@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/ampphoto/1446093794",
+  "resolvedUrl": "https://www.flickr.com/photos/ampphoto/1446093794",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:49.604144+00:00",
+  "sourcePageBytes": 518379,
+  "sourcePageSha256": "550c205e727e31a49a98c2ecaec75fb7d8dee11a040b1497fff173b56ffc7228",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/1225/1446093794_3f982ec6aa_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/ampphoto/1446093794",
+    "author": {
+      "@type": "Person",
+      "name": "Aaron Phillips",
+      "url": "https://www.flickr.com/photos/ampphoto",
+      "image": "https://live.staticflickr.com/159/buddyicons/82757149@N00.jpg?1168814509#82757149@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Aaron Phillips",
+      "url": "https://www.flickr.com/photos/ampphoto",
+      "image": "https://live.staticflickr.com/159/buddyicons/82757149@N00.jpg?1168814509#82757149@N00"
+    }
+  },
+  "structuredBlockSha256": "daaaf797dc2143ed3259cef6dc51dfbedefbbb7a1a1c49a863522cb5ed0e934b",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "1446093794",
+  "rawPagePersisted": false
+}

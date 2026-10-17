@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/munimiraflores/11715267326",
+  "resolvedUrl": "https://www.flickr.com/photos/munimiraflores/11715267326",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:05.611059+00:00",
+  "sourcePageBytes": 518838,
+  "sourcePageSha256": "f84282db97787d1656bf751c34ea9f98a4eec248b16cf5a8546847269de22629",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/5500/11715267326_5e0e0cefe2_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/munimiraflores/11715267326",
+    "author": {
+      "@type": "Person",
+      "name": "Municipalidad de Miraflores",
+      "url": "https://www.flickr.com/photos/munimiraflores",
+      "image": "https://live.staticflickr.com/5451/buddyicons/62785589@N03.jpg?1369085991#62785589@N03"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Municipalidad de Miraflores",
+      "url": "https://www.flickr.com/photos/munimiraflores",
+      "image": "https://live.staticflickr.com/5451/buddyicons/62785589@N03.jpg?1369085991#62785589@N03"
+    }
+  },
+  "structuredBlockSha256": "4e9b55259cfedfa76b5c06b18bf70ce0ce97297507b306819d046b41906643ef",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "11715267326",
+  "rawPagePersisted": false
+}

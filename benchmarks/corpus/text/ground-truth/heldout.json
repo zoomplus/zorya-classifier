@@ -1,0 +1,271 @@
+{
+  "schema_version": 1,
+  "corpus_id": "zorya-original-support-intent-30-v1",
+  "split": "heldout",
+  "input_path": "../inputs/heldout.json",
+  "join_rule": "input_index is the zero-based index into the corresponding input JSON array; verify text_sha256 before scoring.",
+  "provenance": "Original assistant-authored policy labels and rationales; not independently human-annotated ground truth.",
+  "examples": [
+    {
+      "input_index": 0,
+      "id": "support-heldout-001",
+      "split": "heldout",
+      "language": "ru",
+      "expected_label": "order_status",
+      "reason": "Возврат отвергнут, цитата — статус из уведомления; текущая просьба — срок доставки.",
+      "phenomena": [
+        "negation",
+        "quoted_content"
+      ],
+      "text_sha256": "4bdf429d28ea91d2d1ef26d8a076af26bcca6027ec4443edfa0db5b90338b494"
+    },
+    {
+      "input_index": 1,
+      "id": "support-heldout-002",
+      "split": "heldout",
+      "language": "en",
+      "expected_label": "order_status",
+      "reason": "The technical issue is explicitly resolved; locating the current shipment is the only active request.",
+      "phenomena": [
+        "resolved_background"
+      ],
+      "text_sha256": "8476ce4bf755bca48f5c5b116018089ffd73dade190867119299eb8a2a7b9b81"
+    },
+    {
+      "input_index": 2,
+      "id": "support-heldout-003",
+      "split": "heldout",
+      "language": "ru",
+      "expected_label": "refund",
+      "reason": "Пользователь прямо принимает процитированный запрос как текущий; требуется возврат оплаты.",
+      "phenomena": [
+        "quoted_content",
+        "explicit_adoption"
+      ],
+      "text_sha256": "1c0e03645461f7bf5b429622eed2309a2d44016c68665f26ad9bbf5bc72bc509"
+    },
+    {
+      "input_index": 3,
+      "id": "support-heldout-004",
+      "split": "heldout",
+      "language": "en",
+      "expected_label": "refund",
+      "reason": "The defect explains the request, troubleshooting is negated, and return-for-refund is explicit.",
+      "phenomena": [
+        "negation",
+        "problem_as_background"
+      ],
+      "text_sha256": "1d41a1ab3c78d6c8ef41c2cabbaa760c469b27a3dbac53ea96a299c880cb941a"
+    },
+    {
+      "input_index": 4,
+      "id": "support-heldout-005",
+      "split": "heldout",
+      "language": "ru",
+      "expected_label": "technical_support",
+      "reason": "Возврат завершён; актуальная просьба относится к сбою входа в аккаунт.",
+      "phenomena": [
+        "resolved_background"
+      ],
+      "text_sha256": "33216f5f932fb3a3c20b728ab61319bdf7f00aee136e8b11a39383785e457d60"
+    },
+    {
+      "input_index": 5,
+      "id": "support-heldout-006",
+      "split": "heldout",
+      "language": "en",
+      "expected_label": "technical_support",
+      "reason": "Shipment-status help is explicitly negated; fixing the website is technical_support.",
+      "phenomena": [
+        "negation",
+        "tracking_vs_site_failure"
+      ],
+      "text_sha256": "4633fb5c0246a98b4a576a9855f164b296aed9720a054e400df8dbbe054edeb6"
+    },
+    {
+      "input_index": 6,
+      "id": "support-heldout-007",
+      "split": "heldout",
+      "language": "ru",
+      "expected_label": "general_feedback",
+      "reason": "Чужая цитата не является просьбой пользователя; собственное сообщение содержит только благодарность.",
+      "phenomena": [
+        "quoted_content",
+        "praise"
+      ],
+      "text_sha256": "afa4fadde7c7ad89bbdcf67c6336d1227e655866aaf106363a6e4f17f6daae6d"
+    },
+    {
+      "input_index": 7,
+      "id": "support-heldout-008",
+      "split": "heldout",
+      "language": "en",
+      "expected_label": "general_feedback",
+      "reason": "The current complaint is explicitly feedback only, and all supported service actions are negated.",
+      "phenomena": [
+        "complaint",
+        "negation"
+      ],
+      "text_sha256": "b5a86200cafcaadfda249be500a9ea3ff7424afb1bceddff256e9a05c282d683"
+    },
+    {
+      "input_index": 8,
+      "id": "support-heldout-009",
+      "split": "heldout",
+      "language": "ru",
+      "expected_label": "unknown",
+      "reason": "Порядок выполнения не снимает ни одну просьбу: техническая помощь и возврат остаются активными.",
+      "phenomena": [
+        "multi_intent_ambiguity",
+        "ordering_is_not_exclusive_priority"
+      ],
+      "text_sha256": "a1a192fa4e95da11f138f54e5ae4f723b39c5684fb0dd06ee3c4588ebcdfb325"
+    },
+    {
+      "input_index": 9,
+      "id": "support-heldout-010",
+      "split": "heldout",
+      "language": "en",
+      "expected_label": "unknown",
+      "reason": "Tracking and troubleshooting are distinct active service classes, with no exclusive priority.",
+      "phenomena": [
+        "multi_intent_ambiguity"
+      ],
+      "text_sha256": "ca915932c44e52ac15a69fe101fccbbc3e031eb47cab40883660fe15153dc721"
+    },
+    {
+      "input_index": 10,
+      "id": "support-heldout-011",
+      "split": "heldout",
+      "language": "ru",
+      "expected_label": "order_status",
+      "reason": "Явно выделена одна текущая просьба о передаче заказа курьеру; отзыв отложен, ремонт не запрошен.",
+      "phenomena": [
+        "exclusive_priority",
+        "feedback_background",
+        "negation"
+      ],
+      "text_sha256": "513daef00175dd3a33c678b894b77da5999a34ae3a7cf95eda0a06b58113931a"
+    },
+    {
+      "input_index": 11,
+      "id": "support-heldout-012",
+      "split": "heldout",
+      "language": "en",
+      "expected_label": "order_status",
+      "reason": "The speaker explicitly adopts the quoted suggestion; both current questions belong to shipment status.",
+      "phenomena": [
+        "quoted_content",
+        "explicit_adoption",
+        "same_class_multiple_questions"
+      ],
+      "text_sha256": "445a5eb2446bf05dfabbcda6d1794e08dcc8f851b16a00d55d74681a151207fe"
+    },
+    {
+      "input_index": 12,
+      "id": "support-heldout-013",
+      "split": "heldout",
+      "language": "ru",
+      "expected_label": "refund",
+      "reason": "Запрошен статус денежного возврата, не статус доставки; по политике это refund.",
+      "phenomena": [
+        "refund_status",
+        "negation",
+        "resolved_background"
+      ],
+      "text_sha256": "f4fc91272baf378cc0fb5be9208b70d391ce035b19df61242122c5b96b6d0191"
+    },
+    {
+      "input_index": 13,
+      "id": "support-heldout-014",
+      "split": "heldout",
+      "language": "en",
+      "expected_label": "refund",
+      "reason": "Technical help is deferred; the sole current request is refund eligibility for a purchase.",
+      "phenomena": [
+        "exclusive_priority",
+        "refund_eligibility"
+      ],
+      "text_sha256": "aa9830bc18890c2427e89873300fce2e46d8562defb33468fed7363d4a8c5c4f"
+    },
+    {
+      "input_index": 14,
+      "id": "support-heldout-015",
+      "split": "heldout",
+      "language": "ru",
+      "expected_label": "technical_support",
+      "reason": "Совет о возврате отвергнут; текущая просьба — устранить ошибку подключения.",
+      "phenomena": [
+        "quoted_content",
+        "negation"
+      ],
+      "text_sha256": "5ff05ed9eadcd00481a678478cacd29da7373be11b6b9dde7a50e86dbe0f3bc1"
+    },
+    {
+      "input_index": 15,
+      "id": "support-heldout-016",
+      "split": "heldout",
+      "language": "en",
+      "expected_label": "technical_support",
+      "reason": "Praise is background and refund discussion is deferred; diagnosing the malfunction is the only current service intent.",
+      "phenomena": [
+        "feedback_background",
+        "exclusive_priority"
+      ],
+      "text_sha256": "fd4913db26bdd3f94c7b0d46fd7f64981956f046069b3b9c9f96c90ce16b106d"
+    },
+    {
+      "input_index": 16,
+      "id": "support-heldout-017",
+      "split": "heldout",
+      "language": "ru",
+      "expected_label": "general_feedback",
+      "reason": "Смешанная оценка доставки и товара не содержит активного сервисного запроса.",
+      "phenomena": [
+        "mixed_sentiment",
+        "negation"
+      ],
+      "text_sha256": "f82034911f9c5566077ffdea8b70fdca7f892fe3ee3ffe5115f7f05c3c5059c1"
+    },
+    {
+      "input_index": 17,
+      "id": "support-heldout-018",
+      "split": "heldout",
+      "language": "en",
+      "expected_label": "general_feedback",
+      "reason": "The user proposes a future feature and explicitly reports no malfunction, so the policy selects general_feedback.",
+      "phenomena": [
+        "feature_suggestion",
+        "negation"
+      ],
+      "text_sha256": "403f38a2db46b5be2dd86eb35028bc52f198c4ffa5bf981b4c67a0cbccde97c2"
+    },
+    {
+      "input_index": 18,
+      "id": "support-heldout-019",
+      "split": "heldout",
+      "language": "ru",
+      "expected_label": "unknown",
+      "reason": "Запрошено значение слова, а поддержка покупки отвергнута; это запрос вне пяти сервисных сценариев.",
+      "phenomena": [
+        "quoted_content",
+        "out_of_scope",
+        "negation"
+      ],
+      "text_sha256": "70c8e2b711ec8a5751733012c8989983773ed76ca79c4a57ae5f01cedc77c01e"
+    },
+    {
+      "input_index": 19,
+      "id": "support-heldout-020",
+      "split": "heldout",
+      "language": "en",
+      "expected_label": "unknown",
+      "reason": "A hypothetical future problem is not a current support request or current product feedback.",
+      "phenomena": [
+        "hypothetical",
+        "no_current_request"
+      ],
+      "text_sha256": "485dcf8b9530333c60afe94015c720ef9f908af744b8a80a31ee81da4343c9be"
+    }
+  ]
+}

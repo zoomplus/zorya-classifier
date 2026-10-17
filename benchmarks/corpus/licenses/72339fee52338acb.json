@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/iicd/5349322724",
+  "resolvedUrl": "https://www.flickr.com/photos/iicd/5349322724",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:14.636007+00:00",
+  "sourcePageBytes": 514569,
+  "sourcePageSha256": "69675a1b4c119d33905678c029205ee575b2a1283199c468b3683dc2cee142d1",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/5286/5349322724_9bcabe92dc_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/iicd/5349322724",
+    "author": {
+      "@type": "Person",
+      "name": "IICD",
+      "url": "https://www.flickr.com/photos/iicd",
+      "image": "https://live.staticflickr.com/4027/buddyicons/32348003@N02.jpg?1298365502#32348003@N02"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "IICD",
+      "url": "https://www.flickr.com/photos/iicd",
+      "image": "https://live.staticflickr.com/4027/buddyicons/32348003@N02.jpg?1298365502#32348003@N02"
+    }
+  },
+  "structuredBlockSha256": "9d6177baae48e979cd163d1180ebd853f1f74dff0be6ac564ac07d7b82a37e25",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "5349322724",
+  "rawPagePersisted": false
+}

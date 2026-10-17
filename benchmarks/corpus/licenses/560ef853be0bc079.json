@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/neeta_lind/8734575580",
+  "resolvedUrl": "https://www.flickr.com/photos/neeta_lind/8734575580",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:02.254194+00:00",
+  "sourcePageBytes": 517281,
+  "sourcePageSha256": "6b1e4f0efd20ebb32025c7f1593b6f4f49c338fc961f5f27c07a32e59ca38e10",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/7294/8734575580_6ee100baf9_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/neeta_lind/8734575580",
+    "author": {
+      "@type": "Person",
+      "name": "Neeta Lind",
+      "url": "https://www.flickr.com/photos/neeta_lind",
+      "image": "https://live.staticflickr.com/54/buddyicons/71132408@N00.jpg?1155918541#71132408@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Neeta Lind",
+      "url": "https://www.flickr.com/photos/neeta_lind",
+      "image": "https://live.staticflickr.com/54/buddyicons/71132408@N00.jpg?1155918541#71132408@N00"
+    }
+  },
+  "structuredBlockSha256": "b67b7d87513cbc5733afe583815a431768584fa2decd8d31069c611396f43f17",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "8734575580",
+  "rawPagePersisted": false
+}

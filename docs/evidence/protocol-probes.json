@@ -1,0 +1,61 @@
+{
+  "purpose": "Two independent diagnostic replays of invalid distributions; not scored into the primary benchmark",
+  "model": "typesafe/jev-1.14",
+  "provider": "typesafe",
+  "maxCalls": 2,
+  "maxReservedUsd": 0.04,
+  "retries": 0,
+  "startedAt": "2026-10-17T21:37:19.055Z",
+  "calls": [
+    {
+      "input": "dev/photo-dev-02/locate/call-2/request.json",
+      "status": 200,
+      "durationMs": 2546.6695290000002,
+      "error": {
+        "code": "INVALID_RESPONSE",
+        "message": "See preserved wire and adapter validation"
+      },
+      "choices": {
+        "selection": {
+          "choice": "C000",
+          "options": 153,
+          "sum": 0.9900000000000004,
+          "max": 0.06999999999999999,
+          "selectedProbability": 0.06999999999999999
+        }
+      },
+      "usage": {
+        "input_tokens": 27042,
+        "output_tokens": 1567,
+        "cost": 0.001135764
+      },
+      "model": "typesafe/jev-1.14-20261014",
+      "provider": "TypeSafe"
+    },
+    {
+      "input": "dev/photo-dev-05/locate/call-3/request.json",
+      "status": 200,
+      "durationMs": 1236.846798,
+      "choices": {
+        "selection": {
+          "choice": "A",
+          "options": 5,
+          "sum": 1,
+          "max": 0.5599999999999999,
+          "selectedProbability": 0.5599999999999999
+        }
+      },
+      "usage": {
+        "input_tokens": 6785,
+        "output_tokens": 69,
+        "cost": 0.00028497
+      },
+      "model": "typesafe/jev-1.14-20261014",
+      "provider": "TypeSafe"
+    }
+  ],
+  "rawManifestSha256": "bb81b6f26a61b2a320968f7aa3a850da6b8f4ffd3950bfea7f40d3a0d351eb8f",
+  "knownCostUsd": 0.001420734,
+  "physicalHttpCalls": 2,
+  "limitations": "These are new diagnostic replays; their outcomes/costs do not replace historical benchmark failures or unknown costs."
+}

@@ -1,0 +1,2 @@
+npm run secrets:staged
+npm run check

@@ -1,0 +1,9 @@
+{
+  "rawReportSha256": "0aff3f5669d1dd8b8289eb3cb3d1f47dd9e355c49888e1f558dfe785feb08ebc",
+  "rawManifestSha256": "98c1f67cbc96a7ab5bb2f404c47195e8b58259101d523d695719a8b3b6351d30",
+  "status": "complete",
+  "physicalHttpCalls": 321,
+  "knownCostUsd": 0.07354666199999998,
+  "unknownCostCalls": 23,
+  "scope": "Initial full-corpus strict-mass snapshot"
+}

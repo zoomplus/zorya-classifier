@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/thomasrdororg/14631188427",
+  "resolvedUrl": "https://www.flickr.com/photos/thomasrdororg/14631188427",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:51.810274+00:00",
+  "sourcePageBytes": 518462,
+  "sourcePageSha256": "4434201a1f34f362517c1a465393140696e290afbdd37d250c8f36238d6bd189",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/3849/14631188427_43a6a872a7_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/thomasrdororg/14631188427",
+    "author": {
+      "@type": "Person",
+      "name": "Tom Reynolds",
+      "url": "https://www.flickr.com/photos/thomasrdororg",
+      "image": "https://live.staticflickr.com/7752/buddyicons/28135215@N00.jpg?1431232602#28135215@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Tom Reynolds",
+      "url": "https://www.flickr.com/photos/thomasrdororg",
+      "image": "https://live.staticflickr.com/7752/buddyicons/28135215@N00.jpg?1431232602#28135215@N00"
+    }
+  },
+  "structuredBlockSha256": "86dcb3325f7d3485221ee322bc29f3c9d7f6d860acc6ae823d6e13659b3d5200",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "14631188427",
+  "rawPagePersisted": false
+}

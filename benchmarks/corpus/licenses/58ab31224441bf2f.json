@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/loangxoang/19144085754",
+  "resolvedUrl": "https://www.flickr.com/photos/loangxoang/19144085754",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:21.922089+00:00",
+  "sourcePageBytes": 517807,
+  "sourcePageSha256": "9749f8696848d49b99eeae9ae26e761e3f8399bba07ef8e89b9ce5e8bbd61acc",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/3698/19144085754_6a9bc26d3d_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/loangxoang/19144085754",
+    "author": {
+      "@type": "Person",
+      "name": "Dũng Nguyễn",
+      "url": "https://www.flickr.com/photos/loangxoang",
+      "image": "https://live.staticflickr.com/7152/buddyicons/55510638@N05.jpg?1324659988#55510638@N05"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Dũng Nguyễn",
+      "url": "https://www.flickr.com/photos/loangxoang",
+      "image": "https://live.staticflickr.com/7152/buddyicons/55510638@N05.jpg?1324659988#55510638@N05"
+    }
+  },
+  "structuredBlockSha256": "96fa8b0076e2ce45eaf8add0a9caf96764de50dc17705d34d5be6e5adadebb60",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "19144085754",
+  "rawPagePersisted": false
+}

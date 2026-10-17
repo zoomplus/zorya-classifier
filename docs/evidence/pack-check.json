@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "command": "npm run pack:check",
+  "consumer": {
+    "independentConsumer": "passed",
+    "declarations": "compiled",
+    "sharp": "0.34.5",
+    "vips": "8.17.3",
+    "classification": "yes",
+    "localization": "located",
+    "controlledDecisionCalls": 4,
+    "providerHttpCalls": 0
+  },
+  "testedSnapshot": {
+    "files": 60,
+    "unpackedSize": 648482,
+    "sha256": "a68e64d52b6120635b1f9945586bbe679846f90945b109970639c18180556c8a",
+    "runtimeDistFiles": 34,
+    "runtimeDistSha256": "62d5a0075e5ccca6627ba81f8ca8be427f499ded7508570171c00520bcf369ca",
+    "consumerDeclarationFiles": 184,
+    "npmTransport": "node npm-cli.js; shell:false"
+  },
+  "sourceLogSha256": "2b2654fa14f71ff0861c51282acf047f1b07cfe1eeda9fd44c94884bdd1e5311",
+  "scope": "Independent Linux archive installation; installed source-byte equality and secret scan; fixture classification/localization with native Sharp",
+  "note": "Docs/evidence added afterward change final archive SHA. Final release SHA and source commit are recorded in the external release manifest; tested dist must stay equal."
+}

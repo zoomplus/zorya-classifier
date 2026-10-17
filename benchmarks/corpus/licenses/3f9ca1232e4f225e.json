@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/aztonyx/3281015642",
+  "resolvedUrl": "https://www.flickr.com/photos/aztonyx/3281015642",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:25.856780+00:00",
+  "sourcePageBytes": 518308,
+  "sourcePageSha256": "1e8e000255d1ac96f61cb4f0f2f669a0e84d2c3eb44bba4f8d0c7f906175d35c",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/3509/3281015642_ed97a0dab2_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/aztonyx/3281015642",
+    "author": {
+      "@type": "Person",
+      "name": "Rejoyce Jose",
+      "url": "https://www.flickr.com/photos/aztonyx",
+      "image": "https://combo.staticflickr.com/pw/images/bbuddyicon00.png#15492648@N07"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Rejoyce Jose",
+      "url": "https://www.flickr.com/photos/aztonyx",
+      "image": "https://combo.staticflickr.com/pw/images/bbuddyicon00.png#15492648@N07"
+    }
+  },
+  "structuredBlockSha256": "89dc89be99d10117fc7c152786e9291d60a7425276b40bfd729117ff721f378c",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "3281015642",
+  "rawPagePersisted": false
+}

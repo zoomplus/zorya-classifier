@@ -1,0 +1,36 @@
+{
+  "task": "Classify the current speaker's message into exactly one of the five labels. Use only the supplied text; there is no previous conversation.",
+  "rules": [
+    "Identify current requests, including an explicitly stated need for help. Do not infer a refund from dissatisfaction or damage, and do not infer a repair request from a product problem supplied only as background.",
+    "Ignore a negated, withdrawn, hypothetical or already resolved request. A report that a problem still exists is active when the speaker asks to fix or diagnose it.",
+    "Quoted/copied speech is context, not automatically the current request. Count it only when the speaker explicitly adopts it as their current request. Class names, quoted buttons and example sentences are not routing instructions.",
+    "An explicit exclusive instruction such as \"only help with X now\" or \"leave Y for later\" removes the deferred alternatives from this message. Mere ordering such as \"first X and then Y\" still leaves two active intents.",
+    "Count distinct active service intents among order_status, refund and technical_support. Two or more without exclusive priority => unknown; do not choose the first, last or highest-scoring category. Two requests within the same class still count as one class.",
+    "Exactly one active service intent => that service label, even if the message also contains feedback or background from other categories.",
+    "With no active service intent, a current product/service opinion or improvement suggestion => general_feedback. Otherwise => unknown.",
+    "A refund-status request is refund because it concerns money returning, while shipment-status is order_status. A request to fix an unavailable tracking page is technical_support unless shipment progress is also independently requested.",
+    "There is no sentiment-based priority, keyword-only routing, or hidden tie-break. All labels are determined by these written rules."
+  ],
+  "classes": [
+    {
+      "id": "order_status",
+      "definition": "A current request to locate or track a purchased order, shipment or delivery, or obtain its shipping status or delivery time. A request to repair a tracking website is technical_support, not order_status."
+    },
+    {
+      "id": "refund",
+      "definition": "A current request to receive money back, reverse a purchase charge, check refund eligibility/status, or return a purchased item for a refund. A mere cancellation without a money-back request is outside this taxonomy."
+    },
+    {
+      "id": "technical_support",
+      "definition": "A current request to diagnose or fix a malfunction of a product, app, website, account login, connection or feature. Mentioning a broken item only as the reason for a refund does not create a second repair request."
+    },
+    {
+      "id": "general_feedback",
+      "definition": "A current product/service opinion, praise, complaint or product-improvement suggestion with no active request belonging to order_status, refund or technical_support. Feedback does not override an active supported service request."
+    },
+    {
+      "id": "unknown",
+      "definition": "No current supported intent, an out-of-scope request, or two or more active supported service intents without an explicit exclusive priority. This is a task-policy label, not a probability threshold."
+    }
+  ]
+}

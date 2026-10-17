@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/65544876@N03/15864345298",
+  "resolvedUrl": "https://www.flickr.com/photos/65544876@N03/15864345298",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:09.390900+00:00",
+  "sourcePageBytes": 518548,
+  "sourcePageSha256": "c4c579ebfa9ff5157f19222f58672d6da59f4f55e1d5d6772ebae02f51040239",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/7555/15864345298_0a53a701fc_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/65544876@N03/15864345298",
+    "author": {
+      "@type": "Person",
+      "name": "Vladimir Rebellón Palmezano",
+      "url": "https://www.flickr.com/photos/65544876@N03",
+      "image": "https://live.staticflickr.com/7411/buddyicons/65544876@N03.jpg?1376539385#65544876@N03"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Vladimir Rebellón Palmezano",
+      "url": "https://www.flickr.com/photos/65544876@N03",
+      "image": "https://live.staticflickr.com/7411/buddyicons/65544876@N03.jpg?1376539385#65544876@N03"
+    }
+  },
+  "structuredBlockSha256": "4fb5e6648cb7a64ae272eab16e3d8584a6f8eeb2812372e2a22e211cf75b728c",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "15864345298",
+  "rawPagePersisted": false
+}

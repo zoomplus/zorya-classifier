@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "status": "passed",
+  "scope": "Structural source/GT/bytes/license evidence and actual JPEG decode; not model accuracy or independent human adjudication",
+  "photos": 60,
+  "splits": {
+    "dev": 20,
+    "heldout": 40
+  },
+  "uniqueCurrentAuthorIdentities": 60,
+  "classes": 25,
+  "photoBytes": 15565072,
+  "annotationChecks": [
+    {
+      "caseId": "photo-dev-01",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-02",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-03",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-04",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-05",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-06",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-07",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-08",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-09",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-10",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-11",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-12",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-13",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-14",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-15",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-16",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-17",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-18",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-19",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-dev-20",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-01",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-02",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-03",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-04",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-05",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-06",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-07",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-08",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-09",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-10",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-11",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-12",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-13",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-14",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-15",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-16",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-17",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-18",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-19",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-20",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-21",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-22",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-23",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-24",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-25",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-26",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-27",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-28",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-29",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-30",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-31",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-32",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-33",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-34",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-35",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-36",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-37",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-38",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-39",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    },
+    {
+      "caseId": "photo-heldout-40",
+      "bytes": true,
+      "licensePageIdentity": true,
+      "sourceAnnotation": true
+    }
+  ],
+  "jpegDecoder": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+  "decodeChecks": [
+    {
+      "caseId": "photo-dev-01",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 63.267
+    },
+    {
+      "caseId": "photo-dev-02",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 62.162
+    },
+    {
+      "caseId": "photo-dev-03",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 61.323
+    },
+    {
+      "caseId": "photo-dev-04",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 61.208
+    },
+    {
+      "caseId": "photo-dev-05",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 44.935
+    },
+    {
+      "caseId": "photo-dev-06",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 41.444
+    },
+    {
+      "caseId": "photo-dev-07",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 45.511
+    },
+    {
+      "caseId": "photo-dev-08",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 44.257
+    },
+    {
+      "caseId": "photo-dev-09",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 43.677
+    },
+    {
+      "caseId": "photo-dev-10",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 43.228
+    },
+    {
+      "caseId": "photo-dev-11",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 48.038
+    },
+    {
+      "caseId": "photo-dev-12",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 39.302
+    },
+    {
+      "caseId": "photo-dev-13",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 47.727
+    },
+    {
+      "caseId": "photo-dev-14",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 43.147
+    },
+    {
+      "caseId": "photo-dev-15",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 45.331
+    },
+    {
+      "caseId": "photo-dev-16",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 41.455
+    },
+    {
+      "caseId": "photo-dev-17",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 40.98
+    },
+    {
+      "caseId": "photo-dev-18",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 39.016
+    },
+    {
+      "caseId": "photo-dev-19",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 41.319
+    },
+    {
+      "caseId": "photo-dev-20",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 43.464
+    },
+    {
+      "caseId": "photo-heldout-01",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 44.332
+    },
+    {
+      "caseId": "photo-heldout-02",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 40.643
+    },
+    {
+      "caseId": "photo-heldout-03",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 40.669
+    },
+    {
+      "caseId": "photo-heldout-04",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 42.811
+    },
+    {
+      "caseId": "photo-heldout-05",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 45.221
+    },
+    {
+      "caseId": "photo-heldout-06",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 40.538
+    },
+    {
+      "caseId": "photo-heldout-07",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 37.517
+    },
+    {
+      "caseId": "photo-heldout-08",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 37.854
+    },
+    {
+      "caseId": "photo-heldout-09",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 38.345
+    },
+    {
+      "caseId": "photo-heldout-10",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 38.177
+    },
+    {
+      "caseId": "photo-heldout-11",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 44.324
+    },
+    {
+      "caseId": "photo-heldout-12",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 37.597
+    },
+    {
+      "caseId": "photo-heldout-13",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 39.067
+    },
+    {
+      "caseId": "photo-heldout-14",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 40.924
+    },
+    {
+      "caseId": "photo-heldout-15",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 40.245
+    },
+    {
+      "caseId": "photo-heldout-16",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 38.715
+    },
+    {
+      "caseId": "photo-heldout-17",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 43.789
+    },
+    {
+      "caseId": "photo-heldout-18",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 39.191
+    },
+    {
+      "caseId": "photo-heldout-19",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 42.222
+    },
+    {
+      "caseId": "photo-heldout-20",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 41.101
+    },
+    {
+      "caseId": "photo-heldout-21",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 42.211
+    },
+    {
+      "caseId": "photo-heldout-22",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 40.586
+    },
+    {
+      "caseId": "photo-heldout-23",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 39.656
+    },
+    {
+      "caseId": "photo-heldout-24",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 40.401
+    },
+    {
+      "caseId": "photo-heldout-25",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 40.205
+    },
+    {
+      "caseId": "photo-heldout-26",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 37.892
+    },
+    {
+      "caseId": "photo-heldout-27",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 36.404
+    },
+    {
+      "caseId": "photo-heldout-28",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 42.748
+    },
+    {
+      "caseId": "photo-heldout-29",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 43.016
+    },
+    {
+      "caseId": "photo-heldout-30",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 41.151
+    },
+    {
+      "caseId": "photo-heldout-31",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 38.769
+    },
+    {
+      "caseId": "photo-heldout-32",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 42.671
+    },
+    {
+      "caseId": "photo-heldout-33",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 39.147
+    },
+    {
+      "caseId": "photo-heldout-34",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 39.485
+    },
+    {
+      "caseId": "photo-heldout-35",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 36.901
+    },
+    {
+      "caseId": "photo-heldout-36",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 43.997
+    },
+    {
+      "caseId": "photo-heldout-37",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 41.967
+    },
+    {
+      "caseId": "photo-heldout-38",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 44.498
+    },
+    {
+      "caseId": "photo-heldout-39",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 41.279
+    },
+    {
+      "caseId": "photo-heldout-40",
+      "exitCode": 0,
+      "stderr": "",
+      "durationMs": 46.889
+    }
+  ],
+  "photoManifestSha256": "a99f47d4e1c064581c6cc9123b58a5c81b196d15227963bf015041544f713aa3",
+  "sourceManifestSha256": "bb735ac5c7d1475c2599d54f60057c505677178a9fc775e4f9943cd02ed01cd9",
+  "modelCalls": 0
+}

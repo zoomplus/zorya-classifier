@@ -1,0 +1,9 @@
+{
+  "rawReportSha256": "53ded957128475306bbb8ab4c7a5a40d37382ee48cc51fe1df5301bd2c21d439",
+  "rawManifestSha256": "456dccfd3af1593d1a420453a5f5a5cbae47506542889156da81c83db3fd4487",
+  "status": "complete",
+  "physicalHttpCalls": 14,
+  "knownCostUsd": 0.004080510000000001,
+  "unknownCostCalls": 0,
+  "scope": "Final runtime smoke, 2 development photos and 2 development texts; not a quality re-evaluation"
+}

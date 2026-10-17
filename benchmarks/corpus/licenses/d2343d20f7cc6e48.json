@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/14279744@N03/1519316454",
+  "resolvedUrl": "https://www.flickr.com/photos/14279744@N03/1519316454",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:38.651843+00:00",
+  "sourcePageBytes": 517076,
+  "sourcePageSha256": "bed84d66dc2ea8df4310dac4d91c99a2d5a4c5483d12adf245eb4838962441e6",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/2084/1519316454_bd1456e6e1_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/14279744@N03/1519316454",
+    "author": {
+      "@type": "Person",
+      "name": "kangotraveler",
+      "url": "https://www.flickr.com/photos/14279744@N03",
+      "image": "https://live.staticflickr.com/1328/buddyicons/14279744@N03.jpg?1191263727#14279744@N03"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "kangotraveler",
+      "url": "https://www.flickr.com/photos/14279744@N03",
+      "image": "https://live.staticflickr.com/1328/buddyicons/14279744@N03.jpg?1191263727#14279744@N03"
+    }
+  },
+  "structuredBlockSha256": "9bdbae35cdf5071251a69bddd98cffb4c9915ba1173e6f151386356b1368c1b7",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "1519316454",
+  "rawPagePersisted": false
+}

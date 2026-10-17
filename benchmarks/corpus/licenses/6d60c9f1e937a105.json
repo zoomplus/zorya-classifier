@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/owenthatsmyname/2706838213",
+  "resolvedUrl": "https://www.flickr.com/photos/owenthatsmyname/2706838213",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:08.795847+00:00",
+  "sourcePageBytes": 517984,
+  "sourcePageSha256": "66e196696237115f52a117581df5d5cbdcc50f264e5a9b4b948c97207abf1ba4",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/3144/2706838213_3c50c2f528_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/owenthatsmyname/2706838213",
+    "author": {
+      "@type": "Person",
+      "name": "Owen",
+      "url": "https://www.flickr.com/photos/owenthatsmyname",
+      "image": "https://live.staticflickr.com/182/buddyicons/7389424@N05.jpg?1174354554#7389424@N05"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Owen",
+      "url": "https://www.flickr.com/photos/owenthatsmyname",
+      "image": "https://live.staticflickr.com/182/buddyicons/7389424@N05.jpg?1174354554#7389424@N05"
+    }
+  },
+  "structuredBlockSha256": "9a7aa2845eb62f668304222e9bc917d503c0c89f9eba5b24cdbdef9120274e8c",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "2706838213",
+  "rawPagePersisted": false
+}

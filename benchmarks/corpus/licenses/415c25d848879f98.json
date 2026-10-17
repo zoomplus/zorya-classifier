@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/jennifrog/377342134",
+  "resolvedUrl": "https://www.flickr.com/photos/jennifrog/377342134",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:32.092407+00:00",
+  "sourcePageBytes": 517380,
+  "sourcePageSha256": "7edd146677dd9d3769998fd5e07e505a9b5f26033e4a52e2c898cf5799ec41e9",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/171/377342134_8dedff15c9_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/jennifrog/377342134",
+    "author": {
+      "@type": "Person",
+      "name": "Jenny Mealing",
+      "url": "https://www.flickr.com/photos/jennifrog",
+      "image": "https://live.staticflickr.com/10/buddyicons/38061770@N00.jpg?1147920700#38061770@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Jenny Mealing",
+      "url": "https://www.flickr.com/photos/jennifrog",
+      "image": "https://live.staticflickr.com/10/buddyicons/38061770@N00.jpg?1147920700#38061770@N00"
+    }
+  },
+  "structuredBlockSha256": "0ce378aae2b396659897b3b2ce79b2d2ca7661360e4cf8c1e5ca3073195d124b",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "377342134",
+  "rawPagePersisted": false
+}

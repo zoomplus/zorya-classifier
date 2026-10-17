@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/digitaldrew/4930418632",
+  "resolvedUrl": "https://www.flickr.com/photos/digitaldrew/4930418632",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:43.623415+00:00",
+  "sourcePageBytes": 514991,
+  "sourcePageSha256": "4e85fb2d334cae1a8660baf57a8e5ad20232e99db912ee82ff6c816e6554d5ac",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/4074/4930418632_2e8a01ee0a_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/digitaldrew/4930418632",
+    "author": {
+      "@type": "Person",
+      "name": "Andrew Michael Nathan",
+      "url": "https://www.flickr.com/photos/digitaldrew",
+      "image": "https://live.staticflickr.com/3456/buddyicons/33333986@N07.jpg?1288258940#33333986@N07"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Andrew Michael Nathan",
+      "url": "https://www.flickr.com/photos/digitaldrew",
+      "image": "https://live.staticflickr.com/3456/buddyicons/33333986@N07.jpg?1288258940#33333986@N07"
+    }
+  },
+  "structuredBlockSha256": "01016724ffc10c49d00191d3e9be0768f02b4b0cd3b17a4bf90dcfe7a0edb637",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "4930418632",
+  "rawPagePersisted": false
+}

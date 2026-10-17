@@ -1,0 +1,802 @@
+[
+  {
+    "caseId": "photo-heldout-01",
+    "image": {
+      "path": "photos/6bf467287bbb6e8b.jpg",
+      "sha256": "837d8820854777f2c11095c83e86f630bb72e4c5e6b7e835e42b7628b7802b76",
+      "width": 1024,
+      "height": 681
+    },
+    "locate": {
+      "target": "Mobile phone",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Mobile phone?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-02",
+    "image": {
+      "path": "photos/6ab55d63ac6708e2.jpg",
+      "sha256": "2d25af2364a8fae4e71ecac7f07d6cf5e1f00d4fe6871b8d19e11613df4c26a1",
+      "width": 501,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Mobile phone",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Mobile phone?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-03",
+    "image": {
+      "path": "photos/3fec3b9feac65f6a.jpg",
+      "sha256": "08eb9e5262a101400c4539cf88ac5e05cc39d4bfacf33a572aa272a5608605ac",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Truck",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Truck?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-04",
+    "image": {
+      "path": "photos/35f837b8efa90099.jpg",
+      "sha256": "e67f1a93f1f828a507c777c66ebc5faed42f5978d557cd5f025334358e569fd0",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Person",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Person?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-05",
+    "image": {
+      "path": "photos/d2343d20f7cc6e48.jpg",
+      "sha256": "d4e2383fc711ec77aad7e18548994d48ee5fe8ab054c18bd0d121c395a07a712",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Butterfly",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Butterfly?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-06",
+    "image": {
+      "path": "photos/9f7963816508342a.jpg",
+      "sha256": "eb8030c048ac3e44319279ed377f8870b2e6a18f28b8e593a7a31e916c2adc7e",
+      "width": 1024,
+      "height": 681
+    },
+    "locate": {
+      "target": "Bird",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bird?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-07",
+    "image": {
+      "path": "photos/92b99b81715472df.jpg",
+      "sha256": "2c567e0dc21235cfde3f95e5d5fcf0122ee900cfe11973342184dc05c5a35eea",
+      "width": 686,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Vase",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Vase?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-08",
+    "image": {
+      "path": "photos/46da83ccb945db5a.jpg",
+      "sha256": "be476befa3c58ff3f1e48e979dc604fbbe68004ced5749b3199be2ca5ccd3461",
+      "width": 768,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Person",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Person?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-09",
+    "image": {
+      "path": "photos/b4c7c24388a9c7af.jpg",
+      "sha256": "f02b53c1c80a5aa54ec745ca84ad8b9e83f45cd516aeff034161505cdc5de1c1",
+      "width": 1024,
+      "height": 681
+    },
+    "locate": {
+      "target": "Person",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Person?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-10",
+    "image": {
+      "path": "photos/9d041d61547563e6.jpg",
+      "sha256": "dd935d29422170caa41fd1ab6aac5b84635aed4bca78cd4fd10a9465f85d4dc0",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Boat",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Boat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-11",
+    "image": {
+      "path": "photos/5a2ca3f1777ef444.jpg",
+      "sha256": "c7672f260512778fd22381e967653d6e871b5c669fb95089c8210b7163bb9618",
+      "width": 1024,
+      "height": 680
+    },
+    "locate": {
+      "target": "Helmet",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Helmet?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-12",
+    "image": {
+      "path": "photos/5ba6c3d6b98cb93f.jpg",
+      "sha256": "2119715438fef6a56252e3d9eee6bd417ffa5bcff2209a60ea3ba0f8016d1024",
+      "width": 768,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Laptop",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Laptop?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-13",
+    "image": {
+      "path": "photos/29def08271143710.jpg",
+      "sha256": "be02b4232b776b88e30e6e50c48710ad8a547c0587f9cda17481d8632674d948",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Chair",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Chair?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-14",
+    "image": {
+      "path": "photos/ccbbb3175f571466.jpg",
+      "sha256": "abff6a2a36c6bde7506704e05b4e5340d4a53a9acf796a23a3f8c35442a9b316",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Plate",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Plate?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-15",
+    "image": {
+      "path": "photos/0bdbf1ec73683c29.jpg",
+      "sha256": "a2ee508e8ecb6262d32ebab3b13356e0ae27addc7a045720a5c3de0231f23818",
+      "width": 750,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Flower",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Flower?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-16",
+    "image": {
+      "path": "photos/66b1a16de2eddedd.jpg",
+      "sha256": "98bcdb12a2101efcd9bbc825382e26943803a4bf4c9938e1afbd7b7b63cb1492",
+      "width": 1024,
+      "height": 680
+    },
+    "locate": {
+      "target": "Helmet",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Helmet?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-17",
+    "image": {
+      "path": "photos/8df826e27ad174b6.jpg",
+      "sha256": "728d07ec610506918c35c68065ef0b2a7e7b441092cf73735157e44be5e22e1d",
+      "width": 682,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Bicycle",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bicycle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-18",
+    "image": {
+      "path": "photos/92051ba4e40b87d5.jpg",
+      "sha256": "1b0d1ae931fd48a2e3484186ca81b117371b6c7c787e71599c0dfde7f8b9fbfb",
+      "width": 1024,
+      "height": 712
+    },
+    "locate": {
+      "target": "Bicycle",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bicycle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-19",
+    "image": {
+      "path": "photos/fe47a278906251b9.jpg",
+      "sha256": "815d1764adaada187b0e4f35187867df1746d8f84df5465ecb85fc2a52a172a4",
+      "width": 1024,
+      "height": 684
+    },
+    "locate": {
+      "target": "Flower",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Flower?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-20",
+    "image": {
+      "path": "photos/6c5c1261ed674951.jpg",
+      "sha256": "f96d8269ebcdd5a57993f9264d4207d37f3926b6692abd348668974f1cbfc1a8",
+      "width": 1024,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Bus",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bus?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-21",
+    "image": {
+      "path": "photos/ab7224e4ed66dc98.jpg",
+      "sha256": "4c447872ddeee68157f4a1e4b83bf39163fe0f57fe074baa0ffa2bbd831c064a",
+      "width": 683,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Dog",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Dog?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-22",
+    "image": {
+      "path": "photos/ff50b6fca1c1d54b.jpg",
+      "sha256": "66ed47acfd98a0dcc45e81e9a46be522339fa866f7aa819bcb6bca96384234da",
+      "width": 768,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Boat",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Boat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-23",
+    "image": {
+      "path": "photos/14f3cf0bf538d81c.jpg",
+      "sha256": "578799260c4e684c2184b7efb2c2f52f91e05a6a28979626cc4aefbc2ee5d9e5",
+      "width": 1024,
+      "height": 753
+    },
+    "locate": {
+      "target": "Bottle",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bottle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-24",
+    "image": {
+      "path": "photos/7ce104b4659254ef.jpg",
+      "sha256": "622c919508f54856e92404088bcdc3b34e2693f8c608309b693df071384fda8e",
+      "width": 1024,
+      "height": 676
+    },
+    "locate": {
+      "target": "Boat",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Boat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-25",
+    "image": {
+      "path": "photos/560ef853be0bc079.jpg",
+      "sha256": "702a6ef07a3a558d127a9adb56e07272db0ae6e88ce7aea236b9e648796ba3a6",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Spoon",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Spoon?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-26",
+    "image": {
+      "path": "photos/4043197c1365a336.jpg",
+      "sha256": "1e4318b2a0e88305604a520a3eb9343c41d6891511cc1824ab3eed77c7bc4c68",
+      "width": 1024,
+      "height": 682
+    },
+    "locate": {
+      "target": "Table",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Table?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-27",
+    "image": {
+      "path": "photos/ab5671e8a5e8979d.jpg",
+      "sha256": "74e583fc38fd0d4828eb8e440f2d17f560d49b70834f2f2133b033f8134537ab",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Chair",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Chair?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-28",
+    "image": {
+      "path": "photos/bcb19dc50d80a2c9.jpg",
+      "sha256": "5b64cc4ba2fc42b754cfd177bf7de5a61f2b008aecc749850e487ca85e7a17c8",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Bowl",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bowl?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-29",
+    "image": {
+      "path": "photos/7259f87c5ffc8cd2.jpg",
+      "sha256": "ddbc217b7879d8c9edfbbbf320ecc40f2fd3797c8efcaf7e4a1a9713c7a2876a",
+      "width": 1024,
+      "height": 932
+    },
+    "locate": {
+      "target": "Bird",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bird?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-30",
+    "image": {
+      "path": "photos/d46c7361fb1eed0f.jpg",
+      "sha256": "3e1b01cd1e553593e12a53bf2ffe15d11d61e27eb070da46a0ed091e8b0ef1e6",
+      "width": 1024,
+      "height": 678
+    },
+    "locate": {
+      "target": "Truck",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Truck?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-31",
+    "image": {
+      "path": "photos/1b2c1d18a5469167.jpg",
+      "sha256": "71a14c95449f1616c5390e1578b1e3923b689138dda613e413ad67ce6bf42b7c",
+      "width": 1024,
+      "height": 744
+    },
+    "locate": {
+      "target": "Horse",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Horse?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-32",
+    "image": {
+      "path": "photos/57b05e17d6075bed.jpg",
+      "sha256": "44cf2364e0c49f6606c876d447c45de24af695ec675027458db1abe3d959eab3",
+      "width": 1024,
+      "height": 681
+    },
+    "locate": {
+      "target": "Horse",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Horse?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-33",
+    "image": {
+      "path": "photos/c7f0bce24ad7d792.jpg",
+      "sha256": "3dbd8b338459ba19544338d99c0336bb2203f802ada77642b878a16acc09993d",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Bird",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bird?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-34",
+    "image": {
+      "path": "photos/218a7e0c84466325.jpg",
+      "sha256": "31679b5de37c0c0bd95e67ca4d06b6b5b5867412fbfd9411e8e7954b034abc89",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Bicycle",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bicycle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-35",
+    "image": {
+      "path": "photos/45d231a2d9d7c38b.jpg",
+      "sha256": "8e551a13711df02307b9323d688e177d791c889798c5486c874d23311f9c9ef1",
+      "width": 1024,
+      "height": 578
+    },
+    "locate": {
+      "target": "Fish",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Fish?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-36",
+    "image": {
+      "path": "photos/2008c9de01d39a22.jpg",
+      "sha256": "9cfa2d2771a96f127069943948983dc39c3b04ef8e422aaff8018f5fe43b88f0",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Hat",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Hat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-37",
+    "image": {
+      "path": "photos/97a73a0bb5d24ed8.jpg",
+      "sha256": "88cb4862ca3cda305608234ea12d9a53e9122795cc16114eb13a33efd7323243",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Cat",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Cat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-38",
+    "image": {
+      "path": "photos/636eb68a603c051a.jpg",
+      "sha256": "f3f850221024d8707e75a7530cd66f1286dee9a8274f6f53822c46a73adf5e2a",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Table",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Table?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-39",
+    "image": {
+      "path": "photos/72339fee52338acb.jpg",
+      "sha256": "e5dea0ff8d470b854538d6ada01e6b7b846e81be4e7306a5fce57c1b9e364656",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Table",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Table?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-40",
+    "image": {
+      "path": "photos/2f64bfca4e0a88b6.jpg",
+      "sha256": "548d2cabd95c065268e88300feb991ed480d28676597c9cdbf8cab4d25a03f9c",
+      "width": 1024,
+      "height": 733
+    },
+    "locate": {
+      "target": "Horse",
+      "instruction": "Locate every visible physical instance of the named object class. Return unknown if not supported; do not infer position from unseen content."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Horse?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  }
+]

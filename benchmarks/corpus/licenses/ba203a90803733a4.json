@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/58789412@N00/5765173293",
+  "resolvedUrl": "https://www.flickr.com/photos/58789412@N00/5765173293",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:31.985325+00:00",
+  "sourcePageBytes": 515660,
+  "sourcePageSha256": "3c8c0947f7bbfb486679001a09a2ba4a178c4527f3420d151fa87fdbe707e74c",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/2134/5765173293_cc870140ce_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/58789412@N00/5765173293",
+    "author": {
+      "@type": "Person",
+      "name": "Verity Cridland",
+      "url": "https://www.flickr.com/photos/58789412@N00",
+      "image": "https://live.staticflickr.com/54/buddyicons/58789412@N00.jpg?1148838021#58789412@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Verity Cridland",
+      "url": "https://www.flickr.com/photos/58789412@N00",
+      "image": "https://live.staticflickr.com/54/buddyicons/58789412@N00.jpg?1148838021#58789412@N00"
+    }
+  },
+  "structuredBlockSha256": "03571c4dd024c2a4f48b22882ee95e1c2cdcf4842993d53b0feb69effa0092dd",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "5765173293",
+  "rawPagePersisted": false
+}

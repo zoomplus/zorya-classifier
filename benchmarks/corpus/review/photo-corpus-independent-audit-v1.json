@@ -1,0 +1,1750 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "atlas_limits_review",
+  "createdAt": "2026-10-17T21:18:44.379287+00:00",
+  "status": "passed-read-only-source-and-artifact-checks",
+  "scope": "Independent local audit only: saved extracted ImageObject evidence, source CSV rows, exact bytes, split ownership, producer/evaluator separation. No HTTP, models, image decoding, or visual inspection.",
+  "photoManifestSha256": "a99f47d4e1c064581c6cc9123b58a5c81b196d15227963bf015041544f713aa3",
+  "sourceManifestSha256": "bb735ac5c7d1475c2599d54f60057c505677178a9fc775e4f9943cd02ed01cd9",
+  "ownerValidationReceiptSha256": "04d7ffb805ba09cb7ba4b090cd4b98d3e99fd16314e897848551806317d0cd32",
+  "photoCount": 60,
+  "splitCounts": {
+    "dev": 20,
+    "heldout": 40
+  },
+  "sourceChecks": [
+    {
+      "path": "source/images.csv",
+      "bytes": 15245485,
+      "sha256": "ed93a0e121fe345effdfc7359b848dbc64a1ff6778c8c73563157cb500b33a17"
+    },
+    {
+      "path": "source/boxes.csv",
+      "bytes": 25105048,
+      "sha256": "d8bbd59410af14835d7733165a7bb8a3f0213981b22dd5077b0b9f7878991ff2"
+    },
+    {
+      "path": "source/labels.csv",
+      "bytes": 10649275,
+      "sha256": "d5ff236d3cdbba36dac1ee6f7fdf9a26934205cbec5b933b0872722e2b6d3417"
+    },
+    {
+      "path": "source/classes.csv",
+      "bytes": 12064,
+      "sha256": "1839e0e7e84130ae281f7f67413768601b031581c0c42e7fc17527b8e2a99aa9"
+    },
+    {
+      "path": "source/openimages-readme.md",
+      "bytes": 138,
+      "sha256": "413065e1b44eec4fd9b2fe4233091ccf70e79f18472f353308aaa401c595adcf"
+    },
+    {
+      "path": "source/cvdf-readme.md",
+      "bytes": 6435,
+      "sha256": "6ed423bff11ed77e142ff173309a35fe5c4601b576dd7dc616a65ae3dd480f48"
+    },
+    {
+      "path": "source/openimages-license-readme.md",
+      "bytes": 22271,
+      "sha256": "003d92e6a6638ce746549dd4ed20a4bfc073b33a3079e0541d95a0d56588767b"
+    }
+  ],
+  "uniqueImageIds": 60,
+  "uniqueFlickrPhotoIds": 60,
+  "uniquePhotoByteHashes": 60,
+  "uniqueOriginalAuthorGroups": 60,
+  "uniqueCurrentAuthorIdentities": 60,
+  "crossSplitAuthorOverlap": 0,
+  "splitFiles": {
+    "dev": {
+      "inputsSha256": "0c443231956e9578afa43d4bf884cc9741594ae69ac5f957657b9c5a24422bb6",
+      "groundTruthSha256": "c618e1a950ae89e0c9ced0c2b1ca249ea7adc891f61c0579468c479613ea4b26",
+      "count": 20
+    },
+    "heldout": {
+      "inputsSha256": "2ce42723824900de9a8eca60b58220567b938a88855ec41a5a882bb410d3b1e4",
+      "groundTruthSha256": "737ee884b8bbf557191d5848b56f17ac056fd01793cd8fb738c5624ea119c7d2",
+      "count": 40
+    }
+  },
+  "producerExpectedLabelLeak": false,
+  "producerBoundingBoxLeak": false,
+  "producerStratumLeak": false,
+  "negativeSourceChecks": [
+    {
+      "caseId": "photo-dev-05",
+      "imageId": "9d198c9c6fc1fc1b",
+      "label": "Tree",
+      "classId": "/m/07j7r",
+      "csvRow": 158664,
+      "source": "verification",
+      "confidence": 0
+    },
+    {
+      "caseId": "photo-dev-06",
+      "imageId": "04d23234a24acc99",
+      "label": "Chair",
+      "classId": "/m/01mzpv",
+      "csvRow": 4765,
+      "source": "verification",
+      "confidence": 0
+    },
+    {
+      "caseId": "photo-dev-07",
+      "imageId": "9157341ce5f6f0bf",
+      "label": "Car",
+      "classId": "/m/0k4j",
+      "csvRow": 146340,
+      "source": "verification",
+      "confidence": 0
+    },
+    {
+      "caseId": "photo-dev-08",
+      "imageId": "58ab31224441bf2f",
+      "label": "Tree",
+      "classId": "/m/07j7r",
+      "csvRow": 91145,
+      "source": "verification",
+      "confidence": 0
+    },
+    {
+      "caseId": "photo-heldout-07",
+      "imageId": "92b99b81715472df",
+      "label": "Vase",
+      "classId": "/m/02s195",
+      "csvRow": 147725,
+      "source": "verification",
+      "confidence": 0
+    },
+    {
+      "caseId": "photo-heldout-08",
+      "imageId": "46da83ccb945db5a",
+      "label": "Person",
+      "classId": "/m/01g317",
+      "csvRow": 72972,
+      "source": "verification",
+      "confidence": 0
+    },
+    {
+      "caseId": "photo-heldout-09",
+      "imageId": "b4c7c24388a9c7af",
+      "label": "Person",
+      "classId": "/m/01g317",
+      "csvRow": 182673,
+      "source": "verification",
+      "confidence": 0
+    },
+    {
+      "caseId": "photo-heldout-10",
+      "imageId": "9d041d61547563e6",
+      "label": "Boat",
+      "classId": "/m/019jd",
+      "csvRow": 158576,
+      "source": "verification",
+      "confidence": 0
+    },
+    {
+      "caseId": "photo-heldout-11",
+      "imageId": "5a2ca3f1777ef444",
+      "label": "Helmet",
+      "classId": "/m/0zvk5",
+      "csvRow": 92625,
+      "source": "verification",
+      "confidence": 0
+    },
+    {
+      "caseId": "photo-heldout-12",
+      "imageId": "5ba6c3d6b98cb93f",
+      "label": "Laptop",
+      "classId": "/m/01c648",
+      "csvRow": 94155,
+      "source": "verification",
+      "confidence": 0
+    }
+  ],
+  "targetBoxRowsChecked": 103,
+  "allAnnotatedBoxRowsChecked": 639,
+  "targetBoxRows": [
+    {
+      "caseId": "photo-dev-01",
+      "csvRow": 299140,
+      "xyxy": [
+        0.19661017,
+        0.078998074,
+        0.8881356,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-dev-02",
+      "csvRow": 129760,
+      "xyxy": [
+        0.06637168,
+        0.37831858,
+        0.9734513,
+        0.8053097
+      ]
+    },
+    {
+      "caseId": "photo-dev-03",
+      "csvRow": 126371,
+      "xyxy": [
+        0.08525034,
+        0.05060241,
+        0.661705,
+        0.76144576
+      ]
+    },
+    {
+      "caseId": "photo-dev-04",
+      "csvRow": 241279,
+      "xyxy": [
+        0.30191457,
+        0.26548672,
+        0.8880707,
+        0.9712389
+      ]
+    },
+    {
+      "caseId": "photo-dev-09",
+      "csvRow": 185878,
+      "xyxy": [
+        0.0,
+        0.0,
+        0.724359,
+        0.89312977
+      ]
+    },
+    {
+      "caseId": "photo-dev-09",
+      "csvRow": 185879,
+      "xyxy": [
+        0.54273504,
+        0.1557252,
+        0.72649574,
+        0.49160305
+      ]
+    },
+    {
+      "caseId": "photo-dev-09",
+      "csvRow": 185880,
+      "xyxy": [
+        0.5982906,
+        0.0,
+        0.74358976,
+        0.17709924
+      ]
+    },
+    {
+      "caseId": "photo-dev-09",
+      "csvRow": 185881,
+      "xyxy": [
+        0.8034188,
+        0.26564884,
+        0.9145299,
+        0.3541985
+      ]
+    },
+    {
+      "caseId": "photo-dev-09",
+      "csvRow": 185882,
+      "xyxy": [
+        0.8995727,
+        0.33587787,
+        1.0,
+        0.40610686
+      ]
+    },
+    {
+      "caseId": "photo-dev-10",
+      "csvRow": 161348,
+      "xyxy": [
+        0.84513277,
+        0.50810015,
+        0.91150445,
+        0.5743741
+      ]
+    },
+    {
+      "caseId": "photo-dev-10",
+      "csvRow": 161349,
+      "xyxy": [
+        0.8960177,
+        0.22974963,
+        1.0,
+        0.54933727
+      ]
+    },
+    {
+      "caseId": "photo-dev-11",
+      "csvRow": 76176,
+      "xyxy": [
+        0.040625,
+        0.64375,
+        0.0671875,
+        0.75625
+      ]
+    },
+    {
+      "caseId": "photo-dev-11",
+      "csvRow": 76177,
+      "xyxy": [
+        0.128125,
+        0.6333333,
+        0.178125,
+        0.81875
+      ]
+    },
+    {
+      "caseId": "photo-dev-12",
+      "csvRow": 8696,
+      "xyxy": [
+        0.57584685,
+        0.0,
+        0.8615611,
+        0.61504424
+      ]
+    },
+    {
+      "caseId": "photo-dev-12",
+      "csvRow": 8697,
+      "xyxy": [
+        0.8645066,
+        0.0,
+        0.9985272,
+        0.79867256
+      ]
+    },
+    {
+      "caseId": "photo-dev-13",
+      "csvRow": 249457,
+      "xyxy": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-dev-14",
+      "csvRow": 103102,
+      "xyxy": [
+        0.10749186,
+        0.0,
+        0.80618894,
+        0.79358715
+      ]
+    },
+    {
+      "caseId": "photo-dev-14",
+      "csvRow": 103103,
+      "xyxy": [
+        0.15960912,
+        0.28857717,
+        0.9153094,
+        0.9519038
+      ]
+    },
+    {
+      "caseId": "photo-dev-15",
+      "csvRow": 51247,
+      "xyxy": [
+        0.24729241,
+        0.18592058,
+        0.6119134,
+        0.97472924
+      ]
+    },
+    {
+      "caseId": "photo-dev-16",
+      "csvRow": 221860,
+      "xyxy": [
+        0.0,
+        0.0,
+        0.284375,
+        0.6242171
+      ]
+    },
+    {
+      "caseId": "photo-dev-16",
+      "csvRow": 221861,
+      "xyxy": [
+        0.2109375,
+        0.060542796,
+        0.8203125,
+        0.9352818
+      ]
+    },
+    {
+      "caseId": "photo-dev-16",
+      "csvRow": 221862,
+      "xyxy": [
+        0.78125,
+        0.17745303,
+        0.9984375,
+        0.5678497
+      ]
+    },
+    {
+      "caseId": "photo-dev-16",
+      "csvRow": 221863,
+      "xyxy": [
+        0.9296875,
+        0.55114824,
+        0.9984375,
+        0.782881
+      ]
+    },
+    {
+      "caseId": "photo-dev-17",
+      "csvRow": 78356,
+      "xyxy": [
+        0.34375,
+        0.26875,
+        0.6765625,
+        0.62291664
+      ]
+    },
+    {
+      "caseId": "photo-dev-18",
+      "csvRow": 83116,
+      "xyxy": [
+        0.0,
+        0.15416667,
+        0.1328125,
+        0.31041667
+      ]
+    },
+    {
+      "caseId": "photo-dev-18",
+      "csvRow": 83117,
+      "xyxy": [
+        0.125,
+        0.20416667,
+        0.8890625,
+        0.75416666
+      ]
+    },
+    {
+      "caseId": "photo-dev-19",
+      "csvRow": 167235,
+      "xyxy": [
+        0.0,
+        0.32743362,
+        0.2300885,
+        0.7640118
+      ]
+    },
+    {
+      "caseId": "photo-dev-19",
+      "csvRow": 167236,
+      "xyxy": [
+        0.13716814,
+        0.4719764,
+        0.5663717,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-dev-20",
+      "csvRow": 74638,
+      "xyxy": [
+        0.01875,
+        0.22291666,
+        1.0,
+        0.8229167
+      ]
+    },
+    {
+      "caseId": "photo-dev-20",
+      "csvRow": 74639,
+      "xyxy": [
+        0.815625,
+        0.1625,
+        1.0,
+        0.4
+      ]
+    },
+    {
+      "caseId": "photo-heldout-01",
+      "csvRow": 128265,
+      "xyxy": [
+        0.0,
+        0.07760532,
+        0.99558175,
+        0.83370286
+      ]
+    },
+    {
+      "caseId": "photo-heldout-02",
+      "csvRow": 127007,
+      "xyxy": [
+        0.09556314,
+        0.016694492,
+        0.92491466,
+        0.94323874
+      ]
+    },
+    {
+      "caseId": "photo-heldout-03",
+      "csvRow": 76479,
+      "xyxy": [
+        0.153125,
+        0.114583336,
+        0.9203125,
+        0.80833334
+      ]
+    },
+    {
+      "caseId": "photo-heldout-04",
+      "csvRow": 63888,
+      "xyxy": [
+        0.3140625,
+        0.32291666,
+        0.621875,
+        0.91041666
+      ]
+    },
+    {
+      "caseId": "photo-heldout-05",
+      "csvRow": 249906,
+      "xyxy": [
+        0.2703125,
+        0.24791667,
+        0.7640625,
+        0.6979167
+      ]
+    },
+    {
+      "caseId": "photo-heldout-06",
+      "csvRow": 189218,
+      "xyxy": [
+        0.23858616,
+        0.20842572,
+        0.8939617,
+        0.96452326
+      ]
+    },
+    {
+      "caseId": "photo-heldout-13",
+      "csvRow": 49633,
+      "xyxy": [
+        0.0,
+        0.65833336,
+        0.20625,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-13",
+      "csvRow": 49634,
+      "xyxy": [
+        0.1609375,
+        0.41666666,
+        0.2828125,
+        0.72291666
+      ]
+    },
+    {
+      "caseId": "photo-heldout-13",
+      "csvRow": 49635,
+      "xyxy": [
+        0.4359375,
+        0.65,
+        0.71875,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-13",
+      "csvRow": 49636,
+      "xyxy": [
+        0.7390625,
+        0.53125,
+        0.8953125,
+        0.6458333
+      ]
+    },
+    {
+      "caseId": "photo-heldout-13",
+      "csvRow": 49637,
+      "xyxy": [
+        0.903125,
+        0.54583335,
+        1.0,
+        0.65
+      ]
+    },
+    {
+      "caseId": "photo-heldout-13",
+      "csvRow": 49638,
+      "xyxy": [
+        0.90625,
+        0.50625,
+        1.0,
+        0.5520833
+      ]
+    },
+    {
+      "caseId": "photo-heldout-14",
+      "csvRow": 243711,
+      "xyxy": [
+        0.3859375,
+        0.7104167,
+        0.6125,
+        0.8
+      ]
+    },
+    {
+      "caseId": "photo-heldout-14",
+      "csvRow": 243712,
+      "xyxy": [
+        0.8578125,
+        0.95416665,
+        0.9109375,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-15",
+      "csvRow": 14405,
+      "xyxy": [
+        0.6729958,
+        0.26429674,
+        0.7236287,
+        0.29984543
+      ]
+    },
+    {
+      "caseId": "photo-heldout-16",
+      "csvRow": 121999,
+      "xyxy": [
+        0.12941177,
+        0.11308204,
+        0.21176471,
+        0.24611974
+      ]
+    },
+    {
+      "caseId": "photo-heldout-16",
+      "csvRow": 122000,
+      "xyxy": [
+        0.1985294,
+        0.20177384,
+        0.23970588,
+        0.2660754
+      ]
+    },
+    {
+      "caseId": "photo-heldout-16",
+      "csvRow": 122001,
+      "xyxy": [
+        0.33235294,
+        0.21064301,
+        0.38088235,
+        0.28381374
+      ]
+    },
+    {
+      "caseId": "photo-heldout-16",
+      "csvRow": 122002,
+      "xyxy": [
+        0.67058825,
+        0.27494457,
+        0.7264706,
+        0.37472284
+      ]
+    },
+    {
+      "caseId": "photo-heldout-17",
+      "csvRow": 167294,
+      "xyxy": [
+        0.6836283,
+        0.19026549,
+        0.7632743,
+        0.30235988
+      ]
+    },
+    {
+      "caseId": "photo-heldout-18",
+      "csvRow": 172330,
+      "xyxy": [
+        0.0,
+        0.75108224,
+        0.20180723,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-18",
+      "csvRow": 172331,
+      "xyxy": [
+        0.21084337,
+        0.7683983,
+        0.2936747,
+        0.88744587
+      ]
+    },
+    {
+      "caseId": "photo-heldout-18",
+      "csvRow": 172332,
+      "xyxy": [
+        0.3493976,
+        0.6818182,
+        0.7560241,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-18",
+      "csvRow": 172333,
+      "xyxy": [
+        0.65210843,
+        0.74891776,
+        0.8433735,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-18",
+      "csvRow": 172334,
+      "xyxy": [
+        0.9141566,
+        0.62770563,
+        1.0,
+        0.96103895
+      ]
+    },
+    {
+      "caseId": "photo-heldout-19",
+      "csvRow": 302254,
+      "xyxy": [
+        0.48082596,
+        0.51106197,
+        0.5412979,
+        0.5995575
+      ]
+    },
+    {
+      "caseId": "photo-heldout-19",
+      "csvRow": 302255,
+      "xyxy": [
+        0.82448375,
+        0.24115044,
+        0.88053095,
+        0.2721239
+      ]
+    },
+    {
+      "caseId": "photo-heldout-20",
+      "csvRow": 128786,
+      "xyxy": [
+        0.0,
+        0.06317689,
+        1.0,
+        0.38808665
+      ]
+    },
+    {
+      "caseId": "photo-heldout-20",
+      "csvRow": 128787,
+      "xyxy": [
+        0.0,
+        0.6534296,
+        1.0,
+        0.97472924
+      ]
+    },
+    {
+      "caseId": "photo-heldout-21",
+      "csvRow": 204294,
+      "xyxy": [
+        0.31858408,
+        0.2581121,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-22",
+      "csvRow": 303351,
+      "xyxy": [
+        0.0,
+        0.43125,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-23",
+      "csvRow": 24699,
+      "xyxy": [
+        0.3869969,
+        0.0,
+        0.60990715,
+        0.8463158
+      ]
+    },
+    {
+      "caseId": "photo-heldout-24",
+      "csvRow": 147350,
+      "xyxy": [
+        0.04692082,
+        0.0022222223,
+        0.92521995,
+        0.90444446
+      ]
+    },
+    {
+      "caseId": "photo-heldout-24",
+      "csvRow": 147351,
+      "xyxy": [
+        0.92082113,
+        0.76222223,
+        0.9985337,
+        0.85555553
+      ]
+    },
+    {
+      "caseId": "photo-heldout-25",
+      "csvRow": 102976,
+      "xyxy": [
+        0.0,
+        0.52708334,
+        0.1265625,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-26",
+      "csvRow": 76997,
+      "xyxy": [
+        0.0,
+        0.5199115,
+        0.82743365,
+        0.9977876
+      ]
+    },
+    {
+      "caseId": "photo-heldout-27",
+      "csvRow": 204184,
+      "xyxy": [
+        0.86283183,
+        0.41371682,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-28",
+      "csvRow": 224879,
+      "xyxy": [
+        0.14749263,
+        0.13716814,
+        0.82300884,
+        0.7942478
+      ]
+    },
+    {
+      "caseId": "photo-heldout-29",
+      "csvRow": 135521,
+      "xyxy": [
+        0.26678142,
+        0.25,
+        0.68846816,
+        0.9640151
+      ]
+    },
+    {
+      "caseId": "photo-heldout-30",
+      "csvRow": 252926,
+      "xyxy": [
+        0.28781205,
+        0.0,
+        0.9162996,
+        0.8935698
+      ]
+    },
+    {
+      "caseId": "photo-heldout-31",
+      "csvRow": 32021,
+      "xyxy": [
+        0.44,
+        0.25635594,
+        0.76,
+        0.9427966
+      ]
+    },
+    {
+      "caseId": "photo-heldout-31",
+      "csvRow": 32022,
+      "xyxy": [
+        0.6492308,
+        0.25635594,
+        0.9692308,
+        0.93008476
+      ]
+    },
+    {
+      "caseId": "photo-heldout-32",
+      "csvRow": 104755,
+      "xyxy": [
+        0.22385861,
+        0.26385808,
+        0.47569954,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-32",
+      "csvRow": 104756,
+      "xyxy": [
+        0.45949927,
+        0.29046562,
+        0.7982327,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-33",
+      "csvRow": 238372,
+      "xyxy": [
+        0.2875,
+        0.35208333,
+        0.7734375,
+        0.71875
+      ]
+    },
+    {
+      "caseId": "photo-heldout-33",
+      "csvRow": 238373,
+      "xyxy": [
+        0.5140625,
+        0.22083333,
+        0.7765625,
+        0.39791667
+      ]
+    },
+    {
+      "caseId": "photo-heldout-34",
+      "csvRow": 39671,
+      "xyxy": [
+        0.43657818,
+        0.5995575,
+        0.5265487,
+        0.75884956
+      ]
+    },
+    {
+      "caseId": "photo-heldout-34",
+      "csvRow": 39672,
+      "xyxy": [
+        0.5707965,
+        0.5818584,
+        0.64749265,
+        0.7345133
+      ]
+    },
+    {
+      "caseId": "photo-heldout-34",
+      "csvRow": 39673,
+      "xyxy": [
+        0.6504425,
+        0.5663717,
+        0.7227139,
+        0.7079646
+      ]
+    },
+    {
+      "caseId": "photo-heldout-34",
+      "csvRow": 39674,
+      "xyxy": [
+        0.7477876,
+        0.5597345,
+        0.8215339,
+        0.6902655
+      ]
+    },
+    {
+      "caseId": "photo-heldout-34",
+      "csvRow": 39675,
+      "xyxy": [
+        0.8702065,
+        0.54646015,
+        0.93510324,
+        0.67256635
+      ]
+    },
+    {
+      "caseId": "photo-heldout-34",
+      "csvRow": 39676,
+      "xyxy": [
+        0.9587021,
+        0.53318584,
+        1.0,
+        0.65929204
+      ]
+    },
+    {
+      "caseId": "photo-heldout-35",
+      "csvRow": 83174,
+      "xyxy": [
+        0.40705562,
+        0.39182693,
+        0.504749,
+        0.46875
+      ]
+    },
+    {
+      "caseId": "photo-heldout-35",
+      "csvRow": 83175,
+      "xyxy": [
+        0.5970149,
+        0.42067307,
+        0.687924,
+        0.58413464
+      ]
+    },
+    {
+      "caseId": "photo-heldout-35",
+      "csvRow": 83176,
+      "xyxy": [
+        0.5983718,
+        0.4471154,
+        0.6824966,
+        0.58413464
+      ]
+    },
+    {
+      "caseId": "photo-heldout-36",
+      "csvRow": 37856,
+      "xyxy": [
+        0.0,
+        0.31858408,
+        0.020648967,
+        0.34955752
+      ]
+    },
+    {
+      "caseId": "photo-heldout-36",
+      "csvRow": 37857,
+      "xyxy": [
+        0.030973451,
+        0.32300884,
+        0.073746316,
+        0.35840708
+      ]
+    },
+    {
+      "caseId": "photo-heldout-36",
+      "csvRow": 37858,
+      "xyxy": [
+        0.104719765,
+        0.36725664,
+        0.14011799,
+        0.38938054
+      ]
+    },
+    {
+      "caseId": "photo-heldout-36",
+      "csvRow": 37859,
+      "xyxy": [
+        0.19026549,
+        0.3340708,
+        0.22271386,
+        0.36283186
+      ]
+    },
+    {
+      "caseId": "photo-heldout-36",
+      "csvRow": 37860,
+      "xyxy": [
+        0.23451327,
+        0.11504425,
+        0.44837758,
+        0.289823
+      ]
+    },
+    {
+      "caseId": "photo-heldout-36",
+      "csvRow": 37861,
+      "xyxy": [
+        0.52359885,
+        0.27433628,
+        0.5707965,
+        0.31858408
+      ]
+    },
+    {
+      "caseId": "photo-heldout-36",
+      "csvRow": 37862,
+      "xyxy": [
+        0.63274336,
+        0.10176991,
+        0.87905604,
+        0.32079646
+      ]
+    },
+    {
+      "caseId": "photo-heldout-36",
+      "csvRow": 37863,
+      "xyxy": [
+        0.9719764,
+        0.30530974,
+        1.0,
+        0.36283186
+      ]
+    },
+    {
+      "caseId": "photo-heldout-37",
+      "csvRow": 179289,
+      "xyxy": [
+        0.0015625,
+        0.15448852,
+        0.575,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-37",
+      "csvRow": 179290,
+      "xyxy": [
+        0.4328125,
+        0.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-38",
+      "csvRow": 118011,
+      "xyxy": [
+        0.3078125,
+        0.41458333,
+        0.475,
+        0.49166667
+      ]
+    },
+    {
+      "caseId": "photo-heldout-38",
+      "csvRow": 118012,
+      "xyxy": [
+        0.365625,
+        0.75416666,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "caseId": "photo-heldout-38",
+      "csvRow": 118013,
+      "xyxy": [
+        0.4078125,
+        0.38541666,
+        0.4671875,
+        0.41875
+      ]
+    },
+    {
+      "caseId": "photo-heldout-39",
+      "csvRow": 135422,
+      "xyxy": [
+        0.0,
+        0.69166666,
+        0.128125,
+        0.99791664
+      ]
+    },
+    {
+      "caseId": "photo-heldout-39",
+      "csvRow": 135423,
+      "xyxy": [
+        0.4125,
+        0.5375,
+        0.55625,
+        0.77708334
+      ]
+    },
+    {
+      "caseId": "photo-heldout-39",
+      "csvRow": 135424,
+      "xyxy": [
+        0.640625,
+        0.46458334,
+        0.740625,
+        0.65416664
+      ]
+    },
+    {
+      "caseId": "photo-heldout-40",
+      "csvRow": 56185,
+      "xyxy": [
+        0.22290076,
+        0.3846154,
+        0.43816793,
+        0.7692308
+      ]
+    },
+    {
+      "caseId": "photo-heldout-40",
+      "csvRow": 56186,
+      "xyxy": [
+        0.49007633,
+        0.33119658,
+        0.71755725,
+        0.7029914
+      ]
+    }
+  ],
+  "licenseChecks": [
+    {
+      "caseId": "photo-dev-01",
+      "imageId": "fbe59eeb48094e5d",
+      "flickrPhotoId": "16576763713",
+      "evidenceSha256": "c2829084d515b8e61f48ed5bd44d2d3bb5356adc11a8615b5cdc59231868d769",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-02",
+      "imageId": "6d60c9f1e937a105",
+      "flickrPhotoId": "2706838213",
+      "evidenceSha256": "f1cc70b997a20aa94994d41ea0a4e947fa8156fa1bda828891c6c485390f478c",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-03",
+      "imageId": "6a202f97eba64a08",
+      "flickrPhotoId": "4293065922",
+      "evidenceSha256": "0d06b71aa6dfd8a327574f74e85bab13e06b7b2b591889dfade7cc4898de8b31",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-04",
+      "imageId": "ca83b4e5ff4b1e49",
+      "flickrPhotoId": "4611191206",
+      "evidenceSha256": "19efb5d5f7959aa30ee239fb8d8b5bfe8b890fe47d6ec723fe1289279e210272",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-05",
+      "imageId": "9d198c9c6fc1fc1b",
+      "flickrPhotoId": "2794891963",
+      "evidenceSha256": "d1015ee6e3ae42babdb0dc9d58289fac7cf17b972defa4f38adb93621f2c8513",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-06",
+      "imageId": "04d23234a24acc99",
+      "flickrPhotoId": "1951706354",
+      "evidenceSha256": "2096208ea822984843e918ffa1148ea6daa6bda46571a27d7044651a0cfb7755",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-07",
+      "imageId": "9157341ce5f6f0bf",
+      "flickrPhotoId": "4208923271",
+      "evidenceSha256": "452afec5cbe6c7c90bb76837e47b75b27ae1b4a359e888a23d427d72ac26d8ff",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-08",
+      "imageId": "58ab31224441bf2f",
+      "flickrPhotoId": "19144085754",
+      "evidenceSha256": "d3de25f6af643c9446188f8a9a8c238a702cf0f10d36050b37c6702dccf80675",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-09",
+      "imageId": "9ca02a39a415edc1",
+      "flickrPhotoId": "7779131926",
+      "evidenceSha256": "b4285971c58a507ed0513aa7c750086a75d4513afe94663b1097ea7f5cff2eb9",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-10",
+      "imageId": "890a08ff48bf62d8",
+      "flickrPhotoId": "5633071873",
+      "evidenceSha256": "39a037d6ef98db668c1ca22414ad037660839445f4e1d933918d893f3f3d9911",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-11",
+      "imageId": "3f9ca1232e4f225e",
+      "flickrPhotoId": "3281015642",
+      "evidenceSha256": "eb3f0f47ec5f818856a157f3679de6eb5fe672f49b93989cbe5c04be48f64120",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-12",
+      "imageId": "073d46c17c65b1f5",
+      "flickrPhotoId": "15753366776",
+      "evidenceSha256": "e00f5cf09c6bce7cbb3e1270a43ec0e2a801b36b74bb69a4796cc83e01a6c740",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-13",
+      "imageId": "d1f728c5761cc354",
+      "flickrPhotoId": "6074126253",
+      "evidenceSha256": "ed3a068707a66f2dad2853d575ec7a24579a992c40c6aaed71b34ab9d26a0633",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-14",
+      "imageId": "563757784fbaccb8",
+      "flickrPhotoId": "7474735852",
+      "evidenceSha256": "e15b8a714a1a51063d253d3ce115b75e66ac967894af74d5de125592b29a90bd",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-15",
+      "imageId": "2b3f752d363cb02a",
+      "flickrPhotoId": "8026647077",
+      "evidenceSha256": "5cde8ea871caeaebb4cf206f367d5f8cf3086ea1de577c306e7e9ff1cd508bbd",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-16",
+      "imageId": "ba203a90803733a4",
+      "flickrPhotoId": "5765173293",
+      "evidenceSha256": "41f1ede5c5aea752606aa460083d85c785293cbf7496f7dfea66b00a56f6e086",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-17",
+      "imageId": "415c25d848879f98",
+      "flickrPhotoId": "377342134",
+      "evidenceSha256": "4a97e7f05adec49af27f05651b8afb53138e56071c3d24915d26a6268322a8e1",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-18",
+      "imageId": "45c6589db22f7524",
+      "flickrPhotoId": "803566474",
+      "evidenceSha256": "f37c374393f5810fee5a06ed847c7ed39001e413b3f878e6cd27e5e086fa89f0",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-19",
+      "imageId": "8de803c15dc6dc7d",
+      "flickrPhotoId": "4077598908",
+      "evidenceSha256": "177906d70a0105d1d424d8950f5d76061c9dcaaae677a3dcd1e97716cd014aaa",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-dev-20",
+      "imageId": "3e8acf516f9dc8ac",
+      "flickrPhotoId": "5417817599",
+      "evidenceSha256": "b68ec9f31091bb8410b880a0739993f261b33790a1e876792b3b1896013c0e7a",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-01",
+      "imageId": "6bf467287bbb6e8b",
+      "flickrPhotoId": "4254007709",
+      "evidenceSha256": "6716a6ed9b8000f17f67dd218a4062628078c29d756e46d8e5cf36634038e398",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-02",
+      "imageId": "6ab55d63ac6708e2",
+      "flickrPhotoId": "3672231175",
+      "evidenceSha256": "3ad048a04f17a68f80a629c5835ebbc6b2d219339a997a55dfad20e35681e1b5",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-03",
+      "imageId": "3fec3b9feac65f6a",
+      "flickrPhotoId": "4562499605",
+      "evidenceSha256": "22f67d5d22a13d36bc181e5d313d2fe1c25be3003e5c9cbbddd8663123994772",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-04",
+      "imageId": "35f837b8efa90099",
+      "flickrPhotoId": "257097723",
+      "evidenceSha256": "042e7d73d4f2cbe8cc8eec6c75b9172894ffbc05c8d2e14bedb297e321c2deab",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-05",
+      "imageId": "d2343d20f7cc6e48",
+      "flickrPhotoId": "1519316454",
+      "evidenceSha256": "55918503b404ec58a44ccd1b8810d25869b1aad9817f151160b785e9b89ff952",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-06",
+      "imageId": "9f7963816508342a",
+      "flickrPhotoId": "1437333121",
+      "evidenceSha256": "b7ff1930a1ac6aa6725428a01024873c884ff0d19c81a5120f1968ed1f1b49bd",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-07",
+      "imageId": "92b99b81715472df",
+      "flickrPhotoId": "429996265",
+      "evidenceSha256": "c65230288e271df3e650a958c29b2e5b990e31ad8c0cb3f966b0b95954a8e417",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-08",
+      "imageId": "46da83ccb945db5a",
+      "flickrPhotoId": "5900036077",
+      "evidenceSha256": "41a2348f15aae0852454a288431ec72ba1bdc20268d4b2d3ec06a43448e7ee3a",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-09",
+      "imageId": "b4c7c24388a9c7af",
+      "flickrPhotoId": "5195137902",
+      "evidenceSha256": "9ce57866be7b3932de03e05fc40aafcad6c5f1aaa5e8d07d177ac2539e203288",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-10",
+      "imageId": "9d041d61547563e6",
+      "flickrPhotoId": "15542402927",
+      "evidenceSha256": "484c766c54fa8db436e3460273dfa6a2a25ac8ff60eb92c42a3471b5063964e8",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-11",
+      "imageId": "5a2ca3f1777ef444",
+      "flickrPhotoId": "5053117627",
+      "evidenceSha256": "172140ee68bc3b9ca9b884cb8e24752a4e2037007ef085753dd0dead6db77bdc",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-12",
+      "imageId": "5ba6c3d6b98cb93f",
+      "flickrPhotoId": "4930418632",
+      "evidenceSha256": "5477f9decef3f5d4c0373c1ebac073ca75dc1f3f8a087a9f4942c957afec6e85",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-13",
+      "imageId": "29def08271143710",
+      "flickrPhotoId": "15803481090",
+      "evidenceSha256": "6d2d4bc130eb8a2673460217723b5693b9fc0d3ae473d59a2cfa7646d11bc511",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-14",
+      "imageId": "ccbbb3175f571466",
+      "flickrPhotoId": "4560356078",
+      "evidenceSha256": "bdae35da3b395e0088ff68ef463c6906bb484e967f8ef6dcbac8f6cb63731e78",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-15",
+      "imageId": "0bdbf1ec73683c29",
+      "flickrPhotoId": "1446093794",
+      "evidenceSha256": "4aa34d71c929ce949b3e48785a3133883ec562abf949132bdf787deb6f1ddc43",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-16",
+      "imageId": "66b1a16de2eddedd",
+      "flickrPhotoId": "9917281696",
+      "evidenceSha256": "49df6b74ccfbd7214163c54bc2d1f35e87396fad6c3ef6ad3feec41b246164eb",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-17",
+      "imageId": "8df826e27ad174b6",
+      "flickrPhotoId": "12527535113",
+      "evidenceSha256": "fd5e0cfced7ea86386d228ac10245d42a7f940cf4ad4cce51c3d407b56eacd32",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-18",
+      "imageId": "92051ba4e40b87d5",
+      "flickrPhotoId": "14631188427",
+      "evidenceSha256": "0c8d4718cee2a6283443d32f0e2ad0c8293785469e21c0e04c299aa498f05539",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-19",
+      "imageId": "fe47a278906251b9",
+      "flickrPhotoId": "7267022270",
+      "evidenceSha256": "9b35195f67337fe3b76a5bb75fc6208c5f073c8e3b1e6ed75809ef2ed32bb3be",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-20",
+      "imageId": "6c5c1261ed674951",
+      "flickrPhotoId": "9431690444",
+      "evidenceSha256": "5e829de1c007123b999003e9868d1208eae4796d605e01b4cbed459c71e8ff93",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-21",
+      "imageId": "ab7224e4ed66dc98",
+      "flickrPhotoId": "4664421132",
+      "evidenceSha256": "6e737db4c246204e76bab5b9411eb12177c90834d58def527ed2d91e088e26bc",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-22",
+      "imageId": "ff50b6fca1c1d54b",
+      "flickrPhotoId": "1429327337",
+      "evidenceSha256": "c04d49302eb0f3df7a014d6d789f899458f29ba2973c4817cbbb395de5a4881f",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-23",
+      "imageId": "14f3cf0bf538d81c",
+      "flickrPhotoId": "14296803258",
+      "evidenceSha256": "51b18fb7ca5a093840cd3cda36ee5e1b1258faec6ce8e8395916e6d3eed2c876",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-24",
+      "imageId": "7ce104b4659254ef",
+      "flickrPhotoId": "16204290613",
+      "evidenceSha256": "3d75e2e32809053d730ffba4e00c84b5a10bb089be1e04f9c1dc2847b9f5e663",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-25",
+      "imageId": "560ef853be0bc079",
+      "flickrPhotoId": "8734575580",
+      "evidenceSha256": "eb7edc7f473b4f5b97d0269535737b8e90b38aca466f76047cb2345e9971e897",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-26",
+      "imageId": "4043197c1365a336",
+      "flickrPhotoId": "297955373",
+      "evidenceSha256": "08d4a7b8ef2d0c03dc6c9dfddd014b70f68ebb48ccc7639c6b0d4ded6fc84d57",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-27",
+      "imageId": "ab5671e8a5e8979d",
+      "flickrPhotoId": "15700093739",
+      "evidenceSha256": "f89494dbc3d929b537496deec634b921d377eae09ee2872fbf6afa3968bae3df",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-28",
+      "imageId": "bcb19dc50d80a2c9",
+      "flickrPhotoId": "3566500017",
+      "evidenceSha256": "5045a8865e21efed30cd9d0e926a207cf0c1f39e6b08c0f9d49e5cefcac485a4",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-29",
+      "imageId": "7259f87c5ffc8cd2",
+      "flickrPhotoId": "6739926435",
+      "evidenceSha256": "c344893ff5763a1e50518f70ef39dbdffbb48984ce6c45bd3cd0698dd43a2cdf",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-30",
+      "imageId": "d46c7361fb1eed0f",
+      "flickrPhotoId": "11715267326",
+      "evidenceSha256": "c0037aebb6f4e8e73d52777131717c926d01b1cdeac914a598030b5a6d163293",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-31",
+      "imageId": "1b2c1d18a5469167",
+      "flickrPhotoId": "3721695949",
+      "evidenceSha256": "fc61bb3c988cddf7f49ec3be0e2a9b4274eb12c35d369223f744e6cfaf35b94a",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-32",
+      "imageId": "57b05e17d6075bed",
+      "flickrPhotoId": "536166577",
+      "evidenceSha256": "8d473e5090241f955870128c62d83ccdedbd5ade0ec2f138e370264689f04584",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-33",
+      "imageId": "c7f0bce24ad7d792",
+      "flickrPhotoId": "15864345298",
+      "evidenceSha256": "3ad367c0f0430b5429f7a72bdb6b7a44b6126a56a167c741ecca09b63e44d843",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-34",
+      "imageId": "218a7e0c84466325",
+      "flickrPhotoId": "469087256",
+      "evidenceSha256": "3a8a52d28219067a068fbeb5f9dc6e60a4267263f4c8906c73393fc370f12d68",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-35",
+      "imageId": "45d231a2d9d7c38b",
+      "flickrPhotoId": "19613909724",
+      "evidenceSha256": "6f7342250e971d4b3fbdac73c54e21dd4ec0ca8b1c343ceeb3c78475b71975c6",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-36",
+      "imageId": "2008c9de01d39a22",
+      "flickrPhotoId": "8419120460",
+      "evidenceSha256": "fe5139ccd02a6f219cab6abd43a2b19bd12fc0cd08da9449a730309fad5139d7",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-37",
+      "imageId": "97a73a0bb5d24ed8",
+      "flickrPhotoId": "3838342976",
+      "evidenceSha256": "f057175e916f5a8fa14f71ec12109b8df9e8c7d56c5647645e136a2dc6488ad0",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-38",
+      "imageId": "636eb68a603c051a",
+      "flickrPhotoId": "4604392884",
+      "evidenceSha256": "b4a1dc6b68de33c171463b56b3a41d5720425875c3fc7ebc7d4f31300aeebef3",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-39",
+      "imageId": "72339fee52338acb",
+      "flickrPhotoId": "5349322724",
+      "evidenceSha256": "187a946d2cdf6abe05096121e8a88b5dd14867c3d97c8475684a7209a3d2144d",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    },
+    {
+      "caseId": "photo-heldout-40",
+      "imageId": "2f64bfca4e0a88b6",
+      "flickrPhotoId": "9502350063",
+      "evidenceSha256": "d7a303a474e31a6c96c4e5121e61b5279e4959b3f2fb51f77816aa63ae4362f3",
+      "savedImageObjectIdentityAndLicenseMatch": true,
+      "originalPageBytesAvailable": false,
+      "rawJsonLdBlockAvailable": false
+    }
+  ],
+  "limitations": [
+    "Only parsed page-specific ImageObject is retained. Original HTML and raw JSON-LD block bytes are not present; reported sourcePageSha256 and structuredBlockSha256 cannot be independently recomputed from this corpus. No live license verification was rerun.",
+    "Matching photo IDs and saved source metadata bind the declared license chain. The resized mirror image was not pixel-compared against the original Flickr upload; photographer ownership is not warranted.",
+    "Exact byte and ID duplicate checks passed. Perceptual duplicates, adjacent-shot leakage, author aliases not resolved by saved current identity, and manual annotation accuracy remain unestablished.",
+    "Open Images annotations remain source labels, not new independently human-adjudicated GT. Possible ontology disagreements or incomplete annotations can affect expected outcomes.",
+    "Producer caseId exposes split/index and ordering follows strata. Keep caseId/path/hash/split outside the model payload; transmit only pixels plus target/question/options/instruction. This audit confirms no explicit expected label, boxes or stratum in producer files, not operational isolation of a future runner.",
+    "No model was evaluated. No conclusion about locator/classifier accuracy or real-world representativeness.",
+    "Image decoding was not repeated; owner validation receipt was read and hashed only."
+  ]
+}

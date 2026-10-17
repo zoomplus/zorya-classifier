@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/damurphy/16204290613",
+  "resolvedUrl": "https://www.flickr.com/photos/damurphy/16204290613",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:02.388388+00:00",
+  "sourcePageBytes": 513010,
+  "sourcePageSha256": "27cc5e02ab4a30d9be61cf0d6111e24a53c5a6e6fd30f95881d8ece1218cc6e6",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/8598/16204290613_c67a048231_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/damurphy/16204290613",
+    "author": {
+      "@type": "Person",
+      "name": "Dennis Murphy",
+      "url": "https://www.flickr.com/photos/damurphy",
+      "image": "https://live.staticflickr.com/203/buddyicons/28485341@N00.jpg?1177429397#28485341@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Dennis Murphy",
+      "url": "https://www.flickr.com/photos/damurphy",
+      "image": "https://live.staticflickr.com/203/buddyicons/28485341@N00.jpg?1177429397#28485341@N00"
+    }
+  },
+  "structuredBlockSha256": "ef8fadcd70836d4ecd3816f3a25652f4e70e73d26754398a5a0facf99c1ba45b",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "16204290613",
+  "rawPagePersisted": false
+}

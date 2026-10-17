@@ -1,0 +1,2136 @@
+{
+  "version": 1,
+  "status": "complete",
+  "mode": "live",
+  "evidence": "real-provider",
+  "startedAt": "2026-10-17T21:54:57.525Z",
+  "finishedAt": "2026-10-17T21:55:23.740Z",
+  "durationMs": 26214.849941,
+  "planned": {
+    "photos": 2,
+    "texts": 2
+  },
+  "startedCases": 4,
+  "unstartedCases": 0,
+  "reason": null,
+  "budget": {
+    "admittedProviderCalls": 14,
+    "maxCalls": 14,
+    "maxCostUsd": 0.1,
+    "knownCostUsd": 0.004080510000000001,
+    "unknownCostCalls": 0,
+    "inFlightCalls": 0,
+    "reservationPerUnknownUsd": 0.02,
+    "accountedExposureUsd": 0.004080510000000001,
+    "exceededByReportedCost": false
+  },
+  "physicalHttpCalls": 14,
+  "network": [
+    {
+      "ordinal": 1,
+      "startedAt": "2026-10-17T21:54:57.715Z",
+      "durationMs": 1391.801035,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 2,
+      "startedAt": "2026-10-17T21:54:59.250Z",
+      "durationMs": 1781.528527,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 3,
+      "startedAt": "2026-10-17T21:55:01.469Z",
+      "durationMs": 2241.155944,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 4,
+      "startedAt": "2026-10-17T21:55:04.264Z",
+      "durationMs": 2700.8958040000007,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 5,
+      "startedAt": "2026-10-17T21:55:07.048Z",
+      "durationMs": 1769.2731670000012,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 6,
+      "startedAt": "2026-10-17T21:55:09.020Z",
+      "durationMs": 1613.102332999999,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 7,
+      "startedAt": "2026-10-17T21:55:10.663Z",
+      "durationMs": 1686.4409849999993,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 8,
+      "startedAt": "2026-10-17T21:55:12.602Z",
+      "durationMs": 2791.432412,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 9,
+      "startedAt": "2026-10-17T21:55:15.826Z",
+      "durationMs": 4423.496494999999,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 10,
+      "startedAt": "2026-10-17T21:55:20.305Z",
+      "durationMs": 2004.1290690000023,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 11,
+      "startedAt": "2026-10-17T21:55:22.396Z",
+      "durationMs": 294.4697090000009,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 12,
+      "startedAt": "2026-10-17T21:55:22.693Z",
+      "durationMs": 416.867846000001,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 13,
+      "startedAt": "2026-10-17T21:55:23.114Z",
+      "durationMs": 332.41298800000004,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    },
+    {
+      "ordinal": 14,
+      "startedAt": "2026-10-17T21:55:23.450Z",
+      "durationMs": 289.43417899999986,
+      "durationScope": "fetch-until-response-headers",
+      "failed": false,
+      "status": 200
+    }
+  ],
+  "metrics": {
+    "dev": {
+      "photo": {
+        "library": {
+          "attempted": 2,
+          "classified": 2,
+          "correct": 1,
+          "failed": 0,
+          "operationalUnknown": 0,
+          "accuracy": 0.5,
+          "macroF1": 0.3333333333333333,
+          "zeroDivision": 0,
+          "confusion": [
+            {
+              "expectedClassId": "present",
+              "predictions": [
+                {
+                  "classId": "present",
+                  "count": 1
+                },
+                {
+                  "classId": "absent",
+                  "count": 1
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "absent",
+              "predictions": [
+                {
+                  "classId": "present",
+                  "count": 0
+                },
+                {
+                  "classId": "absent",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            }
+          ],
+          "perClass": [
+            {
+              "classId": "present",
+              "support": 2,
+              "tp": 1,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1,
+              "recall": 0.5,
+              "f1": 0.6666666666666666
+            },
+            {
+              "classId": "absent",
+              "support": 0,
+              "tp": 0,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            }
+          ],
+          "latency": {
+            "count": 2,
+            "minMs": 1661.5783860000001,
+            "maxMs": 1700.8201369999988,
+            "meanMs": 1681.1992614999995,
+            "p50Ms": 1661.5783860000001,
+            "p95Ms": 1700.8201369999988,
+            "quantileMethod": "nearest-rank"
+          }
+        },
+        "native": {
+          "attempted": 2,
+          "classified": 2,
+          "correct": 1,
+          "failed": 0,
+          "operationalUnknown": 0,
+          "accuracy": 0.5,
+          "macroF1": 0.3333333333333333,
+          "zeroDivision": 0,
+          "confusion": [
+            {
+              "expectedClassId": "present",
+              "predictions": [
+                {
+                  "classId": "present",
+                  "count": 1
+                },
+                {
+                  "classId": "absent",
+                  "count": 1
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "absent",
+              "predictions": [
+                {
+                  "classId": "present",
+                  "count": 0
+                },
+                {
+                  "classId": "absent",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            }
+          ],
+          "perClass": [
+            {
+              "classId": "present",
+              "support": 2,
+              "tp": 1,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1,
+              "recall": 0.5,
+              "f1": 0.6666666666666666
+            },
+            {
+              "classId": "absent",
+              "support": 0,
+              "tp": 0,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            }
+          ],
+          "latency": {
+            "count": 2,
+            "minMs": 1715.3739490000007,
+            "maxMs": 1832.7428920000002,
+            "meanMs": 1774.0584205000005,
+            "p50Ms": 1715.3739490000007,
+            "p95Ms": 1832.7428920000002,
+            "quantileMethod": "nearest-rank"
+          }
+        },
+        "parity": {
+          "attempted": 2,
+          "paired": 2,
+          "missingLibrary": 0,
+          "missingNative": 0,
+          "classMatches": 2,
+          "classMatchRateAllAttempts": 1,
+          "classMatchRatePaired": 1,
+          "probabilityPairs": 2,
+          "unavailableProbabilityPairs": 0,
+          "exactProbabilityMatches": 1,
+          "maxAbsoluteProbabilityDifference": {
+            "count": 2,
+            "min": 0,
+            "max": 0.010000000000000009,
+            "mean": 0.0050000000000000044,
+            "p50": 0,
+            "p95": 0.010000000000000009
+          }
+        }
+      },
+      "text": {
+        "library": {
+          "attempted": 2,
+          "classified": 2,
+          "correct": 2,
+          "failed": 0,
+          "operationalUnknown": 0,
+          "accuracy": 1,
+          "macroF1": 0.2,
+          "zeroDivision": 0,
+          "confusion": [
+            {
+              "expectedClassId": "order_status",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 2
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "refund",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "technical_support",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "general_feedback",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "unknown",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            }
+          ],
+          "perClass": [
+            {
+              "classId": "order_status",
+              "support": 2,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            {
+              "classId": "refund",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "technical_support",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "general_feedback",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "unknown",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            }
+          ],
+          "latency": {
+            "count": 2,
+            "minMs": 296.7311860000009,
+            "maxMs": 334.99809900000037,
+            "meanMs": 315.8646425000006,
+            "p50Ms": 296.7311860000009,
+            "p95Ms": 334.99809900000037,
+            "quantileMethod": "nearest-rank"
+          }
+        },
+        "native": {
+          "attempted": 2,
+          "classified": 2,
+          "correct": 2,
+          "failed": 0,
+          "operationalUnknown": 0,
+          "accuracy": 1,
+          "macroF1": 0.2,
+          "zeroDivision": 0,
+          "confusion": [
+            {
+              "expectedClassId": "order_status",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 2
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "refund",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "technical_support",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "general_feedback",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "unknown",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            }
+          ],
+          "perClass": [
+            {
+              "classId": "order_status",
+              "support": 2,
+              "tp": 2,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1,
+              "recall": 1,
+              "f1": 1
+            },
+            {
+              "classId": "refund",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "technical_support",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "general_feedback",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "unknown",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            }
+          ],
+          "latency": {
+            "count": 2,
+            "minMs": 291.4641900000024,
+            "maxMs": 418.8979799999979,
+            "meanMs": 355.18108500000017,
+            "p50Ms": 291.4641900000024,
+            "p95Ms": 418.8979799999979,
+            "quantileMethod": "nearest-rank"
+          }
+        },
+        "parity": {
+          "attempted": 2,
+          "paired": 2,
+          "missingLibrary": 0,
+          "missingNative": 0,
+          "classMatches": 2,
+          "classMatchRateAllAttempts": 1,
+          "classMatchRatePaired": 1,
+          "probabilityPairs": 2,
+          "unavailableProbabilityPairs": 0,
+          "exactProbabilityMatches": 2,
+          "maxAbsoluteProbabilityDifference": {
+            "count": 2,
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "p50": 0,
+            "p95": 0
+          }
+        }
+      },
+      "localization": {
+        "oneStagePrefix": {
+          "attempted": 2,
+          "located": 2,
+          "failed": 0,
+          "unknown": 0,
+          "notFound": 0,
+          "successful": 2,
+          "overallSuccessRate": 1,
+          "present": {
+            "attempted": 2,
+            "located": 2,
+            "hits": 2,
+            "misses": 0,
+            "failed": 0,
+            "unknown": 0,
+            "notFound": 0,
+            "hitRate": 1
+          },
+          "negative": {
+            "attempted": 0,
+            "falsePositives": 0,
+            "correctRejections": 0,
+            "failed": 0,
+            "unknown": 0,
+            "falsePositiveRate": null,
+            "correctRejectionRate": null
+          },
+          "locatedAreaFraction": {
+            "count": 2,
+            "min": 0.062430632630410654,
+            "max": 0.06259150805270863,
+            "mean": 0.06251107034155964,
+            "p50": 0.062430632630410654,
+            "p95": 0.06259150805270863
+          },
+          "presentLocatedDistance": {
+            "count": 2,
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "p50": 0,
+            "p95": 0
+          },
+          "geometryCoverage": 1,
+          "distanceUnit": "normalized-xy-euclidean-divided-by-sqrt2",
+          "latency": {
+            "count": 2,
+            "minMs": 2677.115603,
+            "maxMs": 3043.3385479999997,
+            "meanMs": 2860.2270755,
+            "p50Ms": 2677.115603,
+            "p95Ms": 3043.3385479999997,
+            "quantileMethod": "nearest-rank"
+          },
+          "cases": [
+            {
+              "presence": "present",
+              "status": "located",
+              "center": {
+                "x": 0.625,
+                "y": 0.12486126526082131
+              },
+              "areaFraction": 0.062430632630410654,
+              "distanceToNearestBox": 0,
+              "pointInsideAnyBox": true
+            },
+            {
+              "presence": "present",
+              "status": "located",
+              "center": {
+                "x": 0.625,
+                "y": 0.6244509516837482
+              },
+              "areaFraction": 0.06259150805270863,
+              "distanceToNearestBox": 0,
+              "pointInsideAnyBox": true
+            }
+          ]
+        },
+        "twoStagePrefix": {
+          "attempted": 2,
+          "located": 2,
+          "failed": 0,
+          "unknown": 0,
+          "notFound": 0,
+          "successful": 2,
+          "overallSuccessRate": 1,
+          "present": {
+            "attempted": 2,
+            "located": 2,
+            "hits": 2,
+            "misses": 0,
+            "failed": 0,
+            "unknown": 0,
+            "notFound": 0,
+            "hitRate": 1
+          },
+          "negative": {
+            "attempted": 0,
+            "falsePositives": 0,
+            "correctRejections": 0,
+            "failed": 0,
+            "unknown": 0,
+            "falsePositiveRate": null,
+            "correctRejectionRate": null
+          },
+          "locatedAreaFraction": {
+            "count": 2,
+            "min": 0.0039539400665926745,
+            "max": 0.005215959004392387,
+            "mean": 0.00458494953549253,
+            "p50": 0.0039539400665926745,
+            "p95": 0.005215959004392387
+          },
+          "presentLocatedDistance": {
+            "count": 2,
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "p50": 0,
+            "p95": 0
+          },
+          "geometryCoverage": 1,
+          "distanceUnit": "normalized-xy-euclidean-divided-by-sqrt2",
+          "latency": {
+            "count": 2,
+            "minMs": 5932.7227889999995,
+            "maxMs": 7899.015927,
+            "meanMs": 6915.869358,
+            "p50Ms": 5932.7227889999995,
+            "p95Ms": 7899.015927,
+            "quantileMethod": "nearest-rank"
+          },
+          "cases": [
+            {
+              "presence": "present",
+              "status": "located",
+              "center": {
+                "x": 0.65625,
+                "y": 0.15593784683684794
+              },
+              "areaFraction": 0.0039539400665926745,
+              "distanceToNearestBox": 0,
+              "pointInsideAnyBox": true
+            },
+            {
+              "presence": "present",
+              "status": "located",
+              "center": {
+                "x": 0.40625,
+                "y": 0.4150805270863836
+              },
+              "areaFraction": 0.005215959004392387,
+              "distanceToNearestBox": 0,
+              "pointInsideAnyBox": true
+            }
+          ]
+        },
+        "threeStage": {
+          "attempted": 2,
+          "located": 1,
+          "failed": 0,
+          "unknown": 1,
+          "notFound": 0,
+          "successful": 1,
+          "overallSuccessRate": 0.5,
+          "present": {
+            "attempted": 2,
+            "located": 1,
+            "hits": 1,
+            "misses": 1,
+            "failed": 0,
+            "unknown": 1,
+            "notFound": 0,
+            "hitRate": 0.5
+          },
+          "negative": {
+            "attempted": 0,
+            "falsePositives": 0,
+            "correctRejections": 0,
+            "failed": 0,
+            "unknown": 0,
+            "falsePositiveRate": null,
+            "correctRejectionRate": null
+          },
+          "locatedAreaFraction": {
+            "count": 1,
+            "min": 0.0038533469070278184,
+            "max": 0.0038533469070278184,
+            "mean": 0.0038533469070278184,
+            "p50": 0.0038533469070278184,
+            "p95": 0.0038533469070278184
+          },
+          "presentLocatedDistance": {
+            "count": 1,
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "p50": 0,
+            "p95": 0
+          },
+          "geometryCoverage": 0.5,
+          "distanceUnit": "normalized-xy-euclidean-divided-by-sqrt2",
+          "latency": {
+            "count": 2,
+            "minMs": 7784.592634999999,
+            "maxMs": 9958.698424000002,
+            "meanMs": 8871.645529500001,
+            "p50Ms": 7784.592634999999,
+            "p95Ms": 9958.698424000002,
+            "quantileMethod": "nearest-rank"
+          },
+          "cases": [
+            {
+              "presence": "present",
+              "status": "unknown",
+              "center": null,
+              "areaFraction": null,
+              "distanceToNearestBox": null,
+              "pointInsideAnyBox": false
+            },
+            {
+              "presence": "present",
+              "status": "located",
+              "center": {
+                "x": 0.18701171875,
+                "y": 0.6244509516837481
+              },
+              "areaFraction": 0.0038533469070278184,
+              "distanceToNearestBox": 0,
+              "pointInsideAnyBox": true
+            }
+          ]
+        }
+      }
+    },
+    "heldout": {
+      "photo": {
+        "library": {
+          "attempted": 0,
+          "classified": 0,
+          "correct": 0,
+          "failed": 0,
+          "operationalUnknown": 0,
+          "accuracy": null,
+          "macroF1": null,
+          "zeroDivision": 0,
+          "confusion": [
+            {
+              "expectedClassId": "present",
+              "predictions": [
+                {
+                  "classId": "present",
+                  "count": 0
+                },
+                {
+                  "classId": "absent",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "absent",
+              "predictions": [
+                {
+                  "classId": "present",
+                  "count": 0
+                },
+                {
+                  "classId": "absent",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            }
+          ],
+          "perClass": [
+            {
+              "classId": "present",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "absent",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            }
+          ],
+          "latency": {
+            "count": 0,
+            "minMs": null,
+            "maxMs": null,
+            "meanMs": null,
+            "p50Ms": null,
+            "p95Ms": null,
+            "quantileMethod": "nearest-rank"
+          }
+        },
+        "native": {
+          "attempted": 0,
+          "classified": 0,
+          "correct": 0,
+          "failed": 0,
+          "operationalUnknown": 0,
+          "accuracy": null,
+          "macroF1": null,
+          "zeroDivision": 0,
+          "confusion": [
+            {
+              "expectedClassId": "present",
+              "predictions": [
+                {
+                  "classId": "present",
+                  "count": 0
+                },
+                {
+                  "classId": "absent",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "absent",
+              "predictions": [
+                {
+                  "classId": "present",
+                  "count": 0
+                },
+                {
+                  "classId": "absent",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            }
+          ],
+          "perClass": [
+            {
+              "classId": "present",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "absent",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            }
+          ],
+          "latency": {
+            "count": 0,
+            "minMs": null,
+            "maxMs": null,
+            "meanMs": null,
+            "p50Ms": null,
+            "p95Ms": null,
+            "quantileMethod": "nearest-rank"
+          }
+        },
+        "parity": {
+          "attempted": 0,
+          "paired": 0,
+          "missingLibrary": 0,
+          "missingNative": 0,
+          "classMatches": 0,
+          "classMatchRateAllAttempts": null,
+          "classMatchRatePaired": null,
+          "probabilityPairs": 0,
+          "unavailableProbabilityPairs": 0,
+          "exactProbabilityMatches": 0,
+          "maxAbsoluteProbabilityDifference": {
+            "count": 0,
+            "min": null,
+            "max": null,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        }
+      },
+      "text": {
+        "library": {
+          "attempted": 0,
+          "classified": 0,
+          "correct": 0,
+          "failed": 0,
+          "operationalUnknown": 0,
+          "accuracy": null,
+          "macroF1": null,
+          "zeroDivision": 0,
+          "confusion": [
+            {
+              "expectedClassId": "order_status",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "refund",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "technical_support",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "general_feedback",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "unknown",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            }
+          ],
+          "perClass": [
+            {
+              "classId": "order_status",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "refund",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "technical_support",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "general_feedback",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "unknown",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            }
+          ],
+          "latency": {
+            "count": 0,
+            "minMs": null,
+            "maxMs": null,
+            "meanMs": null,
+            "p50Ms": null,
+            "p95Ms": null,
+            "quantileMethod": "nearest-rank"
+          }
+        },
+        "native": {
+          "attempted": 0,
+          "classified": 0,
+          "correct": 0,
+          "failed": 0,
+          "operationalUnknown": 0,
+          "accuracy": null,
+          "macroF1": null,
+          "zeroDivision": 0,
+          "confusion": [
+            {
+              "expectedClassId": "order_status",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "refund",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "technical_support",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "general_feedback",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            },
+            {
+              "expectedClassId": "unknown",
+              "predictions": [
+                {
+                  "classId": "order_status",
+                  "count": 0
+                },
+                {
+                  "classId": "refund",
+                  "count": 0
+                },
+                {
+                  "classId": "technical_support",
+                  "count": 0
+                },
+                {
+                  "classId": "general_feedback",
+                  "count": 0
+                },
+                {
+                  "classId": "unknown",
+                  "count": 0
+                }
+              ],
+              "operationalUnknown": 0,
+              "failed": 0
+            }
+          ],
+          "perClass": [
+            {
+              "classId": "order_status",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "refund",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "technical_support",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "general_feedback",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            },
+            {
+              "classId": "unknown",
+              "support": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0,
+              "recall": 0,
+              "f1": 0
+            }
+          ],
+          "latency": {
+            "count": 0,
+            "minMs": null,
+            "maxMs": null,
+            "meanMs": null,
+            "p50Ms": null,
+            "p95Ms": null,
+            "quantileMethod": "nearest-rank"
+          }
+        },
+        "parity": {
+          "attempted": 0,
+          "paired": 0,
+          "missingLibrary": 0,
+          "missingNative": 0,
+          "classMatches": 0,
+          "classMatchRateAllAttempts": null,
+          "classMatchRatePaired": null,
+          "probabilityPairs": 0,
+          "unavailableProbabilityPairs": 0,
+          "exactProbabilityMatches": 0,
+          "maxAbsoluteProbabilityDifference": {
+            "count": 0,
+            "min": null,
+            "max": null,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          }
+        }
+      },
+      "localization": {
+        "oneStagePrefix": {
+          "attempted": 0,
+          "located": 0,
+          "failed": 0,
+          "unknown": 0,
+          "notFound": 0,
+          "successful": 0,
+          "overallSuccessRate": null,
+          "present": {
+            "attempted": 0,
+            "located": 0,
+            "hits": 0,
+            "misses": 0,
+            "failed": 0,
+            "unknown": 0,
+            "notFound": 0,
+            "hitRate": null
+          },
+          "negative": {
+            "attempted": 0,
+            "falsePositives": 0,
+            "correctRejections": 0,
+            "failed": 0,
+            "unknown": 0,
+            "falsePositiveRate": null,
+            "correctRejectionRate": null
+          },
+          "locatedAreaFraction": {
+            "count": 0,
+            "min": null,
+            "max": null,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "presentLocatedDistance": {
+            "count": 0,
+            "min": null,
+            "max": null,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "geometryCoverage": null,
+          "distanceUnit": "normalized-xy-euclidean-divided-by-sqrt2",
+          "latency": {
+            "count": 0,
+            "minMs": null,
+            "maxMs": null,
+            "meanMs": null,
+            "p50Ms": null,
+            "p95Ms": null,
+            "quantileMethod": "nearest-rank"
+          },
+          "cases": []
+        },
+        "twoStagePrefix": {
+          "attempted": 0,
+          "located": 0,
+          "failed": 0,
+          "unknown": 0,
+          "notFound": 0,
+          "successful": 0,
+          "overallSuccessRate": null,
+          "present": {
+            "attempted": 0,
+            "located": 0,
+            "hits": 0,
+            "misses": 0,
+            "failed": 0,
+            "unknown": 0,
+            "notFound": 0,
+            "hitRate": null
+          },
+          "negative": {
+            "attempted": 0,
+            "falsePositives": 0,
+            "correctRejections": 0,
+            "failed": 0,
+            "unknown": 0,
+            "falsePositiveRate": null,
+            "correctRejectionRate": null
+          },
+          "locatedAreaFraction": {
+            "count": 0,
+            "min": null,
+            "max": null,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "presentLocatedDistance": {
+            "count": 0,
+            "min": null,
+            "max": null,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "geometryCoverage": null,
+          "distanceUnit": "normalized-xy-euclidean-divided-by-sqrt2",
+          "latency": {
+            "count": 0,
+            "minMs": null,
+            "maxMs": null,
+            "meanMs": null,
+            "p50Ms": null,
+            "p95Ms": null,
+            "quantileMethod": "nearest-rank"
+          },
+          "cases": []
+        },
+        "threeStage": {
+          "attempted": 0,
+          "located": 0,
+          "failed": 0,
+          "unknown": 0,
+          "notFound": 0,
+          "successful": 0,
+          "overallSuccessRate": null,
+          "present": {
+            "attempted": 0,
+            "located": 0,
+            "hits": 0,
+            "misses": 0,
+            "failed": 0,
+            "unknown": 0,
+            "notFound": 0,
+            "hitRate": null
+          },
+          "negative": {
+            "attempted": 0,
+            "falsePositives": 0,
+            "correctRejections": 0,
+            "failed": 0,
+            "unknown": 0,
+            "falsePositiveRate": null,
+            "correctRejectionRate": null
+          },
+          "locatedAreaFraction": {
+            "count": 0,
+            "min": null,
+            "max": null,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "presentLocatedDistance": {
+            "count": 0,
+            "min": null,
+            "max": null,
+            "mean": null,
+            "p50": null,
+            "p95": null
+          },
+          "geometryCoverage": null,
+          "distanceUnit": "normalized-xy-euclidean-divided-by-sqrt2",
+          "latency": {
+            "count": 0,
+            "minMs": null,
+            "maxMs": null,
+            "meanMs": null,
+            "p50Ms": null,
+            "p95Ms": null,
+            "quantileMethod": "nearest-rank"
+          },
+          "cases": []
+        }
+      }
+    }
+  },
+  "samples": [
+    {
+      "caseId": "photo-dev-01",
+      "split": "dev",
+      "kind": "photo",
+      "library": {
+        "expectedClassId": "present",
+        "outcome": {
+          "status": "ok",
+          "choice": "absent"
+        },
+        "latencyMs": 1661.5783860000001
+      },
+      "native": {
+        "expectedClassId": "present",
+        "outcome": {
+          "status": "ok",
+          "choice": "absent"
+        },
+        "latencyMs": 1832.7428920000002
+      },
+      "parity": {
+        "library": {
+          "choice": "absent",
+          "nativeChoice": "absent",
+          "probabilities": {
+            "present": 0.13,
+            "absent": 0.87
+          },
+          "tied": ["absent"],
+          "confidence": 0.74,
+          "metadata": {
+            "model": "typesafe/jev-1.14-20261014",
+            "provider": "TypeSafe",
+            "requestId": "gen-dec-1792274098-imQYXadQjreLdfLP5XKq",
+            "durationMs": 1483.447235,
+            "costUsd": 0.000123396,
+            "attempts": 1
+          }
+        },
+        "native": {
+          "choice": "absent",
+          "probabilities": {
+            "present": 0.14,
+            "absent": 0.86
+          },
+          "metadata": {
+            "model": "typesafe/jev-1.14-20261014",
+            "provider": "TypeSafe",
+            "requestId": "gen-dec-1792274099-nVsShuHTIvzpbl5l1Tl6",
+            "costUsd": 0.000123522,
+            "durationMs": 1782.2406589999998,
+            "attempts": 1
+          }
+        }
+      },
+      "locate": {
+        "expected": {
+          "presence": "present",
+          "boxes": [
+            {
+              "left": 0.19661017,
+              "top": 0.078998074,
+              "width": 0.69152543,
+              "height": 0.921001926
+            }
+          ]
+        },
+        "outcome": {
+          "status": "unknown"
+        },
+        "latencyMs": 7784.592634999999
+      },
+      "oneStage": {
+        "expected": {
+          "presence": "present",
+          "boxes": [
+            {
+              "left": 0.19661017,
+              "top": 0.078998074,
+              "width": 0.69152543,
+              "height": 0.921001926
+            }
+          ]
+        },
+        "outcome": {
+          "status": "located",
+          "region": {
+            "left": 0.5,
+            "top": 0,
+            "width": 0.25,
+            "height": 0.24972253052164262
+          }
+        },
+        "latencyMs": 2677.115603
+      },
+      "twoStage": {
+        "expected": {
+          "presence": "present",
+          "boxes": [
+            {
+              "left": 0.19661017,
+              "top": 0.078998074,
+              "width": 0.69152543,
+              "height": 0.921001926
+            }
+          ]
+        },
+        "outcome": {
+          "status": "located",
+          "region": {
+            "left": 0.625,
+            "top": 0.12430632630410655,
+            "width": 0.0625,
+            "height": 0.06326304106548279
+          }
+        },
+        "latencyMs": 5932.7227889999995
+      }
+    },
+    {
+      "caseId": "photo-dev-02",
+      "split": "dev",
+      "kind": "photo",
+      "library": {
+        "expectedClassId": "present",
+        "outcome": {
+          "status": "ok",
+          "choice": "present"
+        },
+        "latencyMs": 1700.8201369999988
+      },
+      "native": {
+        "expectedClassId": "present",
+        "outcome": {
+          "status": "ok",
+          "choice": "present"
+        },
+        "latencyMs": 1715.3739490000007
+      },
+      "parity": {
+        "library": {
+          "choice": "present",
+          "nativeChoice": "present",
+          "probabilities": {
+            "present": 1,
+            "absent": 0
+          },
+          "tied": ["present"],
+          "confidence": 1,
+          "metadata": {
+            "model": "typesafe/jev-1.14-20261014",
+            "provider": "TypeSafe",
+            "requestId": "gen-dec-1792274110-AHoRDydslgVkdAaLt1bP",
+            "durationMs": 1613.7301209999987,
+            "costUsd": 9.8616e-5,
+            "attempts": 1
+          }
+        },
+        "native": {
+          "choice": "present",
+          "probabilities": {
+            "present": 1,
+            "absent": 0
+          },
+          "metadata": {
+            "model": "typesafe/jev-1.14-20261014",
+            "provider": "TypeSafe",
+            "requestId": "gen-dec-1792274112-N2kpAmtU9DLzSB7dOs0m",
+            "costUsd": 9.8574e-5,
+            "durationMs": 1686.9623760000013,
+            "attempts": 1
+          }
+        }
+      },
+      "locate": {
+        "expected": {
+          "presence": "present",
+          "boxes": [
+            {
+              "left": 0.06637168,
+              "top": 0.37831858,
+              "width": 0.90707962,
+              "height": 0.42699112
+            }
+          ]
+        },
+        "outcome": {
+          "status": "located",
+          "region": {
+            "left": 0.16015625,
+            "top": 0.5885797950219619,
+            "width": 0.0537109375,
+            "height": 0.07174231332357248
+          }
+        },
+        "latencyMs": 9958.698424000002
+      },
+      "oneStage": {
+        "expected": {
+          "presence": "present",
+          "boxes": [
+            {
+              "left": 0.06637168,
+              "top": 0.37831858,
+              "width": 0.90707962,
+              "height": 0.42699112
+            }
+          ]
+        },
+        "outcome": {
+          "status": "located",
+          "region": {
+            "left": 0.5,
+            "top": 0.4992679355783309,
+            "width": 0.25,
+            "height": 0.25036603221083453
+          }
+        },
+        "latencyMs": 3043.3385479999997
+      },
+      "twoStage": {
+        "expected": {
+          "presence": "present",
+          "boxes": [
+            {
+              "left": 0.06637168,
+              "top": 0.37831858,
+              "width": 0.90707962,
+              "height": 0.42699112
+            }
+          ]
+        },
+        "outcome": {
+          "status": "located",
+          "region": {
+            "left": 0.375,
+            "top": 0.3733528550512445,
+            "width": 0.0625,
+            "height": 0.08345534407027819
+          }
+        },
+        "latencyMs": 7899.015927
+      }
+    },
+    {
+      "caseId": "support-dev-001",
+      "split": "dev",
+      "kind": "text",
+      "library": {
+        "expectedClassId": "order_status",
+        "outcome": {
+          "status": "ok",
+          "choice": "order_status"
+        },
+        "latencyMs": 296.7311860000009
+      },
+      "native": {
+        "expectedClassId": "order_status",
+        "outcome": {
+          "status": "ok",
+          "choice": "order_status"
+        },
+        "latencyMs": 418.8979799999979
+      },
+      "parity": {
+        "library": {
+          "choice": "order_status",
+          "nativeChoice": "order_status",
+          "probabilities": {
+            "order_status": 1,
+            "refund": 0,
+            "technical_support": 0,
+            "general_feedback": 0,
+            "unknown": 0
+          },
+          "tied": ["order_status"],
+          "confidence": 1,
+          "metadata": {
+            "model": "typesafe/jev-1.14-20261014",
+            "provider": "TypeSafe",
+            "requestId": "gen-dec-1792274124-S5u8QPMIu0CQn9ylW5Lp",
+            "durationMs": 294.8442639999994,
+            "costUsd": 3.8724e-5,
+            "attempts": 1
+          }
+        },
+        "native": {
+          "choice": "order_status",
+          "probabilities": {
+            "order_status": 1,
+            "refund": 0,
+            "technical_support": 0,
+            "general_feedback": 0,
+            "unknown": 0
+          },
+          "metadata": {
+            "model": "typesafe/jev-1.14-20261014",
+            "provider": "TypeSafe",
+            "requestId": "gen-dec-1792274124-bzyydYwn7e4fldUvZ125",
+            "costUsd": 3.8724e-5,
+            "durationMs": 417.424884,
+            "attempts": 1
+          }
+        }
+      }
+    },
+    {
+      "caseId": "support-dev-002",
+      "split": "dev",
+      "kind": "text",
+      "library": {
+        "expectedClassId": "order_status",
+        "outcome": {
+          "status": "ok",
+          "choice": "order_status"
+        },
+        "latencyMs": 334.99809900000037
+      },
+      "native": {
+        "expectedClassId": "order_status",
+        "outcome": {
+          "status": "ok",
+          "choice": "order_status"
+        },
+        "latencyMs": 291.4641900000024
+      },
+      "parity": {
+        "library": {
+          "choice": "order_status",
+          "nativeChoice": "order_status",
+          "probabilities": {
+            "order_status": 1,
+            "refund": 0,
+            "technical_support": 0,
+            "general_feedback": 0,
+            "unknown": 0
+          },
+          "tied": ["order_status"],
+          "confidence": 1,
+          "metadata": {
+            "model": "typesafe/jev-1.14-20261014",
+            "provider": "TypeSafe",
+            "requestId": "gen-dec-1792274125-qzUfbHyRIfgYGeppuYJE",
+            "durationMs": 333.26782600000297,
+            "costUsd": 3.7842e-5,
+            "attempts": 1
+          }
+        },
+        "native": {
+          "choice": "order_status",
+          "probabilities": {
+            "order_status": 1,
+            "refund": 0,
+            "technical_support": 0,
+            "general_feedback": 0,
+            "unknown": 0
+          },
+          "metadata": {
+            "model": "typesafe/jev-1.14-20261014",
+            "provider": "TypeSafe",
+            "requestId": "gen-dec-1792274125-1rmdEmbc1rdabtRHGm9g",
+            "costUsd": 3.7842e-5,
+            "durationMs": 289.9406549999985,
+            "attempts": 1
+          }
+        }
+      }
+    }
+  ]
+}

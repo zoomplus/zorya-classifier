@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/swisschef/9431690444",
+  "resolvedUrl": "https://www.flickr.com/photos/swisschef/9431690444",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:56.232776+00:00",
+  "sourcePageBytes": 512847,
+  "sourcePageSha256": "b42e4faa57550f151b47944a2aa6df530aadb9f361092ff204aa7a6a7e7051b7",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/3670/9431690444_a5c9ee83d1_z.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/swisschef/9431690444",
+    "author": {
+      "@type": "Person",
+      "name": "Glenn Dettwiler",
+      "url": "https://www.flickr.com/photos/swisschef",
+      "image": "https://live.staticflickr.com/3001/buddyicons/25771400@N06.jpg?1236877205#25771400@N06"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Glenn Dettwiler",
+      "url": "https://www.flickr.com/photos/swisschef",
+      "image": "https://live.staticflickr.com/3001/buddyicons/25771400@N06.jpg?1236877205#25771400@N06"
+    }
+  },
+  "structuredBlockSha256": "539046833ea2cc835b2c1e56c7c37e4afebfcb21a2b8c31f74926b1f6819196c",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "9431690444",
+  "rawPagePersisted": false
+}

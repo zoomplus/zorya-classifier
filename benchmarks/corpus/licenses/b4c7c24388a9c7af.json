@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/22179048@N05/5195137902",
+  "resolvedUrl": "https://www.flickr.com/photos/22179048@N05/5195137902",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:41.003535+00:00",
+  "sourcePageBytes": 518407,
+  "sourcePageSha256": "c386823acc01ec9ca8894a64049209710d363c695ca88754a3104378684e3847",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/5121/5195137902_8060d708d2_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/22179048@N05/5195137902",
+    "author": {
+      "@type": "Person",
+      "name": "Bob Peters",
+      "url": "https://www.flickr.com/photos/22179048@N05",
+      "image": "https://live.staticflickr.com/5643/buddyicons/22179048@N05.jpg?1443094801#22179048@N05"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Bob Peters",
+      "url": "https://www.flickr.com/photos/22179048@N05",
+      "image": "https://live.staticflickr.com/5643/buddyicons/22179048@N05.jpg?1443094801#22179048@N05"
+    }
+  },
+  "structuredBlockSha256": "1f3189ea70847ea6fd0b207747e159730664548a87e7beee7a914d0a8f234376",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "5195137902",
+  "rawPagePersisted": false
+}

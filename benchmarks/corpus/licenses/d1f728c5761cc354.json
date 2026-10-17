@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/brambleberriesphotography/6074126253",
+  "resolvedUrl": "https://www.flickr.com/photos/brambleberriesphotography/6074126253",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:27.926458+00:00",
+  "sourcePageBytes": 515349,
+  "sourcePageSha256": "d52d3d171fbae28dbaf9373eaf95f8135ecafef32badc5811d709ab3ea6e7530",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/6088/6074126253_63311bb623_c.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/brambleberriesphotography/6074126253",
+    "author": {
+      "@type": "Person",
+      "name": "Angelica",
+      "url": "https://www.flickr.com/photos/brambleberriesphotography",
+      "image": "https://live.staticflickr.com/6191/buddyicons/66517343@N07.jpg?1313662401#66517343@N07"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Angelica",
+      "url": "https://www.flickr.com/photos/brambleberriesphotography",
+      "image": "https://live.staticflickr.com/6191/buddyicons/66517343@N07.jpg?1313662401#66517343@N07"
+    }
+  },
+  "structuredBlockSha256": "6bdbb9fee4d595181f4e10c9d7fa42dbc858e31bb2b999952490e83aa639240b",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "6074126253",
+  "rawPagePersisted": false
+}

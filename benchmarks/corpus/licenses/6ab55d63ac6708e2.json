@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/glennf/3672231175",
+  "resolvedUrl": "https://www.flickr.com/photos/glennf/3672231175",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:36.008561+00:00",
+  "sourcePageBytes": 510363,
+  "sourcePageSha256": "d7f7fef0c002d52fc4958e1f336815731fef0817c301439a0fa2617fb1ec2871",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/3585/3672231175_04c6ab438a_z.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/glennf/3672231175",
+    "author": {
+      "@type": "Person",
+      "name": "Glenn Fleishman",
+      "url": "https://www.flickr.com/photos/glennf",
+      "image": "https://live.staticflickr.com/2829/buddyicons/69628725@N00.jpg?1381730267#69628725@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Glenn Fleishman",
+      "url": "https://www.flickr.com/photos/glennf",
+      "image": "https://live.staticflickr.com/2829/buddyicons/69628725@N00.jpg?1381730267#69628725@N00"
+    }
+  },
+  "structuredBlockSha256": "1a9d45a4449f487de8acd7d77507c55c12994521d90740b155ec12cab4a6f2d5",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "3672231175",
+  "rawPagePersisted": false
+}

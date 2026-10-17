@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/kamikura/1437333121",
+  "resolvedUrl": "https://www.flickr.com/photos/kamikura/1437333121",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:38.546435+00:00",
+  "sourcePageBytes": 516711,
+  "sourcePageSha256": "a97a24835bb1d0997c919ba94e7f946f9fd18d092506ce7055571b5287b4c793",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/1332/1437333121_857271b676_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/kamikura/1437333121",
+    "author": {
+      "@type": "Person",
+      "name": "Masaru Kamikura",
+      "url": "https://www.flickr.com/photos/kamikura",
+      "image": "https://live.staticflickr.com/68/buddyicons/20119192@N00.jpg?1153197635#20119192@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Masaru Kamikura",
+      "url": "https://www.flickr.com/photos/kamikura",
+      "image": "https://live.staticflickr.com/68/buddyicons/20119192@N00.jpg?1153197635#20119192@N00"
+    }
+  },
+  "structuredBlockSha256": "a02ae6b32a27a5d73ee941fe9ce570739b0eb25e7939d09175e83a1af6f3ed22",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "1437333121",
+  "rawPagePersisted": false
+}

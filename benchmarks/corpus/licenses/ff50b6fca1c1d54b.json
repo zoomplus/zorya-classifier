@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/lejoe/1429327337/",
+  "resolvedUrl": "https://www.flickr.com/photos/lejoe/1429327337/",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:56.286076+00:00",
+  "sourcePageBytes": 518237,
+  "sourcePageSha256": "d113538d6b15f372998dc8fc069f309ed8f1cc383b17995cca74767fc3114dd0",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/1010/1429327337_d132987b44_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/lejoe/1429327337",
+    "author": {
+      "@type": "Person",
+      "name": "Joel Bez",
+      "url": "https://www.flickr.com/photos/lejoe",
+      "image": "https://live.staticflickr.com/8203/buddyicons/21458229@N00.jpg?1354687071#21458229@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Joel Bez",
+      "url": "https://www.flickr.com/photos/lejoe",
+      "image": "https://live.staticflickr.com/8203/buddyicons/21458229@N00.jpg?1354687071#21458229@N00"
+    }
+  },
+  "structuredBlockSha256": "9c5d5daacc8931dc614308566f7f558e4a1cf20f823c652ac6fa39f3902367c3",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "1429327337",
+  "rawPagePersisted": false
+}

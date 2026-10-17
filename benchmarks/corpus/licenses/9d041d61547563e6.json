@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/73715185@N00/15542402927/",
+  "resolvedUrl": "https://www.flickr.com/photos/73715185@N00/15542402927/",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:41.251385+00:00",
+  "sourcePageBytes": 517791,
+  "sourcePageSha256": "64d0a837866bfab3c2f2ed8f2f4fb0177fd86a44918eb4058c9ee55b744768b2",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/5604/15542402927_733620e0ca_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/73715185@N00/15542402927",
+    "author": {
+      "@type": "Person",
+      "name": "Hazel Scott",
+      "url": "https://www.flickr.com/photos/73715185@N00",
+      "image": "https://live.staticflickr.com/130/buddyicons/73715185@N00.jpg?1169041979#73715185@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Hazel Scott",
+      "url": "https://www.flickr.com/photos/73715185@N00",
+      "image": "https://live.staticflickr.com/130/buddyicons/73715185@N00.jpg?1169041979#73715185@N00"
+    }
+  },
+  "structuredBlockSha256": "1e5c92f52808d0df91761dd284d7e114902484f3d7ea849e5429137ba0c81d93",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "15542402927",
+  "rawPagePersisted": false
+}

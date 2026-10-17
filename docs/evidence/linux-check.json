@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "node": "v24.12.0",
+  "platform": "linux",
+  "command": "npm run check",
+  "checks": [
+    "secret worktree scan",
+    "typecheck",
+    "eslint --max-warnings 0",
+    "boundaries",
+    "dead-code:ci",
+    "160 tests, zero skipped",
+    "build"
+  ],
+  "sourceLogSha256": "652f6d6d3dd911fb39449b4102b83a0fa06c9dffcf0aa1f865508f6d73a421c8",
+  "runtimeDistSha256": "62d5a0075e5ccca6627ba81f8ca8be427f499ded7508570171c00520bcf369ca",
+  "runtimeDistFileCount": 34,
+  "scope": "Offline contract/lifecycle/geometry/provider-wire/secret guard tests, not model accuracy",
+  "note": "Native Windows runtime suite contains 142 tests; two later benchmark-only regressions are Linux-tested, and the 16 secret tests were run separately on Windows with one expected POSIX-only skip. Runtime dist remains identical."
+}

@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/wm_archiv/2794891963",
+  "resolvedUrl": "https://www.flickr.com/photos/wm_archiv/2794891963",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:18.049518+00:00",
+  "sourcePageBytes": 516043,
+  "sourcePageSha256": "b61c1b503e8648f9a98574db748e34ecf16a07fdbdc3102889c87bff7f91a4e4",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/3106/2794891963_d28516023f_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/wm_archiv/2794891963",
+    "author": {
+      "@type": "Person",
+      "name": "Allie_Caulfield",
+      "url": "https://www.flickr.com/photos/wm_archiv",
+      "image": "https://live.staticflickr.com/3286/buddyicons/28577026@N02.jpg?1216155587#28577026@N02"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Allie_Caulfield",
+      "url": "https://www.flickr.com/photos/wm_archiv",
+      "image": "https://live.staticflickr.com/3286/buddyicons/28577026@N02.jpg?1216155587#28577026@N02"
+    }
+  },
+  "structuredBlockSha256": "66c4eb8ae446b683208d403ce54440736acc21f9e87aaaa200e47d04421a1020",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "2794891963",
+  "rawPagePersisted": false
+}

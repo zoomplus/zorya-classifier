@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/spycherf/12527535113",
+  "resolvedUrl": "https://www.flickr.com/photos/spycherf/12527535113",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:49.661015+00:00",
+  "sourcePageBytes": 516630,
+  "sourcePageSha256": "97c4b2a2a4ea20e90851ada06cabaa1e9f0e56bcdf8fb9fbd7e920b0430c4161",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/3763/12527535113_466ab8ea77_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/spycherf/12527535113",
+    "author": {
+      "@type": "Person",
+      "name": "Odaklar Odaklar",
+      "url": "https://www.flickr.com/photos/spycherf",
+      "image": "https://live.staticflickr.com/4622/buddyicons/107852214@N04.jpg?1518865001#107852214@N04"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Odaklar Odaklar",
+      "url": "https://www.flickr.com/photos/spycherf",
+      "image": "https://live.staticflickr.com/4622/buddyicons/107852214@N04.jpg?1518865001#107852214@N04"
+    }
+  },
+  "structuredBlockSha256": "8cf2949d8a1bf17dd9202975726cfb3a8760173064910e3785344f18d66333db",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "12527535113",
+  "rawPagePersisted": false
+}

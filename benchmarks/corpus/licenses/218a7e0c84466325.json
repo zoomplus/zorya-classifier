@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/gogostevie/469087256",
+  "resolvedUrl": "https://www.flickr.com/photos/gogostevie/469087256",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:11.112101+00:00",
+  "sourcePageBytes": 518922,
+  "sourcePageSha256": "b4766308009eaead1c2e52e6f58084ab4dfb92cb32232d3a3d0f1c82a7d0bb15",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/214/469087256_a06acec512_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/gogostevie/469087256",
+    "author": {
+      "@type": "Person",
+      "name": "Stephen Harlan",
+      "url": "https://www.flickr.com/photos/gogostevie",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/17647948@N00.jpg?1675824045#17647948@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Stephen Harlan",
+      "url": "https://www.flickr.com/photos/gogostevie",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/17647948@N00.jpg?1675824045#17647948@N00"
+    }
+  },
+  "structuredBlockSha256": "f7cccabe120605322c6f5162603680e2070ba2505153e769e75b84a5669fc127",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "469087256",
+  "rawPagePersisted": false
+}

@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "corpus_id": "zorya-original-support-intent-30-v1",
+  "split": "dev",
+  "input_path": "../inputs/dev.json",
+  "join_rule": "input_index is the zero-based index into the corresponding input JSON array; verify text_sha256 before scoring.",
+  "provenance": "Original assistant-authored policy labels and rationales; not independently human-annotated ground truth.",
+  "examples": [
+    {
+      "input_index": 0,
+      "id": "support-dev-001",
+      "split": "dev",
+      "language": "ru",
+      "expected_label": "order_status",
+      "reason": "Текущая просьба касается местоположения и срока доставки одного заказа; оба вопроса относятся к order_status.",
+      "phenomena": [
+        "direct_request",
+        "same_class_multiple_questions"
+      ],
+      "text_sha256": "ad2735be1babef6a2a6dcecf5f81aaabd9ae6fbbf54040ef63afb8390df2c5b9"
+    },
+    {
+      "input_index": 1,
+      "id": "support-dev-002",
+      "split": "dev",
+      "language": "en",
+      "expected_label": "order_status",
+      "reason": "The refund is explicitly negated; the only active request is shipment status.",
+      "phenomena": [
+        "negation"
+      ],
+      "text_sha256": "63c5adbecc109bba7651cbd9e8ea8f49e8cf5e9e57adbb28858cf3e44e4b84ea"
+    },
+    {
+      "input_index": 2,
+      "id": "support-dev-003",
+      "split": "dev",
+      "language": "ru",
+      "expected_label": "refund",
+      "reason": "Возврат денег запрошен явно; техническая помощь явно отвергнута.",
+      "phenomena": [
+        "direct_request",
+        "negation"
+      ],
+      "text_sha256": "c10004560bc51868618386680abfd5fadcd898107155fa1bb8f9463d06077a10"
+    },
+    {
+      "input_index": 3,
+      "id": "support-dev-004",
+      "split": "dev",
+      "language": "en",
+      "expected_label": "refund",
+      "reason": "Delivery is resolved background; reversing the duplicate purchase charge is the current money-back request.",
+      "phenomena": [
+        "resolved_background"
+      ],
+      "text_sha256": "3f0a0840dc789a6c388eccaa2f28e0439ba38731282d8c6736de71ad640fd382"
+    },
+    {
+      "input_index": 4,
+      "id": "support-dev-005",
+      "split": "dev",
+      "language": "ru",
+      "expected_label": "technical_support",
+      "reason": "Пользователь просит устранить текущий сбой приложения; запроса возврата или доставки нет.",
+      "phenomena": [
+        "direct_request"
+      ],
+      "text_sha256": "a9bda1c8038f29cc39512a15ca7944c6968c583d12a4362deb46c03f0694ad7c"
+    },
+    {
+      "input_index": 5,
+      "id": "support-dev-006",
+      "split": "dev",
+      "language": "en",
+      "expected_label": "technical_support",
+      "reason": "The quoted label is UI context; the exclusive current request is to fix the page, not process a refund.",
+      "phenomena": [
+        "quoted_content",
+        "exclusive_priority"
+      ],
+      "text_sha256": "14feb9faa8c2e87dd9d172ec40eba6440c0cb4de1eab154242aa4841fa60ca88"
+    },
+    {
+      "input_index": 6,
+      "id": "support-dev-007",
+      "split": "dev",
+      "language": "ru",
+      "expected_label": "general_feedback",
+      "reason": "Доставка завершена, неисправности нет; текущее сообщение — положительный отзыв о продукте.",
+      "phenomena": [
+        "resolved_background",
+        "praise"
+      ],
+      "text_sha256": "728fa6a74acf7f431cefa3f8f536e42331e313dc8f10a09540d9b7dcc9272c6c"
+    },
+    {
+      "input_index": 7,
+      "id": "support-dev-008",
+      "split": "dev",
+      "language": "en",
+      "expected_label": "general_feedback",
+      "reason": "A future product-improvement suggestion with no active service request is general_feedback.",
+      "phenomena": [
+        "feature_suggestion",
+        "negation"
+      ],
+      "text_sha256": "7b2a0b3f890a369c0e79a194ef1895846f42720fd58b26067f6c86eb8bc387db"
+    },
+    {
+      "input_index": 8,
+      "id": "support-dev-009",
+      "split": "dev",
+      "language": "ru",
+      "expected_label": "unknown",
+      "reason": "Просьба — перевод учебной цитаты, а не отслеживание покупки; текущего поддерживаемого намерения нет.",
+      "phenomena": [
+        "quoted_content",
+        "out_of_scope",
+        "negation"
+      ],
+      "text_sha256": "c083ff583425a3755a4f6cf4bfcaf136eea6567dfd5991997543ff950e4b2468"
+    },
+    {
+      "input_index": 9,
+      "id": "support-dev-010",
+      "split": "dev",
+      "language": "en",
+      "expected_label": "unknown",
+      "reason": "Shipment tracking and a refund are two active service classes with no exclusive priority; policy requires unknown.",
+      "phenomena": [
+        "multi_intent_ambiguity"
+      ],
+      "text_sha256": "8f99cdb5b6ec6ad3eb1d6f9e33117445dd0bc511ec72cbd558342460ba1d3ee7"
+    }
+  ]
+}

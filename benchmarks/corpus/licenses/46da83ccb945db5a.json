@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/ddebold/5900036077",
+  "resolvedUrl": "https://www.flickr.com/photos/ddebold/5900036077",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:41.087946+00:00",
+  "sourcePageBytes": 518743,
+  "sourcePageSha256": "b8b89f6dd0c0d208152372a83572302173b66bb3203ff79de6af2d933cc73001",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/6060/5900036077_df62a74257_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/ddebold/5900036077",
+    "author": {
+      "@type": "Person",
+      "name": "Don DeBold",
+      "url": "https://www.flickr.com/photos/ddebold",
+      "image": "https://live.staticflickr.com/5338/buddyicons/28156071@N00.jpg?1369092836#28156071@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Don DeBold",
+      "url": "https://www.flickr.com/photos/ddebold",
+      "image": "https://live.staticflickr.com/5338/buddyicons/28156071@N00.jpg?1369092836#28156071@N00"
+    }
+  },
+  "structuredBlockSha256": "d4346a1845d80037fc35f1d1e7321a6d2caa7897d519cd5d42140ffec4ca72d5",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "5900036077",
+  "rawPagePersisted": false
+}

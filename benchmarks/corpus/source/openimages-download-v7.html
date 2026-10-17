@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="generator"
+      content="HTML Tidy for HTML5 for Linux version 5.6.0"
+    />
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta content="utf-8" http-equiv="encoding" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300"
+      rel="stylesheet"
+    />
+    <link href="main.css" rel="stylesheet" type="text/css;charset=utf-8" />
+    <script src="main.js" type="text/javascript"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=UA-116935204-2"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "UA-116935204-2");
+
+      function toggle_download_view(selector_prefix, subset) {
+        // selector_prefix expected to be: seg_ or ln_
+        const all_subsets = ["train", "validation", "test"];
+
+        const menu = document.getElementById(
+          selector_prefix + subset + "_menu"
+        );
+        const button = document.getElementById(
+          selector_prefix + subset + "_button"
+        );
+        if (menu.style.display === "none") {
+          for (const some_subset of all_subsets) {
+            const menu_element_id = selector_prefix + some_subset + "_menu";
+            var element = document.getElementById(menu_element_id);
+            if (element) {
+              element.style.display = "none";
+            }
+
+            const button_element_id = selector_prefix + some_subset + "_button";
+            element = document.getElementById(button_element_id);
+            if (element) {
+              element.classList.remove("hovered");
+            }
+          }
+
+          button.classList.add("hovered");
+          menu.style.display = "block";
+        } else {
+          button.classList.remove("hovered");
+          menu.style.display = "none";
+        }
+      }
+    </script>
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>Open Images V7 - Download</title>
+  </head>
+  <body onload="mainDivResize('download')" onresize="mainDivResize()">
+    <div class="topnav" id="myTopnav">
+      <a id="100" href="index.html" class="title">Open Images Dataset V7</a>
+<div id="challenge" class="menu-dropdown">
+<a href="challenge_overview.html" class="droplink">Challenge</a>
+<div class="menu-dropdown-content" style="right:0px;">
+      <a href="challenge_overview.html" class="subitem">Overview</a>
+      <a href="challenge2019_downloads.html" class="subitem">Downloads</a>
+      <a href="evaluation.html" class="subitem">Evaluation</a>
+      <!--<a href="challenge2019_guidelines.html" class="subitem">Participation guidelines</a>-->
+      <a href="challenge2019.html" class="subitem">Past challenge: 2019</a>
+      <a href="challenge.html" class="subitem">Past challenge: 2018</a>
+</div>
+</div>
+<a id="news" href="news.html" class="menuitem">News</a>
+<a id="extras" href="extras.html" class="menuitem">Extras</a>
+<a id="extended" href="extended.html" class="menuitem">Extended</a>
+<a id="download" href="download_v7.html" class="menuitem">Download</a>
+<a id="factsfigures" href="factsfigures_v7.html" class="menuitem">Description</a>
+<a id="index" href="visualizer/index.html" class="menuitem">Explore</a>
+<a id="0" href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="navbarResize()">&#9776;</a>
+
+    </div>
+    <div
+      class="main"
+      id="main"
+      onscroll="scrollCallback(event,'download_banner')"
+    >
+      <div id="download_banner"></div>
+      <div style="max-width: 900px; margin: 0 auto">
+        <div style="margin-top: 50px">
+          <i
+            >You are viewing the description of the latest version of Open
+            Images (V7 - released Oct 2022),<br />
+            if you would like to view the description of a previous version,
+            please select it here:</i
+          >
+        </div>
+        <div class="versions-row">
+          <div class="version-button">
+            <button class="button hovered">V7</button>
+          </div>
+          <div class="version-button">
+            <a href="download_v6.html"><button class="button">V6</button></a>
+          </div>
+          <div class="version-button">
+            <a href="download_v5.html"><button class="button">V5</button></a>
+          </div>
+          <div class="version-button">
+            <a href="download_v4.html"><button class="button">V4</button></a>
+          </div>
+          <div class="version-button">
+            <a
+              href="https://github.com/openimages/dataset/blob/master/READMEV3.md"
+              target="_blank"
+              ><button class="button">V3</button></a
+            >
+          </div>
+          <div class="version-button">
+            <a
+              href="https://github.com/openimages/dataset/blob/master/READMEV2.md"
+              target="_blank"
+              ><button class="button">V2</button></a
+            >
+          </div>
+          <div class="version-button">
+            <a
+              href="https://github.com/openimages/dataset/blob/master/READMEV1.md"
+              target="_blank"
+              ><button class="button">V1</button></a
+            >
+          </div>
+        </div>
+        <nav class="table-of-contents">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              <a href="#dense-labels-subset"
+                >Download Dense annotations over 1.9M images</a
+              >
+            </li>
+            <ul>
+              <li>
+                <a href="#download-manually">Manual download</a>
+              </li>
+              <li>
+                <a href="#download-tfds">TFDS</a>
+              </li>
+              <li>
+                <a href="#download-fiftyone">FiftyOne</a>
+              </li>
+            </ul>
+            <li>
+              <a href="#image-labels-subset"
+                >Download image labels over 9M images</a
+              >
+            </li>
+            <li>
+              <a href="#all-images">Download all images</a>
+            </li>
+            <li>
+              <a href="#oid-extended">Open Images extended</a>
+            </li>
+            <li>
+              <a href="#data-formats">Data formats</a>
+              <ul>
+                <li>
+                  <a href="#df-bounding-boxes">Bounding boxes</a>
+                </li>
+                <li>
+                  <a href="#df-instance-segmentation-masks"
+                    >Instance segmentation masks</a
+                  >
+                </li>
+                <li>
+                  <a href="#df-visual-relationships">Visual relationships</a>
+                </li>
+                <li>
+                  <a href="#df-localized-narratives">Localized narratives</a>
+                </li>
+                <li>
+                  <a href="#df-point-labels">Point labels</a>
+                </li>
+                <li>
+                  <a href="#df-image-labels">Image labels</a>
+                </li>
+                <li>
+                  <a href="#df-class-names">Class names</a>
+                </li>
+                <li>
+                  <a href="#df-image-information">Image information</a>
+                </li>
+                <li>
+                  <a href="#df-classes-hierarchy">Classes hierarchy</a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <a href="#references">References</a>
+            </li>
+          </ul>
+        </nav>
+        <h2>
+          <a
+            class="title-anchor"
+            id="dense-labels-subset"
+            href="#dense-labels-subset"
+            >Download dense annotations over 1.9M images</a
+          >
+        </h2>
+        <p>
+          Out of the 9M images, a subset of 1.9M images have been annotated
+          with: bounding boxes, object segmentations, visual relationships,
+          localized narratives, point-level labels, and image-level labels. (The
+          remaining images have only image-level labels).
+        </p>
+        <p>
+          This subset of images and dense annotations are available via three
+          data channels:
+        </p>
+        <dl class="download-options">
+          <dt>
+            <a href="#download-manually">Manual</a>
+          </dt>
+          <dd>
+            <a href="#download-manually">Manual download</a> of the images and
+            raw annotations.
+          </dd>
+          <dt>
+            <a href="#download-tfds">TFDS</a>
+          </dt>
+          <dd>
+            Access to all annotations via
+            <a href="#download-tfds">Tensorflow datasets</a>.
+          </dd>
+          <dt>
+            <a href="#download-fiftyone">FiftyOne</a>
+          </dt>
+          <dd>
+            Access to a subset of annotations (images, image
+            labels, boxes, relationships, masks, and point labels) via
+            <a href="#download-fiftyone">FiftyOne</a> thirtd-party open source
+            library.
+          </dd>
+        </dl>
+        <p>
+          Trouble accessing the data?
+          <a href="mailto:jponttuset@google.com">Let us know</a>.
+        </p>
+        <h3>
+          <a class="title-anchor" id="download-tfds" href="#download-tfds"
+            >Download using Tensorflow Datasets</a
+          >
+        </h3>
+        <p>2022-09:<em>To be released.</em> 
+          Please <a href="https://github.com/tensorflow/datasets/issues/906"> +1 and subscribe to this Github issue</a>  
+          if you want TFDS support.<br/><br/></p>
+        <p>
+          <a href="https://www.tensorflow.org/datasets">Tensorflow datasets</a>
+          provides an unified API to access hundreds of datasets.
+        </p>
+        <p>
+          Once installed
+        <!-- <a href="https://www.tensorflow.org/datasets/catalog/open_images" -->
+        <a href="https://github.com/tensorflow/datasets/issues/906"
+            >Open Images data</a
+          >
+
+          can be directly accessed via:
+        </p>
+        <pre>
+dataset = tfds.load(‘open_images/v7’, split='train')
+for datum in dataset:
+  image, bboxes = datum["image"], example["bboxes"]</pre
+        >
+        <p>
+          Previous versions <code>open_images/v6</code>, <code>/v5</code>, 
+          and <code>/v4</code> are also available.
+        </p>
+<!--
+        <p>
+          It is also possible to download and access only subsets of the data,
+          for example, to only access localized narrative captions (L) and voice
+          recordings (V) one can use
+          <code>dataset = tfds.load(‘open_image/v7-LV’, split='train')</code>.
+        </p>
+        <p>
+          Because the full Open Images takes ~0.5 TiB the download and build of
+          the tensorflow datasets requires a few steps.<br />
+          See install and usage documentation at the
+          <a href="https://www.tensorflow.org/datasets/catalog/open_images"
+            >Open Images tensorflow dataset page</a
+          >.
+        </p>
+      -->
+        <h3>
+          <a
+            class="title-anchor"
+            id="download-fiftyone"
+            href="#download-fiftyone"
+            >Download and Visualize using FiftyOne</a
+          >
+        </h3>
+        <p>
+          We have collaborated with the team at
+          <a href="https://voxel51.com/" target="_blank">Voxel51</a> to make
+          downloading and visualizing (a subset of) Open Images a breeze using
+          their open-source tool
+          <a href="https://voxel51.com/docs/fiftyone/" target="_blank">FiftyOne</a>.<br />
+        </p>
+        <p>
+          <a href="https://voxel51.com/docs/fiftyone/" target="_blank"
+            ><img
+              style="max-width: 90%"
+              src="images/fiftyone_v7.png"
+              alt="FiftyOne Example"
+          /></a>
+        </p>
+        As with any other dataset in the
+        <a
+          href="https://voxel51.com/docs/fiftyone/user_guide/dataset_zoo/index.html"
+          target="_blank"
+          >FiftyOne Dataset Zoo</a
+        >, downloading it is as easy as calling:
+        <pre>
+dataset = fiftyone.zoo.load_zoo_dataset("open-images-v7", split="validation")</pre
+        >
+        The function allows you to:
+        <ul>
+          <li>Choose which split to download.</li>
+          <li>
+            Choose which types of annotations to download ("detections",
+            "classifications", "relationships", "segmentations", or "points").
+          </li>
+          <li>
+            Choose which classes of objects to download (e.g. cats and dogs).
+          </li>
+          <li>
+            Limit the number of samples, to do a first exploration of the data.
+          </li>
+          <li>Download specific images by ID.</li>
+        </ul>
+        <p>
+          These properties give you the ability to quickly
+          <a
+            href="https://voxel51.com/docs/fiftyone/user_guide/dataset_zoo/datasets.html#dataset-zoo-open-images-v6"
+            target="_blank"
+            >download subsets of the dataset</a
+          >
+          that are relevant to you.
+        </p>
+        <pre>
+dataset = fiftyone.zoo.load_zoo_dataset(
+              "open-images-v7",
+              split="validation",
+              label_types=["detections", "segmentations", "points"],
+              classes=["Cat", "Dog"],
+              max_samples=100,
+          )</pre
+        >
+        <p>
+          FiftyOne also provides native
+          <a
+            href="https://voxel51.com/docs/fiftyone/user_guide/evaluation.html#evaluating-detections-open-images"
+            target="_blank"
+            >support for Open Images-style evaluation</a
+          >
+          to compute mAP, plot PR curves, interact with confusion matrices, and
+          explore individual label-level results.
+        </p>
+        <pre>
+results = dataset.evaluate_detections("predictions", gt_field="detections", method="open-images")</pre
+        >
+        <div class="row" style="margin-top: 20px">
+          <div class="col-12">
+            <a
+              href="https://voxel51.com/docs/fiftyone/tutorials/open_images.html"
+              target="_blank"
+              ><button class="button">Get started!</button></a
+            >
+          </div>
+        </div>
+        <h3>
+          <a
+            class="title-anchor"
+            id="download-manually"
+            href="#download-manually"
+            >Download Manually</a
+          >
+        </h3>
+        <a class="anchor" id="download-specific-subsets"></a>
+        <h4>Images</h4>
+        If you're interested in downloading the full set of training, test, or
+        validation images (1.7M, 125k, and 42k, respectively; annotated with
+        bounding boxes, etc.), you can download them packaged in various
+        compressed files from CVDF's site:
+        <div class="row" style="margin-top: 20px">
+          <div class="col-12">
+            <a
+              href="https://github.com/cvdfoundation/open-images-dataset#download-images-with-bounding-boxes-annotations"
+              target="_blank"
+              ><button class="button">Download from CVDF</button></a
+            >
+          </div>
+        </div>
+        <br />
+        If you only need a certain subset of these images and you'd rather avoid
+        downloading the full 1.9M images, we provide a Python script that
+        downloads images from CVDF.
+        <ol>
+          <li>
+            Download the file
+            <a
+              href="https://raw.githubusercontent.com/openimages/dataset/master/downloader.py"
+              download=""
+              >downloader.py</a
+            >
+            (open and press <code>Ctrl + S</code>), or directly run:
+            <pre>
+wget https://raw.githubusercontent.com/openimages/dataset/master/downloader.py</pre
+            >
+          </li>
+          <li>
+            Create a text file containing all the image IDs that you're
+            interested in downloading. It can come from filtering the
+            annotations with certain classes, those annotated with a certain
+            type of annotations (e.g., <a href="extended.html#miap">MIAP</a>).
+            Each line should follow the format <code>$SPLIT/$IMAGE_ID</code>,
+            where <code>$SPLIT</code> is either "train", "test", "validation",
+            or "challenge2018"; and <code>$IMAGE_ID</code> is the image ID that
+            uniquely identifies the image. A sample file could be:
+            <pre>
+train/f9e0434389a1d4dd
+train/1a007563ebc18664
+test/ea8bfd4e765304db</pre
+            >
+          </li>
+          <li>
+            Run the following script, making sure you have the dependencies
+            installed:
+            <pre>
+python downloader.py $IMAGE_LIST_FILE --download_folder=$DOWNLOAD_FOLDER --num_processes=5</pre
+            >
+            For help, run:
+            <pre>python downloader.py -h</pre>
+          </li>
+        </ol>
+        <h4 style="padding-top: 25px">Annotations and metadata</h4>
+        <div class="row">
+          <div class="col-2 titlecol">Image IDs</div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/2018_04/train/train-images-boxable-with-rotation.csv"
+                ><button class="button">Train</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/2018_04/validation/validation-images-with-rotation.csv"
+                ><button class="button">Validation</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/2018_04/test/test-images-with-rotation.csv"
+                ><button class="button">Test</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol">Image labels</div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v5/train-annotations-human-imagelabels-boxable.csv"
+                ><button class="button">Train</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v5/validation-annotations-human-imagelabels-boxable.csv"
+                ><button class="button">Validation</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v5/test-annotations-human-imagelabels-boxable.csv"
+                ><button class="button">Test</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol">Boxes</div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v6/oidv6-train-annotations-bbox.csv"
+                ><button class="button">Train</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v5/validation-annotations-bbox.csv"
+                ><button class="button">Validation</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v5/test-annotations-bbox.csv"
+                ><button class="button">Test</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol">Segmentations</div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-4">
+              <button
+                class="button"
+                id="seg_train_button"
+                onclick="toggle_download_view('seg_', 'train')"
+              >
+                Train
+              </button>
+            </div>
+            <div class="col-4">
+              <button
+                class="button"
+                id="seg_validation_button"
+                onclick="toggle_download_view('seg_', 'validation')"
+              >
+                Validation
+              </button>
+            </div>
+            <div class="col-4">
+              <button
+                class="button"
+                id="seg_test_button"
+                onclick="toggle_download_view('seg_', 'test')"
+              >
+                Test
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          class="row"
+          id="seg_train_menu"
+          style="display: none; margin-bottom: 20px"
+        >
+          <div class="col-2 titlecol"></div>
+          <div class="col-10">
+            <div style="margin: 0">
+              <p
+                style="
+                  text-align: center;
+                  margin-bottom: 0;
+                  margin-top: 5px;
+                  font-size: -1;
+                "
+              >
+                Train segmentations are split into 16 smaller files for ease of
+                download (grouped by first character of the Image ID).
+              </p>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-0.zip"
+                  ><button class="button grayed">0</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-1.zip"
+                  ><button class="button grayed">1</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-2.zip"
+                  ><button class="button grayed">2</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-3.zip"
+                  ><button class="button grayed">3</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-4.zip"
+                  ><button class="button grayed">4</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-5.zip"
+                  ><button class="button grayed">5</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-6.zip"
+                  ><button class="button grayed">6</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-7.zip"
+                  ><button class="button grayed">7</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-8.zip"
+                  ><button class="button grayed">8</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-9.zip"
+                  ><button class="button grayed">9</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-a.zip"
+                  ><button class="button grayed">A</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-b.zip"
+                  ><button class="button grayed">B</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-c.zip"
+                  ><button class="button grayed">C</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-d.zip"
+                  ><button class="button grayed">D</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-e.zip"
+                  ><button class="button grayed">E</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-masks/train-masks-f.zip"
+                  ><button class="button grayed">F</button></a
+                >
+              </div>
+              <div class="col-12">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/train-annotations-object-segmentation.csv"
+                  ><button class="button grayed">Train Mask Data</button></a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="row"
+          id="seg_validation_menu"
+          style="display: none; margin-bottom: 20px"
+        >
+          <div class="col-2 titlecol"></div>
+          <div class="col-10">
+            <div style="margin: 0">
+              <p
+                style="text-align:center;margin-bottom:0;margin-top:5px:font-size:-1"
+              >
+                Validation segmentations are split into 16 smaller files for
+                ease of download (grouped by first character of the Image ID).
+              </p>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-0.zip"
+                  ><button class="button grayed">0</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-1.zip"
+                  ><button class="button grayed">1</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-2.zip"
+                  ><button class="button grayed">2</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-3.zip"
+                  ><button class="button grayed">3</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-4.zip"
+                  ><button class="button grayed">4</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-5.zip"
+                  ><button class="button grayed">5</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-6.zip"
+                  ><button class="button grayed">6</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-7.zip"
+                  ><button class="button grayed">7</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-8.zip"
+                  ><button class="button grayed">8</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-9.zip"
+                  ><button class="button grayed">9</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-a.zip"
+                  ><button class="button grayed">A</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-b.zip"
+                  ><button class="button grayed">B</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-c.zip"
+                  ><button class="button grayed">C</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-d.zip"
+                  ><button class="button grayed">D</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-e.zip"
+                  ><button class="button grayed">E</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-masks/validation-masks-f.zip"
+                  ><button class="button grayed">F</button></a
+                >
+              </div>
+              <div class="col-12">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/validation-annotations-object-segmentation.csv"
+                  ><button class="button grayed">
+                    Validation Mask Data
+                  </button></a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="row"
+          id="seg_test_menu"
+          style="display: none; margin-bottom: 20px"
+        >
+          <div class="col-2 titlecol"></div>
+          <div class="col-10">
+            <div style="margin: 0">
+              <p
+                style="
+                  text-align: center;
+                  margin-bottom: 0;
+                  margin-top: 5px;
+                  font-size: -1;
+                "
+              >
+                Test segmentations are split into 16 smaller files for ease of
+                download (grouped by first character of the Image ID).
+              </p>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-0.zip"
+                  ><button class="button grayed">0</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-1.zip"
+                  ><button class="button grayed">1</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-2.zip"
+                  ><button class="button grayed">2</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-3.zip"
+                  ><button class="button grayed">3</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-4.zip"
+                  ><button class="button grayed">4</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-5.zip"
+                  ><button class="button grayed">5</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-6.zip"
+                  ><button class="button grayed">6</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-7.zip"
+                  ><button class="button grayed">7</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-8.zip"
+                  ><button class="button grayed">8</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-9.zip"
+                  ><button class="button grayed">9</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-a.zip"
+                  ><button class="button grayed">A</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-b.zip"
+                  ><button class="button grayed">B</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-c.zip"
+                  ><button class="button grayed">C</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-d.zip"
+                  ><button class="button grayed">D</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-e.zip"
+                  ><button class="button grayed">E</button></a
+                >
+              </div>
+              <div class="col-sixteenth">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-masks/test-masks-f.zip"
+                  ><button class="button grayed">F</button></a
+                >
+              </div>
+              <div class="col-12">
+                <a download
+                  href="https://storage.googleapis.com/openimages/v5/test-annotations-object-segmentation.csv"
+                  ><button class="button grayed">Test Mask Data</button></a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol">Relationships</div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v6/oidv6-train-annotations-vrd.csv"
+                ><button class="button">Train</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v6/oidv6-validation-annotations-vrd.csv"
+                ><button class="button">Validation</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v6/oidv6-test-annotations-vrd.csv"
+                ><button class="button">Test</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol">
+            <a
+              href="https://google.github.io/localized-narratives/"
+              target="_blank"
+              >Localized narratives</a
+            >
+          </div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-4">
+              <button
+                class="button"
+                id="ln_train_button"
+                onclick="toggle_download_view('ln_', 'train')"
+              >
+                Train
+              </button>
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_validation_localized_narratives.jsonl"
+              >
+                <button class="button">Validation</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_test_localized_narratives.jsonl"
+              >
+                <button class="button">Test</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div
+          class="row"
+          id="ln_train_menu"
+          style="display: none; margin-bottom: 20px"
+        >
+          <p class="message">
+            Train set localized narratives are split into 10 smaller files for
+            ease of download.
+          </p>
+          <div class="col-2 titlecol"></div>
+          <div class="col-10 download-buttons">
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_train_v6_localized_narratives-00000-of-00010.jsonl"
+              >
+                <button class="button grayed">0</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_train_v6_localized_narratives-00001-of-00010.jsonl"
+              >
+                <button class="button grayed">1</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_train_v6_localized_narratives-00002-of-00010.jsonl"
+              >
+                <button class="button grayed">2</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_train_v6_localized_narratives-00003-of-00010.jsonl"
+              >
+                <button class="button grayed">3</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_train_v6_localized_narratives-00004-of-00010.jsonl"
+              >
+                <button class="button grayed">4</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_train_v6_localized_narratives-00005-of-00010.jsonl"
+              >
+                <button class="button grayed">5</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_train_v6_localized_narratives-00006-of-00010.jsonl"
+              >
+                <button class="button grayed">6</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_train_v6_localized_narratives-00007-of-00010.jsonl"
+              >
+                <button class="button grayed">7</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_train_v6_localized_narratives-00008-of-00010.jsonl"
+              >
+                <button class="button grayed">8</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/annotations/open_images_train_v6_localized_narratives-00009-of-00010.jsonl"
+              >
+                <button class="button grayed">9</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol">
+            Localized narratives voice recordings
+          </div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/voice-recordings-zip/open_images_train.zip"
+                ><button class="button">Train</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/voice-recordings-zip/open_images_validation.zip"
+                ><button class="button">Validation</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/localized-narratives/voice-recordings-zip/open_images_test.zip"
+                ><button class="button">Test</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol">Point-labels</div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-train-annotations-point-labels.csv"
+                ><button class="button">Train</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-val-annotations-point-labels.csv"
+                ><button class="button">Validation</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-test-annotations-point-labels.csv"
+                ><button class="button">Test</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row metadata">
+          <div class="col-2 titlecol">Metadata</div>
+          <div class="col-10 download-buttons">
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-class-descriptions-boxable.csv"
+                ><button class="button">Boxable class names</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/openimages/v6/oidv6-relationships-description.csv"
+                ><button class="button">Relationship names</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/openimages/v6/oidv6-attributes-description.csv"
+                ><button class="button">Attribute names</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/openimages/v6/oidv6-relationship-triplets.csv"
+                ><button class="button">Relationship triplets</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-classes-segmentation.txt"
+                ><button class="button">Segmentation classes</button></a
+              >
+            </div>
+            <div class="download-button">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-class-descriptions-points.csv"
+                ><button class="button">Point-label classes</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <h2>
+          <a
+            class="title-anchor"
+            id="image-labels-subset"
+            href="#image-labels-subset"
+            >Download image labels over 9M images</a
+          >
+        </h2>
+        <p>
+          These image-label annotation files provide annotations for all images
+          over 20,638 classes. In the train set, the human-verified labels span
+          7,337,077 images, while the machine-generated labels span 8,949,445
+          images. The image IDs below list all images that have human-verified
+          labels. The annotation files span the full validation (41,620 images)
+          and test (125,436 images) sets.
+        </p>
+        <div class="row" style="margin-top: 20px">
+          <div class="col-2 titlecol">Images</div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-12">
+              <a
+                href="https://github.com/cvdfoundation/open-images-dataset#download-full-dataset-with-google-storage-transfer"
+                target="_blank"
+                ><button class="button">Download from CVDF</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol" style="padding-top: 11px">
+            Human-verified labels
+          </div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-train-annotations-human-imagelabels.csv"
+                ><button class="button">Train</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-val-annotations-human-imagelabels.csv"
+                ><button class="button">Validation</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-test-annotations-human-imagelabels.csv"
+                ><button class="button">Test</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol" style="padding-top: 11px">
+            Machine-generated labels
+          </div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-train-annotations-machine-imagelabels.csv"
+                ><button class="button">Train</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-val-annotations-machine-imagelabels.csv"
+                ><button class="button">Validation</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-test-annotations-machine-imagelabels.csv"
+                ><button class="button">Test</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol">Image IDs</div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/v6/oidv6-train-images-with-labels-with-rotation.csv"
+                ><button class="button">Train</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/2018_04/validation/validation-images-with-rotation.csv"
+                ><button class="button">Validation</button></a
+              >
+            </div>
+            <div class="col-4">
+              <a download
+                href="https://storage.googleapis.com/openimages/2018_04/test/test-images-with-rotation.csv"
+                ><button class="button">Test</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol">Metadata</div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-6">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-class-descriptions.csv"
+                ><button class="button">Class Names (all sets)</button></a
+              >
+            </div>
+            <div class="col-6">
+              <a download
+                href="https://storage.googleapis.com/openimages/v7/oidv7-classes-trainable.txt"
+                ><button class="button">Trainable Classes</button></a
+              >
+            </div>
+          </div>
+          <p>
+            Trouble downloading the data?
+            <a href="mailto:jponttuset@google.com">Let us know</a>.
+          </p>
+        </div>
+        <h2>
+          <a class="title-anchor" id="all-images" href="#all-images"
+            >Download all Open Images images</a
+          >
+        </h2>
+        <p>The full set of 9,178,275 images.</p>
+        <div class="row" style="margin-top: 20px">
+          <div class="col-2 titlecol">Images</div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-12">
+              <a
+                href="https://github.com/cvdfoundation/open-images-dataset#download-full-dataset-with-google-storage-transfer"
+                target="_blank"
+                ><button class="button">Download from CVDF</button></a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2 titlecol">Image IDs</div>
+          <div class="col-10" style="padding: 0">
+            <div class="col-12">
+              <a download
+                href="https://storage.googleapis.com/openimages/2018_04/image_ids_and_rotation.csv"
+                ><button class="button">Full Set</button></a
+              >
+            </div>
+          </div>
+        </div>
+        Trouble downloading the pixels?
+        <a href="mailto:jponttuset@google.com">Let us know</a>.
+        <h2>
+          <a class="title-anchor" id="oid-extended" href="#oid-extended"
+            >Open Images Extended</a
+          >
+        </h2>
+        <div class="row" style="margin-top: 20px">
+          <p>
+            <a href="extended.html">Open Images extended</a> complements the
+            existing dataset with additional images and annotations.
+          </p>
+          <div class="col-6">
+            <a href="extended.html#miap"
+              ><button class="button">More people box annotations</button></a
+            >
+          </div>
+          <div class="col-6">
+            <a href="extended.html#crowdsourced"
+              ><button class="button">Crowdsourced images</button></a
+            >
+          </div>
+        </div>
+        <h2><a class="title-anchor" id="data-formats" href="#data-formats">Data formats</a></h2>
+<p>The Open Image annotations come in diverse text, csv, audio, and image files.
+These file formats are documented below. \</p>
+<!-- FIXME 
+An unified library to access all these files is provided in
+<a href="https://www.tensorflow.org/datasets/catalog/open_images">TFDS</a>
+(<a href="https://github.com/tensorflow/datasets/blob/master/tensorflow_datasets/object_detection/open_images.py">github</a>
+<strong>FIXME</strong>).
+-->
+<h3><a class="title-anchor" id="df-bounding-boxes" href="#df-bounding-boxes">Bounding boxes</a></h3>
+<p>Each row defines one bounding box.</p>
+<pre><code>ImageID,Source,LabelName,Confidence,XMin,XMax,YMin,YMax,IsOccluded,IsTruncated,IsGroupOf,IsDepiction,IsInside,XClick1X,XClick2X,XClick3X,XClick4X,XClick1Y,XClick2Y,XClick3Y,XClick4Y
+000002b66c9c498e,xclick,/m/04bcr3,1,0.312500,0.578125,0.351562,0.464063,0,0,0,0,0,0.312500,0.578125,0.385937,0.576562,0.454688,0.364063,0.351562,0.464063
+3550e6ef5d44d91a,activemil,/m/0220r2,1,0.022461,0.865234,0.234375,0.986979,1,0,0,0,0,-1.000000,-1.000000,-1.000000,-1.000000,-1.000000,-1.000000,-1.000000,-1.000000
+880b4b00f75260ec,xclick,/m/0ch_cf,1,0.641875,0.693125,0.818333,0.878333,1,0,0,0,0,0.641875,0.643125,0.678750,0.693125,0.818333,0.842500,0.871667,0.878333
+b17e3f11cb77c7c8,xclick,/m/0dzct,1,0.510156,0.664844,0.337632,0.623681,1,0,0,0,0,0.573438,0.510156,0.664844,0.587500,0.337632,0.438453,0.468933,0.623681
+[...]
+</code></pre>
+<ul>
+<li><code>ImageID</code>: the image this box lives in.</li>
+<li><code>Source</code>: indicates how the box was made:
+<ul>
+<li><code>xclick</code> are manually drawn boxes using the method presented in
+<a href="#ref-1">[1]</a>, were the annotators click on the four extreme points of
+the object. In V6 we release the actual 4 extreme points for all xclick
+boxes in train (13M), see below.</li>
+<li><code>activemil</code> are boxes produced using an enhanced version of the method
+<a href="#ref-2">[2]</a>. These are human verified to be accurate at IoU&gt;0.7.</li>
+</ul>
+</li>
+<li><code>LabelName</code>: the MID of the object class this box belongs to.</li>
+<li><code>Confidence</code>: a dummy value, always 1.</li>
+<li><code>XMin</code>, <code>XMax</code>, <code>YMin</code>, <code>YMax</code>: coordinates of the box, in normalized image
+coordinates. XMin is in [0,1], where 0 is the leftmost pixel, and 1 is the
+rightmost pixel in the image. Y coordinates go from the top pixel (0) to the
+bottom pixel (1).</li>
+<li><code>XClick1X</code>, <code>XClick2X</code>, <code>XClick3X</code>, <code>XClick4X</code>, <code>XClick1Y</code>, <code>XClick2Y</code>,
+<code>XClick3Y</code>, <code>XClick4Y</code>: normalized image coordinates (as <code>XMin</code>, etc.) of
+the four extreme points of the object that produced the box using
+<a href="#ref-1">[1]</a> in the case of <code>xclick</code> boxes. Dummy values of -1 in the case
+of <code>activemil</code> boxes.</li>
+</ul>
+<p><a class="anchor" id="attributes"></a> The attributes have the following
+definitions:</p>
+<ul>
+<li><code>IsOccluded</code>: Indicates that the object is occluded by another object in the
+image.</li>
+<li><code>IsTruncated</code>: Indicates that the object extends beyond the boundary of the
+image.</li>
+<li><code>IsGroupOf</code>: Indicates that the box spans a group of objects (e.g., a bed of
+flowers or a crowd of people). We asked annotators to use this tag for cases
+with more than 5 instances which are heavily occluding each other and are
+physically touching.</li>
+<li><code>IsDepiction</code>: Indicates that the object is a depiction (e.g., a cartoon or
+drawing of the object, not a real physical instance).</li>
+<li><code>IsInside</code>: Indicates a picture taken from the inside of the object (e.g., a
+car interior or inside of a building).</li>
+</ul>
+<p>For each of them, value <code>1</code> indicates present, <code>0</code> not present, and <code>-1</code>
+unknown.</p>
+<h3><a class="title-anchor" id="df-instance-segmentation-masks" href="#df-instance-segmentation-masks">Instance segmentation masks</a></h3>
+<p>The masks information is stored in two files:</p>
+<ul>
+<li>Individual mask images, with information encoded in the filename.</li>
+<li>A comma-separated-values (CSV) file with additional information
+(<code>masks_data.csv</code>).</li>
+</ul>
+<p>The masks images are PNG binary images, where non-zero pixels belong to a single
+object instance and zero pixels are background. The file names look as follows
+(random 5 examples): <code>e88da03f2d80f1a1_m019jd_e16d01b9.png 540c5536e95a3282_m014j1m_b00fa52e.png 1c84bdd61fa3b883_m06m11_62ef2388.png 663389d2c9d562d8_m04_sv_7e23f2a5.png 072b8fd82919ab3e_m06mf6_dd70f221.png</code></p>
+<p>The format of .zip archives names is the following: each <code>&lt;subset&gt;_&lt;suffix&gt;.zip</code>
+contains all masks for all images with the first characted of ImageID equal to
+<code>&lt;suffix&gt;</code>. The value of <code>&lt;suffix&gt;</code> is from 0-9 and a-f.</p>
+<p>Each row in <code>masks_data.csv</code> describes one instance, using similar conventions
+as the boxes CSV data file.</p>
+<pre><code>MaskPath,ImageID,LabelName,BoxID,BoxXMin,BoxXMax,BoxYMin,BoxYMax,PredictedIoU,Clicks
+25adb319ebc72921_m02mqfb_8423aba8.png,25adb319ebc72921,/m/02mqfb,8423aba8,0.000000,0.998438,0.089062,0.770312,0.62821,0.15808 0.26206 1;0.90333 0.41076 0;0.17578 0.66566 1;0.00761 0.23197 1;0.07918 0.26058 0;0.31792 0.47737 1;0.12858 0.59262 0;0.73229 0.34016 1;0.01865 0.20001 1;0.52214 0.31037 0;0.83596 0.28105 1;0.23418 0.60177 0
+0a419be97dec2fa3_m02mqfb_8ad2c442.png,0a419be97dec2fa3,/m/02mqfb,8ad2c442,0.057813,0.943750,0.056250,0.960938,0.87836,0.89971 0.08481 1;0.20175 0.90471 0;0.11511 0.89990 0;0.94728 0.28410 0;0.19611 0.85369 0;0.07672 0.87857 1;0.82215 0.62642 0;0.13916 0.92650 1;0.51738 0.48419 1
+8eef6e54789ce66d_m02mqfb_83dae39c.png,8eef6e54789ce66d,/m/02mqfb,83dae39c,0.037500,0.978750,0.129688,0.925000,0.70206,0.40219 0.16838 1;0.56758 0.65286 1;0.08311 0.90762 1;0.20840 0.56515 1;0.43336 0.23679 0;0.24689 0.43426 0;0.49292 0.65762 1;0.31383 0.51431 0;0.07137 0.86214 0;0.68160 0.38210 1;0.69462 0.59568 0
+...
+</code></pre>
+<ul>
+<li><code>MaskPath</code>: name of the corresponding mask image.</li>
+<li><code>ImageID</code>: the image this mask lives in.</li>
+<li><code>LabelName</code>: the MID of the object class this mask belongs to.</li>
+<li><code>BoxID</code>: an identifier for the box within the image.</li>
+<li><code>BoxXMin</code>, <code>BoxXMax</code>, <code>BoxYMin</code>, <code>BoxYMax</code>: coordinates of the box linked to
+the mask, in normalized image coordinates. Note that this is not the
+bounding box of the mask, but the starting box from which the mask was
+annotated. These coordinates can be used to relate the mask data with the
+boxes data.</li>
+<li><code>PredictedIoU</code>: if present, indicates a predicted IoU value with respect to
+ground-truth. This quality estimate is machine-generated based on human
+annotator behaviour. See <a href="#ref-3">[3]</a> for details.</li>
+<li><code>Clicks</code>: if present, indicates the human annotator clicks, which provided
+guidance during the annotation process we carried out (See <a href="#ref-3">[3]</a> for
+details). This field is encoded using the following format: <code>X1 Y1 T1;X2 Y2 T2;X3 Y3 T3;...</code>. <code>Xi Yi</code> are the coordinates of the click in normalized
+image coordinates. <code>Ti</code> is the click type, value <code>0</code> indicates the annotator
+marks the point as background, value <code>1</code> as part of the object instance
+(foreground). These clicks can be interesting for researchers in the field
+of interactive segmentation. They are not necessary for users interested in
+the final masks only.</li>
+</ul>
+<h3><a class="title-anchor" id="df-visual-relationships" href="#df-visual-relationships">Visual relationships</a></h3>
+<p>Each row in the file corresponds to a single annotation.</p>
+<pre><code>ImageID,LabelName1,LabelName2,XMin1,XMax1,YMin1,YMax1,XMin2,XMax2,YMin2,YMax2,RelationLabel
+0009fde62ded08a6,/m/0342h,/m/01d380,0.2682927,0.78549093,0.4977778,0.8288889,0.2682927,0.78549093,0.4977778,0.8288889,is
+00198353ef684011,/m/01mzpv,/m/04bcr3,0.23779725,0.30162704,0.6500938,0.7335835,0,0.5819775,0.6482176,0.99906194,at
+001e341dd7456c72,/m/04yx4,/m/01mzpv,0.07009346,0.2859813,0.2332708,0.5203252,0.14018692,0.31588784,0.32082552,0.48405254,on
+001e341dd7456c72,/m/04yx4,/m/01mzpv,0,0.28317758,0.26454034,0.5540963,0.2224299,0.3411215,0.3908693,0.4859287,on
+001e341dd7456c72,/m/01599,/m/04bcr3,0.5551402,0.6084112,0.50343966,0.5490932,0.5411215,0.95981306,0.5090682,0.78361475,on
+001e341dd7456c72,/m/04bcr3,/m/01d380,0.7392523,0.9990654,0.3889931,0.518449,0.7392523,0.9990654,0.3889931,0.518449,is
+...
+</code></pre>
+<ul>
+<li><code>ImageID</code>: the image this relationship instance lives in.</li>
+<li><code>LabelName1</code>: the label of the first object in the relationship triplet.</li>
+<li><code>XMin1,XMax1,YMin1,YMax1</code>: normalized bounding box coordinates of the
+bounding box of the first object.</li>
+<li><code>LabelName2</code>: the label of the second object in the relationship triplet, or
+an attribute.</li>
+<li><code>XMin2</code>, <code>XMax2</code>, <code>YMin2</code>, <code>YMax2</code>: If the relationship is between a pair of
+objects: normalized bounding box coordinates of the bounding box of the
+second object. For an object-attribute relationship (RelationLabel=&quot;is&quot;):
+normalized bounding box of the first object (repeated). In this case,
+LabelName2 is an attribute.</li>
+<li><code>RelationLabel</code>: the label of the relationship (&quot;is&quot; in case of attributes).</li>
+</ul>
+<h3><a class="title-anchor" id="df-localized-narratives" href="#df-localized-narratives">Localized narratives</a></h3>
+<p>The Localized Narrative annotations are in
+<a href="https://jsonlines.org/" target="_blank">JSON Lines</a> format, that is,
+each line of the file is an independent valid JSON-encoded object. The largest
+files are split into smaller sub-files (shards) for ease of download. Since each
+line of the file is independent, the whole file can be reconstructed by simply
+concatenating the contents of the shards.</p>
+<p>Each line represents one Localized Narrative annotation on one image by one
+annotator and has the following fields:</p>
+<ul>
+<li><code>dataset_id</code>: String identifying the dataset and split where the image
+belongs, e.g. <code>openimages-train</code>.</li>
+<li><code>image_id</code>: String identifier of the image, as specified on each dataset.</li>
+<li><code>annotator_id</code>: Integer number uniquely identifying each annotator.</li>
+<li><code>caption</code>: Image caption as a string of characters.</li>
+<li><code>timed_caption</code>: List of timed utterances, i.e. <code>{utterance, start_time, end_time}</code> where <code>utterance</code> is a word (or group of words) and <code>(start_time, end_time)</code> is the time during which it was spoken, with respect to the start
+of the recording.</li>
+<li><code>traces</code>: List of trace segments, one between each time the mouse pointer
+enters the image and goes away from it. Each trace segment is represented as
+a list of timed points, i.e. <code>{x, y, t}</code>, where <code>x</code> and <code>y</code> are the
+normalized image coordinates (with origin at the top-left corner of the
+image) and <code>t</code> is the time in seconds since the start of the recording.
+Please note that the coordinates can go a bit beyond the image, i.e.
+&lt;0 or &gt;=1, as we recorded the mouse traces including a small band around the
+image.</li>
+<li><code>voice_recording</code>: Relative URL path with respect to
+<code>https://storage.googleapis.com/localized-narratives/voice-recordings</code> where
+to find the voice recording (in
+<a href="https://en.wikipedia.org/wiki/Ogg" target="_blank">OGG</a> format)
+for that particular image.</li>
+</ul>
+<p>Below a sample of one Localized Narrative in this format:</p>
+<pre><code>{
+    dataset_id: 'open_image',
+    image_id: 'abe9ff8763cdcc5d',
+    annotator_id: 93,
+    caption: 'In this image there are group of cows standing and eating th...',
+    timed_caption: [{'utterance': 'In this', 'start_time': 0.0, 'end_time': 0.4}, ...],
+    traces: [[{'x': 0.2086, 'y': -0.0533, 't': 0.022}, ...], ...],
+    voice_recording: &quot;open_images_validation/open_images_validation_abe9ff8763cdcc5d_110.ogg&quot;,
+}
+</code></pre>
+<p>For more information, additional download files, and annotations over other
+datasets, consult the
+<a href="https://google.github.io/localized-narratives/">localized narratives website</a>.</p>
+<h3><a class="title-anchor" id="df-point-labels" href="#df-point-labels">Point Labels</a></h3>
+<p>The point label data is contained in two types of comma separated value files.
+One per-split file containing the point labels, and one dataset-wide file
+describing the annotated classes.</p>
+<p>Per-split point labels data looks as follows:</p>
+<pre><code>ImageId,X,Y,Label,EstimatedYesNo,Source,YesVotes,NoVotes,UnsureVotes,TextLabel
+00c73a28068f9b33,0.32324219,0.22656250,/m/01280g,no,ih,0,3,0,
+00c73a28068f9b33,0.43164062,0.74869792,/m/01280g,unsure,ih,2,1,0,
+00c73a28068f9b33,0.81737432,0.42705993,/m/096mb,no,cc,0,1,0,
+00c73a28068f9b33,0.25814126,0.98454896,/m/096mb,yes,cc,1,0,0,
+00c73a28068f9b33,0.53840625,0.62643750,/m/06q74,yes,ff,1,0,0,ship
+00ccda615ec9731d,0.44140625,0.43652344,/g/11bc5yhfnk,unsure,ih,2,1,0,
+00ccda615ec9731d,0.81510417,0.59082031,/g/11bc5yhfnk,yes,ih,3,0,0,
+00ccda615ec9731d,0.46223958,0.91894531,/m/01z562,no,ih,0,3,0,
+...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ImageID</code>: the image this point lives in.</li>
+<li><code>X</code>, <code>Y</code>: coordinates of the point, in normalized image coordinates. Where X=0
+is the leftmost pixel, and 1 is the rightmost pixel in the image. Y
+coordinates go from the top pixel (0) to the bottom pixel (1).</li>
+<li><code>Label</code>: the MID of the thing or stuff class this point belongs to.</li>
+<li><code>EstimatedYesNo</code>: estimated yes/no/unsure label for this point, based on the
+available votes.</li>
+<li><code>Source</code>: source of the votes available:
+<ul>
+<li><code>ih</code>: stands for &quot;in-house verification&quot;, where internal human raters
+voted for the point-label.</li>
+<li><code>cc</code>: stands for points collected via corrective clicks (see
+<a href="#df-bounding-boxes">box annotations</a>), and converted to point-labels
+using the box annotations.</li>
+<li><code>ff</code>: point-labels annotated via free-from input (see <a href="#ref-4">4</a> ).
+This process only provides yes annotations.</li>
+<li><code>cs</code>: stands for &quot;crowdsource verification&quot;, where external contributors
+voted for the point-label via the
+<a href="https://crowdsource.google.com/about/">CrowdSource application</a>.<!--   -   `ih+cs`: point-label with both `ih` and `cs` votes. --></li>
+</ul>
+</li>
+<li><code>YesVotes</code>: number of yes votes received.</li>
+<li><code>NoVotes</code>: number of no votes received.</li>
+<li><code>Unsure</code>: number of unsure votes received.</li>
+<li><code>TextLabel</code>: for <code>ff</code> annotations, provides the specific text label
+provided. <br />
+Otherwise consult the class-description for MID-&gt;human name mapping.</li>
+</ul>
+<p>The class description data looks as follows:</p>
+<pre><code>LabelName,DisplayName,YesPoints,Points,TextMentions,...
+/m/016q19,Petal,2681,5656,petals,petal,with petals,with petals and,flower petal,they have pink petals,color petals,are petals,some petals of flowers,see petals,petals which are in,petal and
+/m/01qr50,Mud,2871,14850,mud,on the mud,the mud,is mud,a mud,mud and,the mud and in,see mud,see the mud,we can see mud,there is mud,in the mud
+/m/0cyhj_,Orange (fruit),25002,55836,orange,oranges,an orange,the orange,an orange on this,can see orange,and orange,an oranges,halved orange,wearing orange,orange slice,oranges and some
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>MID</code>: machine identifier of the thing or stuff class.</li>
+<li><code>ClassName</code>: canonical humane name for this class.</li>
+<li><code>YesPoints</code>: total of yes point-labels for this class (based on
+<code>EstimatedYesNo</code>, across all splits and vote sources).</li>
+<li><code>Points</code>: total of point-labels for this class (with at least one vote;
+across all splits, vote sources).</li>
+<li><code>TextMentions</code>: examples of text mentions from free-form labels or localized
+narratives captions parsing, sorted by frequency of appearance (with removal
+of repeated entries). These give an idea of the kind of text mentions used
+to detect the class presence. <br />
+(For <code>ih</code>/<code>cs</code> questions the <code>ClassName</code> was used, not the mention)
+<!-- and removal of text with unexpected format (e.g. b3d) -->
+</li>
+</ul>
+<p>For more details about these annotations, see <a href="#ref-5">5</a>.</p>
+<h3><a class="title-anchor" id="df-image-labels" href="#df-image-labels">Image Labels</a></h3>
+<p>Human-verified and machine-generated image-level labels:</p>
+<pre><code>ImageID,Source,LabelName,Confidence
+000026e7ee790996,verification,/m/04hgtk,0
+000026e7ee790996,verification,/m/07j7r,1
+000026e7ee790996,crowdsource-verification,/m/01bqvp,1
+000026e7ee790996,crowdsource-verification,/m/0csby,1
+000026e7ee790996,verification,/m/01_m7,0
+000026e7ee790996,verification,/m/01cbzq,1
+000026e7ee790996,verification,/m/01czv3,0
+000026e7ee790996,verification,/m/01v4jb,0
+000026e7ee790996,verification,/m/03d1rd,0
+...
+</code></pre>
+<p><code>Source</code>: indicates how the annotation was created:</p>
+<ul>
+<li><code>verification</code> are labels verified by in-house annotators at Google.</li>
+<li><code>crowdsource-verification</code> are labels verified from the Crowdsource app.</li>
+<li><code>machine</code> are machine-generated labels.</li>
+</ul>
+<p><code>Confidence</code>: Labels that are human-verified to be present in an image have
+confidence = 1 (positive labels). Labels that are human-verified to be absent
+from an image have confidence = 0 (negative labels). Machine-generated labels
+have fractional confidences, generally &gt;= 0.5. The higher the confidence, the
+smaller the chance for the label to be a false positive.</p>
+<h3><a class="title-anchor" id="df-class-names" href="#df-class-names">Class names</a></h3>
+<p>The class names in MID format can be converted to their short descriptions by
+looking into <code>class-descriptions.csv</code>:</p>
+<pre><code>...
+/m/0pc9,Alphorn
+/m/0pckp,Robin
+/m/0pcm_,Larch
+/m/0pcq81q,Soccer player
+/m/0pcr,Alpaca
+/m/0pcvyk2,Nem
+/m/0pd7,Army
+/m/0pdnd2t,Bengal clockvine
+/m/0pdnpc9,Bushwacker
+/m/0pdnsdx,Enduro
+/m/0pdnymj,Gekkonidae
+...
+</code></pre>
+<p>Note the presence of characters like commas and quotes. The file follows
+standard CSV escaping rules. e.g.:</p>
+<pre><code>/m/02wvth,&quot;Fiat 500 &quot;&quot;topolino&quot;&quot;&quot;
+/m/03gtp5,Lamb's quarters
+/m/03hgsf0,&quot;Lemon, lime and bitters&quot;
+</code></pre>
+<h3><a class="title-anchor" id="df-image-information" href="#df-image-information">Image information</a></h3>
+<p>It has image URLs, their OpenImages IDs, the rotation information, titles,
+authors, and license information:</p>
+<pre><code>ImageID,Subset,OriginalURL,OriginalLandingURL,License,AuthorProfileURL,Author,Title,
+OriginalSize,OriginalMD5,Thumbnail300KURL,Rotation
+...
+000060e3121c7305,train,https://c1.staticflickr.com/5/4129/5215831864_46f356962f_o.jpg,\
+https://www.flickr.com/photos/brokentaco/5215831864,\
+https://creativecommons.org/licenses/by/2.0/,\
+&quot;https://www.flickr.com/people/brokentaco/&quot;,&quot;David&quot;,&quot;28 Nov 2010 Our new house.&quot;\
+211079,0Sad+xMj2ttXM1U8meEJ0A==,https://c1.staticflickr.com/5/4129/5215831864_ee4e8c6535_z.jpg,0
+...
+</code></pre>
+<p>Each image has a unique 64-bit ID assigned. In the CSV files they appear as
+zero-padded hex integers, such as <code>000060e3121c7305</code>.</p>
+<p>The data is as it appears on the destination websites.</p>
+<ul>
+<li><code>OriginalSize</code> is the download size of the original image.</li>
+<li><code>OriginalMD5</code> is base64-encoded binary MD5, as described
+<a href="https://cloud.google.com/storage-transfer/docs/create-url-list">here</a>.</li>
+<li><code>Thumbnail300KURL</code> is an optional URL to a thumbnail with ~300K pixels
+(~640x480). It is provided for the convenience of downloading the data in
+the absence of more convenient ways to get the images. If missing,
+<code>OriginalURL</code> must be used (and then resized to the same size, if needed).
+These thumbnails are generated on the fly and their contents and even
+resolution might be different every day.</li>
+<li><code>Rotation</code> is the number of degrees that the image should be rotated
+counterclockwise to match the Flickr user intended orientation (<code>0</code>, <code>90</code>,
+<code>180</code>, <code>270</code>). <code>nan</code> means that this information is not available. Check
+<a href="2018-05-17-rotation-information.html">this announcement</a> for more
+information about the issue.</li>
+</ul>
+<h2><a class="title-anchor" id="df-classes-hierarchy" href="#df-classes-hierarchy">Hierarchy for 600 boxable classes</a></h2>
+<p>View the set of boxable classes as a hierarchy
+<a href="https://storage.googleapis.com/openimages/2018_04/bbox_labels_600_hierarchy_visualizer/circle.html">here</a>
+or download it as a
+<a href="https://storage.googleapis.com/openimages/2018_04/bbox_labels_600_hierarchy.json">JSON file</a>:</p>
+<p><a href="https://storage.googleapis.com/openimages/2018_04/bbox_labels_600_hierarchy_visualizer/circle.html"><img src="images/v2-bbox_labels_vis_screenshot.png" alt="Hierarchy Visualizer" /></a></p>
+<h2><a class="title-anchor" id="references" href="#references">References</a></h2>
+<ol>
+<li>
+<p><a class="anchor" id="ref-1"></a>&quot;<a href="https://arxiv.org/abs/1708.02750" target="_blank">Extreme
+clicking for efficient object annotation</a>&quot;, Papadopolous et al.,
+ICCV 2017.</p>
+</li>
+<li>
+<p><a class="anchor" id="ref-2"></a>&quot;<a href="https://arxiv.org/abs/1602.08405" target="_blank">We
+don't need no bounding-boxes: Training object class detectors using only
+human verification</a>, Papadopolous et al., CVPR 2016.</p>
+</li>
+<li>
+<p><a class="anchor" id="ref-3"></a>&quot;<a href="https://arxiv.org/pdf/1903.10830" target="_blank">Large-scale
+interactive object segmentation with human annotators</a>&quot;, Benenson et al.,
+CVPR 2019.</p>
+</li>
+<li>
+<p><a class="anchor" id="ref-4"></a>&quot;<a href="https://arxiv.org/pdf/1906.01542" target="_blank">Natural
+Vocabulary Emerges from Free-Form Annotations</a>&quot;, Pont-Tuset et al.,
+arXiv 2019.</p>
+</li>
+<li>
+<p><a class="anchor" id="ref-5"></a>&quot;<a href="https://storage.googleapis.com/openimages/web_v7/2022_pointillism_arxiv.pdf" target="_blank">From couloring-in to pointillism:
+revisiting semantic segmentation supervision</a>&quot;, Benenson et al., arXiv 2022.</p>
+</li>
+</ol>
+
+      </div>
+    </div>
+  </body>
+</html>

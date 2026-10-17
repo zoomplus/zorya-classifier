@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/bioblitzbristol/7267022270",
+  "resolvedUrl": "https://www.flickr.com/photos/bioblitzbristol/7267022270",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:53.880891+00:00",
+  "sourcePageBytes": 517785,
+  "sourcePageSha256": "dafd656b4eb7d4ea521ba9812ac8e6d11c2359514615199cf74bf8f24177312c",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/7245/7267022270_b9e7fa4c56_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/bioblitzbristol/7267022270",
+    "author": {
+      "@type": "Person",
+      "name": "Bio Blitz",
+      "url": "https://www.flickr.com/photos/bioblitzbristol",
+      "image": "https://live.staticflickr.com/4066/buddyicons/39573813@N05.jpg?1286880038#39573813@N05"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Bio Blitz",
+      "url": "https://www.flickr.com/photos/bioblitzbristol",
+      "image": "https://live.staticflickr.com/4066/buddyicons/39573813@N05.jpg?1286880038#39573813@N05"
+    }
+  },
+  "structuredBlockSha256": "50ea3d536b49f7593dff5ceee5d5ffc1e42988fec3b5d40322994fe689e39034",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "7267022270",
+  "rawPagePersisted": false
+}

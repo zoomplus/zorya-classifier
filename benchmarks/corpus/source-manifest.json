@@ -1,0 +1,58 @@
+[
+  {
+    "path": "source/images.csv",
+    "sourceUrl": "https://storage.googleapis.com/openimages/2018_04/validation/validation-images-with-rotation.csv",
+    "retrievedAtUnix": 1792271571.5543716,
+    "bytes": 15245485,
+    "sha256": "ed93a0e121fe345effdfc7359b848dbc64a1ff6778c8c73563157cb500b33a17",
+    "cache": "existing-local-exact-fetch"
+  },
+  {
+    "path": "source/boxes.csv",
+    "sourceUrl": "https://storage.googleapis.com/openimages/v5/validation-annotations-bbox.csv",
+    "retrievedAtUnix": 1792271575.3021116,
+    "bytes": 25105048,
+    "sha256": "d8bbd59410af14835d7733165a7bb8a3f0213981b22dd5077b0b9f7878991ff2",
+    "cache": "existing-local-exact-fetch"
+  },
+  {
+    "path": "source/labels.csv",
+    "sourceUrl": "https://storage.googleapis.com/openimages/v5/validation-annotations-human-imagelabels-boxable.csv",
+    "retrievedAtUnix": 1792271571.352705,
+    "bytes": 10649275,
+    "sha256": "d5ff236d3cdbba36dac1ee6f7fdf9a26934205cbec5b933b0872722e2b6d3417",
+    "cache": "existing-local-exact-fetch"
+  },
+  {
+    "path": "source/classes.csv",
+    "sourceUrl": "https://storage.googleapis.com/openimages/v7/oidv7-class-descriptions-boxable.csv",
+    "retrievedAtUnix": 1792271570.2596238,
+    "bytes": 12064,
+    "sha256": "1839e0e7e84130ae281f7f67413768601b031581c0c42e7fc17527b8e2a99aa9",
+    "cache": "existing-local-exact-fetch"
+  },
+  {
+    "path": "source/openimages-readme.md",
+    "sourceUrl": "https://raw.githubusercontent.com/openimages/dataset/main/README.md",
+    "retrievedAtUnix": 1792271570.6303718,
+    "bytes": 138,
+    "sha256": "413065e1b44eec4fd9b2fe4233091ccf70e79f18472f353308aaa401c595adcf",
+    "cache": "existing-local-exact-fetch"
+  },
+  {
+    "path": "source/cvdf-readme.md",
+    "sourceUrl": "https://raw.githubusercontent.com/cvdfoundation/open-images-dataset/master/README.md",
+    "resolvedUrl": "https://raw.githubusercontent.com/cvdfoundation/open-images-dataset/master/README.md",
+    "retrievedAtUnix": 1792271605.4321685,
+    "bytes": 6435,
+    "sha256": "6ed423bff11ed77e142ff173309a35fe5c4601b576dd7dc616a65ae3dd480f48"
+  },
+  {
+    "path": "source/openimages-license-readme.md",
+    "sourceUrl": "https://raw.githubusercontent.com/openimages/dataset/main/READMEV3.md",
+    "resolvedUrl": "https://raw.githubusercontent.com/openimages/dataset/main/READMEV3.md",
+    "retrievedAtUnix": 1792271605.454553,
+    "bytes": 22271,
+    "sha256": "003d92e6a6638ce746549dd4ed20a4bfc073b33a3079e0541d95a0d56588767b"
+  }
+]

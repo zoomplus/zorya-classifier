@@ -1,0 +1,5076 @@
+{
+  "version": 1,
+  "seed": "zorya-classifier-corpus-v1-2026-10-18",
+  "createdAt": "2026-10-17T21:16:17.728586+00:00",
+  "expectedCounts": {
+    "dev": 20,
+    "heldout": 40
+  },
+  "independentOfModelOutputs": true,
+  "licensePolicy": {
+    "code": "MIT",
+    "photos": "CC-BY-2.0",
+    "annotations": "CC-BY-4.0",
+    "photosRelicensedAsMIT": false
+  },
+  "quotas": {
+    "dev": {
+      "baseline": 4,
+      "negative": 4,
+      "small": 3,
+      "edge": 3,
+      "occluded": 3,
+      "duplicate": 3
+    },
+    "heldout": {
+      "baseline": 6,
+      "negative": 6,
+      "small": 7,
+      "edge": 7,
+      "occluded": 7,
+      "duplicate": 7
+    }
+  },
+  "sourceManifestSha256": "bb735ac5c7d1475c2599d54f60057c505677178a9fc775e4f9943cd02ed01cd9",
+  "cases": [
+    {
+      "imageId": "fbe59eeb48094e5d",
+      "targetClassId": "/m/0bt9lr",
+      "target": "Dog",
+      "primaryStratum": "baseline",
+      "targetBoxes": [
+        {
+          "classId": "/m/0bt9lr",
+          "className": "Dog",
+          "xyxy": [
+            0.19661017,
+            0.078998074,
+            0.8881356,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 299140,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "baseline"
+      ],
+      "file": "photos/fbe59eeb48094e5d.jpg",
+      "sha256": "acc3b42fd4c7df4943054ba462182133f22a773e397ed91ae7896c26344ef9ac",
+      "bytes": 589756,
+      "width": 1024,
+      "height": 901,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "fbe59eeb48094e5d",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/fbe59eeb48094e5d.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/fbe59eeb48094e5d.jpg",
+        "originalUrl": "https://c6.staticflickr.com/9/8754/16576763713_404e0db726_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/nickjonsson/16576763713",
+        "originalMD5Base64": "XOyTUSxNpRR9YVuqgqWxuQ==",
+        "originalSize": "1890709",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:12.987081+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Eurasian wolf Canis lupus lupus Kingcraig 2014",
+        "author": "Nick Jonsson",
+        "authorUrl": "https://www.flickr.com/people/nickjonsson/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Nick Jonsson",
+          "url": "https://www.flickr.com/photos/nickjonsson",
+          "image": "https://live.staticflickr.com/7629/buddyicons/126637122@N05.jpg?1429384545#126637122@N05"
+        },
+        "evidenceFile": "licenses/fbe59eeb48094e5d.json",
+        "evidenceSha256": "c2829084d515b8e61f48ed5bd44d2d3bb5356adc11a8615b5cdc59231868d769",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/nickjonsson",
+      "split": "dev",
+      "caseId": "photo-dev-01"
+    },
+    {
+      "imageId": "6d60c9f1e937a105",
+      "targetClassId": "/m/0k4j",
+      "target": "Car",
+      "primaryStratum": "baseline",
+      "targetBoxes": [
+        {
+          "classId": "/m/0k4j",
+          "className": "Car",
+          "xyxy": [
+            0.06637168,
+            0.37831858,
+            0.9734513,
+            0.8053097
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 129760,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "baseline"
+      ],
+      "file": "photos/6d60c9f1e937a105.jpg",
+      "sha256": "68d92b810be3205702e9ea527654ffbbb2eab3f48fd73f66770a0a0df4f484a1",
+      "bytes": 324481,
+      "width": 1024,
+      "height": 683,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "6d60c9f1e937a105",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/6d60c9f1e937a105.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/6d60c9f1e937a105.jpg",
+        "originalUrl": "https://farm6.staticflickr.com/3144/2706838213_45f74bf740_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/owenthatsmyname/2706838213",
+        "originalMD5Base64": "KiZVxqrMSc5I0X8AiCMu+g==",
+        "originalSize": "2150615",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:12.337876+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "IMG_9695",
+        "author": "Owen",
+        "authorUrl": "https://www.flickr.com/people/owenthatsmyname/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Owen",
+          "url": "https://www.flickr.com/photos/owenthatsmyname",
+          "image": "https://live.staticflickr.com/182/buddyicons/7389424@N05.jpg?1174354554#7389424@N05"
+        },
+        "evidenceFile": "licenses/6d60c9f1e937a105.json",
+        "evidenceSha256": "f1cc70b997a20aa94994d41ea0a4e947fa8156fa1bda828891c6c485390f478c",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/owenthatsmyname",
+      "split": "dev",
+      "caseId": "photo-dev-02"
+    },
+    {
+      "imageId": "6a202f97eba64a08",
+      "targetClassId": "/m/019jd",
+      "target": "Boat",
+      "primaryStratum": "baseline",
+      "targetBoxes": [
+        {
+          "classId": "/m/019jd",
+          "className": "Boat",
+          "xyxy": [
+            0.08525034,
+            0.05060241,
+            0.661705,
+            0.76144576
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 126371,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "baseline"
+      ],
+      "file": "photos/6a202f97eba64a08.jpg",
+      "sha256": "974286e376815b28a70dd84fa47f03e2148db02b11d64e63c7ec39602f4b197b",
+      "bytes": 55734,
+      "width": 1024,
+      "height": 575,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "6a202f97eba64a08",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/6a202f97eba64a08.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/6a202f97eba64a08.jpg",
+        "originalUrl": "https://c1.staticflickr.com/3/2771/4293065922_67359fbf8d_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/11795120@N06/4293065922",
+        "originalMD5Base64": "GqxlWXqVZoqZ58D08D/7LQ==",
+        "originalSize": "365178",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:15.440769+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Ship Wreck - Black Sea",
+        "author": "Revolution_Ferg",
+        "authorUrl": "https://www.flickr.com/people/11795120@N06/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Revolution_Ferg",
+          "url": "https://www.flickr.com/photos/11795120@N06",
+          "image": "https://live.staticflickr.com/8722/buddyicons/11795120@N06.jpg?1428240255#11795120@N06"
+        },
+        "evidenceFile": "licenses/6a202f97eba64a08.json",
+        "evidenceSha256": "0d06b71aa6dfd8a327574f74e85bab13e06b7b2b591889dfade7cc4898de8b31",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/11795120@N06",
+      "split": "dev",
+      "caseId": "photo-dev-03"
+    },
+    {
+      "imageId": "ca83b4e5ff4b1e49",
+      "targetClassId": "/m/0c9ph5",
+      "target": "Flower",
+      "primaryStratum": "baseline",
+      "targetBoxes": [
+        {
+          "classId": "/m/0c9ph5",
+          "className": "Flower",
+          "xyxy": [
+            0.30191457,
+            0.26548672,
+            0.8880707,
+            0.9712389
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 241279,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "baseline"
+      ],
+      "file": "photos/ca83b4e5ff4b1e49.jpg",
+      "sha256": "33947252cee398869fac3dab8e0a042fc29c207db8646ead2505b89992065f46",
+      "bytes": 178537,
+      "width": 1024,
+      "height": 681,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "ca83b4e5ff4b1e49",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ca83b4e5ff4b1e49.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ca83b4e5ff4b1e49.jpg",
+        "originalUrl": "https://c2.staticflickr.com/2/1074/4611191206_64bfa1570f_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/ume-y/4611191206/",
+        "originalMD5Base64": "ki8lsyp7wi+qRCJuc6hHbQ==",
+        "originalSize": "3452642",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:17.366184+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "DSC01629",
+        "author": "ume-y",
+        "authorUrl": "https://www.flickr.com/people/ume-y/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "ume-y",
+          "url": "https://www.flickr.com/photos/ume-y",
+          "image": "https://farm66.staticflickr.com/65535/buddyicons/29989965@N00.jpg?1766812982#29989965@N00"
+        },
+        "evidenceFile": "licenses/ca83b4e5ff4b1e49.json",
+        "evidenceSha256": "19efb5d5f7959aa30ee239fb8d8b5bfe8b890fe47d6ec723fe1289279e210272",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/ume-y",
+      "split": "dev",
+      "caseId": "photo-dev-04"
+    },
+    {
+      "imageId": "9d198c9c6fc1fc1b",
+      "targetClassId": "/m/07j7r",
+      "target": "Tree",
+      "primaryStratum": "negative",
+      "targetBoxes": [],
+      "negativeEvidence": {
+        "type": "explicit-human-verified-image-label",
+        "source": "verification",
+        "confidence": 0,
+        "sourceCsvRow": 158664,
+        "sourceFile": "source/labels.csv"
+      },
+      "tags": [
+        "negative"
+      ],
+      "file": "photos/9d198c9c6fc1fc1b.jpg",
+      "sha256": "733472dc827ea4961a175e8bcb1c1c70b15f3cba131475eaa7721eef14ffafcc",
+      "bytes": 405282,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "9d198c9c6fc1fc1b",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/9d198c9c6fc1fc1b.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/9d198c9c6fc1fc1b.jpg",
+        "originalUrl": "https://c4.staticflickr.com/4/3106/2794891963_9dacedbf86_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/wm_archiv/2794891963",
+        "originalMD5Base64": "CiebJFSme8I9/9lZn0qyrA==",
+        "originalSize": "809681",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:19.472409+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "2001-12-02 01-03 Neuseeland 104",
+        "author": "Allie_Caulfield",
+        "authorUrl": "https://www.flickr.com/people/wm_archiv/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Allie_Caulfield",
+          "url": "https://www.flickr.com/photos/wm_archiv",
+          "image": "https://live.staticflickr.com/3286/buddyicons/28577026@N02.jpg?1216155587#28577026@N02"
+        },
+        "evidenceFile": "licenses/9d198c9c6fc1fc1b.json",
+        "evidenceSha256": "d1015ee6e3ae42babdb0dc9d58289fac7cf17b972defa4f38adb93621f2c8513",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/wm_archiv",
+      "split": "dev",
+      "caseId": "photo-dev-05"
+    },
+    {
+      "imageId": "04d23234a24acc99",
+      "targetClassId": "/m/01mzpv",
+      "target": "Chair",
+      "primaryStratum": "negative",
+      "targetBoxes": [],
+      "negativeEvidence": {
+        "type": "explicit-human-verified-image-label",
+        "source": "verification",
+        "confidence": 0,
+        "sourceCsvRow": 4765,
+        "sourceFile": "source/labels.csv"
+      },
+      "tags": [
+        "negative"
+      ],
+      "file": "photos/04d23234a24acc99.jpg",
+      "sha256": "cee963af90385caa6a51698cfad9d827f5e96d99fdad538ace9396cdfaff7d52",
+      "bytes": 191776,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "04d23234a24acc99",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/04d23234a24acc99.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/04d23234a24acc99.jpg",
+        "originalUrl": "https://c2.staticflickr.com/3/2084/1951706354_7ed37a69fe_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/systemslibrarian/1951706354",
+        "originalMD5Base64": "rYPJwLvj7q4ED54de964Fw==",
+        "originalSize": "933639",
+        "rotationMetadata": "",
+        "retrievedAt": "2026-10-17T21:15:19.085034+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Poe Spring (Alachua County, FL)",
+        "author": "Paul Clark",
+        "authorUrl": "https://www.flickr.com/people/systemslibrarian/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Paul",
+          "url": "https://www.flickr.com/photos/systemslibrarian",
+          "image": "https://live.staticflickr.com/5470/buddyicons/35168275@N00.jpg?1370199908#35168275@N00"
+        },
+        "evidenceFile": "licenses/04d23234a24acc99.json",
+        "evidenceSha256": "2096208ea822984843e918ffa1148ea6daa6bda46571a27d7044651a0cfb7755",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/systemslibrarian",
+      "split": "dev",
+      "caseId": "photo-dev-06"
+    },
+    {
+      "imageId": "9157341ce5f6f0bf",
+      "targetClassId": "/m/0k4j",
+      "target": "Car",
+      "primaryStratum": "negative",
+      "targetBoxes": [],
+      "negativeEvidence": {
+        "type": "explicit-human-verified-image-label",
+        "source": "verification",
+        "confidence": 0,
+        "sourceCsvRow": 146340,
+        "sourceFile": "source/labels.csv"
+      },
+      "tags": [
+        "negative"
+      ],
+      "file": "photos/9157341ce5f6f0bf.jpg",
+      "sha256": "fc576b873e00e8a28ee3a159545f0ae31291b4f43f8d423152a0b8f84fd80145",
+      "bytes": 224771,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "9157341ce5f6f0bf",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/9157341ce5f6f0bf.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/9157341ce5f6f0bf.jpg",
+        "originalUrl": "https://c8.staticflickr.com/5/4029/4208923271_3906c1d77d_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/35814052@N06/4208923271",
+        "originalMD5Base64": "G7p9N3sr8RF2TBE1qEA+zA==",
+        "originalSize": "618223",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:19.106655+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Slurry Spreading Tractor and Trailer",
+        "author": "desomurchu archive gallery",
+        "authorUrl": "https://www.flickr.com/people/35814052@N06/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "desomurchu archive gallery",
+          "url": "https://www.flickr.com/photos/35814052@N06",
+          "image": "https://combo.staticflickr.com/pw/images/bbuddyicon04.png#35814052@N06"
+        },
+        "evidenceFile": "licenses/9157341ce5f6f0bf.json",
+        "evidenceSha256": "452afec5cbe6c7c90bb76837e47b75b27ae1b4a359e888a23d427d72ac26d8ff",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/35814052@N06",
+      "split": "dev",
+      "caseId": "photo-dev-07"
+    },
+    {
+      "imageId": "58ab31224441bf2f",
+      "targetClassId": "/m/07j7r",
+      "target": "Tree",
+      "primaryStratum": "negative",
+      "targetBoxes": [],
+      "negativeEvidence": {
+        "type": "explicit-human-verified-image-label",
+        "source": "verification",
+        "confidence": 0,
+        "sourceCsvRow": 91145,
+        "sourceFile": "source/labels.csv"
+      },
+      "tags": [
+        "negative"
+      ],
+      "file": "photos/58ab31224441bf2f.jpg",
+      "sha256": "53491bf995541280796fb14bceb65da0ca3f3a7d2724eb35a456b3dbd93b3b2e",
+      "bytes": 388536,
+      "width": 1024,
+      "height": 542,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "58ab31224441bf2f",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/58ab31224441bf2f.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/58ab31224441bf2f.jpg",
+        "originalUrl": "https://c8.staticflickr.com/4/3698/19144085754_a59e05f6e7_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/loangxoang/19144085754",
+        "originalMD5Base64": "HpbXYzlfxmO0S8JYjPwr7Q==",
+        "originalSize": "1022608",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:22.995058+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Dandelion in 3ds Max",
+        "author": "Dũng Nguyễn",
+        "authorUrl": "https://www.flickr.com/people/loangxoang/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Dũng Nguyễn",
+          "url": "https://www.flickr.com/photos/loangxoang",
+          "image": "https://live.staticflickr.com/7152/buddyicons/55510638@N05.jpg?1324659988#55510638@N05"
+        },
+        "evidenceFile": "licenses/58ab31224441bf2f.json",
+        "evidenceSha256": "d3de25f6af643c9446188f8a9a8c238a702cf0f10d36050b37c6702dccf80675",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/loangxoang",
+      "split": "dev",
+      "caseId": "photo-dev-08"
+    },
+    {
+      "imageId": "9ca02a39a415edc1",
+      "targetClassId": "/m/0c9ph5",
+      "target": "Flower",
+      "primaryStratum": "small",
+      "targetBoxes": [
+        {
+          "classId": "/m/0c9ph5",
+          "className": "Flower",
+          "xyxy": [
+            0.0,
+            0.0,
+            0.724359,
+            0.89312977
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 185878,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0c9ph5",
+          "className": "Flower",
+          "xyxy": [
+            0.54273504,
+            0.1557252,
+            0.72649574,
+            0.49160305
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 185879,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0c9ph5",
+          "className": "Flower",
+          "xyxy": [
+            0.5982906,
+            0.0,
+            0.74358976,
+            0.17709924
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 185880,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0c9ph5",
+          "className": "Flower",
+          "xyxy": [
+            0.8034188,
+            0.26564884,
+            0.9145299,
+            0.3541985
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 185881,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0c9ph5",
+          "className": "Flower",
+          "xyxy": [
+            0.8995727,
+            0.33587787,
+            1.0,
+            0.40610686
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 185882,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "duplicate"
+      ],
+      "file": "photos/9ca02a39a415edc1.jpg",
+      "sha256": "b52f82b86c0e73935d64f25d26505a09f9e751f42b482901a3dab39d2b4ea17d",
+      "bytes": 325817,
+      "width": 731,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "9ca02a39a415edc1",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/9ca02a39a415edc1.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/9ca02a39a415edc1.jpg",
+        "originalUrl": "https://farm2.staticflickr.com/8423/7779131926_a75a85c3c7_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/curacumba/7779131926",
+        "originalMD5Base64": "6jwf+VCRS+bHXusp8ovCGw==",
+        "originalSize": "3658835",
+        "rotationMetadata": "",
+        "retrievedAt": "2026-10-17T21:15:25.134422+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "University of Saskatchewan@ Boffins- August 13, 2012",
+        "author": "Kyla Duhamel",
+        "authorUrl": "https://www.flickr.com/people/curacumba/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Kyla Duhamel",
+          "url": "https://www.flickr.com/photos/curacumba",
+          "image": "https://live.staticflickr.com/894/buddyicons/31119510@N06.jpg?1523171657#31119510@N06"
+        },
+        "evidenceFile": "licenses/9ca02a39a415edc1.json",
+        "evidenceSha256": "b4285971c58a507ed0513aa7c750086a75d4513afe94663b1097ea7f5cff2eb9",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/curacumba",
+      "split": "dev",
+      "caseId": "photo-dev-09"
+    },
+    {
+      "imageId": "890a08ff48bf62d8",
+      "targetClassId": "/m/07j7r",
+      "target": "Tree",
+      "primaryStratum": "small",
+      "targetBoxes": [
+        {
+          "classId": "/m/07j7r",
+          "className": "Tree",
+          "xyxy": [
+            0.84513277,
+            0.50810015,
+            0.91150445,
+            0.5743741
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 161348,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/07j7r",
+          "className": "Tree",
+          "xyxy": [
+            0.8960177,
+            0.22974963,
+            1.0,
+            0.54933727
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 161349,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "edge",
+        "duplicate"
+      ],
+      "file": "photos/890a08ff48bf62d8.jpg",
+      "sha256": "86ef00a40b7b43f2e9c0348502d491fce1225d231babf217bdc4c189889c68a7",
+      "bytes": 418093,
+      "width": 681,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "890a08ff48bf62d8",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/890a08ff48bf62d8.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/890a08ff48bf62d8.jpg",
+        "originalUrl": "https://c1.staticflickr.com/6/5182/5633071873_99609644bf_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/jbozanowski/5633071873",
+        "originalMD5Base64": "GceFlyyxrD3vFappC/aRMA==",
+        "originalSize": "5863316",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:24.877981+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Untitled",
+        "author": "Kuba Bożanowski",
+        "authorUrl": "https://www.flickr.com/people/jbozanowski/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Kuba Bożanowski",
+          "url": "https://www.flickr.com/photos/jbozanowski",
+          "image": "https://farm66.staticflickr.com/65535/buddyicons/31871979@N00.jpg?1765676822#31871979@N00"
+        },
+        "evidenceFile": "licenses/890a08ff48bf62d8.json",
+        "evidenceSha256": "39a037d6ef98db668c1ca22414ad037660839445f4e1d933918d893f3f3d9911",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/jbozanowski",
+      "split": "dev",
+      "caseId": "photo-dev-10"
+    },
+    {
+      "imageId": "3f9ca1232e4f225e",
+      "targetClassId": "/m/01g317",
+      "target": "Person",
+      "primaryStratum": "small",
+      "targetBoxes": [
+        {
+          "classId": "/m/01g317",
+          "className": "Person",
+          "xyxy": [
+            0.040625,
+            0.64375,
+            0.0671875,
+            0.75625
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 76176,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/01g317",
+          "className": "Person",
+          "xyxy": [
+            0.128125,
+            0.6333333,
+            0.178125,
+            0.81875
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 76177,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/3f9ca1232e4f225e.jpg",
+      "sha256": "787659fea115ee3183da2dd3f8b5dacaeb2c80f04be754fd0072c3c7d2bc3c2b",
+      "bytes": 492976,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "3f9ca1232e4f225e",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/3f9ca1232e4f225e.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/3f9ca1232e4f225e.jpg",
+        "originalUrl": "https://c7.staticflickr.com/4/3509/3281015642_415c212753_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/aztonyx/3281015642",
+        "originalMD5Base64": "yuo4mfFdalVCqhXgFHtFGQ==",
+        "originalSize": "2259344",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:27.252069+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "DSCN1981",
+        "author": "Rejoyce Jose",
+        "authorUrl": "https://www.flickr.com/people/aztonyx/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Rejoyce Jose",
+          "url": "https://www.flickr.com/photos/aztonyx",
+          "image": "https://combo.staticflickr.com/pw/images/bbuddyicon00.png#15492648@N07"
+        },
+        "evidenceFile": "licenses/3f9ca1232e4f225e.json",
+        "evidenceSha256": "eb3f0f47ec5f818856a157f3679de6eb5fe672f49b93989cbe5c04be48f64120",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/aztonyx",
+      "split": "dev",
+      "caseId": "photo-dev-11"
+    },
+    {
+      "imageId": "073d46c17c65b1f5",
+      "targetClassId": "/m/07j7r",
+      "target": "Tree",
+      "primaryStratum": "edge",
+      "targetBoxes": [
+        {
+          "classId": "/m/07j7r",
+          "className": "Tree",
+          "xyxy": [
+            0.57584685,
+            0.0,
+            0.8615611,
+            0.61504424
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 8696,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/07j7r",
+          "className": "Tree",
+          "xyxy": [
+            0.8645066,
+            0.0,
+            0.9985272,
+            0.79867256
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 8697,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/073d46c17c65b1f5.jpg",
+      "sha256": "fb84b0eedf5564a8d92826e2af13286487120ca45912f8ebf56920f1e5a7ac1d",
+      "bytes": 166143,
+      "width": 1024,
+      "height": 682,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "073d46c17c65b1f5",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/073d46c17c65b1f5.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/073d46c17c65b1f5.jpg",
+        "originalUrl": "https://farm6.staticflickr.com/7501/15753366776_b70bdc90c0_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/uncut/15753366776",
+        "originalMD5Base64": "Z1OZtYXKx0PMSUlsAqpFIw==",
+        "originalSize": "2410062",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:29.069613+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Perro",
+        "author": "cesar bojorquez",
+        "authorUrl": "https://www.flickr.com/people/uncut/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "cesar bojorquez",
+          "url": "https://www.flickr.com/photos/uncut",
+          "image": "https://live.staticflickr.com/737/buddyicons/92258912@N00.jpg?1439441879#92258912@N00"
+        },
+        "evidenceFile": "licenses/073d46c17c65b1f5.json",
+        "evidenceSha256": "e00f5cf09c6bce7cbb3e1270a43ec0e2a801b36b74bb69a4796cc83e01a6c740",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/uncut",
+      "split": "dev",
+      "caseId": "photo-dev-12"
+    },
+    {
+      "imageId": "d1f728c5761cc354",
+      "targetClassId": "/m/0bt9lr",
+      "target": "Dog",
+      "primaryStratum": "edge",
+      "targetBoxes": [
+        {
+          "classId": "/m/0bt9lr",
+          "className": "Dog",
+          "xyxy": [
+            0.0,
+            0.0,
+            1.0,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 249457,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge"
+      ],
+      "file": "photos/d1f728c5761cc354.jpg",
+      "sha256": "b172d314148ba8739628542ae2a6462748016a48e925864dd6238357141aae5b",
+      "bytes": 383692,
+      "width": 1024,
+      "height": 695,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "d1f728c5761cc354",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/d1f728c5761cc354.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/d1f728c5761cc354.jpg",
+        "originalUrl": "https://farm5.staticflickr.com/6088/6074126253_1d5c77eea7_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/brambleberriesphotography/6074126253",
+        "originalMD5Base64": "/k0uTRkhycJZA5/pgbOaqQ==",
+        "originalSize": "252663",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:29.024825+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Scooter",
+        "author": "Angelica",
+        "authorUrl": "https://www.flickr.com/people/brambleberriesphotography/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Angelica",
+          "url": "https://www.flickr.com/photos/brambleberriesphotography",
+          "image": "https://live.staticflickr.com/6191/buddyicons/66517343@N07.jpg?1313662401#66517343@N07"
+        },
+        "evidenceFile": "licenses/d1f728c5761cc354.json",
+        "evidenceSha256": "ed3a068707a66f2dad2853d575ec7a24579a992c40c6aaed71b34ab9d26a0633",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/brambleberriesphotography",
+      "split": "dev",
+      "caseId": "photo-dev-13"
+    },
+    {
+      "imageId": "563757784fbaccb8",
+      "targetClassId": "/m/0bt9lr",
+      "target": "Dog",
+      "primaryStratum": "edge",
+      "targetBoxes": [
+        {
+          "classId": "/m/0bt9lr",
+          "className": "Dog",
+          "xyxy": [
+            0.10749186,
+            0.0,
+            0.80618894,
+            0.79358715
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 103102,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0bt9lr",
+          "className": "Dog",
+          "xyxy": [
+            0.15960912,
+            0.28857717,
+            0.9153094,
+            0.9519038
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 103103,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/563757784fbaccb8.jpg",
+      "sha256": "f6edacb60be5615c5a416a286f2becc2dd6ea828f87ba7d43dd6227ad3e8cc01",
+      "bytes": 175583,
+      "width": 1024,
+      "height": 833,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "563757784fbaccb8",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/563757784fbaccb8.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/563757784fbaccb8.jpg",
+        "originalUrl": "https://c1.staticflickr.com/8/7122/7474735852_224e82cea8_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/loxy/7474735852",
+        "originalMD5Base64": "GME541xeB9/77EY9018NMA==",
+        "originalSize": "174444",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:31.356463+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "IMG_5615",
+        "author": "Loxy!!",
+        "authorUrl": "https://www.flickr.com/people/loxy/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Loxy!!",
+          "url": "https://www.flickr.com/photos/loxy",
+          "image": "https://farm66.staticflickr.com/65535/buddyicons/88297232@N00.jpg?1573057110#88297232@N00"
+        },
+        "evidenceFile": "licenses/563757784fbaccb8.json",
+        "evidenceSha256": "e15b8a714a1a51063d253d3ce115b75e66ac967894af74d5de125592b29a90bd",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/loxy",
+      "split": "dev",
+      "caseId": "photo-dev-14"
+    },
+    {
+      "imageId": "2b3f752d363cb02a",
+      "targetClassId": "/m/01g317",
+      "target": "Person",
+      "primaryStratum": "occluded",
+      "targetBoxes": [
+        {
+          "classId": "/m/01g317",
+          "className": "Person",
+          "xyxy": [
+            0.24729241,
+            0.18592058,
+            0.6119134,
+            0.97472924
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 51247,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "occluded"
+      ],
+      "file": "photos/2b3f752d363cb02a.jpg",
+      "sha256": "e2b785c3c9ab25a0b8146394082f3fb48c7c361aaa7d4df9678e63694429a7cb",
+      "bytes": 210412,
+      "width": 1024,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "2b3f752d363cb02a",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/2b3f752d363cb02a.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/2b3f752d363cb02a.jpg",
+        "originalUrl": "https://c3.staticflickr.com/9/8320/8026647077_a769ae0eb6_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/maurina/8026647077",
+        "originalMD5Base64": "COXdThUXcGDeTIdKOhm6xA==",
+        "originalSize": "115033",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:33.006874+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Doing #aqiqah in India. Alhamdullilah everything went well. 8 kambings slaughtered and bubbling in a pot of masala for distribution to the poor eseh. Yummy! Thank you @maurizahamid",
+        "author": "Maurina Rara",
+        "authorUrl": "https://www.flickr.com/people/maurina/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Maurina Rara",
+          "url": "https://www.flickr.com/photos/maurina",
+          "image": "https://live.staticflickr.com/42/buddyicons/51854834@N00.jpg?1137085754#51854834@N00"
+        },
+        "evidenceFile": "licenses/2b3f752d363cb02a.json",
+        "evidenceSha256": "5cde8ea871caeaebb4cf206f367d5f8cf3086ea1de577c306e7e9ff1cd508bbd",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/maurina",
+      "split": "dev",
+      "caseId": "photo-dev-15"
+    },
+    {
+      "imageId": "ba203a90803733a4",
+      "targetClassId": "/m/02s195",
+      "target": "Vase",
+      "primaryStratum": "occluded",
+      "targetBoxes": [
+        {
+          "classId": "/m/02s195",
+          "className": "Vase",
+          "xyxy": [
+            0.0,
+            0.0,
+            0.284375,
+            0.6242171
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 221860,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/02s195",
+          "className": "Vase",
+          "xyxy": [
+            0.2109375,
+            0.060542796,
+            0.8203125,
+            0.9352818
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 221861,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/02s195",
+          "className": "Vase",
+          "xyxy": [
+            0.78125,
+            0.17745303,
+            0.9984375,
+            0.5678497
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 221862,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/02s195",
+          "className": "Vase",
+          "xyxy": [
+            0.9296875,
+            0.55114824,
+            0.9984375,
+            0.782881
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 221863,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/ba203a90803733a4.jpg",
+      "sha256": "5fb76ec0d0d61d5cf05dd7427381533b20191943b680948a9960c40aca67d0fe",
+      "bytes": 126860,
+      "width": 1024,
+      "height": 766,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "ba203a90803733a4",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ba203a90803733a4.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ba203a90803733a4.jpg",
+        "originalUrl": "https://farm5.staticflickr.com/2134/5765173293_1d39b140ac_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/58789412@N00/5765173293",
+        "originalMD5Base64": "uHASlveKcTD9lK4/dmGrDA==",
+        "originalSize": "777010",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:32.908155+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Cerveteri Museum",
+        "author": "Verity Cridland",
+        "authorUrl": "https://www.flickr.com/people/58789412@N00/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Verity Cridland",
+          "url": "https://www.flickr.com/photos/58789412@N00",
+          "image": "https://live.staticflickr.com/54/buddyicons/58789412@N00.jpg?1148838021#58789412@N00"
+        },
+        "evidenceFile": "licenses/ba203a90803733a4.json",
+        "evidenceSha256": "41f1ede5c5aea752606aa460083d85c785293cbf7496f7dfea66b00a56f6e086",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/58789412@N00",
+      "split": "dev",
+      "caseId": "photo-dev-16"
+    },
+    {
+      "imageId": "415c25d848879f98",
+      "targetClassId": "/m/015p6",
+      "target": "Bird",
+      "primaryStratum": "occluded",
+      "targetBoxes": [
+        {
+          "classId": "/m/015p6",
+          "className": "Bird",
+          "xyxy": [
+            0.34375,
+            0.26875,
+            0.6765625,
+            0.62291664
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 78356,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "occluded"
+      ],
+      "file": "photos/415c25d848879f98.jpg",
+      "sha256": "3cb418763df8f049b9505461056c9421eec6b10f675c788eea390dbdff5dfc7d",
+      "bytes": 183938,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "415c25d848879f98",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/415c25d848879f98.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/415c25d848879f98.jpg",
+        "originalUrl": "https://c1.staticflickr.com/1/171/377342134_8dedff15c9_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/jennifrog/377342134",
+        "originalMD5Base64": "i8xvXJ+UBrBrTR4pG2JVqQ==",
+        "originalSize": "566142",
+        "rotationMetadata": "",
+        "retrievedAt": "2026-10-17T21:15:33.089458+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Echidna in the wild, Lake St Clair",
+        "author": "Jenny Mealing",
+        "authorUrl": "https://www.flickr.com/people/jennifrog/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Jenny Mealing",
+          "url": "https://www.flickr.com/photos/jennifrog",
+          "image": "https://live.staticflickr.com/10/buddyicons/38061770@N00.jpg?1147920700#38061770@N00"
+        },
+        "evidenceFile": "licenses/415c25d848879f98.json",
+        "evidenceSha256": "4a97e7f05adec49af27f05651b8afb53138e56071c3d24915d26a6268322a8e1",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/jennifrog",
+      "split": "dev",
+      "caseId": "photo-dev-17"
+    },
+    {
+      "imageId": "45c6589db22f7524",
+      "targetClassId": "/m/0k4j",
+      "target": "Car",
+      "primaryStratum": "duplicate",
+      "targetBoxes": [
+        {
+          "classId": "/m/0k4j",
+          "className": "Car",
+          "xyxy": [
+            0.0,
+            0.15416667,
+            0.1328125,
+            0.31041667
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 83116,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0k4j",
+          "className": "Car",
+          "xyxy": [
+            0.125,
+            0.20416667,
+            0.8890625,
+            0.75416666
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 83117,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge",
+        "duplicate"
+      ],
+      "file": "photos/45c6589db22f7524.jpg",
+      "sha256": "ab2c784dbe37a3ce5737ae28808324d3d902d590e4f3cefd60df52f7096a4248",
+      "bytes": 220863,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "45c6589db22f7524",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/45c6589db22f7524.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/45c6589db22f7524.jpg",
+        "originalUrl": "https://farm5.staticflickr.com/1230/803566474_ed9dd455ae_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/diaper/803566474",
+        "originalMD5Base64": "EtxS0f2hIpP7+CX0stIr2g==",
+        "originalSize": "250914",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:34.691737+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Nice looking",
+        "author": "diaper",
+        "authorUrl": "https://www.flickr.com/people/diaper/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "diaper",
+          "url": "https://www.flickr.com/photos/diaper",
+          "image": "https://live.staticflickr.com/218/buddyicons/7608165@N06.jpg?1179528940#7608165@N06"
+        },
+        "evidenceFile": "licenses/45c6589db22f7524.json",
+        "evidenceSha256": "f37c374393f5810fee5a06ed847c7ed39001e413b3f878e6cd27e5e086fa89f0",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/diaper",
+      "split": "dev",
+      "caseId": "photo-dev-18"
+    },
+    {
+      "imageId": "8de803c15dc6dc7d",
+      "targetClassId": "/m/01mzpv",
+      "target": "Chair",
+      "primaryStratum": "duplicate",
+      "targetBoxes": [
+        {
+          "classId": "/m/01mzpv",
+          "className": "Chair",
+          "xyxy": [
+            0.0,
+            0.32743362,
+            0.2300885,
+            0.7640118
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 167235,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/01mzpv",
+          "className": "Chair",
+          "xyxy": [
+            0.13716814,
+            0.4719764,
+            0.5663717,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 167236,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/8de803c15dc6dc7d.jpg",
+      "sha256": "2e33e7ede083653ba706e7e3d78ef663d6761e31630e40bf7a945c6235c7d001",
+      "bytes": 89767,
+      "width": 683,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "8de803c15dc6dc7d",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/8de803c15dc6dc7d.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/8de803c15dc6dc7d.jpg",
+        "originalUrl": "https://c6.staticflickr.com/3/2604/4077598908_8586d77db2_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/usarmyafrica/4077598908",
+        "originalMD5Base64": "LSMhjjkodM9Im4Ubv/yxkg==",
+        "originalSize": "1579121",
+        "rotationMetadata": "",
+        "retrievedAt": "2026-10-17T21:15:34.629796+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "USAMRUK Malaria Diagnostics and Control Center of Excellence microscopy training -  Nigeria, Africa 092009",
+        "author": "US Army Africa",
+        "authorUrl": "https://www.flickr.com/people/usarmyafrica/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "U.S. Army Southern European Task Force,  Africa",
+          "url": "https://www.flickr.com/photos/usarmyafrica",
+          "image": "https://farm66.staticflickr.com/65535/buddyicons/36281822@N08.jpg?1606143725#36281822@N08"
+        },
+        "evidenceFile": "licenses/8de803c15dc6dc7d.json",
+        "evidenceSha256": "177906d70a0105d1d424d8950f5d76061c9dcaaae677a3dcd1e97716cd014aaa",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/usarmyafrica",
+      "split": "dev",
+      "caseId": "photo-dev-19"
+    },
+    {
+      "imageId": "3e8acf516f9dc8ac",
+      "targetClassId": "/m/0k4j",
+      "target": "Car",
+      "primaryStratum": "duplicate",
+      "targetBoxes": [
+        {
+          "classId": "/m/0k4j",
+          "className": "Car",
+          "xyxy": [
+            0.01875,
+            0.22291666,
+            1.0,
+            0.8229167
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 74638,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0k4j",
+          "className": "Car",
+          "xyxy": [
+            0.815625,
+            0.1625,
+            1.0,
+            0.4
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 74639,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/3e8acf516f9dc8ac.jpg",
+      "sha256": "e40b5791a000840f4ab5f660f2231528b5d2201d8d9a25021c7a73f99c4c10d2",
+      "bytes": 545027,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "3e8acf516f9dc8ac",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/3e8acf516f9dc8ac.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/3e8acf516f9dc8ac.jpg",
+        "originalUrl": "https://c5.staticflickr.com/6/5257/5417817599_964292023a_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/fire_up_the_quattro/5417817599",
+        "originalMD5Base64": "tkVdlk+M+uoLa17X3fPpPw==",
+        "originalSize": "5328940",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:34.870611+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "A REAL motor!",
+        "author": "Firing up the quattro....",
+        "authorUrl": "https://www.flickr.com/people/fire_up_the_quattro/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Firing up the quattro....",
+          "url": "https://www.flickr.com/photos/fire_up_the_quattro",
+          "image": "https://live.staticflickr.com/3690/buddyicons/53595130@N06.jpg?1369161111#53595130@N06"
+        },
+        "evidenceFile": "licenses/3e8acf516f9dc8ac.json",
+        "evidenceSha256": "b68ec9f31091bb8410b880a0739993f261b33790a1e876792b3b1896013c0e7a",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/fire_up_the_quattro",
+      "split": "dev",
+      "caseId": "photo-dev-20"
+    },
+    {
+      "imageId": "6bf467287bbb6e8b",
+      "targetClassId": "/m/050k8",
+      "target": "Mobile phone",
+      "primaryStratum": "baseline",
+      "targetBoxes": [
+        {
+          "classId": "/m/050k8",
+          "className": "Mobile phone",
+          "xyxy": [
+            0.0,
+            0.07760532,
+            0.99558175,
+            0.83370286
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 128265,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "baseline"
+      ],
+      "file": "photos/6bf467287bbb6e8b.jpg",
+      "sha256": "837d8820854777f2c11095c83e86f630bb72e4c5e6b7e835e42b7628b7802b76",
+      "bytes": 338614,
+      "width": 1024,
+      "height": 681,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "6bf467287bbb6e8b",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/6bf467287bbb6e8b.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/6bf467287bbb6e8b.jpg",
+        "originalUrl": "https://c4.staticflickr.com/3/2649/4254007709_55dedf2739_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/46326024@N06/4254007709",
+        "originalMD5Base64": "stTawDgOjwWwPIvhWo405g==",
+        "originalSize": "3041953",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:37.808406+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Safari on iPhone 3G",
+        "author": "Charm2010",
+        "authorUrl": "https://www.flickr.com/people/46326024@N06/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Charm2010",
+          "url": "https://www.flickr.com/photos/46326024@N06",
+          "image": "https://live.staticflickr.com/2695/buddyicons/46326024@N06.jpg?1262892184#46326024@N06"
+        },
+        "evidenceFile": "licenses/6bf467287bbb6e8b.json",
+        "evidenceSha256": "6716a6ed9b8000f17f67dd218a4062628078c29d756e46d8e5cf36634038e398",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/46326024@N06",
+      "split": "heldout",
+      "caseId": "photo-heldout-01"
+    },
+    {
+      "imageId": "6ab55d63ac6708e2",
+      "targetClassId": "/m/050k8",
+      "target": "Mobile phone",
+      "primaryStratum": "baseline",
+      "targetBoxes": [
+        {
+          "classId": "/m/050k8",
+          "className": "Mobile phone",
+          "xyxy": [
+            0.09556314,
+            0.016694492,
+            0.92491466,
+            0.94323874
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 127007,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "baseline"
+      ],
+      "file": "photos/6ab55d63ac6708e2.jpg",
+      "sha256": "2d25af2364a8fae4e71ecac7f07d6cf5e1f00d4fe6871b8d19e11613df4c26a1",
+      "bytes": 83614,
+      "width": 501,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "6ab55d63ac6708e2",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/6ab55d63ac6708e2.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/6ab55d63ac6708e2.jpg",
+        "originalUrl": "https://farm3.staticflickr.com/3585/3672231175_67e2325a0c_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/glennf/3672231175",
+        "originalMD5Base64": "mZbqGAxQuu9po6k+xllpow==",
+        "originalSize": "39532",
+        "rotationMetadata": "",
+        "retrievedAt": "2026-10-17T21:15:36.753934+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Nokia T610",
+        "author": "Glenn Fleishman",
+        "authorUrl": "https://www.flickr.com/people/glennf/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Glenn Fleishman",
+          "url": "https://www.flickr.com/photos/glennf",
+          "image": "https://live.staticflickr.com/2829/buddyicons/69628725@N00.jpg?1381730267#69628725@N00"
+        },
+        "evidenceFile": "licenses/6ab55d63ac6708e2.json",
+        "evidenceSha256": "3ad048a04f17a68f80a629c5835ebbc6b2d219339a997a55dfad20e35681e1b5",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/glennf",
+      "split": "heldout",
+      "caseId": "photo-heldout-02"
+    },
+    {
+      "imageId": "3fec3b9feac65f6a",
+      "targetClassId": "/m/07r04",
+      "target": "Truck",
+      "primaryStratum": "baseline",
+      "targetBoxes": [
+        {
+          "classId": "/m/07r04",
+          "className": "Truck",
+          "xyxy": [
+            0.153125,
+            0.114583336,
+            0.9203125,
+            0.80833334
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 76479,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "baseline"
+      ],
+      "file": "photos/3fec3b9feac65f6a.jpg",
+      "sha256": "08eb9e5262a101400c4539cf88ac5e05cc39d4bfacf33a572aa272a5608605ac",
+      "bytes": 273012,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "3fec3b9feac65f6a",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/3fec3b9feac65f6a.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/3fec3b9feac65f6a.jpg",
+        "originalUrl": "https://c3.staticflickr.com/5/4040/4562499605_3d4bde606e_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/daveseven/4562499605",
+        "originalMD5Base64": "A078YcVnSTvdDEeYoIhOwg==",
+        "originalSize": "2614649",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:40.210349+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "GMC Syclone",
+        "author": "dave_7",
+        "authorUrl": "https://www.flickr.com/people/daveseven/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "dave_7",
+          "url": "https://www.flickr.com/photos/daveseven",
+          "image": "https://farm66.staticflickr.com/65535/buddyicons/21612624@N00.jpg?1629750485#21612624@N00"
+        },
+        "evidenceFile": "licenses/3fec3b9feac65f6a.json",
+        "evidenceSha256": "22f67d5d22a13d36bc181e5d313d2fe1c25be3003e5c9cbbddd8663123994772",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/daveseven",
+      "split": "heldout",
+      "caseId": "photo-heldout-03"
+    },
+    {
+      "imageId": "35f837b8efa90099",
+      "targetClassId": "/m/01g317",
+      "target": "Person",
+      "primaryStratum": "baseline",
+      "targetBoxes": [
+        {
+          "classId": "/m/01g317",
+          "className": "Person",
+          "xyxy": [
+            0.3140625,
+            0.32291666,
+            0.621875,
+            0.91041666
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 63888,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "baseline"
+      ],
+      "file": "photos/35f837b8efa90099.jpg",
+      "sha256": "e67f1a93f1f828a507c777c66ebc5faed42f5978d557cd5f025334358e569fd0",
+      "bytes": 109564,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "35f837b8efa90099",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/35f837b8efa90099.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/35f837b8efa90099.jpg",
+        "originalUrl": "https://c2.staticflickr.com/1/89/257097723_51c16f714a_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/toms/257097723",
+        "originalMD5Base64": "efJUSmurjYUC70mf38OsIQ==",
+        "originalSize": "119818",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:39.566772+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Chill room",
+        "author": "Toms Baugis",
+        "authorUrl": "https://www.flickr.com/people/toms/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Toms Baugis",
+          "url": "https://www.flickr.com/photos/toms",
+          "image": "https://live.staticflickr.com/8409/buddyicons/35342879@N00.jpg?1369087953#35342879@N00"
+        },
+        "evidenceFile": "licenses/35f837b8efa90099.json",
+        "evidenceSha256": "042e7d73d4f2cbe8cc8eec6c75b9172894ffbc05c8d2e14bedb297e321c2deab",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/toms",
+      "split": "heldout",
+      "caseId": "photo-heldout-04"
+    },
+    {
+      "imageId": "d2343d20f7cc6e48",
+      "targetClassId": "/m/0cyf8",
+      "target": "Butterfly",
+      "primaryStratum": "baseline",
+      "targetBoxes": [
+        {
+          "classId": "/m/0cyf8",
+          "className": "Butterfly",
+          "xyxy": [
+            0.2703125,
+            0.24791667,
+            0.7640625,
+            0.6979167
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 249906,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "baseline"
+      ],
+      "file": "photos/d2343d20f7cc6e48.jpg",
+      "sha256": "d4e2383fc711ec77aad7e18548994d48ee5fe8ab054c18bd0d121c395a07a712",
+      "bytes": 625250,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "d2343d20f7cc6e48",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/d2343d20f7cc6e48.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/d2343d20f7cc6e48.jpg",
+        "originalUrl": "https://c1.staticflickr.com/3/2084/1519316454_14ca0004b3_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/14279744@N03/1519316454",
+        "originalMD5Base64": "IxAzSedYZCAA7jOGst3XkQ==",
+        "originalSize": "4498092",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:39.960025+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "CIMG0826",
+        "author": "kangotraveler",
+        "authorUrl": "https://www.flickr.com/people/14279744@N03/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "kangotraveler",
+          "url": "https://www.flickr.com/photos/14279744@N03",
+          "image": "https://live.staticflickr.com/1328/buddyicons/14279744@N03.jpg?1191263727#14279744@N03"
+        },
+        "evidenceFile": "licenses/d2343d20f7cc6e48.json",
+        "evidenceSha256": "55918503b404ec58a44ccd1b8810d25869b1aad9817f151160b785e9b89ff952",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/14279744@N03",
+      "split": "heldout",
+      "caseId": "photo-heldout-05"
+    },
+    {
+      "imageId": "9f7963816508342a",
+      "targetClassId": "/m/015p6",
+      "target": "Bird",
+      "primaryStratum": "baseline",
+      "targetBoxes": [
+        {
+          "classId": "/m/015p6",
+          "className": "Bird",
+          "xyxy": [
+            0.23858616,
+            0.20842572,
+            0.8939617,
+            0.96452326
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 189218,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "baseline"
+      ],
+      "file": "photos/9f7963816508342a.jpg",
+      "sha256": "eb8030c048ac3e44319279ed377f8870b2e6a18f28b8e593a7a31e916c2adc7e",
+      "bytes": 211078,
+      "width": 1024,
+      "height": 681,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "9f7963816508342a",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/9f7963816508342a.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/9f7963816508342a.jpg",
+        "originalUrl": "https://c3.staticflickr.com/2/1332/1437333121_2b4d65d27c_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/kamikura/1437333121",
+        "originalMD5Base64": "fRG46dp4xrUTCUz7pn3Bww==",
+        "originalSize": "2405692",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:39.566431+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Bird",
+        "author": "Masaru Kamikura",
+        "authorUrl": "https://www.flickr.com/people/kamikura/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Masaru Kamikura",
+          "url": "https://www.flickr.com/photos/kamikura",
+          "image": "https://live.staticflickr.com/68/buddyicons/20119192@N00.jpg?1153197635#20119192@N00"
+        },
+        "evidenceFile": "licenses/9f7963816508342a.json",
+        "evidenceSha256": "b7ff1930a1ac6aa6725428a01024873c884ff0d19c81a5120f1968ed1f1b49bd",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/kamikura",
+      "split": "heldout",
+      "caseId": "photo-heldout-06"
+    },
+    {
+      "imageId": "92b99b81715472df",
+      "targetClassId": "/m/02s195",
+      "target": "Vase",
+      "primaryStratum": "negative",
+      "targetBoxes": [],
+      "negativeEvidence": {
+        "type": "explicit-human-verified-image-label",
+        "source": "verification",
+        "confidence": 0,
+        "sourceCsvRow": 147725,
+        "sourceFile": "source/labels.csv"
+      },
+      "tags": [
+        "negative"
+      ],
+      "file": "photos/92b99b81715472df.jpg",
+      "sha256": "2c567e0dc21235cfde3f95e5d5fcf0122ee900cfe11973342184dc05c5a35eea",
+      "bytes": 140672,
+      "width": 686,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "92b99b81715472df",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/92b99b81715472df.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/92b99b81715472df.jpg",
+        "originalUrl": "https://c8.staticflickr.com/1/156/429996265_3ae75e488e_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/deadling/429996265",
+        "originalMD5Base64": "CKBU4lDTY3hB4a5fqrgHoA==",
+        "originalSize": "214264",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:41.876980+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Lobby Plant",
+        "author": "Eric",
+        "authorUrl": "https://www.flickr.com/people/deadling/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Eric",
+          "url": "https://www.flickr.com/photos/deadling",
+          "image": "https://live.staticflickr.com/6/buddyicons/48986833@N00.jpg?1142981785#48986833@N00"
+        },
+        "evidenceFile": "licenses/92b99b81715472df.json",
+        "evidenceSha256": "c65230288e271df3e650a958c29b2e5b990e31ad8c0cb3f966b0b95954a8e417",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/deadling",
+      "split": "heldout",
+      "caseId": "photo-heldout-07"
+    },
+    {
+      "imageId": "46da83ccb945db5a",
+      "targetClassId": "/m/01g317",
+      "target": "Person",
+      "primaryStratum": "negative",
+      "targetBoxes": [],
+      "negativeEvidence": {
+        "type": "explicit-human-verified-image-label",
+        "source": "verification",
+        "confidence": 0,
+        "sourceCsvRow": 72972,
+        "sourceFile": "source/labels.csv"
+      },
+      "tags": [
+        "negative"
+      ],
+      "file": "photos/46da83ccb945db5a.jpg",
+      "sha256": "be476befa3c58ff3f1e48e979dc604fbbe68004ced5749b3199be2ca5ccd3461",
+      "bytes": 228950,
+      "width": 768,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "46da83ccb945db5a",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/46da83ccb945db5a.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/46da83ccb945db5a.jpg",
+        "originalUrl": "https://c3.staticflickr.com/7/6060/5900036077_210cd9c60e_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/ddebold/5900036077",
+        "originalMD5Base64": "x4P7d1d/Nvr7a44lGOaUKg==",
+        "originalSize": "2746105",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:42.400436+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Wafer Inspector",
+        "author": "Don DeBold",
+        "authorUrl": "https://www.flickr.com/people/ddebold/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Don DeBold",
+          "url": "https://www.flickr.com/photos/ddebold",
+          "image": "https://live.staticflickr.com/5338/buddyicons/28156071@N00.jpg?1369092836#28156071@N00"
+        },
+        "evidenceFile": "licenses/46da83ccb945db5a.json",
+        "evidenceSha256": "41a2348f15aae0852454a288431ec72ba1bdc20268d4b2d3ec06a43448e7ee3a",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/ddebold",
+      "split": "heldout",
+      "caseId": "photo-heldout-08"
+    },
+    {
+      "imageId": "b4c7c24388a9c7af",
+      "targetClassId": "/m/01g317",
+      "target": "Person",
+      "primaryStratum": "negative",
+      "targetBoxes": [],
+      "negativeEvidence": {
+        "type": "explicit-human-verified-image-label",
+        "source": "verification",
+        "confidence": 0,
+        "sourceCsvRow": 182673,
+        "sourceFile": "source/labels.csv"
+      },
+      "tags": [
+        "negative"
+      ],
+      "file": "photos/b4c7c24388a9c7af.jpg",
+      "sha256": "f02b53c1c80a5aa54ec745ca84ad8b9e83f45cd516aeff034161505cdc5de1c1",
+      "bytes": 107306,
+      "width": 1024,
+      "height": 681,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "b4c7c24388a9c7af",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/b4c7c24388a9c7af.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/b4c7c24388a9c7af.jpg",
+        "originalUrl": "https://c8.staticflickr.com/6/5121/5195137902_e74ff66f8c_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/22179048@N05/5195137902",
+        "originalMD5Base64": "auMcg0zwbn76sf/voEuN5A==",
+        "originalSize": "10524797",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:42.868770+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "4815",
+        "author": "Bob Peters",
+        "authorUrl": "https://www.flickr.com/people/22179048@N05/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Bob Peters",
+          "url": "https://www.flickr.com/photos/22179048@N05",
+          "image": "https://live.staticflickr.com/5643/buddyicons/22179048@N05.jpg?1443094801#22179048@N05"
+        },
+        "evidenceFile": "licenses/b4c7c24388a9c7af.json",
+        "evidenceSha256": "9ce57866be7b3932de03e05fc40aafcad6c5f1aaa5e8d07d177ac2539e203288",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/22179048@N05",
+      "split": "heldout",
+      "caseId": "photo-heldout-09"
+    },
+    {
+      "imageId": "9d041d61547563e6",
+      "targetClassId": "/m/019jd",
+      "target": "Boat",
+      "primaryStratum": "negative",
+      "targetBoxes": [],
+      "negativeEvidence": {
+        "type": "explicit-human-verified-image-label",
+        "source": "verification",
+        "confidence": 0,
+        "sourceCsvRow": 158576,
+        "sourceFile": "source/labels.csv"
+      },
+      "tags": [
+        "negative"
+      ],
+      "file": "photos/9d041d61547563e6.jpg",
+      "sha256": "dd935d29422170caa41fd1ab6aac5b84635aed4bca78cd4fd10a9465f85d4dc0",
+      "bytes": 143847,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "9d041d61547563e6",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/9d041d61547563e6.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/9d041d61547563e6.jpg",
+        "originalUrl": "https://farm7.staticflickr.com/5604/15542402927_69e9cc33b5_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/73715185@N00/15542402927/",
+        "originalMD5Base64": "1Dp0YyYvaQxxVj1ddHbOpQ==",
+        "originalSize": "417150",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:42.134783+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Cromer pier",
+        "author": "Hazel Scott",
+        "authorUrl": "https://www.flickr.com/people/73715185@N00/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Hazel Scott",
+          "url": "https://www.flickr.com/photos/73715185@N00",
+          "image": "https://live.staticflickr.com/130/buddyicons/73715185@N00.jpg?1169041979#73715185@N00"
+        },
+        "evidenceFile": "licenses/9d041d61547563e6.json",
+        "evidenceSha256": "484c766c54fa8db436e3460273dfa6a2a25ac8ff60eb92c42a3471b5063964e8",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/73715185@N00",
+      "split": "heldout",
+      "caseId": "photo-heldout-10"
+    },
+    {
+      "imageId": "5a2ca3f1777ef444",
+      "targetClassId": "/m/0zvk5",
+      "target": "Helmet",
+      "primaryStratum": "negative",
+      "targetBoxes": [],
+      "negativeEvidence": {
+        "type": "explicit-human-verified-image-label",
+        "source": "verification",
+        "confidence": 0,
+        "sourceCsvRow": 92625,
+        "sourceFile": "source/labels.csv"
+      },
+      "tags": [
+        "negative"
+      ],
+      "file": "photos/5a2ca3f1777ef444.jpg",
+      "sha256": "c7672f260512778fd22381e967653d6e871b5c669fb95089c8210b7163bb9618",
+      "bytes": 618129,
+      "width": 1024,
+      "height": 680,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "5a2ca3f1777ef444",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/5a2ca3f1777ef444.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/5a2ca3f1777ef444.jpg",
+        "originalUrl": "https://farm5.staticflickr.com/4106/5053117627_d5f0f939a7_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/sonofgroucho/5053117627",
+        "originalMD5Base64": "VlBivEzVVhUgE4Ed0ueG4w==",
+        "originalSize": "6498017",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:47.129345+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "With Optional iPhone Clip (iClip™)",
+        "author": "Son of Groucho",
+        "authorUrl": "https://www.flickr.com/people/sonofgroucho/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Son of Groucho",
+          "url": "https://www.flickr.com/photos/sonofgroucho",
+          "image": "https://live.staticflickr.com/1619/buddyicons/23401669@N00.jpg?1453068123#23401669@N00"
+        },
+        "evidenceFile": "licenses/5a2ca3f1777ef444.json",
+        "evidenceSha256": "172140ee68bc3b9ca9b884cb8e24752a4e2037007ef085753dd0dead6db77bdc",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/sonofgroucho",
+      "split": "heldout",
+      "caseId": "photo-heldout-11"
+    },
+    {
+      "imageId": "5ba6c3d6b98cb93f",
+      "targetClassId": "/m/01c648",
+      "target": "Laptop",
+      "primaryStratum": "negative",
+      "targetBoxes": [],
+      "negativeEvidence": {
+        "type": "explicit-human-verified-image-label",
+        "source": "verification",
+        "confidence": 0,
+        "sourceCsvRow": 94155,
+        "sourceFile": "source/labels.csv"
+      },
+      "tags": [
+        "negative"
+      ],
+      "file": "photos/5ba6c3d6b98cb93f.jpg",
+      "sha256": "2119715438fef6a56252e3d9eee6bd417ffa5bcff2209a60ea3ba0f8016d1024",
+      "bytes": 218166,
+      "width": 768,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "5ba6c3d6b98cb93f",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/5ba6c3d6b98cb93f.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/5ba6c3d6b98cb93f.jpg",
+        "originalUrl": "https://c8.staticflickr.com/5/4074/4930418632_f8befa0ce9_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/digitaldrew/4930418632",
+        "originalMD5Base64": "mOXICI2m76t6FEyYhtXYaA==",
+        "originalSize": "306303",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:46.967586+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "All in One Copy-Scanner-Fax",
+        "author": "Andrew Michael Nathan",
+        "authorUrl": "https://www.flickr.com/people/digitaldrew/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Andrew Michael Nathan",
+          "url": "https://www.flickr.com/photos/digitaldrew",
+          "image": "https://live.staticflickr.com/3456/buddyicons/33333986@N07.jpg?1288258940#33333986@N07"
+        },
+        "evidenceFile": "licenses/5ba6c3d6b98cb93f.json",
+        "evidenceSha256": "5477f9decef3f5d4c0373c1ebac073ca75dc1f3f8a087a9f4942c957afec6e85",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/digitaldrew",
+      "split": "heldout",
+      "caseId": "photo-heldout-12"
+    },
+    {
+      "imageId": "29def08271143710",
+      "targetClassId": "/m/01mzpv",
+      "target": "Chair",
+      "primaryStratum": "small",
+      "targetBoxes": [
+        {
+          "classId": "/m/01mzpv",
+          "className": "Chair",
+          "xyxy": [
+            0.0,
+            0.65833336,
+            0.20625,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 49633,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/01mzpv",
+          "className": "Chair",
+          "xyxy": [
+            0.1609375,
+            0.41666666,
+            0.2828125,
+            0.72291666
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 49634,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/01mzpv",
+          "className": "Chair",
+          "xyxy": [
+            0.4359375,
+            0.65,
+            0.71875,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 49635,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/01mzpv",
+          "className": "Chair",
+          "xyxy": [
+            0.7390625,
+            0.53125,
+            0.8953125,
+            0.6458333
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 49636,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/01mzpv",
+          "className": "Chair",
+          "xyxy": [
+            0.903125,
+            0.54583335,
+            1.0,
+            0.65
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 49637,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/01mzpv",
+          "className": "Chair",
+          "xyxy": [
+            0.90625,
+            0.50625,
+            1.0,
+            0.5520833
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 49638,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "edge",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/29def08271143710.jpg",
+      "sha256": "be02b4232b776b88e30e6e50c48710ad8a547c0587f9cda17481d8632674d948",
+      "bytes": 204233,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "29def08271143710",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/29def08271143710.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/29def08271143710.jpg",
+        "originalUrl": "https://farm1.staticflickr.com/7561/15803481090_d7cd075983_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/walmart3/15803481090",
+        "originalMD5Base64": "Km1ngt1TJKntzrZp1if12g==",
+        "originalSize": "2069125",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:48.890048+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Jukebox",
+        "author": "Random Retail",
+        "authorUrl": "https://www.flickr.com/people/walmart3/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Random Retail",
+          "url": "https://www.flickr.com/photos/walmart3",
+          "image": "https://live.staticflickr.com/1930/buddyicons/67408512@N03.jpg?1539185166#67408512@N03"
+        },
+        "evidenceFile": "licenses/29def08271143710.json",
+        "evidenceSha256": "6d2d4bc130eb8a2673460217723b5693b9fc0d3ae473d59a2cfa7646d11bc511",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/walmart3",
+      "split": "heldout",
+      "caseId": "photo-heldout-13"
+    },
+    {
+      "imageId": "ccbbb3175f571466",
+      "targetClassId": "/m/050gv4",
+      "target": "Plate",
+      "primaryStratum": "small",
+      "targetBoxes": [
+        {
+          "classId": "/m/050gv4",
+          "className": "Plate",
+          "xyxy": [
+            0.3859375,
+            0.7104167,
+            0.6125,
+            0.8
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 243711,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/050gv4",
+          "className": "Plate",
+          "xyxy": [
+            0.8578125,
+            0.95416665,
+            0.9109375,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 243712,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "edge",
+        "duplicate"
+      ],
+      "file": "photos/ccbbb3175f571466.jpg",
+      "sha256": "abff6a2a36c6bde7506704e05b4e5340d4a53a9acf796a23a3f8c35442a9b316",
+      "bytes": 125074,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "ccbbb3175f571466",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ccbbb3175f571466.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ccbbb3175f571466.jpg",
+        "originalUrl": "https://farm7.staticflickr.com/4052/4560356078_26bdc1ba73_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/larra505/4560356078",
+        "originalMD5Base64": "HQ6/rfPGCSj0iKMZBiHHvQ==",
+        "originalSize": "582420",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:48.718635+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "P4050001",
+        "author": "Larra Jungle Princess",
+        "authorUrl": "https://www.flickr.com/people/larra505/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Larra Jungle Princess",
+          "url": "https://www.flickr.com/photos/larra505",
+          "image": "https://farm66.staticflickr.com/65535/buddyicons/69877202@N00.jpg?1694773909#69877202@N00"
+        },
+        "evidenceFile": "licenses/ccbbb3175f571466.json",
+        "evidenceSha256": "bdae35da3b395e0088ff68ef463c6906bb484e967f8ef6dcbac8f6cb63731e78",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/larra505",
+      "split": "heldout",
+      "caseId": "photo-heldout-14"
+    },
+    {
+      "imageId": "0bdbf1ec73683c29",
+      "targetClassId": "/m/0c9ph5",
+      "target": "Flower",
+      "primaryStratum": "small",
+      "targetBoxes": [
+        {
+          "classId": "/m/0c9ph5",
+          "className": "Flower",
+          "xyxy": [
+            0.6729958,
+            0.26429674,
+            0.7236287,
+            0.29984543
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 14405,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small"
+      ],
+      "file": "photos/0bdbf1ec73683c29.jpg",
+      "sha256": "a2ee508e8ecb6262d32ebab3b13356e0ae27addc7a045720a5c3de0231f23818",
+      "bytes": 159888,
+      "width": 750,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "0bdbf1ec73683c29",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/0bdbf1ec73683c29.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/0bdbf1ec73683c29.jpg",
+        "originalUrl": "https://c2.staticflickr.com/2/1225/1446093794_33a517bc73_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/ampphoto/1446093794",
+        "originalMD5Base64": "vnJWB4VVa90BdKbq+jzquQ==",
+        "originalSize": "454004",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:50.909787+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Untitled-104",
+        "author": "Aaron Phillips",
+        "authorUrl": "https://www.flickr.com/people/ampphoto/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Aaron Phillips",
+          "url": "https://www.flickr.com/photos/ampphoto",
+          "image": "https://live.staticflickr.com/159/buddyicons/82757149@N00.jpg?1168814509#82757149@N00"
+        },
+        "evidenceFile": "licenses/0bdbf1ec73683c29.json",
+        "evidenceSha256": "4aa34d71c929ce949b3e48785a3133883ec562abf949132bdf787deb6f1ddc43",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/ampphoto",
+      "split": "heldout",
+      "caseId": "photo-heldout-15"
+    },
+    {
+      "imageId": "66b1a16de2eddedd",
+      "targetClassId": "/m/0zvk5",
+      "target": "Helmet",
+      "primaryStratum": "small",
+      "targetBoxes": [
+        {
+          "classId": "/m/0zvk5",
+          "className": "Helmet",
+          "xyxy": [
+            0.12941177,
+            0.11308204,
+            0.21176471,
+            0.24611974
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 121999,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0zvk5",
+          "className": "Helmet",
+          "xyxy": [
+            0.1985294,
+            0.20177384,
+            0.23970588,
+            0.2660754
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 122000,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0zvk5",
+          "className": "Helmet",
+          "xyxy": [
+            0.33235294,
+            0.21064301,
+            0.38088235,
+            0.28381374
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 122001,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0zvk5",
+          "className": "Helmet",
+          "xyxy": [
+            0.67058825,
+            0.27494457,
+            0.7264706,
+            0.37472284
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 122002,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/66b1a16de2eddedd.jpg",
+      "sha256": "98bcdb12a2101efcd9bbc825382e26943803a4bf4c9938e1afbd7b7b63cb1492",
+      "bytes": 209933,
+      "width": 1024,
+      "height": 680,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "66b1a16de2eddedd",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/66b1a16de2eddedd.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/66b1a16de2eddedd.jpg",
+        "originalUrl": "https://c6.staticflickr.com/3/2815/9917281696_0d2957c621_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/angryjuliemonday/9917281696",
+        "originalMD5Base64": "kxzwI2+TP3tfCTt0x+FZEw==",
+        "originalSize": "1189703",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:50.590448+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "JAD_5109",
+        "author": "AngryJulieMonday",
+        "authorUrl": "https://www.flickr.com/people/angryjuliemonday/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "AngryJulieMonday",
+          "url": "https://www.flickr.com/photos/angryjuliemonday",
+          "image": "https://live.staticflickr.com/3548/buddyicons/33731571@N07.jpg?1238775289#33731571@N07"
+        },
+        "evidenceFile": "licenses/66b1a16de2eddedd.json",
+        "evidenceSha256": "49df6b74ccfbd7214163c54bc2d1f35e87396fad6c3ef6ad3feec41b246164eb",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/angryjuliemonday",
+      "split": "heldout",
+      "caseId": "photo-heldout-16"
+    },
+    {
+      "imageId": "8df826e27ad174b6",
+      "targetClassId": "/m/0199g",
+      "target": "Bicycle",
+      "primaryStratum": "small",
+      "targetBoxes": [
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.6836283,
+            0.19026549,
+            0.7632743,
+            0.30235988
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 167294,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small"
+      ],
+      "file": "photos/8df826e27ad174b6.jpg",
+      "sha256": "728d07ec610506918c35c68065ef0b2a7e7b441092cf73735157e44be5e22e1d",
+      "bytes": 435445,
+      "width": 682,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "8df826e27ad174b6",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/8df826e27ad174b6.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/8df826e27ad174b6.jpg",
+        "originalUrl": "https://farm7.staticflickr.com/3763/12527535113_5a9e43e7d9_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/spycherf/12527535113",
+        "originalMD5Base64": "Cs7kTzHuC1a+khleoiptNg==",
+        "originalSize": "676074",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:50.853127+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Man feeding some stray dogs",
+        "author": "Frederic Spycher",
+        "authorUrl": "https://www.flickr.com/people/spycherf/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Odaklar Odaklar",
+          "url": "https://www.flickr.com/photos/spycherf",
+          "image": "https://live.staticflickr.com/4622/buddyicons/107852214@N04.jpg?1518865001#107852214@N04"
+        },
+        "evidenceFile": "licenses/8df826e27ad174b6.json",
+        "evidenceSha256": "fd5e0cfced7ea86386d228ac10245d42a7f940cf4ad4cce51c3d407b56eacd32",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/spycherf",
+      "split": "heldout",
+      "caseId": "photo-heldout-17"
+    },
+    {
+      "imageId": "92051ba4e40b87d5",
+      "targetClassId": "/m/0199g",
+      "target": "Bicycle",
+      "primaryStratum": "small",
+      "targetBoxes": [
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.0,
+            0.75108224,
+            0.20180723,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 172330,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.21084337,
+            0.7683983,
+            0.2936747,
+            0.88744587
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 172331,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.3493976,
+            0.6818182,
+            0.7560241,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 172332,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.65210843,
+            0.74891776,
+            0.8433735,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 172333,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.9141566,
+            0.62770563,
+            1.0,
+            0.96103895
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 172334,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "edge",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/92051ba4e40b87d5.jpg",
+      "sha256": "1b0d1ae931fd48a2e3484186ca81b117371b6c7c787e71599c0dfde7f8b9fbfb",
+      "bytes": 249340,
+      "width": 1024,
+      "height": 712,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "92051ba4e40b87d5",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/92051ba4e40b87d5.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/92051ba4e40b87d5.jpg",
+        "originalUrl": "https://farm6.staticflickr.com/3849/14631188427_2be7a84dc4_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/thomasrdororg/14631188427",
+        "originalMD5Base64": "uVonz+Zvd137sRfc47Pe2A==",
+        "originalSize": "1475391",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:53.199683+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "_DSC0095",
+        "author": "Tom Reynolds",
+        "authorUrl": "https://www.flickr.com/people/thomasrdororg/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Tom Reynolds",
+          "url": "https://www.flickr.com/photos/thomasrdororg",
+          "image": "https://live.staticflickr.com/7752/buddyicons/28135215@N00.jpg?1431232602#28135215@N00"
+        },
+        "evidenceFile": "licenses/92051ba4e40b87d5.json",
+        "evidenceSha256": "0c8d4718cee2a6283443d32f0e2ad0c8293785469e21c0e04c299aa498f05539",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/thomasrdororg",
+      "split": "heldout",
+      "caseId": "photo-heldout-18"
+    },
+    {
+      "imageId": "fe47a278906251b9",
+      "targetClassId": "/m/0c9ph5",
+      "target": "Flower",
+      "primaryStratum": "small",
+      "targetBoxes": [
+        {
+          "classId": "/m/0c9ph5",
+          "className": "Flower",
+          "xyxy": [
+            0.48082596,
+            0.51106197,
+            0.5412979,
+            0.5995575
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 302254,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0c9ph5",
+          "className": "Flower",
+          "xyxy": [
+            0.82448375,
+            0.24115044,
+            0.88053095,
+            0.2721239
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 302255,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "duplicate"
+      ],
+      "file": "photos/fe47a278906251b9.jpg",
+      "sha256": "815d1764adaada187b0e4f35187867df1746d8f84df5465ecb85fc2a52a172a4",
+      "bytes": 329871,
+      "width": 1024,
+      "height": 684,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "fe47a278906251b9",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/fe47a278906251b9.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/fe47a278906251b9.jpg",
+        "originalUrl": "https://c2.staticflickr.com/8/7245/7267022270_850b7092a1_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/bioblitzbristol/7267022270",
+        "originalMD5Base64": "DVdJvyPieHJJmC6IAeBHqw==",
+        "originalSize": "1682773",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:55.157934+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "IMG_3284",
+        "author": "Bio Blitz",
+        "authorUrl": "https://www.flickr.com/people/bioblitzbristol/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Bio Blitz",
+          "url": "https://www.flickr.com/photos/bioblitzbristol",
+          "image": "https://live.staticflickr.com/4066/buddyicons/39573813@N05.jpg?1286880038#39573813@N05"
+        },
+        "evidenceFile": "licenses/fe47a278906251b9.json",
+        "evidenceSha256": "9b35195f67337fe3b76a5bb75fc6208c5f073c8e3b1e6ed75809ef2ed32bb3be",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/bioblitzbristol",
+      "split": "heldout",
+      "caseId": "photo-heldout-19"
+    },
+    {
+      "imageId": "6c5c1261ed674951",
+      "targetClassId": "/m/01bjv",
+      "target": "Bus",
+      "primaryStratum": "edge",
+      "targetBoxes": [
+        {
+          "classId": "/m/01bjv",
+          "className": "Bus",
+          "xyxy": [
+            0.0,
+            0.06317689,
+            1.0,
+            0.38808665
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 128786,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/01bjv",
+          "className": "Bus",
+          "xyxy": [
+            0.0,
+            0.6534296,
+            1.0,
+            0.97472924
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 128787,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge",
+        "duplicate"
+      ],
+      "file": "photos/6c5c1261ed674951.jpg",
+      "sha256": "f96d8269ebcdd5a57993f9264d4207d37f3926b6692abd348668974f1cbfc1a8",
+      "bytes": 233476,
+      "width": 1024,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "6c5c1261ed674951",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/6c5c1261ed674951.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/6c5c1261ed674951.jpg",
+        "originalUrl": "https://farm2.staticflickr.com/3670/9431690444_432f417777_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/swisschef/9431690444",
+        "originalMD5Base64": "xtt4yOrUnl1UUHPu2GTp9Q==",
+        "originalSize": "130036",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:57.207620+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "National Geographic.. Highlights Shark week... !",
+        "author": "Glenn Dettwiler",
+        "authorUrl": "https://www.flickr.com/people/swisschef/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Glenn Dettwiler",
+          "url": "https://www.flickr.com/photos/swisschef",
+          "image": "https://live.staticflickr.com/3001/buddyicons/25771400@N06.jpg?1236877205#25771400@N06"
+        },
+        "evidenceFile": "licenses/6c5c1261ed674951.json",
+        "evidenceSha256": "5e829de1c007123b999003e9868d1208eae4796d605e01b4cbed459c71e8ff93",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/swisschef",
+      "split": "heldout",
+      "caseId": "photo-heldout-20"
+    },
+    {
+      "imageId": "ab7224e4ed66dc98",
+      "targetClassId": "/m/0bt9lr",
+      "target": "Dog",
+      "primaryStratum": "edge",
+      "targetBoxes": [
+        {
+          "classId": "/m/0bt9lr",
+          "className": "Dog",
+          "xyxy": [
+            0.31858408,
+            0.2581121,
+            1.0,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 204294,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge"
+      ],
+      "file": "photos/ab7224e4ed66dc98.jpg",
+      "sha256": "4c447872ddeee68157f4a1e4b83bf39163fe0f57fe074baa0ffa2bbd831c064a",
+      "bytes": 317020,
+      "width": 683,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "ab7224e4ed66dc98",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ab7224e4ed66dc98.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ab7224e4ed66dc98.jpg",
+        "originalUrl": "https://c1.staticflickr.com/5/4009/4664421132_d7e3b060aa_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/mariettaga/4664421132",
+        "originalMD5Base64": "JkaHXNuIVoz1EG03LOLNnQ==",
+        "originalSize": "5315817",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:57.120613+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "tazo",
+        "author": "Public Information Office",
+        "authorUrl": "https://www.flickr.com/people/mariettaga/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Communications Office",
+          "url": "https://www.flickr.com/photos/mariettaga",
+          "image": "https://farm66.staticflickr.com/65535/buddyicons/32370233@N05.jpg?1786634799#32370233@N05"
+        },
+        "evidenceFile": "licenses/ab7224e4ed66dc98.json",
+        "evidenceSha256": "6e737db4c246204e76bab5b9411eb12177c90834d58def527ed2d91e088e26bc",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/mariettaga",
+      "split": "heldout",
+      "caseId": "photo-heldout-21"
+    },
+    {
+      "imageId": "ff50b6fca1c1d54b",
+      "targetClassId": "/m/019jd",
+      "target": "Boat",
+      "primaryStratum": "edge",
+      "targetBoxes": [
+        {
+          "classId": "/m/019jd",
+          "className": "Boat",
+          "xyxy": [
+            0.0,
+            0.43125,
+            1.0,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 303351,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge"
+      ],
+      "file": "photos/ff50b6fca1c1d54b.jpg",
+      "sha256": "66ed47acfd98a0dcc45e81e9a46be522339fa866f7aa819bcb6bca96384234da",
+      "bytes": 189309,
+      "width": 768,
+      "height": 1024,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "ff50b6fca1c1d54b",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ff50b6fca1c1d54b.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ff50b6fca1c1d54b.jpg",
+        "originalUrl": "https://c4.staticflickr.com/2/1010/1429327337_d056c60faf_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/lejoe/1429327337/",
+        "originalMD5Base64": "hhME9BxRWRW4uy4e1QGTDA==",
+        "originalSize": "624516",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:00.675615+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "23092007106.jpg",
+        "author": "Joel Bez",
+        "authorUrl": "https://www.flickr.com/people/lejoe/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Joel Bez",
+          "url": "https://www.flickr.com/photos/lejoe",
+          "image": "https://live.staticflickr.com/8203/buddyicons/21458229@N00.jpg?1354687071#21458229@N00"
+        },
+        "evidenceFile": "licenses/ff50b6fca1c1d54b.json",
+        "evidenceSha256": "c04d49302eb0f3df7a014d6d789f899458f29ba2973c4817cbbb395de5a4881f",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/lejoe",
+      "split": "heldout",
+      "caseId": "photo-heldout-22"
+    },
+    {
+      "imageId": "14f3cf0bf538d81c",
+      "targetClassId": "/m/04dr76w",
+      "target": "Bottle",
+      "primaryStratum": "edge",
+      "targetBoxes": [
+        {
+          "classId": "/m/04dr76w",
+          "className": "Bottle",
+          "xyxy": [
+            0.3869969,
+            0.0,
+            0.60990715,
+            0.8463158
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 24699,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge"
+      ],
+      "file": "photos/14f3cf0bf538d81c.jpg",
+      "sha256": "578799260c4e684c2184b7efb2c2f52f91e05a6a28979626cc4aefbc2ee5d9e5",
+      "bytes": 202795,
+      "width": 1024,
+      "height": 753,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "14f3cf0bf538d81c",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/14f3cf0bf538d81c.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/14f3cf0bf538d81c.jpg",
+        "originalUrl": "https://c5.staticflickr.com/3/2909/14296803258_1cf58840fa_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/nslashdot/14296803258",
+        "originalMD5Base64": "8AXgDld+9HzDAFHK8AP3xQ==",
+        "originalSize": "2606441",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:15:56.997751+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Midsummer table",
+        "author": "Deeped Niclas &amp; Amanda Strandh",
+        "authorUrl": "https://www.flickr.com/people/nslashdot/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Deeped Niclas Strandh",
+          "url": "https://www.flickr.com/photos/nslashdot",
+          "image": "https://farm66.staticflickr.com/65535/buddyicons/16881254@N00.jpg?1630936799#16881254@N00"
+        },
+        "evidenceFile": "licenses/14f3cf0bf538d81c.json",
+        "evidenceSha256": "51b18fb7ca5a093840cd3cda36ee5e1b1258faec6ce8e8395916e6d3eed2c876",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/nslashdot",
+      "split": "heldout",
+      "caseId": "photo-heldout-23"
+    },
+    {
+      "imageId": "7ce104b4659254ef",
+      "targetClassId": "/m/019jd",
+      "target": "Boat",
+      "primaryStratum": "edge",
+      "targetBoxes": [
+        {
+          "classId": "/m/019jd",
+          "className": "Boat",
+          "xyxy": [
+            0.04692082,
+            0.0022222223,
+            0.92521995,
+            0.90444446
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 147350,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/019jd",
+          "className": "Boat",
+          "xyxy": [
+            0.92082113,
+            0.76222223,
+            0.9985337,
+            0.85555553
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 147351,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "edge",
+        "duplicate"
+      ],
+      "file": "photos/7ce104b4659254ef.jpg",
+      "sha256": "622c919508f54856e92404088bcdc3b34e2693f8c608309b693df071384fda8e",
+      "bytes": 171018,
+      "width": 1024,
+      "height": 676,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "7ce104b4659254ef",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/7ce104b4659254ef.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/7ce104b4659254ef.jpg",
+        "originalUrl": "https://c8.staticflickr.com/9/8598/16204290613_63ed7689a6_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/damurphy/16204290613",
+        "originalMD5Base64": "EIElIRWlLvjvaR4sZwB5Lw==",
+        "originalSize": "166020",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:03.357016+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "1977161",
+        "author": "Dennis Murphy",
+        "authorUrl": "https://www.flickr.com/people/damurphy/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Dennis Murphy",
+          "url": "https://www.flickr.com/photos/damurphy",
+          "image": "https://live.staticflickr.com/203/buddyicons/28485341@N00.jpg?1177429397#28485341@N00"
+        },
+        "evidenceFile": "licenses/7ce104b4659254ef.json",
+        "evidenceSha256": "3d75e2e32809053d730ffba4e00c84b5a10bb089be1e04f9c1dc2847b9f5e663",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/damurphy",
+      "split": "heldout",
+      "caseId": "photo-heldout-24"
+    },
+    {
+      "imageId": "560ef853be0bc079",
+      "targetClassId": "/m/0cmx8",
+      "target": "Spoon",
+      "primaryStratum": "edge",
+      "targetBoxes": [
+        {
+          "classId": "/m/0cmx8",
+          "className": "Spoon",
+          "xyxy": [
+            0.0,
+            0.52708334,
+            0.1265625,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 102976,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge"
+      ],
+      "file": "photos/560ef853be0bc079.jpg",
+      "sha256": "702a6ef07a3a558d127a9adb56e07272db0ae6e88ce7aea236b9e648796ba3a6",
+      "bytes": 147308,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "560ef853be0bc079",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/560ef853be0bc079.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/560ef853be0bc079.jpg",
+        "originalUrl": "https://c2.staticflickr.com/8/7294/8734575580_00263ee452_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/neeta_lind/8734575580",
+        "originalMD5Base64": "idTi1NWyHwxTgfk39G5cnw==",
+        "originalSize": "518670",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:03.305455+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "IMG_4575",
+        "author": "Neeta Lind",
+        "authorUrl": "https://www.flickr.com/people/neeta_lind/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Neeta Lind",
+          "url": "https://www.flickr.com/photos/neeta_lind",
+          "image": "https://live.staticflickr.com/54/buddyicons/71132408@N00.jpg?1155918541#71132408@N00"
+        },
+        "evidenceFile": "licenses/560ef853be0bc079.json",
+        "evidenceSha256": "eb7edc7f473b4f5b97d0269535737b8e90b38aca466f76047cb2345e9971e897",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/neeta_lind",
+      "split": "heldout",
+      "caseId": "photo-heldout-25"
+    },
+    {
+      "imageId": "4043197c1365a336",
+      "targetClassId": "/m/04bcr3",
+      "target": "Table",
+      "primaryStratum": "edge",
+      "targetBoxes": [
+        {
+          "classId": "/m/04bcr3",
+          "className": "Table",
+          "xyxy": [
+            0.0,
+            0.5199115,
+            0.82743365,
+            0.9977876
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 76997,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge",
+        "occluded"
+      ],
+      "file": "photos/4043197c1365a336.jpg",
+      "sha256": "1e4318b2a0e88305604a520a3eb9343c41d6891511cc1824ab3eed77c7bc4c68",
+      "bytes": 129209,
+      "width": 1024,
+      "height": 682,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "4043197c1365a336",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/4043197c1365a336.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/4043197c1365a336.jpg",
+        "originalUrl": "https://farm7.staticflickr.com/120/297955373_1260488cde_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/gmarziou/297955373",
+        "originalMD5Base64": "mcjpZ+DippZ3DBgQ7V5/zQ==",
+        "originalSize": "602448",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:02.503789+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "IMG_5100-1",
+        "author": "Gaël Marziou",
+        "authorUrl": "https://www.flickr.com/people/gmarziou/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Gaël Marziou",
+          "url": "https://www.flickr.com/photos/gmarziou",
+          "image": "https://farm66.staticflickr.com/65535/buddyicons/89762954@N00.jpg?1596060432#89762954@N00"
+        },
+        "evidenceFile": "licenses/4043197c1365a336.json",
+        "evidenceSha256": "08d4a7b8ef2d0c03dc6c9dfddd014b70f68ebb48ccc7639c6b0d4ded6fc84d57",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/gmarziou",
+      "split": "heldout",
+      "caseId": "photo-heldout-26"
+    },
+    {
+      "imageId": "ab5671e8a5e8979d",
+      "targetClassId": "/m/01mzpv",
+      "target": "Chair",
+      "primaryStratum": "occluded",
+      "targetBoxes": [
+        {
+          "classId": "/m/01mzpv",
+          "className": "Chair",
+          "xyxy": [
+            0.86283183,
+            0.41371682,
+            1.0,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 204184,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge",
+        "occluded"
+      ],
+      "file": "photos/ab5671e8a5e8979d.jpg",
+      "sha256": "74e583fc38fd0d4828eb8e440f2d17f560d49b70834f2f2133b033f8134537ab",
+      "bytes": 94536,
+      "width": 1024,
+      "height": 683,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "ab5671e8a5e8979d",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ab5671e8a5e8979d.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/ab5671e8a5e8979d.jpg",
+        "originalUrl": "https://c6.staticflickr.com/8/7559/15700093739_da7d2143b5_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/thesecondglass/15700093739",
+        "originalMD5Base64": "4oPjzzieiCvZsroQwua1fg==",
+        "originalSize": "5224735",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:04.846712+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "BN_257",
+        "author": "SecondGlass",
+        "authorUrl": "https://www.flickr.com/people/thesecondglass/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Wine Riot",
+          "url": "https://www.flickr.com/photos/thesecondglass",
+          "image": "https://live.staticflickr.com/7521/buddyicons/80461254@N00.jpg?1463070100#80461254@N00"
+        },
+        "evidenceFile": "licenses/ab5671e8a5e8979d.json",
+        "evidenceSha256": "f89494dbc3d929b537496deec634b921d377eae09ee2872fbf6afa3968bae3df",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/thesecondglass",
+      "split": "heldout",
+      "caseId": "photo-heldout-27"
+    },
+    {
+      "imageId": "bcb19dc50d80a2c9",
+      "targetClassId": "/m/04kkgm",
+      "target": "Bowl",
+      "primaryStratum": "occluded",
+      "targetBoxes": [
+        {
+          "classId": "/m/04kkgm",
+          "className": "Bowl",
+          "xyxy": [
+            0.14749263,
+            0.13716814,
+            0.82300884,
+            0.7942478
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 224879,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "occluded"
+      ],
+      "file": "photos/bcb19dc50d80a2c9.jpg",
+      "sha256": "5b64cc4ba2fc42b754cfd177bf7de5a61f2b008aecc749850e487ca85e7a17c8",
+      "bytes": 298383,
+      "width": 1024,
+      "height": 683,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "bcb19dc50d80a2c9",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/bcb19dc50d80a2c9.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/bcb19dc50d80a2c9.jpg",
+        "originalUrl": "https://c2.staticflickr.com/4/3643/3566500017_f3b645b7a1_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/bobjudge/3566500017",
+        "originalMD5Base64": "SrogOm+bVKlTrhlFBI1EWg==",
+        "originalSize": "3020996",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:04.955058+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "zatoons",
+        "author": "Robert Judge",
+        "authorUrl": "https://www.flickr.com/people/bobjudge/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Robert Judge",
+          "url": "https://www.flickr.com/photos/bobjudge",
+          "image": "https://live.staticflickr.com/8302/buddyicons/8286199@N08.jpg?1473279124#8286199@N08"
+        },
+        "evidenceFile": "licenses/bcb19dc50d80a2c9.json",
+        "evidenceSha256": "5045a8865e21efed30cd9d0e926a207cf0c1f39e6b08c0f9d49e5cefcac485a4",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/bobjudge",
+      "split": "heldout",
+      "caseId": "photo-heldout-28"
+    },
+    {
+      "imageId": "7259f87c5ffc8cd2",
+      "targetClassId": "/m/015p6",
+      "target": "Bird",
+      "primaryStratum": "occluded",
+      "targetBoxes": [
+        {
+          "classId": "/m/015p6",
+          "className": "Bird",
+          "xyxy": [
+            0.26678142,
+            0.25,
+            0.68846816,
+            0.9640151
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 135521,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "occluded"
+      ],
+      "file": "photos/7259f87c5ffc8cd2.jpg",
+      "sha256": "ddbc217b7879d8c9edfbbbf320ecc40f2fd3797c8efcaf7e4a1a9713c7a2876a",
+      "bytes": 370467,
+      "width": 1024,
+      "height": 932,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "7259f87c5ffc8cd2",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/7259f87c5ffc8cd2.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/7259f87c5ffc8cd2.jpg",
+        "originalUrl": "https://farm3.staticflickr.com/7148/6739926435_8a50028338_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/68782989@N03/6739926435",
+        "originalMD5Base64": "9mxej6Fj6RBVbK2hA9E9jA==",
+        "originalSize": "2333730",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:06.756294+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "DSC_1205",
+        "author": "Dawn Scranton",
+        "authorUrl": "https://www.flickr.com/people/68782989@N03/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Dawn Scranton",
+          "url": "https://www.flickr.com/photos/68782989@N03",
+          "image": "https://live.staticflickr.com/8259/buddyicons/68782989@N03.jpg?1366513626#68782989@N03"
+        },
+        "evidenceFile": "licenses/7259f87c5ffc8cd2.json",
+        "evidenceSha256": "c344893ff5763a1e50518f70ef39dbdffbb48984ce6c45bd3cd0698dd43a2cdf",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/68782989@N03",
+      "split": "heldout",
+      "caseId": "photo-heldout-29"
+    },
+    {
+      "imageId": "d46c7361fb1eed0f",
+      "targetClassId": "/m/07r04",
+      "target": "Truck",
+      "primaryStratum": "occluded",
+      "targetBoxes": [
+        {
+          "classId": "/m/07r04",
+          "className": "Truck",
+          "xyxy": [
+            0.28781205,
+            0.0,
+            0.9162996,
+            0.8935698
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 252926,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "occluded"
+      ],
+      "file": "photos/d46c7361fb1eed0f.jpg",
+      "sha256": "3e1b01cd1e553593e12a53bf2ffe15d11d61e27eb070da46a0ed091e8b0ef1e6",
+      "bytes": 550690,
+      "width": 1024,
+      "height": 678,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "d46c7361fb1eed0f",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/d46c7361fb1eed0f.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/d46c7361fb1eed0f.jpg",
+        "originalUrl": "https://c8.staticflickr.com/6/5500/11715267326_70a64f8b74_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/munimiraflores/11715267326",
+        "originalMD5Base64": "hmkNbg/tm1r/N5lAxAeJDw==",
+        "originalSize": "4408091",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:06.708666+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Campaña de limpieza de techos (23)",
+        "author": "Municipalidad de Miraflores",
+        "authorUrl": "https://www.flickr.com/people/munimiraflores/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Municipalidad de Miraflores",
+          "url": "https://www.flickr.com/photos/munimiraflores",
+          "image": "https://live.staticflickr.com/5451/buddyicons/62785589@N03.jpg?1369085991#62785589@N03"
+        },
+        "evidenceFile": "licenses/d46c7361fb1eed0f.json",
+        "evidenceSha256": "c0037aebb6f4e8e73d52777131717c926d01b1cdeac914a598030b5a6d163293",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/munimiraflores",
+      "split": "heldout",
+      "caseId": "photo-heldout-30"
+    },
+    {
+      "imageId": "1b2c1d18a5469167",
+      "targetClassId": "/m/03k3r",
+      "target": "Horse",
+      "primaryStratum": "occluded",
+      "targetBoxes": [
+        {
+          "classId": "/m/03k3r",
+          "className": "Horse",
+          "xyxy": [
+            0.44,
+            0.25635594,
+            0.76,
+            0.9427966
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 32021,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/03k3r",
+          "className": "Horse",
+          "xyxy": [
+            0.6492308,
+            0.25635594,
+            0.9692308,
+            0.93008476
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 32022,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/1b2c1d18a5469167.jpg",
+      "sha256": "71a14c95449f1616c5390e1578b1e3923b689138dda613e413ad67ce6bf42b7c",
+      "bytes": 234616,
+      "width": 1024,
+      "height": 744,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "1b2c1d18a5469167",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/1b2c1d18a5469167.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/1b2c1d18a5469167.jpg",
+        "originalUrl": "https://farm8.staticflickr.com/2601/3721695949_27e9e0f147_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/bobrichmond/3721695949",
+        "originalMD5Base64": "uAcPt4EhWeKaWoRCgi5zmQ==",
+        "originalSize": "309816",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:06.631777+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "johndurham1898",
+        "author": "Bob Richmond",
+        "authorUrl": "https://www.flickr.com/people/bobrichmond/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Bob Richmond",
+          "url": "https://www.flickr.com/photos/bobrichmond",
+          "image": "https://live.staticflickr.com/2433/buddyicons/38577038@N02.jpg?1243392078#38577038@N02"
+        },
+        "evidenceFile": "licenses/1b2c1d18a5469167.json",
+        "evidenceSha256": "fc61bb3c988cddf7f49ec3be0e2a9b4274eb12c35d369223f744e6cfaf35b94a",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/bobrichmond",
+      "split": "heldout",
+      "caseId": "photo-heldout-31"
+    },
+    {
+      "imageId": "57b05e17d6075bed",
+      "targetClassId": "/m/03k3r",
+      "target": "Horse",
+      "primaryStratum": "occluded",
+      "targetBoxes": [
+        {
+          "classId": "/m/03k3r",
+          "className": "Horse",
+          "xyxy": [
+            0.22385861,
+            0.26385808,
+            0.47569954,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 104755,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/03k3r",
+          "className": "Horse",
+          "xyxy": [
+            0.45949927,
+            0.29046562,
+            0.7982327,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 104756,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/57b05e17d6075bed.jpg",
+      "sha256": "44cf2364e0c49f6606c876d447c45de24af695ec675027458db1abe3d959eab3",
+      "bytes": 248378,
+      "width": 1024,
+      "height": 681,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "57b05e17d6075bed",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/57b05e17d6075bed.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/57b05e17d6075bed.jpg",
+        "originalUrl": "https://c6.staticflickr.com/2/1371/536166577_4e7fef1990_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/barnyardbbs/536166577",
+        "originalMD5Base64": "Z+/h6BIjqoAKXA24AGs44w==",
+        "originalSize": "1554266",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:08.650766+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Untitled",
+        "author": "Ben Yanis",
+        "authorUrl": "https://www.flickr.com/people/barnyardbbs/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Ben Yanis",
+          "url": "https://www.flickr.com/photos/barnyardbbs",
+          "image": "https://live.staticflickr.com/1299/buddyicons/8626352@N03.jpg?1181265037#8626352@N03"
+        },
+        "evidenceFile": "licenses/57b05e17d6075bed.json",
+        "evidenceSha256": "8d473e5090241f955870128c62d83ccdedbd5ade0ec2f138e370264689f04584",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/barnyardbbs",
+      "split": "heldout",
+      "caseId": "photo-heldout-32"
+    },
+    {
+      "imageId": "c7f0bce24ad7d792",
+      "targetClassId": "/m/015p6",
+      "target": "Bird",
+      "primaryStratum": "occluded",
+      "targetBoxes": [
+        {
+          "classId": "/m/015p6",
+          "className": "Bird",
+          "xyxy": [
+            0.2875,
+            0.35208333,
+            0.7734375,
+            0.71875
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 238372,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/015p6",
+          "className": "Bird",
+          "xyxy": [
+            0.5140625,
+            0.22083333,
+            0.7765625,
+            0.39791667
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 238373,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/c7f0bce24ad7d792.jpg",
+      "sha256": "3dbd8b338459ba19544338d99c0336bb2203f802ada77642b878a16acc09993d",
+      "bytes": 153488,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "c7f0bce24ad7d792",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/c7f0bce24ad7d792.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/c7f0bce24ad7d792.jpg",
+        "originalUrl": "https://farm3.staticflickr.com/7555/15864345298_c9967e32f0_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/65544876@N03/15864345298",
+        "originalMD5Base64": "ItuDf2eVyNTxLdF3K2+vhw==",
+        "originalSize": "2830703",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:10.282850+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Cacicus cela",
+        "author": "Vladimir Rebellón Palmezano",
+        "authorUrl": "https://www.flickr.com/people/65544876@N03/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Vladimir Rebellón Palmezano",
+          "url": "https://www.flickr.com/photos/65544876@N03",
+          "image": "https://live.staticflickr.com/7411/buddyicons/65544876@N03.jpg?1376539385#65544876@N03"
+        },
+        "evidenceFile": "licenses/c7f0bce24ad7d792.json",
+        "evidenceSha256": "3ad367c0f0430b5429f7a72bdb6b7a44b6126a56a167c741ecca09b63e44d843",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/65544876@N03",
+      "split": "heldout",
+      "caseId": "photo-heldout-33"
+    },
+    {
+      "imageId": "218a7e0c84466325",
+      "targetClassId": "/m/0199g",
+      "target": "Bicycle",
+      "primaryStratum": "duplicate",
+      "targetBoxes": [
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.43657818,
+            0.5995575,
+            0.5265487,
+            0.75884956
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 39671,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.5707965,
+            0.5818584,
+            0.64749265,
+            0.7345133
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 39672,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.6504425,
+            0.5663717,
+            0.7227139,
+            0.7079646
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 39673,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.7477876,
+            0.5597345,
+            0.8215339,
+            0.6902655
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 39674,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.8702065,
+            0.54646015,
+            0.93510324,
+            0.67256635
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 39675,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0199g",
+          "className": "Bicycle",
+          "xyxy": [
+            0.9587021,
+            0.53318584,
+            1.0,
+            0.65929204
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 39676,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "edge",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/218a7e0c84466325.jpg",
+      "sha256": "31679b5de37c0c0bd95e67ca4d06b6b5b5867412fbfd9411e8e7954b034abc89",
+      "bytes": 254941,
+      "width": 1024,
+      "height": 683,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "218a7e0c84466325",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/218a7e0c84466325.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/218a7e0c84466325.jpg",
+        "originalUrl": "https://farm6.staticflickr.com/214/469087256_ed8d3b61f6_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/gogostevie/469087256",
+        "originalMD5Base64": "/aGVhvH3Oc8a1p6W3ZkB2A==",
+        "originalSize": "2240408",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:12.250423+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Tour de Georgia",
+        "author": "Stephen Harlan",
+        "authorUrl": "https://www.flickr.com/people/gogostevie/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Stephen Harlan",
+          "url": "https://www.flickr.com/photos/gogostevie",
+          "image": "https://farm66.staticflickr.com/65535/buddyicons/17647948@N00.jpg?1675824045#17647948@N00"
+        },
+        "evidenceFile": "licenses/218a7e0c84466325.json",
+        "evidenceSha256": "3a8a52d28219067a068fbeb5f9dc6e60a4267263f4c8906c73393fc370f12d68",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/gogostevie",
+      "split": "heldout",
+      "caseId": "photo-heldout-34"
+    },
+    {
+      "imageId": "45d231a2d9d7c38b",
+      "targetClassId": "/m/0ch_cf",
+      "target": "Fish",
+      "primaryStratum": "duplicate",
+      "targetBoxes": [
+        {
+          "classId": "/m/0ch_cf",
+          "className": "Fish",
+          "xyxy": [
+            0.40705562,
+            0.39182693,
+            0.504749,
+            0.46875
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 83174,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0ch_cf",
+          "className": "Fish",
+          "xyxy": [
+            0.5970149,
+            0.42067307,
+            0.687924,
+            0.58413464
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 83175,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/0ch_cf",
+          "className": "Fish",
+          "xyxy": [
+            0.5983718,
+            0.4471154,
+            0.6824966,
+            0.58413464
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 83176,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/45d231a2d9d7c38b.jpg",
+      "sha256": "8e551a13711df02307b9323d688e177d791c889798c5486c874d23311f9c9ef1",
+      "bytes": 186811,
+      "width": 1024,
+      "height": 578,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "45d231a2d9d7c38b",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/45d231a2d9d7c38b.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/45d231a2d9d7c38b.jpg",
+        "originalUrl": "https://c4.staticflickr.com/1/311/19613909724_e67bfbfda9_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/96104980@N04/19613909724",
+        "originalMD5Base64": "iFCD0fFcrmqHaEo0zCa26w==",
+        "originalSize": "10146878",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:13.968754+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Point Defiance Zoo & Aquarium",
+        "author": "Jon Acuna",
+        "authorUrl": "https://www.flickr.com/people/96104980@N04/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Jon Acuna",
+          "url": "https://www.flickr.com/photos/96104980@N04",
+          "image": "https://farm66.staticflickr.com/65535/buddyicons/96104980@N04.jpg?1726285470#96104980@N04"
+        },
+        "evidenceFile": "licenses/45d231a2d9d7c38b.json",
+        "evidenceSha256": "6f7342250e971d4b3fbdac73c54e21dd4ec0ca8b1c343ceeb3c78475b71975c6",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/96104980@N04",
+      "split": "heldout",
+      "caseId": "photo-heldout-35"
+    },
+    {
+      "imageId": "2008c9de01d39a22",
+      "targetClassId": "/m/02dl1y",
+      "target": "Hat",
+      "primaryStratum": "duplicate",
+      "targetBoxes": [
+        {
+          "classId": "/m/02dl1y",
+          "className": "Hat",
+          "xyxy": [
+            0.0,
+            0.31858408,
+            0.020648967,
+            0.34955752
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 37856,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/02dl1y",
+          "className": "Hat",
+          "xyxy": [
+            0.030973451,
+            0.32300884,
+            0.073746316,
+            0.35840708
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 37857,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/02dl1y",
+          "className": "Hat",
+          "xyxy": [
+            0.104719765,
+            0.36725664,
+            0.14011799,
+            0.38938054
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 37858,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/02dl1y",
+          "className": "Hat",
+          "xyxy": [
+            0.19026549,
+            0.3340708,
+            0.22271386,
+            0.36283186
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 37859,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/02dl1y",
+          "className": "Hat",
+          "xyxy": [
+            0.23451327,
+            0.11504425,
+            0.44837758,
+            0.289823
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 37860,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/02dl1y",
+          "className": "Hat",
+          "xyxy": [
+            0.52359885,
+            0.27433628,
+            0.5707965,
+            0.31858408
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 37861,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/02dl1y",
+          "className": "Hat",
+          "xyxy": [
+            0.63274336,
+            0.10176991,
+            0.87905604,
+            0.32079646
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 37862,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/02dl1y",
+          "className": "Hat",
+          "xyxy": [
+            0.9719764,
+            0.30530974,
+            1.0,
+            0.36283186
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 37863,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "edge",
+        "duplicate"
+      ],
+      "file": "photos/2008c9de01d39a22.jpg",
+      "sha256": "9cfa2d2771a96f127069943948983dc39c3b04ef8e422aaff8018f5fe43b88f0",
+      "bytes": 195482,
+      "width": 1024,
+      "height": 683,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "2008c9de01d39a22",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/2008c9de01d39a22.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/2008c9de01d39a22.jpg",
+        "originalUrl": "https://farm3.staticflickr.com/8463/8419120460_906eff6d36_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/45553853@N04/8419120460",
+        "originalMD5Base64": "uqJZgfhE18USALEZGWmW4g==",
+        "originalSize": "1684179",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:13.989023+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "PO2 Longley",
+        "author": "G.S. Matthews",
+        "authorUrl": "https://www.flickr.com/people/45553853@N04/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "G.S. Matthews",
+          "url": "https://www.flickr.com/photos/gsmatthews",
+          "image": "https://live.staticflickr.com/5447/buddyicons/45553853@N04.jpg?1369121734#45553853@N04"
+        },
+        "evidenceFile": "licenses/2008c9de01d39a22.json",
+        "evidenceSha256": "fe5139ccd02a6f219cab6abd43a2b19bd12fc0cd08da9449a730309fad5139d7",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/45553853@N04",
+      "split": "heldout",
+      "caseId": "photo-heldout-36"
+    },
+    {
+      "imageId": "97a73a0bb5d24ed8",
+      "targetClassId": "/m/01yrx",
+      "target": "Cat",
+      "primaryStratum": "duplicate",
+      "targetBoxes": [
+        {
+          "classId": "/m/01yrx",
+          "className": "Cat",
+          "xyxy": [
+            0.0015625,
+            0.15448852,
+            0.575,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 179289,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/01yrx",
+          "className": "Cat",
+          "xyxy": [
+            0.4328125,
+            0.0,
+            1.0,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 179290,
+          "occluded": 0,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge",
+        "duplicate"
+      ],
+      "file": "photos/97a73a0bb5d24ed8.jpg",
+      "sha256": "88cb4862ca3cda305608234ea12d9a53e9122795cc16114eb13a33efd7323243",
+      "bytes": 235225,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "97a73a0bb5d24ed8",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/97a73a0bb5d24ed8.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/97a73a0bb5d24ed8.jpg",
+        "originalUrl": "https://c1.staticflickr.com/3/2539/3838342976_26a4f80a1d_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/armydre2008/3838342976",
+        "originalMD5Base64": "NPd7WAh/Lf4ykTpxX/+94A==",
+        "originalSize": "443935",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:15.990206+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Un rendez-vous galant",
+        "author": "frankieleon",
+        "authorUrl": "https://www.flickr.com/people/armydre2008/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "frankieleon",
+          "url": "https://www.flickr.com/photos/armydre2008",
+          "image": "https://live.staticflickr.com/7572/buddyicons/23307937@N04.jpg?1420157246#23307937@N04"
+        },
+        "evidenceFile": "licenses/97a73a0bb5d24ed8.json",
+        "evidenceSha256": "f057175e916f5a8fa14f71ec12109b8df9e8c7d56c5647645e136a2dc6488ad0",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/armydre2008",
+      "split": "heldout",
+      "caseId": "photo-heldout-37"
+    },
+    {
+      "imageId": "636eb68a603c051a",
+      "targetClassId": "/m/04bcr3",
+      "target": "Table",
+      "primaryStratum": "duplicate",
+      "targetBoxes": [
+        {
+          "classId": "/m/04bcr3",
+          "className": "Table",
+          "xyxy": [
+            0.3078125,
+            0.41458333,
+            0.475,
+            0.49166667
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 118011,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/04bcr3",
+          "className": "Table",
+          "xyxy": [
+            0.365625,
+            0.75416666,
+            1.0,
+            1.0
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 118012,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/04bcr3",
+          "className": "Table",
+          "xyxy": [
+            0.4078125,
+            0.38541666,
+            0.4671875,
+            0.41875
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 118013,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "small",
+        "edge",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/636eb68a603c051a.jpg",
+      "sha256": "f3f850221024d8707e75a7530cd66f1286dee9a8274f6f53822c46a73adf5e2a",
+      "bytes": 310489,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "636eb68a603c051a",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/636eb68a603c051a.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/636eb68a603c051a.jpg",
+        "originalUrl": "https://c3.staticflickr.com/2/1259/4604392884_8819933b9e_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/98706376@N00/4604392884",
+        "originalMD5Base64": "CkhcnOmcvAGUVzPRtMijyA==",
+        "originalSize": "2889342",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:16.012819+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Brown bag lunch with LHS Jazz Band",
+        "author": "John S. Quarterman",
+        "authorUrl": "https://www.flickr.com/people/98706376@N00/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "John S. Quarterman",
+          "url": "https://www.flickr.com/photos/98706376@N00",
+          "image": "https://combo.staticflickr.com/pw/images/bbuddyicon04.png#98706376@N00"
+        },
+        "evidenceFile": "licenses/636eb68a603c051a.json",
+        "evidenceSha256": "b4a1dc6b68de33c171463b56b3a41d5720425875c3fc7ebc7d4f31300aeebef3",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/98706376@N00",
+      "split": "heldout",
+      "caseId": "photo-heldout-38"
+    },
+    {
+      "imageId": "72339fee52338acb",
+      "targetClassId": "/m/04bcr3",
+      "target": "Table",
+      "primaryStratum": "duplicate",
+      "targetBoxes": [
+        {
+          "classId": "/m/04bcr3",
+          "className": "Table",
+          "xyxy": [
+            0.0,
+            0.69166666,
+            0.128125,
+            0.99791664
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 135422,
+          "occluded": 1,
+          "truncated": 1,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/04bcr3",
+          "className": "Table",
+          "xyxy": [
+            0.4125,
+            0.5375,
+            0.55625,
+            0.77708334
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 135423,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/04bcr3",
+          "className": "Table",
+          "xyxy": [
+            0.640625,
+            0.46458334,
+            0.740625,
+            0.65416664
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 135424,
+          "occluded": 1,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "edge",
+        "occluded",
+        "duplicate"
+      ],
+      "file": "photos/72339fee52338acb.jpg",
+      "sha256": "e5dea0ff8d470b854538d6ada01e6b7b846e81be4e7306a5fce57c1b9e364656",
+      "bytes": 373533,
+      "width": 1024,
+      "height": 768,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "72339fee52338acb",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/72339fee52338acb.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/72339fee52338acb.jpg",
+        "originalUrl": "https://c4.staticflickr.com/6/5286/5349322724_f5ea7c8ee5_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/iicd/5349322724",
+        "originalMD5Base64": "WvehpKpZ7EqhKxiWT0Oo0w==",
+        "originalSize": "1144388",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:15.805670+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "Picture 014",
+        "author": "IICD",
+        "authorUrl": "https://www.flickr.com/people/iicd/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "IICD",
+          "url": "https://www.flickr.com/photos/iicd",
+          "image": "https://live.staticflickr.com/4027/buddyicons/32348003@N02.jpg?1298365502#32348003@N02"
+        },
+        "evidenceFile": "licenses/72339fee52338acb.json",
+        "evidenceSha256": "187a946d2cdf6abe05096121e8a88b5dd14867c3d97c8475684a7209a3d2144d",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/iicd",
+      "split": "heldout",
+      "caseId": "photo-heldout-39"
+    },
+    {
+      "imageId": "2f64bfca4e0a88b6",
+      "targetClassId": "/m/03k3r",
+      "target": "Horse",
+      "primaryStratum": "duplicate",
+      "targetBoxes": [
+        {
+          "classId": "/m/03k3r",
+          "className": "Horse",
+          "xyxy": [
+            0.22290076,
+            0.3846154,
+            0.43816793,
+            0.7692308
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 56185,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        },
+        {
+          "classId": "/m/03k3r",
+          "className": "Horse",
+          "xyxy": [
+            0.49007633,
+            0.33119658,
+            0.71755725,
+            0.7029914
+          ],
+          "source": "xclick",
+          "sourceCsvRow": 56186,
+          "occluded": 0,
+          "truncated": 0,
+          "groupOf": 0,
+          "depiction": 0,
+          "inside": 0
+        }
+      ],
+      "negativeEvidence": null,
+      "tags": [
+        "duplicate"
+      ],
+      "file": "photos/2f64bfca4e0a88b6.jpg",
+      "sha256": "548d2cabd95c065268e88300feb991ed480d28676597c9cdbf8cab4d25a03f9c",
+      "bytes": 157868,
+      "width": 1024,
+      "height": 733,
+      "source": {
+        "dataset": "Open Images validation (V7 download index, V5 validation boxes/labels)",
+        "imageId": "2f64bfca4e0a88b6",
+        "originalSplit": "validation",
+        "downloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/2f64bfca4e0a88b6.jpg",
+        "resolvedDownloadUrl": "https://open-images-dataset.s3.amazonaws.com/validation/2f64bfca4e0a88b6.jpg",
+        "originalUrl": "https://farm7.staticflickr.com/3672/9502350063_4d4851549c_o.jpg",
+        "originalLandingUrl": "https://www.flickr.com/photos/16179216@N07/9502350063",
+        "originalMD5Base64": "pnEHwanrTISUMiE1q3GG7Q==",
+        "originalSize": "1794794",
+        "rotationMetadata": "0.0",
+        "retrievedAt": "2026-10-17T21:16:17.724342+00:00",
+        "transformation": "CVDF upstream aspect-preserving max-side1024 resize; no local resize/crop/normalization"
+      },
+      "license": {
+        "spdx": "CC-BY-2.0",
+        "url": "https://creativecommons.org/licenses/by/2.0/",
+        "title": "The Runnymede Show 1972",
+        "author": "Barry Lewis",
+        "authorUrl": "https://www.flickr.com/people/16179216@N07/",
+        "currentAuthor": {
+          "@type": "Person",
+          "name": "Barry Lewis",
+          "url": "https://www.flickr.com/photos/16179216@N07",
+          "image": "https://live.staticflickr.com/2861/buddyicons/16179216@N07.jpg?1372449894#16179216@N07"
+        },
+        "evidenceFile": "licenses/2f64bfca4e0a88b6.json",
+        "evidenceSha256": "d7a303a474e31a6c96c4e5121e61b5279e4959b3f2fb51f77816aa63ae4362f3",
+        "verification": "original-photo-page ImageObject license independently checked; no ownership warranty"
+      },
+      "authorGroup": "https://www.flickr.com/people/16179216@N07",
+      "split": "heldout",
+      "caseId": "photo-heldout-40"
+    }
+  ],
+  "rejections": [
+    {
+      "imageId": "d7deef955e16cc20",
+      "stratum": "baseline",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "b64c955a259910ca",
+      "stratum": "baseline",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "4f76d507fd32eace",
+      "stratum": "baseline",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 403: Forbidden"
+    },
+    {
+      "imageId": "0d6c0f3e1d2bfb08",
+      "stratum": "baseline",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "25f64e9aca8971ea",
+      "stratum": "baseline",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "5d6f6b9c77f2de36",
+      "stratum": "negative",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "3f74cd65e54abec5",
+      "stratum": "negative",
+      "stage": "license-or-image",
+      "errorType": "ValueError",
+      "detail": "page-specific CC BY2.0 license not verified"
+    },
+    {
+      "imageId": "7884ca4ac4fe6e4b",
+      "stratum": "negative",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "59836e496d29d57e",
+      "stratum": "small",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "2d6640fb230770fd",
+      "stratum": "edge",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 403: Forbidden"
+    },
+    {
+      "imageId": "a24e9c389d3876ac",
+      "stratum": "edge",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "8d207f7ea5da29f1",
+      "stratum": "baseline",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "42894a81eca95732",
+      "stratum": "baseline",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 403: Forbidden"
+    },
+    {
+      "imageId": "27337e0ad2040478",
+      "stratum": "small",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "6c2aa294019ac91a",
+      "stratum": "small",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "8477dba43b300e36",
+      "stratum": "small",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "7daaf067307dbd5b",
+      "stratum": "small",
+      "stage": "license-or-image",
+      "errorType": "ValueError",
+      "detail": "page-specific CC BY2.0 license not verified"
+    },
+    {
+      "imageId": "58b50dce36e63205",
+      "stratum": "occluded",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "f2e36a831907afff",
+      "stratum": "occluded",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "027cffb13d932cf2",
+      "stratum": "occluded",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 403: Forbidden"
+    },
+    {
+      "imageId": "83c8fff6303c468a",
+      "stratum": "occluded",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "6eb53f2b93013759",
+      "stratum": "duplicate",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "d7deef955e16cc20",
+      "stratum": "duplicate",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "bf646c5c90dea12c",
+      "stratum": "duplicate",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    },
+    {
+      "imageId": "087d9274f12a6a47",
+      "stratum": "duplicate",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 403: Forbidden"
+    },
+    {
+      "imageId": "027cffb13d932cf2",
+      "stratum": "duplicate",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 403: Forbidden"
+    },
+    {
+      "imageId": "de5f41e9f8b2512a",
+      "stratum": "duplicate",
+      "stage": "license-or-image",
+      "errorType": "HTTPError",
+      "detail": "HTTP Error 404: Not Found"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/usarmyafrica/4077598908",
+  "resolvedUrl": "https://www.flickr.com/photos/usarmyafrica/4077598908",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:33.731801+00:00",
+  "sourcePageBytes": 559010,
+  "sourcePageSha256": "495394d858c5a6f2ff54edc66120ea932ed4745171342d68a1dc4419add6fe7b",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/2604/4077598908_234b91c5d6_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/usarmyafrica/4077598908",
+    "author": {
+      "@type": "Person",
+      "name": "U.S. Army Southern European Task Force,  Africa",
+      "url": "https://www.flickr.com/photos/usarmyafrica",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/36281822@N08.jpg?1606143725#36281822@N08"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "U.S. Army Southern European Task Force,  Africa",
+      "url": "https://www.flickr.com/photos/usarmyafrica",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/36281822@N08.jpg?1606143725#36281822@N08"
+    }
+  },
+  "structuredBlockSha256": "0a086813ffd2b5f5780eeb525888817f6d647121c5646964835baceb2dce09b4",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "4077598908",
+  "rawPagePersisted": false
+}

@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/45553853@N04/8419120460",
+  "resolvedUrl": "https://www.flickr.com/photos/45553853@N04/8419120460",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:12.963915+00:00",
+  "sourcePageBytes": 519078,
+  "sourcePageSha256": "3f20bbb1e6cb5023ffc06612912e0b4c509ba53655bd2ba70d804baab2727f65",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/8463/8419120460_5e3653f617_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/gsmatthews/8419120460",
+    "author": {
+      "@type": "Person",
+      "name": "G.S. Matthews",
+      "url": "https://www.flickr.com/photos/gsmatthews",
+      "image": "https://live.staticflickr.com/5447/buddyicons/45553853@N04.jpg?1369121734#45553853@N04"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "G.S. Matthews",
+      "url": "https://www.flickr.com/photos/gsmatthews",
+      "image": "https://live.staticflickr.com/5447/buddyicons/45553853@N04.jpg?1369121734#45553853@N04"
+    }
+  },
+  "structuredBlockSha256": "6a3a56682ed33e24e26660eceac7f3f4357e64b8de79392dd62686b86086dce4",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "8419120460",
+  "rawPagePersisted": false
+}

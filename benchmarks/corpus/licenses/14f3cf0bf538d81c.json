@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/nslashdot/14296803258",
+  "resolvedUrl": "https://www.flickr.com/photos/nslashdot/14296803258",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:55.873563+00:00",
+  "sourcePageBytes": 518836,
+  "sourcePageSha256": "d6bf35e08c67436150d884525a5db818b0f9211b33aba88e8b6d6fc6a26e02b7",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/2909/14296803258_39faaeb4f2_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/nslashdot/14296803258",
+    "author": {
+      "@type": "Person",
+      "name": "Deeped Niclas Strandh",
+      "url": "https://www.flickr.com/photos/nslashdot",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/16881254@N00.jpg?1630936799#16881254@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Deeped Niclas Strandh",
+      "url": "https://www.flickr.com/photos/nslashdot",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/16881254@N00.jpg?1630936799#16881254@N00"
+    }
+  },
+  "structuredBlockSha256": "e0859ed8f7fe53b7ef5ddad776641609c304af86b696dba41455743b7f715ee1",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "14296803258",
+  "rawPagePersisted": false
+}

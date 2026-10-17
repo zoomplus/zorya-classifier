@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/diaper/803566474",
+  "resolvedUrl": "https://www.flickr.com/photos/diaper/803566474",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:33.733272+00:00",
+  "sourcePageBytes": 513100,
+  "sourcePageSha256": "43822296429deb791d75dcfd6296e527cc162827124aa4ceecb284f28228d529",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/1230/803566474_fd2a527c77_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/diaper/803566474",
+    "author": {
+      "@type": "Person",
+      "name": "diaper",
+      "url": "https://www.flickr.com/photos/diaper",
+      "image": "https://live.staticflickr.com/218/buddyicons/7608165@N06.jpg?1179528940#7608165@N06"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "diaper",
+      "url": "https://www.flickr.com/photos/diaper",
+      "image": "https://live.staticflickr.com/218/buddyicons/7608165@N06.jpg?1179528940#7608165@N06"
+    }
+  },
+  "structuredBlockSha256": "301966ab30e0eae2662fc0ed6224673bea5891355816d212478af18d70e27cfc",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "803566474",
+  "rawPagePersisted": false
+}

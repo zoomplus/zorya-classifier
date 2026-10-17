@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/ume-y/4611191206/",
+  "resolvedUrl": "https://www.flickr.com/photos/ume-y/4611191206/",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:16.270385+00:00",
+  "sourcePageBytes": 517728,
+  "sourcePageSha256": "5d3d33be33f6663555893a6b24179b8054fc4e7261e30c22af30b87c4a23a64f",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/1074/4611191206_90b3a13671_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/ume-y/4611191206",
+    "author": {
+      "@type": "Person",
+      "name": "ume-y",
+      "url": "https://www.flickr.com/photos/ume-y",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/29989965@N00.jpg?1766812982#29989965@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "ume-y",
+      "url": "https://www.flickr.com/photos/ume-y",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/29989965@N00.jpg?1766812982#29989965@N00"
+    }
+  },
+  "structuredBlockSha256": "c0828c7b16ac9a26231f077f28caada2e81fa561b0b06534d3f25557f82953af",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "4611191206",
+  "rawPagePersisted": false
+}

@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/curacumba/7779131926",
+  "resolvedUrl": "https://www.flickr.com/photos/curacumba/7779131926",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:23.887453+00:00",
+  "sourcePageBytes": 520277,
+  "sourcePageSha256": "1fc515a4c74287bd4d4929c88cd5c28f46c3d40c5e4f28e96ea97ae15c3585ce",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/8423/7779131926_f7761bf8a1_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/curacumba/7779131926",
+    "author": {
+      "@type": "Person",
+      "name": "Kyla Duhamel",
+      "url": "https://www.flickr.com/photos/curacumba",
+      "image": "https://live.staticflickr.com/894/buddyicons/31119510@N06.jpg?1523171657#31119510@N06"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Kyla Duhamel",
+      "url": "https://www.flickr.com/photos/curacumba",
+      "image": "https://live.staticflickr.com/894/buddyicons/31119510@N06.jpg?1523171657#31119510@N06"
+    }
+  },
+  "structuredBlockSha256": "f00d0552e22fbe60972aeaf6da59f674c91dd47842c85f53fda72fc75dcbeb3c",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "7779131926",
+  "rawPagePersisted": false
+}

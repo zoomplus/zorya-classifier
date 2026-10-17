@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/armydre2008/3838342976",
+  "resolvedUrl": "https://www.flickr.com/photos/armydre2008/3838342976",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:14.983285+00:00",
+  "sourcePageBytes": 514604,
+  "sourcePageSha256": "24b684f56ffa5306a02922765aba4ba3fa63bde4ad0650f78ab64221093687f1",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/2539/3838342976_c28e9fb89d_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/armydre2008/3838342976",
+    "author": {
+      "@type": "Person",
+      "name": "frankieleon",
+      "url": "https://www.flickr.com/photos/armydre2008",
+      "image": "https://live.staticflickr.com/7572/buddyicons/23307937@N04.jpg?1420157246#23307937@N04"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "frankieleon",
+      "url": "https://www.flickr.com/photos/armydre2008",
+      "image": "https://live.staticflickr.com/7572/buddyicons/23307937@N04.jpg?1420157246#23307937@N04"
+    }
+  },
+  "structuredBlockSha256": "e8991bf8a29895ef413126d926eb0f0e96aeb897acb6e5eaf9b3825a5bddeb02",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "3838342976",
+  "rawPagePersisted": false
+}

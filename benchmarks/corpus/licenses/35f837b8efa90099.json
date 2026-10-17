@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/toms/257097723",
+  "resolvedUrl": "https://www.flickr.com/photos/toms/257097723",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:38.712687+00:00",
+  "sourcePageBytes": 514349,
+  "sourcePageSha256": "268f0da89b1e3291f6f438166aec2caebbd131ef1e60ad26ca0438ea545053d7",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/89/257097723_51c16f714a_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/toms/257097723",
+    "author": {
+      "@type": "Person",
+      "name": "Toms Baugis",
+      "url": "https://www.flickr.com/photos/toms",
+      "image": "https://live.staticflickr.com/8409/buddyicons/35342879@N00.jpg?1369087953#35342879@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Toms Baugis",
+      "url": "https://www.flickr.com/photos/toms",
+      "image": "https://live.staticflickr.com/8409/buddyicons/35342879@N00.jpg?1369087953#35342879@N00"
+    }
+  },
+  "structuredBlockSha256": "e2603b42b39052f3643ec44f9272ef0f6f16813a9e43f39867d3fa076127d2a7",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "257097723",
+  "rawPagePersisted": false
+}

@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/jbozanowski/5633071873",
+  "resolvedUrl": "https://www.flickr.com/photos/jbozanowski/5633071873",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:23.627393+00:00",
+  "sourcePageBytes": 517951,
+  "sourcePageSha256": "0999e44dc3c76754611edb96a702ca5f79d5d48b68bffcc4a5dd8d4f2d9515ec",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/5182/5633071873_b43247cb17_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/jbozanowski/5633071873",
+    "author": {
+      "@type": "Person",
+      "name": "Kuba Bożanowski",
+      "url": "https://www.flickr.com/photos/jbozanowski",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/31871979@N00.jpg?1765676822#31871979@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Kuba Bożanowski",
+      "url": "https://www.flickr.com/photos/jbozanowski",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/31871979@N00.jpg?1765676822#31871979@N00"
+    }
+  },
+  "structuredBlockSha256": "7bede36927a6def17012b1be1fa18e70b9a9777f8cf13b55f3793d70192fc3c6",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "5633071873",
+  "rawPagePersisted": false
+}

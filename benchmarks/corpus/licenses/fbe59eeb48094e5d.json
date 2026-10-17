@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/nickjonsson/16576763713",
+  "resolvedUrl": "https://www.flickr.com/photos/nickjonsson/16576763713",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:08.821694+00:00",
+  "sourcePageBytes": 518672,
+  "sourcePageSha256": "aef5893c56cb2cfcdd90bdb76dd001abda64ce191c0bd2c5d60451f748458a00",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/8754/16576763713_35ae7e6ea4_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/nickjonsson/16576763713",
+    "author": {
+      "@type": "Person",
+      "name": "Nick Jonsson",
+      "url": "https://www.flickr.com/photos/nickjonsson",
+      "image": "https://live.staticflickr.com/7629/buddyicons/126637122@N05.jpg?1429384545#126637122@N05"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Nick Jonsson",
+      "url": "https://www.flickr.com/photos/nickjonsson",
+      "image": "https://live.staticflickr.com/7629/buddyicons/126637122@N05.jpg?1429384545#126637122@N05"
+    }
+  },
+  "structuredBlockSha256": "f49b616dd838386147ff98884d80a606af215c6ae77363ac1562d4aa25e82a47",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "16576763713",
+  "rawPagePersisted": false
+}

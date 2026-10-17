@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/68782989@N03/6739926435",
+  "resolvedUrl": "https://www.flickr.com/photos/68782989@N03/6739926435",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:05.707474+00:00",
+  "sourcePageBytes": 516872,
+  "sourcePageSha256": "454e09b06cb4c82dad65d80c3b72a392605d51151a211cf6644e28dbd4b0188b",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/7148/6739926435_595b728e12_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/68782989@N03/6739926435",
+    "author": {
+      "@type": "Person",
+      "name": "Dawn Scranton",
+      "url": "https://www.flickr.com/photos/68782989@N03",
+      "image": "https://live.staticflickr.com/8259/buddyicons/68782989@N03.jpg?1366513626#68782989@N03"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Dawn Scranton",
+      "url": "https://www.flickr.com/photos/68782989@N03",
+      "image": "https://live.staticflickr.com/8259/buddyicons/68782989@N03.jpg?1366513626#68782989@N03"
+    }
+  },
+  "structuredBlockSha256": "25f49fb4652512d982c90b3fbc1bf0ab3520edd37777ffe6757cc07c41fb779a",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "6739926435",
+  "rawPagePersisted": false
+}

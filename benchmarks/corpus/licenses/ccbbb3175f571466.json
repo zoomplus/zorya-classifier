@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/larra505/4560356078",
+  "resolvedUrl": "https://www.flickr.com/photos/larra505/4560356078",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:47.889716+00:00",
+  "sourcePageBytes": 517670,
+  "sourcePageSha256": "57e46caa26f57fd9000004392fd2978d987aef9cd89c6d4aefedd0945ef28999",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/4052/4560356078_7afce23104_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/larra505/4560356078",
+    "author": {
+      "@type": "Person",
+      "name": "Larra Jungle Princess",
+      "url": "https://www.flickr.com/photos/larra505",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/69877202@N00.jpg?1694773909#69877202@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Larra Jungle Princess",
+      "url": "https://www.flickr.com/photos/larra505",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/69877202@N00.jpg?1694773909#69877202@N00"
+    }
+  },
+  "structuredBlockSha256": "e6106ef2c4c50d385f728dd9db0d51dda6512dabd10b49067762a45b7c0335ca",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "4560356078",
+  "rawPagePersisted": false
+}

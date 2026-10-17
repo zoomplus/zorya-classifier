@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/walmart3/15803481090",
+  "resolvedUrl": "https://www.flickr.com/photos/walmart3/15803481090",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:47.819875+00:00",
+  "sourcePageBytes": 518034,
+  "sourcePageSha256": "0ac0b1c2bdf95b97a5ae8fb3ea2984c431b4bd7fa5a20353b02e71fc6661c146",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/7561/15803481090_3f7df13d64_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/walmart3/15803481090",
+    "author": {
+      "@type": "Person",
+      "name": "Random Retail",
+      "url": "https://www.flickr.com/photos/walmart3",
+      "image": "https://live.staticflickr.com/1930/buddyicons/67408512@N03.jpg?1539185166#67408512@N03"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Random Retail",
+      "url": "https://www.flickr.com/photos/walmart3",
+      "image": "https://live.staticflickr.com/1930/buddyicons/67408512@N03.jpg?1539185166#67408512@N03"
+    }
+  },
+  "structuredBlockSha256": "ea893c1d1addadd3d9baa392b7a6fd31de07be9e161068ed55e0f3075242dc54",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "15803481090",
+  "rawPagePersisted": false
+}

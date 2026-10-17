@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/deadling/429996265",
+  "resolvedUrl": "https://www.flickr.com/photos/deadling/429996265",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:41.027064+00:00",
+  "sourcePageBytes": 514550,
+  "sourcePageSha256": "c616b9a6ccf9215edce40dc56437e3fe61035dda8fd46bf90a186bf9bd136c02",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/156/429996265_c3e3d94f68_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/deadling/429996265",
+    "author": {
+      "@type": "Person",
+      "name": "Eric",
+      "url": "https://www.flickr.com/photos/deadling",
+      "image": "https://live.staticflickr.com/6/buddyicons/48986833@N00.jpg?1142981785#48986833@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Eric",
+      "url": "https://www.flickr.com/photos/deadling",
+      "image": "https://live.staticflickr.com/6/buddyicons/48986833@N00.jpg?1142981785#48986833@N00"
+    }
+  },
+  "structuredBlockSha256": "fb0cfcec3feeb2b4529e60fafe2c497af94956495f36cba5c68ffd9cff7c4506",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "429996265",
+  "rawPagePersisted": false
+}

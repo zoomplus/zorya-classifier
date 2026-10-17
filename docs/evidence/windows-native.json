@@ -1,0 +1,73 @@
+{
+  "status": "PASS",
+  "scope": "Final explicit-rounding runtime native Windows source/package offline qualification; no inference, game, app or installer",
+  "createdAt": "2026-10-17T21:47:43.642962+00:00",
+  "rawReceiptSha256": "86f9d51e043883e7e8f7c804f6ef64037d84adb548fedc8b121be8a79298df49",
+  "platform": {
+    "platform": "win32",
+    "node": "v24.19.0",
+    "arch": "x64",
+    "osType": "Windows_NT",
+    "osRelease": "10.0.26200",
+    "osVersion": "Windows 11 Pro"
+  },
+  "npm": "11.17.0",
+  "steps": [
+    {
+      "step": "check-final",
+      "durationMs": 11737.6716,
+      "exitCode": 0,
+      "timedOut": false,
+      "physicalCloseObserved": true,
+      "stdoutSha256": "1a02d2081e7b52e7d16c252627caa7d2427aaf93c5defc2aea541b18c86487e7",
+      "stderrSha256": "bdd8e52cff96a1a2de65f7c89c275f8eb847c4cb3c4e80298775e92dc8853ba8"
+    },
+    {
+      "step": "pack-check-final",
+      "durationMs": 6953.8477,
+      "exitCode": 0,
+      "timedOut": false,
+      "physicalCloseObserved": true,
+      "stdoutSha256": "975c81cf847d6360b2199e518f17f84e2570210a46e4759409f8ec319f57fdcc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "tests": {
+    "tests": 142,
+    "pass": 142,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "consumer": {
+    "independentConsumer": "passed",
+    "declarations": "compiled",
+    "sharp": "0.34.5",
+    "vips": "8.17.3",
+    "classification": "yes",
+    "localization": "located",
+    "controlledDecisionCalls": 4,
+    "providerHttpCalls": 0
+  },
+  "testedSnapshotPackage": {
+    "files": 47,
+    "unpackedSize": 109715,
+    "sha256": "9029ed25c0c5f2ecc638d87d69d0dbefe1024181ccbe19bfe6f5513e85da0426",
+    "runtimeDistFiles": 34,
+    "runtimeDistSha256": "62d5a0075e5ccca6627ba81f8ca8be427f499ded7508570171c00520bcf369ca",
+    "consumerDeclarationFiles": 184,
+    "npmTransport": "node npm-cli.js; shell:false"
+  },
+  "runtimeDistEqualLinuxWindows": true,
+  "sourceMismatchCounts": {
+    "immutable": 0,
+    "staged": 0
+  },
+  "limitations": [
+    "Offline fake-fetch/DecisionPort checks do not qualify live Jev accuracy or performance",
+    "No Windows app/installer/game executed",
+    "Source docs may evolve after this immutable runtime snapshot",
+    "No OS-wide process/network trace claimed"
+  ],
+  "note": "Host-specific temporary paths removed from this public summary; original receipt retained locally. Final release docs/evidence can change archive SHA without changing tested dist."
+}

@@ -1,0 +1,487 @@
+{
+  "schema_version": 1,
+  "corpus_id": "zorya-original-support-intent-30-v1",
+  "created_date": "2026-10-18",
+  "license": "MIT",
+  "license_file": "LICENSE",
+  "provenance": {
+    "origin": "original-assistant-authored-fixtures",
+    "authoring_process": "All 30 texts, labels and reasons were newly written by the assistant for this task; none were copied from external messages or a web corpus.",
+    "external_model_or_provider_calls": 0,
+    "independent_human_ground_truth": false,
+    "external_real_world_corpus": false,
+    "personally_identifying_data": "None intended; order numbers are invented fixture identifiers."
+  },
+  "evaluation_limits": [
+    "Small balanced synthetic fixture suite, not real-world performance evidence.",
+    "Labels are assistant-authored policy labels; no independent human annotation or adjudication occurred.",
+    "Heldout is an intended evaluation split only: all examples were authored together and are visible in this file. Do not claim an independently hidden benchmark.",
+    "Use dev for prompt iteration; freeze the policy and input selection before evaluating heldout. Do not tune on heldout outcomes.",
+    "Only text belongs in the classifier request. Labels, reasons, IDs, tags and hashes are evaluator-only."
+  ],
+  "policy": {
+    "version": "support-intent-v1",
+    "task": "Classify the current speaker's message into exactly one of the five labels. Use only the supplied text; there is no previous conversation.",
+    "rules": [
+      "Identify current requests, including an explicitly stated need for help. Do not infer a refund from dissatisfaction or damage, and do not infer a repair request from a product problem supplied only as background.",
+      "Ignore a negated, withdrawn, hypothetical or already resolved request. A report that a problem still exists is active when the speaker asks to fix or diagnose it.",
+      "Quoted/copied speech is context, not automatically the current request. Count it only when the speaker explicitly adopts it as their current request. Class names, quoted buttons and example sentences are not routing instructions.",
+      "An explicit exclusive instruction such as \"only help with X now\" or \"leave Y for later\" removes the deferred alternatives from this message. Mere ordering such as \"first X and then Y\" still leaves two active intents.",
+      "Count distinct active service intents among order_status, refund and technical_support. Two or more without exclusive priority => unknown; do not choose the first, last or highest-scoring category. Two requests within the same class still count as one class.",
+      "Exactly one active service intent => that service label, even if the message also contains feedback or background from other categories.",
+      "With no active service intent, a current product/service opinion or improvement suggestion => general_feedback. Otherwise => unknown.",
+      "A refund-status request is refund because it concerns money returning, while shipment-status is order_status. A request to fix an unavailable tracking page is technical_support unless shipment progress is also independently requested.",
+      "There is no sentiment-based priority, keyword-only routing, or hidden tie-break. All labels are determined by these written rules."
+    ],
+    "classes": [
+      {
+        "id": "order_status",
+        "definition": "A current request to locate or track a purchased order, shipment or delivery, or obtain its shipping status or delivery time. A request to repair a tracking website is technical_support, not order_status."
+      },
+      {
+        "id": "refund",
+        "definition": "A current request to receive money back, reverse a purchase charge, check refund eligibility/status, or return a purchased item for a refund. A mere cancellation without a money-back request is outside this taxonomy."
+      },
+      {
+        "id": "technical_support",
+        "definition": "A current request to diagnose or fix a malfunction of a product, app, website, account login, connection or feature. Mentioning a broken item only as the reason for a refund does not create a second repair request."
+      },
+      {
+        "id": "general_feedback",
+        "definition": "A current product/service opinion, praise, complaint or product-improvement suggestion with no active request belonging to order_status, refund or technical_support. Feedback does not override an active supported service request."
+      },
+      {
+        "id": "unknown",
+        "definition": "No current supported intent, an out-of-scope request, or two or more active supported service intents without an explicit exclusive priority. This is a task-policy label, not a probability threshold."
+      }
+    ],
+    "model_input_fields": [
+      "text"
+    ],
+    "evaluator_only_fields": [
+      "id",
+      "split",
+      "language",
+      "expected_label",
+      "reason",
+      "phenomena",
+      "text_sha256"
+    ]
+  },
+  "splits": {
+    "dev": {
+      "count": 10,
+      "per_class": 2,
+      "purpose": "Prompt development only"
+    },
+    "heldout": {
+      "count": 20,
+      "per_class": 4,
+      "purpose": "Reserved evaluation; no prompt tuning after reading results"
+    }
+  },
+  "examples": [
+    {
+      "id": "support-dev-001",
+      "split": "dev",
+      "language": "ru",
+      "text": "Пожалуйста, проверьте, где сейчас мой заказ 8142 и когда его привезут.",
+      "expected_label": "order_status",
+      "reason": "Текущая просьба касается местоположения и срока доставки одного заказа; оба вопроса относятся к order_status.",
+      "phenomena": [
+        "direct_request",
+        "same_class_multiple_questions"
+      ],
+      "text_sha256": "ad2735be1babef6a2a6dcecf5f81aaabd9ae6fbbf54040ef63afb8390df2c5b9"
+    },
+    {
+      "id": "support-dev-002",
+      "split": "dev",
+      "language": "en",
+      "text": "I do not want a refund. Please tell me whether order 527 has left the warehouse.",
+      "expected_label": "order_status",
+      "reason": "The refund is explicitly negated; the only active request is shipment status.",
+      "phenomena": [
+        "negation"
+      ],
+      "text_sha256": "63c5adbecc109bba7651cbd9e8ea8f49e8cf5e9e57adbb28858cf3e44e4b84ea"
+    },
+    {
+      "id": "support-dev-003",
+      "split": "dev",
+      "language": "ru",
+      "text": "Верните, пожалуйста, деньги за покупку. Настраивать устройство мне не нужно.",
+      "expected_label": "refund",
+      "reason": "Возврат денег запрошен явно; техническая помощь явно отвергнута.",
+      "phenomena": [
+        "direct_request",
+        "negation"
+      ],
+      "text_sha256": "c10004560bc51868618386680abfd5fadcd898107155fa1bb8f9463d06077a10"
+    },
+    {
+      "id": "support-dev-004",
+      "split": "dev",
+      "language": "en",
+      "text": "The box arrived on time, but I was charged twice. Please reverse the duplicate charge.",
+      "expected_label": "refund",
+      "reason": "Delivery is resolved background; reversing the duplicate purchase charge is the current money-back request.",
+      "phenomena": [
+        "resolved_background"
+      ],
+      "text_sha256": "3f0a0840dc789a6c388eccaa2f28e0439ba38731282d8c6736de71ad640fd382"
+    },
+    {
+      "id": "support-dev-005",
+      "split": "dev",
+      "language": "ru",
+      "text": "После обновления приложение закрывается при входе. Помогите восстановить работу.",
+      "expected_label": "technical_support",
+      "reason": "Пользователь просит устранить текущий сбой приложения; запроса возврата или доставки нет.",
+      "phenomena": [
+        "direct_request"
+      ],
+      "text_sha256": "a9bda1c8038f29cc39512a15ca7944c6968c583d12a4362deb46c03f0694ad7c"
+    },
+    {
+      "id": "support-dev-006",
+      "split": "dev",
+      "language": "en",
+      "text": "The button says \"Request a refund\", but clicking it freezes the page. I only want help fixing the page right now.",
+      "expected_label": "technical_support",
+      "reason": "The quoted label is UI context; the exclusive current request is to fix the page, not process a refund.",
+      "phenomena": [
+        "quoted_content",
+        "exclusive_priority"
+      ],
+      "text_sha256": "14feb9faa8c2e87dd9d172ec40eba6440c0cb4de1eab154242aa4841fa60ca88"
+    },
+    {
+      "id": "support-dev-007",
+      "split": "dev",
+      "language": "ru",
+      "text": "Заказ уже получил, всё работает. Новый дизайн приложения мне очень нравится.",
+      "expected_label": "general_feedback",
+      "reason": "Доставка завершена, неисправности нет; текущее сообщение — положительный отзыв о продукте.",
+      "phenomena": [
+        "resolved_background",
+        "praise"
+      ],
+      "text_sha256": "728fa6a74acf7f431cefa3f8f536e42331e313dc8f10a09540d9b7dcc9272c6c"
+    },
+    {
+      "id": "support-dev-008",
+      "split": "dev",
+      "language": "en",
+      "text": "Please consider larger text in the settings menu in a future release. I am sending a design suggestion, not reporting a malfunction.",
+      "expected_label": "general_feedback",
+      "reason": "A future product-improvement suggestion with no active service request is general_feedback.",
+      "phenomena": [
+        "feature_suggestion",
+        "negation"
+      ],
+      "text_sha256": "7b2a0b3f890a369c0e79a194ef1895846f42720fd58b26067f6c86eb8bc387db"
+    },
+    {
+      "id": "support-dev-009",
+      "split": "dev",
+      "language": "ru",
+      "text": "Переведите на английский фразу «Где мой заказ?». Это упражнение, заказ я не делал.",
+      "expected_label": "unknown",
+      "reason": "Просьба — перевод учебной цитаты, а не отслеживание покупки; текущего поддерживаемого намерения нет.",
+      "phenomena": [
+        "quoted_content",
+        "out_of_scope",
+        "negation"
+      ],
+      "text_sha256": "c083ff583425a3755a4f6cf4bfcaf136eea6567dfd5991997543ff950e4b2468"
+    },
+    {
+      "id": "support-dev-010",
+      "split": "dev",
+      "language": "en",
+      "text": "Please check where my parcel is and refund the separate purchase I made yesterday. I need both handled.",
+      "expected_label": "unknown",
+      "reason": "Shipment tracking and a refund are two active service classes with no exclusive priority; policy requires unknown.",
+      "phenomena": [
+        "multi_intent_ambiguity"
+      ],
+      "text_sha256": "8f99cdb5b6ec6ad3eb1d6f9e33117445dd0bc511ec72cbd558342460ba1d3ee7"
+    },
+    {
+      "id": "support-heldout-001",
+      "split": "heldout",
+      "language": "ru",
+      "text": "Оплату возвращать не надо. В уведомлении написано «отправлен», но я хочу узнать дату доставки посылки.",
+      "expected_label": "order_status",
+      "reason": "Возврат отвергнут, цитата — статус из уведомления; текущая просьба — срок доставки.",
+      "phenomena": [
+        "negation",
+        "quoted_content"
+      ],
+      "text_sha256": "4bdf429d28ea91d2d1ef26d8a076af26bcca6027ec4443edfa0db5b90338b494"
+    },
+    {
+      "id": "support-heldout-002",
+      "split": "heldout",
+      "language": "en",
+      "text": "Yesterday I asked you to fix my login; that is sorted now. Could you locate the replacement shipment?",
+      "expected_label": "order_status",
+      "reason": "The technical issue is explicitly resolved; locating the current shipment is the only active request.",
+      "phenomena": [
+        "resolved_background"
+      ],
+      "text_sha256": "8476ce4bf755bca48f5c5b116018089ffd73dade190867119299eb8a2a7b9b81"
+    },
+    {
+      "id": "support-heldout-003",
+      "split": "heldout",
+      "language": "ru",
+      "text": "В прошлом письме я написал «верните оплату». Подтверждаю: это и есть моя просьба сейчас, покупку оставлять не хочу.",
+      "expected_label": "refund",
+      "reason": "Пользователь прямо принимает процитированный запрос как текущий; требуется возврат оплаты.",
+      "phenomena": [
+        "quoted_content",
+        "explicit_adoption"
+      ],
+      "text_sha256": "1c0e03645461f7bf5b429622eed2309a2d44016c68665f26ad9bbf5bc72bc509"
+    },
+    {
+      "id": "support-heldout-004",
+      "split": "heldout",
+      "language": "en",
+      "text": "The headphones crackle. Do not troubleshoot them; I want to return them and get my payment back.",
+      "expected_label": "refund",
+      "reason": "The defect explains the request, troubleshooting is negated, and return-for-refund is explicit.",
+      "phenomena": [
+        "negation",
+        "problem_as_background"
+      ],
+      "text_sha256": "1d41a1ab3c78d6c8ef41c2cabbaa760c469b27a3dbac53ea96a299c880cb941a"
+    },
+    {
+      "id": "support-heldout-005",
+      "split": "heldout",
+      "language": "ru",
+      "text": "Деньги за прошлую покупку уже вернули. Теперь не приходит код входа в аккаунт — помогите разобраться с авторизацией.",
+      "expected_label": "technical_support",
+      "reason": "Возврат завершён; актуальная просьба относится к сбою входа в аккаунт.",
+      "phenomena": [
+        "resolved_background"
+      ],
+      "text_sha256": "33216f5f932fb3a3c20b728ab61319bdf7f00aee136e8b11a39383785e457d60"
+    },
+    {
+      "id": "support-heldout-006",
+      "split": "heldout",
+      "language": "en",
+      "text": "I am not asking where the parcel is. The tracking page is blank on two browsers; please help me make it load.",
+      "expected_label": "technical_support",
+      "reason": "Shipment-status help is explicitly negated; fixing the website is technical_support.",
+      "phenomena": [
+        "negation",
+        "tracking_vs_site_failure"
+      ],
+      "text_sha256": "4633fb5c0246a98b4a576a9855f164b296aed9720a054e400df8dbbe054edeb6"
+    },
+    {
+      "id": "support-heldout-007",
+      "split": "heldout",
+      "language": "ru",
+      "text": "В отзыве другого покупателя было «верните деньги». У меня претензий нет: хочу поблагодарить вас за аккуратную упаковку.",
+      "expected_label": "general_feedback",
+      "reason": "Чужая цитата не является просьбой пользователя; собственное сообщение содержит только благодарность.",
+      "phenomena": [
+        "quoted_content",
+        "praise"
+      ],
+      "text_sha256": "afa4fadde7c7ad89bbdcf67c6336d1227e655866aaf106363a6e4f17f6daae6d"
+    },
+    {
+      "id": "support-heldout-008",
+      "split": "heldout",
+      "language": "en",
+      "text": "The delivery was late and the packaging looked untidy. I am leaving feedback only; I am not asking for tracking, a refund, or repairs.",
+      "expected_label": "general_feedback",
+      "reason": "The current complaint is explicitly feedback only, and all supported service actions are negated.",
+      "phenomena": [
+        "complaint",
+        "negation"
+      ],
+      "text_sha256": "b5a86200cafcaadfda249be500a9ea3ff7424afb1bceddff256e9a05c282d683"
+    },
+    {
+      "id": "support-heldout-009",
+      "split": "heldout",
+      "language": "ru",
+      "text": "Пожалуйста, восстановите вход в приложение и верните деньги за подписку. Сначала решите вход, потом возврат; нужны оба действия.",
+      "expected_label": "unknown",
+      "reason": "Порядок выполнения не снимает ни одну просьбу: техническая помощь и возврат остаются активными.",
+      "phenomena": [
+        "multi_intent_ambiguity",
+        "ordering_is_not_exclusive_priority"
+      ],
+      "text_sha256": "a1a192fa4e95da11f138f54e5ae4f723b39c5684fb0dd06ee3c4588ebcdfb325"
+    },
+    {
+      "id": "support-heldout-010",
+      "split": "heldout",
+      "language": "en",
+      "text": "Can you find my shipment and also repair the app that keeps crashing? Neither request can wait.",
+      "expected_label": "unknown",
+      "reason": "Tracking and troubleshooting are distinct active service classes, with no exclusive priority.",
+      "phenomena": [
+        "multi_intent_ambiguity"
+      ],
+      "text_sha256": "ca915932c44e52ac15a69fe101fccbbc3e031eb47cab40883660fe15153dc721"
+    },
+    {
+      "id": "support-heldout-011",
+      "split": "heldout",
+      "language": "ru",
+      "text": "Приложение неудобное, но отзыв оставлю позже. Сейчас только сообщите, передан ли заказ курьеру; чинить ничего не прошу.",
+      "expected_label": "order_status",
+      "reason": "Явно выделена одна текущая просьба о передаче заказа курьеру; отзыв отложен, ремонт не запрошен.",
+      "phenomena": [
+        "exclusive_priority",
+        "feedback_background",
+        "negation"
+      ],
+      "text_sha256": "513daef00175dd3a33c678b894b77da5999a34ae3a7cf95eda0a06b58113931a"
+    },
+    {
+      "id": "support-heldout-012",
+      "split": "heldout",
+      "language": "en",
+      "text": "Your agent wrote, \"Ask us to check the parcel location.\" I am doing that now: please check its location and expected arrival.",
+      "expected_label": "order_status",
+      "reason": "The speaker explicitly adopts the quoted suggestion; both current questions belong to shipment status.",
+      "phenomena": [
+        "quoted_content",
+        "explicit_adoption",
+        "same_class_multiple_questions"
+      ],
+      "text_sha256": "445a5eb2446bf05dfabbcda6d1794e08dcc8f851b16a00d55d74681a151207fe"
+    },
+    {
+      "id": "support-heldout-013",
+      "split": "heldout",
+      "language": "ru",
+      "text": "Не ищите посылку: её уже доставили. Возврат я оформил неделю назад — проверьте, когда деньги придут на карту.",
+      "expected_label": "refund",
+      "reason": "Запрошен статус денежного возврата, не статус доставки; по политике это refund.",
+      "phenomena": [
+        "refund_status",
+        "negation",
+        "resolved_background"
+      ],
+      "text_sha256": "f4fc91272baf378cc0fb5be9208b70d391ce035b19df61242122c5b96b6d0191"
+    },
+    {
+      "id": "support-heldout-014",
+      "split": "heldout",
+      "language": "en",
+      "text": "I may need help connecting the speaker later. For this message, only check whether this purchase qualifies for a refund.",
+      "expected_label": "refund",
+      "reason": "Technical help is deferred; the sole current request is refund eligibility for a purchase.",
+      "phenomena": [
+        "exclusive_priority",
+        "refund_eligibility"
+      ],
+      "text_sha256": "aa9830bc18890c2427e89873300fce2e46d8562defb33468fed7363d4a8c5c4f"
+    },
+    {
+      "id": "support-heldout-015",
+      "split": "heldout",
+      "language": "ru",
+      "text": "Оператор советовал «запросить возврат», но я этого не хочу. Нужна помощь: как устранить ошибку подключения наушников?",
+      "expected_label": "technical_support",
+      "reason": "Совет о возврате отвергнут; текущая просьба — устранить ошибку подключения.",
+      "phenomena": [
+        "quoted_content",
+        "negation"
+      ],
+      "text_sha256": "5ff05ed9eadcd00481a678478cacd29da7373be11b6b9dde7a50e86dbe0f3bc1"
+    },
+    {
+      "id": "support-heldout-016",
+      "split": "heldout",
+      "language": "en",
+      "text": "I like the device, but its microphone stops working after sleep. Please diagnose that fault; any refund discussion can wait.",
+      "expected_label": "technical_support",
+      "reason": "Praise is background and refund discussion is deferred; diagnosing the malfunction is the only current service intent.",
+      "phenomena": [
+        "feedback_background",
+        "exclusive_priority"
+      ],
+      "text_sha256": "fd4913db26bdd3f94c7b0d46fd7f64981956f046069b3b9c9f96c90ce16b106d"
+    },
+    {
+      "id": "support-heldout-017",
+      "split": "heldout",
+      "language": "ru",
+      "text": "Курьер приехал поздно, зато товар отличный. Ничего проверять или возвращать не нужно, просто делюсь впечатлением.",
+      "expected_label": "general_feedback",
+      "reason": "Смешанная оценка доставки и товара не содержит активного сервисного запроса.",
+      "phenomena": [
+        "mixed_sentiment",
+        "negation"
+      ],
+      "text_sha256": "f82034911f9c5566077ffdea8b70fdca7f892fe3ee3ffe5115f7f05c3c5059c1"
+    },
+    {
+      "id": "support-heldout-018",
+      "split": "heldout",
+      "language": "en",
+      "text": "Please add a dark theme someday. The existing screen works correctly; this is an idea for the product team.",
+      "expected_label": "general_feedback",
+      "reason": "The user proposes a future feature and explicitly reports no malfunction, so the policy selects general_feedback.",
+      "phenomena": [
+        "feature_suggestion",
+        "negation"
+      ],
+      "text_sha256": "403f38a2db46b5be2dd86eb35028bc52f198c4ffa5bf981b4c67a0cbccde97c2"
+    },
+    {
+      "id": "support-heldout-019",
+      "split": "heldout",
+      "language": "ru",
+      "text": "В инструкции встретилось слово «refund». Что оно значит по-русски? Мне сейчас не нужен возврат и проблем с заказами нет.",
+      "expected_label": "unknown",
+      "reason": "Запрошено значение слова, а поддержка покупки отвергнута; это запрос вне пяти сервисных сценариев.",
+      "phenomena": [
+        "quoted_content",
+        "out_of_scope",
+        "negation"
+      ],
+      "text_sha256": "70c8e2b711ec8a5751733012c8989983773ed76ca79c4a57ae5f01cedc77c01e"
+    },
+    {
+      "id": "support-heldout-020",
+      "split": "heldout",
+      "language": "en",
+      "text": "Hello. If I ever buy a headset and it fails, I might need help. I have not bought one and have no issue to resolve today.",
+      "expected_label": "unknown",
+      "reason": "A hypothetical future problem is not a current support request or current product feedback.",
+      "phenomena": [
+        "hypothetical",
+        "no_current_request"
+      ],
+      "text_sha256": "485dcf8b9530333c60afe94015c720ef9f908af744b8a80a31ee81da4343c9be"
+    }
+  ],
+  "artifact_role": "evaluator-only: contains expected labels and rationales; never use this manifest as a classifier request",
+  "distribution": {
+    "producer_policy": "inputs/policy.json",
+    "producer_inputs": {
+      "dev": "inputs/dev.json",
+      "heldout": "inputs/heldout.json"
+    },
+    "evaluator_labels": {
+      "dev": "ground-truth/dev.json",
+      "heldout": "ground-truth/heldout.json"
+    },
+    "join": "zero-based input_index plus exact UTF-8 text_sha256",
+    "payload_rule": "Pass inputs/policy.json and only the selected row.text to the classifier. Producer input rows contain exactly text; never read the full manifest or ground-truth directory in the producer."
+  }
+}

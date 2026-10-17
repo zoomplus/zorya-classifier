@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
+  <link rel="stylesheet" type="text/css;charset=utf-8" href="main.css">
+  <script type="text/javascript" src="main.js"></script><!-- Global site tag (gtag.js) - Google Analytics -->
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116935204-2"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-116935204-2');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Open Images V7 - Description</title>
+</head>
+<body onload="mainDivResize('factsfigures')" onresize="mainDivResize()">
+  <div class="topnav" id="myTopnav">
+    <a id="100" href="index.html" class="title">Open Images Dataset V7</a>
+<div id="challenge" class="menu-dropdown">
+<a href="challenge_overview.html" class="droplink">Challenge</a>
+<div class="menu-dropdown-content" style="right:0px;">
+      <a href="challenge_overview.html" class="subitem">Overview</a>
+      <a href="challenge2019_downloads.html" class="subitem">Downloads</a>
+      <a href="evaluation.html" class="subitem">Evaluation</a>
+      <!--<a href="challenge2019_guidelines.html" class="subitem">Participation guidelines</a>-->
+      <a href="challenge2019.html" class="subitem">Past challenge: 2019</a>
+      <a href="challenge.html" class="subitem">Past challenge: 2018</a>
+</div>
+</div>
+<a id="news" href="news.html" class="menuitem">News</a>
+<a id="extras" href="extras.html" class="menuitem">Extras</a>
+<a id="extended" href="extended.html" class="menuitem">Extended</a>
+<a id="download" href="download_v7.html" class="menuitem">Download</a>
+<a id="factsfigures" href="factsfigures_v7.html" class="menuitem">Description</a>
+<a id="index" href="visualizer/index.html" class="menuitem">Explore</a>
+<a id="0" href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="navbarResize()">&#9776;</a>
+
+  </div>
+  <div class="main" id="main" onscroll="scrollCallback(event,'factsfigures_banner')">
+    <div id="factsfigures_banner"></div>
+    <div style='max-width: 900px; margin: 0 auto;'>
+      <div style="margin-top:50px">
+  <i>You are viewing the description of the latest version of Open Images (V7 - released Oct 2022),<br>if you would like to view the description of a previous version, please select it here:</i>
+</div>
+<div class="versions-row" >
+  <div class="version-button">
+    <button class="button hovered">V7</button>
+  </div>
+  <div class="version-button">
+    <a href='factsfigures_v6.html'>
+      <button class="button">V6</button>
+    </a>
+  </div>
+  <div class="version-button">
+    <a href='factsfigures_v5.html'>
+      <button class="button">V5</button>
+    </a>
+  </div>
+  <div class="version-button">
+    <a href='factsfigures_v4.html'>
+      <button class="button">V4</button>
+    </a>
+  </div>
+  <div class="version-button">
+    <a href='https://github.com/openimages/dataset/blob/master/READMEV3.md' target="_blank">
+      <button class="button">V3</button>
+    </a>
+  </div>
+  <div class="version-button">
+    <a href='https://github.com/openimages/dataset/blob/master/READMEV2.md' target="_blank">
+      <button class="button">V2</button>
+    </a>
+  </div>
+  <div class="version-button">
+    <a href='https://github.com/openimages/dataset/blob/master/READMEV1.md' target="_blank">
+      <button class="button">V1</button>
+    </a>
+  </div>
+</div>
+<nav class="table-of-contents">
+<h3>Contents</h3>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#publications">Publications</a></li>
+<li><a href="#data-organization">Data organization</a>
+<ul>
+<li><a href="#image-level-labels">Image-level labels</a></li>
+<li><a href="#bounding-boxes">Bounding boxes</a></li>
+<li><a href="#object-segmentations">Object segmentations</a></li>
+<li><a href="#visual-relationships">Visual relationships</a></li>
+<li><a href="#localized-narratives">Localized Narratives</a></li>
+<li><a href="#point-level-labels">Point-level labels</a></li>
+<li><a href="#class-definitions">Class definitions</a></li>
+</ul>
+</li>
+<li><a href="#statistics">Statistics</a></li>
+<li><a href="#licenses">Licenses</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</nav>
+<h2><a class="title-anchor" id="overview" href="#overview">Overview of Open Images V7</a></h2>
+<p>Open Images is a dataset of ~9M images annotated with image-level labels, object bounding boxes, object segmentation masks, visual relationships, and localized narratives:</p>
+<ul>
+<li>It contains a total of 16M <a href="#bounding-boxes">bounding boxes</a> for 600 object classes on 1.9M images, making it the <em>largest existing dataset with object location annotations</em>. The boxes have been largely manually drawn by professional annotators to ensure accuracy and consistency. The images are very diverse and often contain complex scenes with several objects (8.3 per image on average).</li>
+<li>Open Images also offers <a href="#visual-relationships">visual relationship</a> annotations, indicating pairs of objects in particular relations (e.g. &quot;woman playing guitar&quot;, &quot;beer on table&quot;), object properties (e.g. &quot;table is wooden&quot;), and human actions (e.g. &quot;woman is jumping&quot;). In total it has 3.3M annotations from 1,466 distinct relationship triplets.</li>
+<li>In V5 we added <a href="#object-segmentations">segmentation masks</a> for 2.8M object instances in 350 classes. Segmentation masks mark the outline of objects, which characterizes their spatial extent to a much higher level of detail.</li>
+<li>In V6 we added 675k <a href="#localized-narratives">localized narratives</a>: multimodal descriptions of images consisting of synchronized voice, text, and mouse traces over the objects being described. <!-- (Note we originally launched localized narratives only on train in V6, but since July 2020 we also have validation and test covered.) --></li>
+<li>In v7 we added 66.4M <a href="#point-level-labels">point-level labels</a> over 1.4M images, covering 5,827 classes. These labels provide sparse pixel-level localization and are suitable for zero/few-shot semantic segmentation training and evaluation.</li>
+<li>Finally, the dataset is annotated with 61.4M <a href="#image-level-labels">image-level labels</a> spanning 20,638 classes.</li>
+</ul>
+<p>We believe that having a single dataset with unified annotations for image classification, object detection, visual relationship detection, instance segmentation, and multimodal image descriptions will enable to study these tasks jointly and stimulate progress towards genuine scene understanding.<br><br></p>
+<figure>
+  <a href="./visualizer/index.html"><img style="height: 22em;" src="images/oidv7_all-in-one_example_ab.jpg" alt="Example of all annotations in one image"></a>
+  <figcaption>Example images with various annotations in the <a href="./visualizer/index.html">all-in-one visualizer</a>.
+  <br>(Images by <a href="https://c1.staticflickr.com/4/3835/15014236762_04033666d5_z.jpg">Jason</a> <a href="https://www.flickr.com/people/jasonparis/">Paris</a>, and <a href="https://c7.staticflickr.com/5/4015/4359099851_701ccfd762_z.jpg">Rubén</a> <a href="https://www.flickr.com/people/vike/">Vique</a>, both under <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0 license</a>).
+  </figcaption>
+</figure>
+<h2><a class="title-anchor" id="oid-extended" href="#oid-extended">Open Images Extended</a></h2>
+<p>Open Images Extended is a collection of sets that complement the core Open Images Dataset with additional images and/or annotations. You can read more about this in the <a href="extended.html">Extended section</a>. The rest of this page describes the core Open Images Dataset, without Extensions.</p>
+<h2><a class="title-anchor" id="publications" href="#publications">Publications</a></h2>
+<p style="margin-block-end: 7px;">The following paper describes Open Images V4 in depth: from the data collection and annotation to detailed statistics about the data and evaluation of models trained on it. If you use the Open Images dataset in your work (also V5-V7), please cite this article.</p>
+<table style="border: 0;">
+    <tr>
+      <td width=25% style="border: 0;">
+        <img src="images/oid_thumbnail.png">
+      </td>
+      <td width=75% style="border: 0;">
+        <i>A. Kuznetsova, H. Rom, N. Alldrin, J. Uijlings, I. Krasin, J. Pont-Tuset, S. Kamali, S. Popov, M. Malloci, A. Kolesnikov, T. Duerig, and V. Ferrari.</i><br>
+        The Open Images Dataset V4: Unified image classification, object detection, and visual relationship detection at scale.<br>
+        IJCV, 2020.<br>
+        <a href=https://arxiv.org/abs/1811.00982 target="_blank">[PDF]</a> <a href="javascript:toggleBibtex('OpenImages')">[BibTeX]</a>
+      </td>
+  </tr>
+</table>
+<div id="bib_OpenImages" class="bibtex noshow">
+<pre>
+@article{OpenImages,
+  author = {Alina Kuznetsova and Hassan Rom and Neil Alldrin and Jasper Uijlings and Ivan Krasin and Jordi Pont-Tuset and Shahab Kamali and Stefan Popov and Matteo Malloci and Alexander Kolesnikov and Tom Duerig and Vittorio Ferrari},
+  title = {The Open Images Dataset V4: Unified image classification, object detection, and visual relationship detection at scale},
+  year = {2020},
+  journal = {IJCV}
+}
+</pre>
+</div>
+<p style="margin-top: 19px; margin-block-end: 7px;">The next paper describes the technique used to annotate instance segmentations in Open Images. If you use the segmentations, please cite this article too.</p>
+<table style="border: 0;">
+    <tr>
+      <td width=25% style="border: 0;">
+        <img src="images/segm_thumbnail.png">
+      </td>
+      <td width=75% style="border: 0;">
+        <i>R. Benenson, S. Popov, and V. Ferrari.</i><br>
+        Large-scale interactive object segmentation with human annotators.<br>
+        CVPR, 2019.<br>
+        <a href="https://arxiv.org/pdf/1903.10830.pdf" target="_blank">[PDF]</a> <a href="javascript:toggleBibtex('Segmentation')">[BibTeX]</a>
+      </td>
+  </tr>
+</table>
+<div id="bib_Segmentation" class="bibtex noshow">
+<pre>
+@inproceedings{OpenImagesSegmentation,
+  author = {Rodrigo Benenson and Stefan Popov and Vittorio Ferrari},
+  title = {Large-scale interactive object segmentation with human annotators},
+  booktitle = {CVPR},
+  year = {2019}
+}
+</pre>
+</div>
+<p style="margin-top: 19px; margin-block-end: 7px;">The following paper describes Localized Narratives, please cite this article too if you use them in your research.</p>
+<table style="border: 0;">
+    <tr>
+      <td width=25% style="border: 0;">
+        <img src="images/loc_narr_thumbnail.png">
+      </td>
+      <td width=75% style="border: 0;">
+        <i>J. Pont-Tuset, J. Uijlings, S. Changpinyo, R. Soricut, and V. Ferrari.</i><br>
+        Connecting Vision and Language with Localized Narratives.<br>
+        ECCV, 2020.<br>
+        <a href="https://arxiv.org/abs/1912.03098" target="_blank">[PDF]</a> <a href="https://google.github.io/localized-narratives/" target="_blank">[Web]</a> <a href="javascript:toggleBibtex('LocNarr')">[BibTeX]</a>
+      </td>
+  </tr>
+</table>
+<div id="bib_LocNarr" class="bibtex noshow">
+<pre>
+@inproceedings{OpenImagesLocNarr,
+  author    = {Jordi Pont-Tuset and Jasper Uijlings and Soravit Changpinyo and Radu Soricut and Vittorio Ferrari},
+  title     = {Connecting Vision and Language with Localized Narratives},
+  booktitle = {ECCV},
+  year      = {2020}
+}
+</pre>
+</div>
+<p style="margin-top: 19px; margin-block-end: 7px;">The paper below describes the data collection campaign and initial experiments with point-labels. If you use the point-labels, please cite this article too.</p>
+<table style="border: 0;">
+    <tr>
+      <td width=25% style="border: 0;">
+        <img src="images/pointillism_thumbnail.png">
+      </td>
+      <td width=75% style="border: 0;">
+        <i>R. Benenson and V. Ferrari.</i><br>
+        From couloring-in to pointillism: revisiting semantic segmentation supervision<br>
+        Arxiv, 2022.<br>
+        <a href="https://storage.googleapis.com/openimages/web_v7/2022_pointillism_arxiv.pdf" target="_blank">[PDF]</a> <a href="javascript:toggleBibtex('Pointillism')">[BibTeX]</a>
+      </td>
+  </tr>
+</table>
+<div id="bib_Pointillism" class="bibtex noshow">
+<pre>
+@inproceedings{OpenImagesPoints,
+  author = {Rodrigo Benenson and Vittorio Ferrari},
+  title = {From couloring-in to pointillism: revisiting semantic segmentation supervision},
+  booktitle = {ArXiv},
+  year = {2022}
+}
+</pre>
+</div>
+<p style="margin-top: 19px; margin-block-end: 7px;">Please also consider citing this general reference to the dataset:</p>
+<table style="border: 0;">
+    <tr>
+      <td width=100% style="border: 0;">
+<i>Krasin I., Duerig T., Alldrin N., Ferrari V., Abu-El-Haija S., Kuznetsova A., Rom H., Uijlings J., Popov S., Kamali S., Malloci M., Pont-Tuset J., Veit A., Belongie S., Gomes V., Gupta A., Sun C., Chechik G., Cai D., Feng Z., Narayanan D., Murphy K.</i><br>
+OpenImages: A public dataset for large-scale multi-label and multi-class image classification, 2017.<br>
+Available from https://storage.googleapis.com/openimages/web/index.html.<br>
+        <a href="javascript:toggleBibtex('OpenImages2')">[BibTeX]</a>
+      </td>
+  </tr>
+</table>
+<div id="bib_OpenImages2" class="bibtex noshow">
+<pre>
+@article{OpenImages2,
+  title={OpenImages: A public dataset for large-scale multi-label and multi-class image classification.},
+  author={Krasin, Ivan and Duerig, Tom and Alldrin, Neil and Ferrari, Vittorio and Abu-El-Haija, Sami and Kuznetsova, Alina and Rom, Hassan and Uijlings, Jasper and Popov, Stefan and Kamali, Shahab and Malloci, Matteo and Pont-Tuset, Jordi and Veit, Andreas and Belongie, Serge and Gomes, Victor and Gupta, Abhinav and Sun, Chen and Chechik, Gal and Cai, David and Feng, Zheyun and Narayanan, Dhyanesh and Murphy, Kevin},
+  journal={Dataset available from https://storage.googleapis.com/openimages/web/index.html},
+  year={2017}
+}
+</pre>
+</div>
+<h2>Complexity and Diversity</h2>
+<div style="text-align: center;"><img src="images/center_bias.png" width="90%"></div>
+<p>The plots above show the distributions of object centers in normalized image coordinates for various sets of Open Images and other related datasets. The Open Images Train set, which contains most of the data, and Challenge sets show a rich and diverse distribution of a complexity in a similar ballpark to the COCO dataset. This is also confirmed when considering the number of objects per image and their area distribution (plots below). While we improved the density of annotation in the smaller validation and test sets from V4 to V5, their center distribution is simpler and closer to PASCAL 2012. We recommend users to report results on the Challenge set, which offers the hardest performance test for object detectors. We thank Ross Girshick for suggesting this type of visualizations and for correcting the figure in their LVIS paper, which displayed a plot for the validation set without knowing that it was not representative of the whole dataset, and included an intensity scaling artifact that exaggerated its peakiness.</p>
+<div style="text-align: center;">
+  <img src="images/number_of_objects_area.png" width="80%">
+  <p style="width: 80%; margin: 8px auto 30px; font-size: 90%;">Number of objects per image (left) and object area (right) for Open Images V6/V5/V4 and other related datasets (training sets in all cases).</p>
+</div>
+<h2><a class="title-anchor" id="data-organization" href="#data-organization">Data organization</a></h2>
+<p>The dataset is split into a training set (9,011,219 images), a validation set (41,620 images), and a test set (125,436 images). The images are annotated with image-level labels, object bounding boxes, object segmentation masks, visual relationships, and localized narratives as described below.<br><br></p>
+<h3><a class="title-anchor" id="image-level-labels" href="#image-level-labels">Image-level labels</a></h3>
+<p>Table 1 shows an overview of the image-level labels in all splits of the dataset. All images have machine generated image-level labels automatically generated by a computer vision model similar to <a href="https://cloud.google.com/vision/">Google Cloud Vision API</a>. These automatically generated labels have a substantial false positive rate.</p>
+<p align='center'>Table 1: Image-level labels.</p>
+<table>
+<thead>
+<tr>
+<th align="right"></th>
+<th align="right">Train</th>
+<th align="right">Validation</th>
+<th align="right">Test</th>
+<th align="right"># Classes</th>
+<th align="right"># Trainable Classes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="right">Images</td>
+<td align="right">8,992,648</td>
+<td align="right">41,620</td>
+<td align="right">125,436</td>
+<td align="right">-</td>
+<td align="right">-</td>
+</tr>
+<tr>
+<td align="right">Machine-Generated Labels</td>
+<td align="right">164,809,380</td>
+<td align="right">681,049</td>
+<td align="right">2,060,717</td>
+<td align="right">15,382</td>
+<td align="right">9,068</td>
+</tr>
+<tr>
+<td align="right">Human-Verified Labels</td>
+<td align="right">58,783,034<br>pos: 21,144,175<br>neg: 37,638,859</td>
+<td align="right">618,184<br>pos: 390,797<br>neg: 227,387</td>
+<td align="right">2,003,748<br>pos: 1,319,751<br>neg: 683,997</td>
+<td align="right">20,638</td>
+<td align="right">9,668</td>
+</tr>
+</tbody>
+</table>
+<p>Moreover, the validation and test sets, as well as part of the training set have human-verified image-level labels. Most verifications were done with in-house annotators at Google. A smaller part was done by crowd-sourcing from Image Labeler: <a href="http://play.google.com/store/apps/details?id=com.google.android.apps.village.boond">Crowdsource app</a>, <a href="http://g.co/imagelabeler">g.co/imagelabeler</a>. This verification process practically eliminates false positives (but not false negatives: some labels might be missing from an image). The resulting labels are largely correct and we recommend to use these for training computer vision models. Multiple computer vision models were used to generate the samples (not just the one used for the machine-generated labels) which is why the vocabulary is significantly expanded (#classes column in Table 1).</p>
+<p>As a result of our annotation process, each image is annotated both with verified positive image-level labels, indicating some object classes are present, and with  verified negative image-level labels, indicating some classes are absent. All other classes which are not explicitly marked as positive or negative for an image are not annotated. The verified negative labels are reliable and can be used during training and evaluation of image classifiers.</p>
+<p>Overall, there are 20,638 distinct <a href="https://storage.googleapis.com/openimages/v7/oidv7-classes-imagelabels.txt">classes with image-level labels</a>. Trainable classes are those with at least 100 positive human-verifications in the V7 training set. Based on this definition, <a href="https://storage.googleapis.com/openimages/v7/oidv7-classes-trainable.txt">9,668 classes are considered trainable</a> and machine-generated labels cover 9,068 of these.<br><br></p>
+<h3><a class="title-anchor" id="bounding-boxes" href="#bounding-boxes">Bounding boxes</a></h3>
+<p>Table 2 shows an overview of the bounding box annotations in all splits of the dataset, which span <a href="https://storage.googleapis.com/openimages/v5/class-descriptions-boxable.csv">600 object classes</a>. These offer a broader range than those in the ILSVRC and COCO detection challenges, including new objects such as &quot;fedora&quot; and &quot;snowman&quot;.</p>
+<p align='center'>Table 2: Boxes.</p>
+<table>
+<thead>
+<tr>
+<th align="right"></th>
+<th align="right">Train</th>
+<th align="right">Validation</th>
+<th align="right">Test</th>
+<th align="right"># Classes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="right">Images</td>
+<td align="right">1,743,042</td>
+<td align="right">41,620</td>
+<td align="right">125,436</td>
+<td align="right">-</td>
+</tr>
+<tr>
+<td align="right">Boxes</td>
+<td align="right">14,610,229</td>
+<td align="right">303,980</td>
+<td align="right">937,327</td>
+<td align="right">600</td>
+</tr>
+</tbody>
+</table>
+<p>For the training set, we annotated boxes in 1.74M images, for the available positive human-verified image-level labels. We focused on the most specific labels. For example, if an image has labels {car, limousine, screwdriver}, we  annotated boxes for limousine and screwdriver. For each positive label in an image, we <em>exhaustively annotated every instance of that object class in the image</em> (but see below for group cases). We provide 14.6M bounding boxes. On average there are 8.4 boxed objects per image. 90% of the boxes were manually drawn by professional annotators at Google using the efficient extreme clicking interface <a href="#ref-1">[1]</a> (new in V6: the actual four extreme points defining each box are released for train). We produced the remaining 10% semi-automatically using an enhanced version of the method in <a href="#ref-2">[2]</a>. These boxes have been human verified to have IoU&gt;0.7 with a perfect box on the object, and in practice they are accurate (mean IoU ~0.77, see Sect. 4.2 of <a href="#ref-3">[3]</a>). We have drawn bounding boxes for <a href="https://storage.googleapis.com/openimages/2018_04/class-ids-human-body-parts-and-mammal.txt">human body parts and the class &quot;Mammal&quot;</a> only for <a href="https://storage.googleapis.com/openimages/2018_04/train/train-image-ids-with-human-parts-and-mammal-boxes.txt">95,335 images</a>, due to the overwhelming number of instances (1,327,596 on the 95,335 images). This list of images enables using the data correctly during training of object detectors (as there might be a positive image label for a human body part, and yet no boxes). Finally, we drew a single box around groups of objects (e.g., a bed of flowers or a crowd of people) if they had more than 5 instances which were heavily occluding each other and were physically touching (we marked these boxes with the attribute &quot;group-of&quot;).</p>
+<p>For the validation and test sets, we provide exhaustive box annotation for all object instances, for all available positive image-level labels (again, except for &quot;groups-of&quot;). All boxes were manually drawn. We deliberately tried to annotate boxes at the most specific level in our <a href="https://storage.googleapis.com/openimages/2018_04/bbox_labels_600_hierarchy_visualizer/circle.html">semantic hierarchy</a> as possible. On average, there are 7.4 boxes per image in the validation and test sets. For Open Images V5, we improved the annotation density, which now comes close to the density in the training set. This ensures more precise evaluation of object detection models. In contrast to the training set, on the validation and test sets we annotated human body parts on all images for which we have a positive label.</p>
+<p>We emphasize that the images are annotated both human-verified positive <em>and</em> negative labels (see <a href="#image-level-labels">section above</a>). Importantly, the negative image-level labels can be used during training of object detectors, e.g. for hard-negative mining. Moreover, they can also be used during evaluation, as detections of a class annotated as negative (absent) in the ground-truth can be reliably counted as false-positives. In our Open Images Challenge <a href="challenge2019.html" target="_blank">website</a> we present an <a href="evaluation.html" target="_blank">evaluation metric</a> that fully uses the image-level labels to fairly evaluate detection models.</p>
+<p>In all splits (train, val, test), annotators also marked a set of attributes for each box, e.g. indicating whether that object is occluded (see the full description in the <a href="download_v7.html#attributes">download</a> section).<br><br></p>
+<h3><a class="title-anchor" id="object-segmentations" href="#object-segmentations">Object segmentations</a></h3>
+<p>Table 3 shows an overview of the object segmentation annotations in all splits of the dataset. These annotations cover a subset of 350 classes from the 600 boxed classes. These offer a broader range of categories than Cityscapes or COCO, and cover more images and instances than ADE20k. The segmentations are spread over a subset of the images with bounding boxes (Table 2).</p>
+<p align='center'>Table 3: Instance segmentation masks.</p>
+<table>
+<thead>
+<tr>
+<th align="right"></th>
+<th align="right">Train</th>
+<th align="right">Validation</th>
+<th align="right">Test</th>
+<th align="right"># Classes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="right">Images</td>
+<td align="right">944,037</td>
+<td align="right">13,524</td>
+<td align="right">40,386</td>
+<td align="right">-</td>
+</tr>
+<tr>
+<td align="right">Instance masks</td>
+<td align="right">2,686,666</td>
+<td align="right">24,730</td>
+<td align="right">74,102</td>
+<td align="right">350</td>
+</tr>
+</tbody>
+</table>
+<p>For the training set we annotated 2.7M instance masks, starting from the available bounding boxes. The masks cover 350 classes and are spread over 944k images. On average there are 2.8 segmented instances per image. The segmentation masks on the training set have been produced by a state-of-the-art interactive segmentation process [4], where professional human annotators iteratively correct the output of a segmentation neural network. This is more efficient than manual drawing alone, while at the same time delivering accurate masks (mIoU 84% [4]).</p>
+<p>We selected the 350 classes to annotate with segmentation masks based on the following criteria: (1) whether the class exhibits one coherent appearance over which a policy could be defined (e.g. &quot;hiking equipment&quot; is rather ill-defined); (2) whether a clear annotation policy can be defined (e.g. which pixels belong to a nose?); and (3) whether we expect current segmentation neural networks to be able to capture the shape of the class adequately (e.g. jellyfish contains thin structures that are hard for state-of-the-art models).
+We have put particular effort into ensuring consistent annotations across different objects (e.g., all cat masks include their tail; bags carried by camels or persons, are included in their mask).</p>
+<p>We annotated all boxed instances of these 350 classes on the training split that fulfill the following criteria: (1) the object size is larger than 40x80 or 80x40 pixels; (2) the object boundaries can be confidently determined by the annotator (e.g. blurry or very dark instances are skipped); (3) the bounding-box contains a single real object (i.e. does not have any of the IsGroupOf, IsDepiction, IsInside attributes). A few of the 350 classes have a disproportionately large number of instances. To better spread the annotation effort we capped four categories: &quot;clothing&quot; to 441k instances, &quot;person&quot; to 149k, &quot;woman&quot; to 117k, &quot;man&quot; to 114k. In total we annotated segmentation masks for 769k instances of &quot;person&quot;+&quot;man&quot;+&quot;woman&quot;+&quot;boy&quot;+&quot;girl&quot;+&quot;human body&quot;. All other classes are annotated without caps, using only the two criteria above. <br />
+The per-instance corrective clicks generated by the interactive segmentation process [4] are included in the mask data files, and as part of the <a href="#point-level-labels">point-level labels</a> (see below).</p>
+<p>For the validation and test splits we created 99k masks spread over 54k images. These have been annotated with a purely manual free-painting tool and with a strong focus on quality. They are near-perfect (self-consistency 90% mIoU [4]) and capture even fine details of complex object boundaries (e.g. spiky flowers and thin structures in man-made objects). For the validation and test splits we limited these annotation to a maximum of 600 instances per class (per split), and applied the same instance selection criteria as in the training split (minimal size, unambiguous boundary, single real object). On average over all instances, both our training and validation+test annotations offer more accurate object boundaries than the polygon annotations provided by most existing datasets [4].</p>
+<p>Please note that instances without a mask remain covered by their corresponding bounding boxes, and thus can be appropriately handled during training and evaluation of segmentation models.</p>
+<p>We emphasize that the images are annotated both human-verified positive <em> and </em> negative labels. The negative image-level labels can be used during training of segmentation models, e.g. for hard-negative mining. Moreover, they can also be used during evaluation, as we do for the <a href="evaluation.html" target="_blank">Open Images Challenge</a>.<br><br></p>
+<h3><a class="title-anchor" id="visual-relationships" href="#visual-relationships">Visual relationships</a></h3>
+<p>Table 4 shows an overview of the visual relationship annotations in the dataset.</p>
+<p align='center'>Table 4: Relationships and attributes.</p>
+<table>
+<thead>
+<tr>
+<th align="right"></th>
+<th align="right">Train</th>
+<th align="right">Validation</th>
+<th align="right">Test</th>
+<th align="right"># Distinct relationship triplets</th>
+<th align="right"># Classes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="right">Relationship triplets</td>
+<td align="right">3,174,291<br/>non-attr: 348,560</td>
+<td align="right">27,243<br/>non-attr: 4,951</td>
+<td align="right">82,746<br/>non-attr: 14,403</td>
+<td align="right">1,466<br/>non-attr:  1,384</td>
+<td align="right">288</td>
+</tr>
+</tbody>
+</table>
+<p>In our notation, a pair of objects connected by a relationship forms a triplet (e.g. &quot;beer on table&quot;). Visual attributes are also represented as triplets, where an object in connected with an attribute using the relationship <em>is</em>. We annotate two types of attributes: physical object properties (e.g. &quot;table is wooden&quot; or &quot;handbag is made of leather&quot;) and human actions (e.g. &quot;man is jumping&quot; or &quot;woman is standing&quot;). We initially selected 2019 possible triplets based on existing bounding box annotations. The 1,466 of them that have at least one instance in the training split form the final set of visual relationships/attributes triplets. In total, we annotated more than 3.1M instances of these triplets on the training split, involving 288 different object classes and 15 attributes. These include human-object relationships (e.g. &quot;woman playing guitar&quot;, &quot;man holding microphone&quot;), object-object relationships (e.g. &quot;beer on table&quot;, &quot;dog inside car&quot;), human-human relationships (e.g. &quot;two men shake hands&quot;), object attributes (e.g. &quot;table is wooden&quot;), and human actions (e.g. &quot;man is jumping&quot;).</p>
+<p>Visual relationship annotations are exhaustive (except human-human relationships, see next), meaning that for each image that can potentially contain a relationship triplet (i.e. that contains the objects involved in that triplet), we provide annotations exhaustively listing all positive triplets instances in that image. For example, for &quot;woman playing guitar&quot; in an image, we list all pairs of (&quot;woman&quot;,&quot;guitar&quot;) that are in the relationship &quot;playing&quot; in that image. All other pairs of (&quot;woman&quot;,&quot;guitar&quot;) in that image are reliable negative examples for the &quot;playing&quot; relationship. Further, human-human relationships were exhaustively annotated for the images that have the corresponding positively verified image-level label for the relationship (e.g., if an image has positively verified image-level label &quot;hug&quot;, all pairs of people hugging would be annotated).</p>
+<p>Finally, we annotated some zero-shot triplets: 61 distinct triplets in the validation and test sets do not have samples in the train set (and some triplets in train set do not have corresponding triplets on validation and test sets). Examples of these triplets are: &quot;girl holds dumbbell&quot;, &quot;pizza on a cutting board&quot;, or &quot;dog on a washing machine&quot;.</p>
+<p>We emphasize that the images are annotated both with human-verified positive <em> and </em> negative image-level labels (see <a href="#image-level-labels">section above</a>). Importantly, the negative image-level labels can be used during training of visual relationship detectors: if any of the two object classes in a relationship triplet is marked as a negative label in our ground-truth, then all detections of that triplet are false-positives. The same can be done during evaluation, as we did for our official <a href="evaluation.html" target="_blank">Open Images Challenge metric</a>.<br><br></p>
+<h3><a class="title-anchor" id="localized-narratives" href="#localized-narratives">Localized narratives</a></h3>
+<p>Localized narratives are multimodal descriptions of images consisting of synchronized voice, text, and mouse traces over the objects being described. In Open Images V6 we released 675k localized narratives annotations on images from Open Images (Table 5).</p>
+<p align='center'>Table 5: Localized narrative counts on Open Images.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="right">Train</th>
+<th align="right">Validation</th>
+<th align="right">Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Images</td>
+<td align="right">504,413</td>
+<td align="right">41,620</td>
+<td align="right">125,436</td>
+</tr>
+<tr>
+<td>Localized narrative annotations</td>
+<td align="right">507,444</td>
+<td align="right">41,691</td>
+<td align="right">126,020</td>
+</tr>
+</tbody>
+</table>
+<p>Note we originally launched localized narratives only on train in V6, but since July 2020 we also have validation and test covered.
+More information about this type of annotations, as well as visualizations and annotations for other datasets can be found in the <a href="https://google.github.io/localized-narratives/" target="_blank">localized narratives standalone website</a>.
+<br><br></p>
+<h3><a class="title-anchor" id="point-level-labels" href="#point-level-labels">Point-level labels</a></h3>
+<p>We provide class labels for large, diverse set of points over 1.4M images. These labels cover 5,827 classes including both things and stuff (e.g. things: dog, shoes; stuff: mountain, pavement). These point labels are suitable for zero/few-shot semantic segmentation training and evaluation. The number of points per class has a zipf-like distribution (few classes have many point labels, many classes have few labels).</p>
+<!-- Drafted at https://codeplay.googleplex.com/playground/oidv7-table/1 -->
+<p align='center'>Table 6: Point-level label counts for new Open Images v7 data.</p>
+<table>
+<thead>
+<tr align="right">
+  <th></th>
+  <th>Train</th>
+  <th>Validation</th>
+  <th>Test</th>
+  <th>#Classes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td align="left">Images</td>
+  <td align="right">805,298</td>
+  <td align="right">36,702</td>
+  <td align="right">122,885</td>
+  <td align="right">-</td>
+</tr>
+<tr class="separation">
+  <td align="left">PointVerification</td>
+  <td align="right">14,650,957</td>
+  <td align="right">693,085</td>
+  <td align="right">7,251,456</td>
+  <td align="right">4,171</td>
+</tr>
+<tr>
+  <td align="left">FreeFrom</td>
+  <td align="right">1,486,975</td>
+  <td align="right">0</td>
+  <td align="right">0</td>
+  <td align="right">4,142</td>
+</tr>
+<tr>
+  <td align="left">CorrectiveClicks</td>
+  <td align="right">11,374,035</td>
+  <td align="right">790,237</td>
+  <td align="right">2,397,390</td>
+  <td align="right">389</td>
+</tr>
+<tr  class="separation">
+  <td align="left">All point-labels</td>
+  <td align="right">27,511,967</td>
+  <td align="right">1,483,322</td>
+  <td align="right">9,648,846</td>
+  <td align="right">5,827</td>
+</tr>
+<tr>
+  <td align="left">Yes point-labels</td>
+  <td align="right">9,059,312</td>
+  <td align="right">530,313</td>
+  <td align="right">2,794,244</td>
+  <td align="right">5,180</td> 
+</tr>
+</tbody>
+</table>
+</p>
+<p>The point labels were collected from human raters via three different methods:</p>
+<ul>
+<li>PointVerification: A machine learning model generated questions of the kind &quot;is this point on a pumpkin?&quot; <a href="#ref-6">[6]</a>. Human annotators then answered ‘yes’, or ‘no’, or ‘unsure’. Hence, we release both positive (‘yes’) and negative (‘no’) labels here.</li>
+<li>CorrectiveClicks: Corrective clicks generated by the interactive segmentation process <a href="#ref-4">[4]</a>, converted into yes/no/unsure labels. We include the existing OpenImages V5 clicks, as well as many new ones.</li>
+<li>FreeForm: Free-form clicking on the image + label input <a href="#ref-5">[5]</a>. These labels are always positive.</li>
+</ul>
+<p>Table 6 shows some key statistics of the newly released data, and table 7 the grand total when including the converted v5 data.</p>
+<p>Over the train+validation+test sets the 66M point-level class labels cover 57M unique points (image-id + xy coordinates). <!-- Total points 66,391,027; annotations cover 56,722,564 points total (image-y-x). --></p>
+<p>5,180 classes have at least one yes point, 3,739 classes have 3 or more yes points. Out of the 5,827 known classes, 2,033 appear in all three train+validation+test sets.</p>
+<!-- Drafted at https://codeplay.googleplex.com/playground/oidv7-table/1 -->
+<p align='center'>Table 7: Total point-level label counts in Open Images v7.</p>
+<table>
+<thead>
+<tr align="right">
+  <th></th>
+  <th>Train</th>
+  <th>Validation</th>
+  <th>Test</th>
+  <th>#Classes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td align="left">Images</td>
+  <td align="right">1,260,458</td>
+  <td align="right">36,702</td>
+  <td align="right">122,885</td>
+  <td align="right">-</td>
+</tr>
+<tr class="separation">
+  <td align="left">PointVerification</td>
+  <td align="right">14,650,957</td>
+  <td align="right">693,085</td>
+  <td align="right">7,251,456</td>
+  <td align="right">4,171</td>
+</tr>
+<tr>
+  <td align="left">FreeFrom</td>
+  <td align="right">1,486,975</td>
+  <td align="right">0</td>
+  <td align="right">0</td>
+  <td align="right">4,142</td>
+</tr>
+<tr>
+  <td align="left">CorrectiveClicks</td>
+  <td align="right">39,120,927</td> 
+  <td align="right">790,237</td>
+  <td align="right">2,397,390</td>
+  <td align="right">389</td>
+</tr>
+<tr  class="separation">
+  <td align="left">All point-labels</td>
+  <td align="right">55,258,859</td>
+  <td align="right">1,483,322</td>
+  <td align="right">9,648,846</td>
+  <td align="right">5,827</td>
+</tr>
+<tr>
+  <td align="left">Yes point-labels</td>
+  <td align="right">22,589,693</td>
+  <td align="right">530,313</td>
+  <td align="right">2,794,244</td>
+  <td align="right">5,180</td>
+</tr>
+</tbody>
+</table>
+<p>Together FreeForm and PointVerification provide 5.6M yes point labels over 5,800 classes.
+In these two modalities, a class may be mentioned with multiple names (e.g. bottle &amp; flask). We merge such cases via a named-entity recognition system into similar concepts (with an unique class identifier). The <a href="download_v7.html">download</a> page provides a list of such name variants (&quot;Point-label classes metadata&quot;).</p>
+<p>Compared to the v5 release, the v7 CorrectiveClicks release:</p>
+<ul>
+<li>Provide point-level semantic label (instead of instance segmentation in v5),</li>
+<li>Cover train, validation, and test sets (instead of train only in v5),</li>
+<li>Cover 39 new classes (389 total), and include 14.6M new points. <!-- 14,561,662 v7 new Corrective Click points --></li>
+</ul>
+<p>For CorrectiveClicks each point label corresponds to one human annotator click. <br />
+For FreeForm, each point label corresponds to one human annotator click plus a free text entry to name a class. <br />
+For PointVerification, point labels are deduced from multiple human votes over the generated yes-no questions.
+<code>Unsure</code> labels indicate votes that did not converge, or corrective clicks with ambiguous conversion. <br />
+Out of the overall 66M point labels, 40% are &quot;yes&quot; labels, 45% are &quot;no&quot; labels, and 15% are &quot;unsure&quot; labels. Details of each point-label vote are provided in the  <a href="download_v7.html#df-point-labels">download</a> files.</p>
+<p>More details about the point-level labels data collection process and statistics can be found at <a href="#ref-6">[6]</a>.</p>
+<h2><a class="title-anchor" id="class-definitions" href="class-definitions">Class definitions</a></h2>
+<p>Classes are identified by MIDs (Machine-generated Ids) as can be found in <a href="https://en.wikipedia.org/wiki/Freebase">Freebase</a> or <a href="https://developers.google.com/knowledge-graph/">Google Knowledge Graph API</a>. A short description of each class is available in <a href="https://storage.googleapis.com/openimages/v6/oidv6-class-descriptions.csv">class-descriptions.csv</a>.</p>
+<h2><a class="title-anchor" id="statistics" href="#statistics">Statistics and data analysis</a></h2>
+<h3>Hierarchy for the 600 boxable classes</h3>
+<p>View the set of boxable classes as a hierarchy <a href="https://storage.googleapis.com/openimages/2018_04/bbox_labels_600_hierarchy_visualizer/circle.html">here</a> or download it as a <a href="https://storage.googleapis.com/openimages/2018_04/bbox_labels_600_hierarchy.json">JSON file</a>:</p>
+<p><a href="https://storage.googleapis.com/openimages/2018_04/bbox_labels_600_hierarchy_visualizer/circle.html"><img src="images/v2-bbox_labels_vis_screenshot.png" alt="Hierarchy Visualizer" /></a></p>
+<h3>Label distributions</h3>
+<p>The following figures show the distribution of annotations across the dataset for V5. Notice that the label distribution is heavily skewed (note: the y-axis is on a log-scale). Classes are ordered by number of positive samples. Green indicates positive samples while red indicates negatives.</p>
+<p><img src="images/v5-human-image-level-train.png" alt="Label frequencies - Training set" />
+<img src="images/v5-human-image-level-validation.png" alt="Label frequencies - Validation set" />
+<img src="images/v5-human-image-level-test.png" alt="Label frequencies - Test set" />
+<img src="images/v5-boxes-train.png" alt="Bounding box frequencies - Training set" />
+<img src="images/v5-boxes-validation.png" alt="Bounding box frequencies - Validation set" />
+<img src="images/v5-boxes-test.png" alt="Bounding box frequencies - Test set" /></p>
+<h2><a class="title-anchor" id="licenses" href="#licenses">Licenses</a></h2>
+<p>The annotations are licensed by Google LLC under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> license. The images are listed as having a <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a> license. <br />
+<strong>Note:</strong> while we tried to identify images that are licensed under a Creative Commons Attribution license, we make no representations or warranties regarding the license status of each image and you should verify the license for each image yourself.</p>
+<h2><a class="title-anchor" id="references" href="#references">References</a></h2>
+<ol>
+<li>
+<p><a class="anchor" id="ref-1"></a>
+&quot;<a href="https://arxiv.org/abs/1708.02750" target="_blank">Extreme clicking
+for efficient object annotation</a>&quot;, Papadopolous et al., ICCV 2017.</p>
+</li>
+<li>
+<p><a class="anchor" id="ref-2"></a>
+&quot;<a href="https://arxiv.org/abs/1602.08405" target="_blank">We don't need no
+bounding-boxes: Training object class detectors using only human
+verification</a>&quot;, Papadopolous et al., CVPR 2016.</p>
+</li>
+<li>
+<p><a class="anchor" id="ref-3"></a>
+&quot;<a href="https://arxiv.org/abs/1811.00982" target="_blank">The Open Images
+Dataset V4: Unified image classification, object detection, and visual
+relationship detection at scale</a>&quot;, Kuznetsova et al.,
+arXiv:1811.00982 2018.</p>
+</li>
+<li>
+<p><a class="anchor" id="ref-4"></a>
+&quot;<a href="https://arxiv.org/pdf/1903.10830" target="_blank">Large-scale
+interactive object segmentation with human annotators</a>&quot;, Benenson et al.,
+CVPR 2019.</p>
+</li>
+<li>
+<p><a class="anchor" id="ref-5"></a>
+&quot;<a href="https://arxiv.org/abs/1906.01542" target="_blank">Natural
+Vocabulary Emerges from Free-Form Annotations</a>&quot;, Pont-Tuset et al.,
+arXiv 2019.</p>
+</li>
+<li>
+<p><a class="anchor" id="ref-6"></a>&quot;<a href="https://storage.googleapis.com/openimages/web_v7/2022_pointillism_arxiv.pdf" target="_blank">From couloring-in to pointillism:
+revisiting semantic segmentation supervision</a>&quot;, Benenson et al., arXiv 2022.</p>
+</li>
+</ol>
+<!--
+## History - DO WE WANT IT?
+
+- The validation of V1 set was partitioned into validation and test from V2 onwards. This is intended to make evaluations more tractable.
+
+
+## materials - used by Vitto while editing - REMOVE BEFORE LAUNCHING!
+
+CUT FROM IMAGE-LEVEL LABELS SECTION
+
+(19,693 have at least one human-verified sample and 7870 have a sample in the machine-generated pool; note that verifications come from both the released machine-generated labels and from internal-only models).
+
+
+CUT FROM VAL SET BOX SECTION
+
+For example, car has two children limousine and van. All limousines and all vans have been annotated as such, while all other kinds of cars have been annotated as car.
+
+-->
+
+    </div>
+  </div>
+</body>
+</html>

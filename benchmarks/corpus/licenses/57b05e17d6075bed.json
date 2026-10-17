@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/barnyardbbs/536166577",
+  "resolvedUrl": "https://www.flickr.com/photos/barnyardbbs/536166577",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:07.707076+00:00",
+  "sourcePageBytes": 508460,
+  "sourcePageSha256": "654ce94d04700f1ff068a96211f2ead8562377832a29c0128a64e667ee1984e8",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/1371/536166577_13e83f31e4_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/barnyardbbs/536166577",
+    "author": {
+      "@type": "Person",
+      "name": "Ben Yanis",
+      "url": "https://www.flickr.com/photos/barnyardbbs",
+      "image": "https://live.staticflickr.com/1299/buddyicons/8626352@N03.jpg?1181265037#8626352@N03"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Ben Yanis",
+      "url": "https://www.flickr.com/photos/barnyardbbs",
+      "image": "https://live.staticflickr.com/1299/buddyicons/8626352@N03.jpg?1181265037#8626352@N03"
+    }
+  },
+  "structuredBlockSha256": "cfc81d64043a1624171d1e0ed4cce0820ab444533b6e03f8bdca15dffadd95b1",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "536166577",
+  "rawPagePersisted": false
+}

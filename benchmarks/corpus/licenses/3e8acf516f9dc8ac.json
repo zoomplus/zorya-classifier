@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/fire_up_the_quattro/5417817599",
+  "resolvedUrl": "https://www.flickr.com/photos/fire_up_the_quattro/5417817599",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:33.772738+00:00",
+  "sourcePageBytes": 525745,
+  "sourcePageSha256": "b382dc9e82dbf0e3e9756d00c95febb1a72ca77c09b973dafacb7e1e32db35be",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/5257/5417817599_a079023b74_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/fire_up_the_quattro/5417817599",
+    "author": {
+      "@type": "Person",
+      "name": "Firing up the quattro....",
+      "url": "https://www.flickr.com/photos/fire_up_the_quattro",
+      "image": "https://live.staticflickr.com/3690/buddyicons/53595130@N06.jpg?1369161111#53595130@N06"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Firing up the quattro....",
+      "url": "https://www.flickr.com/photos/fire_up_the_quattro",
+      "image": "https://live.staticflickr.com/3690/buddyicons/53595130@N06.jpg?1369161111#53595130@N06"
+    }
+  },
+  "structuredBlockSha256": "a463e0d58a1433c30d7c2c13a4daf5717bd3d9ed68d73a048fd58222f54ed31a",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "5417817599",
+  "rawPagePersisted": false
+}

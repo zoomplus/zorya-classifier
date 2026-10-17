@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/sonofgroucho/5053117627",
+  "resolvedUrl": "https://www.flickr.com/photos/sonofgroucho/5053117627",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:43.567328+00:00",
+  "sourcePageBytes": 519551,
+  "sourcePageSha256": "d77b144f8cd60103ab7cc7fd4135fa59be2a92f0b6f79729d005c3ed00989fd1",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/4106/5053117627_6c0e4fb135_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/sonofgroucho/5053117627",
+    "author": {
+      "@type": "Person",
+      "name": "Son of Groucho",
+      "url": "https://www.flickr.com/photos/sonofgroucho",
+      "image": "https://live.staticflickr.com/1619/buddyicons/23401669@N00.jpg?1453068123#23401669@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Son of Groucho",
+      "url": "https://www.flickr.com/photos/sonofgroucho",
+      "image": "https://live.staticflickr.com/1619/buddyicons/23401669@N00.jpg?1453068123#23401669@N00"
+    }
+  },
+  "structuredBlockSha256": "4d3c3eea95a0204c46404512174f623824cb3b013056c835a5f93af9a274f84f",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "5053117627",
+  "rawPagePersisted": false
+}

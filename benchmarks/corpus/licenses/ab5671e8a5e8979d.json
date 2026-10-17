@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/thesecondglass/15700093739",
+  "resolvedUrl": "https://www.flickr.com/photos/thesecondglass/15700093739",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:04.017872+00:00",
+  "sourcePageBytes": 518251,
+  "sourcePageSha256": "d491b3fc3bf69d198be2f488cc85f8ccb1c3634d17d5fc89d9a211fddfde294e",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/7559/15700093739_5a95395930_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/thesecondglass/15700093739",
+    "author": {
+      "@type": "Person",
+      "name": "Wine Riot",
+      "url": "https://www.flickr.com/photos/thesecondglass",
+      "image": "https://live.staticflickr.com/7521/buddyicons/80461254@N00.jpg?1463070100#80461254@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Wine Riot",
+      "url": "https://www.flickr.com/photos/thesecondglass",
+      "image": "https://live.staticflickr.com/7521/buddyicons/80461254@N00.jpg?1463070100#80461254@N00"
+    }
+  },
+  "structuredBlockSha256": "ac4c079d98b4ee7b0b20598246a848d5e9939f0a0b8ba3c75b2265318a83b3b0",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "15700093739",
+  "rawPagePersisted": false
+}

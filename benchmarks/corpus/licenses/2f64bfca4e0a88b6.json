@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/16179216@N07/9502350063",
+  "resolvedUrl": "https://www.flickr.com/photos/16179216@N07/9502350063",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:16.734436+00:00",
+  "sourcePageBytes": 520654,
+  "sourcePageSha256": "07bf1f9458f454fc75901e133e41367ea4a3f0d1e30f73200d3c6ef45916dcec",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/3672/9502350063_881c91a56b_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/16179216@N07/9502350063",
+    "author": {
+      "@type": "Person",
+      "name": "Barry Lewis",
+      "url": "https://www.flickr.com/photos/16179216@N07",
+      "image": "https://live.staticflickr.com/2861/buddyicons/16179216@N07.jpg?1372449894#16179216@N07"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Barry Lewis",
+      "url": "https://www.flickr.com/photos/16179216@N07",
+      "image": "https://live.staticflickr.com/2861/buddyicons/16179216@N07.jpg?1372449894#16179216@N07"
+    }
+  },
+  "structuredBlockSha256": "2ed2e93882f8ade3511816d2bd0d36a10c4571e90902d2ce565a059fbb86e5f5",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "9502350063",
+  "rawPagePersisted": false
+}

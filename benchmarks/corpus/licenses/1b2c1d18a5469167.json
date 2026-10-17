@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/bobrichmond/3721695949",
+  "resolvedUrl": "https://www.flickr.com/photos/bobrichmond/3721695949",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:05.698235+00:00",
+  "sourcePageBytes": 518400,
+  "sourcePageSha256": "a7ae62230a30dfac9863ff828947ce4ff8dbb583ac9cfa24fec9aa8e27d5b9e9",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/2601/3721695949_8784978f01_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/bobrichmond/3721695949",
+    "author": {
+      "@type": "Person",
+      "name": "Bob Richmond",
+      "url": "https://www.flickr.com/photos/bobrichmond",
+      "image": "https://live.staticflickr.com/2433/buddyicons/38577038@N02.jpg?1243392078#38577038@N02"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Bob Richmond",
+      "url": "https://www.flickr.com/photos/bobrichmond",
+      "image": "https://live.staticflickr.com/2433/buddyicons/38577038@N02.jpg?1243392078#38577038@N02"
+    }
+  },
+  "structuredBlockSha256": "2d16d661e21b9562ec78615ea62510edc0208afd5d7a978bcb4e1a2201a3eb2c",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "3721695949",
+  "rawPagePersisted": false
+}

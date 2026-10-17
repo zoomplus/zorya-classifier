@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/maurina/8026647077",
+  "resolvedUrl": "https://www.flickr.com/photos/maurina/8026647077",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:32.043570+00:00",
+  "sourcePageBytes": 514647,
+  "sourcePageSha256": "bef879b65abb0eef7a55bfee9ab9cfdfaa7aa65823f44472bd5d861af786d8d8",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/8320/8026647077_b4ff7c7b30_z.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/maurina/8026647077",
+    "author": {
+      "@type": "Person",
+      "name": "Maurina Rara",
+      "url": "https://www.flickr.com/photos/maurina",
+      "image": "https://live.staticflickr.com/42/buddyicons/51854834@N00.jpg?1137085754#51854834@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Maurina Rara",
+      "url": "https://www.flickr.com/photos/maurina",
+      "image": "https://live.staticflickr.com/42/buddyicons/51854834@N00.jpg?1137085754#51854834@N00"
+    }
+  },
+  "structuredBlockSha256": "d15c2874e9ad6b12865e02553032b44603993e8450db973739fd4036c2781836",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "8026647077",
+  "rawPagePersisted": false
+}

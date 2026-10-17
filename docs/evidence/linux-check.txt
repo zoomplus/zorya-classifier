@@ -1,0 +1,205 @@
+
+> zorya-classifier@0.1.0 check
+> npm run secrets:check && npm run typecheck && npm run lint && npm run boundaries && npm run dead-code:ci && npm test && npm run build
+
+
+> zorya-classifier@0.1.0 secrets:check
+> node scripts/secrets.mjs --worktree
+
+{"status":"PASS","mode":"--worktree","scanned":175,"skippedBinary":0,"totalBytes":1902577}
+
+> zorya-classifier@0.1.0 typecheck
+> tsc --noEmit
+
+
+> zorya-classifier@0.1.0 lint
+> eslint . --max-warnings 0
+
+
+> zorya-classifier@0.1.0 boundaries
+> node scripts/boundaries.mjs
+
+Boundaries and import cycles passed (17 modules)
+
+> zorya-classifier@0.1.0 dead-code:ci
+> knip --no-progress
+
+Configuration hints (2)
+Remove entry: eslint.config.mjs
+Remove project: eslint.config.mjs
+
+> zorya-classifier@0.1.0 test
+> node --import tsx --test --test-concurrency=2 test/*.test.ts
+
+✔ unknown and in-flight costs are summed, and duplicate settlement is rejected (0.66639ms)
+✔ reported cost overruns halt subsequent admissions and unknown errors retain reservations (0.216476ms)
+✔ zero-priced fixture requests still respect physical call admission cap (0.125403ms)
+✔ runner stops before native baseline and next cases after receipt-only evidence loss (72.938405ms)
+✔ controlled fixture neighbor cannot run under a live evidence label (0.318693ms)
+✔ classification keeps failures and operational unknown distinct from the semantic unknown class (1.416813ms)
+✔ all failed classifications produce zero accuracy and F1, not an empty successful denominator (0.260477ms)
+✔ macro F1 includes a declared class with no examples using zero-division zero (0.144784ms)
+✔ empty classification runs report null aggregate rates and preserve explicit zero confusion (0.131838ms)
+✔ class IDs cannot collide with evaluator buckets or object prototypes (0.172446ms)
+✔ classification rejects missing/duplicate taxonomy and unrecognized labels (0.383222ms)
+✔ latencies use nearest rank without mutating samples and include the slow failure tail (0.211551ms)
+✔ localization scores edge hits, any GT instance, distance, negatives and failed attempts separately (12.287563ms)
+✔ localization uses region center, not any region overlap or enclosing union of GT boxes (0.562178ms)
+✔ all image corners and right/bottom box boundaries count as closed edges (0.300795ms)
+✔ empty and all-failed localization runs do not fabricate zero distances or successes (0.172762ms)
+✔ localization rejects absent verification, missing GT, invalid geometry and invalid failure latency (0.281825ms)
+✔ native parity compares exact classes, raw probability differences and all-attempt denominator (0.344023ms)
+✔ unmatched probability keys are unavailable rather than implicitly filled with zeros (0.121188ms)
+✔ parity preserves empty/failure cases and rejects malformed probability measurements (0.137416ms)
+✔ prefix ablation resolves recorded labels to canonical source pixels, never generated coordinates (1.903325ms)
+✔ prefix presence is independent of spatial Choice, and absence at fine union is not global absence (0.503887ms)
+✔ baseline maxima use stable supplied order for equal probabilities and validate native winner (0.319196ms)
+✔ live CLI requires three explicit budget/admission flags; offline requires explicit artifact directory (1.438702ms)
+✔ recording retains failed attempt and unknown-cost reservation without retry or credential logs (12.984346ms)
+✔ budget rejection is recorded and never dispatches another provider attempt (2.77937ms)
+✔ late provider result is joined and recorded but cannot become a successful outcome (2.923929ms)
+✔ fixture response is content-blind and identical captured request baseline retains byte hash (4.717211ms)
+✔ receipt persistence failure is fatal and retains the primary provider failure and budget (3.218634ms)
+✔ late timeout plus receipt failure retains an independent terminal evidence marker (2.561243ms)
+✔ annotated rounded native distribution keeps raw values and stable ties; unannotated mass is rejected (0.180764ms)
+✔ prefix ablation accepts only explicitly annotated rounded scores without altering canonical geometry (0.211691ms)
+✔ architecture gate accepts ports and rejects reversed dependencies cross-platform (514.478991ms)
+✔ architecture gate rejects private, escaped and cyclic imports (743.341483ms)
+✔ classify validates before dispatch and preserves unknown cost (3.270214ms)
+✔ categorical maxima below 0.8 are accepted; exact ties use supplied order (0.52572ms)
+✔ contradictory native choice and missing probability are errors (0.436812ms)
+✔ one absolute deadline cancels provider and does not retry (15.069897ms)
+✔ cancelled queued operation never dispatches; physical work retains capacity (1.399111ms)
+✔ full queue fails with CAPACITY, then returns to idle (2.068873ms)
+✔ caller bytes are copied before queue awaits, including Buffer views (7.379434ms)
+✔ image limits and malformed media reject without provider calls (0.624833ms)
+✔ 1000 operation/dispose cycles leave no owned timeout handles (43.35027ms)
+✔ already aborted signal dispatches nothing (0.250312ms)
+✔ full queue rejects before reading or copying another image (2.817333ms)
+✔ rounded Jev mass needs explicit annotation and preserves raw categorical ties (0.408105ms)
+✔ leaked global/node intervals are rejected including aliases (18.494244ms)
+✔ stored interval cleanup and shadowed names are accepted (4.394401ms)
+✔ full locator has three calls with direct image parts and bounded candidate sets (259.903884ms)
+✔ global absence is one call, local absence does not claim global absence (256.98777ms)
+✔ none and presence contradiction remains unknown (236.465311ms)
+✔ 0.5 independent presence abstains, not a categorical threshold (35.953414ms)
+✔ ROI bounds checked before provider; tiny ROI reports layout limit (5.144767ms)
+✔ candidate refinement is opt-in, bounded and never substitutes area (448.485079ms)
+✔ source grids partition odd and narrow regions without edge gaps (0.554381ms)
+✔ beam keeps padded source geometry, canonical dedupe and at most196 cells (0.598029ms)
+✔ presentation preserves aspect ratio with padding and stays in Jev limits (5.677856ms)
+✔ adapter pins route, provider and no-fallback and preserves unknown metadata (20.146921ms)
+✔ accepts exact model identity typesafe/jev-1.14 and real zero cost (0.611645ms)
+✔ accepts exact model identity typesafe/jev-1.14-20261014 and real zero cost (1.03887ms)
+✔ uses header request ID only when response ID is unknown (0.568007ms)
+✔ rejects untrusted response metadata model {"model":"typesafe/jev-1.13-20260917"} (1.304323ms)
+✔ rejects untrusted response metadata model {"model":"typesafe/jev-1.14-untrusted"} (2.103559ms)
+✔ rejects untrusted response metadata model {"model":"typesafe/jev-1.14-20260230"} (0.431599ms)
+✔ rejects untrusted response metadata provider {"provider":"other-provider"} (0.378205ms)
+✔ rejects untrusted response metadata usage {"usage":{"cost":-1}} (0.633889ms)
+✔ rejects untrusted response metadata unexpected {"unexpected":"secret-token-do-not-return"} (0.386309ms)
+✔ sends direct top-level png image state unchanged (6.429089ms)
+✔ sends direct top-level jpeg image state unchanged (2.564998ms)
+✔ rejects unprepared image dimensions 279x280 (2.041021ms)
+✔ rejects unprepared image dimensions 280x279 (2.087383ms)
+✔ rejects unprepared image dimensions 1569x280 (4.474847ms)
+✔ rejects unprepared image dimensions 280x1569 (3.740591ms)
+✔ accepts maximum prepared image side (5.396898ms)
+✔ rejects unsupported image representation https://example.com/private.png (0.265924ms)
+✔ rejects unsupported image representation data:audio/wav;base64,AAAA (0.195845ms)
+✔ rejects unsupported image representation data:image/png;base64,AAAA (0.12849ms)
+✔ rejects unsupported image representation data:image/jpeg;base64,!!!! (0.154082ms)
+✔ rejects unsupported image representation data:image/jpeg;base64,/9j/= (0.170413ms)
+✔ rejects nested raw audio and extra request fields before transport (0.400849ms)
+✔ Choice enforces 2..255 options: 1 (0.271837ms)
+✔ Choice enforces 2..255 options: 2 (0.322199ms)
+✔ Choice enforces 2..255 options: 255 (2.553031ms)
+✔ Choice enforces 2..255 options: 256 (0.473632ms)
+✔ preserves categorical ties, raw scores and independent confidence (0.330622ms)
+✔ supports bounded Noul without conflating it with Choice (0.291917ms)
+✔ rejects mismatched question/answer distribution {} (0.254266ms)
+✔ rejects mismatched question/answer distribution {"other":{"type":"choice","choice":"a","probabilities":{"a":0.6,"b":0.4}}} (0.285431ms)
+✔ rejects mismatched question/answer distribution {"target":{"type":"choice","choice":"a","probabilities":{"a":0.6,"b":0.4}},"other":{"type":"choice","choice":"a","probabilities":{"a":0.6,"b":0.4}}} (0.303117ms)
+✔ rejects mismatched question/answer distribution {"target":{"type":"noul","noul":0.8}} (0.256523ms)
+✔ rejects mismatched question/answer distribution {"target":{"type":"choice","choice":"c","probabilities":{"a":0.6,"b":0.4}}} (0.219348ms)
+✔ rejects mismatched question/answer distribution {"target":{"type":"choice","choice":"b","probabilities":{"a":0.6,"b":0.4}}} (0.25795ms)
+✔ rejects mismatched question/answer distribution {"target":{"type":"choice","choice":"a","probabilities":{"a":1}}} (0.303071ms)
+✔ rejects mismatched question/answer distribution {"target":{"type":"choice","choice":"a","probabilities":{"a":0.6,"b":0.4,"c":0}}} (0.204174ms)
+✔ rejects mismatched question/answer distribution {"target":{"type":"choice","choice":"a","probabilities":{"a":1.1,"b":-0.1}}} (0.2671ms)
+✔ takes immutable request snapshot before any await (0.29756ms)
+✔ lower request cap rejects before fetch, including encoded JSON overhead (0.152823ms)
+✔ factory rejects unsafe options {"maxRequestBytes":33554433} (0.137247ms)
+✔ factory rejects unsafe options {"maxResponseBytes":1048577} (0.069426ms)
+✔ factory rejects unsafe options {"maxRequestBytes":0} (0.059932ms)
+✔ factory rejects unsafe options {"maxResponseBytes":-1} (0.061106ms)
+✔ factory rejects unsafe options {"apiKey":"bad\nkey"} (0.074425ms)
+✔ factory rejects unsafe options {"endpoint":"https://unapproved.example"} (0.060902ms)
+✔ HTTP 401 is sanitized, body cancelled, no retry (0.956054ms)
+✔ HTTP 403 is sanitized, body cancelled, no retry (0.301551ms)
+✔ HTTP 413 is sanitized, body cancelled, no retry (0.192749ms)
+✔ HTTP 415 is sanitized, body cancelled, no retry (0.278226ms)
+✔ HTTP 429 is sanitized, body cancelled, no retry (0.206133ms)
+✔ HTTP 500 is sanitized, body cancelled, no retry (0.17819ms)
+✔ HTTP 302 is sanitized, body cancelled, no retry (0.167717ms)
+✔ declared response cap cancels before reading provider body (0.305711ms)
+✔ actual streamed response cap works without or with false Content-Length (0.824344ms)
+✔ malformed successful response is rejected body (1.283253ms)
+✔ malformed successful response is rejected body (0.166169ms)
+✔ malformed successful response is rejected empty (0.142321ms)
+✔ malformed successful response is rejected body (0.127604ms)
+✔ fetch and stream exceptions cannot leak messages or details, including forged ClassifierError (0.468662ms)
+✔ pre-aborted signal prevents transport and sanitizes cancellation reason (0.147096ms)
+✔ retains TIMEOUT code while sanitizing caller reason (0.137947ms)
+✔ late fetch response after abort is cancelled/released and never returns success (0.320195ms)
+✔ abort during body read cancels once, joins physical cleanup, releases reader/listener (0.366724ms)
+✔ cancellation rejection is sanitized and visible without retaining reader (0.249836ms)
+✔ rejects prototype setter keys rather than silently dropping requested options (0.271893ms)
+✔ rejects prototype setter keys in provider answer rather than stripping them (0.218322ms)
+✔ abort racing with body EOF cannot publish successful answer (0.354991ms)
+✔ copies fragmented reused stream buffers without retaining per-chunk allocations (0.767713ms)
+✔ complete request byte cap includes criteria, instructions, keys and JSON escaping (0.55933ms)
+✔ accepts exact serialized request cap and rejects one byte below it (2.757233ms)
+✔ rejects oversized criteria before allocating full serialized body (120.128368ms)
+✔ rejects accessors, cycles and overlong collections before schema cloning (0.455123ms)
+✔ rejects unnormalized choice distribution without renormalizing it (0.34393ms)
+✔ replays actual Jev 1.14 wire: screen-locator-jev-latency-2026-10-16 (0.786599ms)
+✔ replays actual Jev 1.14 wire: screen-locator-jev-1-14-2026-10-16 (0.379678ms)
+✔ non-enumerable declared fields and proxies cannot bypass preflight byte accounting (0.243354ms)
+✔ owned snapshot never invokes caller array iterator: own-method (0.51811ms)
+✔ owned snapshot never invokes caller array iterator: own-getter (0.269403ms)
+✔ owned snapshot never invokes caller array iterator: inherited-getter (0.275344ms)
+✔ choice mass remains strict without explicit rounding provenance (0.119611ms)
+✔ explicit rounding validates clipped feasible mass, not a fixed sum tolerance (0.286918ms)
+✔ adapter annotates only rounded mass and preserves raw native ties (0.484918ms)
+✔ rounded transport still rejects malformed distribution {"type":"choice","choice":"a","probabilities":{"a":0.505,"b":0.485}} (0.263481ms)
+✔ rounded transport still rejects malformed distribution {"type":"choice","choice":"b","probabilities":{"a":0.5,"b":0.49}} (0.256775ms)
+✔ rounded transport still rejects malformed distribution {"type":"choice","choice":"a","probabilities":{"a":0.6,"b":0.4},"probabilityRoundingStep":0.01} (0.24355ms)
+✔ replays actual 153-option Jev 1.14 rounded response without normalizing scores (1.984932ms)
+✔ secret filename checks reject private inputs and keep exact example templates (401.591748ms)
+✔ known provider prefixes, private keys, database credentials and entropy are detected without excerpts (207.454083ms)
+✔ empty templates and obvious low-entropy samples do not trigger credential heuristics (47.424592ms)
+✔ staged secret remains rejected when the working file has already been cleaned (102.660539ms)
+✔ clean staged content is independent of a later working-tree secret (99.823983ms)
+✔ worktree scan includes untracked files and skips ignored env without opening it (88.844787ms)
+✔ forced-staged ignored env is rejected by filename, without content findings (55.885702ms)
+✔ example templates are not a content allowlist (67.146768ms)
+✔ binary content is explicitly counted, while private binary filenames are rejected (114.119753ms)
+✔ oversized text fails closed instead of silently omitting the file (50.151687ms)
+✔ staged symlink blobs are rejected without following a filesystem target (59.643092ms)
+✔ repository gitignore protects local credentials, caches and releases but not examples or source (91.208128ms)
+✔ git failures expose only a sanitized rule and no Git diagnostic text (29.01556ms)
+✔ unquoted environment references are code, while literal quoted credentials remain scanned (71.176543ms)
+✔ POSIX tracked FIFO replacement cannot block the scanner (56.663819ms)
+✔ leading BOM in an untracked Git filename cannot alias a clean tracked file (54.265448ms)
+ℹ tests 160
+ℹ suites 0
+ℹ pass 160
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3914.369024
+
+> zorya-classifier@0.1.0 build
+> tsc -p tsconfig.build.json
+

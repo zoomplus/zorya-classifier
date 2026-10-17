@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/uncut/15753366776",
+  "resolvedUrl": "https://www.flickr.com/photos/uncut/15753366776",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:28.000427+00:00",
+  "sourcePageBytes": 517472,
+  "sourcePageSha256": "1f0f5dae4d5ca802d3bbe6ad1767c3cf4c5314d0bc9c35200bfb3b5764ab2d61",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/7501/15753366776_d36a2355a9_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/uncut/15753366776",
+    "author": {
+      "@type": "Person",
+      "name": "cesar bojorquez",
+      "url": "https://www.flickr.com/photos/uncut",
+      "image": "https://live.staticflickr.com/737/buddyicons/92258912@N00.jpg?1439441879#92258912@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "cesar bojorquez",
+      "url": "https://www.flickr.com/photos/uncut",
+      "image": "https://live.staticflickr.com/737/buddyicons/92258912@N00.jpg?1439441879#92258912@N00"
+    }
+  },
+  "structuredBlockSha256": "ce492c81d082421945f2a793532e0f833df3d6339f906a8b1086e368ba7c7b62",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "15753366776",
+  "rawPagePersisted": false
+}

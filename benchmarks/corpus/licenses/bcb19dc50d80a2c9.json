@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/bobjudge/3566500017",
+  "resolvedUrl": "https://www.flickr.com/photos/bobjudge/3566500017",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:04.013189+00:00",
+  "sourcePageBytes": 517311,
+  "sourcePageSha256": "6b387bb2162fecca05956d4d847a7bceaa56d93f76483942a71b1821e88bdb0a",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/3643/3566500017_aee085508b_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/bobjudge/3566500017",
+    "author": {
+      "@type": "Person",
+      "name": "Robert Judge",
+      "url": "https://www.flickr.com/photos/bobjudge",
+      "image": "https://live.staticflickr.com/8302/buddyicons/8286199@N08.jpg?1473279124#8286199@N08"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Robert Judge",
+      "url": "https://www.flickr.com/photos/bobjudge",
+      "image": "https://live.staticflickr.com/8302/buddyicons/8286199@N08.jpg?1473279124#8286199@N08"
+    }
+  },
+  "structuredBlockSha256": "9ddc58ae31d2817a14b3c5e8b8aa90f6072ae911f8a1e4029207df33791b11bb",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "3566500017",
+  "rawPagePersisted": false
+}

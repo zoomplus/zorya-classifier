@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/98706376@N00/4604392884",
+  "resolvedUrl": "https://www.flickr.com/photos/98706376@N00/4604392884",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:14.919096+00:00",
+  "sourcePageBytes": 518201,
+  "sourcePageSha256": "efe8bdada673ed0ad43f12a4d03474daf3018b03e5af8e2248a7ff9fae7ccc9a",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/1259/4604392884_ae617b9b8f_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/98706376@N00/4604392884",
+    "author": {
+      "@type": "Person",
+      "name": "John S. Quarterman",
+      "url": "https://www.flickr.com/photos/98706376@N00",
+      "image": "https://combo.staticflickr.com/pw/images/bbuddyicon04.png#98706376@N00"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "John S. Quarterman",
+      "url": "https://www.flickr.com/photos/98706376@N00",
+      "image": "https://combo.staticflickr.com/pw/images/bbuddyicon04.png#98706376@N00"
+    }
+  },
+  "structuredBlockSha256": "5e9026e74480bfa74dd5e676a4fdc3577867f3d6da1e113b93a13d9544851920",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "4604392884",
+  "rawPagePersisted": false
+}

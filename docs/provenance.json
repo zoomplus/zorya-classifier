@@ -1,0 +1,29 @@
+{
+  "upstreamCommit": "97fca38ef027f0c83c63bd069248e6299619abd2",
+  "algorithm": "coarse4x4 -> four padded regions/fine<=49 each -> four enlarged candidate Choice",
+  "copiedOrAdaptedFiles": [
+    {
+      "source": "packages/screen-locator-service/src/features/grid/uniform-grid.ts",
+      "sourceSha256": "c4ed5506218e93a79eade528942fdc35f9197b2ea5f1af2027cba21b6e18b847",
+      "destination": "src/features/uniform-grid.ts"
+    },
+    {
+      "source": "packages/screen-locator-service/src/features/grid/choice-beam-layout.ts",
+      "sourceSha256": "4a2a22efc43ef69313da5cacb41425c336186e8602fb168dfdef5572586ee6c8",
+      "destination": "src/features/choice-beam-layout.ts"
+    },
+    {
+      "source": "tools/eslint-plugin-element-guard/no-discarded-interval.js",
+      "sourceSha256": "321c43b61b673515571c969ba4ff75e307c0eefaccad308c414c5736174d260e",
+      "destination": "tools/no-discarded-interval.mjs"
+    }
+  ],
+  "changes": [
+    "Standalone ports and lifecycle; no game/application dependencies",
+    "Multiple targets allowed, returning one candidate",
+    "Stable supplied-order tie selection",
+    "Compact grid rendering and generic prompts require independent new quality evidence",
+    "45-second default for standalone operations; original gaming deadline unchanged"
+  ],
+  "originalRepositoryModified": false
+}

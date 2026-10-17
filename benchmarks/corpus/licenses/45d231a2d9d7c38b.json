@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/96104980@N04/19613909724",
+  "resolvedUrl": "https://www.flickr.com/photos/96104980@N04/19613909724",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:16:12.978131+00:00",
+  "sourcePageBytes": 518971,
+  "sourcePageSha256": "8dbae7679fa399e650dc176823aa903e60f0f032af54931b633120f188ea3ec7",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/311/19613909724_be5efe5fc7_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/96104980@N04/19613909724",
+    "author": {
+      "@type": "Person",
+      "name": "Jon Acuna",
+      "url": "https://www.flickr.com/photos/96104980@N04",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/96104980@N04.jpg?1726285470#96104980@N04"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Jon Acuna",
+      "url": "https://www.flickr.com/photos/96104980@N04",
+      "image": "https://farm66.staticflickr.com/65535/buddyicons/96104980@N04.jpg?1726285470#96104980@N04"
+    }
+  },
+  "structuredBlockSha256": "ec3061bb5f7a24f5c67758861c3605058e44f20cc7b0b8a8bb0a1048b62caf38",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "19613909724",
+  "rawPagePersisted": false
+}

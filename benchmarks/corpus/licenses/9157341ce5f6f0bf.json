@@ -1,0 +1,32 @@
+{
+  "sourceUrl": "https://www.flickr.com/photos/35814052@N06/4208923271",
+  "resolvedUrl": "https://www.flickr.com/photos/35814052@N06/4208923271",
+  "httpStatus": 200,
+  "checkedAt": "2026-10-17T21:15:18.006188+00:00",
+  "sourcePageBytes": 516872,
+  "sourcePageSha256": "7fe0f0fbf27ff2dace15181fd9e7606465af945447d9765345d940875158d4ac",
+  "extraction": "ImageObject matching the original Flickr photo ID; not global license strings",
+  "structuredData": {
+    "@context": "https://schema.org/",
+    "@type": "ImageObject",
+    "contentUrl": "https://live.staticflickr.com/4029/4208923271_67acdbd0b9_b.jpg",
+    "license": "https://creativecommons.org/licenses/by/2.0/",
+    "acquireLicensePage": "https://www.flickr.com/photos/35814052@N06/4208923271",
+    "author": {
+      "@type": "Person",
+      "name": "desomurchu archive gallery",
+      "url": "https://www.flickr.com/photos/35814052@N06",
+      "image": "https://combo.staticflickr.com/pw/images/bbuddyicon04.png#35814052@N06"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "desomurchu archive gallery",
+      "url": "https://www.flickr.com/photos/35814052@N06",
+      "image": "https://combo.staticflickr.com/pw/images/bbuddyicon04.png#35814052@N06"
+    }
+  },
+  "structuredBlockSha256": "38332456b4a09e41df7555a230720927e3c03ea7f43efec37e3ad933823aac66",
+  "verifiedLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "flickrPhotoId": "4208923271",
+  "rawPagePersisted": false
+}

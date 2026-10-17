@@ -1,0 +1,65 @@
+{
+  "status": "passed-structural-checks-only",
+  "example_count": 30,
+  "unique_ids": 30,
+  "unique_texts": 30,
+  "split_counts": {
+    "dev": 10,
+    "heldout": 20
+  },
+  "class_counts": {
+    "order_status": 6,
+    "refund": 6,
+    "technical_support": 6,
+    "general_feedback": 6,
+    "unknown": 6
+  },
+  "language_counts": {
+    "ru": 15,
+    "en": 15
+  },
+  "per_split_class_counts": {
+    "dev": {
+      "order_status": 2,
+      "refund": 2,
+      "technical_support": 2,
+      "general_feedback": 2,
+      "unknown": 2
+    },
+    "heldout": {
+      "order_status": 4,
+      "refund": 4,
+      "technical_support": 4,
+      "general_feedback": 4,
+      "unknown": 4
+    }
+  },
+  "text_hashes_match": true,
+  "independent_human_label_validation": false,
+  "model_execution_count": 0,
+  "files": {
+    "LICENSE": "b5fb9625dbf331e9e5c6c302dba4853f8eec730eda92263ba3f4c9fdbf787d66",
+    "README.md": "c30b65d0dc273dd37b9ee03b9f6d47ec6278ffe268ac2dc0e90b05899ea5b280",
+    "ground-truth/dev.json": "4827650b560f20b32b0366dea14947681d29ef9fefb5a059301ba5abf5c031f0",
+    "ground-truth/heldout.json": "d29cf2fb7b980d138fd7c8e712708fa9730aa6637f350468ae15651bf9f5c4b0",
+    "inputs/dev.json": "e7d2bc07559cba70494d6e4672cc3e1113c070aba8b2694ee45e76ebcbc04fcc",
+    "inputs/heldout.json": "e33beeeb011c55992d955ce66397717875c0084bcc21be29ecd123bd29ccce4a",
+    "inputs/policy.json": "9db3010c97fa056fbb4a43ea51a5c973bd75b9d21f8d07f2c15d6d176e712b8a",
+    "text-manifest.json": "5e74c8c13cd1f1f8a2e2ecc22e90e6c0c83ebf5f9407dfed5b87204d3b8831ac"
+  },
+  "producer_evaluator_separation": {
+    "passed": true,
+    "producer_rows_exact_keys": [
+      "text"
+    ],
+    "shared_policy_exact_keys": [
+      "task",
+      "rules",
+      "classes"
+    ],
+    "ground_truth_join": "input_index plus exact text_sha256",
+    "joined_examples": 30,
+    "input_texts_unchanged": true,
+    "full_manifest_evaluator_only": true
+  }
+}
