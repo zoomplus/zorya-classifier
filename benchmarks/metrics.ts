@@ -28,8 +28,8 @@ export interface LocalizationAttempt {
 
 export interface ParityAttempt {
   /** null means failed/unavailable. Two missing answers do not constitute parity. */
-  library: { choice: string; probabilities?: Readonly<Record<string, number>> } | null
-  native: { choice: string; probabilities?: Readonly<Record<string, number>> } | null
+  library: { choice: string; probabilities?: Readonly<Record<string, number>> | null } | null
+  native: { choice: string; probabilities?: Readonly<Record<string, number>> | null } | null
 }
 
 function requireValue(condition: boolean, message: string): asserts condition {
@@ -325,7 +325,7 @@ export function parityMetrics(attempts: readonly ParityAttempt[]) {
     )
     paired++
     if (attempt.library.choice === attempt.native.choice) classMatches++
-    if (attempt.library.probabilities !== undefined && attempt.native.probabilities !== undefined) {
+    if (attempt.library.probabilities != null && attempt.native.probabilities != null) {
       const difference = probabilityDifference(
         attempt.library.probabilities,
         attempt.native.probabilities,

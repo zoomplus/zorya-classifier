@@ -1,0 +1,95 @@
+{
+  "startedAt": "2026-10-17T22:35:09.527Z",
+  "authorization": "User approved up to 200 additional provider requests and $0.50; licensed public corpus only",
+  "routes": [
+    {
+      "id": "nex",
+      "model": "nex-agi/nex-n2.5-mini",
+      "provider": "nex-agi/bf16",
+      "providerName": "Nex AGI",
+      "inputPerMillion": 0.025,
+      "outputPerMillion": 0.1
+    },
+    {
+      "id": "qwen",
+      "model": "qwen/qwen3.7-flash",
+      "provider": "alibaba",
+      "providerName": "Alibaba",
+      "inputPerMillion": 0.03,
+      "outputPerMillion": 0.13
+    },
+    {
+      "id": "luna",
+      "model": "openai/gpt-6-luna",
+      "provider": "openai",
+      "providerName": "OpenAI",
+      "inputPerMillion": 0.1,
+      "outputPerMillion": 0.5
+    }
+  ],
+  "policy": "Screen all three routes on first 10 fixed development photos. Keep Luna as quality anchor and the better cheap route (screen correct count, then published input+0.15output price). Complete remaining 50 photos and 30 texts on each finalist. Choose cheapest measured photo+text route meeting >=55/60 photos, >=37/40 heldout, 30/30 texts, zero errors. No heldout prompt tuning. Then up to three fixed-stratum locator smoke cases on the chosen route. Max199 planned generations, one spare; no retries. Two consecutive errors stop that candidate batch; unstarted cases remain unverified and cannot qualify.",
+  "screen": [
+    "photo-dev-01",
+    "photo-dev-02",
+    "photo-dev-03",
+    "photo-dev-04",
+    "photo-dev-05",
+    "photo-dev-06",
+    "photo-dev-07",
+    "photo-dev-08",
+    "photo-dev-09",
+    "photo-dev-10"
+  ],
+  "sourceHashes": {
+    "src/app/create-classifier.ts": "55bfcf78b8c12c616d1144371541ec4eb1e56a6a4790700b366e41dbdf896491",
+    "src/cli.ts": "2a28730b48e07437549421513b9db3a23c1c1fa907831ae02c034db17aee8aec",
+    "src/entities/contracts.ts": "a40e772d7b270d2979e711ffa2f1caf772ca1589fff671aa566cdf5477e65f79",
+    "src/entities/errors.ts": "1c92c94c9ed6917953ac5192bfd2d8896cdb6fe13b7d05593573b7f2103330b0",
+    "src/features/choice-beam-layout.ts": "8f61d6f784e0e6273467cea01315f17bbfa4fffa695dd7a7bb9cd5cac5354e1a",
+    "src/features/choice.ts": "e58ef6b8edf9a6f3642dcb4a3c2fa23b653ffffa111d6eb56c45048d00adff9d",
+    "src/features/prompts.ts": "14eb40b4afe1151bfaa178a6412dbb56fb0ecf8639f059792090f2fd7ec88368",
+    "src/features/uniform-grid.ts": "8cee38aee52ba2c4ac2eaed909d5f53cc0e5aa2c04fe87585c66b29573e21c4d",
+    "src/index.ts": "1cd73c74a874adf1a4a3b6edb48e230f54c671098b9a3d51bb3a01a0ad2866db",
+    "src/infrastructure/openrouter-common.ts": "0eca1edd5408569f039dc5d62eaacd2d18a107fe9d8a6647d5ba364019739955",
+    "src/infrastructure/openrouter-vision.ts": "d95f1be71f8011d32ec6dfbe15c3ad93d12fe1aaf88799f8dfb06156353e1915",
+    "src/infrastructure/openrouter.ts": "9af64ed338b153ad9a42ab1d6687d8f2e5bd05849c508a02c54d517a4a57fba7",
+    "src/infrastructure/raster.ts": "8217346f671b957540f3c01a7eb3d8ef7d0bfb6a5e18a47c96f0ccb08f4bcb08",
+    "src/infrastructure/vision-chat.ts": "936c2018b49a3cf1682b18d3615f69f01900ccaec16a6b77a3b133e636c97310",
+    "src/openai-compatible.ts": "ff9096393ecb437d9c917c5da716553a5a887a810e65c9815dd791b772895fc3",
+    "src/openrouter.ts": "055afb5bac15dbbee4f9727decdd9e9b66fc2382fb31ad7bcd8c894626b00cd3",
+    "src/processes/classify.ts": "fb2a13aec8f02853f5ba353babf9588cce7aaebecb9f4ae6339a2f40897d736f",
+    "src/processes/locate.ts": "4f7583fbdf92370b9c41f76129f787b0a1827dd2fb4472e9cc6ee8f98960edc2",
+    "src/shared/choice-mass.ts": "7f645998d9cd2688ca425b4765ec0bf7d125e932f085f9e84599b4c3b97743a3",
+    "src/shared/gate.ts": "97e4e32749dc9d3a9def6faaea2566b5d0ed831ba4451999740c719fafa8e576",
+    "src/shared/scope.ts": "cc557e9fd83a838f5366c64d026859db119491d927dfb3a84ef4320b2f0b0beb"
+  },
+  "harnessHashes": {
+    "benchmarks/ablations.ts": "d4450a1c962bd96f89af3499fd0d5da52bb20eb2c6fdf8c79d2e6057d0d6325b",
+    "benchmarks/budget.ts": "538a7e89ca643d2c26ea7e13a4d213ee019a2df865fac6573c31e9fb1ea63166",
+    "benchmarks/corpus.ts": "0af52e2f896e74e8e9ab0937e34862cea5396ac0649f896299631160314848b4",
+    "benchmarks/metrics.ts": "024e2461104df77add39ef8fa1c501863b11ca126079d1ab28d512dbbee98d37",
+    "benchmarks/model-selection.ts": "1a24180a441f5f2fdaa17536f28023c0593a051ff7d11aec2f31c2417c2baa10",
+    "benchmarks/overlay.ts": "9eced23935c5428d657df747d0f239c6fc8a61ef2f1582d88a86e08f71ddfbf5",
+    "benchmarks/recording.ts": "142f271e6fce60580ff273aa3b0e64de52bd6b74e838bb75c925ac90099c8159",
+    "benchmarks/run.ts": "5ff28c02fd9bc6dc03aaf5934e7e28300f958696a2fb1fffca44edabf748ebfa",
+    "benchmarks/runner.ts": "fd95d5b720e11f4f22bd39e5044b456fcd3c42fffd6b4f308ee98bd99695558f"
+  },
+  "corpus": {
+    "corpus-manifest.json": "00f4459996db0f61a38235adaf512e1bfc52e02e1d599bb590b62a98217e4cdb",
+    "photo-manifest.json": "a99f47d4e1c064581c6cc9123b58a5c81b196d15227963bf015041544f713aa3",
+    "text/text-manifest.json": "5e74c8c13cd1f1f8a2e2ecc22e90e6c0c83ebf5f9407dfed5b87204d3b8831ac",
+    "text/inputs/policy.json": "9db3010c97fa056fbb4a43ea51a5c973bd75b9d21f8d07f2c15d6d176e712b8a",
+    "inputs/dev.json": "0c443231956e9578afa43d4bf884cc9741594ae69ac5f957657b9c5a24422bb6",
+    "ground-truth/dev.json": "c618e1a950ae89e0c9ced0c2b1ca249ea7adc891f61c0579468c479613ea4b26",
+    "text/inputs/dev.json": "e7d2bc07559cba70494d6e4672cc3e1113c070aba8b2694ee45e76ebcbc04fcc",
+    "text/ground-truth/dev.json": "4827650b560f20b32b0366dea14947681d29ef9fefb5a059301ba5abf5c031f0",
+    "inputs/heldout.json": "2ce42723824900de9a8eca60b58220567b938a88855ec41a5a882bb410d3b1e4",
+    "ground-truth/heldout.json": "737ee884b8bbf557191d5848b56f17ac056fd01793cd8fb738c5624ea119c7d2",
+    "text/inputs/heldout.json": "e33beeeb011c55992d955ce66397717875c0084bcc21be29ecd123bd29ccce4a",
+    "text/ground-truth/heldout.json": "d29cf2fb7b980d138fd7c8e712708fa9730aa6637f350468ae15651bf9f5c4b0"
+  },
+  "perCallReservationUsd": 0.05,
+  "reasoningEffort": "none",
+  "responseFormat": "prompt",
+  "timeoutMs": 45000
+}

@@ -1,5 +1,7 @@
 # Recorded model results
 
+This report is historical evidence for the optional Jev integration. Current native Luna Decisions and ordinary vision model comparisons are in [tested models](vision-results.md); these figures do not qualify a different backend.
+
 These are measured outcomes, including mistakes and failures. They are not a claim that the wrapper improves Jev's classification accuracy, that photographic accuracy transfers to games, or that a selected cell is a segmented object.
 
 ## Full corpus: live-v1

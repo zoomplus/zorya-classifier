@@ -33,3 +33,35 @@ await test('zero-priced fixture requests still respect physical call admission c
   budget.settle(budget.reserve(), 0)
   assert.throws(() => budget.reserve(), BudgetExhausted)
 })
+
+await test('continued budget retains previous calls and unknown cost and cannot settle historical reservations', () => {
+  const budget = new BenchmarkBudget(1000, 0.5, 0.05, {
+    admittedProviderCalls: 288,
+    knownCostUsd: 0.03,
+    unknownCostCalls: 3,
+    inFlightCalls: 0,
+  })
+  assert.equal(budget.reserve(), 289)
+  assert.throws(() => budget.settle(288, 0))
+  budget.settle(289, 0.001)
+  assert.equal(budget.snapshot().admittedProviderCalls, 289)
+  assert.equal(budget.snapshot().unknownCostCalls, 3)
+  assert.throws(
+    () =>
+      new BenchmarkBudget(1000, 0.1, 0.05, {
+        admittedProviderCalls: 288,
+        knownCostUsd: 0.03,
+        unknownCostCalls: 3,
+        inFlightCalls: 0,
+      }),
+  )
+  assert.throws(
+    () =>
+      new BenchmarkBudget(1000, 0.5, 0.05, {
+        admittedProviderCalls: 288,
+        knownCostUsd: 0.03,
+        unknownCostCalls: 3,
+        inFlightCalls: 1,
+      }),
+  )
+})

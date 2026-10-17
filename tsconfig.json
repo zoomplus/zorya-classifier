@@ -16,7 +16,8 @@
     "noEmit": true,
     "paths": {
       "zorya-classifier": ["./src/index.ts"],
-      "zorya-classifier/openrouter": ["./src/openrouter.ts"]
+      "zorya-classifier/openrouter": ["./src/openrouter.ts"],
+      "zorya-classifier/openai-compatible": ["./src/openai-compatible.ts"]
     }
   },
   "include": ["src/**/*.ts", "test/**/*.ts", "examples/**/*.ts", "benchmarks/**/*.ts"]

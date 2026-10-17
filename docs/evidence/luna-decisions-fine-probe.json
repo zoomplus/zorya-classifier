@@ -1,0 +1,19 @@
+{
+  "httpStatus": 502,
+  "transportError": false,
+  "durationMs": 1977,
+  "requestSha256": "e11285a5d5d6914645ebc210d7bb5d36afd402ac3ab9e4e5fce4d3a28ccc2290",
+  "responseSha256": "082902bef07a9357f83d3ba4f88b500337975a3127159ef86a4968d12abca170",
+  "reportedCostUsd": null,
+  "aggregatePhysicalCalls": 329,
+  "aggregateKnownCostUsd": 0.03266816000000008,
+  "aggregateUnknownCostCalls": 4,
+  "aggregateAccountedExposureUsd": 0.2326681600000001,
+  "requestEvidence": "Recorded public-corpus fine request; original image-bearing request retained locally, SHA256 above",
+  "response": {
+    "error": {
+      "message": "OpenAI refused to answer question \"selection\"",
+      "code": 502
+    }
+  }
+}

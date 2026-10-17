@@ -8,7 +8,7 @@ import { scanSecretText, secretPathRules } from './secrets.mjs'
 
 function existingNpmCli(candidate) {
   try {
-    const path = realpathSync(candidate)
+    const path = realpathSync.native(candidate)
     return basename(path) === 'npm-cli.js' && statSync(path).isFile() ? path : null
   } catch (error) {
     if (error.code === 'ENOENT' || error.code === 'ENOTDIR') return null
@@ -65,12 +65,17 @@ import { isAbsolute, join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { createClassifier, type DecisionPort, type DecisionResult } from 'zorya-classifier'
-import { createOpenRouterJev, type OpenRouterJevOptions } from 'zorya-classifier/openrouter'
-const transport: (options: OpenRouterJevOptions) => DecisionPort = createOpenRouterJev
+import { createOpenRouterDecisions, type OpenRouterDecisionsOptions, createOpenRouterVision, type OpenRouterVisionOptions } from 'zorya-classifier/openrouter'
+import { createOpenAICompatibleVision, type OpenAICompatibleVisionOptions } from 'zorya-classifier/openai-compatible'
+const native: (options: OpenRouterDecisionsOptions) => DecisionPort = createOpenRouterDecisions
+assert.equal(typeof native, 'function')
+const transport: (options: OpenRouterVisionOptions) => DecisionPort = createOpenRouterVision
+const direct: (options: OpenAICompatibleVisionOptions) => DecisionPort = createOpenAICompatibleVision
+assert.equal(typeof direct, 'function')
 assert.equal(typeof transport, 'function')
-const packageRoot = realpathSync(join(process.cwd(), 'node_modules', 'zorya-classifier'))
-for (const name of ['zorya-classifier', 'zorya-classifier/openrouter']) {
-  const suffix = relative(packageRoot, realpathSync(fileURLToPath(import.meta.resolve(name))))
+const packageRoot = realpathSync.native(join(process.cwd(), 'node_modules', 'zorya-classifier'))
+for (const name of ['zorya-classifier', 'zorya-classifier/openrouter', 'zorya-classifier/openai-compatible']) {
+  const suffix = relative(packageRoot, realpathSync.native(fileURLToPath(import.meta.resolve(name))))
   assert.ok(suffix !== '..' && !suffix.startsWith('..' + sep) && !isAbsolute(suffix))
 }
 const image = await sharp({create:{width:512,height:384,channels:3,background:'#336699'}}).png().toBuffer()
@@ -104,6 +109,27 @@ try {
   assert.ok(located.region.width > 0 && located.region.height > 0)
   console.log(JSON.stringify({independentConsumer:'passed',declarations:'compiled',sharp:sharp.versions.sharp,vips:sharp.versions.vips,classification:classified.choice,localization:located.status,controlledDecisionCalls:calls,providerHttpCalls:0}))
 } finally { await classifier.dispose() }
+let fixtureTransportCalls = 0
+const ordinary = createClassifier({decision: direct({endpoint:'http://localhost:9/v1/chat/completions', model:'fixture/ordinary-vision',fetch:async (_url,init)=>{
+  fixtureTransportCalls++
+  const body = String(init?.body)
+  assert.ok(body.includes('image_url'))
+  return new Response(JSON.stringify({model:'fixture/ordinary-vision', choices:[{index:0,finish_reason:'stop',message:{content:JSON.stringify({answers:{selection:{ranking:['yes']}}})}}]}))
+}})})
+try {
+  const answer = await ordinary.classify({input:{image},classes:[{id:'yes',description:'Rectangle'},{id:'no',description:'No rectangle'}]})
+  assert.equal(answer.choice,'yes')
+  assert.equal(answer.probabilities,null)
+  assert.equal(answer.nativeChoice,null)
+  assert.equal(fixtureTransportCalls,1)
+  console.log(JSON.stringify({ordinaryVisionAdapter:'passed',fixtureTransportCalls,providerHttpCalls:0}))
+} finally { await ordinary.dispose() }
+let nativeTransportCalls=0
+const typed=createClassifier({decision:native({apiKey:'fixture',model:'fixture/decisions',provider:'fixture',fetch:async(url,init)=>{
+ nativeTransportCalls++;assert.equal(url,'https://openrouter.ai/api/alpha/decisions');assert.ok(String(init?.body).includes('image_url'));assert.ok(!String(init?.body).includes('rankingSize'))
+ return new Response(JSON.stringify({model:'fixture/decisions',provider:'fixture',answers:{selection:{type:'choice',choice:'yes',probabilities:{yes:0.7,no:0.3}}}}))
+}})})
+try {const answer=await typed.classify({input:{image},classes:[{id:'yes',description:'Rectangle'},{id:'no',description:'No rectangle'}]});assert.equal(answer.choice,'yes');assert.deepEqual(answer.probabilities,{yes:0.7,no:0.3});assert.equal(nativeTransportCalls,1);console.log(JSON.stringify({nativeDecisionsAdapter:'passed',nativeTransportCalls,providerHttpCalls:0}))}finally{await typed.dispose()}
 `
 
 run(['run', 'build'])
@@ -183,8 +209,8 @@ try {
       include: ['probe.ts'],
     }),
   )
-  const compiler = realpathSync(resolve('node_modules/typescript/bin/tsc'))
-  const compilerLib = realpathSync(join(dirname(compiler), '..', 'lib'))
+  const compiler = realpathSync.native(resolve('node_modules/typescript/bin/tsc'))
+  const compilerLib = realpathSync.native(join(dirname(compiler), '..', 'lib'))
   const listed = execute(
     process.execPath,
     [compiler, '--project', 'tsconfig.json', '--listFiles'],
@@ -193,9 +219,9 @@ try {
     .trim()
     .split(/\r?\n/)
     .filter(Boolean)
-  const consumerRoot = realpathSync(dir)
+  const consumerRoot = realpathSync.native(dir)
   for (const file of listed) {
-    const actual = realpathSync(file)
+    const actual = realpathSync.native(file)
     if (
       !within(consumerRoot, actual) &&
       !(within(compilerLib, actual) && /^lib\..*\.d\.ts$/.test(basename(actual)))
@@ -204,9 +230,11 @@ try {
         'Consumer declaration resolution escaped its install and compiler standard libraries',
       )
   }
-  for (const name of ['index.d.ts', 'openrouter.d.ts']) {
-    const expected = realpathSync(join(dir, 'node_modules', 'zorya-classifier', 'dist', name))
-    if (!listed.some((file) => realpathSync(file) === expected))
+  for (const name of ['index.d.ts', 'openrouter.d.ts', 'openai-compatible.d.ts']) {
+    const expected = realpathSync.native(
+      join(dir, 'node_modules', 'zorya-classifier', 'dist', name),
+    )
+    if (!listed.some((file) => realpathSync.native(file) === expected))
       throw new Error(`Consumer did not resolve installed ${name}`)
   }
   console.log(execute(process.execPath, [join(dir, 'compiled', 'probe.js')], dir).trim())

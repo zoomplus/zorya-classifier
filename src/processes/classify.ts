@@ -30,6 +30,7 @@ export async function classifyInput(
     ...selection(
       result,
       input.classes.map((c) => c.id),
+      1,
     ),
     metadata: result.metadata,
   }

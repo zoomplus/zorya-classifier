@@ -67,6 +67,7 @@ export function recordProvider(
   budget: BenchmarkBudget,
   directory: string,
   operationStarted: number,
+  route = { model: 'typesafe/jev-1.14', provider: 'typesafe', allowFallbacks: false },
 ): Recorder {
   const calls: CallRecord[] = []
   return {
@@ -133,11 +134,7 @@ export function recordProvider(
           await writeJson(join(callDir, 'receipt.json'), {
             ...record,
             request: undefined,
-            modelRoute: {
-              model: 'typesafe/jev-1.14',
-              provider: 'typesafe',
-              allowFallbacks: false,
-            },
+            modelRoute: route,
             attemptsAllowed: 1,
           })
         } catch {

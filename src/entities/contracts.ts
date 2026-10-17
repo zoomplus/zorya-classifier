@@ -77,6 +77,7 @@ export type ImagePart = { type: 'image_url'; image_url: { url: string; detail: '
 export type DecisionState = (string | ImagePart)[]
 export type ChoiceQuestion = {
   type: 'choice'
+  rankingSize?: 1 | 4
   instructions: string
   criteria: Record<string, string>
 }
@@ -102,6 +103,15 @@ export type ChoiceAnswer = z.infer<typeof choiceAnswerSchema>
 const answersSchema = z.record(
   z.discriminatedUnion('type', [
     choiceAnswerSchema,
+    z
+      .object({
+        type: z.literal('ranked-choice'),
+        ranking: z.array(z.string().min(1).max(128)).min(1).max(4),
+      })
+      .strict(),
+    z
+      .object({ type: z.literal('presence'), presence: z.enum(['present', 'absent', 'unknown']) })
+      .strict(),
     z.object({ type: z.literal('noul'), noul: z.number().finite().min(0).max(1) }),
   ]),
 )
@@ -120,8 +130,9 @@ export interface DecisionPort {
 }
 export interface ChoiceSelection {
   choice: string
-  nativeChoice: string
-  probabilities: Record<string, number>
+  nativeChoice: string | null
+  probabilities: Record<string, number> | null
+  ranking?: string[]
   confidence?: number
   probabilityRoundingStep?: 0.01
   tied: string[]

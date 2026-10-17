@@ -46,10 +46,23 @@ function canonicalAnswer(chosen: ChoiceSelection, labels: ReadonlyMap<string, st
   const ids = new Map([...labels].map(([id, label]) => [label, id]))
   const choice = ids.get(chosen.choice)
   if (!choice) throw new ClassifierError('INVALID_RESPONSE', 'Unknown printed choice')
+  if (chosen.probabilities === null) {
+    const ranking = chosen.ranking?.map((label) => ids.get(label))
+    if (!ranking || ranking.some((id) => id === undefined))
+      throw new ClassifierError('INVALID_RESPONSE', 'Unknown ranked label')
+    return {
+      choice,
+      ranking: ranking.map((id) => {
+        if (!id) throw new ClassifierError('INVALID_RESPONSE', 'Missing rank ID')
+        return id
+      }),
+    }
+  }
+  const probabilities = chosen.probabilities
   return {
     choice,
     probabilities: Object.fromEntries(
-      [...labels].map(([id, label]) => [id, chosen.probabilities[label] ?? NaN]),
+      [...labels].map(([id, label]) => [id, probabilities[label] ?? NaN]),
     ),
   }
 }
@@ -110,7 +123,9 @@ async function gridPass(context: Context, panels: readonly GridPanel[], pass: 1 
 async function finalPass(
   context: Context,
   cells: readonly GridCell[],
-  selected: { choice: string; probabilities: Record<string, number> },
+  selected:
+    | { choice: string; probabilities: Record<string, number> }
+    | { choice: string; ranking: readonly string[] },
 ) {
   const ranked = rankChoiceBeamCells(cells, selected)
   const shortest = Math.min(...ranked.flatMap((c) => [c.cell.region.width, c.cell.region.height]))
@@ -131,7 +146,7 @@ async function finalPass(
     )
   }
   const answer = await decide(context, { state, questions: candidateQuestions(labels) })
-  const result = selection(answer, [...labels, 'none'])
+  const result = selection(answer, [...labels, 'none'], 1)
   const index = labels.indexOf(result.choice)
   return { result, present: presence(answer), region: ranked[index]?.cell.region }
 }

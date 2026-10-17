@@ -1,0 +1,4598 @@
+{
+  "status": "complete",
+  "startedAt": "2026-10-17T22:35:09.527Z",
+  "finishedAt": "2026-10-17T22:44:48.469Z",
+  "policy": "Screen all three routes on first 10 fixed development photos. Keep Luna as quality anchor and the better cheap route (screen correct count, then published input+0.15output price). Complete remaining 50 photos and 30 texts on each finalist. Choose cheapest measured photo+text route meeting >=55/60 photos, >=37/40 heldout, 30/30 texts, zero errors. No heldout prompt tuning. Then up to three fixed-stratum locator smoke cases on the chosen route. Max199 planned generations, one spare; no retries. Two consecutive errors stop that candidate batch; unstarted cases remain unverified and cannot qualify.",
+  "finalists": ["qwen", "luna"],
+  "selected": null,
+  "summaries": [
+    {
+      "route": "nex",
+      "model": "nex-agi/nex-n2.5-mini",
+      "provider": "nex-agi/bf16",
+      "photos": 10,
+      "photoCorrect": 6,
+      "heldout": 0,
+      "heldoutCorrect": 0,
+      "texts": 0,
+      "textCorrect": 0,
+      "errors": 0,
+      "knownCostUsd": 0.00030314999999999997,
+      "knownCostCount": 10,
+      "priceIndex": 0.04
+    },
+    {
+      "route": "qwen",
+      "model": "qwen/qwen3.7-flash",
+      "provider": "alibaba",
+      "photos": 60,
+      "photoCorrect": 53,
+      "heldout": 40,
+      "heldoutCorrect": 37,
+      "texts": 30,
+      "textCorrect": 26,
+      "errors": 3,
+      "knownCostUsd": 0.0033048800000000005,
+      "knownCostCount": 87,
+      "priceIndex": 0.0495
+    },
+    {
+      "route": "luna",
+      "model": "openai/gpt-6-luna",
+      "provider": "openai",
+      "photos": 60,
+      "photoCorrect": 54,
+      "heldout": 40,
+      "heldoutCorrect": 38,
+      "texts": 30,
+      "textCorrect": 30,
+      "errors": 1,
+      "knownCostUsd": 0.01314735000000001,
+      "knownCostCount": 89,
+      "priceIndex": 0.175
+    }
+  ],
+  "physicalCalls": 190,
+  "budget": {
+    "admittedProviderCalls": 190,
+    "maxCalls": 200,
+    "maxCostUsd": 0.5,
+    "knownCostUsd": 0.016755380000000004,
+    "unknownCostCalls": 4,
+    "inFlightCalls": 0,
+    "reservationPerUnknownUsd": 0.05,
+    "accountedExposureUsd": 0.21675538000000003,
+    "exceededByReportedCost": false
+  },
+  "stopped": null,
+  "rows": [
+    {
+      "route": "nex",
+      "caseId": "photo-dev-01",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3901.195785,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "nex-agi/nex-n2.5-mini",
+          "provider": "Nex AGI",
+          "requestId": "gen-1792276511-hPYYYV3Cfza3Hg4h9Yst",
+          "durationMs": 3741.5193980000004,
+          "costUsd": 0.000034875,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "nex",
+      "caseId": "photo-dev-02",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3198.356205,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "nex-agi/nex-n2.5-mini",
+          "provider": "Nex AGI",
+          "requestId": "gen-1792276515-4HQIKY1OE7AmlzepvPf5",
+          "durationMs": 3109.4959479999998,
+          "costUsd": 0.000029275,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "nex",
+      "caseId": "photo-dev-03",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2409.336374999999,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "nex-agi/nex-n2.5-mini",
+          "provider": "Nex AGI",
+          "requestId": "gen-1792276518-CINgcoDR9HfigreLfIz7",
+          "durationMs": 2354.628991999999,
+          "costUsd": 0.000026875,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "nex",
+      "caseId": "photo-dev-04",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3713.9388099999996,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "nex-agi/nex-n2.5-mini",
+          "provider": "Nex AGI",
+          "requestId": "gen-1792276521-j7R2c77tt6g5Rr2AyB7Q",
+          "durationMs": 3632.816014,
+          "costUsd": 0.000029275,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "nex",
+      "caseId": "photo-dev-05",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 1599.773122999999,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "nex-agi/nex-n2.5-mini",
+          "provider": "Nex AGI",
+          "requestId": "gen-1792276525-FMaUlMSzEWOWOJ0buvAX",
+          "durationMs": 1503.3311130000002,
+          "costUsd": 0.000031995,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "nex",
+      "caseId": "photo-dev-06",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2323.574779999999,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "nex-agi/nex-n2.5-mini",
+          "provider": "Nex AGI",
+          "requestId": "gen-1792276527-d2WxMnrsM7VCKrXLuUYY",
+          "durationMs": 2214.6967670000013,
+          "costUsd": 0.000031675,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "nex",
+      "caseId": "photo-dev-07",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 1466.6317320000016,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "nex-agi/nex-n2.5-mini",
+          "provider": "Nex AGI",
+          "requestId": "gen-1792276530-PkKfst77oFTpPDJwwMzX",
+          "durationMs": 1363.5034439999981,
+          "costUsd": 0.000031995,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "nex",
+      "caseId": "photo-dev-08",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 996.9490449999976,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "nex-agi/nex-n2.5-mini",
+          "provider": "Nex AGI",
+          "requestId": "gen-1792276531-KBHZMRUAxuRBw0aKvBg6",
+          "durationMs": 947.9840169999989,
+          "costUsd": 0.000026395,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "nex",
+      "caseId": "photo-dev-09",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 1487.0687870000002,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "nex-agi/nex-n2.5-mini",
+          "provider": "Nex AGI",
+          "requestId": "gen-1792276532-7pq8NANS3sz5zAozWjGW",
+          "durationMs": 1364.698795999997,
+          "costUsd": 0.000031195,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "nex",
+      "caseId": "photo-dev-10",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 1304.486417,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "nex-agi/nex-n2.5-mini",
+          "provider": "Nex AGI",
+          "requestId": "gen-1792276534-ilzHAGyWMEGha0re1RVw",
+          "durationMs": 1219.545001999999,
+          "costUsd": 0.000029595,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-01",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 5198.667383,
+      "error": {
+        "name": "ClassifierError",
+        "code": "INVALID_RESPONSE",
+        "message": "Vision model returned an invalid closed ranking"
+      },
+      "expected": "present",
+      "correct": false
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-02",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2906.762468000001,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276541-xysboAMeR4iKSiU3d03b",
+          "durationMs": 2819.650031000001,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-03",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2458.4211350000005,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276544-A1bxhzd4MDxCrB5CNHCc",
+          "durationMs": 2403.903615999996,
+          "costUsd": 0.00003603,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-04",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2852.6471820000006,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276547-0l16Js2a8I0T2PaE0FIe",
+          "durationMs": 2773.325137,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-05",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3072.491148000001,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276550-Z3ZrioR7NgmXKsOImbrk",
+          "durationMs": 2974.910469000002,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-06",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3237.068744999997,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276554-cABFNL378qc7NhNrdG8Q",
+          "durationMs": 3134.3401469999953,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-07",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3622.571538999997,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276557-fLE0MKfCn5BUli7Z6oNn",
+          "durationMs": 3515.5544569999984,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-08",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2634.329098000002,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276561-ST3LVeumqzZHTmKSGk7E",
+          "durationMs": 2581.3072930000053,
+          "costUsd": 0.00003507,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-09",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3739.098665000005,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276564-hzUhDv5eledvQ0WnbjBo",
+          "durationMs": 3605.451362,
+          "costUsd": 0.00004083,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-10",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3170.9018540000034,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276567-DHt2qSYs8QvT0ZMw6Jtr",
+          "durationMs": 3087.0026760000037,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-01",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 5249.4274060000025,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276571-oKSwn7frshDufkq84Ev5",
+          "durationMs": 5110.044676000005,
+          "costUsd": 0.000200925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": false
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-02",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2645.5861210000003,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276577-olyCnO19GP7hBu0ECdRe",
+          "durationMs": 2553.997795000003,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-03",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2600.280466999997,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276580-NoSjPcAB0EPFccsSPgSI",
+          "durationMs": 2545.8421089999974,
+          "costUsd": 0.000148175,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-04",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3438.4976440000028,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276583-8zKTHyds11sRNV37ljAV",
+          "durationMs": 3359.980164000008,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-05",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3402.7298540000047,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276587-oqJTqiuvMAIaGOWHMe1O",
+          "durationMs": 3310.3198189999966,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-06",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3464.9612789999956,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276591-BhF5YwHaLIoKMYI9EkE7",
+          "durationMs": 3364.0839949999936,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-07",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3620.318293999997,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276595-EpOtENmIncvFqQElvzA4",
+          "durationMs": 3521.4830220000003,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-08",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2058.7448189999996,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276598-KMhJ1txLQ524gPGdsMoG",
+          "durationMs": 2010.2170780000015,
+          "costUsd": 0.0001433,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-09",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3548.395670999991,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276601-dKxiHOjHeQyt4F3GuQaz",
+          "durationMs": 3430.6613129999896,
+          "costUsd": 0.000172175,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-10",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2449.388871999996,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276605-kvAwGFzBgrvjMI0DIOMv",
+          "durationMs": 2367.6700370000035,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-11",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3433.744967000006,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276608-0Yhd2oPNS6k1ok2lxnTw",
+          "durationMs": 3338.5448879999894,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-12",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3820.8137940000015,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276611-e5tjkWqp895GVxPh2ALN",
+          "durationMs": 3730.8558300000004,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-13",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3579.675197999997,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276615-qLWOtHd96bXSqxmgUAcb",
+          "durationMs": 3498.187896000003,
+          "costUsd": 0.00003987,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-14",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3990.7913069999922,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276620-64Xm6GQTnplCg65pekja",
+          "durationMs": 3892.688320000001,
+          "costUsd": 0.00004371,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-15",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 5549.2360920000065,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276625-wi1dDIHisfz8KASapSov",
+          "durationMs": 5409.124430000011,
+          "costUsd": 0.00004956,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-16",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 4823.906715000005,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276631-PjSaGVhVLGMyW0pINRcj",
+          "durationMs": 4716.997078999993,
+          "costUsd": 0.00004182,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-17",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 5095.419477999996,
+      "error": {
+        "name": "ClassifierError",
+        "code": "INVALID_RESPONSE",
+        "message": "Vision model returned an invalid closed ranking"
+      },
+      "expected": "present",
+      "correct": false
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-18",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 4463.995955000006,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276641-Dg9PaRN1kKlwZ9pSsa0U",
+          "durationMs": 4355.278621999998,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-19",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 4316.272016999996,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276646-cORRvxloDS29bjApq3jO",
+          "durationMs": 4231.666964000004,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-dev-20",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 4357.390010000003,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276651-mvXQV1utp6Wak8Encerl",
+          "durationMs": 4242.358810999984,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-01",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3832.2791040000156,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276656-wkAdw9wHW2OKxbd3FR3P",
+          "durationMs": 3742.034759000002,
+          "costUsd": 0.00003894,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-02",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2796.877286999981,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276659-FxiNPpFWLzv5f9Xt5tYn",
+          "durationMs": 2754.300381000008,
+          "costUsd": 0.00003414,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-03",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4141.022931999993,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276663-SoF7wJmVzXptSNH6mAPb",
+          "durationMs": 4042.022815000004,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-04",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3764.625700000004,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276667-k2RyMW8zhvT8xDZ9iMNl",
+          "durationMs": 3668.630468999996,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-05",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3844.32978,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276671-pexPbj16cmJmzBbJmaEw",
+          "durationMs": 3720.414435999992,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-06",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 5315.089853000012,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276675-4Ap5mGpPgtYa9TI7BY18",
+          "durationMs": 5224.763854999997,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-07",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4581.845601999987,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276681-oQfhiNOY2qLK3Ri2rG3u",
+          "durationMs": 4501.464715999988,
+          "costUsd": 0.00003894,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-08",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3081.1537329999846,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276686-4TZ29EAK07ieHzOFAe8G",
+          "durationMs": 2986.7024749999982,
+          "costUsd": 0.00004075,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-09",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3525.3367190000135,
+      "error": {
+        "name": "ClassifierError",
+        "code": "INVALID_RESPONSE",
+        "message": "Vision model returned an invalid closed ranking"
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-10",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3375.459004000004,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276693-IOBxblJWPFpPgDeRYwBq",
+          "durationMs": 3299.4701909999712,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-11",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4097.1069120000175,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276698-oNNGdlqVKHm5pYCXhs69",
+          "durationMs": 3993.0358340000093,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-12",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3654.0223220000044,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276702-n4gitIKVrJGAbbLOzakZ",
+          "durationMs": 3551.189373000001,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-13",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 5078.96476100001,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276707-vxAlP6oIE5YVfSSmE21Q",
+          "durationMs": 4972.158631999977,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-14",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4898.158513000002,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276712-bu9P4Tn9wapzbrlBUjfC",
+          "durationMs": 4792.4464260000095,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-15",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 6266.815285000019,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276720-9Ib443oA2hzIE9hLSJJI",
+          "durationMs": 6174.909513999999,
+          "costUsd": 0.00004083,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-16",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4520.439241000015,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276725-jg8VN89VRUUVn3SwO162",
+          "durationMs": 4428.696885000012,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-17",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4233.934596999985,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276729-QpHupwEX1Py2zBAS3zT7",
+          "durationMs": 4141.671973999997,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-18",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4170.703238999995,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276734-aaWVd6NN4On60T2CEq6e",
+          "durationMs": 4073.1614270000136,
+          "costUsd": 0.00003987,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-19",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4135.509357000003,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276738-x4z5ZqiUzl9JwQzhOuEx",
+          "durationMs": 4030.866024000017,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-20",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4371.0682709999965,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276743-5uaS2FA4GKs07EMlEEvP",
+          "durationMs": 4223.694864999998,
+          "costUsd": 0.00004956,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-21",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3670.62163400001,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276747-tN99zFlWRboPFoGP7CCI",
+          "durationMs": 3573.06678199998,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-22",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3939.7940679999883,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276752-MGBnsCMKIm6fVvfDGhHp",
+          "durationMs": 3825.5116910000215,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-23",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3798.259893999988,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276756-3G7Lm4R7aBchX7LIpgYi",
+          "durationMs": 3703.1609009999956,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-24",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3673.273870999983,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276760-jYwSmUuVS7bGOjSjlrP8",
+          "durationMs": 3576.3703870000027,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-25",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3962.2725199999986,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276764-qz1GMsRP6C2NBEDiHOA2",
+          "durationMs": 3872.1101299999864,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-26",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 5997.277205999999,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276770-CZVoCI6IAWCx6RO1wxLF",
+          "durationMs": 5898.485620000021,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-27",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4726.995349000004,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276776-62Hjo9yeTCsOxS92prML",
+          "durationMs": 4640.930770000006,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-28",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 5187.479749999999,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276781-pYOx8tDGKxHrRuM8FSLe",
+          "durationMs": 5072.141543999984,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-29",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4289.072834999999,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276786-ki4nE8kigcw0q5rpOyCt",
+          "durationMs": 4191.66481799999,
+          "costUsd": 0.00004659,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-30",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4655.139752999996,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276792-vRnn0CvAaIqBY72JMkhT",
+          "durationMs": 4558.1518019999785,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-31",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4338.935007000022,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276796-ax1MJGHKe91Ctgyluts6",
+          "durationMs": 4235.219726000039,
+          "costUsd": 0.00004083,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-32",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4317.543024999963,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276801-YJIUqgeHGRW5LoPbegiY",
+          "durationMs": 4224.935830999981,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-33",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4512.875149000029,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276806-UzdVIR2pz0kCaAYotW99",
+          "durationMs": 4407.170381000033,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-34",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4581.86462800001,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276810-wux3x4zClSAS0a0hjWSK",
+          "durationMs": 4500.079540000006,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-35",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3649.394872999983,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276815-0ehYrcEqhRJamuVmX2pz",
+          "durationMs": 3564.4956249999814,
+          "costUsd": 0.00003603,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-36",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3632.8432500000345,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276819-DplTDTflnsVIz23jDroT",
+          "durationMs": 3541.579657000024,
+          "costUsd": 0.00003891,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-37",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3777.6804569999804,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276823-NaJQ7G7Ik7Xeg7CMDacT",
+          "durationMs": 3665.181658000045,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-38",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3850.1961060000467,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276827-f1WwDUVPkPXoorkevCjD",
+          "durationMs": 3734.718210000021,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-39",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3631.9164920000476,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276831-oY0AKvfEV7DNt8SEC9m5",
+          "durationMs": 3516.8850289999973,
+          "costUsd": 0.00004179,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "photo-heldout-40",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3396.2192560000112,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276835-ILMg8xqo7chsikEIGbYq",
+          "durationMs": 3293.4050960000022,
+          "costUsd": 0.00003979,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-dev-001",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1066.1089750000392,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "unknown", "technical_support", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276838-i8U6G79zvYZv8Idb23Ff",
+          "durationMs": 1061.9980540000251,
+          "costUsd": 0.00003326,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-dev-002",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1194.8394400000107,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "unknown", "refund", "technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276839-tvjO4VRn1QTxTJwPipi7",
+          "durationMs": 1193.0103540000273,
+          "costUsd": 0.00003304,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-dev-003",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1047.6020410000347,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund", "technical_support", "general_feedback", "unknown"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276840-yRQ1kiBz8nfAtiStEq9d",
+          "durationMs": 1045.9752679999801,
+          "costUsd": 0.00003295,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-dev-004",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1071.2092980000307,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund", "order_status", "technical_support", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276841-gnccM3MXdWbVTM1RPddq",
+          "durationMs": 1069.8673969999654,
+          "costUsd": 0.00003308,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-dev-005",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1140.6807580000022,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "unknown", "general_feedback", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276843-NTnak6AAsxtzgFFFhYke",
+          "durationMs": 1139.2421019999892,
+          "costUsd": 0.00003308,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-dev-006",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1179.6708719999879,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "unknown", "general_feedback", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276844-I0iewcP3KDuAg4eq0Mdk",
+          "durationMs": 1178.268080000009,
+          "costUsd": 0.00003316,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-dev-007",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1040.6618610000005,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "order_status", "technical_support", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276845-vJhUhq2sVVWGd9DgiH0C",
+          "durationMs": 1039.311205999984,
+          "costUsd": 0.00003299,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-dev-008",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1048.7260380000225,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "unknown", "technical_support", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276846-cmt6X3J2YsaVXGUsuOan",
+          "durationMs": 1047.1946879999596,
+          "costUsd": 0.00003329,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-dev-009",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1246.0037309999461,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "unknown", "technical_support", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276847-NNjjgAYtPliiwd8AW5X0",
+          "durationMs": 1244.6604260000167,
+          "costUsd": 0.00003326,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": false
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-dev-010",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1016.8888730000472,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown", "order_status", "refund", "technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276849-5DcJ3dOUKUHVAZer2BXM",
+          "durationMs": 1015.4751099999994,
+          "costUsd": 0.00003301,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-001",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1111.8022779999883,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "unknown", "refund", "technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276850-cYQl7k5zgas2z9pvupW5",
+          "durationMs": 1110.3413760000258,
+          "costUsd": 0.00003325,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-002",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1181.048283000011,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "technical_support", "general_feedback", "unknown"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276851-GXQPLl1xE2E2cIX4epwP",
+          "durationMs": 1179.6613260000013,
+          "costUsd": 0.0000332,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-003",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1106.2937260000035,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund", "order_status", "technical_support", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276852-IOjwvMy3146vWBoDqUpq",
+          "durationMs": 1104.873023000022,
+          "costUsd": 0.00003341,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-004",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1178.1791889999877,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund", "technical_support", "general_feedback", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276853-njPWQ8GRZ6K06DQAw9Gw",
+          "durationMs": 1176.733310999989,
+          "costUsd": 0.0000332,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-005",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1043.3406509999768,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "unknown", "refund", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276855-jHvz2x10Al2OTUeTQbTD",
+          "durationMs": 1041.6945540000452,
+          "costUsd": 0.00003328,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-006",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1233.1018829999957,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "order_status", "unknown", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276856-m6zyp8C6RB1jV3C16Ulj",
+          "durationMs": 1231.4778510000324,
+          "costUsd": 0.00003329,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-007",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1067.220254999993,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "unknown", "order_status", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276857-FT5n7IZbWxytC01sb8Mh",
+          "durationMs": 1065.9094640000258,
+          "costUsd": 0.00003331,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-008",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1280.5193459999864,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "unknown", "order_status", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276858-YPDvNEJa9yk6BYS0IaPl",
+          "durationMs": 1279.1842579999939,
+          "costUsd": 0.00003331,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-009",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1013.1020310000167,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "refund", "unknown", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276860-lA0VnHsB90qIxos2jHif",
+          "durationMs": 1011.6794069999596,
+          "costUsd": 0.00003331,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": false
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-010",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1059.5996169999707,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown", "order_status", "technical_support", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276861-0E155Tf4yOf4chaLLEw3",
+          "durationMs": 1058.2059900000459,
+          "costUsd": 0.00003311,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-011",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1105.5011299999896,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "general_feedback", "technical_support", "unknown"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276862-dDLFpR6RsvMfzCf9DtIU",
+          "durationMs": 1104.0165300000226,
+          "costUsd": 0.0000335,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-012",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1109.352030000009,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "unknown", "technical_support", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276863-WrlH7Ij5nViYoUhIyhQQ",
+          "durationMs": 1107.8254980000202,
+          "costUsd": 0.00003335,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-013",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1101.8768629999831,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund", "order_status", "technical_support", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276864-Ux8UUUFG1EDI74MeLthU",
+          "durationMs": 1100.2900500000105,
+          "costUsd": 0.00003347,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-014",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1062.9582930000033,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown", "general_feedback", "technical_support", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276866-etZ40DQUb2vGIvcGruGJ",
+          "durationMs": 1061.4113700000453,
+          "costUsd": 0.0000331,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": false
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-015",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1121.7700030000415,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "unknown", "refund", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276867-bOgkcrCRmiDA4w5LRAIQ",
+          "durationMs": 1120.3821590000298,
+          "costUsd": 0.00003328,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-016",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 970.8462790000485,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "general_feedback", "unknown", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276868-MHIdExORmyvbvXfPNuEG",
+          "durationMs": 969.590566000028,
+          "costUsd": 0.00003313,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-017",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1113.3225549999624,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "order_status", "unknown", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276869-BZ3aDCFa7tCObzQ5lgHT",
+          "durationMs": 1111.9945230000303,
+          "costUsd": 0.00003325,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-018",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1110.767015999998,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "unknown", "technical_support", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276870-zYkS84rrZkAIoVTE8cq3",
+          "durationMs": 1109.3291949999984,
+          "costUsd": 0.0000332,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-019",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1063.2080140000326,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "unknown", "order_status", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276872-PvogL7LdsoEprLJBhHmC",
+          "durationMs": 1061.5697869999567,
+          "costUsd": 0.00003325,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": false
+    },
+    {
+      "route": "qwen",
+      "caseId": "support-heldout-020",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 952.3251370000071,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown", "technical_support", "general_feedback", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "qwen/qwen3.7-flash",
+          "provider": "Alibaba",
+          "requestId": "gen-1792276873-J2cWs8khf6s5izaVQEn7",
+          "durationMs": 950.9388289999915,
+          "costUsd": 0.00003331,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-11",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3380.4590629999875,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276875-HDUL7e0UJ8EnybLqbuzw",
+          "durationMs": 3282.1378099999856,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-12",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2988.6593120000325,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276878-VFtPxJkqDhFTa6a06z2v",
+          "durationMs": 2894.9470849999925,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-13",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2440.3382850000053,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276881-vMS1XNb9FCukYiOgL7MK",
+          "durationMs": 2356.8020639999886,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-14",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2518.0792989999754,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276884-tINHGVEoGVd8KyqE6hXA",
+          "durationMs": 2420.643428999989,
+          "costUsd": 0.0001913,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-15",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2805.774149999954,
+      "error": {
+        "name": "ClassifierError",
+        "code": "AUTHENTICATION",
+        "message": "Model provider rejected the request"
+      },
+      "expected": "present",
+      "correct": false
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-16",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3090.449950999988,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276890-j0Hzfs6KREGz0N4RnjyA",
+          "durationMs": 2985.4035760000115,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-17",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 4722.2574770000065,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276895-vLpDMXbB7MTtDBbF3tmE",
+          "durationMs": 4590.369168000005,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": false
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-18",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 4379.56452200003,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276900-Rgga3u1bBYa6NaXIRf2l",
+          "durationMs": 4264.849744999956,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-19",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3202.183490000025,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276904-fedpmsJCmiPkiT9mH4bb",
+          "durationMs": 3119.51005599997,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-dev-20",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3427.3057430000044,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276908-1h0Nb7ZHHGYKtf3RPpMy",
+          "durationMs": 3305.4454039999982,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-01",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3333.896852999984,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276911-bjrwasb9R1seLItNZPv7",
+          "durationMs": 3242.642086000007,
+          "costUsd": 0.000167425,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-02",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 1835.7154590000282,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276914-nIYqllPV4NhVTsUKZ9ML",
+          "durationMs": 1792.8809809999657,
+          "costUsd": 0.000138675,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-03",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4635.300338000001,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276918-ZAanNkxEaolE0GDcqRPa",
+          "durationMs": 4533.004057000042,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-04",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3634.316320999991,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276922-PJypCOu5yhWbQJlRXsSc",
+          "durationMs": 3536.809963000007,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-05",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4625.676773999992,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276927-SLgKVEByyCcDu2VoTS74",
+          "durationMs": 4498.898438000004,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-06",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3093.173739000049,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276931-Q2IGyL2VX57osDv3gjTA",
+          "durationMs": 3001.6891269999905,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-07",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2398.9950569999637,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276934-VNXYHLlFHbHlFF4XIN6Y",
+          "durationMs": 2320.959656000021,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-08",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2739.5667169999797,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276937-i6JSALyhs8Y0zo66u5l4",
+          "durationMs": 2648.507990000013,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-09",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3164.99234300002,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276940-u6uypvlP5WZkP9HaRfl9",
+          "durationMs": 3081.8106689999695,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-10",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4788.130577999982,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276945-WlibMhg6Oww7YBw0lcri",
+          "durationMs": 4710.272141000023,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-11",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 5128.74831299996,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276950-t1Iokqpy4anLBUAouYyE",
+          "durationMs": 5024.280480999965,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-12",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3953.9888230000506,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276955-c3d2DRkK7VX03TgKs4wD",
+          "durationMs": 3861.519342000014,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-13",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3766.8141269999905,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276959-k4gZVuwrngWNKUKRlBuf",
+          "durationMs": 3657.021689999965,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-14",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3710.1331869999995,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276963-63ChsK4RyZlMEMvuuzDT",
+          "durationMs": 3605.2474979999824,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-15",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2774.6753700000118,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276966-i8LXIstG1HHXUc5ukSun",
+          "durationMs": 2685.59203,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-16",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3510.873457000009,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276970-AE85AQioM176ToEPoOPj",
+          "durationMs": 3417.4849279999617,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-17",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3207.4352349999826,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276973-EAO0Y2NzsHuQNFcVKO9r",
+          "durationMs": 3115.1023249999853,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-18",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3962.5516539999517,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276977-eB3BRY6pwckSKqe3UClj",
+          "durationMs": 3859.5860630000243,
+          "costUsd": 0.000172175,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-19",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4248.305203999975,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276981-YAfOipoK8YwaIcPEaVuy",
+          "durationMs": 4140.494767000026,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-20",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4000.6009440000053,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276986-3x9TlITfWmWxnxieWQMm",
+          "durationMs": 3858.613387999998,
+          "costUsd": 0.000215675,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-21",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2618.573785000015,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276990-SvPcZwm7AwNWnEoWmWkX",
+          "durationMs": 2520.6155649999855,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-22",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3276.1345819999697,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276993-4t6PwsZm2ga48EjH4NkS",
+          "durationMs": 3165.536330999981,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-23",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2817.749817999953,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276996-092Apfz7HF7MSiWY1t4z",
+          "durationMs": 2719.9090769999893,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-24",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 4505.630978000001,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792276999-je9IyGACW8Rx3IsxWTmI",
+          "durationMs": 4402.58397399995,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-25",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2461.285593000008,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277004-8D1NnrAXIsQ15hFYsDG0",
+          "durationMs": 2364.8811509999796,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-26",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3020.2903560000123,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277007-ONcYrC9ZXw7ZZBSwmCrE",
+          "durationMs": 2922.1723769999808,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-27",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2515.019524000003,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent", "present"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277010-ybdqIMqJ1SJQBuMuHAFJ",
+          "durationMs": 2431.670409000013,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": false
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-28",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2444.871041999955,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277013-BLfyYiqa1pDfQ9HIwep1",
+          "durationMs": 2337.732366000011,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-29",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2488.711096999992,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277015-2yRvn3rpgudxCpcP0XVP",
+          "durationMs": 2384.3398809999926,
+          "costUsd": 0.0002058,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-30",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3523.57822700002,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277018-5LwkieeTzDaaA6HlQGYZ",
+          "durationMs": 3425.53465700004,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-31",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2713.128402000002,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277022-XAsQcYzl8NiTzbTtKRDr",
+          "durationMs": 2608.2157489999663,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-32",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2804.4759429999976,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277025-owREgrJAyKr9LXVELiUX",
+          "durationMs": 2708.304333999986,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-33",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3108.0667879999964,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277028-Yvmr8KSkG8Ao8BwFnODN",
+          "durationMs": 3001.433717000007,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-34",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2240.0942360000336,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277031-I9d1PAFKJEf4946LTfPN",
+          "durationMs": 2154.3292789999978,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-35",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2337.050432000018,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277034-N6Skl8kFagh6WLctlqXj",
+          "durationMs": 2260.049774999963,
+          "costUsd": 0.000152925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-36",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 2591.1769569999888,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277037-RfqmToUeO1wVfeAyJ6Wh",
+          "durationMs": 2500.794980000006,
+          "costUsd": 0.0001673,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-37",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3939.979361000005,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277040-Rx11ENCT7szGd6WM0LvA",
+          "durationMs": 3833.0601139999926,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-38",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3910.1327769999625,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277044-qrZeEx2S3UOUAc4urivY",
+          "durationMs": 3791.7196090000216,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-39",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 5369.971748000011,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277049-OibJ3Gttq0DCHlI2yAMV",
+          "durationMs": 5251.985973000003,
+          "costUsd": 0.000176925,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "photo-heldout-40",
+      "split": "heldout",
+      "kind": "photo",
+      "durationMs": 3044.5808770000003,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present", "absent"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277054-TQUf353dOP2N2AEVgoyr",
+          "durationMs": 2938.8669319999753,
+          "costUsd": 0.000172175,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-dev-001",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 928.6519439999829,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "unknown", "general_feedback", "technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277056-GPPm21nIBqjqRmsh5jRv",
+          "durationMs": 927.1221130000195,
+          "costUsd": 0.0000987,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-dev-002",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 987.8091589999967,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "unknown", "general_feedback", "technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277057-xQBcFJq5WY214ciLqYDE",
+          "durationMs": 986.4157649999834,
+          "costUsd": 0.0000984,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-dev-003",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 968.3653599999961,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund", "order_status", "technical_support", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277058-iRT6xVlb9miRE9vzc7Sf",
+          "durationMs": 966.6362840000074,
+          "costUsd": 0.0000983,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-dev-004",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1030.47876800003,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund", "unknown", "general_feedback", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277059-PhRX5riGp8PI9lowXm3h",
+          "durationMs": 1029.1181159999687,
+          "costUsd": 0.0000978,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-dev-005",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 989.9366549999686,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "general_feedback", "unknown", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277060-fmVBQQP1sX9lrbhHQ762",
+          "durationMs": 988.1711519999662,
+          "costUsd": 0.0000982,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-dev-006",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 1303.0983649999835,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "general_feedback", "refund", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277061-6frkDgfqtHQM3cfQirNN",
+          "durationMs": 1301.6809099999955,
+          "costUsd": 0.000099,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-dev-007",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 947.5874940000358,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "unknown", "order_status", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277063-celNmjf2BHfXqt7peKz0",
+          "durationMs": 945.7322139999596,
+          "costUsd": 0.0000975,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-dev-008",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 953.8800570000312,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "unknown", "technical_support", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277064-79Tumg2gd9a3dWaunv6d",
+          "durationMs": 952.3096430000151,
+          "costUsd": 0.000099,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-dev-009",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 970.4331879999954,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown", "general_feedback", "order_status", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277065-bAJIpzgVV27nUzg4twjm",
+          "durationMs": 968.9879279999877,
+          "costUsd": 0.0000986,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-dev-010",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 891.2464029999683,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown", "order_status", "refund", "technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277066-yBTH3mEdlGntYWjjrtBT",
+          "durationMs": 889.2854329999536,
+          "costUsd": 0.000098,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-001",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 945.9144160000142,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "unknown", "refund", "technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277067-5xXiUiwSKvNejFush3Q6",
+          "durationMs": 941.8811259999638,
+          "costUsd": 0.0000987,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-002",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 962.3370350000332,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "unknown", "general_feedback", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277068-EFF593iNJmUpcSR0RJKr",
+          "durationMs": 961.0089819999994,
+          "costUsd": 0.0000982,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-003",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 931.668816999998,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund", "general_feedback", "unknown", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277069-CTmcrUHhtmw2QrRNU7ry",
+          "durationMs": 930.0950580000062,
+          "costUsd": 0.0000993,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-004",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 920.4190989999915,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund", "technical_support", "general_feedback", "unknown"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277070-oD6bsJBIA8oqS8wti3pr",
+          "durationMs": 919.1810040000128,
+          "costUsd": 0.0000981,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-005",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 965.4535359999863,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "unknown", "general_feedback", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277071-v0O3UTklhKsliSEzPYR5",
+          "durationMs": 964.2034829999902,
+          "costUsd": 0.0000995,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-006",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1019.4915110000293,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "general_feedback", "order_status", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277072-XFOJUwj9q0XEG43SB3P3",
+          "durationMs": 1018.1488019999815,
+          "costUsd": 0.000099,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-007",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 942.9509869999602,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "unknown", "refund", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277073-elcmYZKRT3ouxFx8lBAx",
+          "durationMs": 941.5426230000448,
+          "costUsd": 0.0000992,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-008",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 951.1929970000056,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "unknown", "order_status", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277074-dyZzyhNc506sLhVBPL74",
+          "durationMs": 949.8337020000326,
+          "costUsd": 0.000099,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-009",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 984.2661649999791,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown", "technical_support", "refund", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277075-gRFPGtFc7t7mWos3YX5R",
+          "durationMs": 982.7441180000314,
+          "costUsd": 0.0000991,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-010",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1170.623907000001,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown", "order_status", "technical_support", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277076-IBKwBk4FcCPth9mUD5mc",
+          "durationMs": 1168.91957800003,
+          "costUsd": 0.0000979,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-011",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 949.790726999985,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "general_feedback", "unknown", "technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277077-aU1vliDae1o0Pc1py36y",
+          "durationMs": 948.4415060000028,
+          "costUsd": 0.0000999,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-012",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 981.4932480000425,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status", "unknown", "technical_support", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277079-huzZAQXbBu4EiHZut97b",
+          "durationMs": 980.0639920000103,
+          "costUsd": 0.0000992,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-013",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 951.2590060000075,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund", "order_status", "technical_support", "general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277080-ORRZGMxPirrnPxfZFBmv",
+          "durationMs": 949.9246649999986,
+          "costUsd": 0.0000997,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-014",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 875.4648429999943,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund", "unknown", "technical_support", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277081-LUfEj2LpLZpogPuVSYrC",
+          "durationMs": 873.9149590000161,
+          "costUsd": 0.0000983,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-015",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 965.2557699999888,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "unknown", "general_feedback", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277082-wbFRjlqnE27KEsE12xfh",
+          "durationMs": 963.6049270000076,
+          "costUsd": 0.0000999,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-016",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1005.5802590000676,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support", "refund", "general_feedback", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277083-5QrG7HVsB852AEHDXUeQ",
+          "durationMs": 1004.29644799995,
+          "costUsd": 0.0000989,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-017",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 928.8549020000501,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "unknown", "order_status", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277084-RddGmIMd2fHzuu4yFeg1",
+          "durationMs": 927.5874589999439,
+          "costUsd": 0.0000989,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-018",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 905.2842769999988,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback", "unknown", "technical_support", "order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277085-oPFIrt9mYuvnWZ8wGUoO",
+          "durationMs": 903.9611120000482,
+          "costUsd": 0.0000987,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-019",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1047.210848000017,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown", "general_feedback", "refund", "technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277086-f5DlZLTaiHczOXi9iFnc",
+          "durationMs": 1045.8791889999993,
+          "costUsd": 0.0000989,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "luna",
+      "caseId": "support-heldout-020",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1260.0757910000393,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown", "general_feedback", "technical_support", "refund"],
+        "tied": [],
+        "metadata": {
+          "model": "openai/gpt-6-luna",
+          "provider": "OpenAI",
+          "requestId": "gen-1792277087-s1rWKdZOzS5uDYDEnRe4",
+          "durationMs": 1258.8198080000002,
+          "costUsd": 0.000099,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    }
+  ],
+  "limitations": [
+    "Public images can overlap model training",
+    "Authored text fixtures are not customer traffic",
+    "No accuracy guarantees outside this corpus",
+    "Only two finalists receive full evaluation",
+    "Locator cases are integration smoke, not full localization quality",
+    "Local cost reservations are not an account-side spending cap"
+  ]
+}

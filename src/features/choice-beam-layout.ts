@@ -8,9 +8,11 @@ import type {
 import { pixelRectSchema } from '../entities/contracts.js'
 import { uniformCoordinateCells } from './uniform-grid.js'
 
-type ChoiceMap = Pick<CategoricalAnswer, 'choice' | 'probabilities'>
+type ChoiceMap =
+  | Pick<CategoricalAnswer, 'choice' | 'probabilities'>
+  | { choice: string; ranking: readonly string[] }
 type PanelGeometry = Pick<GridDecisionPanel, 'id' | 'region' | 'cells'>
-type RankedCell = { cell: GridCell; probability: number }
+type RankedCell = { cell: GridCell; probability: number | null }
 type Layout = { columns: number; rows: number; side: number; imbalance: number; count: number }
 const sourceKey = (region: PixelRect): string =>
   `${region.left}:${region.top}:${region.width}:${region.height}`
@@ -34,6 +36,34 @@ function contains(outer: PixelRect, inner: PixelRect): boolean {
 export function rankChoiceBeamCells(cells: readonly GridCell[], answer: ChoiceMap): RankedCell[] {
   if (cells.length > 196) throw new RangeError('Choice beam exceeds its distinct-cell budget')
   if (!cells.length) return []
+  if ('ranking' in answer) {
+    if (
+      answer.ranking.length !== Math.min(4, cells.length) ||
+      new Set(answer.ranking).size !== answer.ranking.length ||
+      answer.ranking[0] !== answer.choice
+    )
+      throw new RangeError('Choice beam needs a complete top-four closed ranking')
+    const meanings = new Map<string, string>()
+    for (const cell of cells) {
+      assertRegion(cell.region)
+      const key = sourceKey(cell.region)
+      if (!cell.id || (meanings.has(cell.id) && meanings.get(cell.id) !== key))
+        throw new RangeError('Conflicting cell IDs')
+      meanings.set(cell.id, key)
+    }
+    const seen = new Set<string>(),
+      ranked: RankedCell[] = []
+    for (const id of answer.ranking) {
+      const cell = cells.find((value) => value.id === id)
+      if (!cell) throw new RangeError('Ranking contains an unknown cell')
+      const key = sourceKey(cell.region)
+      if (!seen.has(key)) {
+        seen.add(key)
+        ranked.push({ cell, probability: null })
+      }
+    }
+    return ranked
+  }
   const meanings = new Map<string, string>()
   const ranked = cells.map((cell, order) => {
     assertRegion(cell.region)

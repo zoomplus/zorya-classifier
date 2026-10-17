@@ -1,0 +1,37 @@
+{
+  "priorReportSha256": "25c463dc9b005c2702dd94e78b12cee861e5f27827c5093cda857771837b19c7",
+  "reconciled": [
+    {
+      "path": ".run/vision-selection-v1/qwen/photo/photo-dev-01/wire-response-1.json",
+      "sha256": "2fa3b79d85a81fc392c13a68b3174e28e40f7c1c8502f89c7e534b218a8cc686",
+      "costUsd": 0.00004498
+    },
+    {
+      "path": ".run/vision-selection-v1/qwen/photo/photo-dev-17/wire-response-1.json",
+      "sha256": "483a9270a3f91cddc71bd819ddd2b146dce3d5176b516fe651984d444033d94c",
+      "costUsd": 0.00004114
+    },
+    {
+      "path": ".run/vision-selection-v1/qwen/photo/photo-heldout-09/wire-response-1.json",
+      "sha256": "f4cf9a5021bafd083d0620b91ccf95a0f77a31317333610510b394af71c4dbb2",
+      "costUsd": 0.00003826
+    },
+    {
+      "path": ".run/vision-selection-v2/haiku/photo/photo-dev-16/wire-response-1.json",
+      "sha256": "a27afbda79dbfa8bcaab0a2cedb958ffe848292fb1792e89c3f32476352d0d85",
+      "costUsd": 0.0001922
+    },
+    {
+      "path": ".run/vision-selection-v2/haiku/text/support-heldout-016/wire-response-1.json",
+      "sha256": "a51ad18129c35d4d788a69a933b0fa25edb64d47979c6d5cf0a29f513f8606be",
+      "costUsd": 0.0001622
+    }
+  ],
+  "seed": {
+    "admittedProviderCalls": 288,
+    "knownCostUsd": 0.029322660000000056,
+    "unknownCostCalls": 3,
+    "inFlightCalls": 0
+  },
+  "note": "Billing metadata only; failed classifications remain failures. Two auth errors and one provider error still retain unknown-cost reservations."
+}

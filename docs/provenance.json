@@ -23,7 +23,10 @@
     "Multiple targets allowed, returning one candidate",
     "Stable supplied-order tie selection",
     "Compact grid rendering and generic prompts require independent new quality evidence",
-    "45-second default for standalone operations; original gaming deadline unchanged"
+    "45-second default for standalone operations; original gaming deadline unchanged",
+    "Provider-independent ordinary vision chat protocol with closed ranks and separate presence; no invented probabilities",
+    "Direct OpenAI-compatible endpoint and optional OpenRouter wrapper; native Jev retained as optional historical integration",
+    "One winner for single-label/final selection; four ranks only for coarse/fine beam stages"
   ],
   "originalRepositoryModified": false
 }

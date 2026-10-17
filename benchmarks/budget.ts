@@ -1,3 +1,9 @@
+interface InitialBudget {
+  admittedProviderCalls: number
+  knownCostUsd: number
+  unknownCostCalls: number
+  inFlightCalls: number
+}
 /** Admission is conservative when price is unknown; it is not a provider-side spending cap. */
 export class BenchmarkBudget {
   private calls = 0
@@ -8,11 +14,12 @@ export class BenchmarkBudget {
     readonly maxCalls: number,
     readonly maxCostUsd: number,
     readonly reservationUsd = 0.02,
+    initial?: InitialBudget,
   ) {
     if (
       !Number.isInteger(maxCalls) ||
       maxCalls < 1 ||
-      maxCalls > 360 ||
+      maxCalls > 1000 ||
       !Number.isFinite(maxCostUsd) ||
       maxCostUsd <= 0 ||
       maxCostUsd > 1 ||
@@ -20,6 +27,24 @@ export class BenchmarkBudget {
       reservationUsd <= 0
     )
       throw new Error('Invalid benchmark budget')
+    if (initial) {
+      if (
+        !Number.isInteger(initial.admittedProviderCalls) ||
+        initial.admittedProviderCalls < 0 ||
+        initial.admittedProviderCalls > maxCalls ||
+        !Number.isInteger(initial.unknownCostCalls) ||
+        initial.unknownCostCalls < 0 ||
+        initial.unknownCostCalls > initial.admittedProviderCalls ||
+        !Number.isFinite(initial.knownCostUsd) ||
+        initial.knownCostUsd < 0 ||
+        initial.inFlightCalls !== 0 ||
+        initial.knownCostUsd + initial.unknownCostCalls * reservationUsd > maxCostUsd + 1e-12
+      )
+        throw new Error('Invalid initial benchmark budget')
+      this.calls = initial.admittedProviderCalls
+      this.known = initial.knownCostUsd
+      this.unknown = initial.unknownCostCalls
+    }
   }
   reserve(): number {
     if (

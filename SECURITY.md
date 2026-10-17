@@ -2,7 +2,7 @@
 
 Never post API keys, private photographs, raw sessions or personal data in public issues. A minimal synthetic reproduction is preferable. Use GitHub private vulnerability reporting when the repository owner enables it; if unavailable, request a private contact without publishing exploit details or secrets.
 
-The library sends supplied text and prepared image fragments to OpenRouter/TypeSafe only when classify or locate is called with the real adapter. The library does not store them. Explicit benchmark runs can save request/response media locally, so review those outputs before sharing them.
+The library sends supplied text and prepared image fragments to the explicitly configured model endpoint when classify or locate is called. The direct OpenAI-compatible adapter accepts a trusted HTTP(S) URL; the optional OpenRouter wrapper fixes its endpoint and pins the requested model/provider. The library does not store them. Explicit benchmark runs can save request/response media locally, so review those outputs before sharing them.
 
 Local inputs are restricted to byte arrays; the public API does not fetch arbitrary image URLs. The built-in provider endpoint is fixed, redirects are rejected, request/response/image sizes are bounded and external responses are validated. Injected DecisionPort/RefinementPort implementations are trusted code and must honor AbortSignal and terminate their own work.
 
@@ -17,3 +17,5 @@ Call dispose during shutdown. It cancels owned operations and waits for physical
 The npm package uses an explicit `files` allowlist. `npm run pack:check` scans allowed file paths/content, installs the produced archive with lifecycle scripts disabled, checks its actual bytes against the scanned files, and exercises its exported API outside the repository. `prepublishOnly` runs the source and archive checks for a normal directory publication. A separate Gitleaks scan is recorded in release evidence.
 
 These checks are heuristics, not a guarantee against all secret formats, encoded payloads or malicious concurrent filesystem mutation. Binary content is counted as skipped; private binary filenames are still blocked. Hooks can be bypassed locally, so retain CI and enable GitHub secret scanning/push protection when publishing. If a credential was ever published, revoke or rotate it before treating history cleanup as remediation.
+
+For a direct endpoint, choose the address and credentials deliberately: the supplied media will be sent there. OpenRouter keys are not automatically reused for a custom server. Model API keys and custom authentication headers are transmitted as headers, never included in the model prompt. Protocol-correct JSON is not proof that a model classified the picture correctly.

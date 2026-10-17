@@ -2,6 +2,7 @@
   "entry": [
     "src/index.ts",
     "src/openrouter.ts",
+    "src/openai-compatible.ts",
     "src/cli.ts",
     "test/*.test.ts",
     "examples/*.ts",

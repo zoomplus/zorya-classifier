@@ -1,0 +1,39 @@
+{
+  "caseId": "photo-dev-02",
+  "model": "openai/gpt-6-luna-decisions",
+  "provider": "openai",
+  "maxNewCalls": 3,
+  "priorBudget": {
+    "admittedProviderCalls": 329,
+    "maxCalls": 1000,
+    "maxCostUsd": 0.5,
+    "knownCostUsd": 0.03266816000000008,
+    "unknownCostCalls": 4,
+    "inFlightCalls": 0,
+    "reservationPerUnknownUsd": 0.05,
+    "accountedExposureUsd": 0.2326681600000001,
+    "exceededByReportedCost": false
+  },
+  "imageSha256": "68d92b810be3205702e9ea527654ffbbb2eab3f48fd73f66770a0a0df4f484a1",
+  "corpus": {
+    "corpus-manifest.json": "00f4459996db0f61a38235adaf512e1bfc52e02e1d599bb590b62a98217e4cdb",
+    "photo-manifest.json": "a99f47d4e1c064581c6cc9123b58a5c81b196d15227963bf015041544f713aa3",
+    "text/text-manifest.json": "5e74c8c13cd1f1f8a2e2ecc22e90e6c0c83ebf5f9407dfed5b87204d3b8831ac",
+    "text/inputs/policy.json": "9db3010c97fa056fbb4a43ea51a5c973bd75b9d21f8d07f2c15d6d176e712b8a",
+    "inputs/dev.json": "0c443231956e9578afa43d4bf884cc9741594ae69ac5f957657b9c5a24422bb6",
+    "ground-truth/dev.json": "c618e1a950ae89e0c9ced0c2b1ca249ea7adc891f61c0579468c479613ea4b26",
+    "text/inputs/dev.json": "e7d2bc07559cba70494d6e4672cc3e1113c070aba8b2694ee45e76ebcbc04fcc",
+    "text/ground-truth/dev.json": "4827650b560f20b32b0366dea14947681d29ef9fefb5a059301ba5abf5c031f0",
+    "inputs/heldout.json": "2ce42723824900de9a8eca60b58220567b938a88855ec41a5a882bb410d3b1e4",
+    "ground-truth/heldout.json": "737ee884b8bbf557191d5848b56f17ac056fd01793cd8fb738c5624ea119c7d2",
+    "text/inputs/heldout.json": "e33beeeb011c55992d955ce66397717875c0084bcc21be29ecd123bd29ccce4a",
+    "text/ground-truth/heldout.json": "d29cf2fb7b980d138fd7c8e712708fa9730aa6637f350468ae15651bf9f5c4b0"
+  },
+  "runtime": {
+    "index": "69d648d8339d9f2bd5faf1e6db05b23fec163490603a8e72b44750726df8c3ba",
+    "nativeAdapter": "1b8950207342ff463f0b2e5c8552cace9a80db9896637601b924d50625134c3f",
+    "locator": "8d768151c486d48ef221b9764a34233379999bae3359b667ef543fda734ff798"
+  },
+  "harnessSha256": "c0e3d98e54158546bca7a395984e97161e8ce6bf8191686ae1f6c206fb3270d7",
+  "note": "One explicit fixed positive smoke after a preserved failed diagnostic; no automatic retry, ground truth used only after model result"
+}

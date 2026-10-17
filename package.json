@@ -1,7 +1,7 @@
 {
   "name": "zorya-classifier",
   "version": "0.1.0",
-  "description": "Typed Jev classification and coarse-to-fine object localization for Node.js",
+  "description": "Provider-independent text/image classification and coarse-to-fine object localization for Node.js",
   "type": "module",
   "license": "MIT",
   "engines": {
@@ -15,6 +15,10 @@
     "./openrouter": {
       "types": "./dist/openrouter.d.ts",
       "import": "./dist/openrouter.js"
+    },
+    "./openai-compatible": {
+      "types": "./dist/openai-compatible.d.ts",
+      "import": "./dist/openai-compatible.js"
     }
   },
   "bin": {
@@ -74,9 +78,11 @@
     "classification",
     "image-classification",
     "object-localization",
-    "jev",
     "openrouter",
-    "typescript"
+    "typescript",
+    "vision",
+    "openai-compatible",
+    "multimodal"
   ],
   "publishConfig": {
     "access": "public",

@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "platform": "linux",
+  "node": "v24.12.0",
+  "checks": ["secrets:check", "typecheck", "lint", "boundaries", "dead-code:ci", "test", "build"],
+  "tests": {
+    "pass": 187,
+    "fail": 0,
+    "skipped": 0
+  },
+  "runtimeDistFiles": 44,
+  "runtimeDistSha256": "3c9317d9c6945eb00a3c043cfe5e6be4e12541db7fefa30398d177b955f01fbd",
+  "sourceLogSha256": "8f78477d719c1cb813b74230cc246e3645d6dfd0c96b92806b3e89bc89d5fcce",
+  "note": "Source gates passed; documentation evidence subsequently added. Final release/CI checks inspect the committed source snapshot."
+}

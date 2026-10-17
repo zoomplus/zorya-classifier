@@ -1,5 +1,7 @@
 # Reproducible benchmarks
 
+Current native Luna Decisions and ordinary vision comparisons are summarized in [tested models](vision-results.md). The fixed native-Jev runner below remains a historical/reproducibility tool, not the primary model configuration. New model-selection snapshots and budget continuations are retained separately; never label the Jev runner's output as evidence for Luna or another backend.
+
 The optional corpus contains 60 licensed Open Images photographs and 30 authored text fixtures. Photographs cover 25 requested classes with ten each of baseline, absent target, small target, edge truncation, occlusion and repeated instances.20 photos/10 texts are development data;40/20 are reserved evaluation data. Public heldout does not guarantee exclusion from provider training.
 
 Photo licenses and hashes are in benchmarks/corpus/ATTRIBUTION.md, licenses and manifests. Photo pixels and bulk CSVs are not shipped in npm or the source archive. Run the pinned fetch_photos.py script from benchmarks/corpus to obtain them; fetch_metadata.py acquires source CSVs for the independent audit. Image manifests use explicit human-verified negatives. Authored text cases are fixtures, not real customer traffic.
@@ -10,7 +12,17 @@ Metrics include classification accuracy/macro-F 1/confusion, errors in the denom
 
 Offline fixture tests validate mechanics only. Actual provider outcomes are recorded in [results](results.md), acceptance and the run reports. Keep failed and incomplete runs. Never silently retry errors, alter labels or discard difficult images to improve headline metrics.
 
-## Run the fixed corpus
+## Current native Luna Decisions reproduction
+
+For an independent fresh run of the selected non-Jev route, fetch the corpus, set your own `OPENROUTER_API_KEY`, then explicitly opt in:
+
+```sh
+node --import tsx benchmarks/model-selection.ts --allow-paid --fresh-native --out .run/luna-native-example
+```
+
+This caps admission at93 calls and$0.50:60 photos+30 texts, then at most three calls for one fixed positive locator smoke if classification meets the recorded target. It starts a new budget rather than importing the owner's historical runs. No retries/fallback or hidden key loading occur. The source-pinned snapshots in docs/evidence describe their original versions; future results can vary. Extension/completion flags in that script are historical budget-continuation tools and require the exact local earlier-run receipts; they are not needed for a fresh run.
+
+## Historical Jev fixed-corpus runner
 
 From the repository root, install development dependencies with `npm ci --ignore-scripts`. Fetch only the pinned public photo bytes, then run fixture mechanics:
 

@@ -2,9 +2,11 @@
 
 ## 0.1.0 — initial standalone candidate
 
-- Text/image classification through native Jev Choice, with complete distributions and stable tie selection.
+- Primary generic native Decisions adapter with explicit Luna Decisions routing, preserving genuine distributions; no Jev requirement.
+- Provider-independent text/image classification through ordinary vision chat models; explicit one-winner ranks without invented probabilities.
+- Direct OpenAI-compatible endpoint and optional OpenRouter adapters; custom DecisionPort for other protocols. Optional legacy Jev integration retains raw native distributions and stable ties.
 - Three-stage generic object localization with coarse/fine grids and enlarged candidates.
-- Abortable bounded operations, strict schemas, a pinned OpenRouter adapter and optional refinement port.
+- Abortable bounded operations, strict schemas, explicit provider routing and optional refinement port.
 - CLI, Node examples, offline regressions, corpus and explicit real-provider benchmark tooling.
 - MIT code licensing and separate third-party dataset notices.
 

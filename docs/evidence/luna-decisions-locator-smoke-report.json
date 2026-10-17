@@ -1,0 +1,149 @@
+{
+  "caseId": "photo-dev-02",
+  "result": {
+    "status": "located",
+    "region": {
+      "left": 384,
+      "top": 426,
+      "width": 64,
+      "height": 57
+    },
+    "normalizedRegion": {
+      "left": 0.375,
+      "top": 0.623718887262079,
+      "width": 0.0625,
+      "height": 0.08345534407027819
+    },
+    "selection": {
+      "choice": "A",
+      "nativeChoice": "A",
+      "probabilities": {
+        "A": 0.69,
+        "B": 0.12,
+        "C": 0.05,
+        "D": 0.05,
+        "none": 0.09
+      },
+      "tied": ["A"],
+      "confidence": 0.61
+    },
+    "method": "three-choice-grid-v1",
+    "metadata": {
+      "image": {
+        "width": 1024,
+        "height": 683,
+        "coordinateSpace": "oriented-source-pixels"
+      },
+      "stages": [
+        {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278183-chHSntFM0E1U3fsGWzEi",
+          "durationMs": 1636.31997,
+          "costUsd": 0.0003104,
+          "attempts": 1
+        },
+        {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278185-1n5kxDEToDokqs0PB4Ig",
+          "durationMs": 1316.7197260000003,
+          "costUsd": 0.0013121,
+          "attempts": 1
+        },
+        {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278187-NG6D4CV54lamboCuNEA1",
+          "durationMs": 986.0284590000001,
+          "costUsd": 0.0002781,
+          "attempts": 1
+        }
+      ],
+      "durationMs": 4751.135625,
+      "knownCostUsd": 0.0019006000000000001,
+      "unknownCostCount": 0
+    }
+  },
+  "metrics": {
+    "attempted": 1,
+    "located": 1,
+    "failed": 0,
+    "unknown": 0,
+    "notFound": 0,
+    "successful": 1,
+    "overallSuccessRate": 1,
+    "present": {
+      "attempted": 1,
+      "located": 1,
+      "hits": 1,
+      "misses": 0,
+      "failed": 0,
+      "unknown": 0,
+      "notFound": 0,
+      "hitRate": 1
+    },
+    "negative": {
+      "attempted": 0,
+      "falsePositives": 0,
+      "correctRejections": 0,
+      "failed": 0,
+      "unknown": 0,
+      "falsePositiveRate": null,
+      "correctRejectionRate": null
+    },
+    "locatedAreaFraction": {
+      "count": 1,
+      "min": 0.005215959004392387,
+      "max": 0.005215959004392387,
+      "mean": 0.005215959004392387,
+      "p50": 0.005215959004392387,
+      "p95": 0.005215959004392387
+    },
+    "presentLocatedDistance": {
+      "count": 1,
+      "min": 0,
+      "max": 0,
+      "mean": 0,
+      "p50": 0,
+      "p95": 0
+    },
+    "geometryCoverage": 1,
+    "distanceUnit": "normalized-xy-euclidean-divided-by-sqrt2",
+    "latency": {
+      "count": 1,
+      "minMs": 4753.023501000001,
+      "maxMs": 4753.023501000001,
+      "meanMs": 4753.023501000001,
+      "p50Ms": 4753.023501000001,
+      "p95Ms": 4753.023501000001,
+      "quantileMethod": "nearest-rank"
+    },
+    "cases": [
+      {
+        "presence": "present",
+        "status": "located",
+        "center": {
+          "x": 0.40625,
+          "y": 0.6654465592972181
+        },
+        "areaFraction": 0.005215959004392387,
+        "distanceToNearestBox": 0,
+        "pointInsideAnyBox": true
+      }
+    ]
+  },
+  "physicalCalls": 3,
+  "budget": {
+    "admittedProviderCalls": 332,
+    "maxCalls": 1000,
+    "maxCostUsd": 0.5,
+    "knownCostUsd": 0.03456876000000009,
+    "unknownCostCalls": 4,
+    "inFlightCalls": 0,
+    "reservationPerUnknownUsd": 0.05,
+    "accountedExposureUsd": 0.2345687600000001,
+    "exceededByReportedCost": false
+  },
+  "durationMs": 4753.023501000001
+}

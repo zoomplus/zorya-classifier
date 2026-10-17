@@ -1,0 +1,1205 @@
+{
+  "status": "complete",
+  "startedAt": "2026-10-17T22:59:39.495Z",
+  "finishedAt": "2026-10-17T23:00:11.001Z",
+  "policy": "Complete the missing20 development photos and20 heldout texts for the same frozen Luna Decisions classifier; earlier40 heldout photos and10 development texts are retained, never replayed or repaired. No inference/prompt changes. At most40 new classification calls under expanded1000 aggregate request limit and unchanged $0.50 cap. No retries. Preserve previous locator provider error.",
+  "finalists": ["luna-decisions"],
+  "selected": null,
+  "summaries": [
+    {
+      "route": "luna-decisions",
+      "model": "openai/gpt-6-luna-decisions",
+      "provider": "openai",
+      "photos": 20,
+      "photoCorrect": 16,
+      "heldout": 0,
+      "heldoutCorrect": 0,
+      "texts": 20,
+      "textCorrect": 20,
+      "errors": 0,
+      "knownCostUsd": 0.003345499999999999,
+      "knownCostCount": 40,
+      "priceIndex": 0.1
+    }
+  ],
+  "physicalCalls": 40,
+  "aggregatePhysicalCalls": 328,
+  "prior": {
+    "sha256": "25c463dc9b005c2702dd94e78b12cee861e5f27827c5093cda857771837b19c7",
+    "physicalCalls": 288,
+    "budget": {
+      "admittedProviderCalls": 288,
+      "maxCalls": 1000,
+      "maxCostUsd": 0.5,
+      "knownCostUsd": 0.029322660000000056,
+      "unknownCostCalls": 3,
+      "inFlightCalls": 0,
+      "reservationPerUnknownUsd": 0.05,
+      "accountedExposureUsd": 0.17932266000000008,
+      "exceededByReportedCost": false
+    }
+  },
+  "protocol": "native-choice-v1: exact criteria and raw distributions; no chat rank protocol",
+  "budget": {
+    "admittedProviderCalls": 328,
+    "maxCalls": 1000,
+    "maxCostUsd": 0.5,
+    "knownCostUsd": 0.03266816000000008,
+    "unknownCostCalls": 3,
+    "inFlightCalls": 0,
+    "reservationPerUnknownUsd": 0.05,
+    "accountedExposureUsd": 0.1826681600000001,
+    "exceededByReportedCost": false
+  },
+  "stopped": null,
+  "rows": [
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-01",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 1441.0478480000002,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": "absent",
+        "probabilities": {
+          "present": 0.34,
+          "absent": 0.66
+        },
+        "tied": ["absent"],
+        "confidence": 0.32,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277982-Qnm7RpAFI1HTFdeTKjM8",
+          "durationMs": 1281.445572,
+          "costUsd": 0.0001168,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": false
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-02",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 711.966296,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 1,
+          "absent": 0
+        },
+        "tied": ["present"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277983-d3OyMSXttp5rQLX7SdBo",
+          "durationMs": 618.9590979999998,
+          "costUsd": 0.0000944,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-03",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 435.90419999999995,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 1,
+          "absent": 0
+        },
+        "tied": ["present"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277984-QUZCsHthIPNOdeb8jPYx",
+          "durationMs": 382.97728000000006,
+          "costUsd": 0.0000816,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-04",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 829.5554400000001,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 1,
+          "absent": 0
+        },
+        "tied": ["present"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277984-HAE42nTS2M5ZFFUrqtVa",
+          "durationMs": 751.0542809999997,
+          "costUsd": 0.0000944,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-05",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 730.5974340000002,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 0.99,
+          "absent": 0.01
+        },
+        "tied": ["present"],
+        "confidence": 0.98,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277985-nno3rG444Zs4ZN6Ilr8b",
+          "durationMs": 637.6476969999999,
+          "costUsd": 0.0001008,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-06",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 872.4963850000004,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 0.73,
+          "absent": 0.27
+        },
+        "tied": ["present"],
+        "confidence": 0.46,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277986-tKwOEZvbBbktubz05DCH",
+          "durationMs": 773.8749189999999,
+          "costUsd": 0.0001008,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-07",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 857.2547080000004,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": "absent",
+        "probabilities": {
+          "present": 0.09,
+          "absent": 0.91
+        },
+        "tied": ["absent"],
+        "confidence": 0.82,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277987-TcvXMgDdcLpF30lcpL1q",
+          "durationMs": 760.0918329999995,
+          "costUsd": 0.0001008,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-08",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 451.9101609999998,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": "absent",
+        "probabilities": {
+          "present": 0.02,
+          "absent": 0.98
+        },
+        "tied": ["absent"],
+        "confidence": 0.96,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277988-Y0iQJJuRhbmjhPO7EyTL",
+          "durationMs": 404.29795900000045,
+          "costUsd": 0.0000784,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-09",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 931.6173310000004,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 1,
+          "absent": 0
+        },
+        "tied": ["present"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277989-91I9CEsi8n9ZF1WX5MTL",
+          "durationMs": 814.3404379999993,
+          "costUsd": 0.0000976,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-10",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 687.858107,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 0.97,
+          "absent": 0.03
+        },
+        "tied": ["present"],
+        "confidence": 0.94,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277990-uH4VeftKG6bZfAxeyBID",
+          "durationMs": 603.3556960000005,
+          "costUsd": 0.0000944,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-11",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 714.497784000001,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 1,
+          "absent": 0
+        },
+        "tied": ["present"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277990-oEG4bQ4dEWiuc1OYH7HO",
+          "durationMs": 625.7863370000014,
+          "costUsd": 0.0001008,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-12",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 758.023733,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 0.99,
+          "absent": 0.01
+        },
+        "tied": ["present"],
+        "confidence": 0.98,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277991-AvOLoFhKO36lTltlBp76",
+          "durationMs": 672.4401229999985,
+          "costUsd": 0.0000944,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-13",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 1040.0477920000012,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 1,
+          "absent": 0
+        },
+        "tied": ["present"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277993-lGFprmry4xK6q2NVJVgp",
+          "durationMs": 961.8451479999985,
+          "costUsd": 0.0000944,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-14",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 1303.43606,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 1,
+          "absent": 0
+        },
+        "tied": ["present"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277994-pgpOqWWsjllQkKRTxbS0",
+          "durationMs": 1203.900878999999,
+          "costUsd": 0.0001104,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-15",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 1968.3092730000008,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 1,
+          "absent": 0
+        },
+        "tied": ["present"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277996-f24uU0nzr5JUY73N7p7G",
+          "durationMs": 1825.6368390000007,
+          "costUsd": 0.0001267,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-16",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 1211.1612849999983,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 0.99,
+          "absent": 0.01
+        },
+        "tied": ["present"],
+        "confidence": 0.98,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792277997-3wEJmzE58zbMS9OcF0d7",
+          "durationMs": 1119.4658999999992,
+          "costUsd": 0.0001008,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-17",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2455.050903999998,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": "absent",
+        "probabilities": {
+          "present": 0,
+          "absent": 1
+        },
+        "tied": ["absent"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278000-6BrS1wCG4l3wzLzTFXEV",
+          "durationMs": 2333.680232999999,
+          "costUsd": 0.0001008,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": false
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-18",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2094.691584,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 1,
+          "absent": 0
+        },
+        "tied": ["present"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278002-XktG6l0k6ntzKhIj61uX",
+          "durationMs": 1989.4556279999997,
+          "costUsd": 0.0001008,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-19",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 1632.8159440000018,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 1,
+          "absent": 0
+        },
+        "tied": ["present"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278004-7sElRmPIt0bHi4Tmrawo",
+          "durationMs": 1552.7531120000021,
+          "costUsd": 0.0000944,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "photo-dev-20",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2821.4310640000003,
+      "result": {
+        "choice": "present",
+        "nativeChoice": "present",
+        "probabilities": {
+          "present": 1,
+          "absent": 0
+        },
+        "tied": ["present"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278007-54VNatHvi84S5mtcJD1n",
+          "durationMs": 2705.8991290000013,
+          "costUsd": 0.0001008,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-001",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 246.913195000001,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": "order_status",
+        "probabilities": {
+          "order_status": 0.98,
+          "refund": 0.01,
+          "technical_support": 0,
+          "general_feedback": 0,
+          "unknown": 0.01
+        },
+        "tied": ["order_status"],
+        "confidence": 0.98,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278008-pWneBZUBJFTLvOeRhkGT",
+          "durationMs": 245.10594499999934,
+          "costUsd": 0.000068,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-002",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 303.3520260000005,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": "order_status",
+        "probabilities": {
+          "order_status": 0.89,
+          "refund": 0.02,
+          "technical_support": 0.02,
+          "general_feedback": 0.01,
+          "unknown": 0.06
+        },
+        "tied": ["order_status"],
+        "confidence": 0.86,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278008-XL4tT0ffc5ygmwnnvQlP",
+          "durationMs": 301.9031750000031,
+          "costUsd": 0.0000674,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-003",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 201.33628699999826,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": "refund",
+        "probabilities": {
+          "order_status": 0.01,
+          "refund": 0.97,
+          "technical_support": 0.01,
+          "general_feedback": 0,
+          "unknown": 0.01
+        },
+        "tied": ["refund"],
+        "confidence": 0.96,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278009-swByykVuTJ0N1RlwGWZ9",
+          "durationMs": 199.69924299999911,
+          "costUsd": 0.0000686,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-004",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 260.627246,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": "refund",
+        "probabilities": {
+          "order_status": 0,
+          "refund": 1,
+          "technical_support": 0,
+          "general_feedback": 0,
+          "unknown": 0
+        },
+        "tied": ["refund"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278009-Ey1aVw3RDCu3timdNjAN",
+          "durationMs": 259.2615509999996,
+          "costUsd": 0.0000674,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-005",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 195.35287799999787,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": "technical_support",
+        "probabilities": {
+          "order_status": 0,
+          "refund": 0,
+          "technical_support": 1,
+          "general_feedback": 0,
+          "unknown": 0
+        },
+        "tied": ["technical_support"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278009-CwKZmy1GRKHiKB8Y75Rq",
+          "durationMs": 194.00128199999745,
+          "costUsd": 0.0000683,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-006",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 216.72845600000073,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": "technical_support",
+        "probabilities": {
+          "order_status": 0,
+          "refund": 0,
+          "technical_support": 1,
+          "general_feedback": 0,
+          "unknown": 0
+        },
+        "tied": ["technical_support"],
+        "confidence": 1,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278009-xhyunE3yIxzjxRqeYvN3",
+          "durationMs": 215.53119000000152,
+          "costUsd": 0.0000678,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-007",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 193.41025900000022,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": "general_feedback",
+        "probabilities": {
+          "order_status": 0,
+          "refund": 0,
+          "technical_support": 0,
+          "general_feedback": 0.99,
+          "unknown": 0.01
+        },
+        "tied": ["general_feedback"],
+        "confidence": 0.99,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278010-eyZP0xQt425JFx905MCp",
+          "durationMs": 192.1062039999997,
+          "costUsd": 0.0000685,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-008",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 216.69686900000306,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": "general_feedback",
+        "probabilities": {
+          "order_status": 0,
+          "refund": 0,
+          "technical_support": 0,
+          "general_feedback": 0.99,
+          "unknown": 0.01
+        },
+        "tied": ["general_feedback"],
+        "confidence": 0.99,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278010-gYu4F6L5XCCC67LXbEF6",
+          "durationMs": 215.2029450000009,
+          "costUsd": 0.0000683,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-009",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 271.3751020000018,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": "unknown",
+        "probabilities": {
+          "order_status": 0.01,
+          "refund": 0.01,
+          "technical_support": 0.05,
+          "general_feedback": 0,
+          "unknown": 0.93
+        },
+        "tied": ["unknown"],
+        "confidence": 0.91,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278010-wvQTSJSx4AV4erKthEJB",
+          "durationMs": 269.99628999999914,
+          "costUsd": 0.0000684,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-010",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 183.1355659999972,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": "unknown",
+        "probabilities": {
+          "order_status": 0.01,
+          "refund": 0,
+          "technical_support": 0,
+          "general_feedback": 0,
+          "unknown": 0.99
+        },
+        "tied": ["unknown"],
+        "confidence": 0.99,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278010-V8iCooRexe8nb2qP1mV5",
+          "durationMs": 181.67535199999838,
+          "costUsd": 0.0000672,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-011",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 197.27163799999835,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": "order_status",
+        "probabilities": {
+          "order_status": 0.99,
+          "refund": 0.01,
+          "technical_support": 0,
+          "general_feedback": 0,
+          "unknown": 0
+        },
+        "tied": ["order_status"],
+        "confidence": 0.99,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278011-Jiz4CAzjCiXfnMXVeKCN",
+          "durationMs": 195.96227600000202,
+          "costUsd": 0.0000687,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-012",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 621.9313650000004,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": "order_status",
+        "probabilities": {
+          "order_status": 0.91,
+          "refund": 0,
+          "technical_support": 0.01,
+          "general_feedback": 0,
+          "unknown": 0.08
+        },
+        "tied": ["order_status"],
+        "confidence": 0.89,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278011-Evh5DGzlzEQB3hP4YzIS",
+          "durationMs": 620.5858430000008,
+          "costUsd": 0.000068,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-013",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 210.15029100000174,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": "refund",
+        "probabilities": {
+          "order_status": 0.01,
+          "refund": 0.99,
+          "technical_support": 0,
+          "general_feedback": 0,
+          "unknown": 0
+        },
+        "tied": ["refund"],
+        "confidence": 0.99,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278011-P6XE4iOlfa9ofHQVcrKJ",
+          "durationMs": 208.32587299999796,
+          "costUsd": 0.0000685,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-014",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 203.72848599999998,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": "refund",
+        "probabilities": {
+          "order_status": 0.01,
+          "refund": 0.81,
+          "technical_support": 0.02,
+          "general_feedback": 0.01,
+          "unknown": 0.15
+        },
+        "tied": ["refund"],
+        "confidence": 0.76,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278012-xApArfE36pFv2QavEbLt",
+          "durationMs": 201.4932039999985,
+          "costUsd": 0.0000676,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-015",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 214.86429500000304,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": "technical_support",
+        "probabilities": {
+          "order_status": 0,
+          "refund": 0.01,
+          "technical_support": 0.98,
+          "general_feedback": 0,
+          "unknown": 0.01
+        },
+        "tied": ["technical_support"],
+        "confidence": 0.98,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278012-E8NLKHNdE9oMwN3KA3aD",
+          "durationMs": 213.5112509999999,
+          "costUsd": 0.0000686,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-016",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 247.88723400000163,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": "technical_support",
+        "probabilities": {
+          "order_status": 0,
+          "refund": 0,
+          "technical_support": 0.99,
+          "general_feedback": 0,
+          "unknown": 0.01
+        },
+        "tied": ["technical_support"],
+        "confidence": 0.99,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278012-zirENgOqVPT4LvqfCLxi",
+          "durationMs": 246.5892070000009,
+          "costUsd": 0.0000677,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-017",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 268.06552499999816,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": "general_feedback",
+        "probabilities": {
+          "order_status": 0,
+          "refund": 0,
+          "technical_support": 0,
+          "general_feedback": 0.98,
+          "unknown": 0.02
+        },
+        "tied": ["general_feedback"],
+        "confidence": 0.98,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278012-YblJSp9yUJO17TCZlA17",
+          "durationMs": 266.7219179999993,
+          "costUsd": 0.0000682,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-018",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 279.66683099999864,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": "general_feedback",
+        "probabilities": {
+          "order_status": 0,
+          "refund": 0,
+          "technical_support": 0,
+          "general_feedback": 0.99,
+          "unknown": 0.01
+        },
+        "tied": ["general_feedback"],
+        "confidence": 0.99,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278013-HTWHUjOJRSqzW1j6cF4m",
+          "durationMs": 278.2255129999976,
+          "costUsd": 0.0000675,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-019",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 204.25994699999865,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": "unknown",
+        "probabilities": {
+          "order_status": 0,
+          "refund": 0.01,
+          "technical_support": 0.01,
+          "general_feedback": 0.01,
+          "unknown": 0.97
+        },
+        "tied": ["unknown"],
+        "confidence": 0.96,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278013-2SdsjRyMhqDAI3R41q9D",
+          "durationMs": 202.92036200000075,
+          "costUsd": 0.0000682,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "luna-decisions",
+      "caseId": "support-heldout-020",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 216.86293599999772,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": "unknown",
+        "probabilities": {
+          "order_status": 0,
+          "refund": 0,
+          "technical_support": 0,
+          "general_feedback": 0.01,
+          "unknown": 0.99
+        },
+        "tied": ["unknown"],
+        "confidence": 0.99,
+        "metadata": {
+          "model": "openai/gpt-6-luna-decisions-20261006",
+          "provider": "OpenAI",
+          "requestId": "gen-dec-1792278013-eCZ4wQsoEfpKi0IQ0jXQ",
+          "durationMs": 215.5590000000011,
+          "costUsd": 0.0000683,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    }
+  ],
+  "limitations": [
+    "Public images can overlap model training",
+    "Authored text fixtures are not customer traffic",
+    "No accuracy guarantees outside this corpus",
+    "Initial run evaluates two finalists; extension evaluates one fixed route; protocol variants are not paired comparisons",
+    "Locator cases are integration smoke, not full localization quality",
+    "Local cost reservations are not an account-side spending cap"
+  ]
+}

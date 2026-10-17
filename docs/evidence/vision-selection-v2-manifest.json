@@ -1,0 +1,95 @@
+{
+  "startedAt": "2026-10-17T22:52:01.290Z",
+  "authorization": "User expanded this comparison to 290 aggregate calls and $0.50 total; prior190 calls included",
+  "routes": [
+    {
+      "id": "haiku",
+      "model": "anthropic/claude-haiku-5.5",
+      "provider": "anthropic",
+      "providerName": "Anthropic",
+      "inputPerMillion": 0.1,
+      "outputPerMillion": 0.5
+    }
+  ],
+  "prior": {
+    "sha256": "a340e426671b59dd5725ff4bd52f8535f559688ccabb4e270dfe22ddba0fc80f",
+    "physicalCalls": 190,
+    "budget": {
+      "admittedProviderCalls": 190,
+      "maxCalls": 290,
+      "maxCostUsd": 0.5,
+      "knownCostUsd": 0.016755380000000004,
+      "unknownCostCalls": 4,
+      "inFlightCalls": 0,
+      "reservationPerUnknownUsd": 0.05,
+      "accountedExposureUsd": 0.21675538000000003,
+      "exceededByReportedCost": false
+    }
+  },
+  "protocol": "ranking-size-v2: classify/final one; spatial beam four",
+  "policy": "One fixed additional ordinary vision route, 60 photos and 30 text cases with single-winner protocol; threshold >=55/60 photos, >=37/40 heldout, 30/30 texts, zero errors and known cost. No per-case prompt tuning. Then three fixed-stratum locator smoke cases. Maximum99 new calls, aggregate289 planned/290 allowed with previous190 calls and unknown-cost reservations retained. No retries; two consecutive errors stop a batch, unstarted cases are unverified.",
+  "screen": [
+    "photo-dev-01",
+    "photo-dev-02",
+    "photo-dev-03",
+    "photo-dev-04",
+    "photo-dev-05",
+    "photo-dev-06",
+    "photo-dev-07",
+    "photo-dev-08",
+    "photo-dev-09",
+    "photo-dev-10"
+  ],
+  "sourceHashes": {
+    "src/app/create-classifier.ts": "55bfcf78b8c12c616d1144371541ec4eb1e56a6a4790700b366e41dbdf896491",
+    "src/cli.ts": "2a28730b48e07437549421513b9db3a23c1c1fa907831ae02c034db17aee8aec",
+    "src/entities/contracts.ts": "6dc59ce64331d748f57d2f192aeb693ec4c5ff9e021e62dd56f534b94aa67efe",
+    "src/entities/errors.ts": "1c92c94c9ed6917953ac5192bfd2d8896cdb6fe13b7d05593573b7f2103330b0",
+    "src/features/choice-beam-layout.ts": "8f61d6f784e0e6273467cea01315f17bbfa4fffa695dd7a7bb9cd5cac5354e1a",
+    "src/features/choice.ts": "ff972121520a339b82895914242bf40f7b8dcd198b4305fd57e51b204b13952d",
+    "src/features/prompts.ts": "b808ed8f42e8c92daf08060d2805da618f2b140f99b6a9b07df49622d57b62aa",
+    "src/features/uniform-grid.ts": "8cee38aee52ba2c4ac2eaed909d5f53cc0e5aa2c04fe87585c66b29573e21c4d",
+    "src/index.ts": "1cd73c74a874adf1a4a3b6edb48e230f54c671098b9a3d51bb3a01a0ad2866db",
+    "src/infrastructure/openrouter-common.ts": "415462c42da7a3748c6bfe942ee99085fba71bc1f4158d369edda8269efeb124",
+    "src/infrastructure/openrouter-vision.ts": "d95f1be71f8011d32ec6dfbe15c3ad93d12fe1aaf88799f8dfb06156353e1915",
+    "src/infrastructure/openrouter.ts": "5714b23a098f13051bdbffff49220889a073554128e266d567537d369dd7bd87",
+    "src/infrastructure/raster.ts": "8217346f671b957540f3c01a7eb3d8ef7d0bfb6a5e18a47c96f0ccb08f4bcb08",
+    "src/infrastructure/vision-chat.ts": "9df3aeda2a2cb15d068055bca70e1bacc7ec682d70a3fc1b5f91be529753c790",
+    "src/openai-compatible.ts": "ff9096393ecb437d9c917c5da716553a5a887a810e65c9815dd791b772895fc3",
+    "src/openrouter.ts": "055afb5bac15dbbee4f9727decdd9e9b66fc2382fb31ad7bcd8c894626b00cd3",
+    "src/processes/classify.ts": "e9dd25f86e28264f2d6f1b409879514cb443194b8efdd638e42867869f7136ff",
+    "src/processes/locate.ts": "a64d2d3c4120a4ff5389a8a9b4620ecff1132dd5c3b46e69efe04208c97f39b4",
+    "src/shared/choice-mass.ts": "7f645998d9cd2688ca425b4765ec0bf7d125e932f085f9e84599b4c3b97743a3",
+    "src/shared/gate.ts": "97e4e32749dc9d3a9def6faaea2566b5d0ed831ba4451999740c719fafa8e576",
+    "src/shared/scope.ts": "cc557e9fd83a838f5366c64d026859db119491d927dfb3a84ef4320b2f0b0beb"
+  },
+  "harnessHashes": {
+    "benchmarks/ablations.ts": "d4450a1c962bd96f89af3499fd0d5da52bb20eb2c6fdf8c79d2e6057d0d6325b",
+    "benchmarks/budget.ts": "538a7e89ca643d2c26ea7e13a4d213ee019a2df865fac6573c31e9fb1ea63166",
+    "benchmarks/corpus.ts": "0af52e2f896e74e8e9ab0937e34862cea5396ac0649f896299631160314848b4",
+    "benchmarks/metrics.ts": "024e2461104df77add39ef8fa1c501863b11ca126079d1ab28d512dbbee98d37",
+    "benchmarks/model-selection.ts": "1871cd8855c6c23aec7d0c424cc1914bdbc8ed5f8f0bc4f65cbe206a87ed3a1a",
+    "benchmarks/overlay.ts": "9eced23935c5428d657df747d0f239c6fc8a61ef2f1582d88a86e08f71ddfbf5",
+    "benchmarks/recording.ts": "142f271e6fce60580ff273aa3b0e64de52bd6b74e838bb75c925ac90099c8159",
+    "benchmarks/run.ts": "5ff28c02fd9bc6dc03aaf5934e7e28300f958696a2fb1fffca44edabf748ebfa",
+    "benchmarks/runner.ts": "fd95d5b720e11f4f22bd39e5044b456fcd3c42fffd6b4f308ee98bd99695558f"
+  },
+  "corpus": {
+    "corpus-manifest.json": "00f4459996db0f61a38235adaf512e1bfc52e02e1d599bb590b62a98217e4cdb",
+    "photo-manifest.json": "a99f47d4e1c064581c6cc9123b58a5c81b196d15227963bf015041544f713aa3",
+    "text/text-manifest.json": "5e74c8c13cd1f1f8a2e2ecc22e90e6c0c83ebf5f9407dfed5b87204d3b8831ac",
+    "text/inputs/policy.json": "9db3010c97fa056fbb4a43ea51a5c973bd75b9d21f8d07f2c15d6d176e712b8a",
+    "inputs/dev.json": "0c443231956e9578afa43d4bf884cc9741594ae69ac5f957657b9c5a24422bb6",
+    "ground-truth/dev.json": "c618e1a950ae89e0c9ced0c2b1ca249ea7adc891f61c0579468c479613ea4b26",
+    "text/inputs/dev.json": "e7d2bc07559cba70494d6e4672cc3e1113c070aba8b2694ee45e76ebcbc04fcc",
+    "text/ground-truth/dev.json": "4827650b560f20b32b0366dea14947681d29ef9fefb5a059301ba5abf5c031f0",
+    "inputs/heldout.json": "2ce42723824900de9a8eca60b58220567b938a88855ec41a5a882bb410d3b1e4",
+    "ground-truth/heldout.json": "737ee884b8bbf557191d5848b56f17ac056fd01793cd8fb738c5624ea119c7d2",
+    "text/inputs/heldout.json": "e33beeeb011c55992d955ce66397717875c0084bcc21be29ecd123bd29ccce4a",
+    "text/ground-truth/heldout.json": "d29cf2fb7b980d138fd7c8e712708fa9730aa6637f350468ae15651bf9f5c4b0"
+  },
+  "perCallReservationUsd": 0.05,
+  "reasoningEffort": "none",
+  "responseFormat": "prompt",
+  "timeoutMs": 45000
+}

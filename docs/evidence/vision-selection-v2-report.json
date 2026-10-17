@@ -1,0 +1,1139 @@
+{
+  "status": "complete",
+  "startedAt": "2026-10-17T22:52:01.290Z",
+  "finishedAt": "2026-10-17T22:53:24.939Z",
+  "policy": "One fixed additional ordinary vision route, 60 photos and 30 text cases with single-winner protocol; threshold >=55/60 photos, >=37/40 heldout, 30/30 texts, zero errors and known cost. No per-case prompt tuning. Then three fixed-stratum locator smoke cases. Maximum99 new calls, aggregate289 planned/290 allowed with previous190 calls and unknown-cost reservations retained. No retries; two consecutive errors stop a batch, unstarted cases are unverified.",
+  "finalists": ["haiku"],
+  "selected": null,
+  "summaries": [
+    {
+      "route": "haiku",
+      "model": "anthropic/claude-haiku-5.5",
+      "provider": "anthropic",
+      "photos": 16,
+      "photoCorrect": 11,
+      "heldout": 0,
+      "heldoutCorrect": 0,
+      "texts": 30,
+      "textCorrect": 29,
+      "errors": 3,
+      "knownCostUsd": 0.007193600000000002,
+      "knownCostCount": 43,
+      "priceIndex": 0.175
+    }
+  ],
+  "physicalCalls": 46,
+  "aggregatePhysicalCalls": 236,
+  "prior": {
+    "sha256": "a340e426671b59dd5725ff4bd52f8535f559688ccabb4e270dfe22ddba0fc80f",
+    "physicalCalls": 190,
+    "budget": {
+      "admittedProviderCalls": 190,
+      "maxCalls": 290,
+      "maxCostUsd": 0.5,
+      "knownCostUsd": 0.016755380000000004,
+      "unknownCostCalls": 4,
+      "inFlightCalls": 0,
+      "reservationPerUnknownUsd": 0.05,
+      "accountedExposureUsd": 0.21675538000000003,
+      "exceededByReportedCost": false
+    }
+  },
+  "protocol": "ranking-size-v2: classify/final one; spatial beam four",
+  "budget": {
+    "admittedProviderCalls": 236,
+    "maxCalls": 290,
+    "maxCostUsd": 0.5,
+    "knownCostUsd": 0.02394898000000001,
+    "unknownCostCalls": 7,
+    "inFlightCalls": 0,
+    "reservationPerUnknownUsd": 0.05,
+    "accountedExposureUsd": 0.37394898000000004,
+    "exceededByReportedCost": false
+  },
+  "stopped": null,
+  "rows": [
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-01",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 4186.938432999999,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277526-eFqwiddMr3xwnIPaN6cS",
+          "durationMs": 4028.7960940000003,
+          "costUsd": 0.0002087,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": false
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-02",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2866.4524260000007,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277529-xiJkScNaXLf3USyV0x6l",
+          "durationMs": 2774.9701290000003,
+          "costUsd": 0.0001785,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-03",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2289.832863999999,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277532-8MNjThRv8m5xuO6hC34O",
+          "durationMs": 2235.041725,
+          "costUsd": 0.0001638,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-04",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3076.248227,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277535-wqMjfwcDkruqhOAtFWSP",
+          "durationMs": 2995.6268660000005,
+          "costUsd": 0.0001786,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-05",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3099.818195,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277538-SvCLHx2SVIRQlF9qkg1Z",
+          "durationMs": 3005.6935410000006,
+          "costUsd": 0.0001897,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-06",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3094.087862999999,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277542-WGSqrGQDDZtafduFgL2n",
+          "durationMs": 2992.491023999999,
+          "costUsd": 0.0001902,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-07",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2876.0894590000025,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277545-KHi774MLcaVYMUJHXkKG",
+          "durationMs": 2775.3465429999997,
+          "costUsd": 0.0001896,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": false
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-08",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 1952.6736820000006,
+      "result": {
+        "choice": "absent",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["absent"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277548-YXlldMsMhiCMUqOFZKX4",
+          "durationMs": 1899.3931890000022,
+          "costUsd": 0.0001606,
+          "attempts": 1
+        }
+      },
+      "expected": "absent",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-09",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3790.9314250000025,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277551-MA4TWR1LdkwZiqKEvjoI",
+          "durationMs": 3658.4025519999996,
+          "costUsd": 0.000186,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-10",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3521.9219709999998,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277555-kgRuvlBSfWKy4N5peIeG",
+          "durationMs": 3437.460427000002,
+          "costUsd": 0.0001786,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-11",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3552.7884529999974,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277559-y2jsW1Vs1wjdoWBbsOb9",
+          "durationMs": 3457.210059000001,
+          "costUsd": 0.0001896,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-12",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3112.059132999995,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277563-q0UAEaDns2ITc9zifdi5",
+          "durationMs": 3020.456140000002,
+          "costUsd": 0.0001786,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-13",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 2695.317473000003,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277566-DQdeKBwBo74eBgnzbl9J",
+          "durationMs": 2610.3702029999986,
+          "costUsd": 0.0001786,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-14",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3028.0306989999954,
+      "result": {
+        "choice": "present",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["present"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277569-xbDFCXmvBra1Z6ZFln6g",
+          "durationMs": 2930.2998469999948,
+          "costUsd": 0.0001971,
+          "attempts": 1
+        }
+      },
+      "expected": "present",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-15",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3663.347032999998,
+      "error": {
+        "name": "ClassifierError",
+        "code": "AUTHENTICATION",
+        "message": "Model provider rejected the request"
+      },
+      "expected": "present",
+      "correct": false
+    },
+    {
+      "route": "haiku",
+      "caseId": "photo-dev-16",
+      "split": "dev",
+      "kind": "photo",
+      "durationMs": 3937.1723120000024,
+      "error": {
+        "name": "ClassifierError",
+        "code": "INVALID_RESPONSE",
+        "message": "Vision model did not return strict JSON"
+      },
+      "expected": "present",
+      "correct": false
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-dev-001",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 775.4376849999971,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277580-wbY7LWPpsQBvCN2yhCX6",
+          "durationMs": 773.4610440000033,
+          "costUsd": 0.0001589,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-dev-002",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 704.0598099999988,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277580-X872ekaboVZOnqVtUVip",
+          "durationMs": 702.2784969999993,
+          "costUsd": 0.0001581,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-dev-003",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 757.0049549999967,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277581-TDTKahtI5d1TIQiPEnJl",
+          "durationMs": 755.489327000003,
+          "costUsd": 0.0001583,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-dev-004",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 687.3848419999995,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277582-6cebedx4g06Geza1pTOg",
+          "durationMs": 685.7265159999952,
+          "costUsd": 0.0001578,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-dev-005",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 719.6529339999979,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277583-aoy0kRdlk5oMfJxKiXLJ",
+          "durationMs": 718.1162419999964,
+          "costUsd": 0.0001585,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-dev-006",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 752.5243739999933,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277584-MWGJKTB2F7sbYCWz1ClV",
+          "durationMs": 750.9014949999982,
+          "costUsd": 0.0001592,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-dev-007",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 731.4413679999998,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277584-oi7T9dX0F1ZRkLlCptyY",
+          "durationMs": 729.6806359999973,
+          "costUsd": 0.0001596,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-dev-008",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 823.5796489999993,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277585-CkHb8Z3CRjeb1YfzQavN",
+          "durationMs": 821.7692479999969,
+          "costUsd": 0.0001603,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-dev-009",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 763.3551240000015,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277586-2c5NokTbhHYyglqwf0xT",
+          "durationMs": 761.7116200000019,
+          "costUsd": 0.0001589,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-dev-010",
+      "split": "dev",
+      "kind": "text",
+      "durationMs": 663.5317950000026,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277587-35euZx9tqZV0qcPOQOKo",
+          "durationMs": 661.9183080000003,
+          "costUsd": 0.0001585,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-001",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 780.5218000000023,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277588-GVZmUy5HT3tSLJza8qYc",
+          "durationMs": 778.7451030000011,
+          "costUsd": 0.0001597,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-002",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 617.5632949999999,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277589-kMzHQNKGRr35A443MOSS",
+          "durationMs": 616.0627989999994,
+          "costUsd": 0.0001589,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-003",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 884.6851409999945,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277589-Pp09AFjLIfTB0FILhjYd",
+          "durationMs": 883.1075329999949,
+          "costUsd": 0.00016,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-004",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1003.6543539999984,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277590-CWqgwNoX4vypZhlEJFqM",
+          "durationMs": 1001.8308570000008,
+          "costUsd": 0.000158,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-005",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 1140.5337389999986,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277591-wKHqhBdTPT0JRYINCffC",
+          "durationMs": 1138.6985430000059,
+          "costUsd": 0.0001609,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-006",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 750.7187019999983,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277593-CF9QmPAAJBvd00jNvxE3",
+          "durationMs": 749.3605989999996,
+          "costUsd": 0.0001592,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-007",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 653.1931609999956,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277593-ArFxSRPJMMyiARCvn5Zm",
+          "durationMs": 651.4647690000056,
+          "costUsd": 0.0001614,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-008",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 775.4720270000034,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277594-rlOz8Xnr7dDhwevtEZzq",
+          "durationMs": 773.835122000004,
+          "costUsd": 0.000161,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-009",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 929.5359009999956,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277595-ZR6hI9LvMnVYl0Yxwnur",
+          "durationMs": 928.1135950000025,
+          "costUsd": 0.0001606,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-010",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 928.6158629999991,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277596-KAmFFqOkEVzLmk5cTO91",
+          "durationMs": 926.8366349999997,
+          "costUsd": 0.0001584,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-011",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 799.8279490000132,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277597-JOW1ZfcRAmbTtLVpHkWG",
+          "durationMs": 798.4264800000092,
+          "costUsd": 0.0001609,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-012",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 805.7516249999899,
+      "result": {
+        "choice": "order_status",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["order_status"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277598-PHB0jmCnCdfUzJ5dL3is",
+          "durationMs": 804.175642000002,
+          "costUsd": 0.0001593,
+          "attempts": 1
+        }
+      },
+      "expected": "order_status",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-013",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 893.8787470000098,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277599-l3oq3e3l1dP5RSQyQ1re",
+          "durationMs": 892.1396909999894,
+          "costUsd": 0.0001595,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-014",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 717.6131969999988,
+      "result": {
+        "choice": "refund",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["refund"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277600-WyI95E9XeTHLMx85e9Tl",
+          "durationMs": 716.1555170000065,
+          "costUsd": 0.0001583,
+          "attempts": 1
+        }
+      },
+      "expected": "refund",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-015",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 827.2024240000028,
+      "result": {
+        "choice": "technical_support",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["technical_support"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277600-zKQfVicZdfJtkeIRwgun",
+          "durationMs": 825.6765619999933,
+          "costUsd": 0.0001606,
+          "attempts": 1
+        }
+      },
+      "expected": "technical_support",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-016",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 717.7295410000079,
+      "error": {
+        "name": "ClassifierError",
+        "code": "INVALID_RESPONSE",
+        "message": "Vision model did not return strict JSON"
+      },
+      "expected": "technical_support",
+      "correct": false
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-017",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 695.0269799999951,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277602-bQhUia4NU33vwF8MBSrC",
+          "durationMs": 693.5447439999989,
+          "costUsd": 0.0001612,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-018",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 895.8286410000001,
+      "result": {
+        "choice": "general_feedback",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["general_feedback"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277603-7VW5OumSB3NlS4RL9gyy",
+          "durationMs": 894.0671189999994,
+          "costUsd": 0.0001595,
+          "attempts": 1
+        }
+      },
+      "expected": "general_feedback",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-019",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 638.9705570000078,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277604-C5ZpdvAWx0qLmjb0VDxJ",
+          "durationMs": 637.5505340000091,
+          "costUsd": 0.0001605,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    },
+    {
+      "route": "haiku",
+      "caseId": "support-heldout-020",
+      "split": "heldout",
+      "kind": "text",
+      "durationMs": 654.2288739999931,
+      "result": {
+        "choice": "unknown",
+        "nativeChoice": null,
+        "probabilities": null,
+        "ranking": ["unknown"],
+        "tied": [],
+        "metadata": {
+          "model": "anthropic/claude-haiku-5.5",
+          "provider": "Anthropic",
+          "requestId": "gen-1792277605-d4SOIS1z4sB06vAZ0j4l",
+          "durationMs": 652.7989290000114,
+          "costUsd": 0.0001594,
+          "attempts": 1
+        }
+      },
+      "expected": "unknown",
+      "correct": true
+    }
+  ],
+  "limitations": [
+    "Public images can overlap model training",
+    "Authored text fixtures are not customer traffic",
+    "No accuracy guarantees outside this corpus",
+    "Initial run evaluates two finalists; extension evaluates one fixed route; protocol variants are not paired comparisons",
+    "Locator cases are integration smoke, not full localization quality",
+    "Local cost reservations are not an account-side spending cap"
+  ]
+}
