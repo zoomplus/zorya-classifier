@@ -6,13 +6,15 @@ Typed text/image classification and coarse-to-fine object localization for Node.
 
 [Русское руководство](docs/README.ru.md) · [API](docs/api.md) · [Architecture](docs/architecture.md) · [Benchmarks](docs/benchmarks.md) · [Measured results](docs/results.md)
 
-## Install from the prepared archive
+## Installation
 
-Node.js 22.12+ is required. The repository is prepared for npm publication; do not assume the package has already been published.
+Node.js 22.12+ is required. Source: [zoomplus/zorya-classifier](https://github.com/zoomplus/zorya-classifier). npm release: [zorya-classifier](https://www.npmjs.com/package/zorya-classifier). Check registry availability before installing a version that is still being published.
 
 ```sh
-npm install ./zorya-classifier-0.1.0.tgz
+npm install zorya-classifier
 ```
+
+You can also install the reviewed local/release archive with `npm install ./zorya-classifier-0.1.0.tgz`.
 
 There are two runtime dependencies: Zod and Sharp. Sharp installs its platform-specific prebuilt native dependency through npm. No Electron, database, game assets, OpenCV, ONNX weights or background service is required.
 

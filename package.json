@@ -60,5 +60,26 @@
     "tsx": "4.20.5",
     "typescript": "5.9.2",
     "typescript-eslint": "8.71.1"
+  },
+  "author": "zoomplus",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoomplus/zorya-classifier.git"
+  },
+  "homepage": "https://github.com/zoomplus/zorya-classifier#readme",
+  "bugs": {
+    "url": "https://github.com/zoomplus/zorya-classifier/issues"
+  },
+  "keywords": [
+    "classification",
+    "image-classification",
+    "object-localization",
+    "jev",
+    "openrouter",
+    "typescript"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

@@ -21,11 +21,13 @@ Zorya Classifier — библиотека для Node.js и TypeScript, кото
 
 Нужен Node.js 22.12 или новее. Windows и Linux проверены; macOS отдельно не проверялась. Зависимости исполнения — Zod и Sharp, включая подходящий платформе нативный модуль Sharp.
 
-Пакет подготовлен к публикации, но ещё не опубликован. Сейчас установите полученный архив в своём проекте:
+Исходники: [zoomplus/zorya-classifier](https://github.com/zoomplus/zorya-classifier). Пакет: [zorya-classifier в npm](https://www.npmjs.com/package/zorya-classifier). После появления версии в реестре установите его:
 
 ```sh
-npm install ./zorya-classifier-0.1.0.tgz
+npm install zorya-classifier
 ```
+
+Для локального/релизного архива также работает `npm install ./zorya-classifier-0.1.0.tgz`.
 
 Скопируйте пример конфигурации в локальный `.env` и заполните значение `OPENROUTER_API_KEY` своим ключом. В репозитории `.env` исключён из Git; в своём проекте тоже добавьте это исключение. Не помещайте ключ в браузерный React-код, приложение клиента или публичный репозиторий. Вызовы модели выполняйте на доверенном сервере.
 

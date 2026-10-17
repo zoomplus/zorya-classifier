@@ -1,12 +1,10 @@
 # Publishing handoff
 
-The repository and npm archive are prepared locally. No public repository, remote, registry release or automated publishing workflow has been created. Publication requires a destination and an authenticated owner.
+The owner has authorized publication under GitHub account `zoomplus` and npm account `zoomplus`. The selected destinations are the public repository `zoomplus/zorya-classifier` and public package `zorya-classifier`. These names were available at the preflight check. Check the actual repository/registry and release receipt for completion; this document describes the release process rather than asserting remote state.
 
-## Information from the owner
+## Owner and authentication
 
-1. GitHub username or organization, repository name, and whether to create a new public repository or use an existing URL. Confirm the owner permits MIT publication of the extracted code.
-2. npm username/organization and preferred name: `zorya-classifier` if available, or `@scope/zorya-classifier`. A local name in package.json is not a reservation; check registry availability and permissions at publication time.
-3. Public maintainer name/contact if desired in package metadata, and an explicit instruction to publish the reviewed version.
+The supplied account profiles are https://github.com/zoomplus and https://www.npmjs.com/~zoomplus. The owner requested creation of the repository and publication without manually preparing either destination. MIT was already selected for the extracted code. No private email address is added to package metadata. A local package name is not a registry reservation; recheck availability and identity before dispatch.
 
 Send account names and URLs, not passwords, API keys, recovery codes or authentication files. GitHub can be authenticated locally with `gh auth login --web`; the owner completes the browser flow. npm can use local `npm login` followed by the required browser/2FA publication confirmation. See [GitHub CLI authentication](https://cli.github.com/manual/gh_auth_login) and [npm publication authentication](https://docs.npmjs.com/requiring-2fa-for-package-publishing-and-settings-modification/).
 

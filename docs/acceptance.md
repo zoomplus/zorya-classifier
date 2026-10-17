@@ -1,6 +1,6 @@
 # Acceptance: standalone 0.1.0 preview
 
-The standalone library is implemented, documented and packaged for owner publication. **No GitHub or npm publication has occurred.** Classification parity is measured; localization remains experimental, with its failures retained. This acceptance concerns the extracted library, not the Zorya desktop application, installer, microphone or game session.
+The standalone library is implemented, documented and packaged for owner publication. The owner has authorized public GitHub/npm publication under `zoomplus`; remote completion is verified in the external release receipt and actual destinations. Classification parity is measured; localization remains experimental, with its failures retained. This acceptance concerns the extracted library, not the Zorya desktop application, installer, microphone or game session.
 
 ## Executed checks
 
@@ -31,4 +31,4 @@ Known reported provider cost across 337 calls is $0.079047906; 23 calls have unk
 
 Live manifests pin corpus and source snapshots. The source archive derives from the clean standalone Git commit; the external `release/manifest.json` pins that commit, the source-file manifest and final archive SHA256 values. It is intentionally outside the archives to avoid self-referential hashes. Public evidence omits host-specific private paths and contains no API key or raw user media. Licensed public photographs are downloaded separately; attribution/manifests remain in source.
 
-The source/package is ready for review and owner publication as an experimental preview. Publishing destination, account authorization and final package-name availability are owner-dependent steps described in [publishing](publishing.md).
+The source/package is ready for review and owner publication as an experimental preview. The owner-provided destinations and authentication/release procedure are recorded in [publishing](publishing.md). Publication must use the reviewed archive and verified owner identity.
