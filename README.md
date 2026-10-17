@@ -1,5 +1,7 @@
 # Zorya Classifier
 
+[![npm version](https://img.shields.io/npm/v/zorya-classifier)](https://www.npmjs.com/package/zorya-classifier)
+
 Provider-independent text/image classification and coarse-to-fine object localization for Node.js and TypeScript. MIT application code. **Native decision models are the primary integration**, with Luna Decisions as the main example; ordinary vision language models are also supported without a native classification API.
 
 Use any image-capable instruction-following model through an OpenAI-compatible API, or implement the small `DecisionPort` for another protocol. OpenRouter is an optional adapter, not a mandatory service. Model compatibility and accuracy vary; see the exact [tested models/results](docs/vision-results.md), [acceptance](docs/acceptance.md), and historical [Jev baseline](docs/results.md).
