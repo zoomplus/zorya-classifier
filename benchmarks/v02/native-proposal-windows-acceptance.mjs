@@ -328,6 +328,7 @@ async function runWorker(options) {
     osRelease: os.release(),
     startedAt: new Date().toISOString(),
     executionProvider: 'CPU',
+    threads: options.workflow === 'region-segmentation' ? 2 : 1,
     sourceCommitReference: options.sourceCommit,
     harnessSha256: null,
     archive: null,
@@ -520,7 +521,7 @@ async function runWorker(options) {
       encoderPath,
       decoderPath,
       executionProvider: 'cpu',
-      threads: 1,
+      threads: options.workflow === 'region-segmentation' ? 2 : 1,
     })
     report.checks.backendProbeSettled =
       report.childOwnership.starts === report.childOwnership.closes && ownedPids.size === 0
