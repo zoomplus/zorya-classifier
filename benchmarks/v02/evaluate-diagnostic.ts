@@ -70,7 +70,7 @@ export async function evaluateDiagnostic(runDirectory: string) {
       const outcome: LocalizationCase['outcome'] =
         location?.status === 'located' && location.region
           ? { status: 'located', region: location.region }
-          : row.locate.status === 'unknown'
+          : row.locate.status === 'unknown' || row.locate.value === 'unknown'
             ? { status: 'unknown' }
             : row.locate.status === 'not-found'
               ? { status: 'not-found' }

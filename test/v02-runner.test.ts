@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
@@ -13,6 +13,7 @@ import {
   createTextProviderForVariant,
 } from '../benchmarks/v02/runner.js'
 import { parseV02RunnerArgs } from '../benchmarks/v02/run.js'
+import { evaluateDiagnostic } from '../benchmarks/v02/evaluate-diagnostic.js'
 
 await test('Luna native control uses the typed Decisions endpoint and preserves returned probabilities', async () => {
   let calls = 0
@@ -184,6 +185,36 @@ await test('prompt variant has two synthetic examples and leaves the final task 
   assert.match(result.state[1] ?? '', /Example A/u)
   assert.match(result.state[1] ?? '', /Example B/u)
   assert.doesNotMatch(result.state.join('\n'), /photo-dev-\d|ground.truth|expected answer/iu)
+})
+
+await test('diagnostic evaluator counts a no-image unknown localization as an unknown attempt', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v02-evaluator-'))
+  try {
+    await writeFile(
+      join(directory, 'summary.json'),
+      JSON.stringify({
+        runId: 'fixture-run',
+        results: [
+          {
+            caseId: 'photo-dev-01',
+            imageSha256: 'fixture-hash',
+            encoder: 'no-image-control',
+            route: 'no-image-control',
+            classify: { status: 'ok', value: 'unknown' },
+            locate: { status: 'ok', value: 'unknown' },
+          },
+        ],
+      }),
+    )
+    const result = await evaluateDiagnostic(directory)
+    const candidate = result.candidates[0]
+    assert.equal(candidate?.classificationCorrect, 0)
+    assert.equal(candidate?.localization.unknown, 1)
+    assert.equal(candidate?.localization.failed, 0)
+    assert.equal(candidate?.localization.correct, 0)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
 })
 
 await test('recorder writes sanitized append-only dispatch and receipt records', async () => {
