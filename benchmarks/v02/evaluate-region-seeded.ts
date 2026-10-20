@@ -861,6 +861,37 @@ export async function evaluateRegionSeededRun(
       )
     )
       throw new Error('Seed and extraction call ledgers disagree')
+    if (options.expectedPolicy.requireClassifiedPresence === true) {
+      const skippedByAbsence = result.classify.status === 'ok' && result.classify.value === 'absent'
+      const skippedByFailure = result.classify.status === 'failed'
+      if (skippedByAbsence || skippedByFailure) {
+        const expectedStatus = skippedByAbsence ? 'not-found' : 'failed'
+        const expectedReason = skippedByAbsence ? 'classification-absent' : 'classification-failed'
+        if (
+          result.extraction.status !== expectedStatus ||
+          result.extraction.reason !== expectedReason ||
+          result.extraction.seed.status !== 'not-reached' ||
+          result.extraction.physicalCalls !== 0 ||
+          result.extraction.logicalCalls !== 0 ||
+          result.extraction.requestHashes.length !== 0 ||
+          result.extraction.seed.physicalCalls !== 0 ||
+          result.extraction.seed.logicalCalls !== 0 ||
+          result.extraction.seed.requestHashes.length !== 0 ||
+          result.extraction.mask !== undefined ||
+          result.extraction.segmentation !== undefined
+        )
+          throw new Error(
+            'Presence-first classification skip contains localization work or artifacts',
+          )
+      } else if (result.classify.status !== 'ok' || result.classify.value !== 'present') {
+        throw new Error('Presence-first classification result is invalid')
+      } else if (
+        result.extraction.reason === 'classification-absent' ||
+        result.extraction.reason === 'classification-failed'
+      ) {
+        throw new Error('Present classification is mislabeled as a presence-first skip')
+      }
+    }
     if (
       options.variant === 'no-image-control' &&
       (result.extraction.mask ||

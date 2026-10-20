@@ -71,6 +71,8 @@ async function fixture(
     prefetchFailure?: boolean
     prefetchSuccess?: boolean
     classifiedAbsentSkip?: boolean
+    classifiedFailureSkip?: boolean
+    mismatchSkipClassifier?: boolean
   },
 ) {
   const ids = Array.from({ length: 40 }, (_, i) =>
@@ -126,7 +128,13 @@ async function fixture(
     ),
   )
   const results = ids.map((caseId, index) => {
+    const hasPresencePolicy =
+      altered?.classifiedAbsentSkip === true ||
+      altered?.classifiedFailureSkip === true ||
+      altered?.mismatchSkipClassifier === true
     const classifiedAbsentSkip = altered?.classifiedAbsentSkip === true && index === 0
+    const classifiedFailureSkip =
+      (altered?.classifiedFailureSkip === true && index === 0) || (hasPresencePolicy && index > 0)
     const seed =
       index === 0 || (index === 27 && altered?.injectNegativeSeed)
         ? {
@@ -166,61 +174,62 @@ async function fixture(
         qualityScore: 0.7,
       },
     }
-    const extraction = classifiedAbsentSkip
-      ? {
-          status: 'not-found' as const,
-          reason: 'classification-absent',
-          durationMs: 0,
-          physicalCalls: 0,
-          logicalCalls: 0,
-          requestHashes: [],
-          seed: {
-            status: 'not-reached' as const,
+    const extraction =
+      classifiedAbsentSkip || classifiedFailureSkip
+        ? {
+            status: classifiedAbsentSkip ? ('not-found' as const) : ('failed' as const),
+            reason: classifiedAbsentSkip ? 'classification-absent' : 'classification-failed',
             durationMs: 0,
             physicalCalls: 0,
             logicalCalls: 0,
             requestHashes: [],
-          },
-        }
-      : (index === 0 || (index === 27 && altered?.injectNegativeSeed)) &&
-          variant === 'region-seeded-sam'
-        ? {
-            status: 'extracted' as const,
-            durationMs: 2,
-            physicalCalls: 0,
-            logicalCalls: 0,
-            requestHashes: [],
-            seed,
-            mask: fixtureMask,
+            seed: {
+              status: 'not-reached' as const,
+              durationMs: 0,
+              physicalCalls: 0,
+              logicalCalls: 0,
+              requestHashes: [],
+            },
           }
-        : variant === 'no-image-control' && index === 0
-          ? altered?.injectControlMask
-            ? {
-                status: 'extracted' as const,
-                durationMs: 1,
-                physicalCalls: 0,
-                logicalCalls: 0,
-                requestHashes: [],
-                seed,
-                mask: fixtureMask,
-              }
-            : {
-                status: 'region-only' as const,
-                durationMs: 1,
-                physicalCalls: 0,
-                logicalCalls: 0,
-                requestHashes: [],
-                seed,
-              }
-          : {
-              status: 'failed' as const,
-              errorCode: 'TIMEOUT',
-              durationMs: 1,
+        : (index === 0 || (index === 27 && altered?.injectNegativeSeed)) &&
+            variant === 'region-seeded-sam'
+          ? {
+              status: 'extracted' as const,
+              durationMs: 2,
               physicalCalls: 0,
               logicalCalls: 0,
               requestHashes: [],
               seed,
+              mask: fixtureMask,
             }
+          : variant === 'no-image-control' && index === 0
+            ? altered?.injectControlMask
+              ? {
+                  status: 'extracted' as const,
+                  durationMs: 1,
+                  physicalCalls: 0,
+                  logicalCalls: 0,
+                  requestHashes: [],
+                  seed,
+                  mask: fixtureMask,
+                }
+              : {
+                  status: 'region-only' as const,
+                  durationMs: 1,
+                  physicalCalls: 0,
+                  logicalCalls: 0,
+                  requestHashes: [],
+                  seed,
+                }
+            : {
+                status: 'failed' as const,
+                errorCode: 'TIMEOUT',
+                durationMs: 1,
+                physicalCalls: 0,
+                logicalCalls: 0,
+                requestHashes: [],
+                seed,
+              }
     return {
       caseId,
       imageSha256: imageHash,
@@ -228,14 +237,18 @@ async function fixture(
         status:
           altered?.classifiedAbsentSkip && index === 0
             ? ('ok' as const)
-            : altered?.prefetchSuccess && index === 0
+            : altered?.mismatchSkipClassifier && index === 0
               ? ('ok' as const)
-              : ('failed' as const),
-        ...(altered?.classifiedAbsentSkip && index === 0
-          ? { value: 'absent' as const }
-          : altered?.prefetchSuccess && index === 0
-            ? { value: 'present' as const }
-            : {}),
+              : altered?.prefetchSuccess && index === 0
+                ? ('ok' as const)
+                : ('failed' as const),
+        ...(altered?.mismatchSkipClassifier && index === 0
+          ? { value: 'present' as const }
+          : altered?.classifiedAbsentSkip && index === 0
+            ? { value: 'absent' as const }
+            : altered?.prefetchSuccess && index === 0
+              ? { value: 'present' as const }
+              : {}),
         ...((altered?.prefetchFailure || altered?.prefetchSuccess) && index === 0
           ? { errorCode: 'INVALID_INPUT' }
           : { errorCode: 'TIMEOUT' }),
@@ -248,9 +261,7 @@ async function fixture(
             altered?.classifiedAbsentSkip) &&
           index === 0
             ? 1
-            : altered?.classifiedAbsentSkip && index === 0
-              ? 1
-              : 0,
+            : 0,
         requestHashes:
           altered?.receipt && index === 0
             ? ['6'.repeat(64)]
@@ -335,7 +346,12 @@ async function fixture(
     variantSha256,
     route,
     variant,
-    policy: altered?.classifiedAbsentSkip ? { ...policy, requireClassifiedPresence: true } : policy,
+    policy:
+      altered?.classifiedAbsentSkip ||
+      altered?.classifiedFailureSkip ||
+      altered?.mismatchSkipClassifier
+        ? { ...policy, requireClassifiedPresence: true }
+        : policy,
     budget: { maxPhysicalCalls: 250, maxCostUsd: 5, unknownCostReserveUsd: 0.05 },
   }
   const runFile = await putJson(directory, 'run.json', run)
@@ -426,9 +442,12 @@ async function fixture(
       expectedProducerSourceSha256: producerSourceSha256,
       expectedVariantSha256: variantSha256,
       expectedRoute: route,
-      expectedPolicy: altered?.classifiedAbsentSkip
-        ? { ...policy, requireClassifiedPresence: true as const }
-        : policy,
+      expectedPolicy:
+        altered?.classifiedAbsentSkip ||
+        altered?.classifiedFailureSkip ||
+        altered?.mismatchSkipClassifier
+          ? { ...policy, requireClassifiedPresence: true as const }
+          : policy,
       expectedTargetPolicy: 'target-plus-neutral-instruction-v1' as const,
       summary: summaryFile,
       runManifest: runFile,
@@ -529,6 +548,38 @@ await test('v2 classified-absent skip keeps its pinned policy and zero-call seed
     assert.equal(report.rows[0]!.seedStatus, 'not-reached')
     assert.equal(report.rows[0]!.seedRegion, null)
     assert.equal(report.physical.count, 1)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('v2 classified-failure skip is limited to a zero-call failed extraction', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-v2-failure-skip-'))
+  try {
+    const value = await fixture(directory, 'region-seeded-sam', { classifiedFailureSkip: true })
+    const report = await evaluateRegionSeededRun(value.options, signal)
+    assert.equal(report.denominator, 40)
+    assert.equal(report.rows[0]!.classifyStatus, 'failed')
+    assert.equal(report.rows[0]!.extractionStatus, 'failed')
+    assert.equal(report.rows[0]!.seedStatus, 'not-reached')
+    assert.equal(report.rows[0]!.seedRegion, null)
+    assert.equal(report.rows[0]!.wholeObjectBox, null)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('v2 present classification cannot claim a classification skip', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-v2-mismatched-skip-'))
+  try {
+    const value = await fixture(directory, 'region-seeded-sam', {
+      classifiedAbsentSkip: true,
+      mismatchSkipClassifier: true,
+    })
+    await assert.rejects(
+      evaluateRegionSeededRun(value.options, signal),
+      /Present classification is mislabeled/u,
+    )
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
