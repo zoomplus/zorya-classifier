@@ -54,7 +54,7 @@ await test('HELDOUT CLI requires explicit manifest paths and freezes the 80-case
     '--map-inputs=/frozen/map.json',
   ])
   assert.equal(args.phase, 'heldout')
-  assert.equal(args.imageRoot, '/frozen/images')
+  assert.equal(args.imageRoot, resolve('/frozen/images'))
   assert.deepEqual(
     args.manifests.map((item) => item.sha256),
     [...freshProposalHeldoutManifestHashes],

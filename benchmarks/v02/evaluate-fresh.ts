@@ -213,6 +213,7 @@ export async function evaluateFreshRun(input: z.input<typeof optionsSchema>, sig
     const [location] = wholeObjectMetrics([item]).rows
     return {
       caseId: source.caseId,
+      imageSha256: source.image.sha256,
       expectedPresence: expected.expectedPresence,
       sourceStatus: result?.locate.status ?? 'not-attempted',
       classificationCorrect:
