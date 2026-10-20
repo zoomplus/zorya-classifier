@@ -1,0 +1,42 @@
+{
+  "schema": "zorya-integration-gates-v1",
+  "source": "fa82e659208ee34bd49eb0c62e0f1df2c00e95d7",
+  "recordedAt": "2026-10-20T16:42:40.422049+00:00",
+  "platform": "linux",
+  "node": "v24.12.0",
+  "tests": {
+    "passed": 412,
+    "failed": 0,
+    "skipped": 0
+  },
+  "checks": [
+    "secret-staged",
+    "secret-worktree",
+    "typecheck",
+    "eslint-strict",
+    "boundaries",
+    "dead-code",
+    "tests",
+    "build",
+    "format",
+    "installed-archive"
+  ],
+  "externalModelHttpCalls": 0,
+  "archive": {
+    "files": 258,
+    "unpackedSize": 3638384,
+    "sha256": "92db49007504f013128aff24a422bd0ef9ac21be20f9d447714198144f8a0afd",
+    "runtimeDistFiles": 106,
+    "runtimeDistSha256": "87f6a18d46107ca08b37170db1e9204514dfc72a1dfc3181f59e8ffe76d85c95",
+    "consumerDeclarationFiles": 198,
+    "npmTransport": "node npm-cli.js; shell:false",
+    "scope": "temporary archive inspected by pack:check; not final release artifact"
+  },
+  "resourceHarnessSource": "261dc235f609934b7aa125ace52984d9dd786d83",
+  "sourceManifestSha256": "0fb0dae63ffd384c5c32dbc9eac98e51e7c7a67a97b75cebf87eae32b09fdc66",
+  "sourceManifestFiles": 55,
+  "matchingSourceFiles": true,
+  "runtimeUnchangedSince0c365cb": true,
+  "logSha256": "3c11d29eef18a9d69ac864decd3d97447b66cd2cfd5443356bd8d2a4924ea771",
+  "releaseQualified": false
+}
