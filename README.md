@@ -8,7 +8,7 @@ Use an explicitly configured image-capable model through a supported adapter, or
 
 [Русское руководство](docs/README.ru.md) · [API](docs/api.md) · [Architecture](docs/architecture.md) · [Benchmarks](docs/benchmarks.md)
 
-The 0.2 source branch adds explicit whole-object bounds and optional transparent cutouts. See the [new usage guide](docs/v02-usage.md) for contracts, backend ownership, CLI and current qualification limits; this does not change the published 0.1 results.
+The 0.2 source branch adds region-seeded segmentation, mask-derived bounds and optional transparent cutouts. See the [new usage guide](docs/v02-usage.md) for contracts, backend ownership, CLI and current qualification limits; this does not change the published 0.1 results.
 
 Six experimental encodings for text-only models were also tested on fresh photos and real UI captures. None qualified for image localization; see the [measured comparison](docs/evidence/v02/fresh-text/README.md). They remain research code rather than an advertised replacement for a vision model.
 
@@ -114,6 +114,10 @@ if (result.status === 'located') console.log(result.region)
 `region` uses EXIF-oriented source pixels. It is a selected grid cell containing a hypothesized object fragment, not a tight box, segmentation mask or object-center guarantee. `unknown` is distinct from absence; transport/protocol errors throw `ClassifierError`.
 
 The locator uses up to three sequential calls: coarse 4×4 regions, fine grids in four padded regions, then four enlarged candidates. Coordinates come from code, never free-form model coordinates. Ordinary-model rankings select candidates; independent present/absent/unknown answers govern abstention. Multiple matching physical instances are allowed; one candidate is returned. Localization requires the model/endpoint to accept multiple images per call (up to nine); single-image-only endpoints can still support `classify`.
+
+## Extract a mask-derived object
+
+For a visible object box, center, or transparent cutout, use `extract` with an explicitly configured caller-owned segmenter. The existing region locator supplies a seed; the segmenter receives that seed while processing the full oriented source image. The library derives the returned box and center from actual mask pixels. This path uses the locator's normal region requests and adds no boundary-extent or LLM mask-confirmation step. See the [0.2 usage guide](docs/v02-usage.md) and runnable [`extract-object.ts`](examples/extract-object.ts). The classifier and segmenter are separately caller-owned and both must be disposed.
 
 ## Development and limits
 

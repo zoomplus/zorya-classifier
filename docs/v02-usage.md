@@ -1,4 +1,4 @@
-# Whole-object location and extraction (0.2 source branch)
+# Region-seeded masks and extraction (0.2 source branch)
 
 These APIs are implemented on the 0.2 development branch. They are not a claim that npm `latest` already contains them. The [accepted plan](0.2.0-plan.md) and [acceptance status](acceptance.md) distinguish implementation, offline checks, live quality and platform qualification. No text-image encoder has passed release qualification yet.
 
@@ -6,73 +6,49 @@ The library does not select or connect a model. Supply a `DecisionPort` to `crea
 
 ## Choose the operation
 
-| Operation                             | Result                                              | Model requests                                                    |
-| ------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------- |
-| `classify`                            | One supplied class                                  | One                                                               |
-| `locate` (default / `mode: 'region'`) | A grid cell that may contain a fragment             | Up to three                                                       |
-| `locate` with `mode: 'whole-object'`  | Conservative visible bounds of one seeded instance  | Up to six                                                         |
-| `extract`                             | Transparent PNG, cropped binary mask, source offset | Whole-object calls plus the explicitly configured local segmenter |
+| Operation                                               | Result                                                                       | Model requests                       |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------ |
+| `classify`                                              | One supplied class                                                           | One                                  |
+| `locate` (default / `mode: 'region'`)                   | A grid cell that may contain an object fragment                              | Up to three                          |
+| `locate` with `mode: 'whole-object'` and `segmentation` | Visible bounds and center derived from a mask                                | Up to three, plus local segmentation |
+| `extract` with `segmentation`                           | Mask-derived bounds, center, transparent PNG, cropped mask and source offset | Up to three, plus local segmentation |
 
-Default region behavior remains compatible. A whole-object box covers the visible object within the hard ROI; it does not reconstruct hidden parts. A mask is produced only by `extract`. No operation promises exact semantic understanding for every photo or map.
+The primary object workflow is the unchanged region locator followed by an explicitly configured segmenter. Segmentation receives the locator's seed prompt on the full EXIF-oriented source image; it does not receive a seed crop or treat the seed as an object box. Bounds and center come from actual foreground mask pixels. This flow makes no separate extent-search or model mask-confirmation requests. Default `locate` behavior remains compatible.
 
-Runnable source examples are [whole-object location](../examples/locate-whole-object.ts) and [PNG extraction](../examples/extract-object.ts). The extraction example uses the explicit CPU backend and preserves an existing output file. It prints geometry and mask dimensions instead of serializing binary mask bytes. Install the optional runtime and obtain the pinned assets yourself before running it; the library does not select, download or install segmentation assets. Source examples are maintained in the repository rather than bundled into the npm archive.
+## Primary workflow: region seed to mask-derived result
 
-## Locate the complete visible object
-
-Use an existing client configured with a `DecisionPort`:
+Configure the caller's `DecisionPort` and local segmenter, then call `extract`:
 
 ```ts
-const result = await client.locate({
-  image: await readFile('photo.jpg'),
-  target: 'the backpack on the nearest chair',
-  mode: 'whole-object',
-  boxTolerancePx: 8,
-  maxExtentPasses: 3,
-  signal: AbortSignal.timeout(45_000),
-})
-if (result.status === 'located') {
-  console.log(result.region, result.seedRegion, result.bounds, result.completeness)
-}
-```
-
-Coordinates reference the EXIF-oriented source image. `left` and `top` are inclusive; `left + width` and `top + height` are exclusive. Optional integer `roi` is a hard search boundary in that same space.
-
-The seed uses the existing three-stage locator. Each following request asks four closed Choices over actual integer boundary intervals and, on the first pass, a same-instance question. Each axis has at most sixteen intervals plus `unknown`. Up to three passes refine the selected intervals; `boxTolerancePx` is 1–64, default 8. All requests share one deadline, including queue time.
-
-`bounds` contains half-open intervals for the four extreme visible pixels; the rectangle conservatively covers those intervals. The seed must intersect the object, rather than contain it. Reversed bounds, ROI escape or a box missing the seed return `unknown/extent-inconsistent`; they are never sorted or clamped. Ambiguous identity gives `instance-ambiguous`; insufficient resolution or uncertain boundaries give `extent-uncertain`. `boundary-limited` warns that source/ROI edges may clip the visible extent.
-
-## Select whole-object bounds from pixel masks
-
-An explicit `objectProposals` adapter enables `pixel-mask-proposals-v1` instead of the boundary-interval algorithm. It first obtains a seed with the compatible region locator, computes 36 MobileSAM masks from nine seed points, then asks the configured model to choose the supplied mask whose actual foreground-derived rectangle spans the same complete visible instance, or `none`, and independently confirms that rectangle. This box check does not require every interior mask pixel to be correct; cutout quality remains a separate metric. The native process closes before the model request. Mask aliases and actual image pixels determine the result; the model never invents coordinates. Default region and classification operations are unchanged.
-
-```ts
-import { createClassifier } from 'zorya-classifier'
-import { createMobileSamObjectProposals } from 'zorya-classifier/segmentation'
-
-// decision is an explicitly configured DecisionPort; asset paths identify pinned local files.
-const proposals = await createMobileSamObjectProposals({ encoderPath, decoderPath, threads: 2 })
-const client = createClassifier({ decision, objectProposals: proposals })
+const client = createClassifier({ decision, segmentation: segmenter })
 try {
-  const result = await client.locate({ image, target: 'the backpack', mode: 'whole-object' })
-  // extract performs its own localization and reuses that operation's selected mask.
-  const cutout = await client.extract({ image, target: 'the backpack' })
-  console.log(result.status, cutout.status)
+  const result = await client.extract({ image, target: 'the backpack' })
+  if (result.status === 'extracted') {
+    console.log(result.region, result.center, result.offset)
+    // result.png is transparent; result.mask contains the matching cropped binary mask.
+  } else {
+    console.log(result.status, result.reason)
+  }
 } finally {
   try {
     await client.dispose()
   } finally {
-    await proposals.dispose()
+    await segmenter.dispose()
   }
 }
 ```
 
-This adapter requires the same explicit pinned assets and optional ONNX Runtime installation described below. Asset selection, verification and installation belong to the caller. The proposal factory currently supports CPU only, at most 2,097,152 oriented source pixels, one active native task and two waiters. It returns at most 36 masks packed as row-major `binary-lsb0` bits, at most 10 MiB in total. A source larger than this fails explicitly rather than being silently resized. Up to four bounded presentation PNGs supplement the source image during selection. The final check renders only the selected candidate at full source resolution with its exact derived rectangle, while preserving its original alias. A custom presentation port must support ordered unique subsets of the original candidate aliases for this focused view. All native work, rendering and model requests share the classifier deadline; up to five model requests are possible. The library performs no model/provider fallback or retry.
+`result.region` is the mask-derived half-open rectangle in source coordinates. `result.center` is its pixel center, and `result.offset` maps the cropped mask and PNG back to the source. Empty or seed-ungrounded masks return `unknown/segmentation-uncertain`; a locator rectangle is never substituted. Native and resource errors remain typed failures. `locate({ mode: 'whole-object' })` uses the same mask path when a segmenter is explicitly configured.
 
-A [caller-owned categorical presence example](categorical-presence-port.md) shows how to express binary propositions as closed Choice questions in the same injected-port call. It uses only public imports, selects no model/provider, and is a repository source example rather than an npm export. Development selection and fixture tests remain separate from blind quality qualification.
+Both ports remain caller-owned. The classifier cancels and joins its operations but does not dispose an injected segmenter. Dispose both resources when the application owns both. Model/provider selection is also explicit; examples below show one caller-configured route, not a library default or accuracy guarantee.
 
-The returned `bounds` are one-pixel intervals around the selected raster mask. This describes the mask's actual bounds, not a guarantee that the model found the true semantic boundary. `boxTolerancePx` and `maxExtentPasses` apply to the interval strategy, not this strategy. A correct box does not prove a good cutout: mask quality is measured separately. Empty, seed-disjoint or unconfirmed selections return a named `unknown`; native/backend errors throw.
+A Linux CPU wiring smoke with the pinned MobileSAM assets used a synthetic 192×128 image. A colored rectangle produced a 2,800-pixel mask with bounds `[70, 34, 120, 90]`; an all-transparent input produced a full-size empty mask. Three child starts matched three closes. This verifies adapter wiring only, not photo accuracy.
 
-`ObjectProposalPort` supports other caller-owned proposal generators with the same limits. Its `propose` promise must settle only after its physical work closes. `packBinaryMask` and `unpackBinaryMask` from the segmentation entry validate and convert mask bytes. Importing them does not load ONNX Runtime. The caller disposes a shared proposal adapter; the classifier only cancels and joins its own operations. If both `objectProposals` and `segmentation` are explicitly configured, the selected proposal supplies the whole-object box and the segmenter performs a separate refinement; a refinement failure never falls back to the proposal mask.
+## Legacy interval and proposal strategies
+
+The earlier boundary-interval `whole-object` strategy and `objectProposals` mask-choice strategy remain optional legacy/research paths. They are not required by the primary seed-region segmentation workflow and have separate model-confirmation steps and evidence. The interval strategy asks closed Choices over integer boundaries after the region seed. Each axis has at most sixteen intervals plus `unknown`; up to three passes refine the intervals. It returns interval-derived geometry, not a segmented mask.
+
+The optional `objectProposals` adapter computes packed MobileSAM masks from nine seed points, then asks the configured model to select a supplied candidate and confirm its rectangle. Its box checks and mask quality are separate from direct seed-prompt segmentation. Default region and classification operations are unchanged.
 
 ## Extract with an explicit local backend
 
@@ -141,7 +117,9 @@ Built-in adapters probe the backend on explicit factory calls and run each admit
 Set explicit model/provider variables as in the [main guide](../README.md). Arguments are validated before native composition or model dispatch.
 
 ```sh
+# Optional legacy interval-boundary location without an explicit segmenter.
 zorya-classifier locate photo.jpg 'the backpack' --mode whole-object
+# Primary region-seeded segmentation and cutout flow.
 zorya-classifier extract photo.jpg 'the backpack' --output backpack \
   --backend mobile-sam --encoder /models/encoder.onnx --decoder /models/decoder.onnx
 zorya-classifier extract photo.jpg 'the backpack' --output backpack \

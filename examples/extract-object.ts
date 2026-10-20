@@ -31,6 +31,7 @@ try {
       JSON.stringify({
         status: result.status,
         region: result.region,
+        center: result.center,
         offset: result.offset,
         mask: {
           width: result.mask.width,
