@@ -1,0 +1,27 @@
+{
+  "sourceSha": "55796469d5231b2e20fd51f677ae59f66e9ba5c8",
+  "runId": 39409029517,
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39409029517",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "name": "verify (windows-latest, 24)",
+      "conclusion": "failure"
+    },
+    {
+      "name": "verify (ubuntu-latest, 24)",
+      "conclusion": "failure"
+    },
+    {
+      "name": "verify (ubuntu-latest, 22)",
+      "conclusion": "failure"
+    },
+    {
+      "name": "verify (windows-latest, 22)",
+      "conclusion": "failure"
+    }
+  ],
+  "failedLogSha256": "e8856d056cdb7fa82a7b9acacfcc5115d002e06831275ae9bdc1a830dcbc8f79",
+  "failure": "All four jobs passed executable checks, then failed the formatting gate on four newly integrated benchmark source files.",
+  "remediation": "Format source files in the next integration. Original run/source hashes remain frozen and unchanged in evidence."
+}

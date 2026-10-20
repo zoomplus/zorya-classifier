@@ -13,7 +13,10 @@ import { runSeedOutlinePilot } from './seedoutlinepilot.js'
 
 export const intervalPolicyVariants = Object.freeze([
   Object.freeze({ id: 'seed-outline-fixed-16-v1', intervalPolicy: 'fixed-16-v1' as const }),
-  Object.freeze({ id: 'seed-outline-tolerance-aware-v1', intervalPolicy: 'tolerance-aware-v1' as const }),
+  Object.freeze({
+    id: 'seed-outline-tolerance-aware-v1',
+    intervalPolicy: 'tolerance-aware-v1' as const,
+  }),
 ])
 
 export const intervalPolicyPilotPolicy = Object.freeze({
@@ -33,7 +36,8 @@ export const intervalPolicyPilotPolicy = Object.freeze({
 
 const manifestUrl = new URL('./input-manifest.json', import.meta.url)
 
-export interface IntervalPolicyPilotOptions extends Omit<SeedOutlinePilotOptions, 'intervalPolicy' | 'sharedBudget' | 'variantId'> {
+export interface IntervalPolicyPilotOptions
+  extends Omit<SeedOutlinePilotOptions, 'intervalPolicy' | 'sharedBudget' | 'variantId'> {
   composeClassifier: (
     decision: DecisionPort,
     boundaryView: BoundaryViewPort,

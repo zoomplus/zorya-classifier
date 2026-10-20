@@ -14,3 +14,11 @@ docs/evidence/v02/ordinary-luna-axis/run-manifest.json
 docs/evidence/v02/seed-unbounded/run-manifest.json
 docs/evidence/v02/seed-outline/run-manifest.json
 release/
+
+# Frozen fresh producer/evaluator artifacts retain their recorded byte hashes.
+docs/evidence/v02/fresh-native-numeric/summary.json
+docs/evidence/v02/fresh-native-numeric/run-manifest.json
+docs/evidence/v02/fresh-native-numeric/evaluation-root-v1.json
+docs/evidence/v02/fresh-native-outline-axis/summary.json
+docs/evidence/v02/fresh-native-outline-axis/run-manifest.json
+docs/evidence/v02/fresh-native-outline-axis/evaluation-root-v1.json

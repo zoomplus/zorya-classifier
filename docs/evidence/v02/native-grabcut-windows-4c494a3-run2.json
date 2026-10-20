@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "backend": "grabcut",
+  "platform": "win32",
+  "arch": "x64",
+  "node": "v24.19.0",
+  "osRelease": "10.0.26200",
+  "startedAt": "2026-10-20T10:54:25.302Z",
+  "executionProvider": "native CPU / OpenCV.js",
+  "scope": "Corrected five-photo component plus owned-child lifecycle; annotation-derived points/boxes are evaluator-only component interventions, not end-to-end localization.",
+  "packageArchive": {
+    "bytes": 246944,
+    "sha256": "2943bdc143146ff4e8af7117679ad685c5f737ee2d8ef529e449b379a84959f4"
+  },
+  "archiveSourceCommit": "4c494a3eb190c1b5d293ac970e5e88ab68136861",
+  "grabcutFixCommit": "022ca0e1ea4219cb7c6b51445046ae5be3a224d0",
+  "opencvAsset": {
+    "bytes": 10964323,
+    "sha256": "63366510248adf3a7eddf3e793dd825404efb7df3749f4d6f8557c7fa4ca8aa0",
+    "url": "https://docs.opencv.org/4.13.0/opencv.js"
+  },
+  "fixtureManifest": {
+    "sha256": "2827ac66c6f1e510ce4c688cddc95aff4c4ffe8e6dc69b308404cb74183c5c6f"
+  },
+  "fixtures": [
+    {
+      "id": "photo-dev-present-06",
+      "status": "segmented",
+      "iou": 0.5573707950898767,
+      "durationMs": 1925,
+      "method": "grabcut-seeded-box-v1",
+      "backend": "grabcut",
+      "referenceSeedPixels": 121,
+      "predictedSeedPixels": 121,
+      "imageSha256": "ad0eb4bf4a6c2c1be585846a943aa06ec2440696b7e8874374904eb25dcc594a",
+      "maskSha256": "0a82516a43057329a7b2cafa4fcbe1c714d997a87a9e1dbe6d84ffcbf1bbbe26"
+    },
+    {
+      "id": "photo-dev-present-08",
+      "status": "segmented",
+      "iou": 0.5932328061787422,
+      "durationMs": 1120,
+      "method": "grabcut-seeded-box-v1",
+      "backend": "grabcut",
+      "referenceSeedPixels": 121,
+      "predictedSeedPixels": 121,
+      "imageSha256": "74b944d3b7d88a046d01f2d813c88e8a6415296db938a343a83d86048f4c3a4f",
+      "maskSha256": "4e72cfb83de41421ed4a41c02ee4c700ca8bdf57f9c2f903017cf21ad6d4c772"
+    },
+    {
+      "id": "photo-dev-present-09",
+      "status": "segmented",
+      "iou": 0.7519175455417066,
+      "durationMs": 4624,
+      "method": "grabcut-seeded-box-v1",
+      "backend": "grabcut",
+      "referenceSeedPixels": 121,
+      "predictedSeedPixels": 121,
+      "imageSha256": "6710905e971316f4b0d0fe1535eb64702807bc4c041bc161ea1ce1208eff5a0f",
+      "maskSha256": "602668e56dd5ae8c5a0b7f24afe1b3da88d5e28446e96a870d6d0778478b0703"
+    },
+    {
+      "id": "photo-dev-present-13",
+      "status": "segmented",
+      "iou": 0.3636080440275518,
+      "durationMs": 6651,
+      "method": "grabcut-seeded-box-v1",
+      "backend": "grabcut",
+      "referenceSeedPixels": 121,
+      "predictedSeedPixels": 121,
+      "imageSha256": "750f09aeeb5d1113088eedaf47f201f0837ad64720f836a69fec9ed3e4f1e5a7",
+      "maskSha256": "417bb4bf0272c4322e6dd5905505abd221ff8af286735b125e9c1c1f549dc9b0"
+    },
+    {
+      "id": "photo-dev-present-15",
+      "status": "segmented",
+      "iou": 0.53283332821033,
+      "durationMs": 1561,
+      "method": "grabcut-seeded-box-v1",
+      "backend": "grabcut",
+      "referenceSeedPixels": 121,
+      "predictedSeedPixels": 121,
+      "imageSha256": "a0a80df65932f8cb7cf7367305372c04aa37f1991436e4f1cb7828c9138f708e",
+      "maskSha256": "256b081bcf95f744d5524eb16ff1c21795bf5c9896ae0e43d3d4198d53f8e1e3"
+    }
+  ],
+  "lifecycle": {
+    "cancellationCode": "ABORTED",
+    "cancellationDurationMs": 341,
+    "cancellationPhysicalCloseConfirmed": true,
+    "queueFulfilledSegmented": 3,
+    "capacityRejected": 1,
+    "queueOtherFailures": 0,
+    "queueSettled": 4,
+    "afterDisposeCode": "DISPOSED"
+  },
+  "childOwnership": {
+    "starts": 10,
+    "closes": 10,
+    "stillOwnedPids": []
+  },
+  "checks": {
+    "allFiveSegmented": true,
+    "cancellation": true,
+    "capacity": true,
+    "disposal": true,
+    "childOwnership": true,
+    "cleanup": true,
+    "worker": false
+  },
+  "cleanupErrors": [],
+  "failure": null,
+  "npm": "11.17.0",
+  "endedAt": "2026-10-20T10:54:56.356Z",
+  "photoQuality": {
+    "threshold": 0.8,
+    "passCount": 0,
+    "belowThreshold": [
+      {
+        "id": "photo-dev-present-06",
+        "iou": 0.5573707950898767
+      },
+      {
+        "id": "photo-dev-present-08",
+        "iou": 0.5932328061787422
+      },
+      {
+        "id": "photo-dev-present-09",
+        "iou": 0.7519175455417066
+      },
+      {
+        "id": "photo-dev-present-13",
+        "iou": 0.3636080440275518
+      },
+      {
+        "id": "photo-dev-present-15",
+        "iou": 0.53283332821033
+      }
+    ]
+  },
+  "acceptance": false,
+  "tempCleanup": "removed by coordinator after worker exit",
+  "workerStatus": 1,
+  "workerSignal": null,
+  "workerError": null,
+  "rawReportSha256": "90d3a16ac5d7f3ec42b21fc72c4635c213ed33aac8d630ad7ff354aba43d13ec",
+  "redactions": ["owned tempRoot and local artifact paths; immutable hashes retained"]
+}

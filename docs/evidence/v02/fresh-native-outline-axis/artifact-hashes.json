@@ -1,0 +1,9 @@
+{
+  "runId": "v02-fresh-native-seed-outline-axis-fixed16-v1-2026-10-20T104211594Z-29f78126",
+  "sha256": {
+    "summary.json": "ba2b6c44504b5c08223e97ae55c5b676442a22e2ec3bc0843d4f29c1ed726c72",
+    "run-manifest.json": "ed0e03f4ea53705a83c9073f448acb269f6783f8bea24b078a7a38beb68ed54f",
+    "evaluation-root-v1.json": "d8bf1ebfa78b96f26d0ebfcfb63d395af530ceed16ec508d3c3c13495d2581bf"
+  },
+  "scope": "fresh DEV 20 licensed photos and 10 independent controlled UI cases; no heldout; concurrent-development latency unranked"
+}

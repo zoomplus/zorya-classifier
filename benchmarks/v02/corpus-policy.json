@@ -1,7 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "fresh-photos-acquired-controlled-map-ui-supplements-not-natural-capture-gate",
-  "modelCalls": 0,
+  "status": "fresh-photos-and-independent-controlled-dev-strata-acquired-heldout-map-oracle-pending",
   "acquired": {
     "photos": {
       "status": "acquired-and-structurally-validated",
@@ -20,12 +19,39 @@
       "inputAndTruthSplit": true
     },
     "maps": {
-      "status": "not-acquired",
-      "reason": "No source with both verifiable per-screenshot image rights and a defensible full-map/icon annotation has been admitted. DayZ minimap public code does not establish screenshot-content rights; map center-marker coordinates do not define the marker bbox."
+      "status": "independent-controlled-dev-acquired-heldout-oracle-pending",
+      "dev": {
+        "present": 7,
+        "absent": 3
+      },
+      "devInputSha256": "b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15",
+      "annotationMethod": "Freeciv renderer sprite/source-alpha transform and saved-state negative evidence; no model annotations",
+      "limitations": [
+        "One controlled actual-game source family",
+        "All seven positive selected Explorer bodies share the same screen coordinate; background variation is not positional diversity"
+      ],
+      "heldoutSourceFamily": "OpenTTD, separate from Freeciv"
     },
     "ui": {
-      "status": "not-acquired",
-      "reason": "RICO Semantics establishes CC-BY-SA 4.0 for its human annotation dataset, but the RICO screenshots are a separate dataset and the sampled app screenshot rights have not been established individually. No images admitted."
+      "status": "independent-controlled-dev-and-blind-heldout-acquired",
+      "dev": {
+        "present": 7,
+        "absent": 3
+      },
+      "heldout": {
+        "present": 15,
+        "absent": 5
+      },
+      "devInputSha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc",
+      "heldoutInputCommitment": "598da2b326e8d4cbedf1ca0517ce6ecccc8d141125ee53a88ef397aa9a5ea0a2",
+      "annotationMethod": "AT-SPI exact widget allocations, independently corroborated painted edges and complete scoped toolbar inventory",
+      "sourceFamilies": {
+        "dev": "Geany",
+        "heldout": "AbiWord"
+      },
+      "limitations": [
+        "Controlled actual applications, one source family per split; no natural-user-capture diversity claim"
+      ]
     }
   },
   "oldCorpusUse": "development-regression-only",
@@ -92,7 +118,7 @@
     }
   },
   "controlledSupplements": {
-    "status": "acquired-separately-not-counted-as-natural-source-qualification",
+    "status": "historical-model-assisted-supplement-not-independent-qualification",
     "dev": {
       "map": {
         "present": 7,
@@ -121,5 +147,7 @@
       "not natural user-captured imagery",
       "no reference masks"
     ]
-  }
+  },
+  "acquisitionModelCalls": 0,
+  "qualificationScope": "Independent controlled actual game/application strata are eligible under the accepted plan. A separate natural-user-capture quota is not required; report source-family and positional limits explicitly."
 }

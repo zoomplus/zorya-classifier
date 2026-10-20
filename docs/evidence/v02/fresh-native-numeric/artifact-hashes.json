@@ -1,0 +1,9 @@
+{
+  "runId": "v02-fresh-native-numeric-v1-2026-10-20T102835524Z-c381b57e",
+  "sha256": {
+    "summary.json": "fed95ee229191930c9bafe524b126258bb06a934ef821315d555957181b6dd3f",
+    "run-manifest.json": "c955bd54b6140781edbcd2e77a8818805743215b82eb69b5d73e397065ba3fee",
+    "evaluation-root-v1.json": "e826e8652ed3551abe5f5702d342315bc4452487f39f4256b1a979591f4fda3e"
+  },
+  "scope": "fresh DEV 20 licensed photos and 10 independent controlled UI cases; no heldout; concurrent-development latency unranked"
+}

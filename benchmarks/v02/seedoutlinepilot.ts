@@ -172,11 +172,7 @@ export async function runSeedOutlinePilot(options: SeedOutlinePilotOptions) {
   await mkdir(outputDirectory, { recursive: false })
   const budget =
     options.sharedBudget ??
-    new RunBudget(
-      policy.maxPhysicalCalls,
-      policy.maxCostUsd,
-      policy.unknownCostReserveUsd,
-    )
+    new RunBudget(policy.maxPhysicalCalls, policy.maxCostUsd, policy.unknownCostReserveUsd)
   await writeImmutable(join(outputDirectory, 'run-manifest.json'), {
     schemaVersion: 1,
     runId,

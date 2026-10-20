@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "backend": "grabcut",
+  "platform": "win32",
+  "arch": "x64",
+  "node": "v24.19.0",
+  "osRelease": "10.0.26200",
+  "startedAt": "2026-10-20T10:54:05.089Z",
+  "executionProvider": "native CPU / OpenCV.js",
+  "scope": "Corrected five-photo component plus owned-child lifecycle; annotation-derived points/boxes are evaluator-only component interventions, not end-to-end localization.",
+  "packageArchive": {
+    "bytes": 246944,
+    "sha256": "2943bdc143146ff4e8af7117679ad685c5f737ee2d8ef529e449b379a84959f4"
+  },
+  "archiveSourceCommit": "4c494a3eb190c1b5d293ac970e5e88ab68136861",
+  "grabcutFixCommit": "022ca0e1ea4219cb7c6b51445046ae5be3a224d0",
+  "opencvAsset": {
+    "bytes": 10964323,
+    "sha256": "63366510248adf3a7eddf3e793dd825404efb7df3749f4d6f8557c7fa4ca8aa0",
+    "url": "https://docs.opencv.org/4.13.0/opencv.js"
+  },
+  "fixtureManifest": {
+    "sha256": "2827ac66c6f1e510ce4c688cddc95aff4c4ffe8e6dc69b308404cb74183c5c6f"
+  },
+  "fixtures": [],
+  "lifecycle": null,
+  "childOwnership": {
+    "starts": 0,
+    "closes": 0,
+    "stillOwnedPids": []
+  },
+  "checks": {
+    "allFiveSegmented": false,
+    "cancellation": false,
+    "capacity": false,
+    "disposal": false,
+    "childOwnership": true,
+    "cleanup": true,
+    "worker": false
+  },
+  "cleanupErrors": [],
+  "failure": "Windows npm version probe failed (1): Exit prior to config file resolving\ncause\ndouble-loading config \"C:\\Users\\css19\\AppData\\Local\\Temp\\zorya-classifier-v02-grabcut-win-XDX2Z1\\npmrc\" as \"global\", previously loaded as \"user\"\n",
+  "endedAt": "2026-10-20T10:54:06.297Z",
+  "photoQuality": {
+    "threshold": 0.8,
+    "passCount": 0,
+    "belowThreshold": []
+  },
+  "acceptance": false,
+  "tempCleanup": "removed by coordinator after worker exit",
+  "workerStatus": 1,
+  "workerSignal": null,
+  "workerError": null,
+  "rawReportSha256": "35f9d42d649a8a391bedc4417ff2eebfa7cfc65160691064632e9fd9db916f09",
+  "redactions": ["owned tempRoot and local artifact paths; immutable hashes retained"]
+}

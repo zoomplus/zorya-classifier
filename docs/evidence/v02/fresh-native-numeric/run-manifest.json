@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "runId": "v02-fresh-native-numeric-v1-2026-10-20T102835524Z-c381b57e",
+  "purpose": "full pinned DEV photo and independent UI producer pass",
+  "startedAt": "2026-10-20T10:28:35.525Z",
+  "profileId": "native-numeric-v1",
+  "variantSha256": "89c4f16097954665a09e98e68e923b180a263e8ab386d124cb256af427123572",
+  "sourceHashes": {
+    "./fresh-runner.ts": "2ac5398b426fd150d81a01c1557960fc2ad5dbd5dba75cd5f16c099a5c6833b9",
+    "./run-fresh-dev.ts": "ff68e34b0c246ecd85fef8ee32d064d5738ee532c2840c241bc59c96ac41539a",
+    "./fresh-corpus.ts": "6cf97540f953845b2827d7cdcffc92428b01d4465e75ad5047994e0f01666af6",
+    "./recording.ts": "7cf73a6e988491a443caeca6de33fa3824c2253d083d9155b9bde74b317d85f9",
+    "./budget.ts": "386995f2572339e3e54df78ec9e17d4579d4a1665929a21bf45e7e2830d4fda6",
+    "./protocol.ts": "9b1679ddaf38e70aaf6672c4c59411fddd307281023f33c4ad2aa57f347667b2",
+    "./seedoutlinepresentation.ts": "244a7b88572950c2a76fb9fdfee1de0f1055768f33340883eb6b3c2ebd5fb9f1",
+    "./seedunboundedprompt.ts": "180d500f80d1c44e0c16b2008cf91f940ee3c6aa071531b661719ff51c39849d",
+    "../../src/app/create-classifier.ts": "53a1960103ba636221107a82b0fa3780ee198a8b66579804e003dd91d7e29b73",
+    "../../src/entities/contracts.ts": "7710dad19cd6caa1d10516babb2f9d9f108af1c7040302f09bf53b9b478187cd",
+    "../../src/entities/whole-object.ts": "1210894f3f04886ef36af807c7fab7320114e21ea65527037de8134bd2f2ce9c",
+    "../../src/processes/classify.ts": "0edf3e8a05333c2325f53ddd06c1c903d3daca80ca082ba2e3609ff9de6ffb9d",
+    "../../src/processes/locate.ts": "a5a1320c2dff4060a3c5ab5e32cb5f0af2d94fcad458caba3818b6a0a28dab3d",
+    "../../src/processes/whole-object.ts": "548a0de8ee72956da3162023f43983d7596a2df9ec2756e33c952ca27b3fc320",
+    "../../src/features/prompts.ts": "b808ed8f42e8c92daf08060d2805da618f2b140f99b6a9b07df49622d57b62aa",
+    "../../src/features/choice.ts": "ff972121520a339b82895914242bf40f7b8dcd198b4305fd57e51b204b13952d",
+    "../../src/features/choice-beam-layout.ts": "8f61d6f784e0e6273467cea01315f17bbfa4fffa695dd7a7bb9cd5cac5354e1a",
+    "../../src/features/uniform-grid.ts": "8cee38aee52ba2c4ac2eaed909d5f53cc0e5aa2c04fe87585c66b29573e21c4d",
+    "../../src/infrastructure/openrouter.ts": "486a919853949e6789dd4035b7699fd89b9682cb3e928632c77b216656f44c55",
+    "../../src/infrastructure/raster.ts": "615626e6fe04e377712ec7a3e3d8f2ea5e35ec17c2fd3982ea9df940ce5303dd"
+  },
+  "producerSourceSha256": "a1d8920bfe3901f19d22e56b60ec8c6a43188d386a1092ed0122375885e8005e",
+  "manifests": [
+    {
+      "sha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a",
+      "cases": 20
+    },
+    {
+      "sha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc",
+      "cases": 10
+    }
+  ],
+  "plannedCaseIds": [
+    "photo-dev-present-01",
+    "photo-dev-present-02",
+    "photo-dev-present-03",
+    "photo-dev-present-04",
+    "photo-dev-present-05",
+    "photo-dev-present-06",
+    "photo-dev-present-07",
+    "photo-dev-present-08",
+    "photo-dev-present-09",
+    "photo-dev-present-10",
+    "photo-dev-present-11",
+    "photo-dev-present-12",
+    "photo-dev-present-13",
+    "photo-dev-present-14",
+    "photo-dev-present-15",
+    "photo-dev-present-16",
+    "photo-dev-absent-01",
+    "photo-dev-absent-02",
+    "photo-dev-absent-03",
+    "photo-dev-absent-04",
+    "ui-geany-oracle-dev-present-01",
+    "ui-geany-oracle-dev-present-02",
+    "ui-geany-oracle-dev-present-03",
+    "ui-geany-oracle-dev-present-04",
+    "ui-geany-oracle-dev-present-05",
+    "ui-geany-oracle-dev-present-06",
+    "ui-geany-oracle-dev-present-07",
+    "ui-geany-oracle-dev-absent-01",
+    "ui-geany-oracle-dev-absent-02",
+    "ui-geany-oracle-dev-absent-03"
+  ],
+  "plannedCases": [
+    {
+      "caseId": "photo-dev-present-01",
+      "imageSha256": "71e781adb0c2d47d97e6fd5868e6dbe4de8c1375536e1753f897931ff90575dc",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "caseId": "photo-dev-present-02",
+      "imageSha256": "a27d93b12fadd550899a1d1d8ce70d34ba3c692affebf09134eda838910fcab5",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 717
+      }
+    },
+    {
+      "caseId": "photo-dev-present-03",
+      "imageSha256": "e20c5e6f6a9334aca94289a99a56f3c0ee7cb8de8f5e00eff886cf772600250c",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 683
+      }
+    },
+    {
+      "caseId": "photo-dev-present-04",
+      "imageSha256": "66fe4e85ef638a2f28d5a2e7472ccebe46d2c8446304db73659d8af37f0d489c",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 687
+      }
+    },
+    {
+      "caseId": "photo-dev-present-05",
+      "imageSha256": "71b99532e14abb6098a704e9bd9c2c50eebba72588a49e60c8a4b89af4eea4c5",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 683
+      }
+    },
+    {
+      "caseId": "photo-dev-present-06",
+      "imageSha256": "ad0eb4bf4a6c2c1be585846a943aa06ec2440696b7e8874374904eb25dcc594a",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 683
+      }
+    },
+    {
+      "caseId": "photo-dev-present-07",
+      "imageSha256": "16cae5fc9b21c562a005d7e1a00809ea90e4b143ee13614aefffa75fb113e044",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 680
+      }
+    },
+    {
+      "caseId": "photo-dev-present-08",
+      "imageSha256": "74b944d3b7d88a046d01f2d813c88e8a6415296db938a343a83d86048f4c3a4f",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 683
+      }
+    },
+    {
+      "caseId": "photo-dev-present-09",
+      "imageSha256": "6710905e971316f4b0d0fe1535eb64702807bc4c041bc161ea1ce1208eff5a0f",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "caseId": "photo-dev-present-10",
+      "imageSha256": "f118352c4bfeb65b0a2dae153428ce0f802a01a232d45d0be4b0a7176bfaa342",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 683
+      }
+    },
+    {
+      "caseId": "photo-dev-present-11",
+      "imageSha256": "07ab595c6482338b5982d61ac175450295be81338e9c641b218d7794b658249e",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 678
+      }
+    },
+    {
+      "caseId": "photo-dev-present-12",
+      "imageSha256": "65c38939211e8ae0d98e7d01fd3bc8d159fe8b96969940a169e82556071059c8",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "caseId": "photo-dev-present-13",
+      "imageSha256": "750f09aeeb5d1113088eedaf47f201f0837ad64720f836a69fec9ed3e4f1e5a7",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 681
+      }
+    },
+    {
+      "caseId": "photo-dev-present-14",
+      "imageSha256": "77681ffeb78a27bb0d59111acb638254948ece8115f6e5f6d1438b50c319c4d1",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 682
+      }
+    },
+    {
+      "caseId": "photo-dev-present-15",
+      "imageSha256": "a0a80df65932f8cb7cf7367305372c04aa37f1991436e4f1cb7828c9138f708e",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "caseId": "photo-dev-present-16",
+      "imageSha256": "4a0dffd0f9f85bacac77d4f372c1f3eb754ba6a7440de3bc7c7f6a42f4c53ecd",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "caseId": "photo-dev-absent-01",
+      "imageSha256": "604b8fa9c30881acee7c67d078bb7d08f846aeac6152dc1bf23a41ddefe45988",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 721
+      }
+    },
+    {
+      "caseId": "photo-dev-absent-02",
+      "imageSha256": "8bcbc695bc113f645bb66dd2e03615764cd37d80e5794d8f9ffc79f1e364e077",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 683
+      }
+    },
+    {
+      "caseId": "photo-dev-absent-03",
+      "imageSha256": "f8c2cc736fd7941bf2bc51c73147aeec96deba4b22e6948fe088a2d9121c51a6",
+      "imageDimensions": {
+        "width": 816,
+        "height": 1024
+      }
+    },
+    {
+      "caseId": "photo-dev-absent-04",
+      "imageSha256": "085ac7dc3243e28816e69f5e1ad56b9e8858c7135fac366f3172ad862e28eeae",
+      "imageDimensions": {
+        "width": 1024,
+        "height": 683
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-01",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "imageDimensions": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-02",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "imageDimensions": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-03",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "imageDimensions": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-04",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "imageDimensions": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-05",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "imageDimensions": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-06",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "imageDimensions": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-07",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "imageDimensions": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-01",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "imageDimensions": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-02",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "imageDimensions": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-03",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "imageDimensions": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  ],
+  "route": {
+    "id": "openai-gpt-6-luna-native-decisions-v1",
+    "model": "openai/gpt-6-luna-decisions",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "apiEndpoint": "/api/alpha/decisions",
+    "allowFallbacks": false
+  },
+  "policy": {
+    "timeoutMs": 45000,
+    "concurrency": 1,
+    "maxQueue": 0,
+    "boxTolerancePx": 8,
+    "maxExtentPasses": 3,
+    "retries": 0,
+    "fallback": false,
+    "maxPhysicalCalls": 250,
+    "maxCostUsd": 5,
+    "unknownCostReserveUsd": 0.02,
+    "latencyEnvironment": "concurrent-with-linux-native-soak",
+    "latencyRankingEligible": false
+  },
+  "modelBoundary": {
+    "evaluatorTruthRead": false,
+    "retries": 0,
+    "fallback": false
+  }
+}
