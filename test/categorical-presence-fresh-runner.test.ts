@@ -135,7 +135,8 @@ await test('producer closure pins the dedicated box-confirmation CLI directly', 
   assert.ok(categoricalFreshProducerSourceFiles.includes(relativePath))
   const source = await categoricalFreshProducerSourceManifest()
   assert.equal(source[relativePath]?.length, 64)
-  assert.equal(Object.keys(source).filter((path) => path.startsWith('src/')).length, 53)
+  assert.equal(Object.keys(source).filter((path) => path.startsWith('src/')).length, 54)
+  assert.ok(Object.hasOwn(source, 'src/processes/extract-from-region.ts'))
 })
 
 await test('six-call per-case ceiling composes with the 300-call DEV ledger without ID collisions', () => {

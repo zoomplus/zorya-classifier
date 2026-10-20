@@ -13,6 +13,7 @@ import { freshProposalInputPins } from '../benchmarks/v02/evaluate-proposals.js'
 import { freshProducerTask, loadFreshCorpus } from '../benchmarks/v02/fresh-corpus.js'
 import { hashCanonical } from '../benchmarks/v02/protocol.js'
 import { categoricalFreshPolicy } from '../benchmarks/v02/categorical-presence-fresh-runner.js'
+import { historicalRuntimeSourcePaths } from './fixtures/historical-runtime-sources.js'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const signal = new AbortController().signal
@@ -59,17 +60,8 @@ async function fixture(sourceClosure: 'legacy' | 'box' = 'legacy') {
     ...legacyRequired.slice(9),
   ]
   const required = sourceClosure === 'box' ? boxRequired : legacyRequired
-  async function sourceFiles(directory: string): Promise<string[]> {
-    const files: string[] = []
-    for (const entry of await readdir(join(root, directory), { withFileTypes: true })) {
-      const path = `${directory}/${entry.name}`
-      if (entry.isDirectory()) files.push(...(await sourceFiles(path)))
-      else if (path.endsWith('.ts')) files.push(path)
-    }
-    return files
-  }
   const sourceHashes = Object.fromEntries(
-    [...required, ...(await sourceFiles('src'))].map((name) => [name, '1'.repeat(64)]),
+    [...required, ...(await historicalRuntimeSourcePaths())].map((name) => [name, '1'.repeat(64)]),
   )
   const sourceDigest = hashCanonical(
     Object.entries(sourceHashes).sort(([a], [b]) => a.localeCompare(b)),

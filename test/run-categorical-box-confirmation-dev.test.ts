@@ -39,5 +39,6 @@ await test('producer closure directly hashes the executable box-confirmation CLI
   )
   const directHash = createHash('sha256').update(source).digest('hex')
   assert.equal(manifest[relativePath], directHash)
-  assert.equal(Object.keys(manifest).filter((path) => path.startsWith('src/')).length, 53)
+  assert.equal(Object.keys(manifest).filter((path) => path.startsWith('src/')).length, 54)
+  assert.ok(Object.hasOwn(manifest, 'src/processes/extract-from-region.ts'))
 })

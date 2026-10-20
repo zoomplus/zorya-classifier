@@ -105,7 +105,7 @@ await test('text image workflow emits zero images through classification, seed a
   }
 })
 
-await test('research boundary presentation composes through locate and extract without changing the default', async () => {
+await test('research boundary presentation stays opt-in and never adds extent calls to seeded extraction', async () => {
   const image = await sharp({
     create: { width: 512, height: 384, channels: 3, background: '#ffffff' },
   })
@@ -135,7 +135,8 @@ await test('research boundary presentation composes through locate and extract w
     },
   }
   const baseline = createClassifier({ decision })
-  const research = createResearchClassifier(
+  const research = createResearchClassifier({ decision }, undefined, boundaryView)
+  const extraction = createResearchClassifier(
     { decision, segmentation: segmenter.port },
     undefined,
     boundaryView,
@@ -153,12 +154,16 @@ await test('research boundary presentation composes through locate and extract w
     )
     const afterLocate = boundaryRequests
     assert.ok(afterLocate > 0)
-    assert.equal((await research.extract({ image, target: 'fixture object' })).status, 'extracted')
-    assert.ok(boundaryRequests > afterLocate)
+    assert.equal(
+      (await extraction.extract({ image, target: 'fixture object' })).status,
+      'extracted',
+    )
+    assert.equal(boundaryRequests, afterLocate)
     assert.ok(renders >= 4)
   } finally {
     await baseline.dispose()
     await research.dispose()
+    await extraction.dispose()
     await segmenter.port.dispose()
   }
 })

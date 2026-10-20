@@ -1,7 +1,4 @@
 import assert from 'node:assert/strict'
-import { readdir } from 'node:fs/promises'
-import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 import {
   compareCategoricalHeldoutPhotoLocalization,
@@ -17,8 +14,8 @@ import {
 import { promptVariants } from '../benchmarks/v02/promptvariants.js'
 import { textTransportVariants } from '../benchmarks/v02/transportvariants.js'
 import { hashCanonical } from '../benchmarks/v02/protocol.js'
+import { historicalRuntimeSourcePaths } from './fixtures/historical-runtime-sources.js'
 
-const root = fileURLToPath(new URL('..', import.meta.url))
 async function fixture() {
   const cases: FreshCase[] = Array.from({ length: 80 }, (_, index) => ({
     caseId: `${index < 40 ? 'photo' : index < 60 ? 'ui' : 'map'}-synthetic-${index}`,
@@ -61,17 +58,8 @@ async function fixture() {
     '../../package.json',
     '../../package-lock.json',
   ]
-  async function sourceFiles(directory: string): Promise<string[]> {
-    const files: string[] = []
-    for (const entry of await readdir(join(root, directory), { withFileTypes: true })) {
-      const path = `${directory}/${entry.name}`
-      if (entry.isDirectory()) files.push(...(await sourceFiles(path)))
-      else if (path.endsWith('.ts')) files.push(path)
-    }
-    return files
-  }
   const sourceHashes = Object.fromEntries(
-    [...required, ...(await sourceFiles('src'))].map((name) => [name, '1'.repeat(64)]),
+    [...required, ...(await historicalRuntimeSourcePaths())].map((name) => [name, '1'.repeat(64)]),
   )
   const sourceDigest = hashCanonical(
     Object.entries(sourceHashes).sort(([a], [b]) => a.localeCompare(b)),

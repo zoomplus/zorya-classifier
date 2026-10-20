@@ -29,6 +29,7 @@ import { preparedTextSchema, representationLimits } from '../entities/representa
 import type { ExtractInput, ExtractionResult, SegmentationPort } from '../entities/segmentation.js'
 import { extractSchema } from '../entities/segmentation.js'
 import { extractObject } from '../processes/extract.js'
+import { extractFromRegion } from '../processes/extract-from-region.js'
 import { createSharpCutoutRaster } from '../infrastructure/segmentation/cutout-raster.js'
 import type { BoundaryViewPort } from '../entities/boundary-view.js'
 import type { ObjectProposalPort } from '../entities/object-proposals.js'
@@ -176,6 +177,17 @@ function composeClassifier(
     signal: AbortSignal,
     representation: ImageRepresentationPort | undefined,
   ): Promise<WholeObjectLocalizationResult> {
+    if (segmenter) {
+      const result = await extractRegion(input, signal, representation)
+      if (result.status === 'extracted') return result.location
+      if (result.status === 'unknown' && result.reason === 'segmentation-uncertain')
+        return {
+          status: 'unknown',
+          reason: 'segmentation-uncertain',
+          metadata: 'metadata' in result ? result.metadata : result.location.metadata,
+        }
+      return result
+    }
     if (proposalDependencies) {
       if (representation)
         throw new ClassifierError('UNSUPPORTED', 'Mask proposal selection requires vision input')
@@ -189,6 +201,31 @@ function composeClassifier(
       representation,
       boundaryView,
       intervalPolicy,
+    )
+  }
+  function extractRegion(
+    input: Omit<ExtractInput, 'signal'>,
+    signal: AbortSignal,
+    representation: ImageRepresentationPort | undefined,
+  ): Promise<ExtractionResult> {
+    if (!segmenter)
+      throw new ClassifierError('UNSUPPORTED', 'Region extraction requires a SegmentationPort')
+    return extractFromRegion(
+      { ...input, signal },
+      {
+        raster,
+        image: cutoutRaster,
+        segmenter,
+        locateRegion: (source, { signal: operationSignal, ...request }) =>
+          locateInput(
+            { ...request, image: source.bytes },
+            options.decision,
+            raster,
+            operationSignal,
+            undefined,
+            representation,
+          ),
+      },
     )
   }
   async function run<T>(
@@ -307,6 +344,7 @@ function composeClassifier(
       try {
         const snapshot = { ...parsed, image: new Uint8Array(parsed.image) }
         return await run(parent, (s) => {
+          if (segmenter) return extractRegion(snapshot, s, representation)
           let prepared: Awaited<ReturnType<typeof locateFromProposals>> | undefined
           // Per-operation ownership: no global selected-mask cache or second native inference.
           const selectedMask: SegmentationPort = {
@@ -327,28 +365,26 @@ function composeClassifier(
             {
               raster,
               image: cutoutRaster,
-              // An explicitly supplied refinement segmenter wins; its failures never fall back.
-              segmenter: segmenter ?? selectedMask,
+              segmenter: selectedMask,
               locateWhole: async (source, { signal: requestSignal, ...request }) => {
                 const wholeInput = {
                   ...request,
                   mode: 'whole-object' as const,
                   image: source.bytes,
                 }
-                if (!segmenter && proposalDependencies) {
-                  if (representation)
-                    throw new ClassifierError(
-                      'UNSUPPORTED',
-                      'Mask proposal selection requires vision input',
-                    )
-                  prepared = await locateFromProposals(
-                    wholeInput,
-                    proposalDependencies,
-                    requestSignal,
+                if (!proposalDependencies)
+                  throw new ClassifierError('UNSUPPORTED', 'ObjectProposalPort is required')
+                if (representation)
+                  throw new ClassifierError(
+                    'UNSUPPORTED',
+                    'Mask proposal selection requires vision input',
                   )
-                  return prepared.location
-                }
-                return locateWhole(wholeInput, requestSignal, representation)
+                prepared = await locateFromProposals(
+                  wholeInput,
+                  proposalDependencies,
+                  requestSignal,
+                )
+                return prepared.location
               },
             },
           )

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
+import { historicalRuntimeSourcePaths } from './fixtures/historical-runtime-sources.js'
 import { dirname, relative, resolve, sep } from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -207,7 +208,14 @@ await test('new independent evaluators reject legacy profile artifacts instead o
 
 await test('both new evaluators normalize explicit synthetic fixtures and retain emitted policy', async () => {
   const candidateCases = syntheticCases([40, 20, 20])
-  const sourceHashes = await categoricalBoxHeldoutProducerSourceManifest()
+  const historicalSources = new Set(await historicalRuntimeSourcePaths())
+  const historicalManifest = (sources: Record<string, string>) =>
+    Object.fromEntries(
+      Object.entries(sources).filter(
+        ([path]) => !path.startsWith('src/') || historicalSources.has(path),
+      ),
+    )
+  const sourceHashes = historicalManifest(await categoricalBoxHeldoutProducerSourceManifest())
   const sourceSha256 = hashCanonical(
     Object.entries(sourceHashes).sort(([a], [b]) => a.localeCompare(b)),
   )
@@ -335,7 +343,7 @@ await test('both new evaluators normalize explicit synthetic fixtures and retain
 
   const photoCases = candidateCases.slice(0, 40)
   const noImagePlan = plans.noImage
-  const textSourceHashes = await freshTextBoxHeldoutProducerSourceManifest()
+  const textSourceHashes = historicalManifest(await freshTextBoxHeldoutProducerSourceManifest())
   const textSourceSha256 = hashCanonical(
     Object.entries(textSourceHashes).sort(([a], [b]) => a.localeCompare(b)),
   )
@@ -509,10 +517,11 @@ await test('new heldout CLI requires explicit paid mode and the new named profil
 await test('new source closures include the dedicated plan, CLI, and its transitive local imports', async () => {
   const candidate = await categoricalBoxHeldoutProducerSourceManifest()
   const noImage = await freshTextBoxHeldoutProducerSourceManifest()
-  assert.equal(Object.keys(candidate).filter((path) => path.startsWith('src/')).length, 53)
-  assert.equal(Object.keys(noImage).filter((path) => path.startsWith('src/')).length, 53)
-  assert.equal(Object.keys(candidate).length, 82)
-  assert.equal(Object.keys(noImage).length, 82)
+  assert.equal(Object.keys(candidate).filter((path) => path.startsWith('src/')).length, 54)
+  assert.equal(Object.keys(noImage).filter((path) => path.startsWith('src/')).length, 54)
+  assert.equal(Object.keys(candidate).length, 83)
+  assert.equal(Object.keys(noImage).length, 83)
+  assert.ok(Object.hasOwn(candidate, 'src/processes/extract-from-region.ts'))
   for (const sources of [candidate, noImage]) {
     assert.ok(Object.hasOwn(sources, './categorical-box-heldout-plan.ts'))
     assert.ok(Object.hasOwn(sources, './categorical-box-heldout-source.ts'))

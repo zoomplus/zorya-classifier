@@ -97,7 +97,7 @@ type LocateRegion = (
   request: Omit<LocateInput, 'image' | 'mode' | 'signal'> & { signal: AbortSignal },
 ) => Promise<LocalizationResult>
 
-export interface ExtractFromRegionDependencies {
+interface ExtractFromRegionDependencies {
   raster: RasterPort
   image: CutoutRasterPort
   segmenter: SegmentationPort
