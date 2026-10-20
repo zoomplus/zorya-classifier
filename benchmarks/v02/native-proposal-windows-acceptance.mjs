@@ -22,18 +22,29 @@ const DECODER = {
 const resourceChannel = channel('zorya.segmentation.child-resource')
 const WIDTH = 256
 const HEIGHT = 256
-const TARGET = { left: 8, top: 8, width: 48, height: 48 }
+const PROPOSAL_TARGET = { left: 8, top: 8, width: 48, height: 48 }
+// The first fine-grid seed center is inside this synthetic target rectangle.
+const REGION_TARGET = { left: 0, top: 0, width: 64, height: 64 }
 
 function usage() {
   return [
     'Usage: node native-proposal-windows-acceptance.mjs --archive=<verified .tgz> --sha256=<archive sha256> --source-commit=<frozen source commit>',
     '       --encoder=<pinned MobileSAM encoder> --decoder=<pinned MobileSAM decoder> --report=<new report path>',
+    '       [--workflow=proposals|region-segmentation] (default: proposals)',
   ].join('\n')
 }
 
 function parseArgs(argv) {
   if (argv.length === 1 && argv[0] === '--help') return { help: true }
-  const allowed = new Set(['archive', 'sha256', 'source-commit', 'encoder', 'decoder', 'report'])
+  const allowed = new Set([
+    'archive',
+    'sha256',
+    'source-commit',
+    'encoder',
+    'decoder',
+    'report',
+    'workflow',
+  ])
   const result = {}
   for (const arg of argv) {
     const match = /^--([a-z][a-z0-9-]*)=(.*)$/u.exec(arg)
@@ -48,6 +59,9 @@ function parseArgs(argv) {
   if (!/^[a-f0-9]{64}$/u.test(result.sha256)) throw new Error('--sha256 must be lowercase SHA-256')
   if (!/^[a-f0-9]{40}$/u.test(result.sourceCommit))
     throw new Error('--source-commit must be a full lowercase Git SHA')
+  result.workflow ??= 'proposals'
+  if (!['proposals', 'region-segmentation'].includes(result.workflow))
+    throw new Error('--workflow must be proposals or region-segmentation')
   return result
 }
 
@@ -149,16 +163,16 @@ function insideTemp(root) {
   )
 }
 
-function syntheticRgba() {
+function syntheticRgba(target) {
   const data = Buffer.alloc(WIDTH * HEIGHT * 4)
   for (let y = 0; y < HEIGHT; y++) {
     for (let x = 0; x < WIDTH; x++) {
       const offset = (y * WIDTH + x) * 4
       const foreground =
-        x >= TARGET.left &&
-        x < TARGET.left + TARGET.width &&
-        y >= TARGET.top &&
-        y < TARGET.top + TARGET.height
+        x >= target.left &&
+        x < target.left + target.width &&
+        y >= target.top &&
+        y < target.top + target.height
       data[offset] = foreground ? 226 : 228
       data[offset + 1] = foreground ? 36 : 228
       data[offset + 2] = foreground ? 42 : 228
@@ -206,13 +220,29 @@ async function foregroundScores(sharp, state) {
   return scores
 }
 
-function fixtureDecision(sharp) {
+function fixtureDecision(sharp, enforceRegionChoiceContract = false) {
   let calls = 0
+  let validRegionChoiceRequests = 0
   const decision = {
     async decide(request, signal) {
       calls++
       if (signal.aborted)
         throw Object.assign(new Error('Fixture decision aborted'), { code: 'ABORTED' })
+      if (enforceRegionChoiceContract) {
+        const questionIds = Object.keys(request.questions).sort()
+        if (JSON.stringify(questionIds) !== JSON.stringify(['presence', 'selection']))
+          throw new Error(
+            'Region workflow changed the original presence + selection Choice contract',
+          )
+        if (
+          request.questions.presence?.type !== 'noul' ||
+          request.questions.selection?.type !== 'ranked-choice'
+        )
+          throw new Error(
+            'Region workflow changed the original Noul + ranked Choice question types',
+          )
+        validRegionChoiceRequests++
+      }
       const answers = {}
       for (const [id, question] of Object.entries(request.questions)) {
         if (question.type === 'noul') {
@@ -252,7 +282,11 @@ function fixtureDecision(sharp) {
       }
     },
   }
-  return { decision, calls: () => calls }
+  return {
+    decision,
+    calls: () => calls,
+    validRegionChoiceRequests: () => validRegionChoiceRequests,
+  }
 }
 
 function errorCode(error) {
@@ -282,8 +316,15 @@ async function runWorker(options) {
   const tempRoot = createOwnedTemp()
   const report = {
     schemaVersion: 1,
-    benchmark: 'installed-archive-mobile-sam-proposal-windows-v1',
-    backend: 'mobile-sam-object-proposals',
+    benchmark:
+      options.workflow === 'region-segmentation'
+        ? 'installed-archive-mobile-sam-region-segmentation-windows-v1'
+        : 'installed-archive-mobile-sam-proposal-windows-v1',
+    ...(options.workflow === 'region-segmentation' ? { workflow: options.workflow } : {}),
+    backend:
+      options.workflow === 'region-segmentation'
+        ? 'mobile-sam-seed-region'
+        : 'mobile-sam-object-proposals',
     platform: process.platform,
     arch: process.arch,
     node: process.version,
@@ -304,6 +345,7 @@ async function runWorker(options) {
     tempRoot,
     failure: null,
   }
+  const target = options.workflow === 'region-segmentation' ? REGION_TARGET : PROPOSAL_TARGET
   const ownedPids = new Set()
   const onChild = (event) => {
     if (!event || typeof event !== 'object') return
@@ -341,7 +383,10 @@ async function runWorker(options) {
     report.assets.encoder = await stagePinnedFile(options.encoder, encoderPath, ENCODER)
     report.assets.decoder = await stagePinnedFile(options.decoder, decoderPath, DECODER)
     const pkg = {
-      name: 'zorya-proposal-windows-profile',
+      name:
+        options.workflow === 'region-segmentation'
+          ? 'zorya-region-segmentation-windows-profile'
+          : 'zorya-proposal-windows-profile',
       private: true,
       type: 'module',
       dependencies: {
@@ -401,11 +446,12 @@ async function runWorker(options) {
       throw new Error('Installed archive does not export ./segmentation')
     const declarationPath = path.join(packageRoot, 'dist', 'segmentation.d.ts')
     const declaration = await fsp.readFile(declarationPath, 'utf8')
-    if (
-      !declaration.includes('createMobileSamObjectProposals') ||
-      !declaration.includes('ObjectProposalPort')
-    )
-      throw new Error('Installed archive declarations omit the public proposal factory/types')
+    const requiredDeclarations =
+      options.workflow === 'region-segmentation'
+        ? ['createMobileSamSegmenter', 'SegmentationPort']
+        : ['createMobileSamObjectProposals', 'ObjectProposalPort']
+    if (!requiredDeclarations.every((item) => declaration.includes(item)))
+      throw new Error(`Installed archive declarations omit ${requiredDeclarations.join('/')}`)
     const segmentationEntry = installedPackageJson.exports['./segmentation']
     const runtimeEntry = path.join(packageRoot, segmentationEntry.import)
     const runtimeModuleBytes = await fsp.readFile(runtimeEntry)
@@ -443,9 +489,9 @@ async function runWorker(options) {
       runtimeProbe,
       [
         "import sharp from 'sharp'",
-        "import { createMobileSamObjectProposals } from 'zorya-classifier/segmentation'",
+        "import { createMobileSamObjectProposals, createMobileSamSegmenter } from 'zorya-classifier/segmentation'",
         "import { createClassifier, ClassifierError } from 'zorya-classifier'",
-        'export { sharp, createMobileSamObjectProposals, createClassifier, ClassifierError }',
+        'export { sharp, createMobileSamObjectProposals, createMobileSamSegmenter, createClassifier, ClassifierError }',
         '',
       ].join('\n'),
       { flag: 'wx' },
@@ -454,18 +500,26 @@ async function runWorker(options) {
       starts: report.childOwnership.starts,
       closes: report.childOwnership.closes,
     }
-    const { sharp, createMobileSamObjectProposals, createClassifier, ClassifierError } =
-      await import(pathToFileURL(runtimeProbe).href)
-    if (
-      typeof createClassifier !== 'function' ||
-      typeof createMobileSamObjectProposals !== 'function'
-    )
-      throw new Error('Installed archive imports omit classifier or proposal factory')
+    const {
+      sharp,
+      createMobileSamObjectProposals,
+      createMobileSamSegmenter,
+      createClassifier,
+      ClassifierError,
+    } = await import(pathToFileURL(runtimeProbe).href)
+    if (typeof createClassifier !== 'function')
+      throw new Error('Installed archive imports omit classifier')
+    const createBackend =
+      options.workflow === 'region-segmentation'
+        ? createMobileSamSegmenter
+        : createMobileSamObjectProposals
+    if (typeof createBackend !== 'function')
+      throw new Error('Installed archive imports omit the configured segmentation factory')
     report.checks.importWithoutNativeChild = report.childOwnership.starts === importsBefore.starts
     if (!report.checks.importWithoutNativeChild)
       throw new Error('Importing installed package started a native child')
 
-    adapter = await createMobileSamObjectProposals({
+    adapter = await createBackend({
       encoderPath,
       decoderPath,
       executionProvider: 'cpu',
@@ -475,14 +529,16 @@ async function runWorker(options) {
       report.childOwnership.starts === report.childOwnership.closes && ownedPids.size === 0
     if (!report.checks.backendProbeSettled)
       throw new Error('Explicit CPU backend probe left an owned native child running')
-    const rgba = syntheticRgba()
+    const rgba = syntheticRgba(target)
     const png = await sharp(rgba, { raw: { width: WIDTH, height: HEIGHT, channels: 4 } })
       .png()
       .toBuffer()
-    const fixture = fixtureDecision(sharp)
+    const fixture = fixtureDecision(sharp, options.workflow === 'region-segmentation')
     classifier = createClassifier({
       decision: fixture.decision,
-      objectProposals: adapter,
+      ...(options.workflow === 'region-segmentation'
+        ? { segmentation: adapter }
+        : { objectProposals: adapter }),
       concurrency: 1,
       maxQueue: 2,
       timeoutMs: 45_000,
@@ -502,11 +558,28 @@ async function runWorker(options) {
             seedRegion: location.seedRegion,
             region: location.region,
             method: location.method,
-            proposalMetadata: location.proposalMetadata,
+            ...(location.center ? { center: location.center } : {}),
+            ...(location.proposalMetadata ? { proposalMetadata: location.proposalMetadata } : {}),
           }
         : { reason: location.reason }),
     }
     if (location.status !== 'located') throw new Error(`Fixture locate returned ${location.status}`)
+    const seedCenter = {
+      x: location.seedRegion.left + location.seedRegion.width / 2,
+      y: location.seedRegion.top + location.seedRegion.height / 2,
+    }
+    const seedCenterInsideTarget =
+      seedCenter.x >= target.left &&
+      seedCenter.x < target.left + target.width &&
+      seedCenter.y >= target.top &&
+      seedCenter.y < target.top + target.height
+    report.seed = {
+      region: location.seedRegion,
+      center: seedCenter,
+      centerInsideSyntheticTarget: seedCenterInsideTarget,
+    }
+    if (options.workflow === 'region-segmentation' && !seedCenterInsideTarget)
+      throw new Error('Selected seed center is outside the synthetic target rectangle')
     const extractStartedAt = Date.now()
     const extraction = await classifier.extract({
       image: new Uint8Array(png),
@@ -529,27 +602,126 @@ async function runWorker(options) {
     }
     if (extraction.status !== 'extracted')
       throw new Error(`Fixture extract returned ${extraction.status}`)
+    if (options.workflow === 'region-segmentation') {
+      const { data: cutout, info } = await sharp(extraction.png)
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true })
+      let foregroundPixels = 0
+      for (let index = 0; index < extraction.mask.data.length; index++) {
+        const foreground = extraction.mask.data[index] === 1
+        if (foreground) foregroundPixels++
+        if (cutout[index * 4 + 3] > 0 !== foreground)
+          throw new Error('Cutout alpha does not match the cropped binary mask')
+      }
+      const largerThanSeed =
+        extraction.region.width > location.seedRegion.width &&
+        extraction.region.height > location.seedRegion.height
+      const centerMatchesBounds =
+        extraction.center.x === extraction.region.left + extraction.region.width / 2 &&
+        extraction.center.y === extraction.region.top + extraction.region.height / 2
+      const cropMatchesBounds =
+        extraction.mask.width === extraction.region.width &&
+        extraction.mask.height === extraction.region.height &&
+        info.width === extraction.mask.width &&
+        info.height === extraction.mask.height &&
+        extraction.offset.x === extraction.region.left &&
+        extraction.offset.y === extraction.region.top
+      report.maskDerived = {
+        sourceSize: { width: WIDTH, height: HEIGHT },
+        segmenterInputSize: extraction.segmentation.input,
+        syntheticTarget: target,
+        region: extraction.region,
+        center: extraction.center,
+        seedRegion: location.seedRegion,
+        maskPixels: foregroundPixels,
+        pngSize: { width: info.width, height: info.height },
+        method: extraction.segmentation.method,
+        cutoutAlphaMatchesMask: true,
+        centerMatchesBounds,
+        cropMatchesBounds,
+        objectBoundsLargerThanSeed: largerThanSeed,
+      }
+      if (extraction.segmentation.method !== 'mobile-sam-seed-point-v1')
+        throw new Error(`Unexpected seed-prompt method: ${extraction.segmentation.method}`)
+      if (
+        extraction.segmentation.input.width !== WIDTH ||
+        extraction.segmentation.input.height !== HEIGHT
+      )
+        throw new Error('Seed prompt did not segment the full source image')
+      if (!largerThanSeed)
+        throw new Error('Mask-derived object bounds did not exceed the seed region')
+      if (!centerMatchesBounds || !cropMatchesBounds)
+        throw new Error('Mask-derived center, crop dimensions or source offset are inconsistent')
+    }
     report.fixtureDecision = {
       calls: fixture.calls(),
       providerHttpCalls: 0,
-      selectionUsesRenderedSyntheticForegroundPixels: true,
+      ...(options.workflow === 'region-segmentation'
+        ? {
+            noExtentOrMaskConfirmationCalls: true,
+            validRegionChoiceRequests: fixture.validRegionChoiceRequests(),
+          }
+        : { selectionUsesRenderedSyntheticForegroundPixels: true }),
+    }
+    if (options.workflow === 'region-segmentation' && fixture.calls() !== 6)
+      throw new Error(
+        `Expected six locator calls across locate + extract, received ${fixture.calls()}`,
+      )
+    if (options.workflow === 'region-segmentation' && fixture.validRegionChoiceRequests() !== 6)
+      throw new Error('Not all six requests used the original presence + selection Choices')
+
+    if (options.workflow === 'region-segmentation') {
+      const emptyRgba = new Uint8Array(WIDTH * HEIGHT * 4)
+      const empty = await adapter.segment({
+        image: { data: emptyRgba, width: WIDTH, height: HEIGHT, format: 'rgba8' },
+        prompt: 'seed-region',
+        seedRegion: location.seedRegion,
+        wholeRegion: { left: 0, top: 0, width: WIDTH, height: HEIGHT },
+        bounds: location.bounds,
+        roi: { left: 0, top: 0, width: WIDTH, height: HEIGHT },
+        target: 'the red square in the first cell',
+        exclusions: [],
+        completeness: 'visible-object',
+        signal: new globalThis.AbortController().signal,
+      })
+      const emptyForeground =
+        empty.status === 'segmented' ? empty.mask.data.reduce((sum, value) => sum + value, 0) : -1
+      report.emptyTransparentInput = {
+        status: empty.status,
+        maskPixels: emptyForeground,
+        fullSourceSize: { width: WIDTH, height: HEIGHT },
+      }
+      if (empty.status !== 'segmented' || emptyForeground !== 0)
+        throw new Error('Transparent full-source input did not return a valid empty mask')
     }
 
     const cancelController = new globalThis.AbortController()
     const startsBeforeCancel = report.childOwnership.starts
     const closesBeforeCancel = report.childOwnership.closes
     const startEvent = waitForNativeStart()
-    const cancelPending = adapter
-      .propose({
-        image: { data: new Uint8Array(rgba), width: WIDTH, height: HEIGHT, format: 'rgba8' },
-        seedRegion: location.seedRegion,
-        roi: { left: 0, top: 0, width: WIDTH, height: HEIGHT },
-        signal: cancelController.signal,
-      })
-      .then(
-        () => 'FULFILLED',
-        (error) => errorCode(error),
-      )
+    const nativeInput = (signal) => ({
+      image: { data: new Uint8Array(rgba), width: WIDTH, height: HEIGHT, format: 'rgba8' },
+      seedRegion: location.seedRegion,
+      roi: { left: 0, top: 0, width: WIDTH, height: HEIGHT },
+      signal,
+      ...(options.workflow === 'region-segmentation'
+        ? {
+            prompt: 'seed-region',
+            wholeRegion: { left: 0, top: 0, width: WIDTH, height: HEIGHT },
+            bounds: location.bounds,
+            target: 'the red square in the first cell',
+            exclusions: [],
+            completeness: 'visible-object',
+          }
+        : {}),
+    })
+    const runNative = (input) =>
+      options.workflow === 'region-segmentation' ? adapter.segment(input) : adapter.propose(input)
+    const cancelPending = runNative(nativeInput(cancelController.signal)).then(
+      () => 'FULFILLED',
+      (error) => errorCode(error),
+    )
     const cancelPid = await startEvent
     cancelController.abort(new ClassifierError('ABORTED', 'Windows acceptance cancellation'))
     const cancelCode = await cancelPending
@@ -566,13 +738,8 @@ async function runWorker(options) {
     if (cancelCode !== 'ABORTED' || !cancellationPhysicalCloseConfirmed)
       throw new Error(`Cancellation did not abort and join physical child (${cancelCode})`)
 
-    const queueInput = () => ({
-      image: { data: new Uint8Array(rgba), width: WIDTH, height: HEIGHT, format: 'rgba8' },
-      seedRegion: location.seedRegion,
-      roi: { left: 0, top: 0, width: WIDTH, height: HEIGHT },
-      signal: new globalThis.AbortController().signal,
-    })
-    const queued = Array.from({ length: 4 }, () => adapter.propose(queueInput()))
+    const queueInput = () => nativeInput(new globalThis.AbortController().signal)
+    const queued = Array.from({ length: 4 }, () => runNative(queueInput()))
     const queueResults = await Promise.allSettled(queued)
     const queueFulfilled = queueResults.filter((item) => item.status === 'fulfilled').length
     const queueCapacity = queueResults.filter(
@@ -588,17 +755,19 @@ async function runWorker(options) {
       otherFailures: queueOtherFailures,
     }
     if (queueFulfilled !== 3 || queueCapacity !== 1 || queueOtherFailures !== 0)
-      throw new Error('Proposal queue did not enforce one active plus two waiters')
+      throw new Error('Native queue did not enforce one active plus two waiters')
     await adapter.settle()
 
     await classifier.dispose()
     classifier = undefined
-    const afterClassifierDispose = await adapter.propose(queueInput())
+    const afterClassifierDispose = await runNative(queueInput())
     report.lifecycle.callerOwnedAdapterAfterClassifierDispose =
-      afterClassifierDispose.proposals.length
+      options.workflow === 'region-segmentation'
+        ? afterClassifierDispose.status
+        : afterClassifierDispose.proposals.length
     await adapter.settle()
     await adapter.dispose()
-    const afterDispose = await adapter.propose(queueInput()).then(
+    const afterDispose = await runNative(queueInput()).then(
       () => 'FULFILLED',
       (error) => errorCode(error),
     )
@@ -611,9 +780,17 @@ async function runWorker(options) {
       report.lifecycle.cancellationCode === 'ABORTED' &&
       report.lifecycle.cancellationPhysicalCloseConfirmed === true
     report.checks.capacity = queueFulfilled === 3 && queueCapacity === 1 && queueOtherFailures === 0
-    report.checks.callerOwnedAdapter = report.lifecycle.callerOwnedAdapterAfterClassifierDispose > 0
+    report.checks.callerOwnedAdapter =
+      options.workflow === 'region-segmentation'
+        ? report.lifecycle.callerOwnedAdapterAfterClassifierDispose === 'segmented' ||
+          report.lifecycle.callerOwnedAdapterAfterClassifierDispose === 'unknown'
+        : report.lifecycle.callerOwnedAdapterAfterClassifierDispose > 0
     report.checks.dispose = afterDispose === 'DISPOSED'
     report.checks.fixtureDecisionOffline = report.fixtureDecision.providerHttpCalls === 0
+    if (options.workflow === 'region-segmentation')
+      report.checks.emptyTransparentIsValidEmptyMask =
+        report.emptyTransparentInput.status === 'segmented' &&
+        report.emptyTransparentInput.maskPixels === 0
   } catch (error) {
     report.failure = error instanceof Error ? error.message : 'Windows proposal acceptance failed'
   } finally {

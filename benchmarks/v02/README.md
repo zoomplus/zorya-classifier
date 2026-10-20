@@ -2,6 +2,19 @@
 
 Current status: the [first blind recipe failed qualification](../../docs/evidence/v02/heldout-evaluation-20261020.md); its exposed cases cannot qualify another recipe. Both categorical-presence DEV40 recipes completed, and the [neutral-instruction recipe was selected before fresh heldout inspection](../../docs/evidence/v02/categorical-vision-method-selection.json). A source-group-disjoint 80-case cohort was acquired with independent source oracles. Its [first dispatch was rejected before any HTTP request](../../docs/evidence/v02/categorical-heldout-predispatch-20261020-v3.json): all photo inputs used an incompatible generic instruction. The original freeze and failure remain immutable. The corrected v4 inputs and source passed admission; both producers then completed before independent truth evaluation. The [v4 candidate also failed qualification](../../docs/evidence/v02/categorical-heldout-v4/README.md): 1/60 positive whole-object boxes, 0/20 false locations and paired-photo interval [0, 0.10]. The 80 cases are now exposed regression data. A changed method requires separately named development and a new blind cohort, with unchanged gates. See [acceptance](../../docs/acceptance.md) for current quality and release gates.
 
+## Installed-archive Windows checks
+
+`native-proposal-windows-acceptance.mjs` defaults to its original proposal-selection workflow. `--workflow=region-segmentation` opts into the current region-seeded full-source segmentation path using the installed archive, injected fixture `DecisionPort`, and caller-owned MobileSAM segmenter. That mode verifies the original three-Choice locator is run once for `locate` and once for `extract`, the chosen seed center lies inside the controlled synthetic object, the result box/center come with the mask, the cutout alpha matches the cropped binary mask, cancellation joins the physical child, and classifier disposal leaves the segmenter usable. It also checks the valid empty mask for an all-transparent source and final child cleanup. The local fixture makes no provider calls. This is package-wiring and lifecycle evidence on controlled synthetic pixels, not object-segmentation accuracy. Both modes install the exact supplied archive and pinned optional runtime into a fresh owned Windows temporary profile; they do not configure a library model default.
+
+Run the parser smoke tests on any platform with `node --test benchmarks/v02/native-region-segmentation-windows-acceptance.test.mjs`. The actual installed-archive acceptance command is Windows x64 only and requires a verified archive plus the pinned local encoder/decoder files:
+
+```sh
+node benchmarks/v02/native-proposal-windows-acceptance.mjs \
+  --archive=<verified-package.tgz> --sha256=<archive-sha256> --source-commit=<source-commit> \
+  --encoder=<mobile-sam-image-encoder.onnx> --decoder=<sam-mask-decoder-multi.onnx> \
+  --workflow=region-segmentation --report=<new-report-path.json>
+```
+
 The acquisition notes below describe the earlier preparation stage and retain its original gaps and decisions. Statements about unavailable UI/map cases or unexecuted calls refer to that historical stage, not the current corpus. Fixture, component, development and blind results remain separate.
 
 ## Native categorical DEV40 evaluation
