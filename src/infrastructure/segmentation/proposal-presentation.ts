@@ -98,6 +98,29 @@ export function createSharpObjectProposalPresentation(): ObjectProposalPresentat
       )
       pushPng(seedPng)
 
+      if (snapshots.length === 1) {
+        const proposal = snapshots[0]
+        if (!proposal) throw invalid('Singleton proposal disappeared during presentation')
+        const raster = unpackBinaryMask({
+          data: proposal.data,
+          width: image.width,
+          height: image.height,
+          format: 'binary-lsb0',
+        })
+        const overlay = makeOverlay(source, raster, image.width, image.height, proposal.bounds)
+        const overlayPng = await encode(
+          sharp(overlay, {
+            raw: { width: image.width, height: image.height, channels: 4 },
+            limitInputPixels: objectProposalLimits.imagePixels,
+          }).png({ compressionLevel: 6 }),
+          signal,
+        )
+        pushPng(overlayPng)
+        if (output.length !== 2)
+          throw invalid('Singleton presentation returned an invalid image count')
+        return output
+      }
+
       const sourcePreview = await encode(
         sharp(source, {
           raw: { width: image.width, height: image.height, channels: 4 },
@@ -198,7 +221,7 @@ export function createSharpObjectProposalPresentation(): ObjectProposalPresentat
                 '<rect width="142" height="200" fill="#f2f4f7"/><text x="71" y="104" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#555">empty</text>',
               ),
               left: tileX + previewLeft + previewWidth + 8,
-              top: tileY + previewTop,
+              top: tileY + previewTop + 12,
             })
           }
         }

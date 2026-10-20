@@ -45,7 +45,7 @@ async function raw(bytes: Uint8Array) {
   return sharp(bytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
 }
 
-function pixel(buffer: Buffer, width: number, x: number, y: number): number[] {
+function pixel(buffer: Uint8Array, width: number, x: number, y: number): number[] {
   const offset = (y * width + x) * 4
   return [...buffer.subarray(offset, offset + 4)]
 }
@@ -127,10 +127,10 @@ await test('accepts a partial proposal batch and does not invent aliases for unu
   })
   assert.equal(output.length, 2)
   const sheet = await raw(output[1]!)
-  assert.deepEqual([sheet.info.width, sheet.info.height, sheet.info.channels], [1200, 720, 4])
+  assert.deepEqual([sheet.info.width, sheet.info.height, sheet.info.channels], [12, 12, 4])
 })
 
-await test('renders an ordered singleton subset with its original alias and derived rectangle', async () => {
+await test('renders an ordered singleton subset as a source-sized mask overlay with exact bounds', async () => {
   const source = image()
   const proposal = proposalSet(source.width, source.height)[17]!
   const output = await presenter.render({
@@ -140,14 +140,13 @@ await test('renders an ordered singleton subset with its original alias and deri
     signal: new AbortController().signal,
   })
   assert.equal(output.length, 2)
-  const sheet = await raw(output[1]!)
-  assert.deepEqual([sheet.info.width, sheet.info.height], [1200, 720])
-  // The exact alias is rendered in the title rather than renumbered to C00.
-  const titleArea = await sharp(output[1]!)
-    .extract({ left: 0, top: 0, width: 300, height: 40 })
-    .png()
-    .toBuffer()
-  assert.ok(titleArea.byteLength > 0)
+  const overlay = await raw(output[1]!)
+  assert.deepEqual([overlay.info.width, overlay.info.height], [source.width, source.height])
+  assert.deepEqual(pixel(overlay.data, overlay.info.width, 5, 1), [255, 220, 0, 255])
+  assert.deepEqual(
+    pixel(overlay.data, overlay.info.width, 0, 0),
+    pixel(source.data, source.width, 0, 0),
+  )
 })
 
 await test('snapshots caller-owned source and packed masks before asynchronous encoding', async () => {
