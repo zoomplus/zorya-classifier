@@ -69,6 +69,20 @@ export const freshProposalManifestHashes = Object.freeze([
   'b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15',
 ] as const)
 
+export const freshProposalHeldoutManifestHashes = Object.freeze([
+  'f0be4b9b2d5a11bd77f1b890860745c3bf17dd185b5cc1fb73c1af674c9465d5',
+  '598da2b326e8d4cbedf1ca0517ce6ecccc8d141125ee53a88ef397aa9a5ea0a2',
+  'afb2e521962573709ab25ddf53beab4f17d2e33c74192c4fd9218cc34e03efb3',
+] as const)
+
+export const freshProposalHeldoutPolicy = Object.freeze({
+  ...freshProposalPolicy,
+  maxPhysicalCalls: 600,
+  maxCostUsd: 10,
+  latencyEnvironment: 'concurrent-native-soak-unranked',
+  latencyRankingEligible: false,
+})
+
 const sourceFiles = [
   './fresh-proposal-runner.ts',
   './run-fresh-proposals.ts',
@@ -89,6 +103,7 @@ export interface FreshProposalRunnerOptions {
   decoderPath: string
   /** Test-only fixture size; production callers leave this at the full DEV denominator of 40. */
   expectedCaseCount?: number
+  phase?: 'dev' | 'heldout'
   fetch?: typeof globalThis.fetch
   /** Offline fixture seam; production uses the pinned OpenRouter Decisions adapter. */
   createDecision?: (fetcher: typeof globalThis.fetch) => DecisionPort
@@ -438,10 +453,25 @@ function createProposals(options: FreshProposalRunnerOptions) {
   )
 }
 
-/** One immutable 40-case producer pass. It never loads truth or source-ledger files. */
+/** One immutable 40-case DEV producer pass. It never loads truth or source-ledger files. */
 export async function runFreshProposalDev(
   options: FreshProposalRunnerOptions,
   signal: AbortSignal = new AbortController().signal,
+) {
+  return runFreshProposalPhase({ ...options, phase: 'dev' }, signal)
+}
+
+/** One immutable 80-case HELDOUT producer pass. It never loads truth or source-ledger files. */
+export async function runFreshProposalHeldout(
+  options: FreshProposalRunnerOptions,
+  signal: AbortSignal = new AbortController().signal,
+) {
+  return runFreshProposalPhase({ ...options, phase: 'heldout' }, signal)
+}
+
+async function runFreshProposalPhase(
+  options: FreshProposalRunnerOptions & { phase: 'dev' | 'heldout' },
+  signal: AbortSignal,
 ) {
   const corpus = await loadFreshCorpus(
     { manifests: options.manifests, imageRoot: options.imageRoot },
@@ -457,12 +487,27 @@ export async function runFreshProposalDev(
     caseId: item.caseId,
     task: taskFor(item),
   }))
-  const expectedCaseCount = options.expectedCaseCount ?? 40
+  const heldout = options.phase === 'heldout'
+  const expectedCaseCount = options.expectedCaseCount ?? (heldout ? 80 : 40)
   if (!Number.isInteger(expectedCaseCount) || expectedCaseCount < 1 || expectedCaseCount > 120)
-    throw new TypeError('Expected fresh DEV case count must be between 1 and 120')
+    throw new TypeError('Expected fresh corpus case count must be between 1 and 120')
   if (corpus.cases.length !== expectedCaseCount)
     throw new TypeError(`Fresh DEV manifest set must contain exactly ${expectedCaseCount} cases`)
-  if (
+  if (heldout) {
+    if (
+      expectedCaseCount !== 80 ||
+      corpus.manifests.length !== 3 ||
+      corpus.manifests.some(
+        (manifest, index) => manifest.sha256 !== freshProposalHeldoutManifestHashes[index],
+      ) ||
+      corpus.manifests[0]?.cases !== 40 ||
+      corpus.manifests[1]?.cases !== 20 ||
+      corpus.manifests[2]?.cases !== 20
+    )
+      throw new TypeError(
+        'HELDOUT run requires 40 photo, 20 independent UI and 20 independent map cases',
+      )
+  } else if (
     expectedCaseCount === 40 &&
     (corpus.manifests.length !== 3 ||
       corpus.manifests.some(
@@ -487,12 +532,16 @@ export async function runFreshProposalDev(
       imageChecks.set(item.caseId, { ok: false, errorCode: safeErrorCode(error) })
     }
   }
-  const profileId = 'native-mobile-sam-proposals-v1'
+  const profileId = heldout
+    ? 'native-mobile-sam-proposals-heldout-v1'
+    : 'native-mobile-sam-proposals-v1'
+  const policy = heldout ? freshProposalHeldoutPolicy : freshProposalPolicy
   const frozenProfile = {
     profileId,
+    ...(heldout ? { phase: 'heldout' as const } : {}),
     route: freshProposalRoute,
     assets: mobileSamProposalAssets,
-    policy: freshProposalPolicy,
+    policy,
     classification: {
       questionSource: 'freshProducerTask.question',
       instructionSuffix: 'Use only the supplied image. Choose exactly one closed label.',
@@ -523,16 +572,20 @@ export async function runFreshProposalDev(
   await mkdir(options.outputRoot, { recursive: true })
   await mkdir(outputDirectory, { recursive: false })
   const budget = new RunBudget(
-    freshProposalPolicy.maxPhysicalCalls,
-    freshProposalPolicy.maxCostUsd,
-    freshProposalPolicy.unknownCostReserveUsd,
+    policy.maxPhysicalCalls,
+    policy.maxCostUsd,
+    policy.unknownCostReserveUsd,
+    heldout ? 'heldout' : 'dev',
   )
   const plannedCaseIds = caseManifest.map((item) => item.caseId)
   await writeImmutable(join(outputDirectory, 'run-manifest.json'), {
     schemaVersion: 1,
     runId,
     profileId,
-    purpose: 'full fresh DEV photo, independent UI and independent map producer pass',
+    ...(heldout ? { phase: 'heldout' as const } : {}),
+    purpose: heldout
+      ? 'full frozen HELDOUT photo, independent UI and independent map producer pass'
+      : 'full fresh DEV photo, independent UI and independent map producer pass',
     startedAt: new Date().toISOString(),
     variantSha256,
     producerSourceSha256: hashCanonical(
@@ -544,7 +597,7 @@ export async function runFreshProposalDev(
     plannedCases: caseManifest,
     route: freshProposalRoute,
     mobileSam: mobileSamProposalAssets,
-    policy: freshProposalPolicy,
+    policy,
     classification: frozenProfile.classification,
     taskManifest,
     modelBoundary: {
@@ -577,9 +630,9 @@ export async function runFreshProposalDev(
     classifier = createClassifier({
       decision: recorder.port,
       objectProposals: observedProposalPort,
-      timeoutMs: freshProposalPolicy.timeoutMs,
-      concurrency: freshProposalPolicy.concurrency,
-      maxQueue: freshProposalPolicy.maxQueue,
+      timeoutMs: policy.timeoutMs,
+      concurrency: policy.concurrency,
+      maxQueue: policy.maxQueue,
     })
   } catch (error) {
     initializationError = safeErrorCode(error)
@@ -837,6 +890,7 @@ export async function runFreshProposalDev(
   const summary = {
     runId,
     profileId,
+    ...(heldout ? { phase: 'heldout' as const } : {}),
     variantSha256,
     status: missingCaseIds.length === 0 ? 'complete' : 'incomplete',
     plannedCaseIds,
@@ -844,8 +898,8 @@ export async function runFreshProposalDev(
     missingCaseIds,
     results,
     aggregate: budget.snapshot() satisfies BudgetSnapshot,
-    latencyEnvironment: freshProposalPolicy.latencyEnvironment,
-    latencyRankingEligible: freshProposalPolicy.latencyRankingEligible,
+    latencyEnvironment: policy.latencyEnvironment,
+    latencyRankingEligible: policy.latencyRankingEligible,
     initializationError: initializationError ?? null,
     shutdownError: shutdownError ?? null,
     physicalReceipts: recorder?.calls.map(physicalSummary) ?? [],

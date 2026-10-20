@@ -6,10 +6,13 @@ import { pathToFileURL } from 'node:url'
 import { z } from 'zod'
 import { loadFreshCorpus, loadFreshImage } from './fresh-corpus.js'
 import {
+  freshProposalHeldoutManifestHashes,
+  freshProposalHeldoutPolicy,
   freshProposalManifestHashes,
   freshProposalPolicy,
   readFreshProposalOpenRouterKey,
   runFreshProposalDev,
+  runFreshProposalHeldout,
 } from './fresh-proposal-runner.js'
 
 const pinnedManifests = [
@@ -35,8 +38,11 @@ export function parseFreshProposalArgs(args: readonly string[]) {
     options: {
       'allow-paid': { type: 'boolean', default: false },
       'dry-run': { type: 'boolean', default: false },
-      'image-root': { type: 'string', default: '/root/work/zorya-classifier-worktrees/v02/corpus' },
-      'map-inputs': { type: 'string', default: pinnedManifests[2].path },
+      phase: { type: 'string', default: 'dev' },
+      'image-root': { type: 'string' },
+      'map-inputs': { type: 'string' },
+      'photo-inputs': { type: 'string' },
+      'ui-inputs': { type: 'string' },
       encoder: { type: 'string' },
       decoder: { type: 'string' },
       out: { type: 'string', default: '.run/v02' },
@@ -44,18 +50,51 @@ export function parseFreshProposalArgs(args: readonly string[]) {
   })
   if (!values['allow-paid'] && !values['dry-run'])
     throw new Error('Fresh proposal run requires explicit --allow-paid or --dry-run')
+  const phase = z.enum(['dev', 'heldout']).parse(values.phase)
   if (!values['dry-run'] && (!values.encoder || !values.decoder))
     throw new Error('A paid MobileSAM proposal run requires --encoder and --decoder paths')
+  if (
+    phase === 'heldout' &&
+    (!values['image-root'] ||
+      !values['photo-inputs'] ||
+      !values['ui-inputs'] ||
+      !values['map-inputs'])
+  )
+    throw new Error(
+      'HELDOUT phase requires explicit --image-root, --photo-inputs, --ui-inputs, and --map-inputs',
+    )
+  const imageRoot =
+    values['image-root'] ??
+    (phase === 'dev' ? '/root/work/zorya-classifier-worktrees/v02/corpus' : undefined)
+  const mapInputs = values['map-inputs'] ?? (phase === 'dev' ? pinnedManifests[2].path : undefined)
+  const manifests =
+    phase === 'dev'
+      ? [
+          { ...pinnedManifests[0], path: resolve(pinnedManifests[0].path) },
+          { ...pinnedManifests[1], path: resolve(pinnedManifests[1].path) },
+          { ...pinnedManifests[2], path: resolve(z.string().min(1).parse(mapInputs)) },
+        ]
+      : [
+          {
+            path: resolve(z.string().min(1).parse(values['photo-inputs'])),
+            sha256: freshProposalHeldoutManifestHashes[0],
+          },
+          {
+            path: resolve(z.string().min(1).parse(values['ui-inputs'])),
+            sha256: freshProposalHeldoutManifestHashes[1],
+          },
+          {
+            path: resolve(z.string().min(1).parse(mapInputs)),
+            sha256: freshProposalHeldoutManifestHashes[2],
+          },
+        ]
   return {
-    imageRoot: resolve(z.string().min(1).parse(values['image-root'])),
+    phase,
+    imageRoot: resolve(z.string().min(1).parse(imageRoot)),
     outputRoot: resolve(z.string().min(1).parse(values.out)),
     encoderPath: values.encoder ? resolve(values.encoder) : '',
     decoderPath: values.decoder ? resolve(values.decoder) : '',
-    manifests: [
-      { ...pinnedManifests[0], path: resolve(pinnedManifests[0].path) },
-      { ...pinnedManifests[1], path: resolve(pinnedManifests[1].path) },
-      { ...pinnedManifests[2], path: resolve(z.string().min(1).parse(values['map-inputs'])) },
-    ],
+    manifests,
     dryRun: values['dry-run'],
   }
 }
@@ -76,7 +115,9 @@ async function runPreflight(options: ReturnType<typeof parseFreshProposalArgs>) 
       images.push({ caseId: item.caseId, status: 'failed', errorCode: 'INVALID_INPUT' })
     }
   }
-  if (corpus.cases.length !== 40) throw new Error('Pinned producer manifests must contain 40 cases')
+  const expected = options.phase === 'heldout' ? 80 : 40
+  if (corpus.cases.length !== expected)
+    throw new Error(`Pinned producer manifests must contain ${expected} cases`)
   const runId = `v02-fresh-proposal-preflight-${new Date().toISOString().replaceAll(':', '').replaceAll('.', '')}-${randomUUID().slice(0, 8)}`
   const outputDirectory = resolve(options.outputRoot, runId)
   await mkdir(options.outputRoot, { recursive: true })
@@ -84,10 +125,11 @@ async function runPreflight(options: ReturnType<typeof parseFreshProposalArgs>) 
   const report = {
     runId,
     mode: 'offline-preflight-only',
+    ...(options.phase === 'heldout' ? { phase: 'heldout' } : {}),
     plannedCaseIds: corpus.cases.map((item) => item.caseId),
     manifests: corpus.manifests,
     images,
-    policy: freshProposalPolicy,
+    policy: options.phase === 'heldout' ? freshProposalHeldoutPolicy : freshProposalPolicy,
     physicalProviderCalls: 0,
   }
   const serialized = `${JSON.stringify(report, null, 2)}\n`
@@ -110,7 +152,10 @@ async function runFromCommandLine(args: readonly string[]) {
   const options = parseFreshProposalArgs(args)
   if (options.dryRun) return runPreflight(options)
   const apiKey = await readFreshProposalOpenRouterKey()
-  const result = await runFreshProposalDev({ ...options, apiKey })
+  const result =
+    options.phase === 'heldout'
+      ? await runFreshProposalHeldout({ ...options, apiKey })
+      : await runFreshProposalDev({ ...options, apiKey })
   return {
     runId: result.runId,
     profileId: result.profileId,

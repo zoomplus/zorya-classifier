@@ -19,14 +19,17 @@ export class RunBudget {
     readonly maxPhysicalCalls: number,
     readonly maxCostUsd: number,
     readonly unknownReserveUsd = 0.02,
+    profile: 'dev' | 'heldout' = 'dev',
   ) {
+    const maximumCalls = profile === 'heldout' ? 600 : 300
+    const maximumCost = profile === 'heldout' ? 10 : 5
     if (
       !Number.isInteger(maxPhysicalCalls) ||
       maxPhysicalCalls < 1 ||
-      maxPhysicalCalls > 300 ||
+      maxPhysicalCalls > maximumCalls ||
       !Number.isFinite(maxCostUsd) ||
       maxCostUsd <= 0 ||
-      maxCostUsd > 5 ||
+      maxCostUsd > maximumCost ||
       !Number.isFinite(unknownReserveUsd) ||
       unknownReserveUsd <= 0
     )

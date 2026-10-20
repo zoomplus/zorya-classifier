@@ -8,6 +8,8 @@ The immutable manifest freezes every producer task, all source and dependency ha
 
 The paid profile has one shared maximum of 300 physical fetches and $5, with unknown-cost admissions reserved at $0.02 each. The CLI requires `--allow-paid`; dispatch still requires the experiment owner's separate freeze and smoke clearance. Before dispatch, run the offline checks and the no-fetch preflight:
 
+The HELDOUT entry uses the same classifier workflow and assets with a separate `phase: "heldout"` manifest, exact purpose string, pinned 40/20/20 photo/UI/map input hashes, and its own 600-call/$10 hard budget. Its latency ranking is disabled during the concurrent native soak. Supply all three explicit producer manifest paths with `--phase=heldout`; the source runner rejects other hashes or denominators. Do not start HELDOUT until the owner has frozen the winner and authorized that run.
+
 ```sh
 node --import tsx --test test/v02-fresh-proposal-runner.test.ts test/v02-fresh-proposal-cli.test.ts test/v02-fresh-proposal-budget.test.ts
 node --import tsx benchmarks/v02/run-fresh-proposals.ts --dry-run

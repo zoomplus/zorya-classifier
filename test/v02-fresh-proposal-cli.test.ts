@@ -3,6 +3,8 @@ import test from 'node:test'
 import { resolve } from 'node:path'
 import { parseFreshProposalArgs } from '../benchmarks/v02/run-fresh-proposals.js'
 import {
+  freshProposalHeldoutManifestHashes,
+  freshProposalHeldoutPolicy,
   freshProposalPolicy,
   freshProposalRoute,
   mobileSamProposalAssets,
@@ -39,4 +41,25 @@ await test('fresh proposal CLI fixes the forty-case strata and requires explicit
   assert.equal(freshProposalRoute.provider, 'openai')
   assert.equal(freshProposalRoute.apiEndpoint, '/api/alpha/decisions')
   assert.equal(mobileSamProposalAssets.executionProvider, 'cpu')
+})
+
+await test('HELDOUT CLI requires explicit manifest paths and freezes the 80-case cohort metadata', () => {
+  assert.throws(() => parseFreshProposalArgs(['--phase=heldout', '--dry-run']), /image-root/u)
+  const args = parseFreshProposalArgs([
+    '--phase=heldout',
+    '--dry-run',
+    '--image-root=/frozen/images',
+    '--photo-inputs=/frozen/photo.json',
+    '--ui-inputs=/frozen/ui.json',
+    '--map-inputs=/frozen/map.json',
+  ])
+  assert.equal(args.phase, 'heldout')
+  assert.equal(args.imageRoot, '/frozen/images')
+  assert.deepEqual(
+    args.manifests.map((item) => item.sha256),
+    [...freshProposalHeldoutManifestHashes],
+  )
+  assert.equal(freshProposalHeldoutPolicy.maxPhysicalCalls, 600)
+  assert.equal(freshProposalHeldoutPolicy.maxCostUsd, 10)
+  assert.equal(freshProposalHeldoutPolicy.latencyRankingEligible, false)
 })
