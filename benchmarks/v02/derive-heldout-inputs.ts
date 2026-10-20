@@ -80,7 +80,7 @@ async function installImageAlias(
     if (!info.isSymbolicLink() || (await realpath(canonicalImages)) !== originalImages)
       throw new Error('Canonical map image alias already exists with different content')
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    if (!(error instanceof Error) || !('code' in error) || error.code !== 'ENOENT') throw error
     await symlink(originalImages, canonicalImages, 'dir')
   }
   return relativeAlias.split(sep).join('/')

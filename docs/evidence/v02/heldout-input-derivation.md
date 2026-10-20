@@ -1,6 +1,6 @@
 # HELDOUT producer input derivation
 
-The HELDOUT producer inputs were made loadable without changing the 80 source cases, target identities, image bytes, or oracle records. The conversion reads only source case IDs, image paths/hashes/dimensions, authored prompt fields, and the AbiWord capture generator's ordered planned action names. It does not read ground truth, expected presence, boxes, masks, geometry, or image pixels. The frozen source inputs remain preserved at their original hashes.
+The HELDOUT producer inputs were made loadable without changing the 80 source cases, target identities, image bytes, or oracle records. The conversion reads only source case IDs, image paths/hashes/dimensions, authored prompt fields, and the AbiWord capture generator's ordered planned action names. The case generator supplies planned action names and its original 15/5 ordering; this is authoring metadata, rather than observed model outcomes. No ground-truth files, measured boxes/masks, or image pixels are inspected. The frozen source inputs remain preserved at their original hashes.
 
 The canonical arrays contain 40 photos, 20 AbiWord UI captures, and 20 OpenTTD map captures (80 unique case IDs). `loadFreshCorpus` validated all three pinned arrays with relative image paths. The original image root is `/root/work/zorya-classifier-worktrees/v02/corpus`; its 80 source images were separately hash-checked against the source manifests without decoding them.
 
@@ -14,3 +14,5 @@ The canonical arrays contain 40 photos, 20 AbiWord UI captures, and 20 OpenTTD m
 The conversion script SHA-256 is `ab85c7ab2f9c1b36b38479233f5afa272aabefa4f39f4348f00e6bf018dfbf23`; the source UI generator SHA-256 is `0ab479cfe54cef954c340d382088101087bf91cc1698641c52f2324594c0c5f1`. The canonical prompt identity SHA-256 is `281c55d76cae2970099d97c0b6734714bd9343dd710083aebb64c2893834619e`. Full conversion provenance, including the template and UI source-order mapping, is retained in the ignored run artifact `.run/heldout-canonicalization-v3/provenance.json` (SHA-256 `55962b91a5acfbb101c4a5e5b48127aa7ae97622e4c556b7f47e80874598d63d`).
 
 This records input canonicalization only. It does not authorize or record a model dispatch, and it contains no HELDOUT outcomes or truth values.
+
+The recorded conversion used the script first introduced in commit `ec099430888152f8880c92e20013a2ddb73b24da`, whose bytes match the conversion hash above. A later filesystem-error type guard preserves its output. These canonical hashes replace unusable source-oracle hashes in the producer/evaluator phase configuration before any winner freeze or HELDOUT dispatch; the original source pins and provenance remain unchanged.

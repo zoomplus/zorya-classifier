@@ -44,9 +44,9 @@ export const freshProposalPhasePins = Object.freeze({
     totalCases: 80,
     purpose: 'full frozen HELDOUT photo, independent UI and independent map producer pass',
     manifests: Object.freeze([
-      { sha256: 'f0be4b9b2d5a11bd77f1b890860745c3bf17dd185b5cc1fb73c1af674c9465d5', cases: 40 },
-      { sha256: '598da2b326e8d4cbedf1ca0517ce6ecccc8d141125ee53a88ef397aa9a5ea0a2', cases: 20 },
-      { sha256: 'afb2e521962573709ab25ddf53beab4f17d2e33c74192c4fd9218cc34e03efb3', cases: 20 },
+      { sha256: 'b3afaee883990e01a464929727b7b7bb1315d6e0a70e239a10f20e2f82a3e35b', cases: 40 },
+      { sha256: 'ca6b4db64640bf08fffd055c3e7f6e6e85b3cc0c303c1ac8b41690c87a3d4572', cases: 20 },
+      { sha256: 'c259be7b00040e0c852d8a75b67655b07b9deffe5e284aca33718a921a1e2b62', cases: 20 },
     ]),
     budget: { maxPhysicalCalls: 600, maxCostUsd: 10, latencyRankingEligible: false },
   },
