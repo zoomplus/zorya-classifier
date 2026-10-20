@@ -1,0 +1,260 @@
+{
+  "schema": "region-seeded-dev-v1-public-evidence",
+  "status": "failed",
+  "releaseQualified": false,
+  "freeze": {
+    "file": "region-seeded-development-freeze-20261021-v1.json",
+    "sha256": "d1e7eead7588985abb5967e043e92b4d6a51b8c81ea31840969888422ae68196",
+    "producerSourceSha256": "0d04e8bf03ce0d3f7def1cccee666eaf5f52ad31e0c148611d68f7a5ee744446",
+    "frozenGates": {
+      "cases": 40,
+      "positiveCases": 30,
+      "verifiedNegativeCases": 10,
+      "falseSeedLocations": 0,
+      "falseExtractions": 0,
+      "minimumPositiveSeedHits": 1,
+      "minimumMaskDerivedBoxMatches": 1,
+      "minimumExactCanvasMaskIoU08": 1
+    }
+  },
+  "frozenDevelopmentCorpus": {
+    "inputManifests": [
+      {
+        "stratum": "photo",
+        "cases": 20,
+        "sha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a"
+      },
+      {
+        "stratum": "controlled-ui",
+        "cases": 10,
+        "sha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc"
+      },
+      {
+        "stratum": "controlled-map",
+        "cases": 10,
+        "sha256": "b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15"
+      }
+    ],
+    "truthArrays": [
+      {
+        "stratum": "photo",
+        "sha256": "793e26845deaa2cb56748ef270b8cb02877218d680068573f02e5af92b26af6a"
+      },
+      {
+        "stratum": "controlled-ui",
+        "sha256": "c7944190e1cadab695f2688351df10a14132986040dafb72794bb1df4571abfe"
+      },
+      {
+        "stratum": "controlled-map",
+        "sha256": "874971d3e9344f7c54207064115257e5c802260d2a996a53f96bb6a68b2afad3"
+      }
+    ]
+  },
+  "candidate": {
+    "profileId": "native-luna-region-seeded-sam-dev-v1",
+    "runId": "v02-region-seeded-dev-2026-10-20T215428247Z-57df1119",
+    "variantSha256": "ce4b4a21a3d2f15a66a29740a2098433c4a9ef63d72eb7b6321cda44e078bb1b",
+    "manifestSha256": "02338e7a4c84407dc5085f158e353e18950da87489630a9b7b60a88e59068abd",
+    "summaryRawSha256": "dc48416d0d189bdd3856c6719d055fbb4c36f426d014cc8a231a1df98a761d6c",
+    "completionSha256": "90348f48653e3324bc0c3258501ce3c78d7e2f789364575ad0b0dfa1cc2f590e",
+    "summaryCanonicalSha256InCompletionSeal": "4ae5d0ceecbfc277a38815510e2b7e252d1a91b5146bd57d81ad5bc0e58ceaa3",
+    "route": "openai/gpt-6-luna-decisions",
+    "native": "MobileSAM CPU, seed point from the located region, full source raster",
+    "nativeEncoderSha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749",
+    "nativeDecoderSha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe",
+    "denominator": 40,
+    "strata": {
+      "photo": {
+        "cases": 20,
+        "positive": 16,
+        "verifiedNegative": 4,
+        "classificationCorrect": 17,
+        "classificationAnswered": 20,
+        "extractionStatuses": {
+          "extracted": 10,
+          "failed": 7,
+          "unknown": 3
+        },
+        "seedLocated": 10,
+        "positiveSeedBoxIntersections": 10,
+        "falseSeedLocations": 0,
+        "maskDerivedBoxMatches": 5,
+        "falseExtractions": 0
+      },
+      "controlledUi": {
+        "cases": 10,
+        "positive": 7,
+        "verifiedNegative": 3,
+        "classificationCorrect": 8,
+        "classificationAnswered": 10,
+        "extractionStatuses": {
+          "extracted": 5,
+          "failed": 1,
+          "unknown": 4
+        },
+        "seedLocated": 5,
+        "positiveSeedBoxIntersections": 1,
+        "falseSeedLocations": 0,
+        "maskDerivedBoxMatches": 0,
+        "falseExtractions": 0
+      },
+      "controlledMap": {
+        "cases": 10,
+        "positive": 7,
+        "verifiedNegative": 3,
+        "classificationCorrect": 10,
+        "classificationAnswered": 10,
+        "extractionStatuses": {
+          "extracted": 8,
+          "not-found": 2
+        },
+        "seedLocated": 8,
+        "positiveSeedBoxIntersections": 7,
+        "falseSeedLocations": 1,
+        "maskDerivedBoxMatches": 0,
+        "falseExtractions": 1
+      }
+    },
+    "classification": {
+      "correct": 35,
+      "denominator": 40,
+      "accuracy": 0.875,
+      "unanswered": 0
+    },
+    "seedRegionCoarseProxy": {
+      "located": 23,
+      "positiveAreaIntersectionsWithPositiveReferenceBoxes": 18,
+      "locatedOnVerifiedNegatives": 1,
+      "falseSeedLocations": 1,
+      "falseExtractions": 1,
+      "meaning": "A seed-cell intersection is only a coarse region-search proxy, not whole-object localization."
+    },
+    "maskDerivedWholeObjectBoxes": {
+      "positiveMatches": 5,
+      "positiveDenominator": 30,
+      "boxRule": "IoU >= 0.5 and reference-box coverage >= 0.9",
+      "falseLocations": 1,
+      "negativeDenominator": 10,
+      "unknown": 7,
+      "failed": 8
+    },
+    "independentExactCanvasMasks": {
+      "references": 7,
+      "scored": 7,
+      "iouAtLeast0_8": 1,
+      "unavailable": 0,
+      "unannotatedCases": 35,
+      "perReferenceIoU": [
+        0.7589947292, 0, 0.0002087876, 0.9433618606, 0.5063549934, 0.6049145284, 0.3675930123
+      ]
+    },
+    "physical": {
+      "calls": 143,
+      "knownCostUsd": 0.0642163,
+      "unknownCostCalls": 8,
+      "accountedExposureUsd": 0.4642163,
+      "inFlightAtSeal": 0,
+      "httpStatusCounts": {
+        "200": 135,
+        "502_PROVIDER": 8
+      }
+    },
+    "independentEvaluation": {
+      "evaluatorCommit": "0f614da3d8e8d6465f9a7018be0b02ee28d443cc",
+      "evaluatorSha256": "a063d5fc924384e8d28e60cb6270094960369503d990ffe17d96c9d6ac57592f",
+      "outputSha256": "a7161ec5dc1a7052dd5465f30fe4db01a52d854c9e2760ab6ae25a5f4465b341"
+    }
+  },
+  "noImageControl": {
+    "profileId": "native-luna-region-no-image-control-dev-v1",
+    "runId": "v02-region-seeded-dev-2026-10-20T215916312Z-8522cf1f",
+    "variantSha256": "e22aae7fa899b50b44f31d31a931e8f7ba7b295f47cff40c9e74131453f3ec69",
+    "manifestSha256": "f434f4accdfaa3f1e2402aad7bb0564727991bced1ebdbe76d7172c08ba230ec",
+    "summaryRawSha256": "c27b3725764ab5534480f33bca99b538788273232b619ae12cb4ceb5e4c7e4ea",
+    "completionSha256": "84da4ca36fd03bc8129e6037f713977949a4efc74a13cd3d5da09a387b37f565",
+    "summaryCanonicalSha256InCompletionSeal": "85f78f492c79f439fcec78064d246fbafa0fb8aad83da2cc0886b55afe6a3a22",
+    "denominator": 40,
+    "classification": {
+      "correct": 10,
+      "answered": 39,
+      "unanswered": 1
+    },
+    "imageFetchAudit": {
+      "checked": 99,
+      "imageParts": 0,
+      "verifiedImageFree": true
+    },
+    "seedLocations": 0,
+    "physical": {
+      "calls": 99,
+      "knownCostUsd": 0.0056302,
+      "unknownCostCalls": 29,
+      "accountedExposureUsd": 1.4556302,
+      "inFlightAtSeal": 0,
+      "httpStatusCounts": {
+        "200": 70,
+        "502": 28,
+        "503": 1
+      }
+    },
+    "independentEvaluation": {
+      "evaluatorCommit": "0f614da3d8e8d6465f9a7018be0b02ee28d443cc",
+      "evaluatorSha256": "a063d5fc924384e8d28e60cb6270094960369503d990ffe17d96c9d6ac57592f",
+      "outputSha256": "99b302e483ac57917a23f1c98284661f1d36df70b678aec6b2a618bbf11df043"
+    }
+  },
+  "pairedPhotoSeedDiagnostic": {
+    "candidate": "region-seeded-sam",
+    "control": "no-image-control",
+    "population": "16 positive photo cases only",
+    "metric": "seed-region intersection with independent target box, not whole-object localization",
+    "bootstrap": {
+      "iterations": 10000,
+      "seed": "0x5a4f5259",
+      "confidence": 0.95,
+      "difference": 0.625,
+      "lower": 0.375,
+      "upper": 0.875
+    },
+    "exactCanvasMaskForegroundSubset": {
+      "pairs": 5,
+      "difference": 0.8,
+      "lower": 0.4,
+      "upper": 1
+    },
+    "outputSha256": "ff3f7e7b3b6b343594c97ff6146071daf1100134461d4034499460c4cb4121ea"
+  },
+  "grabCutSameSeedComponent": {
+    "runId": "region-grabcut-component-20261020T220523055Z-3ef2329a",
+    "manifestSha256": "8c7487a04a40615a07fdd998bb99fc56cf16ed72259a9ce45688b6851fd483ce",
+    "summarySha256": "910bac83caffbf7ab3192a547d2f0db525de1969292b7cd3d5da09a387b37f565",
+    "completionSha256": "c6f446f318fdb42804f4c251ec833a7487cb0c37568e5e0c8343a770695e13a3",
+    "componentScriptSha256": "c2c8c664c6a1e85d6af96c35509d125b7dc78e6b3019d7ab8c3919a088a40086",
+    "population": "same 23 candidate-found seeds; 22 positive seeds and one verified-negative seed",
+    "positiveDenominator": 30,
+    "seedUnavailablePositives": 8,
+    "sameSeedPositiveCases": 22,
+    "maskDerivedBoxMatches": 0,
+    "sameSeedMobileSamBoxMatches": 5,
+    "falseLocations": 1,
+    "independentExactCanvasMasks": {
+      "references": 7,
+      "grabCutIoUAtLeast0_8": 0,
+      "mobileSamIoUAtLeast0_8": 1
+    },
+    "componentOnly": true,
+    "newModelCalls": 0,
+    "interpretation": "Same-seed segmentation component comparison only; not an end-to-end alternative profile. Eight positive cases had no seed and remain unavailable in the 30-positive denominator."
+  },
+  "sourceGroupLimitations": {
+    "photos": "Open Images photographs with official annotations; one exposed development cohort, not a new blind test.",
+    "ui": "Controlled Geany application captures with a known GTK style and source-geometry oracle; not natural user captures.",
+    "map": "Controlled Freeciv renderer captures with source-state and renderer-oracle checks; a single game family, not diverse natural maps."
+  },
+  "scopeNotes": [
+    "The heldout cohort was not read or scored for this report.",
+    "This is an exposed DEV evaluation; it does not qualify a release recipe.",
+    "A post-hoc gate using the existing classification result would suppress the one negative seed and extraction while retaining positive classifications, but this is not a new run or a pass and does not change any frozen result.",
+    "One Freeciv negative-seed error involved the Fighter target. The classifier said absent, but a seed region and mask were still returned; the independent negative was based on the complete controlled game-state inventory."
+  ]
+}
