@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "hosted-ci-attempt",
+  "date": "2026-10-20",
+  "sourceCommit": "012b93558082c2d2e8b0ab68cb4d680de23dbfc8",
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39400768990",
+  "conclusion": "failure",
+  "failedStep": "npm ci --ignore-scripts",
+  "failureCode": "EUSAGE",
+  "cause": "Fresh npm rejected a lockfile missing the optional @emnapi/core and @emnapi/runtime 1.11.3 entries required by the existing WASM dependency graph.",
+  "sourceChecksExecuted": false,
+  "followup": "Reproduced with npm 11.17.0 in an isolated directory; regenerated the lockfile with scripts disabled and verified its dry-run clean installation. Hosted jobs must be rerun after the fix.",
+  "limits": [
+    "This failed attempt does not qualify any hosted Windows or Linux source gate.",
+    "Some matrix jobs were cancelled by fail-fast; the follow-up workflow collects every matrix result."
+  ]
+}
