@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "policy": "Replace only absolute machine-local path prefixes in provenance JSON. Do not change truth, inputs, source IDs, annotations, URLs, licenses, geometry, or raw sources.",
+  "tokens": {
+    "$CORPUS_RUN_ROOT": "machine-local ignored corpus run root",
+    "$CLASSIFIER_RUN_ROOT": "machine-local ignored classifier run root"
+  },
+  "files": [
+    {
+      "path": "provenance/map-source-ledger.json",
+      "rawBytes": 30742,
+      "rawSha256": "8dc35d0afd4918c80d96fe263729454bf096b470779bd4c05c4b8e6b0cc215ef",
+      "publicBytes": 30676,
+      "publicSha256": "c4d38f911dafeb885175efec48f2e235b715ed79514d402f60b5af5dd18e3e25",
+      "absolutePathStringsScrubbed": 1
+    },
+    {
+      "path": "provenance/admission-receipt.json",
+      "rawBytes": 5875,
+      "rawSha256": "8952e3ec254f69a72620d550c831929fb3a704b8c9da3f860f9488919634c57f",
+      "publicBytes": 5809,
+      "publicSha256": "c779bb78bba39d52d65427c17b73bb393005863ec630c3c405f9dad6dbc05430",
+      "absolutePathStringsScrubbed": 1
+    }
+  ]
+}

@@ -1,0 +1,362 @@
+[
+  {
+    "caseId": "mousepad-ui-v3-01",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-01/frame.png",
+      "sha256": "cd6778e4abc4e7689aa6c54d040e2bffd16c15d1b68976bc1b2ad2affc3fddb0",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the New action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-02",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-02/frame.png",
+      "sha256": "94f43a3435d0db6920d5d6a85427757522b977d1aee003df1b3d5a1fb1f5e073",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Open... action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-03",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-03/frame.png",
+      "sha256": "9c6fdb97f60dc3d0fb442d6483b8b6acfb57427a33dcf1361f891e3a6b4a2d20",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Save action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-04",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-04/frame.png",
+      "sha256": "4e0eb8c3e63fb9a8e2eb6314aaa69f1b8db824520c1c0366bdecc15318aeb35c",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Save As... action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-05",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-05/frame.png",
+      "sha256": "ac8713e0beb22491ad509c770c482dbf085d9eaa6408cf240d793796499dbf2c",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Reload action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-06",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-06/frame.png",
+      "sha256": "c206936c408dfbfc94eb2952b88e3e53a5763c1d716848f409045fcb8305e92a",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Close Tab action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-07",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-07/frame.png",
+      "sha256": "0b6c03405e60534c19ec81bb7bb9d7dfa92452574f3d48ffd0036d6396611d48",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Undo action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-08",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-08/frame.png",
+      "sha256": "ac5b6028856fec3da23e84a6869364d77e9e645e20feaf7b28bb73e1271ec092",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Redo action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-09",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-09/frame.png",
+      "sha256": "36ce6f2b4d1a5e90ef42398eff90c81f6a250c475a38b023dd4bd10c2bbea368",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Cut action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-10",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-10/frame.png",
+      "sha256": "66c5401beaac889d937a769193bddec2fa993d2232b5b549d41fbbc616c2284e",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Copy action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-11",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-11/frame.png",
+      "sha256": "fa70a2153430a627a6f3b935c371e45cac31dc10608a44748e183969f1d91736",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Paste action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-12",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-12/frame.png",
+      "sha256": "75cafa416e51de08ec0481364b36a31a984a1479c385d8c896afb252272d7aa2",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Find action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-13",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-13/frame.png",
+      "sha256": "5db83752ef76c91d2860bc60768f5a8c45bff81b577f22ebc48a246bd777ef83",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Find and Replace... action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-14",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-14/frame.png",
+      "sha256": "29ddd557d01ce46dc4629a02062da9de4f430a1031dd6035e1d0c2bc304e79b4",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Go to... action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-15",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-15/frame.png",
+      "sha256": "8c6cb7ade7d6fecbc623be98d80c2e38565cfa85b3d39a802b82de88542d1058",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Fullscreen action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-16",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-16/frame.png",
+      "sha256": "0aab22656826d5f7f775835ed483c43a6bea97237beba1b69d534e5c50edc90c",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Print action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-17",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-17/frame.png",
+      "sha256": "673f6b19a76a1729edd59ce2069e663239b7fd3d9ed0acbdf6bade57ea81002f",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Zoom In action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-18",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-18/frame.png",
+      "sha256": "d4a50cdbbedc39d7e372b75052d7aa4e9ff1a1f5ae16585b36a3ab7519241d4f",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Zoom Out action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-19",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-19/frame.png",
+      "sha256": "e29918ca58498b4d45d4b161db855b7793ffea9cd7343fbfd2d3f4bdd5ba6c0e",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Spell Check action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  },
+  {
+    "caseId": "mousepad-ui-v3-20",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    },
+    "image": {
+      "height": 800,
+      "path": "mousepad-ui-v3-20/frame.png",
+      "sha256": "372d0738e9059c504d00a9f8a008bb0da08f42eeed5e6fd2687ad4cbc69e3b85",
+      "width": 1280
+    },
+    "locate": {
+      "target": "the visible body of the Toggle Line Numbers action button in the Mousepad toolbar, including its full painted background and border"
+    }
+  }
+]

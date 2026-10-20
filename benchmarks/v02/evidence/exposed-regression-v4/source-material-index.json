@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "74ada0c6df95ae8cbd62b78ec722ed16546cafc0",
+  "files": [
+    {
+      "path": "benchmarks/v02/acquire_corpus.py",
+      "bytes": 16953,
+      "sha256": "231a0019db34d8157cc32e31bfaf5f2325840a66bdcb763054c720f3b7bb7133"
+    },
+    {
+      "path": "benchmarks/v02/acquire_openimages_masks.py",
+      "bytes": 4865,
+      "sha256": "10c41d5b581a4c7a5d9423073081564ada1d91377dc82034f8b3a3a9424f44e4"
+    },
+    {
+      "path": "benchmarks/v02/normalize_openimages_masks.py",
+      "bytes": 4725,
+      "sha256": "61b4a198ea5bdaa00e62d75c7146c0a7df1eef9fcca28d1dd6e46418b12491da"
+    },
+    {
+      "path": "benchmarks/v02/validate_acquired_corpus.py",
+      "bytes": 8764,
+      "sha256": "1753c61d44e21f3b2eb22e12ff53029bdf091c480421c13fc1fec7a7b7c6c281"
+    },
+    {
+      "path": "benchmarks/v02/corpus/v3/README.md",
+      "bytes": 3383,
+      "sha256": "d18a553e98af5c6b3dc19327f4660224f33c830454cb9cc316e1b43bd2ecebdb"
+    },
+    {
+      "path": "benchmarks/v02/corpus/v3/test_source_oracles.py",
+      "bytes": 5756,
+      "sha256": "02379263ac8dd364451ea3d7b7b71ba97f48140b23da7e2f8d170b18f44e04da"
+    },
+    {
+      "path": "benchmarks/v02/corpus/v3/mousepad/capture.py",
+      "bytes": 2613,
+      "sha256": "6482195c3039a73e006406ef8f3e76f43b3ab7304bafbfc007e468e11206860a"
+    },
+    {
+      "path": "benchmarks/v02/corpus/v3/mousepad/derive.py",
+      "bytes": 7287,
+      "sha256": "0de05c65bbba52773094c6658554640edcd7347c0b76b3a77c87d6c273630fe9"
+    },
+    {
+      "path": "benchmarks/v02/corpus/v3/mousepad/paint-provider.c",
+      "bytes": 2007,
+      "sha256": "d94138e461226ac09d3de0f9f808d24b3194236ec7e6e685405fc6fcd0c8a9db"
+    },
+    {
+      "path": "benchmarks/v02/corpus/v3/mousepad/prepare_inputs.py",
+      "bytes": 2058,
+      "sha256": "737719c8dbe2e332cc81b7a146cc7d0b389e2989cc1a5381a9734f225ee30dea"
+    },
+    {
+      "path": "benchmarks/v02/corpus/v3/minetest/capture.py",
+      "bytes": 3579,
+      "sha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c"
+    },
+    {
+      "path": "benchmarks/v02/corpus/v3/minetest/derive.py",
+      "bytes": 12200,
+      "sha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7"
+    },
+    {
+      "path": "benchmarks/v02/corpus/v3/minetest/oracle.lua",
+      "bytes": 3454,
+      "sha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    }
+  ]
+}

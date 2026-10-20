@@ -66,3 +66,15 @@ docs/evidence/v02/fresh-text/ascii-svg-layered-v1/evaluation.json
 docs/evidence/v02/fresh-text/no-image-control/original-summary.json
 docs/evidence/v02/fresh-text/no-image-control/original-run-manifest.json
 docs/evidence/v02/fresh-text/no-image-control/evaluation.json
+
+# Exposed v4 corpus pins are exact source copies; preserve their archived bytes.
+benchmarks/v02/evidence/exposed-regression-v4/inputs/photo-inputs-neutral-v4.json
+benchmarks/v02/evidence/exposed-regression-v4/inputs/ui-inputs.json
+benchmarks/v02/evidence/exposed-regression-v4/inputs/map-inputs.json
+benchmarks/v02/evidence/exposed-regression-v4/truth/photo-evaluator-truth.json
+benchmarks/v02/evidence/exposed-regression-v4/truth/ui-evaluator-truth.json
+benchmarks/v02/evidence/exposed-regression-v4/truth/map-evaluator-truth.json
+benchmarks/v02/evidence/exposed-regression-v4/provenance/ui-source-truth.json
+benchmarks/v02/evidence/exposed-regression-v4/provenance/map-source-truth.json
+benchmarks/v02/evidence/exposed-regression-v4/provenance/admission-receipt.json
+benchmarks/v02/evidence/exposed-regression-v4/audit/openimages-mask-canvas-audit.json

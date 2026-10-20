@@ -1,0 +1,203 @@
+{
+  "appLicenseEvidence": {
+    "path": "/usr/share/doc/mousepad/copyright",
+    "sha256": "026d2237c9b625a5de60dcc5f794c8b760788df4137d731a4aa391068a4dd30c"
+  },
+  "application": "Mousepad 0.6.1",
+  "captureProfile": "private Xvfb, openbox, isolated HOME/XDG/DBus, GTK3 CSS provider",
+  "cases": [
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "f02da5ccbbc4b8d4e2817a2829f74a4f15b4eabcf9890b8225e10f23ae62f6d5",
+      "caseId": "mousepad-ui-v3-01",
+      "gtkWidgetGeometrySha256": "e234cf3755bedba85ea35c5bef3b32a65b6202305f412eb378a578fcea6c1fa5",
+      "imageSha256": "cd6778e4abc4e7689aa6c54d040e2bffd16c15d1b68976bc1b2ad2affc3fddb0"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "5493afdd8c1ef439178e677d5a25411312ea61b71fc8bd7e626962e5e1753956",
+      "caseId": "mousepad-ui-v3-02",
+      "gtkWidgetGeometrySha256": "958756a935a92df2d81696ad79cbf699fcb50f7f43a7ecfd39851b3dd9733d46",
+      "imageSha256": "94f43a3435d0db6920d5d6a85427757522b977d1aee003df1b3d5a1fb1f5e073"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "a0032a09475293bcf63f5ab64f4b5af252b70dc1a95602b05470739a5778fe99",
+      "caseId": "mousepad-ui-v3-03",
+      "gtkWidgetGeometrySha256": "34dc51dcff2a17ff3de15d09ad1aae5838ac63e193308eea08ae6736d10ccc09",
+      "imageSha256": "9c6fdb97f60dc3d0fb442d6483b8b6acfb57427a33dcf1361f891e3a6b4a2d20"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "496997bea7780f7dd0400ff10a9c747cafd27f1826d103365831015c3b5a00d9",
+      "caseId": "mousepad-ui-v3-04",
+      "gtkWidgetGeometrySha256": "4802493f9bac119a63352102a91d847aa8e7336297cd4d14163dcb0d8498ab49",
+      "imageSha256": "4e0eb8c3e63fb9a8e2eb6314aaa69f1b8db824520c1c0366bdecc15318aeb35c"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "c30d0cb4bbb4c669bd4b6696900bca99cef4515ff87a6045fa91458905731023",
+      "caseId": "mousepad-ui-v3-05",
+      "gtkWidgetGeometrySha256": "d54ac8ac7e93b5507cf4f0a1e15310abd7d11c088486288230d3add355a9ad3c",
+      "imageSha256": "ac8713e0beb22491ad509c770c482dbf085d9eaa6408cf240d793796499dbf2c"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "4d39e735a2e53529c2f5c1bbb3208cc694dea9711bde83adf66290b9a5a44c62",
+      "caseId": "mousepad-ui-v3-06",
+      "gtkWidgetGeometrySha256": "7aed44b760d3579c9613a5678d9a860e9f84649db44b75d6c01056921503eec0",
+      "imageSha256": "c206936c408dfbfc94eb2952b88e3e53a5763c1d716848f409045fcb8305e92a"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "4b411e9d48f0620962dd9e28e1996e541f1dd339a5b0d3ab9895c51edb61b95b",
+      "caseId": "mousepad-ui-v3-07",
+      "gtkWidgetGeometrySha256": "4f81512679f308ae1603ea34b02a358c542507c9dc9250f9ef55648a2beb87d0",
+      "imageSha256": "0b6c03405e60534c19ec81bb7bb9d7dfa92452574f3d48ffd0036d6396611d48"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "bbf69b993025d6fdb4bcc9334c9cd000e92a453654936a3d09b1813707d66c09",
+      "caseId": "mousepad-ui-v3-08",
+      "gtkWidgetGeometrySha256": "2e2432c05891d3fd24e732dc9b3596f6c29a0a95ebba1f47afc071f149f20ffe",
+      "imageSha256": "ac5b6028856fec3da23e84a6869364d77e9e645e20feaf7b28bb73e1271ec092"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "7ddcacb75787189ad9df76942fc0190bc1706ed0d27616b7d9077dfc1877f554",
+      "caseId": "mousepad-ui-v3-09",
+      "gtkWidgetGeometrySha256": "1aa39980c8aabdc5f38a81c6c9d6371d87fe63121e98c3b1fd66dc4ee8743c86",
+      "imageSha256": "36ce6f2b4d1a5e90ef42398eff90c81f6a250c475a38b023dd4bd10c2bbea368"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "3c2a90be012ad12d29f3b68bb9b2e533b7401bf0fdc54be9090436545cf9aec9",
+      "caseId": "mousepad-ui-v3-10",
+      "gtkWidgetGeometrySha256": "d8f66e82b721a8c81cdaaf30a899aa2c0a68c76ecd2a5b75225e80b3cc9da2d0",
+      "imageSha256": "66c5401beaac889d937a769193bddec2fa993d2232b5b549d41fbbc616c2284e"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "62130394294dd07f57884e62f4647ebe705dbcca5bae8abe7ab3fc7c7911d86a",
+      "caseId": "mousepad-ui-v3-11",
+      "gtkWidgetGeometrySha256": "1a113cf3ecc82e9284c76a3c48a36a8aefd781df2fbfc597a91671dcc3af242c",
+      "imageSha256": "fa70a2153430a627a6f3b935c371e45cac31dc10608a44748e183969f1d91736"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "c8bfac742f19f93cac6d6f88c034a3e59e0372fddd9f2a7a7c055aa1a7a1c1bd",
+      "caseId": "mousepad-ui-v3-12",
+      "gtkWidgetGeometrySha256": "490368056602191648b9d4606ff69d27727d4aa172c1457f749aad0ca9c2c76a",
+      "imageSha256": "75cafa416e51de08ec0481364b36a31a984a1479c385d8c896afb252272d7aa2"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "0c7492b19374a31fe2bf4db4f15435ee1210c69bc023500e09b318ae9fe62f3e",
+      "caseId": "mousepad-ui-v3-13",
+      "gtkWidgetGeometrySha256": "88e12b134b1a95531065ff24456cd2ef9ed5572ca100231b10ec0abbdc86596c",
+      "imageSha256": "5db83752ef76c91d2860bc60768f5a8c45bff81b577f22ebc48a246bd777ef83"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "d7494fb7cb9e07b5e4fa706d6b09c96fe129a22a21757611ddbe5b72411c898c",
+      "caseId": "mousepad-ui-v3-14",
+      "gtkWidgetGeometrySha256": "e4f9a0fa79c49c58502aa40f5cae8d009203e09ce3d04a77b8d13454124f4aba",
+      "imageSha256": "29ddd557d01ce46dc4629a02062da9de4f430a1031dd6035e1d0c2bc304e79b4"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "af556c2997754e7e5416d93541d69873e300b208da6b7432bdd044c10f110848",
+      "caseId": "mousepad-ui-v3-15",
+      "gtkWidgetGeometrySha256": "2b709154f394c2e8a12b6af02717916dd1a17d3dd542f61ce794c783c9704d53",
+      "imageSha256": "8c6cb7ade7d6fecbc623be98d80c2e38565cfa85b3d39a802b82de88542d1058"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "5f2e6d275772a8d76d5dd45ba548282448e9e3ced3edf6e8b3e3495932e3e147",
+      "caseId": "mousepad-ui-v3-16",
+      "gtkWidgetGeometrySha256": "8ce0671f4cada508f36757917909303e243948f84106129b7f0e7f969b53e162",
+      "imageSha256": "0aab22656826d5f7f775835ed483c43a6bea97237beba1b69d534e5c50edc90c"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "9c1a7b127386c8f5f2ce4ff437519a4119c650df04a42e1f646724c651210011",
+      "caseId": "mousepad-ui-v3-17",
+      "gtkWidgetGeometrySha256": "b75f338c6c886c903b8041519dc88f6a44d5c17b0042ffa9f348c7ee45bcb341",
+      "imageSha256": "673f6b19a76a1729edd59ce2069e663239b7fd3d9ed0acbdf6bade57ea81002f"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "186777eed0b743cb29d4667cffb042e604644fd34efba10383c2bef718f54e80",
+      "caseId": "mousepad-ui-v3-18",
+      "gtkWidgetGeometrySha256": "5c3b4b551c4bcb7fcf0062762874f7e47bfe9b810e86e6bcc4b54e4739fef398",
+      "imageSha256": "d4a50cdbbedc39d7e372b75052d7aa4e9ff1a1f5ae16585b36a3ab7519241d4f"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "f0765745630a0c3002cb9cea0abdd30278a01a20e6dfc83b9cf3a18b608d8a5e",
+      "caseId": "mousepad-ui-v3-19",
+      "gtkWidgetGeometrySha256": "9e153bf83f13f7d6db1404c4e99c0fb9f5f63d2e6c9db48047b670d2fb117ac7",
+      "imageSha256": "e29918ca58498b4d45d4b161db855b7793ffea9cd7343fbfd2d3f4bdd5ba6c0e"
+    },
+    {
+      "appStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "appStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "atspiSha256": "a971138568b326802ebddd7f5bab3fad55e2e8c0940f782b68322f6e1bdf295c",
+      "captureLogSha256": "e953915a7509e26d3c936c04466a7ab7330b9a430d46dff3c3fc284f95a4b30d",
+      "caseId": "mousepad-ui-v3-20",
+      "gtkWidgetGeometrySha256": "81a100aea43743a41fd79e70aec13f45ff4658477d127571c05f1d71cf0afef3",
+      "imageSha256": "372d0738e9059c504d00a9f8a008bb0da08f42eeed5e6fd2687ad4cbc69e3b85"
+    }
+  ],
+  "controlledStyle": "GTK CSS provider, opaque green fill and magenta square border",
+  "freshTruthSha256": "047011b2e15c1f43f6d0ab3aff413ffc7cb24fe9c2c08e9ce8be2c12ee3e176c",
+  "inputManifestSha256": "1bf7940fd92fdc1f7fa295296dfc5f84c5f4c32ccc41b7a2e80a0059bff918c3",
+  "schemaVersion": "mousepad-source-ledger-v1",
+  "sourceCodeSha256": {
+    "capture.py": "6482195c3039a73e006406ef8f3e76f43b3ab7304bafbfc007e468e11206860a",
+    "derive.py": "0de05c65bbba52773094c6658554640edcd7347c0b76b3a77c87d6c273630fe9",
+    "paint-provider.c": "d94138e461226ac09d3de0f9f808d24b3194236ec7e6e685405fc6fcd0c8a9db",
+    "prepare_inputs.py": "737719c8dbe2e332cc81b7a146cc7d0b389e2989cc1a5381a9734f225ee30dea"
+  },
+  "sourceGroup": "controlled-ui:mousepad-0.6.1",
+  "sourceTruthSha256": "41fe8ac9769aa7d1c0d8dd4d11a62cdd7ff47ee3e9eac0e046a00f9140b0f680",
+  "stratum": "controlled-real-application"
+}

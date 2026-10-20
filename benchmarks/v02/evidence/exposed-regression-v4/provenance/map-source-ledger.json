@@ -1,0 +1,642 @@
+{
+  "application": "Minetest 5.6.1",
+  "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+  "cases": [
+    {
+      "captureLogSha256": "445550cc0cd60261f419bb707a4d39944e4fa12e03c16897f691bff822a536cd",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-01",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "f65fc474bc1b698184efc2e4152cb740ff94f16a0d21d69df924111bb225e669",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "999b4bf23b763fa397466b485b3d288236a8ea7d8eec6d798536bbd358408802",
+      "screenHiddenBSha256": "3ae944f94153a47255b74273757e9149f1f884d2948fe3619ace15f096b48991",
+      "screenShownSha256": "27f489c67b1df13a1e1c565f175085f286a5e0459a5b2d991f253162662f0659",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "9b69d90d030ff32a6d1e4fb14eb360deebebcfe2fa1dc43f32c7938da11bffe6",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-02",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "27479bc7493301250f70fd8308acd5788c10a03c2f5e426c11f911adbe5107b9",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "5ac10ecb5d77e309f94ba714861aaacd311c335dc11b13f45db2e091e43a50d6",
+      "screenHiddenBSha256": "101f089e0a8d7b12ea0fa3285e193a9b8a913bfde412afb6364e09f992b8d1c3",
+      "screenShownSha256": "11b5ed5344806a1be0278001b781f7982c1b2556e38f4a8b5f3e2a82a0558f5a",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "a51504224e32a346133668d597712b14d0f3e654b84fd85cde33957fde31f960",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-03",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "1bf0bef0403de78595f596792a3804b0e338982cdf69847ca4b24444324498cf",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "62c4a8cd0380cc6edbf6401379510447c289671c63b51900eeb5eaf52e2cc3cd",
+      "screenHiddenBSha256": "986ed43b50dec668b7be95e5f39bc68be212bd134d9b217e50b2d7ddff1df61b",
+      "screenShownSha256": "c2838992abb88ac540beb969bf4e3d2cf59c793c06b1af9099289ef2ec135dc8",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "cbc32aab6be15ac4eec4de2c5a248a7cd879981bfe9f21369a5ba8a8cc4915db",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-04",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "5325e8da07ca03867844f24fdeaec920014e81007f4d94a5a540c21be1694b09",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "9840be1049f8f10edfeda2f687e2e02ebe855ac8bfd60f67f1ad1d5ecbfadb1a",
+      "screenHiddenBSha256": "8fbab48f2be4397aebe7b430de50b5368222e5e6b61db022e4b9fd5acbca6ffe",
+      "screenShownSha256": "26b8746fa94b2b03f50c183c30f133028859f52e157ac571b9da4586d8d6e69c",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "a7afc0c7c28f1e8058da32ee0ad549a0be25c7999bd00d5dbf8a00f295bfcf66",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-21",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "ba8afd9a7d0dffcff7c5b41b128a966d9f3e154c9a0fb6a911c0b1c0c78897d0",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "2890ddd216a399e2a10fe37017988ed7c15f902f18128245f8eeeb388418c739",
+      "screenHiddenBSha256": "f04e32558cf094316611ade696c20eb976383d171065b76fe6c8769ba41f09c4",
+      "screenShownSha256": "8c43d007f4c346dedea712d822af557a371f91eb75e1aa398bfd6b0067127a53",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "00fa6f969e5d9ca79288c916b5cb40c51f10409191281641c59bd5a6d5f92c1d",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-06",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "0f743b6085563939a72a588a13231ea5b359ef77460054b337f00e1d4e1645be",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "f6afd16e0462ad2649d6eeb1b9b4f8716c9ee563c860ce750733052111e32dad",
+      "screenHiddenBSha256": "5892085cc21943aa716755c51ada3561261f6dfd22e39353934a63c4e1d31b53",
+      "screenShownSha256": "8fb3579cf6129331bfab06e036ab6bb9f45d619c7c924d287de316cae1cfcacb",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "68d231d87b7a6a2ab7a67131d1db65239a0094ec4dea47377bfad55a23786573",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-07",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "3991b29580482fe330d68cc08843c7fe6008f716afb2aaeea0388345aaf61a07",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "d239c1b61775b7514cec33ce5f45e5f3ca44b400b9b2199f9a7a4d497a923f68",
+      "screenHiddenBSha256": "8723ae32e9a3f25c5dffe7b20f80e437aad6c6fdcc5f02713548b6a04733e61e",
+      "screenShownSha256": "d8d0b46d191500b0a28f61322f82177be6108d5a658e912671ae04a0836484d4",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "18844f74c737645728ecd296b1c7b8e46c7e9363d3dead9f2d36f3ec6def5607",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-08",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "5f7e66063d4a9c1fd596f5f8f5c6f4a8669f59aee36da0130e87fe6a5813156c",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "07c9afefb89620de71bce85fcce0420f76f486cac65ac4d6e35ff40118b11eed",
+      "screenHiddenBSha256": "95d40ccf67a3b6bc132e0bd9faee09fc00b6feba7ab3ce5f00f85a63fee61c48",
+      "screenShownSha256": "a2f12c729d23c857407b3ed3645f34d00179642ff759dfc51b7b872787cb9324",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "fa6f799661f245152067ce75ac38f817acfaf19d5e045fc9298e3949857fedb3",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-09",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "9cbec057acc329b7648cf085f8356c3fa97448355e8bf7e3aaa07dabbb2dc9f2",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "0fce498cba8ae61bb48eced14dbaee01d2eff05614cde7f73af13d454046170b",
+      "screenHiddenBSha256": "69ea909150baf307339623f6847666f9dbfcde49adb7a65b28c4bd4a1181571e",
+      "screenShownSha256": "4518faeb9163480c10a67a46f781cb8982739c29d8c03f669808fbbd88675e4f",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "e9f01ff2252895644143f9a8858002f6f44ff0f3f849db11a08bd1b77a0a4a73",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-10",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "514f0e9ec79399e9dcdaccf8e15b3bcb47e6a19cf54acc04326689b42d2837eb",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "4184c1c811d77c73f7e4ef444c3ff4387b8671ba9d81e7e671051ea022e6a47c",
+      "screenHiddenBSha256": "1193a1e94cfbd9db8d0246c96ba7772ec0e07520fd212b6d7dc7ed0ec8457ebf",
+      "screenShownSha256": "8df4a8fb859ba8dc420426c95a7a89bca7ee277a3d82380be93e0070feda36a0",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "0332a29a55b314185999f423becae73a8fa318279c85b7a0a169c46af6eca9e1",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-11",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "555cc1369e8d9da4c7be28bc13a1956fdb1f45876c1f8c573b7e96e6d60cac15",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "e4ba8a89041188a893f7db731c789173ca47c3ca8fb356a9b27d9851ee791402",
+      "screenHiddenBSha256": "b3bf0bca914121fde7a165f87247d4999e279b474058b2471b611a8e072a2113",
+      "screenShownSha256": "13ba5f4da1eb9a34c257ac87ec3baaebf194bdecba15926c4e0299e9825afb65",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "2432d9965f41ac1602a83c8fdc781411a72fad8c4f2d8f952a66411d6dd837df",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-12",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "0dbe108d163fcb19dff059925859d5684a5211717bb478975dbb302314a9a575",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "fe183713d95b64875c61a138f40272474924d36dbf7dcd41db6c35a80f23433f",
+      "screenHiddenBSha256": "96dd1cd62b51822cb9de234e7cd0ca6f408a573b3f5606d9e7fc061d1ef88a9c",
+      "screenShownSha256": "33a887715e04146d38acff55bed3c3bfa7d71ebf85827f656f8bb182fdc7aef0",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "0f3e3492917032ec114c850cae956ec9a67bdbc13fd457d858c0c679abfb4d34",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-13",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "fdb746670147a6828a2363945d73fb6ca24d69c581db984310ea57d3d1f7da47",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "f3facb617abb09fd94d58f2276d8db8ab230af04093cdb931da930525c85f599",
+      "screenHiddenBSha256": "df82d3bdb2ff117ff7033b450d76c43f38cfd299be0b63a4a885f88c25ca27a7",
+      "screenShownSha256": "b770639990cb773ae2c1a4f3641cfc666433c2e7a7972962bc1c527eda7e23a6",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "25babc13cff4fa08810c6cb6448f810b85c7deb312c0775893cda8453b35b219",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-14",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "c27323b391f3725118e7b2ca388fa14d3e0cb08b85d2af52fbe12ffc79857a52",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "ad912b2644c8c4f5ec9605fb9f1c3baa9b429559a09f2edd8d977099a93efc81",
+      "screenHiddenBSha256": "57d7a262e4a2b6fd1764c4686e07a390a9528f9fbf42ce93bd91c296deb8aa41",
+      "screenShownSha256": "4d009dedf407c2f0b44711013e6ce81b8cec684656cd975e75c2733387725a75",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "a7325026eeb45753cb0e8ba223b1c676c7bbbf44818006bd293d9fd280ff3253",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-15",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "aa00d69110e39d78512eff996eb9e01f2a6f2a0c12ecc8b6c6b69480a15a5641",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "3d9a8aeb5df588f838e5b8953783fe6e276ced5123913fce28b1b536640e610a",
+      "screenHiddenBSha256": "fdb9323f60cd5f8b256cd787a1212fa21868c34518df70267fb1d4cb00bdc5e4",
+      "screenShownSha256": "b80d66b18919c6943a1b8cf0c86eaaea51a57f746c2c4aaf128590063a5dca89",
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "e444e3053c61a97588efbb198967f048e5b2ebe9a8aa79d57b02a8d36f9797a7",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-16",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "46f16883732c45ad940ba87d71f4a3769422b465bbe525552b4057ffd8d04725",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "68e98cdd6df7f6b3efe67ebfd070dcd57d5ece14c661f63746db02a1f12d9e79",
+      "screenHiddenBSha256": "be1ae4296b782605af6bc1908639f1f7eb9dbd3b327af246ec1a321feb2d7ddd",
+      "screenShownSha256": null,
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "0129ac46db44a478d773168faa3ffd9e97fd4a324a72c1153074f8792ae738d8",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-17",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "156eefaaef7e45d78a920ac21397cf8a1a8291d2a2681f50be92cf284d463dca",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "4be78056174dbdc649ef0e25171e9c5b7fc7084b2c5fda2fba874e90c671577b",
+      "screenHiddenBSha256": "11909f5cde38401a380b51b78b418da7de4c06c52329a074f0c953b87f837fed",
+      "screenShownSha256": null,
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "3006fa07d7884edf08ae98cecb83dc9a070b0d6c76372e2ae6ceee0555c9cf9f",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-18",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "ecc41346e75e6369bc4ea86d29f5df1c5a3f2814f8463425566bb18755b86a51",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "22e440e1a409607a74d569ca3504cf5244f0025cbbf83933e5ce746f92de11a4",
+      "screenHiddenBSha256": "6b281916ff5fc0de63690fa8f857bd78842b8a0d88b8f0c799466be7bb2ffe1a",
+      "screenShownSha256": null,
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "a93943e96ce8bd8e400db461832000b0e3895cdd2f8cc3a2a185e4b49faab551",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-19",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "fdf0b739ece2601633280421c0a74bc7b4759a63b424409e833bd9ee5ac72e62",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "8df887e410d05ac51b1a2d031d7c37e3bd2e1ae226c0cc7ac2b232825778b187",
+      "screenHiddenBSha256": "74d3e384484fcf1d83a5b1a3a2479cf0ffb62d31f15988436b775c53a8d0f155",
+      "screenShownSha256": null,
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    },
+    {
+      "captureLogSha256": "6ec7966588248411e784d5eaa7828510054e8fb583c917584b5e8062ffc77a66",
+      "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+      "caseId": "map-oracle-v3-20",
+      "cropTransform": {
+        "crop": {
+          "height": 150,
+          "left": 993,
+          "space": "screen pixels",
+          "top": 156,
+          "width": 150
+        },
+        "screenHeight": 800,
+        "screenWidth": 1280,
+        "window": {
+          "HEIGHT": 600,
+          "WIDTH": 1024,
+          "X": 129,
+          "Y": 127
+        }
+      },
+      "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+      "inputImageSha256": "915a4c518660b2e37899b2a588e4a2b8891d559f73a605cfe5390c70463caf66",
+      "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+      "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+      "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+      "screenHiddenASha256": "7e54339c1095ded53c1994f92ca7afadd79e9ac9decf8dd4d4bf285862ab971e",
+      "screenHiddenBSha256": "9818c00faf23c2008ad5f0b28e0e34ec6f01f0878c0dea9ff3407e6906e2f4b6",
+      "screenShownSha256": null,
+      "worldmodSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c"
+    }
+  ],
+  "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+  "freshTruthSha256": "9710edd246a9c2253172bfbd6205b9b2ded393dbd54e0d7a73d301c8f69b6f78",
+  "game": "Minetest Game",
+  "inputManifestSha256": "2c18d2c1bae481d0a1239802f32d4ac985bc0d33a028eaafb490fd5995de7a3b",
+  "licenseEvidence": {
+    "markerAssetLicense": "CC-BY-SA-3.0",
+    "path": "$CORPUS_RUN_ROOT/minetest/root/usr/share/doc/minetest-data/copyright",
+    "sha256": "a9bbaa408a1e2937bb1454641b4f5a52c93f4741ae64df0fbd68a1898a1f2b5a"
+  },
+  "minetestRendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+  "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+  "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+  "schemaVersion": "minetest-source-ledger-v1",
+  "sourceGroup": "controlled-map:minetest-5.6.1-minetest-game",
+  "sourceTruthSha256": "ee279f6568613c0255984f89d636df23fff02a1c98f041fcb266dbd2201a03c3",
+  "stratum": "controlled-real-game-map"
+}

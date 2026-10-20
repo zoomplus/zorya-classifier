@@ -1,0 +1,257 @@
+[
+  {
+    "caseId": "map-oracle-v3-01",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-02",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-03",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-04",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-21",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-06",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-07",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-08",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-09",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-10",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-11",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-12",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-13",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-14",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-15",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5333333333333333,
+          0.15333333333333332,
+          0.5733333333333334,
+          0.19333333333333333
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "map-oracle-v3-16",
+    "expectedPresence": "absent",
+    "negativeEvidence": "bounded observed object enumeration at the fixed player location found zero minimap-rendered objects and zero target entities; hidden A/B minimap crops are identical",
+    "targetBoxes": []
+  },
+  {
+    "caseId": "map-oracle-v3-17",
+    "expectedPresence": "absent",
+    "negativeEvidence": "bounded observed object enumeration at the fixed player location found zero minimap-rendered objects and zero target entities; hidden A/B minimap crops are identical",
+    "targetBoxes": []
+  },
+  {
+    "caseId": "map-oracle-v3-18",
+    "expectedPresence": "absent",
+    "negativeEvidence": "bounded observed object enumeration at the fixed player location found zero minimap-rendered objects and zero target entities; hidden A/B minimap crops are identical",
+    "targetBoxes": []
+  },
+  {
+    "caseId": "map-oracle-v3-19",
+    "expectedPresence": "absent",
+    "negativeEvidence": "bounded observed object enumeration at the fixed player location found zero minimap-rendered objects and zero target entities; hidden A/B minimap crops are identical",
+    "targetBoxes": []
+  },
+  {
+    "caseId": "map-oracle-v3-20",
+    "expectedPresence": "absent",
+    "negativeEvidence": "bounded observed object enumeration at the fixed player location found zero minimap-rendered objects and zero target entities; hidden A/B minimap crops are identical",
+    "targetBoxes": []
+  }
+]

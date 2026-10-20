@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "classification": "exposed-regression-metadata-only",
+  "sourceCommit": "74ada0c6df95ae8cbd62b78ec722ed16546cafc0",
+  "canonicalFiles": [
+    {
+      "path": "README.md",
+      "publicBytes": 5359,
+      "publicSha256": "9994c8635bceaf72ea55746805936d2e815d46d60f987e66f040dcc628d96eaf",
+      "generatedMetadata": true
+    },
+    {
+      "path": "audit/openimages-mask-canvas-audit.json",
+      "publicBytes": 28257,
+      "publicSha256": "46f461c3626031f5d827a239e6431cb57d89d1fd078c2dd38a79d1f93b987822",
+      "generatedMetadata": true
+    },
+    {
+      "path": "inputs/map-inputs.json",
+      "sourceBytes": 12158,
+      "sourceSha256": "2c18d2c1bae481d0a1239802f32d4ac985bc0d33a028eaafb490fd5995de7a3b",
+      "publicBytes": 12158,
+      "publicSha256": "2c18d2c1bae481d0a1239802f32d4ac985bc0d33a028eaafb490fd5995de7a3b",
+      "byteIdentical": true,
+      "machinePathReplacements": 0
+    },
+    {
+      "path": "inputs/photo-inputs-neutral-v4.json",
+      "sourceBytes": 22568,
+      "sourceSha256": "5d125e853ed93558ab634e406ca90cf931569953279c1630d49dcf239b9baa79",
+      "publicBytes": 22568,
+      "publicSha256": "5d125e853ed93558ab634e406ca90cf931569953279c1630d49dcf239b9baa79",
+      "byteIdentical": true,
+      "machinePathReplacements": 0
+    },
+    {
+      "path": "inputs/ui-inputs.json",
+      "sourceBytes": 9693,
+      "sourceSha256": "1bf7940fd92fdc1f7fa295296dfc5f84c5f4c32ccc41b7a2e80a0059bff918c3",
+      "publicBytes": 9693,
+      "publicSha256": "1bf7940fd92fdc1f7fa295296dfc5f84c5f4c32ccc41b7a2e80a0059bff918c3",
+      "byteIdentical": true,
+      "machinePathReplacements": 0
+    },
+    {
+      "path": "path-scrub-map.json",
+      "publicBytes": 1043,
+      "publicSha256": "b81447ecbd4cfa3dfaf6687fbe2bc7a92c0a44584520cd68634af5be57dce0b4",
+      "generatedMetadata": true
+    },
+    {
+      "path": "provenance/admission-receipt.json",
+      "sourceBytes": 5875,
+      "sourceSha256": "8952e3ec254f69a72620d550c831929fb3a704b8c9da3f860f9488919634c57f",
+      "publicBytes": 5809,
+      "publicSha256": "c779bb78bba39d52d65427c17b73bb393005863ec630c3c405f9dad6dbc05430",
+      "byteIdentical": false,
+      "machinePathReplacements": 1
+    },
+    {
+      "path": "provenance/map-source-ledger.json",
+      "sourceBytes": 30742,
+      "sourceSha256": "8dc35d0afd4918c80d96fe263729454bf096b470779bd4c05c4b8e6b0cc215ef",
+      "publicBytes": 30676,
+      "publicSha256": "c4d38f911dafeb885175efec48f2e235b715ed79514d402f60b5af5dd18e3e25",
+      "byteIdentical": false,
+      "machinePathReplacements": 1
+    },
+    {
+      "path": "provenance/map-source-truth.json",
+      "sourceBytes": 5963,
+      "sourceSha256": "9710edd246a9c2253172bfbd6205b9b2ded393dbd54e0d7a73d301c8f69b6f78",
+      "publicBytes": 5963,
+      "publicSha256": "9710edd246a9c2253172bfbd6205b9b2ded393dbd54e0d7a73d301c8f69b6f78",
+      "byteIdentical": true,
+      "machinePathReplacements": 0
+    },
+    {
+      "path": "provenance/photo-source-ledger.json",
+      "sourceBytes": 119135,
+      "sourceSha256": "19507c1c53c7eec76791ae0cd2997db839867afc564d15fc92829b43436d79fe",
+      "publicBytes": 119135,
+      "publicSha256": "19507c1c53c7eec76791ae0cd2997db839867afc564d15fc92829b43436d79fe",
+      "byteIdentical": true,
+      "machinePathReplacements": 0
+    },
+    {
+      "path": "provenance/ui-source-ledger.json",
+      "sourceBytes": 13349,
+      "sourceSha256": "6ee2d979470127330460f1c95bf4d11b6bd54addd43a6c9ee242f5770dfd7fc6",
+      "publicBytes": 13349,
+      "publicSha256": "6ee2d979470127330460f1c95bf4d11b6bd54addd43a6c9ee242f5770dfd7fc6",
+      "byteIdentical": true,
+      "machinePathReplacements": 0
+    },
+    {
+      "path": "provenance/ui-source-truth.json",
+      "sourceBytes": 15885,
+      "sourceSha256": "41fe8ac9769aa7d1c0d8dd4d11a62cdd7ff47ee3e9eac0e046a00f9140b0f680",
+      "publicBytes": 15885,
+      "publicSha256": "41fe8ac9769aa7d1c0d8dd4d11a62cdd7ff47ee3e9eac0e046a00f9140b0f680",
+      "byteIdentical": true,
+      "machinePathReplacements": 0
+    },
+    {
+      "path": "source-material-index.json",
+      "publicBytes": 2421,
+      "publicSha256": "040be98f582f707fb12fe01e1b1975e70cc35cf1c5daf3bda835837bd38c3a2d",
+      "generatedMetadata": true
+    },
+    {
+      "path": "truth/map-evaluator-truth.json",
+      "sourceBytes": 5963,
+      "sourceSha256": "9710edd246a9c2253172bfbd6205b9b2ded393dbd54e0d7a73d301c8f69b6f78",
+      "publicBytes": 5963,
+      "publicSha256": "9710edd246a9c2253172bfbd6205b9b2ded393dbd54e0d7a73d301c8f69b6f78",
+      "byteIdentical": true,
+      "machinePathReplacements": 0
+    },
+    {
+      "path": "truth/photo-evaluator-truth.json",
+      "sourceBytes": 164553,
+      "sourceSha256": "e0b6b8b977ac31e41e74d1f73044e8638bbfeb8c76fae5732a1207112c7b7caa",
+      "publicBytes": 164553,
+      "publicSha256": "e0b6b8b977ac31e41e74d1f73044e8638bbfeb8c76fae5732a1207112c7b7caa",
+      "byteIdentical": true,
+      "machinePathReplacements": 0
+    },
+    {
+      "path": "truth/photo-official-mask-index.json",
+      "sourceBytes": 15946,
+      "sourceSha256": "e58ac07494683301232dcc767411d134e6abc82c293fa35e212cc92658d61fbc",
+      "publicBytes": 15946,
+      "publicSha256": "e58ac07494683301232dcc767411d134e6abc82c293fa35e212cc92658d61fbc",
+      "byteIdentical": true,
+      "machinePathReplacements": 0
+    },
+    {
+      "path": "truth/ui-evaluator-truth.json",
+      "sourceBytes": 5072,
+      "sourceSha256": "047011b2e15c1f43f6d0ab3aff413ffc7cb24fe9c2c08e9ce8be2c12ee3e176c",
+      "publicBytes": 5072,
+      "publicSha256": "047011b2e15c1f43f6d0ab3aff413ffc7cb24fe9c2c08e9ce8be2c12ee3e176c",
+      "byteIdentical": true,
+      "machinePathReplacements": 0
+    }
+  ],
+  "exclusions": {
+    "sourceImages": true,
+    "screenshots": true,
+    "worldSaves": true,
+    "maskPngs": true,
+    "weights": true,
+    "providerOutputs": true,
+    "credentialsAndSessionState": true
+  },
+  "selfHashExcluded": true,
+  "payloadFileCount": 17,
+  "payloadBytes": 463850,
+  "sourceBundleReference": {
+    "preparedBundleVersion": "v2",
+    "preparedBundleIndexSha256": "185c1887fceaa400adaedf08b97604fcd75d8f673b7e17c4b504d8080fcdbd9a",
+    "correctionNoteSha256": "d32c477a9418e265abc72fc8be10cff28bc22350aea1ed93f989cc6c6ec5c07c",
+    "note": "This catalog uses corrected canonical inputs/truth; the source bundle is provenance only and is not copied here."
+  }
+}

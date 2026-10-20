@@ -1,0 +1,134 @@
+{
+  "aggregateCounts": {
+    "cases": 80,
+    "negative": 20,
+    "photoCasesWithAtLeastOneReferenceMask": 21,
+    "photoReferenceMaskInstances": 32,
+    "positive": 60
+  },
+  "candidateOrder": [
+    "photo",
+    "ui",
+    "map"
+  ],
+  "caseCounts": {
+    "map": {
+      "cases": 20,
+      "freshTruthSha256": "9710edd246a9c2253172bfbd6205b9b2ded393dbd54e0d7a73d301c8f69b6f78",
+      "inputSha256": "2c18d2c1bae481d0a1239802f32d4ac985bc0d33a028eaafb490fd5995de7a3b",
+      "negative": 5,
+      "positive": 15,
+      "sourceLedgerSha256": "8dc35d0afd4918c80d96fe263729454bf096b470779bd4c05c4b8e6b0cc215ef",
+      "sourceTruthSha256": "ee279f6568613c0255984f89d636df23fff02a1c98f041fcb266dbd2201a03c3"
+    },
+    "photo": {
+      "cases": 40,
+      "freshTruthSha256": "e0b6b8b977ac31e41e74d1f73044e8638bbfeb8c76fae5732a1207112c7b7caa",
+      "inputSha256": "93cf40732075ab63fd26b77806a7b118382e816c6ab691bf3e5ee68a2acbf013",
+      "negative": 10,
+      "positive": 30,
+      "sourceLedgerSha256": "19507c1c53c7eec76791ae0cd2997db839867afc564d15fc92829b43436d79fe",
+      "sourceTruthSha256": "e0b6b8b977ac31e41e74d1f73044e8638bbfeb8c76fae5732a1207112c7b7caa"
+    },
+    "ui": {
+      "cases": 20,
+      "freshTruthSha256": "047011b2e15c1f43f6d0ab3aff413ffc7cb24fe9c2c08e9ce8be2c12ee3e176c",
+      "inputSha256": "1bf7940fd92fdc1f7fa295296dfc5f84c5f4c32ccc41b7a2e80a0059bff918c3",
+      "negative": 5,
+      "positive": 15,
+      "sourceLedgerSha256": "6ee2d979470127330460f1c95bf4d11b6bd54addd43a6c9ee242f5770dfd7fc6",
+      "sourceTruthSha256": "41fe8ac9769aa7d1c0d8dd4d11a62cdd7ff47ee3e9eac0e046a00f9140b0f680"
+    }
+  },
+  "combinedPins": {
+    "inputs": {
+      "bytes": 45933,
+      "sha256": "6b6cbcf6347fd906f06c78d2b4a36e131344fadb7a06327d7e41ecec8b73f822"
+    },
+    "source-ledger": {
+      "bytes": 176215,
+      "sha256": "0382399d8c4184e3ea411f645b0df948efacad820c5982c1119c7f1e67f54133"
+    },
+    "truth": {
+      "bytes": 188218,
+      "sha256": "1d14963f8743604b5a78181744e56abe1cee53a9e8d259c529279824742912e3"
+    }
+  },
+  "commonImageRoot": "$CORPUS_RUN_ROOT/common-image-root",
+  "individualInputs": {
+    "map": {
+      "path": ".run/v03-heldout-curation/minetest/heldout-v3/map-oracle-v6/inputs.json",
+      "sha256": "2c18d2c1bae481d0a1239802f32d4ac985bc0d33a028eaafb490fd5995de7a3b"
+    },
+    "photo": {
+      "path": ".run/v03-heldout-curation/heldout80-photo-v3/inputs.json",
+      "sha256": "93cf40732075ab63fd26b77806a7b118382e816c6ab691bf3e5ee68a2acbf013"
+    },
+    "ui": {
+      "path": ".run/v03-heldout-curation/mousepad/heldout-v3/ui-oracle-v2/inputs.json",
+      "sha256": "1bf7940fd92fdc1f7fa295296dfc5f84c5f4c32ccc41b7a2e80a0059bff918c3"
+    }
+  },
+  "limitations": [
+    "Controlled UI and map families do not claim natural-capture diversity.",
+    "Photo mask coverage is incomplete; all available official masks are retained and scored separately.",
+    "Map capture uses one controlled Minetest minimap family with stable source-verified marker support."
+  ],
+  "mapAdmission": {
+    "all20WorldmodInitFilesMatchGenericOracle": true,
+    "captureHistory": {
+      "allSourceAttemptsPreserved": true,
+      "baseV5Cases": 20,
+      "baseV5SourceStabilityRejects": 2,
+      "baseV5StrictPass": 18,
+      "boundedRetryCaptures": 3,
+      "excludedOriginalCaseAfterMaxAttempts": 1,
+      "preservedV4MismatchRun": true,
+      "replacementAttempts": {
+        "setupIncomplete": 1,
+        "strictSourcePass": 1
+      },
+      "replacementCaseAccepted": true,
+      "retryPasses": 1,
+      "setupIncompleteSeparateFromSourceStability": true,
+      "sourceStabilityRejectsAcrossBaseAndRetries": 5
+    },
+    "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+    "cases": 20,
+    "controlledMapFamilyLimit": "single Minetest 5.6.1 engine/game family; 150x150 minimap crop",
+    "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+    "genericWorldmodOracleSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+    "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+    "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+    "rendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+    "sourceGroup": "controlled-map:minetest-5.6.1-minetest-game",
+    "stratum": "controlled-real-2d-minimap"
+  },
+  "photoAdmission": {
+    "exposureExclusion": "source ledger records exclusion of old v1/v2 image and photographer groups",
+    "license": "CC-BY-2.0 Flickr sources, per-image provenance recorded",
+    "negativeContradictions": 0,
+    "negativeRule": "explicit absence; exclude any negative with target-class box or segmentation row",
+    "source": "Open Images V5 validation",
+    "uniqueImages": 40,
+    "uniquePhotographerSourceGroups": 40
+  },
+  "schemaVersion": 1,
+  "status": "ready-for-root-freeze",
+  "uiAdmission": {
+    "cases": 20,
+    "controlledCssPaintOracle": "AT-SPI control identity/allocation plus exact four painted magenta edges and opaque fill",
+    "naturalCaptureClaim": false,
+    "provenance": {
+      "appLicenseEvidenceSha256": "026d2237c9b625a5de60dcc5f794c8b760788df4137d731a4aa391068a4dd30c",
+      "captureAndOracleSourceSha256": {
+        "capture.py": "6482195c3039a73e006406ef8f3e76f43b3ab7304bafbfc007e468e11206860a",
+        "derive.py": "0de05c65bbba52773094c6658554640edcd7347c0b76b3a77c87d6c273630fe9",
+        "paint-provider.c": "d94138e461226ac09d3de0f9f808d24b3194236ec7e6e685405fc6fcd0c8a9db",
+        "prepare_inputs.py": "737719c8dbe2e332cc81b7a146cc7d0b389e2989cc1a5381a9734f225ee30dea"
+      }
+    },
+    "sourceGroup": "controlled-ui:mousepad-0.6.1",
+    "stratum": "controlled-real-application"
+  }
+}

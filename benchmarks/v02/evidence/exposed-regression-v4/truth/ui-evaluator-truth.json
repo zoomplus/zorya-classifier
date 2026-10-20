@@ -1,0 +1,257 @@
+[
+  {
+    "caseId": "mousepad-ui-v3-01",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.253125,
+          0.245,
+          0.2828125,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-02",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.2828125,
+          0.245,
+          0.3125,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-03",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.3125,
+          0.245,
+          0.3421875,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-04",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.3421875,
+          0.245,
+          0.371875,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-05",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.371875,
+          0.245,
+          0.4015625,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-06",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.4015625,
+          0.245,
+          0.43125,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-07",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.4421875,
+          0.245,
+          0.471875,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-08",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.471875,
+          0.245,
+          0.5015625,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-09",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5015625,
+          0.245,
+          0.53125,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-10",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.53125,
+          0.245,
+          0.5609375,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-11",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.5609375,
+          0.245,
+          0.590625,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-12",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.6015625,
+          0.245,
+          0.63125,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-13",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.63125,
+          0.245,
+          0.6609375,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-14",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.6609375,
+          0.245,
+          0.690625,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-15",
+    "expectedPresence": "present",
+    "negativeEvidence": null,
+    "targetBoxes": [
+      {
+        "xyxy": [
+          0.71796875,
+          0.245,
+          0.74765625,
+          0.29
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "mousepad-ui-v3-16",
+    "expectedPresence": "absent",
+    "negativeEvidence": "The complete Mousepad toolbar action inventory was read from the app accessibility tree; this action is absent from the toolbar.",
+    "targetBoxes": []
+  },
+  {
+    "caseId": "mousepad-ui-v3-17",
+    "expectedPresence": "absent",
+    "negativeEvidence": "The complete Mousepad toolbar action inventory was read from the app accessibility tree; this action is absent from the toolbar.",
+    "targetBoxes": []
+  },
+  {
+    "caseId": "mousepad-ui-v3-18",
+    "expectedPresence": "absent",
+    "negativeEvidence": "The complete Mousepad toolbar action inventory was read from the app accessibility tree; this action is absent from the toolbar.",
+    "targetBoxes": []
+  },
+  {
+    "caseId": "mousepad-ui-v3-19",
+    "expectedPresence": "absent",
+    "negativeEvidence": "The complete Mousepad toolbar action inventory was read from the app accessibility tree; this action is absent from the toolbar.",
+    "targetBoxes": []
+  },
+  {
+    "caseId": "mousepad-ui-v3-20",
+    "expectedPresence": "absent",
+    "negativeEvidence": "The complete Mousepad toolbar action inventory was read from the app accessibility tree; this action is absent from the toolbar.",
+    "targetBoxes": []
+  }
+]

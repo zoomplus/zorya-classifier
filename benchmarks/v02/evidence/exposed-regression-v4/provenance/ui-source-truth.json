@@ -1,0 +1,721 @@
+{
+  "cases": [
+    {
+      "caseId": "mousepad-ui-v3-01",
+      "expectedPresence": "present",
+      "imageSha256": "cd6778e4abc4e7689aa6c54d040e2bffd16c15d1b68976bc1b2ad2affc3fddb0",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 978,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          324,
+          196,
+          361,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 324,
+        "top": 196,
+        "width": 38
+      },
+      "target": "New",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-02",
+      "expectedPresence": "present",
+      "imageSha256": "94f43a3435d0db6920d5d6a85427757522b977d1aee003df1b3d5a1fb1f5e073",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 947,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          362,
+          196,
+          399,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 362,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Open...",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-03",
+      "expectedPresence": "present",
+      "imageSha256": "9c6fdb97f60dc3d0fb442d6483b8b6acfb57427a33dcf1361f891e3a6b4a2d20",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 1010,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          400,
+          196,
+          437,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 400,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Save",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-04",
+      "expectedPresence": "present",
+      "imageSha256": "4e0eb8c3e63fb9a8e2eb6314aaa69f1b8db824520c1c0366bdecc15318aeb35c",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 1004,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          438,
+          196,
+          475,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 438,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Save As...",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-05",
+      "expectedPresence": "present",
+      "imageSha256": "ac8713e0beb22491ad509c770c482dbf085d9eaa6408cf240d793796499dbf2c",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 952,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          476,
+          196,
+          513,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 476,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Reload",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-06",
+      "expectedPresence": "present",
+      "imageSha256": "c206936c408dfbfc94eb2952b88e3e53a5763c1d716848f409045fcb8305e92a",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 1032,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          514,
+          196,
+          551,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 514,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Close Tab",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-07",
+      "expectedPresence": "present",
+      "imageSha256": "0b6c03405e60534c19ec81bb7bb9d7dfa92452574f3d48ffd0036d6396611d48",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 1000,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          566,
+          196,
+          603,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 566,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Undo",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-08",
+      "expectedPresence": "present",
+      "imageSha256": "ac5b6028856fec3da23e84a6869364d77e9e645e20feaf7b28bb73e1271ec092",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 1000,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          604,
+          196,
+          641,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 604,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Redo",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-09",
+      "expectedPresence": "present",
+      "imageSha256": "36ce6f2b4d1a5e90ef42398eff90c81f6a250c475a38b023dd4bd10c2bbea368",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 982,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          642,
+          196,
+          679,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 642,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Cut",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-10",
+      "expectedPresence": "present",
+      "imageSha256": "66c5401beaac889d937a769193bddec2fa993d2232b5b549d41fbbc616c2284e",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 961,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          680,
+          196,
+          717,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 680,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Copy",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-11",
+      "expectedPresence": "present",
+      "imageSha256": "fa70a2153430a627a6f3b935c371e45cac31dc10608a44748e183969f1d91736",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 968,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          718,
+          196,
+          755,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 718,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Paste",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-12",
+      "expectedPresence": "present",
+      "imageSha256": "75cafa416e51de08ec0481364b36a31a984a1479c385d8c896afb252272d7aa2",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 969,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          770,
+          196,
+          807,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 770,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Find",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-13",
+      "expectedPresence": "present",
+      "imageSha256": "5db83752ef76c91d2860bc60768f5a8c45bff81b577f22ebc48a246bd777ef83",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 929,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          808,
+          196,
+          845,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 808,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Find and Replace...",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-14",
+      "expectedPresence": "present",
+      "imageSha256": "29ddd557d01ce46dc4629a02062da9de4f430a1031dd6035e1d0c2bc304e79b4",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 992,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          846,
+          196,
+          883,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 846,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Go to...",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-15",
+      "expectedPresence": "present",
+      "imageSha256": "8c6cb7ade7d6fecbc623be98d80c2e38565cfa85b3d39a802b82de88542d1058",
+      "paintEvidence": {
+        "allocationContainsPaint": true,
+        "cssFillPixels": 1002,
+        "fourEdgesCssBorderPixels": 144,
+        "paintedPixelBounds": [
+          919,
+          196,
+          956,
+          231
+        ]
+      },
+      "region": {
+        "height": 36,
+        "left": 919,
+        "top": 196,
+        "width": 38
+      },
+      "target": "Fullscreen",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-16",
+      "expectedPresence": "absent",
+      "imageSha256": "0aab22656826d5f7f775835ed483c43a6bea97237beba1b69d534e5c50edc90c",
+      "target": "Print",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-17",
+      "expectedPresence": "absent",
+      "imageSha256": "673f6b19a76a1729edd59ce2069e663239b7fd3d9ed0acbdf6bade57ea81002f",
+      "target": "Zoom In",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-18",
+      "expectedPresence": "absent",
+      "imageSha256": "d4a50cdbbedc39d7e372b75052d7aa4e9ff1a1f5ae16585b36a3ab7519241d4f",
+      "target": "Zoom Out",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-19",
+      "expectedPresence": "absent",
+      "imageSha256": "e29918ca58498b4d45d4b161db855b7793ffea9cd7343fbfd2d3f4bdd5ba6c0e",
+      "target": "Spell Check",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    },
+    {
+      "caseId": "mousepad-ui-v3-20",
+      "expectedPresence": "absent",
+      "imageSha256": "372d0738e9059c504d00a9f8a008bb0da08f42eeed5e6fd2687ad4cbc69e3b85",
+      "target": "Toggle Line Numbers",
+      "toolbarButtonNames": [
+        "New",
+        "Open...",
+        "Save",
+        "Save As...",
+        "Reload",
+        "Close Tab",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Find",
+        "Find and Replace...",
+        "Go to...",
+        "Fullscreen"
+      ]
+    }
+  ],
+  "schemaVersion": "mousepad-ui-oracle-truth-v1",
+  "sourceGroup": "controlled-ui:mousepad-0.6.1"
+}

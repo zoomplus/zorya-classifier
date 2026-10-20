@@ -1,0 +1,802 @@
+[
+  {
+    "caseId": "photo-heldout-v3-present-01",
+    "image": {
+      "path": "photos/19a9c18bb631cf3f.jpg",
+      "sha256": "28035a1bbae8f5372c7195daa138471de59e1ba3361ae69088767a042b2a1ccb",
+      "width": 768,
+      "height": 768
+    },
+    "locate": {
+      "target": "Bottle",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bottle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-02",
+    "image": {
+      "path": "photos/23422c064e2b76c7.jpg",
+      "sha256": "598a4aaaf4b724442ab34ebbfe857a946e9c65015fb08b227cddeed203c16ba9",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Bird",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bird?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-03",
+    "image": {
+      "path": "photos/1c878debbe70c58a.jpg",
+      "sha256": "4055c444e25db4c5f0bdb72e3346b5069fb5abfe5530a6647c85b559b6f733b7",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Truck",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Truck?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-04",
+    "image": {
+      "path": "photos/b02cb2358a21f9bb.jpg",
+      "sha256": "49ccbbf3fa0a9f1dccd95355a877aa10dd137e7fd9a1189a3ed8f28ad8a849de",
+      "width": 1024,
+      "height": 844
+    },
+    "locate": {
+      "target": "Mobile phone",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Mobile phone?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-05",
+    "image": {
+      "path": "photos/09f8e760f60df0da.jpg",
+      "sha256": "bcdbb7a0a17365a5f20930f718508184b376061ab419aae9bec0e8e7d5706072",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Cat",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Cat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-06",
+    "image": {
+      "path": "photos/afea620099754710.jpg",
+      "sha256": "b06a76e0cf88c370d356505441f626484b189d348d4da204338f3e436051b88b",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Cat",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Cat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-07",
+    "image": {
+      "path": "photos/71d4905fad74916e.jpg",
+      "sha256": "46d61246073b01215fdcd2855de007a76c990e950dc89055c0e46365d348c4a1",
+      "width": 1024,
+      "height": 748
+    },
+    "locate": {
+      "target": "Horse",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Horse?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-08",
+    "image": {
+      "path": "photos/0925ac3567b20f47.jpg",
+      "sha256": "fecd2e51edfd13401f3670c66caed6289231609f25a4b048076877eeadb3d5e3",
+      "width": 1024,
+      "height": 791
+    },
+    "locate": {
+      "target": "Horse",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Horse?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-09",
+    "image": {
+      "path": "photos/f58dcd04e49ddbca.jpg",
+      "sha256": "9c47cc619e269370c9d8626f6dd1e468a672f245ae29f6d8f8ba76273bb47fdb",
+      "width": 1024,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Mobile phone",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Mobile phone?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-10",
+    "image": {
+      "path": "photos/df94fb387c3e05c5.jpg",
+      "sha256": "0da18ff473b80319ac0e9c0c0f51095915facbaf49114fa25781137cbdb954db",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Dog",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Dog?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-11",
+    "image": {
+      "path": "photos/b3ca82ba52c64268.jpg",
+      "sha256": "f68cdfc5820f12decb02f62ddfc2c853e5d7b2bfeb072b14842b9842dad0d4e1",
+      "width": 1024,
+      "height": 886
+    },
+    "locate": {
+      "target": "Truck",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Truck?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-12",
+    "image": {
+      "path": "photos/bdcfeb9cd9714cda.jpg",
+      "sha256": "d585c7c75ab7dd5348dd1261d7f6cda2affd98fdfb7be42a0644bf889c408cad",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Dog",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Dog?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-13",
+    "image": {
+      "path": "photos/dc22d9aa88e1f558.jpg",
+      "sha256": "e8a897b9d12878e0729a0574aa1df3b06186cecd5362afb980eed1210d6bff85",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Car",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Car?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-14",
+    "image": {
+      "path": "photos/995d46a87c9a7e0f.jpg",
+      "sha256": "538f4a21e7a6c23249474e05ecbf82f1955b2c5a1b698f3d6be23787ca97fc70",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Cat",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Cat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-15",
+    "image": {
+      "path": "photos/b3c6af94adbac4af.jpg",
+      "sha256": "b2ef44734531b9602071d47c7dda30ff5e958006e4b51cb0459e8cbbe58a1970",
+      "width": 1024,
+      "height": 752
+    },
+    "locate": {
+      "target": "Motorcycle",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Motorcycle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-16",
+    "image": {
+      "path": "photos/aca1f97a74701d64.jpg",
+      "sha256": "b05801fcf83726d8431b447ab5e9b967a8dc324156af2b0a673b007a9b70b941",
+      "width": 1024,
+      "height": 779
+    },
+    "locate": {
+      "target": "Horse",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Horse?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-17",
+    "image": {
+      "path": "photos/049f8c318731eb54.jpg",
+      "sha256": "1b18d27efca3126ba81be73cd8dc1213cd4997b5e4c25b3500ed2eed24a6bf71",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Boat",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Boat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-18",
+    "image": {
+      "path": "photos/1d037250b19fbe2d.jpg",
+      "sha256": "5be9236ed9c39a3e174a395737287efff15dbf4cd2b1aa6eeae98bc159f03a2a",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Car",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Car?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-19",
+    "image": {
+      "path": "photos/bb21b765ea482fc8.jpg",
+      "sha256": "6400ed4682cd486e37ec0eeb9e64dfb6afec8b351317469b63698476166751d5",
+      "width": 1024,
+      "height": 647
+    },
+    "locate": {
+      "target": "Car",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Car?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-20",
+    "image": {
+      "path": "photos/cc32d04829f7e344.jpg",
+      "sha256": "c8f56f5d841e4bfccd3e490be86207807f6f23d3b8f093060a70da867b43e9e7",
+      "width": 1024,
+      "height": 590
+    },
+    "locate": {
+      "target": "Boat",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Boat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-21",
+    "image": {
+      "path": "photos/8d5426d3f7d39106.jpg",
+      "sha256": "f68184cc53b67990345f53572ff5c7d122c6300aca61f4c054f72dca13e3e4ec",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Motorcycle",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Motorcycle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-22",
+    "image": {
+      "path": "photos/3e7dc18b602acadb.jpg",
+      "sha256": "db1050ebc1b2685437528933f860161d9a754a72d2ae4a237e608b94f204e097",
+      "width": 1024,
+      "height": 678
+    },
+    "locate": {
+      "target": "Bird",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bird?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-23",
+    "image": {
+      "path": "photos/240273f2590a3624.jpg",
+      "sha256": "6ca29b47effaa1aad9a6816c2369ce9f672117b8548c61fdd5678926fe1ae575",
+      "width": 1024,
+      "height": 792
+    },
+    "locate": {
+      "target": "Boat",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Boat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-24",
+    "image": {
+      "path": "photos/ccb18ecb34654429.jpg",
+      "sha256": "e772e44fabb6b99cb50a498d87550b5fa2e4fd73dc6a8a51a2d6c5a38c27864a",
+      "width": 1024,
+      "height": 581
+    },
+    "locate": {
+      "target": "Bird",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bird?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-25",
+    "image": {
+      "path": "photos/3b1e5d847d46ed52.jpg",
+      "sha256": "b94a550b9cd01eca7b73feae0c49857694cf4ed8f27e877422fceee27cd36da9",
+      "width": 764,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Dog",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Dog?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-26",
+    "image": {
+      "path": "photos/19ebf7a808dc6193.jpg",
+      "sha256": "b482fcb9598e988aab6432ac5d2a95fd83f5e10f04a748c11d42c50d13452344",
+      "width": 1024,
+      "height": 731
+    },
+    "locate": {
+      "target": "Motorcycle",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Motorcycle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-27",
+    "image": {
+      "path": "photos/201f7542b0206399.jpg",
+      "sha256": "d24a581d9f382bcfc79c59b3a88394f62588eb37c13f7bbfb79d17f8c90d7b8b",
+      "width": 1024,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Truck",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Truck?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-28",
+    "image": {
+      "path": "photos/c8c1b88b4fdd188d.jpg",
+      "sha256": "aaac18f14a7b217cd291666e62e673941ef88708f71c4bffe918dd68f24343b9",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Bottle",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bottle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-29",
+    "image": {
+      "path": "photos/a1e03ed5f3d9c1e9.jpg",
+      "sha256": "5ba08874120a965a62473abd47c8e4851712793c43a6b674161236a29068fa9a",
+      "width": 1024,
+      "height": 576
+    },
+    "locate": {
+      "target": "Bicycle",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bicycle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-present-30",
+    "image": {
+      "path": "photos/89b1e7d636e0c5f8.jpg",
+      "sha256": "182c1508d1a216179c32bd8ad2b2c362b6eead67acde360d187fa8d242600f4a",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Backpack",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Backpack?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-absent-01",
+    "image": {
+      "path": "photos/3aeff8b63b18dc9b.jpg",
+      "sha256": "d12ff909a40b44b2823b88da96717bd095440181413bfbf4be25cb8ed3cb7ee7",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Bicycle",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bicycle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-absent-02",
+    "image": {
+      "path": "photos/5dd61484626127fe.jpg",
+      "sha256": "74fdafbfdee220cdf94b0f4e8b00a0c6e7bd802c9a2d8d7327fe674f6da4a286",
+      "width": 1024,
+      "height": 681
+    },
+    "locate": {
+      "target": "Laptop",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Laptop?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-absent-03",
+    "image": {
+      "path": "photos/46c6d7d31dc48377.jpg",
+      "sha256": "ab6627282229dce5c89c62298741f121335bd2c2672006e1f995581f32afd213",
+      "width": 1024,
+      "height": 724
+    },
+    "locate": {
+      "target": "Backpack",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Backpack?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-absent-04",
+    "image": {
+      "path": "photos/ad00dc935b78097a.jpg",
+      "sha256": "6a09c641f7901f818c48d6a632c313cbdfc221630a434baf8bd1a680e7033333",
+      "width": 681,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Mobile phone",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Mobile phone?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-absent-05",
+    "image": {
+      "path": "photos/2f9f635834d57175.jpg",
+      "sha256": "e466689c4681dde49891a8615dbf4704f04f32ec700fe93c2f765b587d79ce68",
+      "width": 678,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Bottle",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bottle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-absent-06",
+    "image": {
+      "path": "photos/1669479168968bcc.jpg",
+      "sha256": "8aacd38e7bf23c4b62411473e4d2e0d9b9cd23d7efdc1f3445a4ae8866684045",
+      "width": 1024,
+      "height": 651
+    },
+    "locate": {
+      "target": "Bicycle",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bicycle?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-absent-07",
+    "image": {
+      "path": "photos/32e65151dbf85823.jpg",
+      "sha256": "544f8c7ede24b64859ef77e8eeaedaa027b8ccb2db7e6ffc5b8cce1c5e36f48c",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Laptop",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Laptop?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-absent-08",
+    "image": {
+      "path": "photos/2ce8f0c84589bc0f.jpg",
+      "sha256": "a54046c8d80d2e673b04a1ea54dad63aea97b4d1eb50ec57bb5e548676c31013",
+      "width": 683,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Train",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Train?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-absent-09",
+    "image": {
+      "path": "photos/cc413a5d89c5d8e6.jpg",
+      "sha256": "9caaabf778547b6946e31b22249b6a3dce758c0e1d9b284ab0f1f2cc88609c99",
+      "width": 768,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Train",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Train?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-heldout-v3-absent-10",
+    "image": {
+      "path": "photos/1cce79aa26653f1c.jpg",
+      "sha256": "5c37a019303f1ec6fcbfceae417051a9a10f14bd66d900afd48eb2e21735e27f",
+      "width": 1024,
+      "height": 745
+    },
+    "locate": {
+      "target": "Bus",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bus?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  }
+]

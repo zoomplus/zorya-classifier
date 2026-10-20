@@ -1,0 +1,1027 @@
+{
+  "schemaVersion": 1,
+  "sourceDescription": "Metadata-only decoded-dimension audit of official Open Images V5 reference mask PNGs against the corresponding frozen producer JPEGs. No decoded pixel arrays are retained.",
+  "decoder": {
+    "library": "sharp",
+    "libraryVersion": "0.34.5",
+    "method": "Sharp metadata() on the original JPEG, then decode the mask PNG to raw bytes one file at a time; retain only dimensions, channel count, distinct byte values, and aspect-ratio delta. EXIF orientation is reported as metadata.orientation or default 1."
+  },
+  "sourcePins": {
+    "photoInputsSha256": "5d125e853ed93558ab634e406ca90cf931569953279c1630d49dcf239b9baa79",
+    "officialMaskIndexSha256": "e58ac07494683301232dcc767411d134e6abc82c293fa35e212cc92658d61fbc"
+  },
+  "summary": {
+    "maskCount": 32,
+    "exactCanvasMatches": 2,
+    "mismatchedCanvases": 30,
+    "sourceJpegCount": 21,
+    "sourceExifOrientationCounts": {
+      "1": 32
+    },
+    "allSourceAndMaskHashesMatchFrozenBindings": true,
+    "allDecodedImageDimensionsMatchDeclared": true,
+    "allDecodedMaskDimensionsMatchIndex": true,
+    "allMaskPixelsBinaryZero255": true,
+    "aspectRatioDeltaPercent": {
+      "max": 0.11139775,
+      "min": 0,
+      "atMost0_1Percent": 25,
+      "over0_1Through0_5Percent": 7,
+      "over0_5Percent": 0
+    }
+  },
+  "rows": [
+    {
+      "caseId": "photo-heldout-v3-present-01",
+      "imageId": "19a9c18bb631cf3f",
+      "maskPath": "19a9c18bb631cf3f_m04dr76w_3b84ffed.png",
+      "imageSha256": "28035a1bbae8f5372c7195daa138471de59e1ba3361ae69088767a042b2a1ccb",
+      "maskSha256": "46b25a139f50ce5394cd47d4ef9cc6ea9d255bb0dfa0ea41d35ddc4092c7f817",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 768,
+        "height": 768
+      },
+      "decodedImage": {
+        "width": 768,
+        "height": 768
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1024,
+        "height": 1024,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1024,
+        "height": 1024
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-01",
+      "imageId": "19a9c18bb631cf3f",
+      "maskPath": "19a9c18bb631cf3f_m04dr76w_5165565d.png",
+      "imageSha256": "28035a1bbae8f5372c7195daa138471de59e1ba3361ae69088767a042b2a1ccb",
+      "maskSha256": "107357103831133ba944b09b00b03653635efcc9be9c59f75a84bce2d2dbdffa",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 768,
+        "height": 768
+      },
+      "decodedImage": {
+        "width": 768,
+        "height": 768
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1024,
+        "height": 1024,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1024,
+        "height": 1024
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-02",
+      "imageId": "23422c064e2b76c7",
+      "maskPath": "23422c064e2b76c7_m015p6_2cf5f668.png",
+      "imageSha256": "598a4aaaf4b724442ab34ebbfe857a946e9c65015fb08b227cddeed203c16ba9",
+      "maskSha256": "27d60708d08daae0b4cbbb6b4e183ae8715a3087c5d5beb987b9cc5cbdbcf2b0",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1200,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1200
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-02",
+      "imageId": "23422c064e2b76c7",
+      "maskPath": "23422c064e2b76c7_m015p6_0a9f3a69.png",
+      "imageSha256": "598a4aaaf4b724442ab34ebbfe857a946e9c65015fb08b227cddeed203c16ba9",
+      "maskSha256": "3053a4abde58bc14fa2777d759f17e74ea995fbc6de448a7259c85b3eb4ab926",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1200,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1200
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-03",
+      "imageId": "1c878debbe70c58a",
+      "maskPath": "1c878debbe70c58a_m07r04_405fb24c.png",
+      "imageSha256": "4055c444e25db4c5f0bdb72e3346b5069fb5abfe5530a6647c85b559b6f733b7",
+      "maskSha256": "e01bbbaab099a95bce8610966b281c2932b7198c71af7c1aa1881f2fbf0ee53b",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1200,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1200
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-03",
+      "imageId": "1c878debbe70c58a",
+      "maskPath": "1c878debbe70c58a_m07r04_d855ec9c.png",
+      "imageSha256": "4055c444e25db4c5f0bdb72e3346b5069fb5abfe5530a6647c85b559b6f733b7",
+      "maskSha256": "88af707a4977a735933ea4a4d1733f304f94e4f5652fba6ba630402dcc74187b",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1200,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1200
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-04",
+      "imageId": "b02cb2358a21f9bb",
+      "maskPath": "b02cb2358a21f9bb_m050k8_8dcbf9bd.png",
+      "imageSha256": "49ccbbf3fa0a9f1dccd95355a877aa10dd137e7fd9a1189a3ed8f28ad8a849de",
+      "maskSha256": "592caba6fb1152ae7104f40f3f1e9ceef860619040a5290b9e2d298d0411b4bc",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 844
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 844
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 580,
+        "height": 478,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 580,
+        "height": 478
+      },
+      "aspectRatioDeltaPercent": 0.00980649
+    },
+    {
+      "caseId": "photo-heldout-v3-present-04",
+      "imageId": "b02cb2358a21f9bb",
+      "maskPath": "b02cb2358a21f9bb_m050k8_97372f11.png",
+      "imageSha256": "49ccbbf3fa0a9f1dccd95355a877aa10dd137e7fd9a1189a3ed8f28ad8a849de",
+      "maskSha256": "20b51a9b1985389724dde4c06a6e7609b04839f51647d71509abfa7bf5827bd5",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 844
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 844
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 580,
+        "height": 478,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 580,
+        "height": 478
+      },
+      "aspectRatioDeltaPercent": 0.00980649
+    },
+    {
+      "caseId": "photo-heldout-v3-present-05",
+      "imageId": "09f8e760f60df0da",
+      "maskPath": "09f8e760f60df0da_m01yrx_c64eb92f.png",
+      "imageSha256": "bcdbb7a0a17365a5f20930f718508184b376061ab419aae9bec0e8e7d5706072",
+      "maskSha256": "9a8f17532450444ed08459592f8de2acacbab60a0ee7554cc7505dd6c1ffc521",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1066,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1066
+      },
+      "aspectRatioDeltaPercent": 0.11139775
+    },
+    {
+      "caseId": "photo-heldout-v3-present-05",
+      "imageId": "09f8e760f60df0da",
+      "maskPath": "09f8e760f60df0da_m01yrx_ed0c5372.png",
+      "imageSha256": "bcdbb7a0a17365a5f20930f718508184b376061ab419aae9bec0e8e7d5706072",
+      "maskSha256": "e2a9068b7cbafdfe64e498ffab3f8b068de3ef2f3528e3e91065da281f8e902d",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1066,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1066
+      },
+      "aspectRatioDeltaPercent": 0.11139775
+    },
+    {
+      "caseId": "photo-heldout-v3-present-06",
+      "imageId": "afea620099754710",
+      "maskPath": "afea620099754710_m01yrx_3103d09c.png",
+      "imageSha256": "b06a76e0cf88c370d356505441f626484b189d348d4da204338f3e436051b88b",
+      "maskSha256": "e230042f46bd48a7e99ed8413d24a4e180f6ac42a072ce6e977a4b6a642b8258",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1024,
+        "height": 768,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1024,
+        "height": 768
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-06",
+      "imageId": "afea620099754710",
+      "maskPath": "afea620099754710_m01yrx_0f9ac938.png",
+      "imageSha256": "b06a76e0cf88c370d356505441f626484b189d348d4da204338f3e436051b88b",
+      "maskSha256": "8e39094ee85c31bec9e6dc31a544e9a0851f94191381913a7646534b6b87f377",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1024,
+        "height": 768,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1024,
+        "height": 768
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-07",
+      "imageId": "71d4905fad74916e",
+      "maskPath": "71d4905fad74916e_m03k3r_b54dbcd2.png",
+      "imageSha256": "46d61246073b01215fdcd2855de007a76c990e950dc89055c0e46365d348c4a1",
+      "maskSha256": "49af3d00185e0f4772c3c57487b2806f7adb0689a2b2952f54f9b4e9934855ed",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 748
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 748
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1127,
+        "height": 823,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1127,
+        "height": 823
+      },
+      "aspectRatioDeltaPercent": 0.02895276
+    },
+    {
+      "caseId": "photo-heldout-v3-present-07",
+      "imageId": "71d4905fad74916e",
+      "maskPath": "71d4905fad74916e_m03k3r_da07d01c.png",
+      "imageSha256": "46d61246073b01215fdcd2855de007a76c990e950dc89055c0e46365d348c4a1",
+      "maskSha256": "4f0149a18ddbfb2b20bee5e616d6544729f26ea4966edc7cda7190e0404bb158",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 748
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 748
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1127,
+        "height": 823,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1127,
+        "height": 823
+      },
+      "aspectRatioDeltaPercent": 0.02895276
+    },
+    {
+      "caseId": "photo-heldout-v3-present-08",
+      "imageId": "0925ac3567b20f47",
+      "maskPath": "0925ac3567b20f47_m03k3r_22d1d898.png",
+      "imageSha256": "fecd2e51edfd13401f3670c66caed6289231609f25a4b048076877eeadb3d5e3",
+      "maskSha256": "0619034496d32d4c30c7ffda103598c86c8e09f3bdfea4721425023faf55a371",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 791
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 791
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1235,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1235
+      },
+      "aspectRatioDeltaPercent": 0.07591093
+    },
+    {
+      "caseId": "photo-heldout-v3-present-08",
+      "imageId": "0925ac3567b20f47",
+      "maskPath": "0925ac3567b20f47_m03k3r_23204648.png",
+      "imageSha256": "fecd2e51edfd13401f3670c66caed6289231609f25a4b048076877eeadb3d5e3",
+      "maskSha256": "6e95c1080499b3dfa43c3ff68e905d1fe95decb3b6b3c70c2b4f634d777e504a",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 791
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 791
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1235,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1235
+      },
+      "aspectRatioDeltaPercent": 0.07591093
+    },
+    {
+      "caseId": "photo-heldout-v3-present-09",
+      "imageId": "f58dcd04e49ddbca",
+      "maskPath": "f58dcd04e49ddbca_m050k8_fed6de52.png",
+      "imageSha256": "9c47cc619e269370c9d8626f6dd1e468a672f245ae29f6d8f8ba76273bb47fdb",
+      "maskSha256": "17c109c1876c24b7d44709328d66f7c67391dceaa1d4131be666688f4e15ebb2",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 1024
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 1024
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 640,
+        "height": 640,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 640,
+        "height": 640
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-09",
+      "imageId": "f58dcd04e49ddbca",
+      "maskPath": "f58dcd04e49ddbca_m050k8_d13d1afd.png",
+      "imageSha256": "9c47cc619e269370c9d8626f6dd1e468a672f245ae29f6d8f8ba76273bb47fdb",
+      "maskSha256": "02daeb2512b362dc7b61e8defb98cc7e3de08f6453311d7a43c98ea4a1118118",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 1024
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 1024
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 640,
+        "height": 640,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 640,
+        "height": 640
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-10",
+      "imageId": "df94fb387c3e05c5",
+      "maskPath": "df94fb387c3e05c5_m0bt9lr_629aa2d4.png",
+      "imageSha256": "0da18ff473b80319ac0e9c0c0f51095915facbaf49114fa25781137cbdb954db",
+      "maskSha256": "f09be082b9024f92bb7c164bc35fb2532d084babeb5f4c5ddfed7393a4314a2c",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1200,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1200
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-11",
+      "imageId": "b3ca82ba52c64268",
+      "maskPath": "b3ca82ba52c64268_m07r04_3ed70181.png",
+      "imageSha256": "f68cdfc5820f12decb02f62ddfc2c853e5d7b2bfeb072b14842b9842dad0d4e1",
+      "maskSha256": "95f94850672273de08a0e458aa54e9d14de57eaae62475e50dbb640b4c36b3be",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 886
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 886
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1383,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1383
+      },
+      "aspectRatioDeltaPercent": 0.09942155
+    },
+    {
+      "caseId": "photo-heldout-v3-present-12",
+      "imageId": "bdcfeb9cd9714cda",
+      "maskPath": "bdcfeb9cd9714cda_m0bt9lr_1dc8e484.png",
+      "imageSha256": "d585c7c75ab7dd5348dd1261d7f6cda2affd98fdfb7be42a0644bf889c408cad",
+      "maskSha256": "f46eee9ad939e18e213057b57f99fdddd9886114e8a6a095ca9af301d71e0e08",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 800,
+        "height": 600,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 800,
+        "height": 600
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-13",
+      "imageId": "dc22d9aa88e1f558",
+      "maskPath": "dc22d9aa88e1f558_m0k4j_af9722c6.png",
+      "imageSha256": "e8a897b9d12878e0729a0574aa1df3b06186cecd5362afb980eed1210d6bff85",
+      "maskSha256": "636d685676a47f5215c4f0a41c6f6b3154989cf8e2ba474a53b0fe4906b80de0",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1066,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1066
+      },
+      "aspectRatioDeltaPercent": 0.11139775
+    },
+    {
+      "caseId": "photo-heldout-v3-present-14",
+      "imageId": "995d46a87c9a7e0f",
+      "maskPath": "995d46a87c9a7e0f_m01yrx_904d8496.png",
+      "imageSha256": "538f4a21e7a6c23249474e05ecbf82f1955b2c5a1b698f3d6be23787ca97fc70",
+      "maskSha256": "e4ac8fb785d734f00746b4b7cce7f4065fdb0630d57625e4a0a10f7499c9a261",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 768
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 400,
+        "height": 300,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 400,
+        "height": 300
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-15",
+      "imageId": "b3c6af94adbac4af",
+      "maskPath": "b3c6af94adbac4af_m04_sv_42114318.png",
+      "imageSha256": "b2ef44734531b9602071d47c7dda30ff5e958006e4b51cb0459e8cbbe58a1970",
+      "maskSha256": "2382efbca89222586a27d37d70f319b8e889db3d438c581580305978449c6278",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 752
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 752
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1174,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1174
+      },
+      "aspectRatioDeltaPercent": 0.08517888
+    },
+    {
+      "caseId": "photo-heldout-v3-present-16",
+      "imageId": "aca1f97a74701d64",
+      "maskPath": "aca1f97a74701d64_m03k3r_646b5218.png",
+      "imageSha256": "b05801fcf83726d8431b447ab5e9b967a8dc324156af2b0a673b007a9b70b941",
+      "maskSha256": "d0e55be0f34d9574feaafa960be9a22bbe3891890139c03b7423e1e36f4d8340",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 779
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 779
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 510,
+        "height": 388,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 510,
+        "height": 388
+      },
+      "aspectRatioDeltaPercent": 0.00553721
+    },
+    {
+      "caseId": "photo-heldout-v3-present-21",
+      "imageId": "8d5426d3f7d39106",
+      "maskPath": "8d5426d3f7d39106_m04_sv_c44d4b06.png",
+      "imageSha256": "f68184cc53b67990345f53572ff5c7d122c6300aca61f4c054f72dca13e3e4ec",
+      "maskSha256": "3852fc7cd4ca8d4a8ca0d4f8e0fb6d074e2685ede71435a4b0f0a1744b20d2da",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1066,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1066
+      },
+      "aspectRatioDeltaPercent": 0.11139775
+    },
+    {
+      "caseId": "photo-heldout-v3-present-26",
+      "imageId": "19ebf7a808dc6193",
+      "maskPath": "19ebf7a808dc6193_m04_sv_8c35c7d6.png",
+      "imageSha256": "b482fcb9598e988aab6432ac5d2a95fd83f5e10f04a748c11d42c50d13452344",
+      "maskSha256": "e7af6d4a178dbb0e6c5cb3994d9c3cdef265942de9dfd58486300987fe513c3a",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 731
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 731
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 800,
+        "height": 571,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 800,
+        "height": 571
+      },
+      "aspectRatioDeltaPercent": 0.01641856
+    },
+    {
+      "caseId": "photo-heldout-v3-present-26",
+      "imageId": "19ebf7a808dc6193",
+      "maskPath": "19ebf7a808dc6193_m04_sv_ffc57a8d.png",
+      "imageSha256": "b482fcb9598e988aab6432ac5d2a95fd83f5e10f04a748c11d42c50d13452344",
+      "maskSha256": "357396082089ca6d0c49045964fae644f1dc6b9f5ce578df02fa21ef3ec7ee33",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 731
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 731
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 800,
+        "height": 571,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 800,
+        "height": 571
+      },
+      "aspectRatioDeltaPercent": 0.01641856
+    },
+    {
+      "caseId": "photo-heldout-v3-present-27",
+      "imageId": "201f7542b0206399",
+      "maskPath": "201f7542b0206399_m07r04_197d2ffd.png",
+      "imageSha256": "d24a581d9f382bcfc79c59b3a88394f62588eb37c13f7bbfb79d17f8c90d7b8b",
+      "maskSha256": "181d2e862ae7f81923b96955a9ef527ccf1a948643066ed70260f70fbffe3582",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 1024
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 1024
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 612,
+        "height": 612,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 612,
+        "height": 612
+      },
+      "aspectRatioDeltaPercent": 0
+    },
+    {
+      "caseId": "photo-heldout-v3-present-28",
+      "imageId": "c8c1b88b4fdd188d",
+      "maskPath": "c8c1b88b4fdd188d_m04dr76w_75e76ea6.png",
+      "imageSha256": "aaac18f14a7b217cd291666e62e673941ef88708f71c4bffe918dd68f24343b9",
+      "maskSha256": "aefcae2dae49d29d9ad814bf000f2e1985c099dcdd60f0920697b77863986514",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1066,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1066
+      },
+      "aspectRatioDeltaPercent": 0.11139775
+    },
+    {
+      "caseId": "photo-heldout-v3-present-28",
+      "imageId": "c8c1b88b4fdd188d",
+      "maskPath": "c8c1b88b4fdd188d_m04dr76w_e444ee35.png",
+      "imageSha256": "aaac18f14a7b217cd291666e62e673941ef88708f71c4bffe918dd68f24343b9",
+      "maskSha256": "27979a038c9b0736afd354d862907351b43b7b11d6a8b634afd9236d622329a3",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1066,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1066
+      },
+      "aspectRatioDeltaPercent": 0.11139775
+    },
+    {
+      "caseId": "photo-heldout-v3-present-30",
+      "imageId": "89b1e7d636e0c5f8",
+      "maskPath": "89b1e7d636e0c5f8_m01940j_2e6c08dd.png",
+      "imageSha256": "182c1508d1a216179c32bd8ad2b2c362b6eead67acde360d187fa8d242600f4a",
+      "maskSha256": "4d4fb4dd465f4a59183e7ed827b50ababcfb99a671f5a82239280c2bf9d408ad",
+      "hashesMatchFrozenBindings": true,
+      "declaredImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "decodedImage": {
+        "width": 1024,
+        "height": 683
+      },
+      "exifOrientation": 1,
+      "decodedMask": {
+        "width": 1600,
+        "height": 1066,
+        "channels": 3,
+        "uniqueValues": [
+          0,
+          255
+        ]
+      },
+      "declaredMask": {
+        "width": 1600,
+        "height": 1066
+      },
+      "aspectRatioDeltaPercent": 0.11139775
+    }
+  ]
+}

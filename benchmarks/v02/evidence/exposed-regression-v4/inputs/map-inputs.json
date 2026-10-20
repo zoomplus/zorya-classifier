@@ -1,0 +1,382 @@
+[
+  {
+    "caseId": "map-oracle-v3-01",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-01/crop-shown.png",
+      "sha256": "f65fc474bc1b698184efc2e4152cb740ff94f16a0d21d69df924111bb225e669",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-02",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-02/crop-shown.png",
+      "sha256": "27479bc7493301250f70fd8308acd5788c10a03c2f5e426c11f911adbe5107b9",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-03",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-03/crop-shown.png",
+      "sha256": "1bf0bef0403de78595f596792a3804b0e338982cdf69847ca4b24444324498cf",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-04",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-04/crop-shown.png",
+      "sha256": "5325e8da07ca03867844f24fdeaec920014e81007f4d94a5a540c21be1694b09",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-21",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-21/crop-shown.png",
+      "sha256": "ba8afd9a7d0dffcff7c5b41b128a966d9f3e154c9a0fb6a911c0b1c0c78897d0",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-06",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-06/crop-shown.png",
+      "sha256": "0f743b6085563939a72a588a13231ea5b359ef77460054b337f00e1d4e1645be",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-07",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-07/crop-shown.png",
+      "sha256": "3991b29580482fe330d68cc08843c7fe6008f716afb2aaeea0388345aaf61a07",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-08",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-08/crop-shown.png",
+      "sha256": "5f7e66063d4a9c1fd596f5f8f5c6f4a8669f59aee36da0130e87fe6a5813156c",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-09",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-09/crop-shown.png",
+      "sha256": "9cbec057acc329b7648cf085f8356c3fa97448355e8bf7e3aaa07dabbb2dc9f2",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-10",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-10/crop-shown.png",
+      "sha256": "514f0e9ec79399e9dcdaccf8e15b3bcb47e6a19cf54acc04326689b42d2837eb",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-11",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-11/crop-shown.png",
+      "sha256": "555cc1369e8d9da4c7be28bc13a1956fdb1f45876c1f8c573b7e96e6d60cac15",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-12",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-12/crop-shown.png",
+      "sha256": "0dbe108d163fcb19dff059925859d5684a5211717bb478975dbb302314a9a575",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-13",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-13/crop-shown.png",
+      "sha256": "fdb746670147a6828a2363945d73fb6ca24d69c581db984310ea57d3d1f7da47",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-14",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-14/crop-shown.png",
+      "sha256": "c27323b391f3725118e7b2ca388fa14d3e0cb08b85d2af52fbe12ffc79857a52",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-15",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-15/crop-shown.png",
+      "sha256": "aa00d69110e39d78512eff996eb9e01f2a6f2a0c12ecc8b6c6b69480a15a5641",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-16",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-16/crop-hidden-a.png",
+      "sha256": "46f16883732c45ad940ba87d71f4a3769422b465bbe525552b4057ffd8d04725",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-17",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-17/crop-hidden-a.png",
+      "sha256": "156eefaaef7e45d78a920ac21397cf8a1a8291d2a2681f50be92cf284d463dca",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-18",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-18/crop-hidden-a.png",
+      "sha256": "ecc41346e75e6369bc4ea86d29f5df1c5a3f2814f8463425566bb18755b86a51",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-19",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-19/crop-hidden-a.png",
+      "sha256": "fdf0b739ece2601633280421c0a74bc7b4759a63b424409e833bd9ee5ac72e62",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  },
+  {
+    "caseId": "map-oracle-v3-20",
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ],
+      "question": "Does the image contain the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap?"
+    },
+    "image": {
+      "height": 150,
+      "path": "map-oracle-v3-20/crop-hidden-a.png",
+      "sha256": "915a4c518660b2e37899b2a588e4a2b8891d559f73a605cfe5390c70463caf66",
+      "width": 150
+    },
+    "locate": {
+      "target": "the visible red object-marker sprite for the controlled map-marker entity in the round 2D minimap"
+    }
+  }
+]
