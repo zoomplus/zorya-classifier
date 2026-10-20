@@ -1,7 +1,7 @@
-import sharp from 'sharp'
 import { z } from 'zod'
 
 import type { PixelRect, RasterImage, RasterPort } from '../entities/contracts.js'
+import type { CutoutRasterPort } from '../entities/cutout-raster.js'
 import { parse } from '../entities/contracts.js'
 import type {
   ExtractionResult,
@@ -61,6 +61,7 @@ export type WholeObjectLocator = (
 
 export interface ExtractDependencies {
   raster: RasterPort
+  image: CutoutRasterPort
   segmenter: SegmentationPort
   locateWhole: WholeObjectLocator
 }
@@ -106,7 +107,9 @@ export async function extractObject(
   assertActive(signal)
   if (location.status !== 'located') return location
 
-  const image = await toCanonicalRgba(source, signal)
+  const rawImage: unknown = await dependencies.image.rgba(source, signal)
+  assertActive(signal)
+  const image = validateAndSnapshotRgba(rawImage, source.width, source.height)
   const roi = parsed.roi ?? { left: 0, top: 0, width: image.width, height: image.height }
   if (
     !contains({ left: 0, top: 0, width: image.width, height: image.height }, location.region) ||
@@ -189,14 +192,24 @@ export async function extractObject(
     if (image.data[index * 4 + 3] === 0) result.mask.data[index] = 0
   const croppedMask = cropMask(result.mask, box)
   const rgba = maskedRgba(image, result.mask, box)
-  const pipeline = sharp(rgba, { raw: { width: box.width, height: box.height, channels: 4 } })
-  let png: Uint8Array
+  let rawPng: unknown
   try {
-    png = new Uint8Array(await pipeline.png().toBuffer())
-  } finally {
-    pipeline.destroy()
+    rawPng = await dependencies.image.png(
+      { data: rgba, width: box.width, height: box.height, format: 'rgba8' },
+      signal,
+    )
+  } catch (error) {
+    if (error instanceof ClassifierError) throw error
+    throw new ClassifierError('PROVIDER', 'Cutout raster PNG encoder failed')
   }
   assertActive(signal)
+  if (
+    !(rawPng instanceof Uint8Array) ||
+    rawPng.byteLength < 8 ||
+    ![137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => rawPng[index] === byte)
+  )
+    throw new ClassifierError('INVALID_RESPONSE', 'Cutout raster port returned invalid PNG bytes')
+  const png = new Uint8Array(rawPng)
   return {
     status: 'extracted',
     location,
@@ -223,35 +236,29 @@ function assertRasterImage(image: RasterImage): void {
     )
 }
 
-async function toCanonicalRgba(source: RasterImage, signal: AbortSignal): Promise<RgbaRaster> {
-  assertActive(signal)
-  const pipeline = sharp(source.bytes, { limitInputPixels: 16_777_216, failOn: 'error' })
-  try {
-    const output = await pipeline
-      .toColourspace('srgb')
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true })
-    assertActive(signal)
-    if (
-      output.info.width !== source.width ||
-      output.info.height !== source.height ||
-      output.info.channels !== 4 ||
-      output.data.length !== source.width * source.height * 4
+function validateAndSnapshotRgba(value: unknown, width: number, height: number): RgbaRaster {
+  if (
+    typeof value !== 'object' ||
+    value === null ||
+    !('data' in value) ||
+    !('width' in value) ||
+    !('height' in value) ||
+    !('format' in value)
+  )
+    throw new ClassifierError('INVALID_RESPONSE', 'Cutout raster port returned invalid RGBA pixels')
+  const image = value as RgbaRaster
+  if (
+    image.format !== 'rgba8' ||
+    image.width !== width ||
+    image.height !== height ||
+    !(image.data instanceof Uint8Array) ||
+    image.data.length !== width * height * 4
+  )
+    throw new ClassifierError(
+      'INVALID_RESPONSE',
+      'Cutout raster port returned invalid RGBA dimensions',
     )
-      throw new ClassifierError(
-        'INVALID_RESPONSE',
-        'Canonical RGBA dimensions differ from the normalized source',
-      )
-    return {
-      data: new Uint8Array(output.data),
-      width: source.width,
-      height: source.height,
-      format: 'rgba8',
-    }
-  } finally {
-    pipeline.destroy()
-  }
+  return { data: new Uint8Array(image.data), width, height, format: 'rgba8' }
 }
 
 function contains(outer: PixelRect, inner: PixelRect): boolean {

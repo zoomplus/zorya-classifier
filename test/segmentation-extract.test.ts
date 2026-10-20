@@ -6,6 +6,7 @@ import type { PixelRect } from '../src/entities/contracts.js'
 import type { SegmentationInput, SegmentationPort } from '../src/entities/segmentation.js'
 import type { RasterImage, RasterPort } from '../src/entities/contracts.js'
 import { extractObject } from '../src/processes/extract.js'
+import { createSharpCutoutRaster } from '../src/infrastructure/segmentation/cutout-raster.js'
 import { validateMask } from '../src/features/segmentation/mask.js'
 
 const location = {
@@ -112,6 +113,7 @@ await test('extract crops to full mask bounds, preserves inside RGBA and clears 
     { image: new Uint8Array(png), target: 'object', signal: seenSignal },
     {
       raster,
+      image: createSharpCutoutRaster(),
       segmenter,
       locateWhole: async (source, request) => {
         assert.notEqual(source, rasterImage)
@@ -151,6 +153,7 @@ await test('empty or ungrounded segmentation remains unknown and never falls bac
     { image: new Uint8Array(png), target: 'object', signal: new AbortController().signal },
     {
       raster,
+      image: createSharpCutoutRaster(),
       locateWhole: async () => location,
       segmenter: {
         segment: async (input) => ({
@@ -175,4 +178,67 @@ await test('empty or ungrounded segmentation remains unknown and never falls bac
   )
   assert.equal(result.status, 'unknown')
   if (result.status === 'unknown') assert.equal(result.reason, 'segmentation-uncertain')
+})
+
+await test('cutout raster port faults fail explicitly for malformed RGBA and PNG bytes', async () => {
+  const png = await sharp({ create: { width: 4, height: 3, channels: 4, background: '#cc2233' } })
+    .png()
+    .toBuffer()
+  const rasterImage: RasterImage = { bytes: new Uint8Array(png), width: 4, height: 3 }
+  const raster: RasterPort = {
+    normalize: async () => rasterImage,
+    crop: async () => rasterImage,
+    imageState: async () => [],
+    grid: async () => rasterImage,
+  }
+  const segmenter: SegmentationPort = {
+    segment: async () => ({
+      status: 'segmented',
+      mask: {
+        data: Uint8Array.from([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]),
+        width: 4,
+        height: 3,
+        format: 'binary-u8',
+      },
+      metadata: {
+        method: 'fixture',
+        backend: 'fixture',
+        durationMs: 0,
+        input: { width: 4, height: 3 },
+      },
+    }),
+    settle: async () => undefined,
+    dispose: async () => undefined,
+  }
+  const validImage = createSharpCutoutRaster()
+  const base = {
+    image: new Uint8Array(png),
+    target: 'object',
+    signal: new AbortController().signal,
+  }
+  const deps = { raster, segmenter, locateWhole: async () => location }
+  await assert.rejects(
+    extractObject(base, {
+      ...deps,
+      image: {
+        ...validImage,
+        rgba: async () => ({
+          data: new Uint8Array(4),
+          width: 1,
+          height: 1,
+          format: 'rgba8' as const,
+        }),
+      },
+    }),
+    (error: unknown) =>
+      error instanceof Error && 'code' in error && error.code === 'INVALID_RESPONSE',
+  )
+  await assert.rejects(
+    extractObject(base, {
+      ...deps,
+      image: { ...validImage, png: async () => Uint8Array.of(1, 2, 3, 4, 5, 6, 7, 8) },
+    }),
+    (error: unknown) =>
+      error instanceof Error && 'code' in error && error.code === 'INVALID_RESPONSE',
+  )
 })
