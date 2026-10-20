@@ -1,0 +1,376 @@
+{
+  "schema": "zorya-hosted-ci-snapshot-v1",
+  "source": "35e306478f544cf2aa972aebec22f11473810a27",
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39451988375",
+  "status": "completed",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "completedAt": "2026-10-20T15:51:29Z",
+      "conclusion": "failure",
+      "databaseId": 118728913010,
+      "name": "verify (windows-latest, 22)",
+      "startedAt": "2026-10-20T15:49:45Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-20T15:49:46Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-20T15:49:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:49:51Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-10-20T15:49:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:50:00Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 3,
+          "startedAt": "2026-10-20T15:49:51Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:50:09Z",
+          "conclusion": "success",
+          "name": "Run npm ci --ignore-scripts",
+          "number": 4,
+          "startedAt": "2026-10-20T15:50:00Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:25Z",
+          "conclusion": "failure",
+          "name": "Run npm run check",
+          "number": 5,
+          "startedAt": "2026-10-20T15:50:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:25Z",
+          "conclusion": "skipped",
+          "name": "Run npm run pack:check",
+          "number": 6,
+          "startedAt": "2026-10-20T15:51:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:25Z",
+          "conclusion": "skipped",
+          "name": "Run npm run format:check",
+          "number": 7,
+          "startedAt": "2026-10-20T15:51:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:25Z",
+          "conclusion": "skipped",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 13,
+          "startedAt": "2026-10-20T15:51:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:27Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 14,
+          "startedAt": "2026-10-20T15:51:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:27Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-10-20T15:51:27Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39451988375/job/118728913010"
+    },
+    {
+      "completedAt": "2026-10-20T15:51:06Z",
+      "conclusion": "success",
+      "databaseId": 118728913462,
+      "name": "verify (ubuntu-latest, 24)",
+      "startedAt": "2026-10-20T15:49:45Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-20T15:49:46Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-20T15:49:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:49:47Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-10-20T15:49:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:49:49Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 3,
+          "startedAt": "2026-10-20T15:49:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:49:54Z",
+          "conclusion": "success",
+          "name": "Run npm ci --ignore-scripts",
+          "number": 4,
+          "startedAt": "2026-10-20T15:49:49Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:50:46Z",
+          "conclusion": "success",
+          "name": "Run npm run check",
+          "number": 5,
+          "startedAt": "2026-10-20T15:49:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:50:58Z",
+          "conclusion": "success",
+          "name": "Run npm run pack:check",
+          "number": 6,
+          "startedAt": "2026-10-20T15:50:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:03Z",
+          "conclusion": "success",
+          "name": "Run npm run format:check",
+          "number": 7,
+          "startedAt": "2026-10-20T15:50:58Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:04Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 13,
+          "startedAt": "2026-10-20T15:51:03Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:04Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 14,
+          "startedAt": "2026-10-20T15:51:04Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:04Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-10-20T15:51:04Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39451988375/job/118728913462"
+    },
+    {
+      "completedAt": "2026-10-20T15:51:19Z",
+      "conclusion": "success",
+      "databaseId": 118728913720,
+      "name": "verify (ubuntu-latest, 22)",
+      "startedAt": "2026-10-20T15:49:46Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-20T15:49:47Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-20T15:49:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:49:48Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-10-20T15:49:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:49:52Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 3,
+          "startedAt": "2026-10-20T15:49:48Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:49:57Z",
+          "conclusion": "success",
+          "name": "Run npm ci --ignore-scripts",
+          "number": 4,
+          "startedAt": "2026-10-20T15:49:52Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:50:56Z",
+          "conclusion": "success",
+          "name": "Run npm run check",
+          "number": 5,
+          "startedAt": "2026-10-20T15:49:57Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:09Z",
+          "conclusion": "success",
+          "name": "Run npm run pack:check",
+          "number": 6,
+          "startedAt": "2026-10-20T15:50:56Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:16Z",
+          "conclusion": "success",
+          "name": "Run npm run format:check",
+          "number": 7,
+          "startedAt": "2026-10-20T15:51:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:16Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 13,
+          "startedAt": "2026-10-20T15:51:16Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:16Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 14,
+          "startedAt": "2026-10-20T15:51:16Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:16Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-10-20T15:51:16Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39451988375/job/118728913720"
+    },
+    {
+      "completedAt": "2026-10-20T15:51:14Z",
+      "conclusion": "failure",
+      "databaseId": 118728913981,
+      "name": "verify (windows-latest, 24)",
+      "startedAt": "2026-10-20T15:49:45Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-20T15:49:46Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-20T15:49:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:49:52Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-10-20T15:49:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:50:04Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 3,
+          "startedAt": "2026-10-20T15:49:52Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:50:13Z",
+          "conclusion": "success",
+          "name": "Run npm ci --ignore-scripts",
+          "number": 4,
+          "startedAt": "2026-10-20T15:50:04Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:10Z",
+          "conclusion": "failure",
+          "name": "Run npm run check",
+          "number": 5,
+          "startedAt": "2026-10-20T15:50:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:10Z",
+          "conclusion": "skipped",
+          "name": "Run npm run pack:check",
+          "number": 6,
+          "startedAt": "2026-10-20T15:51:10Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:10Z",
+          "conclusion": "skipped",
+          "name": "Run npm run format:check",
+          "number": 7,
+          "startedAt": "2026-10-20T15:51:10Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:10Z",
+          "conclusion": "skipped",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 13,
+          "startedAt": "2026-10-20T15:51:10Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:12Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 14,
+          "startedAt": "2026-10-20T15:51:10Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T15:51:12Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-10-20T15:51:12Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39451988375/job/118728913981"
+    }
+  ],
+  "diagnosis": "Both Windows jobs failed one new benchmark CLI assertion that assumed POSIX separators. Both Linux jobs passed. The runtime and dispatch controller are unchanged by the assertion repair.",
+  "failedWindows24LogSha256": "0abd6eb697323a89604021fbf65defee4fecf664ccef13bd5697558a27517853",
+  "releaseQualified": false
+}
