@@ -16,6 +16,38 @@ interface ChildMemorySample {
 type SamplingPhase = 'idle-before' | 'busy' | 'idle-after'
 export type MonotonicClock = () => number
 
+export interface FullSoakDurations {
+  warmupSeconds: number
+  durationSeconds: number
+  idleSeconds: number
+}
+
+export function validateFullSoakDurations(options: FullSoakDurations): boolean {
+  return (
+    Number.isFinite(options.warmupSeconds) &&
+    options.warmupSeconds >= 600 &&
+    Number.isFinite(options.durationSeconds) &&
+    options.durationSeconds >= 6540 &&
+    Number.isFinite(options.idleSeconds) &&
+    options.idleSeconds >= 30 &&
+    options.warmupSeconds + options.durationSeconds + options.idleSeconds * 2 >= 7200
+  )
+}
+
+/** Run each cleanup even if an earlier owner throws, then propagate the first failure. */
+export async function disposeInOrder(disposers: readonly (() => Promise<void>)[]): Promise<void> {
+  const errors: unknown[] = []
+  for (const dispose of disposers) {
+    try {
+      await dispose()
+    } catch (error) {
+      errors.push(error)
+    }
+  }
+  if (errors.length === 1) throw errors[0]
+  if (errors.length > 1) throw new AggregateError(errors, 'Multiple ordered cleanup steps failed')
+}
+
 interface ParentMemorySample extends NodeJS.MemoryUsage {
   timestampMs: number
   phase: SamplingPhase

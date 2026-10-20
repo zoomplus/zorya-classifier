@@ -2,7 +2,12 @@ import assert from 'node:assert/strict'
 import { channel } from 'node:diagnostics_channel'
 import { test } from 'node:test'
 
-import { ResourceRunner, runMonotonicPhase } from '../benchmarks/v02/resource-runner.js'
+import {
+  ResourceRunner,
+  disposeInOrder,
+  runMonotonicPhase,
+  validateFullSoakDurations,
+} from '../benchmarks/v02/resource-runner.js'
 
 await test('resource runner captures parent and owned-child memory then observes zero owned children', () => {
   const runner = new ResourceRunner(250)
@@ -66,4 +71,38 @@ await test('soak phases follow monotonic time when wall clock jumps', async () =
   assert.equal(report.observedDurationMs, 25)
   assert.ok(report.parentSamples.every((sample) => sample.timestampMs <= 25))
   assert.ok(report.phaseTransitions.every((phase) => phase.timestampMs <= 25))
+})
+
+await test('qualified resource runs enforce duration and cleanup requirements', async () => {
+  assert.equal(
+    validateFullSoakDurations({ warmupSeconds: 600, durationSeconds: 6540, idleSeconds: 30 }),
+    true,
+  )
+  assert.equal(
+    validateFullSoakDurations({ warmupSeconds: 599, durationSeconds: 6540, idleSeconds: 30 }),
+    false,
+  )
+  assert.equal(
+    validateFullSoakDurations({ warmupSeconds: 600, durationSeconds: 6539, idleSeconds: 30 }),
+    false,
+  )
+  assert.equal(
+    validateFullSoakDurations({ warmupSeconds: 600, durationSeconds: 6540, idleSeconds: 29 }),
+    false,
+  )
+
+  const calls: string[] = []
+  await assert.rejects(
+    disposeInOrder([
+      async () => {
+        calls.push('classifier')
+        throw new Error('classifier dispose failed')
+      },
+      async () => {
+        calls.push('adapter')
+      },
+    ]),
+    /classifier dispose failed/,
+  )
+  assert.deepEqual(calls, ['classifier', 'adapter'])
 })

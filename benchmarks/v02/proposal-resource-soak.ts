@@ -20,7 +20,13 @@ import type { ObjectProposalPort } from '../../src/entities/object-proposals.js'
 import type { ExtractInput } from '../../src/entities/segmentation.js'
 import type { WholeObjectLocateInput } from '../../src/entities/whole-object.js'
 import { createMobileSamObjectProposals } from '../../src/infrastructure/segmentation/mobile-sam/index.js'
-import { ResourceRunner, runMonotonicPhase, type ResourceReport } from './resource-runner.js'
+import {
+  ResourceRunner,
+  disposeInOrder,
+  runMonotonicPhase,
+  type ResourceReport,
+  validateFullSoakDurations,
+} from './resource-runner.js'
 
 interface CliOptions {
   encoderPath: string
@@ -89,6 +95,17 @@ function parseOptions(argv: readonly string[]): CliOptions {
   }
   const outputPath = values.get('out')
   if (!smoke && !parentLossChild && !outputPath) throw new Error('--out is required for a soak run')
+  const warmupSeconds = integerOption('warmup-seconds', smoke ? 0 : 600, 0)
+  const durationSeconds = integerOption('duration-seconds', smoke ? 1 : 6540, 1)
+  const idleSeconds = integerOption('idle-seconds', smoke ? 1 : 30, 1)
+  if (
+    !smoke &&
+    !parentLossChild &&
+    !validateFullSoakDurations({ warmupSeconds, durationSeconds, idleSeconds })
+  )
+    throw new Error(
+      'Qualified soak requires at least 600s warmup, 6540s busy, 30s per idle window, and 7200s total',
+    )
   return {
     encoderPath: resolve(encoderPath),
     decoderPath: resolve(decoderPath),
@@ -96,9 +113,9 @@ function parseOptions(argv: readonly string[]): CliOptions {
     sourceManifestSha256,
     archiveReferenceSha256,
     ...(outputPath ? { outputPath: resolve(outputPath) } : {}),
-    warmupSeconds: integerOption('warmup-seconds', smoke ? 0 : 600, 0),
-    durationSeconds: integerOption('duration-seconds', smoke ? 1 : 6540, 1),
-    idleSeconds: integerOption('idle-seconds', smoke ? 1 : 30, 1),
+    warmupSeconds,
+    durationSeconds,
+    idleSeconds,
     sampleMs: integerOption('sample-ms', 5000, 250),
     smoke,
     parentLossChild,
@@ -688,31 +705,41 @@ async function main(): Promise<void> {
       throw new Error('Diagnostic smoke did not produce both a located and an extracted result')
     return
   }
-  const warmupStartedAt = new Date().toISOString()
-  const warmupStartedMonotonic = performance.now()
-  const warmup: CycleRecord[] = []
-  const warmupDurationMs = await runMonotonicPhase(options.warmupSeconds * 1000, async () => {
-    const operation = warmup.length % 2 === 0 ? 'locate' : 'extract'
-    warmup.push(await oneCycle(classifier, image, operation))
-  })
-  const warmupObservedMs = performance.now() - warmupStartedMonotonic
-
-  const resources = new ResourceRunner(options.sampleMs)
-  resources.start()
-  const measurementStartedMonotonic = performance.now()
   const controller = new AbortController()
   const onInterrupt = () => controller.abort(new ClassifierError('ABORTED', 'Soak interrupted'))
   process.once('SIGINT', onInterrupt)
-  const records: CycleRecord[] = []
-  const runStartedAt = new Date().toISOString()
-  const idleBeforeStartedMonotonic = performance.now()
+  const warmupStartedAt = new Date().toISOString()
+  const warmupStartedMonotonic = performance.now()
+  const warmup: CycleRecord[] = []
+  let warmupDurationMs = 0
+  let warmupObservedMs = 0
+  let measurementStartedMonotonic = 0
   let idleBeforeDurationMs = 0
   let busyDurationMs = 0
   let idleAfterDurationMs = 0
   let busyStartedAt = ''
   let busyStartedMonotonic = 0
   let idleAfterStartedAt = ''
+  let resources: ResourceRunner | undefined
+  let resourceReport: ResourceReport | undefined
+  let phaseFailure: unknown
+  const cleanupFailures: unknown[] = []
+  const records: CycleRecord[] = []
+  const runStartedAt = new Date().toISOString()
   try {
+    warmupDurationMs = await runMonotonicPhase(
+      options.warmupSeconds * 1000,
+      async () => {
+        const operation = warmup.length % 2 === 0 ? 'locate' : 'extract'
+        warmup.push(await oneCycle(classifier, image, operation, controller.signal))
+      },
+      { shouldStop: () => controller.signal.aborted },
+    )
+    warmupObservedMs = performance.now() - warmupStartedMonotonic
+    resources = new ResourceRunner(options.sampleMs)
+    resources.start()
+    measurementStartedMonotonic = performance.now()
+    const idleBeforeStartedMonotonic = performance.now()
     await delay(options.idleSeconds * 1000, undefined, { signal: controller.signal }).catch(
       () => undefined,
     )
@@ -743,13 +770,37 @@ async function main(): Promise<void> {
       () => undefined,
     )
     idleAfterDurationMs = performance.now() - idleAfterStartedMonotonic
+  } catch (error) {
+    phaseFailure = error
   } finally {
     process.off('SIGINT', onInterrupt)
-    await classifier.dispose()
-    await adapter.dispose()
+    try {
+      await disposeInOrder([() => classifier.dispose(), () => adapter.dispose()])
+    } catch (error) {
+      cleanupFailures.push(error)
+    }
     await delay(25)
+    if (resources) {
+      try {
+        resourceReport = resources.stop()
+      } catch (error) {
+        cleanupFailures.push(error)
+      }
+    }
   }
-  const resourceReport: ResourceReport = resources.stop()
+  if (phaseFailure !== undefined || cleanupFailures.length > 0) {
+    console.error(
+      JSON.stringify({
+        soakFailure: phaseFailure instanceof Error ? phaseFailure.message : phaseFailure,
+        cleanupFailures: cleanupFailures.map((error) =>
+          error instanceof Error ? error.message : String(error),
+        ),
+      }),
+    )
+    throw phaseFailure ?? new AggregateError(cleanupFailures, 'Resource soak cleanup failed')
+  }
+  if (!resourceReport || measurementStartedMonotonic === 0)
+    throw new Error('Resource soak phases did not initialize monitoring')
   const measurementObservedMs = performance.now() - measurementStartedMonotonic
   if (
     resourceReport.childStarts !== resourceReport.childCloses ||
