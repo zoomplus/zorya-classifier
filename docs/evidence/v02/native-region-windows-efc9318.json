@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "evidenceType": "native-installed-archive-component-wiring",
+  "workflow": "region-segmentation",
+  "sourceCommit": "efc9318437601ee34ce5debba77d376eadc6f395",
+  "harnessCommit": "22c5d9c30c01f4a190f9e7e864a72129c7960fae",
+  "harnessSha256": "be437c132c44de4a776ecc9b27f5a8ff1f905242a7f139d21f745c28279e2d39",
+  "rawReportSha256": "d6b8ec55bcf4fac8be53ef34785dc2bdac356f4119a3edf8f7f60b5476ba135e",
+  "rawReportBytes": 5285,
+  "runtime": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "v24.19.0",
+    "windowsBuild": "10.0.26200",
+    "backend": "MobileSAM CPU",
+    "threads": 2,
+    "optionalRuntime": "onnxruntime-node 1.23.2"
+  },
+  "archive": {
+    "package": "zorya-classifier",
+    "version": "0.2.0",
+    "bytes": 670917,
+    "sha256": "002eb72b5d0c234b97be4b473cfca6d902413fb3c6298e82bd72e5a3fd5a9541",
+    "segmentationExport": true,
+    "installedDistFileCount": 109,
+    "installedDistManifestSha256": "9774b1279371f161caa462df8143548fc73dbbd85e5e84e1b56b819afb915b59",
+    "segmentationRuntimeSha256": "e39c772dce27978c99e86682c442c1082686d05be8b8384ec0e0ad9564bf0e01",
+    "segmentationDeclarationsSha256": "a461fcc214d6d929b89776564a0c11c1c450b5e0bfb5d5709fe8a71dc0a5288e"
+  },
+  "assets": {
+    "encoder": {
+      "bytes": 28157093,
+      "sha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749"
+    },
+    "decoder": {
+      "bytes": 16496559,
+      "sha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe"
+    }
+  },
+  "checks": {
+    "importWithoutNativeChild": true,
+    "backendProbeSettled": true,
+    "locate": true,
+    "extract": true,
+    "cancellationAndPhysicalJoin": true,
+    "capacity": true,
+    "callerOwnedAdapter": true,
+    "dispose": true,
+    "fixtureDecisionOffline": true,
+    "emptyTransparentIsValidEmptyMask": true,
+    "childOwnership": true,
+    "cleanup": true,
+    "worker": true,
+    "tempCleanup": true
+  },
+  "controlledSyntheticFixture": {
+    "sourceSize": {
+      "width": 256,
+      "height": 256
+    },
+    "knownRectangle": {
+      "left": 0,
+      "top": 0,
+      "width": 64,
+      "height": 64
+    },
+    "selectedSeed": {
+      "region": {
+        "left": 0,
+        "top": 0,
+        "width": 13,
+        "height": 13
+      },
+      "center": {
+        "x": 6.5,
+        "y": 6.5
+      },
+      "centerInsideSyntheticTarget": true
+    },
+    "locate": {
+      "status": "located",
+      "method": "region-segmentation-v1",
+      "region": {
+        "left": 0,
+        "top": 0,
+        "width": 64,
+        "height": 64
+      },
+      "center": {
+        "x": 32,
+        "y": 32
+      }
+    },
+    "extract": {
+      "status": "extracted",
+      "method": "mobile-sam-seed-point-v1",
+      "segmenterInputSize": {
+        "width": 256,
+        "height": 256
+      },
+      "region": {
+        "left": 0,
+        "top": 0,
+        "width": 64,
+        "height": 64
+      },
+      "center": {
+        "x": 32,
+        "y": 32
+      },
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "maskPixels": 4096,
+      "maskBytes": 4096,
+      "cutoutPngBytes": 267,
+      "cutoutPngSize": {
+        "width": 64,
+        "height": 64
+      },
+      "cutoutAlphaMatchesBinaryMask": true,
+      "centerMatchesBounds": true,
+      "cropAndOffsetMatchBounds": true
+    },
+    "decisionCalls": 6,
+    "eachCallUsesPresenceAndChoiceQuestions": 6,
+    "providerHttpCalls": 0,
+    "emptyTransparentInput": {
+      "status": "segmented",
+      "maskPixels": 0,
+      "fullSourceSize": {
+        "width": 256,
+        "height": 256
+      }
+    }
+  },
+  "lifecycle": {
+    "nativeChildStarts": 9,
+    "nativeChildCloses": 9,
+    "ownedPidsRemaining": [],
+    "cancelCode": "ABORTED",
+    "cancellationWaitedForPhysicalClose": true,
+    "capacity": {
+      "submitted": 4,
+      "fulfilled": 3,
+      "capacityRejected": 1,
+      "otherFailures": 0
+    },
+    "segmenterStillUsableAfterClassifierDispose": "segmented",
+    "segmenterAfterOwnDispose": "DISPOSED",
+    "cleanupErrors": [],
+    "workerExitCode": 0,
+    "workerSignal": null,
+    "ownedWindowsTempRemoved": "removed by coordinator after worker exit"
+  },
+  "limitations": [
+    "Controlled synthetic pixels verify installed-archive wiring, native CPU lifecycle and geometry propagation only; this is not photo or semantic segmentation accuracy evidence.",
+    "No provider API requests were made; the DecisionPort is a deterministic local fixture.",
+    "Earlier harness development attempts remain preserved in the ignored run directory; only the final two-thread report is acceptance evidence."
+  ]
+}

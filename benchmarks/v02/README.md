@@ -6,6 +6,8 @@ Current status: the [first blind recipe failed qualification](../../docs/evidenc
 
 `native-proposal-windows-acceptance.mjs` defaults to its original proposal-selection workflow. `--workflow=region-segmentation` opts into the current region-seeded full-source segmentation path using the installed archive, injected fixture `DecisionPort`, and caller-owned MobileSAM segmenter. That mode verifies the original three-Choice locator is run once for `locate` and once for `extract`, the chosen seed center lies inside the controlled synthetic object, the result box/center come with the mask, the cutout alpha matches the cropped binary mask, cancellation joins the physical child, and classifier disposal leaves the segmenter usable. It also checks the valid empty mask for an all-transparent source and final child cleanup. The local fixture makes no provider calls. This is package-wiring and lifecycle evidence on controlled synthetic pixels, not object-segmentation accuracy. Both modes install the exact supplied archive and pinned optional runtime into a fresh owned Windows temporary profile; they do not configure a library model default.
 
+The successful two-thread Windows x64 installed-archive run is summarized in the [sanitized receipt](../../docs/evidence/v02/native-region-windows-efc9318.json); raw paths, runner logs and the full machine report remain in the ignored local run directory.
+
 Run the parser smoke tests on any platform with `node --test benchmarks/v02/native-region-segmentation-windows-acceptance.test.mjs`. The actual installed-archive acceptance command is Windows x64 only and requires a verified archive plus the pinned local encoder/decoder files:
 
 ```sh
