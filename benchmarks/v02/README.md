@@ -1,6 +1,16 @@
-# v0.2 independent acceptance preparation
+# v0.2 independent acceptance
 
-This directory contains evaluator code, the frozen **intended** corpus policy, and partial acquisition evidence, not a completed corpus or model-quality report. Fresh Open Images photos have been acquired and structurally validated; real map and UI cases remain open. No model calls were made. See [corpus-status.md](./corpus-status.md) for the acquisition record and blind input-manifest commitment.
+Current status: the original 40-case DEV corpus and first 80-case blind cohort were acquired and evaluated. The [first blind recipe failed qualification](../../docs/evidence/v02/heldout-evaluation-20261020.md); its exposed cases cannot qualify another recipe. Two predeclared native categorical-presence recipes are now being compared on the complete original DEV40. A new source-family-disjoint blind cohort is being curated; it is not frozen or qualified yet. See [acceptance](../../docs/acceptance.md) for current gates and the preserved failed runs.
+
+The acquisition notes below describe the earlier preparation stage and retain its original gaps and decisions. Statements about unavailable UI/map cases or unexecuted calls refer to that historical stage, not the current corpus. Fixture, component, development and blind results remain separate.
+
+## Native categorical DEV40 evaluation
+
+`evaluate-categorical-fresh.ts` accepts only the two exact `native-luna-categorical-presence-sam-target-plus-neutral-v1` and `native-luna-categorical-presence-sam-target-only-v1` DEV profiles. It validates their distinct target policies, 120-second operation budget, two case workers, one active native job, exact original 20/10/10 input pins, pinned assets, and a producer source digest supplied independently from the predispatch freeze. It checks all 40 results, source equality before/after, global physical IDs, per-case six-fetch limits, request-hash correspondence, native metadata and cropped mask geometry. Parsed and wire receipts reconcile actual known costs; missing costs keep the $0.05 reservation. Timings stay unranked under concurrent native stress.
+
+The normalizer preserves the actual profile identity rather than relabeling a run as the legacy proposal recipe. It reuses strict artifact shapes and the same box/mask metrics, while the legacy evaluator's profile/phase/policy pins remain unchanged. `evaluateFreshRun` counts every unknown, failure and negative in its original denominator. `scoreProposalMasks` verifies actual binary/cutout bytes, hashes, source offsets and independent reference masks; box correctness does not imply mask correctness. Offline normalization tests contain authored fixture truth and make no provider calls.
+
+The text-image comparison uses the same text route with and without encodings. The native vision recipe and its pinned DeepSeek/Together no-image control use different model families; their paired result compares complete recipes and does not isolate the causal contribution of image input alone.
 
 ## Fresh source acquisition
 
@@ -60,7 +70,7 @@ These checks do not access network, consume keys, start native models or infer l
 
 ## Exposed v1 diagnostic producer
 
-`run.ts` is the sole v0.2 paid dispatcher. It is deliberately an old, already-exposed development diagnostic, not a fresh qualification run. The frozen producer input is `input-manifest.json` (three varied positive objects and one explicitly verified negative); its separate `diagnostic-evaluator-dev4.json` file is evaluator-only and is never imported by `runner.ts`. Provider state contains the task, target, closed options and image representation only. It never contains case IDs, local paths, hashes, split labels or ground truth.
+`run.ts` is the paid dispatcher for this original diagnostic. It is deliberately an old, already-exposed development diagnostic, not a fresh qualification run. The frozen producer input is `input-manifest.json` (three varied positive objects and one explicitly verified negative); its separate `diagnostic-evaluator-dev4.json` file is evaluator-only and is never imported by `runner.ts`. Provider state contains the task, target, closed options and image representation only. It never contains case IDs, local paths, hashes, split labels or ground truth.
 
 Run the bounded two-case functional pilot first, choosing the first positive and explicit negative. For example:
 

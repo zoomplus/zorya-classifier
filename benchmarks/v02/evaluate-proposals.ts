@@ -425,6 +425,17 @@ const rawSummarySchema = z
   })
   .strict()
 
+/** Shared artifact shapes only; each producer recipe retains its own strict admission policy. */
+export const proposalArtifactSchemas = Object.freeze({
+  result: resultSchema,
+  physicalReceipt: physicalReceiptSchema,
+  budget: budgetSchema,
+  route: routeSchema,
+  assets: proposalAssetSchema,
+  taskManifest: taskManifestSchema,
+  plannedCase: caseManifestSchema,
+})
+
 const referenceMaskSchema = z
   .object({
     path: z.string().min(1),
@@ -697,8 +708,8 @@ function writeExclusive(path: string, bytes: string): Promise<void> {
   return writeFile(path, bytes, { flag: 'wx' })
 }
 
-async function scoreProposalMasks(
-  rawSummary: z.infer<typeof rawSummarySchema>,
+export async function scoreProposalMasks(
+  rawSummary: Pick<z.infer<typeof rawSummarySchema>, 'results'>,
   corpus: readonly FreshCase[],
   truthFiles: readonly z.infer<typeof pinnedFileSchema>[],
   runDirectory: string,
