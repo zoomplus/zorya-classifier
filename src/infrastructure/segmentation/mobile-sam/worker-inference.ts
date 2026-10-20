@@ -205,12 +205,13 @@ export function packFullSourceBinaryMask(
   width: number,
   height: number,
 ): Uint8Array {
-  const pixels = width * height
+  const pixels = Number.isSafeInteger(width) && Number.isSafeInteger(height) ? width * height : NaN
   if (
     !Number.isSafeInteger(width) ||
     !Number.isSafeInteger(height) ||
     width < 1 ||
     height < 1 ||
+    !Number.isSafeInteger(pixels) ||
     pixels > 16_777_216 ||
     mask.length !== pixels
   )
@@ -230,13 +231,14 @@ export function unpackFullSourceBinaryMask(
   width: number,
   height: number,
 ): Uint8Array {
-  const pixels = width * height
-  const expectedBytes = Math.ceil(pixels / 8)
+  const pixels = Number.isSafeInteger(width) && Number.isSafeInteger(height) ? width * height : NaN
+  const expectedBytes = Number.isSafeInteger(pixels) ? Math.ceil(pixels / 8) : NaN
   if (
     !Number.isSafeInteger(width) ||
     !Number.isSafeInteger(height) ||
     width < 1 ||
     height < 1 ||
+    !Number.isSafeInteger(pixels) ||
     pixels > 16_777_216 ||
     data.length !== expectedBytes
   )
@@ -261,15 +263,23 @@ export function validateMobileSamPreviousMask(input: {
   previousMask: Uint8Array
   roi: { left: number; top: number; width: number; height: number }
 }): { area: number; bounds: { left: number; top: number; right: number; bottom: number } } {
-  const pixels = input.width * input.height
+  const pixels =
+    Number.isSafeInteger(input.width) && Number.isSafeInteger(input.height)
+      ? input.width * input.height
+      : NaN
   if (
     !Number.isSafeInteger(input.width) ||
     !Number.isSafeInteger(input.height) ||
     input.width < 1 ||
     input.height < 1 ||
+    !Number.isSafeInteger(pixels) ||
     pixels > 16_777_216 ||
     input.rgba.length !== pixels * 4 ||
     input.previousMask.length !== pixels ||
+    !Number.isSafeInteger(input.roi.left) ||
+    !Number.isSafeInteger(input.roi.top) ||
+    !Number.isSafeInteger(input.roi.width) ||
+    !Number.isSafeInteger(input.roi.height) ||
     input.roi.left < 0 ||
     input.roi.top < 0 ||
     input.roi.width < 1 ||
@@ -316,61 +326,69 @@ export function selectEnclosingMobileSamCandidate(input: {
   if (input.logits.length !== pixels * 4 || input.scores.length !== 4)
     throw new Error('Invalid MobileSAM decoder output dimensions')
   let best: EnclosingMobileSamCandidate | undefined
-  for (let token = 0; token < 4; token++) {
-    const score = input.scores[token]
-    if (score === undefined || !Number.isFinite(score))
-      throw new Error('Non-finite MobileSAM quality diagnostic')
-    const mask = new Uint8Array(pixels)
-    let area = 0
-    let left = input.width
-    let top = input.height
-    let right = -1
-    let bottom = -1
-    let containsPrevious = true
-    const base = token * pixels
-    for (let index = 0; index < pixels; index++) {
-      const value = input.logits[base + index]
-      if (value === undefined || !Number.isFinite(value))
-        throw new Error('Non-finite MobileSAM mask logit')
-      const x = index % input.width
-      const y = Math.floor(index / input.width)
-      const foreground = value > 0 && input.rgba[index * 4 + 3] !== 0 && inside(input.roi, x, y)
-      if (input.previousMask[index] === 1 && !foreground) containsPrevious = false
-      if (!foreground) continue
-      mask[index] = 1
-      area++
-      left = Math.min(left, x)
-      top = Math.min(top, y)
-      right = Math.max(right, x)
-      bottom = Math.max(bottom, y)
+  let currentMask: Uint8Array | undefined
+  try {
+    for (let token = 0; token < 4; token++) {
+      const score = input.scores[token]
+      if (score === undefined || !Number.isFinite(score))
+        throw new Error('Non-finite MobileSAM quality diagnostic')
+      const mask = new Uint8Array(pixels)
+      currentMask = mask
+      let area = 0
+      let left = input.width
+      let top = input.height
+      let right = -1
+      let bottom = -1
+      let containsPrevious = true
+      const base = token * pixels
+      for (let index = 0; index < pixels; index++) {
+        const value = input.logits[base + index]
+        if (value === undefined || !Number.isFinite(value))
+          throw new Error('Non-finite MobileSAM mask logit')
+        const x = index % input.width
+        const y = Math.floor(index / input.width)
+        const foreground = value > 0 && input.rgba[index * 4 + 3] !== 0 && inside(input.roi, x, y)
+        if (input.previousMask[index] === 1 && !foreground) containsPrevious = false
+        if (!foreground) continue
+        mask[index] = 1
+        area++
+        left = Math.min(left, x)
+        top = Math.min(top, y)
+        right = Math.max(right, x)
+        bottom = Math.max(bottom, y)
+      }
+      const strictBoundsGrowth =
+        left <= previous.bounds.left &&
+        top <= previous.bounds.top &&
+        right >= previous.bounds.right &&
+        bottom >= previous.bounds.bottom &&
+        (left < previous.bounds.left ||
+          top < previous.bounds.top ||
+          right > previous.bounds.right ||
+          bottom > previous.bounds.bottom)
+      if (!containsPrevious || area <= previous.area || !strictBoundsGrowth) {
+        mask.fill(0)
+        continue
+      }
+      const candidate = { token, score, mask, area, bounds: { left, top, right, bottom } }
+      if (
+        !best ||
+        candidate.area < best.area ||
+        (candidate.area === best.area && candidate.score > best.score) ||
+        (candidate.area === best.area &&
+          candidate.score === best.score &&
+          candidate.token < best.token)
+      ) {
+        best?.mask.fill(0)
+        best = candidate
+      } else mask.fill(0)
     }
-    const strictBoundsGrowth =
-      left <= previous.bounds.left &&
-      top <= previous.bounds.top &&
-      right >= previous.bounds.right &&
-      bottom >= previous.bounds.bottom &&
-      (left < previous.bounds.left ||
-        top < previous.bounds.top ||
-        right > previous.bounds.right ||
-        bottom > previous.bounds.bottom)
-    if (!containsPrevious || area <= previous.area || !strictBoundsGrowth) {
-      mask.fill(0)
-      continue
-    }
-    const candidate = { token, score, mask, area, bounds: { left, top, right, bottom } }
-    if (
-      !best ||
-      candidate.area < best.area ||
-      (candidate.area === best.area && candidate.score > best.score) ||
-      (candidate.area === best.area &&
-        candidate.score === best.score &&
-        candidate.token < best.token)
-    ) {
-      best?.mask.fill(0)
-      best = candidate
-    } else mask.fill(0)
+    return best
+  } catch (error) {
+    currentMask?.fill(0)
+    best?.mask.fill(0)
+    throw error
   }
-  return best
 }
 
 export async function runMobileSamTask(

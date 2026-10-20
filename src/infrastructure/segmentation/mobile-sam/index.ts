@@ -121,51 +121,84 @@ export async function createMobileSamSegmenter(
       return expansion.data
     },
   })
+  return createMobileSamPortForPool(pool, parsed)
+}
+
+/** Internal adapter seam: pool ownership stays with the caller. */
+export function createMobileSamPortForPool(
+  pool: Pick<NativeChildPool<SerializedTask>, 'runLazy' | 'settle' | 'dispose'>,
+  parsed: z.output<typeof optionsSchema>,
+): SegmentationPort & Required<Pick<SegmentationPort, 'expand'>> {
   return {
     async segment(input): Promise<SegmentationResult> {
       const started = performance.now()
       assertActive(input.signal)
-      let image!: ReturnType<typeof snapshotInput>
-      const raw = await pool.runLazy(input.signal, () => {
-        image = snapshotInput(input)
-        return {
-          kind: 'mobile-sam',
-          width: image.width,
-          height: image.height,
-          rgba: Buffer.from(image.data).toString('base64'),
-          seedRegion: image.seedRegion,
-          wholeRegion: image.wholeRegion,
-          roi: image.roi,
-          prompt: image.prompt,
-          options: parsed,
-        }
-      })
-      const reply = nativeSegmentationReplySchema.parse(raw)
-      const maskData = Buffer.from(reply.mask, 'base64')
-      if (
-        reply.width !== image.width ||
-        reply.height !== image.height ||
-        maskData.length !== image.width * image.height ||
-        maskData.toString('base64') !== reply.mask
-      )
-        throw new ClassifierError(
-          'INVALID_RESPONSE',
-          'Native child mask dimensions or encoding are invalid',
+      let image: ReturnType<typeof snapshotInput> | undefined
+      let maskData: Buffer | undefined
+      try {
+        const raw = await pool.runLazy(input.signal, () => {
+          image = snapshotInput(input)
+          const rgba = Buffer.from(image.data)
+          let rgbaBase64: string
+          try {
+            rgbaBase64 = rgba.toString('base64')
+          } finally {
+            rgba.fill(0)
+          }
+          return {
+            kind: 'mobile-sam',
+            width: image.width,
+            height: image.height,
+            rgba: rgbaBase64,
+            seedRegion: image.seedRegion,
+            wholeRegion: image.wholeRegion,
+            roi: image.roi,
+            prompt: image.prompt,
+            options: parsed,
+          }
+        })
+        if (!image)
+          throw new ClassifierError(
+            'INVALID_RESPONSE',
+            'Native segmentation omitted its input snapshot',
+          )
+        const checkedReply = nativeSegmentationReplySchema.safeParse(raw)
+        if (
+          !checkedReply.success ||
+          checkedReply.data.width !== image.width ||
+          checkedReply.data.height !== image.height
         )
-      return {
-        status: 'segmented',
-        mask: {
-          data: new Uint8Array(maskData),
-          width: image.width,
-          height: image.height,
-          format: 'binary-u8',
-        },
-        metadata: {
-          method: reply.method,
-          backend: 'mobile-sam',
-          durationMs: Math.max(0, performance.now() - started),
-          input: { width: image.width, height: image.height },
-        },
+          throw new ClassifierError(
+            'INVALID_RESPONSE',
+            'Native child returned an invalid segmentation reply',
+          )
+        maskData = Buffer.from(checkedReply.data.mask, 'base64')
+        if (
+          maskData.length !== image.width * image.height ||
+          maskData.toString('base64') !== checkedReply.data.mask
+        )
+          throw new ClassifierError(
+            'INVALID_RESPONSE',
+            'Native child mask dimensions or encoding are invalid',
+          )
+        return {
+          status: 'segmented',
+          mask: {
+            data: new Uint8Array(maskData),
+            width: image.width,
+            height: image.height,
+            format: 'binary-u8',
+          },
+          metadata: {
+            method: checkedReply.data.method,
+            backend: 'mobile-sam',
+            durationMs: Math.max(0, performance.now() - started),
+            input: { width: image.width, height: image.height },
+          },
+        }
+      } finally {
+        maskData?.fill(0)
+        image?.data.fill(0)
       }
     },
     async expand(input, previousMask): Promise<SegmentationResult> {
@@ -173,6 +206,8 @@ export async function createMobileSamSegmenter(
       assertActive(input.signal)
       let image: ReturnType<typeof snapshotInput> | undefined
       let previous: Uint8Array | undefined
+      let resultData: Uint8Array | undefined
+      let transferred = false
       try {
         const raw = await pool.runLazy(input.signal, () => {
           image = snapshotInput(input)
@@ -245,6 +280,7 @@ export async function createMobileSamSegmenter(
             )
           try {
             data = unpackFullSourceBinaryMask(packedBytes, image.width, image.height)
+            resultData = data
           } catch {
             throw new ClassifierError('INVALID_RESPONSE', 'Native expansion packed mask is invalid')
           }
@@ -298,6 +334,7 @@ export async function createMobileSamSegmenter(
             'Native expansion is not a strict enclosing mask',
           )
         }
+        transferred = true
         return {
           status: 'segmented',
           mask: { data, width: image.width, height: image.height, format: 'binary-u8' },
@@ -312,6 +349,7 @@ export async function createMobileSamSegmenter(
       } finally {
         image?.data.fill(0)
         previous?.fill(0)
+        if (resultData && !transferred) resultData.fill(0)
       }
     },
     settle: () => pool.settle(),
