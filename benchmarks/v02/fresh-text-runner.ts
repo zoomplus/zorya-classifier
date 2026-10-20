@@ -48,6 +48,50 @@ export const freshTextPolicy = Object.freeze({
   latencyRankingEligible: false,
 })
 
+export type FreshTextPhase = 'dev' | 'heldout'
+
+export const heldoutPhotoInputSha256 =
+  'b3afaee883990e01a464929727b7b7bb1315d6e0a70e239a10f20e2f82a3e35b'
+
+export function freshTextPolicyForPhase(phase: FreshTextPhase) {
+  if (phase === 'dev') return freshTextPolicy
+  if (phase !== 'heldout') throw new TypeError('Unknown fresh text phase')
+  return Object.freeze({
+    ...freshTextPolicy,
+    timeoutMs: 120000,
+    maxPhysicalCalls: 300,
+    maxCostUsd: 5,
+    latencyEnvironment: 'heldout-no-image-control-unranked',
+    latencyRankingEligible: false,
+  })
+}
+
+export function validateFreshTextPhaseRequest(
+  phase: FreshTextPhase,
+  profileId: FreshTextProfileId,
+  manifests: readonly { path: string; sha256: string }[],
+  stages: 'classify-and-locate' | 'classify-only' = 'classify-and-locate',
+): string {
+  if (phase === 'dev') return 'single-profile complete pinned fresh DEV text/no-image comparison'
+  if (phase !== 'heldout') throw new TypeError('Unknown fresh text phase')
+  if (profileId !== 'no-image-control')
+    throw new Error('Heldout text control requires the no-image-control profile')
+  if (stages !== 'classify-and-locate')
+    throw new Error('Heldout text control requires classify-and-locate stages')
+  if (
+    manifests.length !== 1 ||
+    manifests[0]?.sha256 !== heldoutPhotoInputSha256 ||
+    manifests[0]?.path.trim().length === 0
+  )
+    throw new Error('Heldout text control requires the frozen 40-photo input manifest')
+  return 'full frozen HELDOUT photo-only no-image text control run'
+}
+
+export function assertFreshTextPhaseCaseCount(phase: FreshTextPhase, caseIds: readonly string[]) {
+  if (phase === 'heldout' && (caseIds.length !== 40 || new Set(caseIds).size !== 40))
+    throw new Error('Heldout text control must contain exactly 40 unique photo cases')
+}
+
 const encoderIds = [
   'ascii-luma-v1',
   'palette-grid-v1',
@@ -73,6 +117,8 @@ export interface FreshTextRunnerOptions {
   createDecision?: (fetcher: typeof globalThis.fetch, maxOutputTokens: 1024 | 4096) => DecisionPort
   /** Classification-only evidence follow-up; it deliberately emits no locate stage. */
   stages?: 'classify-and-locate' | 'classify-only'
+  /** Heldout is only for the frozen photo-only no-image control, after winner freeze. */
+  phase?: FreshTextPhase
 }
 
 type StageStatus = 'ok' | 'failed' | 'located' | 'unknown' | 'not-found'
@@ -206,6 +252,7 @@ function composeTextClassifier(
   decision: DecisionPort,
   encoder: TextRepresentationEncoder | undefined,
   noImage: boolean,
+  policy: ReturnType<typeof freshTextPolicyForPhase>,
 ) {
   const preparedDecision: DecisionPort = {
     async decide(request, signal) {
@@ -218,9 +265,9 @@ function composeTextClassifier(
   }
   const options = {
     decision: preparedDecision,
-    timeoutMs: freshTextPolicy.timeoutMs,
-    concurrency: freshTextPolicy.concurrency,
-    maxQueue: freshTextPolicy.maxQueue,
+    timeoutMs: policy.timeoutMs,
+    concurrency: policy.concurrency,
+    maxQueue: policy.maxQueue,
   }
   if (encoder) return createResearchClassifier(options, createTextRepresentation(encoder))
   return createClassifier(options)
@@ -242,6 +289,7 @@ async function persistCase(
   budget: RunBudget,
   outputDirectory: string,
   fetcher: typeof globalThis.fetch,
+  policy: ReturnType<typeof freshTextPolicyForPhase>,
 ): Promise<{ result: ResultRow; calls: PhysicalCallRecord[] }> {
   const task = freshProducerTask(item)
   const caseDirectory = join(outputDirectory, item.caseId)
@@ -253,13 +301,18 @@ async function persistCase(
     const noImage = profileId === 'no-image-control'
     const encoder = noImage ? undefined : textEncodersV1[profileId]
     const classifyRecorder = recordProvider(
-      (fetchImpl) => providerFor(options, fetchImpl, freshTextPolicy.classifyMaxOutputTokens),
+      (fetchImpl) => providerFor(options, fetchImpl, policy.classifyMaxOutputTokens),
       budget,
       join(caseDirectory, 'classify'),
       route,
       fetcher,
     )
-    const classifyClassifier = composeTextClassifier(classifyRecorder.port, encoder, noImage)
+    const classifyClassifier = composeTextClassifier(
+      classifyRecorder.port,
+      encoder,
+      noImage,
+      policy,
+    )
     const classifyStarted = performance.now()
     const classifyLogicalStart = classifyRecorder.logicalCalls.length
     try {
@@ -301,13 +354,13 @@ async function persistCase(
     calls.push(...classifyRecorder.calls)
     if (options.stages !== 'classify-only') {
       const locateRecorder = recordProvider(
-        (fetchImpl) => providerFor(options, fetchImpl, freshTextPolicy.locateMaxOutputTokens),
+        (fetchImpl) => providerFor(options, fetchImpl, policy.locateMaxOutputTokens),
         budget,
         join(caseDirectory, 'locate'),
         route,
         fetcher,
       )
-      const locateClassifier = composeTextClassifier(locateRecorder.port, encoder, noImage)
+      const locateClassifier = composeTextClassifier(locateRecorder.port, encoder, noImage, policy)
       const locateStarted = performance.now()
       const locateLogicalStart = locateRecorder.logicalCalls.length
       try {
@@ -316,8 +369,8 @@ async function persistCase(
           image: bytes,
           target,
           mode: 'whole-object',
-          boxTolerancePx: freshTextPolicy.boxTolerancePx,
-          maxExtentPasses: freshTextPolicy.maxExtentPasses,
+          boxTolerancePx: policy.boxTolerancePx,
+          maxExtentPasses: policy.maxExtentPasses,
           ...(encoder
             ? {
                 representation: {
@@ -372,9 +425,21 @@ export async function runFreshTextProfile(
   signal: AbortSignal = new AbortController().signal,
 ) {
   if (!freshTextProfiles.includes(profileId)) throw new TypeError('Unknown fresh text profile')
+  const phase = options.phase ?? 'dev'
+  const purpose = validateFreshTextPhaseRequest(
+    phase,
+    profileId,
+    options.manifests,
+    options.stages ?? 'classify-and-locate',
+  )
+  const policy = freshTextPolicyForPhase(phase)
   const corpus = await loadFreshCorpus(
     { manifests: options.manifests, imageRoot: options.imageRoot },
     signal,
+  )
+  assertFreshTextPhaseCaseCount(
+    phase,
+    corpus.cases.map((item) => item.caseId),
   )
   for (const item of corpus.cases) (await loadFreshImage(item, corpus.imageRoot, signal)).fill(0)
   const source = await sourceHashes()
@@ -390,7 +455,8 @@ export async function runFreshTextProfile(
     route,
     prompt,
     transport,
-    policy: freshTextPolicy,
+    phase,
+    policy,
     stages: options.stages ?? 'classify-and-locate',
     manifestHashes: corpus.manifests,
     cases: manifestCases,
@@ -405,17 +471,18 @@ export async function runFreshTextProfile(
   await mkdir(options.outputRoot, { recursive: true })
   await mkdir(outputDirectory, { recursive: false })
   const budget = new RunBudget(
-    freshTextPolicy.maxPhysicalCalls,
-    freshTextPolicy.maxCostUsd,
-    freshTextPolicy.unknownCostReserveUsd,
+    policy.maxPhysicalCalls,
+    policy.maxCostUsd,
+    policy.unknownCostReserveUsd,
   )
   await writeImmutable(join(outputDirectory, 'run-manifest.json'), {
     schemaVersion: 1,
     runId,
+    phase,
     purpose:
       options.stages === 'classify-only'
         ? 'classification-only follow-up for pinned fresh DEV text profiles'
-        : 'single-profile complete pinned fresh DEV text/no-image comparison',
+        : purpose,
     startedAt: new Date().toISOString(),
     profileId,
     stages: options.stages ?? 'classify-and-locate',
@@ -432,8 +499,16 @@ export async function runFreshTextProfile(
     promptSha256: hashCanonical(prompt),
     transport,
     transportSha256: hashCanonical(transport),
-    policy: freshTextPolicy,
-    modelBoundary: { evaluatorTruthRead: false, retries: 0, fallback: false },
+    policy,
+    modelBoundary: {
+      evaluatorTruthRead: false,
+      retries: 0,
+      fallback: false,
+      imagePartsRemoved: profileId === 'no-image-control',
+      textEncoder: profileId === 'no-image-control' ? null : profileId,
+      segmentation: false,
+      ocr: false,
+    },
   })
   const results: ResultRow[] = []
   const allCalls: PhysicalCallRecord[] = []
@@ -448,6 +523,7 @@ export async function runFreshTextProfile(
         budget,
         outputDirectory,
         options.fetch ?? globalThis.fetch,
+        policy,
       )
       results.push(outcome.result)
       allCalls.push(...outcome.calls)
@@ -487,6 +563,8 @@ export async function runFreshTextProfile(
   const summary = {
     runId,
     profileId,
+    phase,
+    purpose,
     variantSha256,
     status: missingCaseIds.length === 0 ? 'complete' : 'incomplete',
     plannedCaseIds,
@@ -494,8 +572,9 @@ export async function runFreshTextProfile(
     missingCaseIds,
     results,
     aggregate: budget.snapshot(),
-    latencyEnvironment: freshTextPolicy.latencyEnvironment,
-    latencyRankingEligible: false,
+    policy,
+    latencyEnvironment: policy.latencyEnvironment,
+    latencyRankingEligible: policy.latencyRankingEligible,
     physicalReceipts: allCalls.map((call) => ({
       physicalId: call.physicalId,
       requestSha256: call.requestSha256,

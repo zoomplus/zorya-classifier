@@ -1,12 +1,20 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import sharp from 'sharp'
 import test from 'node:test'
 import type { DecisionPort, DecisionRequest, DecisionResult } from '../src/entities/contracts.js'
-import { freshTextProfiles, runFreshTextProfile } from '../benchmarks/v02/fresh-text-runner.js'
+import {
+  assertFreshTextPhaseCaseCount,
+  freshTextPolicy,
+  freshTextPolicyForPhase,
+  freshTextProfiles,
+  heldoutPhotoInputSha256,
+  runFreshTextProfile,
+  validateFreshTextPhaseRequest,
+} from '../benchmarks/v02/fresh-text-runner.js'
 import { parseFreshTextArgs } from '../benchmarks/v02/fresh-text-dev.js'
 
 function digest(bytes: Uint8Array): string {
@@ -24,6 +32,64 @@ await test('fresh text CLI pins a single profile and refuses implicit paid dispa
   assert.equal(
     parseFreshTextArgs(['--allow-paid', '--profile', 'ascii-luma-v1', '--classify-only']).stages,
     'classify-only',
+  )
+})
+
+await test('heldout no-image policy is exact and cannot read an unpinned corpus', async () => {
+  assert.deepEqual(freshTextPolicyForPhase('dev'), freshTextPolicy)
+  const held = freshTextPolicyForPhase('heldout')
+  assert.equal(held.timeoutMs, 120000)
+  assert.equal(held.maxPhysicalCalls, 300)
+  assert.equal(held.maxCostUsd, 5)
+  assert.equal(held.retries, 0)
+  assert.equal(held.fallback, false)
+  assert.equal(held.latencyRankingEligible, false)
+
+  const manifest = [{ path: '/frozen/photo/inputs.json', sha256: heldoutPhotoInputSha256 }]
+  assert.equal(
+    validateFreshTextPhaseRequest('heldout', 'no-image-control', manifest),
+    'full frozen HELDOUT photo-only no-image text control run',
+  )
+  assert.throws(
+    () => validateFreshTextPhaseRequest('heldout', 'ascii-luma-v1', manifest),
+    /no-image-control/u,
+  )
+  assert.throws(
+    () =>
+      validateFreshTextPhaseRequest('heldout', 'no-image-control', [
+        { ...manifest[0]!, sha256: '0'.repeat(64) },
+      ]),
+    /frozen 40-photo/u,
+  )
+  assert.throws(
+    () => validateFreshTextPhaseRequest('heldout', 'no-image-control', manifest, 'classify-only'),
+    /classify-and-locate/u,
+  )
+  const ids = Array.from({ length: 40 }, (_, index) => `frozen-photo-${index + 1}`)
+  assert.doesNotThrow(() => assertFreshTextPhaseCaseCount('heldout', ids))
+  assert.throws(() => assertFreshTextPhaseCaseCount('heldout', ids.slice(1)), /40 unique/u)
+  assert.throws(
+    () => assertFreshTextPhaseCaseCount('heldout', [...ids.slice(0, 39), ids[0]!]),
+    /40 unique/u,
+  )
+  assert.doesNotThrow(() => assertFreshTextPhaseCaseCount('dev', ['one']))
+
+  const outputRoot = join(tmpdir(), `zorya-guard-${Date.now()}`)
+  await assert.rejects(
+    runFreshTextProfile(
+      {
+        manifests: manifest,
+        imageRoot: '/this-must-not-be-read',
+        outputRoot,
+        apiKey: 'must-not-be-used',
+        phase: 'heldout',
+        createDecision: () => {
+          throw new Error('provider must not be constructed')
+        },
+      },
+      'ascii-luma-v1',
+    ),
+    /no-image-control/u,
   )
 })
 
@@ -98,6 +164,28 @@ await test('all six text encoders and no-image control preserve fresh tasks and 
         profile,
       )
       assert.equal(result.status, 'complete')
+      const runManifest = JSON.parse(
+        await readFile(join(result.outputDirectory, 'run-manifest.json'), 'utf8'),
+      ) as {
+        phase: string
+        policy: { timeoutMs: number; maxPhysicalCalls: number }
+        modelBoundary: {
+          imagePartsRemoved: boolean
+          textEncoder: string | null
+          segmentation: boolean
+          ocr: boolean
+        }
+      }
+      assert.equal(runManifest.phase, 'dev')
+      assert.equal(runManifest.policy.timeoutMs, 45000)
+      assert.equal(runManifest.policy.maxPhysicalCalls, 250)
+      assert.equal(runManifest.modelBoundary.imagePartsRemoved, profile === 'no-image-control')
+      assert.equal(
+        runManifest.modelBoundary.textEncoder,
+        profile === 'no-image-control' ? null : profile,
+      )
+      assert.equal(runManifest.modelBoundary.segmentation, false)
+      assert.equal(runManifest.modelBoundary.ocr, false)
       assert.deepEqual(result.completedCaseIds, ['private-case-id'])
       assert.equal(result.results[0]?.classify.status, 'ok', JSON.stringify(result.results[0]))
       assert.equal(result.results[0]?.classify.value, 'present')
