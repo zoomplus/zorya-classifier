@@ -136,10 +136,9 @@ const expectedAssets = {
     sha256: '8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe',
   },
 }
-const requiredSources = [
+const legacyRequiredSources = [
   './categorical-presence-fresh-runner.ts',
   './run-categorical-presence-fresh.ts',
-  './run-categorical-box-confirmation-dev.ts',
   './fresh-corpus.ts',
   './recording.ts',
   './budget.ts',
@@ -147,6 +146,13 @@ const requiredSources = [
   './categorical-presence-port.ts',
   './native-categorical-presence-port.ts',
   './categorical-presence-fresh-pair.md',
+  '../../package.json',
+  '../../package-lock.json',
+]
+const boxConfirmationRequiredSources = [
+  ...legacyRequiredSources.slice(0, 2),
+  './run-categorical-box-confirmation-dev.ts',
+  ...legacyRequiredSources.slice(2, 9),
   './categorical-heldout-plan.ts',
   './fresh-text-runner.ts',
   './run-categorical-heldout.ts',
@@ -167,7 +173,7 @@ function sameIds(left: readonly string[], right: readonly string[], label: strin
     throw new Error(`Categorical DEV ${label} mismatch`)
 }
 
-/** Evaluator-only: accepts two frozen DEV recipes, never a relabeled legacy or heldout run. */
+/** Evaluator-only: preserves the two historical source closures and the separate box recipe. */
 export function normalizeCategoricalFreshOutput(
   rawSummary: unknown,
   rawManifest: unknown,
@@ -188,6 +194,13 @@ export function normalizeCategoricalFreshOutput(
     run.profileId === 'native-luna-categorical-presence-sam-target-only-v1'
       ? 'target-only-v1'
       : 'target-plus-neutral-instruction-v1'
+  const isBoxConfirmation =
+    run.profileId === 'native-luna-box-confirmation-sam-target-plus-neutral-v1'
+  const expectedRequiredSources = isBoxConfirmation
+    ? boxConfirmationRequiredSources
+    : legacyRequiredSources
+  const expectedSourceCount = expectedRequiredSources.length + 53
+  const nonSourcePaths = Object.keys(run.sourceHashes).filter((path) => !path.startsWith('src/'))
   if (
     summary.runId !== run.runId ||
     summary.profileId !== run.profileId ||
@@ -199,9 +212,10 @@ export function normalizeCategoricalFreshOutput(
     summary.sourceAfterSha256 !== commitments.expectedProducerSourceSha256 ||
     hashCanonical(Object.entries(run.sourceHashes).sort(([a], [b]) => a.localeCompare(b))) !==
       commitments.expectedProducerSourceSha256 ||
-    requiredSources.some((path) => !Object.hasOwn(run.sourceHashes, path)) ||
+    expectedRequiredSources.some((path) => !Object.hasOwn(run.sourceHashes, path)) ||
+    !same([...nonSourcePaths].sort(), [...expectedRequiredSources].sort()) ||
     Object.keys(run.sourceHashes).filter((path) => path.startsWith('src/')).length !== 53 ||
-    Object.keys(run.sourceHashes).length !== 68
+    Object.keys(run.sourceHashes).length !== expectedSourceCount
   )
     throw new Error('Categorical DEV profile or frozen source mismatch')
   if (

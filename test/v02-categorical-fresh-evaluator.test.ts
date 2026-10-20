@@ -19,13 +19,25 @@ const inputFiles = ['dev', 'dev-independent-ui', 'dev-independent-map'].map((par
   path: join(root, 'benchmarks/v02/corpus', part, 'inputs.json'),
   sha256: freshProposalInputPins[index]!.sha256,
 }))
+const legacyRequiredSources = [
+  './categorical-presence-fresh-runner.ts',
+  './run-categorical-presence-fresh.ts',
+  './fresh-corpus.ts',
+  './recording.ts',
+  './budget.ts',
+  './protocol.ts',
+  './categorical-presence-port.ts',
+  './native-categorical-presence-port.ts',
+  './categorical-presence-fresh-pair.md',
+  '../../package.json',
+  '../../package-lock.json',
+]
 
-async function fixture() {
+async function fixture(sourceClosure: 'legacy' | 'box' = 'legacy') {
   const corpus = await loadFreshCorpus({ manifests: inputFiles, imageRoot: root }, signal)
-  const required = [
+  const legacyRequired = [
     './categorical-presence-fresh-runner.ts',
     './run-categorical-presence-fresh.ts',
-    './run-categorical-box-confirmation-dev.ts',
     './fresh-corpus.ts',
     './recording.ts',
     './budget.ts',
@@ -33,12 +45,19 @@ async function fixture() {
     './categorical-presence-port.ts',
     './native-categorical-presence-port.ts',
     './categorical-presence-fresh-pair.md',
-    './categorical-heldout-plan.ts',
-    './fresh-text-runner.ts',
-    './run-categorical-heldout.ts',
     '../../package.json',
     '../../package-lock.json',
   ]
+  const boxRequired = [
+    ...legacyRequired.slice(0, 2),
+    './run-categorical-box-confirmation-dev.ts',
+    ...legacyRequired.slice(2, 9),
+    './categorical-heldout-plan.ts',
+    './fresh-text-runner.ts',
+    './run-categorical-heldout.ts',
+    ...legacyRequired.slice(9),
+  ]
+  const required = sourceClosure === 'box' ? boxRequired : legacyRequired
   async function sourceFiles(directory: string): Promise<string[]> {
     const files: string[] = []
     for (const entry of await readdir(join(root, directory), { withFileTypes: true })) {
@@ -226,8 +245,23 @@ async function fixture() {
   return { corpus, manifest, summary, commitments }
 }
 
-await test('categorical DEV normalization preserves three distinct profile identities and all 40 cases', async () => {
-  const f = await fixture()
+function convertToLegacyClosure(f: Awaited<ReturnType<typeof fixture>>) {
+  f.manifest.sourceHashes = Object.fromEntries(
+    Object.entries(f.manifest.sourceHashes).filter(
+      ([path]) => path.startsWith('src/') || legacyRequiredSources.includes(path),
+    ),
+  )
+  const sourceDigest = hashCanonical(
+    Object.entries(f.manifest.sourceHashes).sort(([a], [b]) => a.localeCompare(b)),
+  )
+  f.manifest.producerSourceSha256 = sourceDigest
+  f.summary.producerSourceSha256 = sourceDigest
+  f.summary.sourceAfterSha256 = sourceDigest
+  f.commitments.expectedProducerSourceSha256 = sourceDigest
+  return f
+}
+
+await test('categorical DEV normalization preserves legacy 64-source profiles and the separate 68-source box profile', async () => {
   for (const profile of [
     {
       id: 'native-luna-categorical-presence-sam-target-plus-neutral-v1',
@@ -237,11 +271,8 @@ await test('categorical DEV normalization preserves three distinct profile ident
       id: 'native-luna-categorical-presence-sam-target-only-v1',
       targetPolicy: 'target-only-v1',
     },
-    {
-      id: 'native-luna-box-confirmation-sam-target-plus-neutral-v1',
-      targetPolicy: 'target-plus-neutral-instruction-v1',
-    },
   ]) {
+    const f = convertToLegacyClosure(await fixture())
     const manifest = structuredClone(f.manifest),
       summary = structuredClone(f.summary)
     manifest.profileId = summary.profileId = profile.id
@@ -258,6 +289,50 @@ await test('categorical DEV normalization preserves three distinct profile ident
     assert.equal(result.rawProposalProvenance.targetPolicy, manifest.targetPolicy)
     assert.equal(result.rawProposalProvenance.physicalCalls, 40)
   }
+  const f = await fixture('box')
+  f.manifest.profileId = f.summary.profileId =
+    'native-luna-box-confirmation-sam-target-plus-neutral-v1'
+  const boxResult = normalizeCategoricalFreshOutput(
+    f.summary,
+    f.manifest,
+    f.corpus.cases,
+    f.corpus.manifests,
+    f.commitments,
+  )
+  assert.equal(boxResult.results.length, 40)
+  assert.equal(boxResult.profileId, f.manifest.profileId)
+})
+
+await test('categorical DEV source closures cannot be relabeled across historical and box profiles', async () => {
+  const legacyUnderNewId = convertToLegacyClosure(await fixture())
+  legacyUnderNewId.manifest.profileId = legacyUnderNewId.summary.profileId =
+    'native-luna-box-confirmation-sam-target-plus-neutral-v1'
+  assert.throws(
+    () =>
+      normalizeCategoricalFreshOutput(
+        legacyUnderNewId.summary,
+        legacyUnderNewId.manifest,
+        legacyUnderNewId.corpus.cases,
+        legacyUnderNewId.corpus.manifests,
+        legacyUnderNewId.commitments,
+      ),
+    /source mismatch/u,
+  )
+
+  const boxUnderLegacyId = await fixture('box')
+  boxUnderLegacyId.manifest.profileId = boxUnderLegacyId.summary.profileId =
+    'native-luna-categorical-presence-sam-target-plus-neutral-v1'
+  assert.throws(
+    () =>
+      normalizeCategoricalFreshOutput(
+        boxUnderLegacyId.summary,
+        boxUnderLegacyId.manifest,
+        boxUnderLegacyId.corpus.cases,
+        boxUnderLegacyId.corpus.manifests,
+        boxUnderLegacyId.commitments,
+      ),
+    /source mismatch/u,
+  )
 })
 
 await test('categorical evaluator rejects missing/duplicate cases, identity, task, policy and source drift', async () => {
