@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
+import { currentRuntimeSourcePaths } from './fixtures/current-runtime-sources.js'
 import {
   categoricalFreshProducerSourceFiles,
   categoricalFreshProducerSourceManifest,
@@ -39,6 +40,11 @@ await test('producer closure directly hashes the executable box-confirmation CLI
   )
   const directHash = createHash('sha256').update(source).digest('hex')
   assert.equal(manifest[relativePath], directHash)
-  assert.equal(Object.keys(manifest).filter((path) => path.startsWith('src/')).length, 54)
+  assert.deepEqual(
+    Object.keys(manifest)
+      .filter((path) => path.startsWith('src/'))
+      .sort(),
+    await currentRuntimeSourcePaths(),
+  )
   assert.ok(Object.hasOwn(manifest, 'src/processes/extract-from-region.ts'))
 })

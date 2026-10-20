@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import sharp from 'sharp'
 import test from 'node:test'
+import { currentRuntimeSourcePaths } from './fixtures/current-runtime-sources.js'
 import {
   CATEGORICAL_FRESH_MAX_PHYSICAL_PER_CASE,
   CATEGORICAL_FRESH_MAX_PHYSICAL_PER_PROFILE,
@@ -135,7 +136,12 @@ await test('producer closure pins the dedicated box-confirmation CLI directly', 
   assert.ok(categoricalFreshProducerSourceFiles.includes(relativePath))
   const source = await categoricalFreshProducerSourceManifest()
   assert.equal(source[relativePath]?.length, 64)
-  assert.equal(Object.keys(source).filter((path) => path.startsWith('src/')).length, 54)
+  assert.deepEqual(
+    Object.keys(source)
+      .filter((path) => path.startsWith('src/'))
+      .sort(),
+    await currentRuntimeSourcePaths(),
+  )
   assert.ok(Object.hasOwn(source, 'src/processes/extract-from-region.ts'))
 })
 

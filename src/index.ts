@@ -46,6 +46,14 @@ export type {
   ExtractInput,
 } from './entities/segmentation.js'
 export type {
+  SegmentationBoxCheckInput,
+  SegmentationBoxCheckResult,
+  SegmentationBoxVerdict,
+  SegmentationBoxCheckPort,
+  SegmentationBoxPresentationPort,
+  SegmentationVerification,
+} from './entities/segmentation-verification.js'
+export type {
   PackedBinaryMask,
   ObjectProposal,
   ObjectProposalInput,

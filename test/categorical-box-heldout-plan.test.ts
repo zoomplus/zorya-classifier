@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { historicalRuntimeSourcePaths } from './fixtures/historical-runtime-sources.js'
+import { currentRuntimeSourcePaths } from './fixtures/current-runtime-sources.js'
 import { dirname, relative, resolve, sep } from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -517,10 +518,21 @@ await test('new heldout CLI requires explicit paid mode and the new named profil
 await test('new source closures include the dedicated plan, CLI, and its transitive local imports', async () => {
   const candidate = await categoricalBoxHeldoutProducerSourceManifest()
   const noImage = await freshTextBoxHeldoutProducerSourceManifest()
-  assert.equal(Object.keys(candidate).filter((path) => path.startsWith('src/')).length, 54)
-  assert.equal(Object.keys(noImage).filter((path) => path.startsWith('src/')).length, 54)
-  assert.equal(Object.keys(candidate).length, 83)
-  assert.equal(Object.keys(noImage).length, 83)
+  const runtimePaths = await currentRuntimeSourcePaths()
+  assert.deepEqual(
+    Object.keys(candidate)
+      .filter((path) => path.startsWith('src/'))
+      .sort(),
+    runtimePaths,
+  )
+  assert.deepEqual(
+    Object.keys(noImage)
+      .filter((path) => path.startsWith('src/'))
+      .sort(),
+    runtimePaths,
+  )
+  assert.equal(Object.keys(candidate).length, runtimePaths.length + 29)
+  assert.equal(Object.keys(noImage).length, runtimePaths.length + 29)
   assert.ok(Object.hasOwn(candidate, 'src/processes/extract-from-region.ts'))
   for (const sources of [candidate, noImage]) {
     assert.ok(Object.hasOwn(sources, './categorical-box-heldout-plan.ts'))

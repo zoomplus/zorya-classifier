@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { locateSchema } from './contracts.js'
 import type { SegmentationMetadata } from './segmentation-metadata.js'
+import type { SegmentationVerification } from './segmentation-verification.js'
 import type {
   LocalizationMetadata,
   LocalizationResult,
@@ -35,11 +36,16 @@ export interface WholeObjectLocated {
   seedRegion: PixelRect
   bounds: ObjectBounds
   completeness: 'visible-object' | 'boundary-limited'
-  method: 'grid-object-extent-v1' | 'pixel-mask-proposals-v1' | 'region-segmentation-v1'
+  method:
+    | 'grid-object-extent-v1'
+    | 'pixel-mask-proposals-v1'
+    | 'region-segmentation-v1'
+    | 'region-checked-segmentation-v1'
   /** Available when the bounds have been derived from actual segmented foreground. */
   center?: { x: number; y: number }
   /** Present only for the explicitly configured, caller-owned mask proposal workflow. */
   proposalMetadata?: SegmentationMetadata
+  verification?: SegmentationVerification
   metadata: LocalizationMetadata
 }
 export type WholeObjectFailure =
@@ -53,5 +59,6 @@ export type WholeObjectFailure =
         | 'representation-limit'
         | 'segmentation-uncertain'
       metadata: LocalizationMetadata
+      verification?: SegmentationVerification
     }
 export type WholeObjectLocalizationResult = WholeObjectLocated | WholeObjectFailure

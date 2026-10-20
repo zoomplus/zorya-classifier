@@ -4,6 +4,7 @@ import type { ObjectBounds, WholeObjectFailure, WholeObjectLocated } from './who
 import { wholeObjectSchema } from './whole-object.js'
 import { z } from 'zod'
 import type { SegmentationMetadata } from './segmentation-metadata.js'
+import type { SegmentationVerification } from './segmentation-verification.js'
 export type { SegmentationMetadata } from './segmentation-metadata.js'
 
 export const extractSchema = wholeObjectSchema.extend({
@@ -36,6 +37,8 @@ export type SegmentationResult =
 /** Caller-owned. settle joins physical work; dispose closes this adapter only. */
 export interface SegmentationPort {
   segment(input: SegmentationInput): Promise<SegmentationResult>
+  /** Optional actual enclosing mask on the full source; previousMask is full-source binary-u8. */
+  expand?(input: SegmentationInput, previousMask: BinaryMask): Promise<SegmentationResult>
   settle(): Promise<void>
   dispose(): Promise<void>
 }
@@ -50,6 +53,7 @@ export type ExtractionResult =
       center: { x: number; y: number }
       offset: { x: number; y: number }
       segmentation: SegmentationMetadata
+      verification?: SegmentationVerification
     }
   | WholeObjectFailure
   | {
@@ -57,6 +61,7 @@ export type ExtractionResult =
       reason: 'segmentation-uncertain'
       location: WholeObjectLocated
       segmentation: SegmentationMetadata
+      verification?: SegmentationVerification
     }
   | {
       status: 'unknown'
@@ -65,4 +70,5 @@ export type ExtractionResult =
       seedLocation: Extract<LocalizationResult, { status: 'located' }>
       metadata: LocalizationMetadata
       segmentation: SegmentationMetadata
+      verification?: SegmentationVerification
     }

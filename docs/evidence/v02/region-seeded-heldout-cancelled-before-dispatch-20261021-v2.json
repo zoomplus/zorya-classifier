@@ -1,0 +1,20 @@
+{
+  "schema": "heldout-cancelled-before-dispatch-v1",
+  "recordedDate": "2026-10-21",
+  "status": "cancelled-before-dispatch",
+  "reason": "Owner requested a closed post-segmentation box-containment check and one actual enclosing-mask correction. This changes the executable recipe and requires separately named development selection before blind qualification.",
+  "cancelledFreeze": {
+    "file": "region-seeded-heldout-run-freeze-20261021-v2.json",
+    "sha256": "f9348f9a3e4abdd3e577ab998e526d03b7148db85d8977c88f2b69caeefe2c81"
+  },
+  "cancelledMethodSelection": {
+    "file": "region-seeded-method-selection-20261021-v2.json",
+    "sha256": "ee54c74f61a057124445d4a86424366eff2763ef9d8556c8f142d70f2233fcf6"
+  },
+  "physicalProviderCalls": 0,
+  "candidateRunsDispatched": 0,
+  "controlRunsDispatched": 0,
+  "sealedCases": 80,
+  "truthOrImagesOpenedByProducer": false,
+  "preserveImmutableFreezesAndEarlierFailures": true
+}

@@ -76,8 +76,9 @@ export function selection(
   result: DecisionResult,
   keys: readonly string[],
   rankingSize = 4,
+  answerKey = 'selection',
 ): ChoiceSelection {
-  const answer = result.answers['selection']
+  const answer = result.answers[answerKey]
   if (!answer) throw new ClassifierError('INVALID_RESPONSE', 'Missing selection')
   if (answer.type === 'choice') return selectChoice(answer, keys)
   if (answer.type === 'ranked-choice') return selectRanking(answer.ranking, keys, rankingSize)
