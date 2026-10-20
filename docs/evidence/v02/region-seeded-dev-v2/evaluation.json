@@ -1,0 +1,232 @@
+{
+  "schema": "region-seeded-dev-v2-public-evidence",
+  "status": "development-admission-passed",
+  "releaseQualified": false,
+  "freeze": {
+    "file": "region-seeded-development-freeze-20261021-v2.json",
+    "sha256": "4f8846aa3ca82462d5fff83ac7dbab8925a090bc85b90d45a6eb9b3433f270dc",
+    "producerSourceSha256": "99beadec729003691c6861166b4738db2cc1ee92699040c98254468b24c998e9",
+    "requireClassifiedPresence": true,
+    "gates": {
+      "completeCases": 40,
+      "positives": 30,
+      "verifiedNegatives": 10,
+      "maximumFalseSeedLocations": 0,
+      "maximumFalseExtractions": 0,
+      "minimumPositiveSeedHits": 1,
+      "minimumMaskDerivedBoxMatches": 1,
+      "minimumExactCanvasMaskIoU08": 1
+    }
+  },
+  "inputs": [
+    {
+      "stratum": "photo",
+      "cases": 20,
+      "inputSha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a",
+      "truthSha256": "793e26845deaa2cb56748ef270b8cb02877218d680068573f02e5af92b26af6a"
+    },
+    {
+      "stratum": "controlled-ui",
+      "cases": 10,
+      "inputSha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc",
+      "truthSha256": "c7944190e1cadab695f2688351df10a14132986040dafb72794bb1df4571abfe"
+    },
+    {
+      "stratum": "controlled-map",
+      "cases": 10,
+      "inputSha256": "b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15",
+      "truthSha256": "874971d3e9344f7c54207064115257e5c802260d2a996a53f96bb6a68b2afad3"
+    }
+  ],
+  "candidate": {
+    "profileId": "native-luna-presence-first-region-seeded-sam-dev-v2",
+    "variant": "region-seeded-sam",
+    "runId": "v02-region-seeded-dev-2026-10-20T221925301Z-95745556",
+    "manifestRawSha256": "e5cb1bbee2a72a32b2a2d65cbca75bbcb0fb6309220399662f6e288dd07ff51e",
+    "summaryRawSha256": "20741658e039172934e0edd3b555e49d8e30367a68855107581bb1478af5e131",
+    "summaryCanonicalSha256InCompletionSeal": "d9d9a1e4e956fcae3b08088b47cd9373c530755da033d14ee06e4750eaa15ca1",
+    "completionRawSha256": "243812213d44cc348c706ba42a73f84a5adc11a37f9255867d472ce8b4caada5",
+    "variantSha256": "4ccbd0960d0984033dca1b49b84108abd5a81b6e55e02e9aef3e02018cead4f7",
+    "sourceBeforeAndAfterSha256": "99beadec729003691c6861166b4738db2cc1ee92699040c98254468b24c998e9",
+    "route": "openai/gpt-6-luna-decisions",
+    "nativeAssetManifestMethod": "mobile-sam-seed-point-v1",
+    "legacyRunnerRegionSeededAssetLabel": "mobile-sam-seed-region-v1",
+    "actualSegmentationResultMethod": "mobile-sam-seed-point-v1",
+    "nativeBackend": "MobileSAM CPU",
+    "nativeEncoderSha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749",
+    "nativeDecoderSha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe",
+    "denominator": 40,
+    "classification": {
+      "correct": 35,
+      "denominator": 40,
+      "accuracy": 0.875,
+      "unanswered": 0
+    },
+    "strata": {
+      "photo": {
+        "cases": 20,
+        "positive": 16,
+        "verifiedNegative": 4,
+        "classificationCorrect": 17,
+        "extractionStatuses": {
+          "extracted": 10,
+          "failed": 6,
+          "unknown": 3,
+          "not-found": 1
+        },
+        "seedLocated": 10,
+        "positiveSeedBoxIntersections": 10,
+        "falseSeedLocations": 0,
+        "maskDerivedBoxMatches": 5,
+        "falseExtractions": 0
+      },
+      "controlledUi": {
+        "cases": 10,
+        "positive": 7,
+        "verifiedNegative": 3,
+        "classificationCorrect": 8,
+        "extractionStatuses": {
+          "extracted": 5,
+          "unknown": 4,
+          "not-found": 1
+        },
+        "seedLocated": 5,
+        "positiveSeedBoxIntersections": 1,
+        "falseSeedLocations": 0,
+        "maskDerivedBoxMatches": 0,
+        "falseExtractions": 0
+      },
+      "controlledMap": {
+        "cases": 10,
+        "positive": 7,
+        "verifiedNegative": 3,
+        "classificationCorrect": 10,
+        "extractionStatuses": {
+          "extracted": 7,
+          "not-found": 3
+        },
+        "seedLocated": 7,
+        "positiveSeedBoxIntersections": 7,
+        "falseSeedLocations": 0,
+        "maskDerivedBoxMatches": 0,
+        "falseExtractions": 0
+      }
+    },
+    "seedRegionCoarseProxy": {
+      "located": 22,
+      "locatedOnPositiveCases": 22,
+      "locatedOnVerifiedNegatives": 0,
+      "positiveBoxIntersections": 18,
+      "positiveDenominator": 30,
+      "falseSeedLocations": 0,
+      "falseExtractions": 0,
+      "meaning": "Any positive-area seed-cell/reference-box overlap; a coarse search proxy, never whole-object localization."
+    },
+    "maskDerivedWholeObjectBoxes": {
+      "positiveMatches": 5,
+      "positiveDenominator": 30,
+      "criterion": "IoU >= 0.5 and reference-box coverage >= 0.9",
+      "falseLocations": 0,
+      "negativeDenominator": 10,
+      "unknown": 7,
+      "failed": 6
+    },
+    "independentExactCanvasMasks": {
+      "references": 7,
+      "scored": 7,
+      "iouAtLeast0_8": 1,
+      "unavailable": 0,
+      "unannotatedCases": 35,
+      "perReferenceIoU": [
+        0.7589947292, 0, 0.0002087876, 0.9433618606, 0.5063549934, 0.6049145284, 0.3675930123
+      ]
+    },
+    "physical": {
+      "calls": 134,
+      "knownCostUsd": 0.0608289,
+      "unknownCostCalls": 6,
+      "accountedExposureUsd": 0.3608289,
+      "httpStatusCounts": {
+        "200": 128,
+        "502_PROVIDER": 6
+      },
+      "inFlightAtSeal": 0
+    },
+    "independentEvaluation": {
+      "evaluatorCommit": "afb2bce3befb8002050d3fca5660cdc6464f5484",
+      "evaluatorSha256": "208e94d58622f59f3299e79ff3b0ce0e468c118f468060623e0e8b93380c1579",
+      "outputSha256": "64ab30c6085b6b0e404416f18bafd9246358a8de0ccb142350df04f17efd7507"
+    }
+  },
+  "noImageControl": {
+    "profileId": "native-luna-presence-first-region-no-image-control-dev-v2",
+    "variant": "no-image-control",
+    "runId": "v02-region-seeded-dev-2026-10-20T222226064Z-b84bf16f",
+    "manifestRawSha256": "9e0ab7e6662bafbd21f16855398bf254906e544973181adf6def2f6c3c4848bb",
+    "summaryRawSha256": "2e34686c6ba5e85666926c6169ebc22adb2d353e37550ffc35418dc57c18f6f1",
+    "summaryCanonicalSha256InCompletionSeal": "aeb67b5b685f3465616fabadf9479d70fe0d1aa559831605f69a0df9287ed2bc",
+    "completionRawSha256": "2a974aa6d28588195522b8d0eadf482534a9485bf637ae9d49fabc678482d778",
+    "variantSha256": "c2f46326480853101fef59374cfd9363b45d44666f8c455cbe36ab9d206aa953",
+    "denominator": 40,
+    "classification": {
+      "correct": 10,
+      "answered": 40,
+      "unanswered": 0
+    },
+    "imageFetchAudit": {
+      "checked": 40,
+      "imageParts": 0,
+      "verifiedImageFree": true
+    },
+    "seedLocations": 0,
+    "physical": {
+      "calls": 40,
+      "knownCostUsd": 0.0008353,
+      "unknownCostCalls": 0,
+      "accountedExposureUsd": 0.0008353,
+      "httpStatusCounts": {
+        "200": 40
+      },
+      "inFlightAtSeal": 0
+    },
+    "independentEvaluation": {
+      "evaluatorCommit": "afb2bce3befb8002050d3fca5660cdc6464f5484",
+      "evaluatorSha256": "208e94d58622f59f3299e79ff3b0ce0e468c118f468060623e0e8b93380c1579",
+      "outputSha256": "6303a8a818401235e6edba5be2c88d7fbe9f5921080cf873bb677775207a4fda"
+    }
+  },
+  "pairedPhotoSeedDiagnostic": {
+    "candidateProfile": "native-luna-presence-first-region-seeded-sam-dev-v2",
+    "controlProfile": "native-luna-presence-first-region-no-image-control-dev-v2",
+    "population": "16 positive photo cases",
+    "metric": "coarse seed-region/reference-box intersection; not whole-object localization",
+    "bootstrap": {
+      "iterations": 10000,
+      "seed": "0x5a4f5259",
+      "confidence": 0.95,
+      "difference": 0.625,
+      "lower": 0.375,
+      "upper": 0.875
+    },
+    "exactReferenceMaskForegroundSubset": {
+      "pairs": 5,
+      "difference": 0.8,
+      "lower": 0.4,
+      "upper": 1
+    },
+    "outputSha256": "ff3f7e7b3b6b343594c97ff6146071daf1100134461d4034499460c4cb4121ea"
+  },
+  "devAdmission": {
+    "passed": true,
+    "conditions": {
+      "complete40CaseRun": true,
+      "zeroFalseSeedLocations": true,
+      "zeroFalseExtractions": true,
+      "positiveSeedHitPresent": true,
+      "maskDerivedBoxMatchPresent": true,
+      "exactCanvasMaskIoU08Present": true
+    },
+    "releaseOrHeldoutQualification": false,
+    "note": "The DEV admission result permits the frozen recipe to be considered for a separate blind run; it does not establish heldout performance or release qualification."
+  }
+}

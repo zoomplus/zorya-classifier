@@ -1,0 +1,15 @@
+# Region-seeded DEV v2: frozen development gates passed
+
+The v2 candidate passed the development-admission conditions frozen before dispatch: all 40 cases completed, there were zero false seed locations and zero false extractions, and at least one positive seed hit, mask-derived box match, and exact-canvas mask with IoU at least 0.8. This permits consideration for a separate blind evaluation; it does not qualify a release or establish heldout performance. The candidate still matched only 5 of 30 positive whole-object boxes, so localization quality remains limited.
+
+The v2 composition reused the existing class decision and allowed the unchanged region locator plus full-source segmenter to run only after a successful “present” classification. An “absent” result skipped localization with `not-found`; a classification failure skipped localization with a recorded failure. The evaluator checked these skips for the frozen `requireClassifiedPresence` policy and required them to carry no seed or extraction work. No extra model query was added.
+
+The candidate classified 35/40 cases correctly. The coarse seed-cell metric intersected a reference box on 18/30 positive cases; this metric is only a search proxy and does not mean the whole object was located. The separate mask-derived box metric passed 5/30 positive cases using the frozen IoU >= 0.5 and reference-box coverage >= 0.9 rule. There were no false locations among 10 verified negatives. All 40 rows remain in the denominator, including 7 unknown and 6 failed extraction outcomes.
+
+All seven independent exact-canvas mask references were scored. One reached IoU 0.8; six did not. The other 35 cases had no reference mask and remain unannotated for mask scoring. Mask success is not inferred from a matching box.
+
+The no-image control answered all 40 classification requests, with 10 correct, and verified zero image parts in all 40 checked provider requests. It returned no seeds or masks. The paired comparison covers only the 16 positive photo cases and the coarse seed-box-intersection metric; it does not compare a candidate mask box with a control seed region.
+
+The recorded route was `openai/gpt-6-luna-decisions`, with CPU MobileSAM. The freeze's native asset manifest calls the method `mobile-sam-seed-point-v1`; a legacy runner field retains the label `mobile-sam-seed-region-v1`; the actual segmentation result metadata reports `mobile-sam-seed-point-v1`. These names refer to the same pinned encoder and decoder assets and are preserved here as recorded. Benchmark model routes are caller configurations, not library defaults.
+
+The 20 photograph cases use Open Images annotations, 10 UI cases are controlled Geany captures with a known GTK style, and 10 map cases are controlled Freeciv captures from one game family. The controlled strata are not natural user captures and do not represent diverse applications or games. The JSON records the exact freeze, source, input, truth, raw run, completion-seal, and independent-evaluation digests. It contains aggregate metrics only, with no per-case rows, image pixels, masks, or machine-local paths.
