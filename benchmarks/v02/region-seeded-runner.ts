@@ -32,6 +32,18 @@ export const regionSeededNoImageProfile = Object.freeze({
   purpose:
     'paired original exposed DEV region-search and classification control without image parts',
 })
+export const regionPresenceFirstProfile = Object.freeze({
+  id: 'native-luna-presence-first-region-seeded-sam-dev-v2',
+  phase: 'dev',
+  targetPolicy: 'target-plus-neutral-instruction-v1',
+  purpose:
+    'full original exposed DEV pass with existing closed classification gating region search',
+})
+export const regionPresenceFirstNoImageProfile = Object.freeze({
+  id: 'native-luna-presence-first-region-no-image-control-dev-v2',
+  phase: 'dev',
+  purpose: 'paired original exposed DEV no-image control with the same classification gate',
+})
 export const regionSeededHeldoutProfile = Object.freeze({
   id: 'native-luna-region-seeded-sam-heldout-v1',
   phase: 'heldout',
@@ -134,6 +146,7 @@ export interface RegionSeededRunnerOptions {
   decoderPath: string
   profileId: string
   variant: 'region-seeded-sam' | 'no-image-control'
+  requireClassifiedPresence?: boolean
   phase: 'dev' | 'heldout'
   expectedCaseCount: number
   maxPhysicalCalls: number
@@ -256,6 +269,8 @@ function safeReason(value: unknown): string | undefined {
     'contradictory-evidence',
     'layout-limit',
     'segmentation-uncertain',
+    'classification-absent',
+    'classification-failed',
   ])
   return typeof value === 'string' && allowed.has(value) ? value : undefined
 }
@@ -496,7 +511,7 @@ function persistExtracted(
 
 type Extracted = Extract<ExtractionResult, { status: 'extracted' }>
 
-async function processCase(args: {
+export async function processRegionSeededCase(args: {
   item: FreshCase
   root: string
   caseDirectory: string
@@ -504,6 +519,7 @@ async function processCase(args: {
   decision: DecisionPort
   segmentation?: SegmentationPort
   variant: RegionSeededRunnerOptions['variant']
+  requireClassifiedPresence?: boolean
   recorder: Recorder
   signal: AbortSignal
 }): Promise<RegionSeededCaseResult> {
@@ -515,6 +531,7 @@ async function processCase(args: {
     decision,
     segmentation,
     variant,
+    requireClassifiedPresence = false,
     recorder,
     signal,
   } = args
@@ -617,6 +634,15 @@ async function processCase(args: {
     // A provider/JSON failure is an ordinary failed case. Losing the recorder's own
     // request/receipt evidence is a run-level stop condition, before another stage.
     assertRecorderHealthy(recorder)
+
+    if (requireClassifiedPresence && classify.status !== 'ok') {
+      extraction = skippedExtraction('classification-failed')
+      return { caseId: item.caseId, imageSha256: item.image.sha256, classify, extraction }
+    }
+    if (requireClassifiedPresence && classify.value !== 'present') {
+      extraction = skippedExtraction('classification-absent')
+      return { caseId: item.caseId, imageSha256: item.image.sha256, classify, extraction }
+    }
 
     const extractionStarted = performance.now()
     const physicalStart = recorder.calls.length
@@ -764,9 +790,35 @@ async function processCase(args: {
   return { caseId: item.caseId, imageSha256: item.image.sha256, classify, extraction }
 }
 
+function skippedExtraction(
+  reason: 'classification-absent' | 'classification-failed',
+): RegionExtractionRecord {
+  return {
+    status: reason === 'classification-absent' ? 'not-found' : 'failed',
+    reason,
+    durationMs: 0,
+    physicalCalls: 0,
+    logicalCalls: 0,
+    requestHashes: [],
+    seed: {
+      status: 'not-reached',
+      durationMs: 0,
+      physicalCalls: 0,
+      logicalCalls: 0,
+      requestHashes: [],
+    },
+  }
+}
+
 export async function runRegionSeededProfile(options: RegionSeededRunnerOptions) {
-  const expectedProfile =
-    options.variant === 'region-seeded-sam'
+  const requireClassifiedPresence = options.requireClassifiedPresence === true
+  if (requireClassifiedPresence && options.phase !== 'dev')
+    throw new TypeError('Presence-first gating is a separate DEV-only recipe')
+  const expectedProfile = requireClassifiedPresence
+    ? options.variant === 'region-seeded-sam'
+      ? regionPresenceFirstProfile.id
+      : regionPresenceFirstNoImageProfile.id
+    : options.variant === 'region-seeded-sam'
       ? options.phase === 'dev'
         ? regionSeededProfile.id
         : regionSeededHeldoutProfile.id
@@ -893,7 +945,9 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     taskSha256: hashCanonical(taskFor(item)),
   }))
   const promptPolicy = {
-    targetPolicy: regionSeededProfile.targetPolicy,
+    targetPolicy: requireClassifiedPresence
+      ? regionPresenceFirstProfile.targetPolicy
+      : regionSeededProfile.targetPolicy,
     classificationClasses: [
       { id: 'present', description: 'The target in the question is visible in this image.' },
       { id: 'absent', description: 'The target in the question is not visible in this image.' },
@@ -903,11 +957,18 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
       'Original three-choice region search once; full-source MobileSAM seed-region extraction once; no extent or whole-object model confirmation.',
     noImageControl:
       'Remove all image parts at DecisionPort boundary; assert no image part at actual fetch; no segmentation, OCR, or hidden CV.',
+    ...(requireClassifiedPresence
+      ? {
+          presenceFirstGate:
+            'Reuse the existing closed classification result. Run no region search or segmentation unless classification succeeded with value present; absent and failed classifications are retained with extraction skipped.',
+        }
+      : {}),
   }
   const variantSha256 = hashCanonical({
     profileId: options.profileId,
     phase: options.phase,
     variant: options.variant,
+    ...(requireClassifiedPresence ? { requireClassifiedPresence: true as const } : {}),
     route,
     policy: regionSeededRecipe,
     promptPolicy,
@@ -922,9 +983,13 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     phase: options.phase,
     purpose:
       options.phase === 'dev'
-        ? options.variant === 'region-seeded-sam'
-          ? regionSeededProfile.purpose
-          : regionSeededNoImageProfile.purpose
+        ? requireClassifiedPresence
+          ? options.variant === 'region-seeded-sam'
+            ? regionPresenceFirstProfile.purpose
+            : regionPresenceFirstNoImageProfile.purpose
+          : options.variant === 'region-seeded-sam'
+            ? regionSeededProfile.purpose
+            : regionSeededNoImageProfile.purpose
         : 'frozen heldout photo, independent UI and independent map pass',
     targetPolicy: regionSeededProfile.targetPolicy,
     producerSourceSha256: sourceBeforeSha256,
@@ -937,7 +1002,9 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     imageChecks,
     route,
     variant: options.variant,
-    policy: regionSeededRecipe,
+    policy: requireClassifiedPresence
+      ? { ...regionSeededRecipe, requireClassifiedPresence: true }
+      : regionSeededRecipe,
     ...(verifiedAssetManifest
       ? { nativeAssets: verifiedAssetManifest }
       : { native: 'none; image parts are removed before recording and asserted absent at fetch' }),
@@ -1013,7 +1080,7 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
               : nativeDecision
           const factory =
             options.createClassifier ?? ((classifierOptions) => createClassifier(classifierOptions))
-          results[index] = await processCase({
+          results[index] = await processRegionSeededCase({
             item,
             root: corpus.imageRoot,
             caseDirectory: caseDir,
@@ -1021,6 +1088,7 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
             decision: apiDecision,
             ...(segmenter ? { segmentation: segmenter } : {}),
             variant: options.variant,
+            ...(requireClassifiedPresence ? { requireClassifiedPresence: true } : {}),
             recorder,
             signal: controller.signal,
           })
@@ -1091,6 +1159,8 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     runId,
     profileId: options.profileId,
     phase: options.phase,
+    ...(requireClassifiedPresence ? { requireClassifiedPresence: true as const } : {}),
+    ...(requireClassifiedPresence ? { requireClassifiedPresence: true } : {}),
     status:
       failed ||
       missingCaseIds.length ||

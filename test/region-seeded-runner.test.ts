@@ -1,17 +1,30 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readdir, rm, writeFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import type { DecisionPort, DecisionRequest, DecisionResult } from '../src/entities/contracts.js'
+import sharp from 'sharp'
+import type {
+  ClassificationResult,
+  DecisionPort,
+  DecisionRequest,
+  DecisionResult,
+} from '../src/entities/contracts.js'
+import type { Classifier, ClassifierOptions } from '../src/app/create-classifier.js'
+import type { FreshCase } from '../benchmarks/v02/fresh-corpus.js'
+import type { SegmentationPort } from '../src/entities/segmentation.js'
 import {
   assertRecorderHealthy,
   assertNoImagePartsAtFetch,
   regionSeededDevManifests,
   regionSeededNoImageProfile,
   regionSeededProfile,
+  regionPresenceFirstNoImageProfile,
+  regionPresenceFirstProfile,
   regionSeededProducerSourceManifest,
   regionSeededRecipe,
+  processRegionSeededCase,
   removeImagesAtDecisionBoundary,
 } from '../benchmarks/v02/region-seeded-runner.js'
 import type { Recorder } from '../benchmarks/v02/recording.js'
@@ -22,6 +35,11 @@ import { parseRegionSeededArgs } from '../benchmarks/v02/run-region-seeded-dev.j
 await test('region-seeded and no-image controls are distinct named fixed recipes', () => {
   assert.equal(regionSeededProfile.id, 'native-luna-region-seeded-sam-dev-v1')
   assert.equal(regionSeededNoImageProfile.id, 'native-luna-region-no-image-control-dev-v1')
+  assert.equal(regionPresenceFirstProfile.id, 'native-luna-presence-first-region-seeded-sam-dev-v2')
+  assert.equal(
+    regionPresenceFirstNoImageProfile.id,
+    'native-luna-presence-first-region-no-image-control-dev-v2',
+  )
   assert.equal(regionSeededRecipe.model, 'openai/gpt-6-luna-decisions')
   assert.equal(regionSeededRecipe.provider, 'openai')
   assert.equal(regionSeededRecipe.regionSearchPasses, 3)
@@ -41,6 +59,58 @@ await test('region-seeded and no-image controls are distinct named fixed recipes
       'b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15',
     ],
   )
+})
+
+await test('presence-first gate skips candidate extraction and control region search after absent classification', async () => {
+  for (const variant of ['region-seeded-sam', 'no-image-control'] as const) {
+    const fixture = await makeProcessCaseFixture({
+      variant,
+      classify: { choice: 'absent' },
+    })
+    try {
+      const result = await processRegionSeededCase(fixture.args)
+      assert.equal(result.classify.status, 'ok')
+      assert.equal(result.classify.value, 'absent')
+      assert.equal(result.extraction.status, 'not-found')
+      assert.equal(result.extraction.reason, 'classification-absent')
+      assert.equal(result.extraction.physicalCalls, 0)
+      assert.equal(result.extraction.logicalCalls, 0)
+      assert.equal(result.extraction.seed.status, 'not-reached')
+      assert.equal(fixture.locateCalls(), 0)
+      assert.equal(fixture.extractCalls(), 0)
+      assert.equal(fixture.segmentCalls(), 0)
+      assert.equal(fixture.classifyCalls(), 1)
+      assert.equal(fixture.disposeCalls(), 1)
+      assert.deepEqual(await readdir(fixture.caseDirectory), [])
+    } finally {
+      await fixture.dispose()
+    }
+  }
+})
+
+await test('presence-first gate skips region work and artifacts after failed classification', async () => {
+  const fixture = await makeProcessCaseFixture({
+    variant: 'region-seeded-sam',
+    classifyError: Object.assign(new Error('fixture provider failure'), { code: 'PROVIDER' }),
+  })
+  try {
+    const result = await processRegionSeededCase(fixture.args)
+    assert.equal(result.classify.status, 'failed')
+    assert.equal(result.classify.errorCode, 'PROVIDER')
+    assert.equal(result.extraction.status, 'failed')
+    assert.equal(result.extraction.reason, 'classification-failed')
+    assert.equal(result.extraction.physicalCalls, 0)
+    assert.equal(result.extraction.logicalCalls, 0)
+    assert.equal(result.extraction.seed.status, 'not-reached')
+    assert.equal(fixture.locateCalls(), 0)
+    assert.equal(fixture.extractCalls(), 0)
+    assert.equal(fixture.segmentCalls(), 0)
+    assert.equal(fixture.classifyCalls(), 1)
+    assert.equal(fixture.disposeCalls(), 1)
+    assert.deepEqual(await readdir(fixture.caseDirectory), [])
+  } finally {
+    await fixture.dispose()
+  }
 })
 
 await test('no-image DecisionPort strips image parts while preserving text state and questions', async () => {
@@ -211,9 +281,32 @@ await test('CLI defaults to the pinned complete exposed DEV candidate and requir
   )
   const control = parseRegionSeededArgs(['--dry-run', '--variant', 'no-image-control'])
   assert.equal(control.profileId, regionSeededNoImageProfile.id)
+  const gatedCandidate = parseRegionSeededArgs(['--dry-run', '--presence-first'])
+  assert.equal(gatedCandidate.profileId, regionPresenceFirstProfile.id)
+  assert.equal(gatedCandidate.requireClassifiedPresence, true)
+  const gatedControl = parseRegionSeededArgs([
+    '--dry-run',
+    '--variant',
+    'no-image-control',
+    '--presence-first',
+  ])
+  assert.equal(gatedControl.profileId, regionPresenceFirstNoImageProfile.id)
+  assert.equal(gatedControl.requireClassifiedPresence, true)
   assert.throws(
     () => parseRegionSeededArgs(['--dry-run', '--phase', 'heldout']),
     /HELDOUT requires --freeze/u,
+  )
+  assert.throws(
+    () =>
+      parseRegionSeededArgs([
+        '--dry-run',
+        '--phase',
+        'heldout',
+        '--presence-first',
+        '--freeze',
+        '/tmp/freeze.json',
+      ]),
+    /Presence-first is a separate DEV-only profile/u,
   )
   assert.throws(
     () =>
@@ -243,3 +336,139 @@ await test('source seal includes the new runner, CLI, no-image guard and policy 
   ])
     assert.ok(sources[path], `missing source pin ${path}`)
 })
+
+async function makeProcessCaseFixture(input: {
+  variant: 'region-seeded-sam' | 'no-image-control'
+  classify?: { choice: 'present' | 'absent' }
+  classifyError?: Error
+}) {
+  const root = await mkdtemp(join(tmpdir(), 'presence-first-case-'))
+  const bytes = await sharp({
+    create: { width: 2, height: 2, channels: 3, background: { r: 20, g: 30, b: 40 } },
+  })
+    .png()
+    .toBuffer()
+  const imagePath = join(root, 'image.png')
+  await writeFile(imagePath, bytes)
+  const item: FreshCase = {
+    caseId: 'fixture-case',
+    image: {
+      path: 'image.png',
+      sha256: createHash('sha256').update(bytes).digest('hex'),
+      width: 2,
+      height: 2,
+    },
+    locate: { target: 'named target' },
+    classify: { question: 'Is the target present?', options: ['present', 'absent'] },
+  }
+  const caseDirectory = join(root, 'case-output')
+  let locateCalls = 0
+  let extractCalls = 0
+  let segmentCalls = 0
+  let classifyCalls = 0
+  let disposeCalls = 0
+  const metadata = {
+    model: 'fixture',
+    provider: 'fixture',
+    requestId: null,
+    durationMs: 1,
+    costUsd: 0,
+    attempts: 1,
+  }
+  const result: ClassificationResult = {
+    choice: input.classify?.choice ?? 'present',
+    nativeChoice: input.classify?.choice ?? 'present',
+    probabilities: { [input.classify?.choice ?? 'present']: 1 },
+    tied: [input.classify?.choice ?? 'present'],
+    metadata,
+  }
+  const decision: DecisionPort = { decide: async () => ({ answers: {}, metadata }) }
+  const recorder: Recorder = {
+    port: decision,
+    calls: [],
+    logicalCalls: [],
+    fetch: async () => new Response('{}'),
+    persistenceFailures: [],
+  }
+  const segmentation: SegmentationPort = {
+    async segment() {
+      segmentCalls++
+      return {
+        status: 'unknown',
+        reason: 'fixture',
+        metadata: {
+          method: 'fixture',
+          backend: 'fixture',
+          durationMs: 1,
+          input: { width: 2, height: 2 },
+        },
+      }
+    },
+    async settle() {},
+    async dispose() {},
+  }
+  const classifierFactory = (options: ClassifierOptions): Classifier => ({
+    async classify() {
+      classifyCalls++
+      if (input.classifyError) throw input.classifyError
+      return result
+    },
+    async locate() {
+      locateCalls++
+      return {
+        status: 'not-found',
+        reason: 'absent-in-evaluated-region',
+        metadata: {
+          image: { width: 2, height: 2, coordinateSpace: 'oriented-source-pixels' },
+          stages: [],
+          durationMs: 1,
+          knownCostUsd: 0,
+          unknownCostCount: 0,
+        },
+      }
+    },
+    async extract() {
+      extractCalls++
+      return {
+        status: 'not-found',
+        reason: 'absent-in-evaluated-region',
+        metadata: {
+          image: { width: 2, height: 2, coordinateSpace: 'oriented-source-pixels' },
+          stages: [],
+          durationMs: 1,
+          knownCostUsd: 0,
+          unknownCostCount: 0,
+        },
+      }
+    },
+    async dispose() {
+      disposeCalls++
+      assert.equal(options.segmentation !== undefined, input.variant === 'region-seeded-sam')
+    },
+  })
+  const args: Parameters<typeof processRegionSeededCase>[0] = {
+    item,
+    root,
+    caseDirectory,
+    classifierFactory,
+    decision,
+    ...(input.variant === 'region-seeded-sam' ? { segmentation } : {}),
+    variant: input.variant,
+    requireClassifiedPresence: true,
+    recorder,
+    signal: new AbortController().signal,
+  }
+  return {
+    args,
+    caseDirectory,
+    locateCalls: () => locateCalls,
+    extractCalls: () => extractCalls,
+    segmentCalls: () => segmentCalls,
+    classifyCalls: () => classifyCalls,
+    disposeCalls: () => disposeCalls,
+    async dispose() {
+      bytes.fill(0)
+      await rm(root, { recursive: true, force: true })
+    },
+  }
+}

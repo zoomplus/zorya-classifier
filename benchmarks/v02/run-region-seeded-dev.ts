@@ -14,6 +14,8 @@ import {
   regionSeededProfile,
   regionSeededHeldoutProfile,
   regionSeededProducerSourceManifest,
+  regionPresenceFirstNoImageProfile,
+  regionPresenceFirstProfile,
   runRegionSeededProfile,
 } from './region-seeded-runner.js'
 
@@ -37,6 +39,7 @@ export function parseRegionSeededArgs(args: readonly string[]) {
       phase: { type: 'string', default: 'dev' },
       variant: { type: 'string', default: 'region-seeded-sam' },
       'profile-id': { type: 'string' },
+      'presence-first': { type: 'boolean', default: false },
       'image-root': { type: 'string', default: '/root/work/zorya-classifier-worktrees/v02/corpus' },
       'photo-inputs': { type: 'string', default: regionSeededDevManifests[0].path },
       'photo-sha256': { type: 'string', default: regionSeededDevManifests[0].sha256 },
@@ -55,8 +58,14 @@ export function parseRegionSeededArgs(args: readonly string[]) {
     throw new TypeError('Choose exactly one of --dry-run or --allow-paid')
   const phase = z.enum(['dev', 'heldout']).parse(values.phase)
   const variant = z.enum(['region-seeded-sam', 'no-image-control']).parse(values.variant)
-  const expectedProfile =
-    variant === 'region-seeded-sam'
+  const requireClassifiedPresence = values['presence-first']
+  if (requireClassifiedPresence && phase !== 'dev')
+    throw new TypeError('Presence-first is a separate DEV-only profile')
+  const expectedProfile = requireClassifiedPresence
+    ? variant === 'region-seeded-sam'
+      ? regionPresenceFirstProfile.id
+      : regionPresenceFirstNoImageProfile.id
+    : variant === 'region-seeded-sam'
       ? phase === 'dev'
         ? regionSeededProfile.id
         : regionSeededHeldoutProfile.id
@@ -89,6 +98,7 @@ export function parseRegionSeededArgs(args: readonly string[]) {
     phase,
     variant,
     profileId,
+    requireClassifiedPresence,
     expectedCaseCount: phase === 'dev' ? 40 : 80,
     imageRoot: resolve(z.string().min(1).parse(values['image-root'])),
     outputRoot: resolve(z.string().min(1).parse(values.out)),
@@ -179,6 +189,7 @@ async function preflight(options: ReturnType<typeof parseRegionSeededArgs>) {
         profileId: options.profileId,
         phase: options.phase,
         variant: options.variant,
+        requireClassifiedPresence: options.requireClassifiedPresence,
         manifests: corpus.manifests,
         plannedCaseIds: corpus.cases.map((item) => item.caseId),
         imageChecks: images,
@@ -220,6 +231,7 @@ export async function runRegionSeededCli(args: readonly string[]) {
     profileId: options.profileId,
     phase: options.phase,
     variant: options.variant,
+    requireClassifiedPresence: options.requireClassifiedPresence,
     expectedCaseCount: options.expectedCaseCount,
     maxPhysicalCalls: options.maxPhysicalCalls,
     maxCostUsd: options.maxCostUsd,
