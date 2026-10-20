@@ -2,6 +2,42 @@ import { z } from 'zod'
 
 import { pixelRectSchema } from '../../entities/contracts.js'
 
+/** Validate canonical RFC 4648 base64 without a large repeated-group RegExp. */
+function isCanonicalBase64(value: string): boolean {
+  if (value.length % 4 !== 0) return false
+  if (value.length === 0) return true
+
+  const alphabet = (code: number): number => {
+    if (code >= 65 && code <= 90) return code - 65
+    if (code >= 97 && code <= 122) return code - 97 + 26
+    if (code >= 48 && code <= 57) return code - 48 + 52
+    if (code === 43) return 62
+    if (code === 47) return 63
+    return -1
+  }
+
+  const length = value.length
+  const padding =
+    value.charCodeAt(length - 1) === 61 ? (value.charCodeAt(length - 2) === 61 ? 2 : 1) : 0
+  const contentEnd = length - padding
+  for (let index = 0; index < contentEnd; index++)
+    if (alphabet(value.charCodeAt(index)) < 0) return false
+  for (let index = contentEnd; index < length; index++)
+    if (value.charCodeAt(index) !== 61) return false
+
+  // Padding must encode zero bits so there is exactly one spelling per byte sequence.
+  if (padding === 2) return (alphabet(value.charCodeAt(length - 3)) & 15) === 0
+  if (padding === 1) return (alphabet(value.charCodeAt(length - 2)) & 3) === 0
+  return true
+}
+
+function base64Schema(maxLength: number) {
+  return z
+    .string()
+    .max(maxLength)
+    .refine((value) => value.length <= maxLength && isCanonicalBase64(value))
+}
+
 const modelOptionsSchema = z
   .object({
     encoderPath: z.string().min(1).max(4096),
@@ -33,10 +69,7 @@ const mobileSamRequestSchema = z
     kind: z.literal('mobile-sam'),
     width: z.number().int().positive().max(16384),
     height: z.number().int().positive().max(16384),
-    rgba: z
-      .string()
-      .max(90_000_000)
-      .regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/),
+    rgba: base64Schema(90_000_000),
     seedRegion: pixelRectSchema,
     wholeRegion: pixelRectSchema,
     roi: pixelRectSchema,
@@ -59,10 +92,7 @@ const mobileSamProposalsRequestSchema = z
     kind: z.literal('mobile-sam-proposals'),
     width: z.number().int().positive().max(16384),
     height: z.number().int().positive().max(16384),
-    rgba: z
-      .string()
-      .max(11_200_000)
-      .regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/),
+    rgba: base64Schema(11_200_000),
     seedRegion: pixelRectSchema,
     roi: pixelRectSchema,
     options: modelOptionsSchema.extend({ executionProvider: z.literal('cpu') }),
@@ -82,10 +112,7 @@ const grabCutRequestSchema = z
     kind: z.literal('grabcut'),
     width: z.number().int().positive().max(16384),
     height: z.number().int().positive().max(16384),
-    rgba: z
-      .string()
-      .max(90_000_000)
-      .regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/),
+    rgba: base64Schema(90_000_000),
     seedRegion: pixelRectSchema,
     wholeRegion: pixelRectSchema,
     roi: pixelRectSchema,
@@ -114,10 +141,7 @@ export const nativeSegmentationReplySchema = z
     status: z.literal('segmented'),
     width: z.number().int().positive(),
     height: z.number().int().positive(),
-    mask: z
-      .string()
-      .max(32_000_000)
-      .regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/),
+    mask: base64Schema(32_000_000),
     method: z.string().min(1).max(128),
   })
   .strict()
@@ -135,10 +159,7 @@ export const nativeObjectProposalReplySchema = z
         z
           .object({
             id: z.string().regex(/^C(?:0[0-9]|1[0-9]|2[0-9]|3[0-5])$/),
-            mask: z
-              .string()
-              .max(349_528)
-              .regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/),
+            mask: base64Schema(349_528),
             qualityScore: z.number().finite(),
           })
           .strict(),
