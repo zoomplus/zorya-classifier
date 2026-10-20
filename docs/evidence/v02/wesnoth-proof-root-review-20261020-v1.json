@@ -1,0 +1,76 @@
+{
+  "schema": "independent-wesnoth-excluded-proof-review-v1",
+  "sourceMapSha256": "41d2b65d3098c77c68d560832938c9e38bf2a549496e338cb158835ebbdff417",
+  "imageSha256": {
+    "a": "560f6f6fa5b69e0ff30f5416457f537ede44c2d023cd9096785ad98865d19c86",
+    "b": "cc7763407c1084802c3ab5e78c538ce7da6c7c1186d396c4daae6304bfabd569",
+    "a2": "0a89337c48966476368131328402d056940da7fefc67071e6883b825a5b27917"
+  },
+  "roiRawSha256": {
+    "a": "49416ea53f982154205b2a0e6c04deea74c5a34db6d3eddfa6e706793e14927a",
+    "b": "440809bfeff0badb16815394f64ee40b62d1c3ee904c3670e97bf927d40546e1",
+    "a2": "49416ea53f982154205b2a0e6c04deea74c5a34db6d3eddfa6e706793e14927a"
+  },
+  "captureSize": {
+    "width": 1024,
+    "height": 768
+  },
+  "contentRect": {
+    "left": 856,
+    "top": 11,
+    "width": 160,
+    "height": 212
+  },
+  "bitmapRoi": {
+    "left": 856,
+    "top": 11,
+    "width": 159,
+    "height": 212
+  },
+  "sameStateRoiByteIdentical": true,
+  "markerCount": 51,
+  "changedPixels": 1297,
+  "float32RepeatedSampler": {
+    "projectedPixels": 1363,
+    "deltaInside": 1297,
+    "outside": [],
+    "projectedUnchanged": 66,
+    "allMarkerProjectionsIntersectDelta": true,
+    "sampledSourceYAtRow53": 215,
+    "cursorAtRow53": 215.9999237060547
+  },
+  "idealRationalSampler": {
+    "projectedPixels": 1363,
+    "deltaInside": 1294,
+    "outside": [
+      [923, 64],
+      [924, 64],
+      [925, 64]
+    ],
+    "projectedUnchanged": 69,
+    "allMarkerProjectionsIntersectDelta": true,
+    "sampledSourceYAtRow53": 216
+  },
+  "providerCalls": 0,
+  "freshCohortImagesRead": false,
+  "freshCohortTruthRead": false,
+  "scope": "Excluded proof only. Projection is an upper bound, not an exact foreground mask; painter overdraw leaves projected pixels unchanged. Full-frame A/A2 stability is not claimed.",
+  "operatorSha256": "b37bfea4abeeb2b25c4fb630129bd1da483b798f5df8bba2846ca4e15c171a1f",
+  "rawReviewSha256": "c0e359dd2811ee90d1a356b7ac8357fd50d3bf2182f68380f249c40230c4928d",
+  "sourceTransform": {
+    "map": "Wesnoth 1.16.11 official 4p_Siege_Castles.map",
+    "rawGrid": [38, 38],
+    "defaultBorderSize": 1,
+    "unscaledBitmap": [648, 864],
+    "markerRect": "L=18*x-6; T=24*y+(odd(x)?0:-12); width=18; height=24; half-open",
+    "sampling": "float32(source/destination); float32 accumulator initialized0; truncation before each float32 addition",
+    "sourceAudit": "wesnoth-1.16.11-minimap-projection-source-audit.md"
+  },
+  "limits": [
+    "This proof is excluded from the new blind cohort.",
+    "Same-state stability is established only for the minimap bitmap ROI.",
+    "Whole-source projection covers markers, including pixels hidden by later terrain painting. It is not an exact foreground mask.",
+    "Controlled Wesnoth rendering is one source family; this is not a diverse natural-game accuracy benchmark.",
+    "No model request or localization accuracy was measured by this proof."
+  ]
+}
