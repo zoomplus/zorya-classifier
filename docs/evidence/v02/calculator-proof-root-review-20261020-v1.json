@@ -1,0 +1,63 @@
+{
+  "schema": "independent-controlled-calculator-proof-review-v1",
+  "application": "GNOME Calculator 46.3",
+  "scope": "One proof capture, excluded from the new HELDOUT cohort; no localization-model accuracy claim.",
+  "sourceBinding": {
+    "url": "https://raw.githubusercontent.com/GNOME/gnome-calculator/46.3/src/ui/buttons-basic.ui",
+    "sha256": "248e9fca5c32a6197b6495a9dc4e1e4f7d176a17f86a76e18de25a7ec6a644a6",
+    "independentlyFetchedAndHashed": true,
+    "widgetId": "calc_7_button",
+    "label": "7",
+    "row": 1,
+    "column": 0,
+    "action": "cal.insert-digit",
+    "actionTarget": "7"
+  },
+  "proofScreenshot": {
+    "sha256": "d9eb033c3441459fc36f9880b932b6d6656726765fb8035d52a6c6eb336eabe9",
+    "width": 1024,
+    "height": 768,
+    "rootVisuallyInspected": true,
+    "box": {
+      "left": 17,
+      "top": 304,
+      "width": 62,
+      "height": 44
+    }
+  },
+  "accessibility": {
+    "sha256": "d3aee8ff3eccddfed987a3784e9671d5464cf8f1bfdee9194f819ddde7da379b",
+    "uniqueTarget7": true,
+    "targetSize": {
+      "width": 62,
+      "height": 44
+    },
+    "reportedOrigin": {
+      "x": 0,
+      "y": 0
+    },
+    "originUsedAsTruth": false
+  },
+  "paintedEdges": {
+    "independentDecoder": "Sharp 0.34.5",
+    "exactRgba": [240, 0, 200, 255],
+    "widthPx": 3,
+    "leftPass": true,
+    "rightPass": true,
+    "topPass": true,
+    "bottomPass": true
+  },
+  "corrections": [
+    "The curator message said 800x600; the preserved PNG is 1024x768. Recorded box remains unchanged.",
+    "One message mistranscribed the GtkBuilder digest; the actual source/receipt uses the verified full 64-character digest.",
+    "The first root Python/Pillow audit could not run because that interpreter lacks PIL. The completed independent pixel audit used the already installed Sharp decoder."
+  ],
+  "limits": [
+    "Controlled CSS style, one application family; not default-theme or diverse natural UI evidence.",
+    "Source+accessibility identify the widget; painted pixels establish origin because AT-SPI positions are zero.",
+    "No HELDOUT case images or per-case truth were opened by root."
+  ],
+  "rootProviderCalls": 0,
+  "oracleProofVerified": true,
+  "releaseQualified": false
+}

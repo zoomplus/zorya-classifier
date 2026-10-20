@@ -1,0 +1,44 @@
+{
+  "schema": "sealed-box-heldout-ui-admission-v1",
+  "status": "sealed-source-cohort-before-combined-freeze",
+  "methodSelectionSha256": "3b576871c36d904203ef06e0cf26af5847a71a92c2df3647725d532238258c5e",
+  "cases": 20,
+  "positives": 15,
+  "verifiedNegatives": 5,
+  "controlledApplicationFamilies": 1,
+  "viewportVariants": 2,
+  "files": [
+    {
+      "file": "inputs.json",
+      "sha256": "2a0fafceeefa3253b1b99f993d3a7a41b7595aa70b60abbb9b3f1ee654866781",
+      "bytes": 13393,
+      "rootRehashedWithoutParsingCaseDetails": true
+    },
+    {
+      "file": "truth.json",
+      "sha256": "c749e524854ab34e37abe36d83d91078a1ee31297a67af5cc7a26e019f851548",
+      "bytes": 8004,
+      "rootRehashedWithoutParsingCaseDetails": true
+    },
+    {
+      "file": "source-ledger.json",
+      "sha256": "d8907ac71b1227745c2254da59e3e12a5b932faed36a9d065aaa4904f8dd48f3",
+      "bytes": 61607,
+      "rootRehashedWithoutParsingCaseDetails": true
+    }
+  ],
+  "gtkBuilderSha256": "248e9fca5c32a6197b6495a9dc4e1e4f7d176a17f86a76e18de25a7ec6a644a6",
+  "rootScope": {
+    "openedOnlyExcludedProofCapture": true,
+    "openedHeldoutPixels": false,
+    "parsedHeldoutTruth": false
+  },
+  "curatorReportedCaptureScriptSha256": "961d6f44ab55b432dccca3adc0cd2a42a0a325a36fc188fc19cf8dac4af0a489",
+  "curatorReportedOracleScriptSha256": "d37017126934b820e8a3c6ea70dd109c5a0253c2bf41177aa48d927f10c62804",
+  "providerCalls": 0,
+  "limits": [
+    "Aggregate cohort admission, not model accuracy or release qualification.",
+    "Controlled application screenshots; no claim of 20 independent application families.",
+    "Combined canonical image-path manifests need separate pins before dispatch."
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "owned-native-temp-cleanup-summary-v1",
+  "status": "complete",
+  "platform": "native-Windows-PowerShell",
+  "ownedDirectoriesRemoved": 2,
+  "filesRemoved": 21,
+  "bytesRemoved": 90429980,
+  "mibRemoved": 86.24074935913086,
+  "matchedLiveProcessCommands": 0,
+  "reparsePoints": 0,
+  "directoryNames": ["zorya-classifier-v02-native-7V8DuL", "zorya-classifier-v02-native-uXR5NM"],
+  "directoriesConfirmedAbsent": true,
+  "nativeRawReceiptSha256": "fe9b44117e1386013239f4299a16f306779ab0b0477cfe387a2b70b2cb7fcbfd",
+  "beforeInventorySha256": "ebf3b33113048c000ed0fce16880b52f320d2f8f485791a7853327825afba5be",
+  "preservedStageArchiveSha256": "f41de58a35763910f912859a3ad823a4a4e23e40ee60be70adb7c4752eb5d7c3",
+  "preservedFixtureManifestSha256": "3ed96c003bd59b0de5e9174e69b5aa4489b0e7632178d56eb381c56ae6f6bd8f",
+  "cleanupScriptAndOwnWindowsReportFilesRemoved": true,
+  "retained": [
+    "All original successful/failed benchmark archives and receipts, including the1.4GiB historical0.1 raw archive set.",
+    "The live monotonic resource run and both pinned native model assets.",
+    "Source, corpus, oracle data, active worktrees and dependencies required for release gates."
+  ],
+  "limits": [
+    "No broad cleanup of shared Linux/npm/system caches or other agents data.",
+    "Matching command lines were checked; this does not assert a systemwide file-handle audit.",
+    "The first stdin-only PowerShell launch produced no report and did not establish cleanup; only the later explicit-File native report and filesystem state establish success."
+  ]
+}
