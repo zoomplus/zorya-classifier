@@ -10,6 +10,8 @@ Use any image-capable instruction-following model through an OpenAI-compatible A
 
 The 0.2 source branch adds explicit whole-object bounds and optional transparent cutouts. See the [new usage guide](docs/v02-usage.md) for contracts, backend ownership, CLI and current qualification limits; this does not change the published 0.1 results.
 
+Six experimental encodings for text-only models were also tested on fresh photos and real UI captures. None qualified for image localization; see the [measured comparison](docs/evidence/v02/fresh-text/README.md). They remain research code rather than an advertised replacement for a vision model.
+
 ## Install
 
 Node.js 22.12+ is required. Source: [zoomplus/zorya-classifier](https://github.com/zoomplus/zorya-classifier). Package: [zorya-classifier](https://www.npmjs.com/package/zorya-classifier).

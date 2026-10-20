@@ -89,7 +89,7 @@ const intervalSchema = z
   .refine((value) => value.start < value.endExclusive)
 const sourceRegionSchema = z
   .object({
-    optionId: z.string().regex(/^(?:P\d{2}|C\d{3}|[A-H]|none)$/u),
+    optionId: z.string().regex(/^(?:P\d{2}|C(?:0[0-9]|[12][0-9]|3[0-5])|C\d{3}|[A-H]|none)$/u),
     region: pixelRectSchema,
   })
   .strict()
@@ -106,7 +106,7 @@ const probabilitySchema = z
     optionId: z
       .string()
       .regex(
-        /^(?:P\d{2}|C\d{3}|[A-H]|none|same|different|ambiguous|(?:left|right|top|bottom)(?:0[0-9]|1[0-5])|unknown)$/u,
+        /^(?:P\d{2}|C(?:0[0-9]|[12][0-9]|3[0-5])|C\d{3}|[A-H]|none|same|different|ambiguous|(?:left|right|top|bottom)(?:0[0-9]|1[0-5])|unknown)$/u,
       ),
     value: z.number().finite().min(0).max(1),
   })
@@ -119,7 +119,7 @@ const traceQuestionSchema = z.discriminatedUnion('answerType', [
       selected: z
         .string()
         .regex(
-          /^(?:P\d{2}|C\d{3}|[A-H]|none|same|different|ambiguous|(?:left|right|top|bottom)(?:0[0-9]|1[0-5])|unknown)$/u,
+          /^(?:P\d{2}|C(?:0[0-9]|[12][0-9]|3[0-5])|C\d{3}|[A-H]|none|same|different|ambiguous|(?:left|right|top|bottom)(?:0[0-9]|1[0-5])|unknown)$/u,
         ),
       probabilities: z.array(probabilitySchema).max(255).optional(),
       ranking: z
@@ -127,7 +127,7 @@ const traceQuestionSchema = z.discriminatedUnion('answerType', [
           z
             .string()
             .regex(
-              /^(?:P\d{2}|C\d{3}|[A-H]|none|same|different|ambiguous|(?:left|right|top|bottom)(?:0[0-9]|1[0-5])|unknown)$/u,
+              /^(?:P\d{2}|C(?:0[0-9]|[12][0-9]|3[0-5])|C\d{3}|[A-H]|none|same|different|ambiguous|(?:left|right|top|bottom)(?:0[0-9]|1[0-5])|unknown)$/u,
             ),
         )
         .max(4)
@@ -145,7 +145,7 @@ const traceQuestionSchema = z.discriminatedUnion('answerType', [
           z
             .string()
             .regex(
-              /^(?:P\d{2}|C\d{3}|[A-H]|none|same|different|ambiguous|(?:left|right|top|bottom)(?:0[0-9]|1[0-5])|unknown)$/u,
+              /^(?:P\d{2}|C(?:0[0-9]|[12][0-9]|3[0-5])|C\d{3}|[A-H]|none|same|different|ambiguous|(?:left|right|top|bottom)(?:0[0-9]|1[0-5])|unknown)$/u,
             ),
         )
         .min(1)
@@ -227,7 +227,7 @@ const boundsSchema = z
 const traceByteLimit = 64 * 1024
 const geometryScanByteLimit = 256 * 1024
 const geometryPartByteLimit = 64 * 1024
-const generatedLabel = /^(?:P\d{2}|C\d{3}|[A-H]|none)$/u
+const generatedLabel = /^(?:P\d{2}|C(?:0[0-9]|[12][0-9]|3[0-5])|C\d{3}|[A-H]|none)$/u
 const generatedAxisLabel = /^(?:left|right|top|bottom)(?:0[0-9]|1[0-5])$/u
 
 const gridMetadataSchema = z

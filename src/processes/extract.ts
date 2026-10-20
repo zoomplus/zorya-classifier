@@ -42,7 +42,7 @@ const segmentationMetadataSchema = z
     input: z
       .object({ width: z.number().int().positive(), height: z.number().int().positive() })
       .strict(),
-    qualityScore: z.number().finite().nonnegative().optional(),
+    qualityScore: z.number().finite().optional(),
   })
   .strict()
 const segmentationResultSchema = z.discriminatedUnion('status', [

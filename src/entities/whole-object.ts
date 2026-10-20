@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { locateSchema } from './contracts.js'
+import type { SegmentationMetadata } from './segmentation-metadata.js'
 import type {
   LocalizationMetadata,
   LocalizationResult,
@@ -34,7 +35,9 @@ export interface WholeObjectLocated {
   seedRegion: PixelRect
   bounds: ObjectBounds
   completeness: 'visible-object' | 'boundary-limited'
-  method: 'grid-object-extent-v1'
+  method: 'grid-object-extent-v1' | 'pixel-mask-proposals-v1'
+  /** Present only for the explicitly configured, caller-owned mask proposal workflow. */
+  proposalMetadata?: SegmentationMetadata
   metadata: LocalizationMetadata
 }
 export type WholeObjectFailure =

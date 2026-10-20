@@ -3,6 +3,8 @@ import type { RgbaRaster } from './representation.js'
 import type { ObjectBounds, WholeObjectFailure, WholeObjectLocated } from './whole-object.js'
 import { wholeObjectSchema } from './whole-object.js'
 import { z } from 'zod'
+import type { SegmentationMetadata } from './segmentation-metadata.js'
+export type { SegmentationMetadata } from './segmentation-metadata.js'
 
 export const extractSchema = wholeObjectSchema.extend({
   mode: z.literal('whole-object').optional(),
@@ -25,13 +27,6 @@ export interface SegmentationInput {
   exclusions: readonly string[]
   completeness: 'visible-object' | 'boundary-limited'
   signal: AbortSignal
-}
-export interface SegmentationMetadata {
-  method: string
-  backend: string
-  durationMs: number
-  input: { width: number; height: number }
-  qualityScore?: number
 }
 export type SegmentationResult =
   | { status: 'segmented'; mask: BinaryMask; metadata: SegmentationMetadata }

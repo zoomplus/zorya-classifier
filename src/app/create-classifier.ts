@@ -31,6 +31,9 @@ import { extractSchema } from '../entities/segmentation.js'
 import { extractObject } from '../processes/extract.js'
 import { createSharpCutoutRaster } from '../infrastructure/segmentation/cutout-raster.js'
 import type { BoundaryViewPort } from '../entities/boundary-view.js'
+import type { ObjectProposalPort } from '../entities/object-proposals.js'
+import { locateFromProposals } from '../processes/proposal-location.js'
+import { createSharpObjectProposalPresentation } from '../infrastructure/segmentation/proposal-presentation.js'
 
 export interface ClassifierOptions {
   decision: DecisionPort
@@ -41,6 +44,8 @@ export interface ClassifierOptions {
   refinement?: RefinementPort
   /** Caller-owned; classifier disposal never disposes a shared segmenter. */
   segmentation?: SegmentationPort
+  /** Explicit, caller-owned pixel-mask proposal strategy for whole-object operations. */
+  objectProposals?: ObjectProposalPort
 }
 export interface Classifier {
   classify(input: ClassifyInput): Promise<ClassificationResult>
@@ -90,6 +95,7 @@ function composeClassifier(
   if (!options || typeof options.decision?.decide !== 'function')
     throw new ClassifierError('INVALID_INPUT', 'A DecisionPort is required')
   const segmenter = options.segmentation
+  const objectProposals = options.objectProposals
   if (
     segmenter !== undefined &&
     (!segmenter ||
@@ -98,6 +104,14 @@ function composeClassifier(
       typeof segmenter.dispose !== 'function')
   )
     throw new ClassifierError('INVALID_INPUT', 'segmentation must implement SegmentationPort')
+  if (
+    objectProposals !== undefined &&
+    (!objectProposals ||
+      typeof objectProposals.propose !== 'function' ||
+      typeof objectProposals.settle !== 'function' ||
+      typeof objectProposals.dispose !== 'function')
+  )
+    throw new ClassifierError('INVALID_INPUT', 'objectProposals must implement ObjectProposalPort')
   const config = parse(configSchema, {
     timeoutMs: options.timeoutMs,
     concurrency: options.concurrency,
@@ -108,6 +122,15 @@ function composeClassifier(
   const inputBudget = new InputBudget(config.maxInputBytes)
   const raster = createSharpRaster()
   const cutoutRaster = createSharpCutoutRaster()
+  const proposalDependencies = objectProposals
+    ? {
+        decision: options.decision,
+        raster,
+        image: cutoutRaster,
+        proposals: objectProposals,
+        presentation: createSharpObjectProposalPresentation(),
+      }
+    : undefined
   const owned = new Map<OperationScope, Promise<unknown>>()
   let disposed = false
   const textRepresentation: ImageRepresentationPort | undefined = experimental
@@ -147,6 +170,26 @@ function composeClassifier(
         'No text-image profile has passed release qualification yet',
       )
     return textRepresentation
+  }
+  async function locateWhole(
+    input: Omit<WholeObjectLocateInput, 'signal'>,
+    signal: AbortSignal,
+    representation: ImageRepresentationPort | undefined,
+  ): Promise<WholeObjectLocalizationResult> {
+    if (proposalDependencies) {
+      if (representation)
+        throw new ClassifierError('UNSUPPORTED', 'Mask proposal selection requires vision input')
+      return (await locateFromProposals(input, proposalDependencies, signal)).location
+    }
+    return locateWholeObjectInput(
+      input,
+      options.decision,
+      raster,
+      signal,
+      representation,
+      boundaryView,
+      intervalPolicy,
+    )
   }
   async function run<T>(
     signal: AbortSignal | undefined,
@@ -195,17 +238,7 @@ function composeClassifier(
       const release = inputBudget.reserve(parsed.image.byteLength)
       try {
         const snapshot = { ...parsed, image: new Uint8Array(parsed.image) }
-        return await run(parent, (s) =>
-          locateWholeObjectInput(
-            snapshot,
-            options.decision,
-            raster,
-            s,
-            representation,
-            boundaryView,
-            intervalPolicy,
-          ),
-        )
+        return await run(parent, (s) => locateWhole(snapshot, s, representation))
       } finally {
         release()
       }
@@ -264,32 +297,62 @@ function composeClassifier(
       const { signal, ...rest } = input
       const parent = signalOf(signal)
       const parsed = parse(extractSchema, rest)
-      if (!segmenter)
-        throw new ClassifierError('UNSUPPORTED', 'extract requires an explicit SegmentationPort')
+      if (!segmenter && !proposalDependencies)
+        throw new ClassifierError(
+          'UNSUPPORTED',
+          'extract requires an explicit SegmentationPort or ObjectProposalPort',
+        )
       const representation = representationFor(parsed.representation)
       const release = inputBudget.reserve(parsed.image.byteLength)
       try {
         const snapshot = { ...parsed, image: new Uint8Array(parsed.image) }
-        return await run(parent, (s) =>
-          extractObject(
+        return await run(parent, (s) => {
+          let prepared: Awaited<ReturnType<typeof locateFromProposals>> | undefined
+          // Per-operation ownership: no global selected-mask cache or second native inference.
+          const selectedMask: SegmentationPort = {
+            async segment() {
+              if (!prepared?.mask || !prepared.segmentation)
+                throw new ClassifierError('INVALID_RESPONSE', 'Proposal selection omitted its mask')
+              return {
+                status: 'segmented',
+                mask: prepared.mask,
+                metadata: prepared.segmentation,
+              }
+            },
+            async settle() {},
+            async dispose() {},
+          }
+          return extractObject(
             { ...snapshot, mode: 'whole-object', signal: s },
             {
               raster,
               image: cutoutRaster,
-              segmenter,
-              locateWhole: (source, { signal: requestSignal, ...request }) =>
-                locateWholeObjectInput(
-                  { ...request, mode: 'whole-object', image: source.bytes },
-                  options.decision,
-                  raster,
-                  requestSignal,
-                  representation,
-                  boundaryView,
-                  intervalPolicy,
-                ),
+              // An explicitly supplied refinement segmenter wins; its failures never fall back.
+              segmenter: segmenter ?? selectedMask,
+              locateWhole: async (source, { signal: requestSignal, ...request }) => {
+                const wholeInput = {
+                  ...request,
+                  mode: 'whole-object' as const,
+                  image: source.bytes,
+                }
+                if (!segmenter && proposalDependencies) {
+                  if (representation)
+                    throw new ClassifierError(
+                      'UNSUPPORTED',
+                      'Mask proposal selection requires vision input',
+                    )
+                  prepared = await locateFromProposals(
+                    wholeInput,
+                    proposalDependencies,
+                    requestSignal,
+                  )
+                  return prepared.location
+                }
+                return locateWhole(wholeInput, requestSignal, representation)
+              },
             },
-          ),
-        )
+          )
+        })
       } finally {
         release()
       }

@@ -1,0 +1,846 @@
+{
+  "runId": "v02-fresh-text-classify-only-ascii-svg-layered-v1-2026-10-20T111515077Z-b015caab",
+  "profileId": "ascii-svg-layered-v1",
+  "variantSha256": "e52d9409132a6d2f483b86e4720a81d81b3d312e66294c807e55785ac3d84d12",
+  "status": "complete",
+  "plannedCaseIds": [
+    "photo-dev-present-01",
+    "photo-dev-present-02",
+    "photo-dev-present-03",
+    "photo-dev-present-04",
+    "photo-dev-present-05",
+    "photo-dev-present-06",
+    "photo-dev-present-07",
+    "photo-dev-present-08",
+    "photo-dev-present-09",
+    "photo-dev-present-10",
+    "photo-dev-present-11",
+    "photo-dev-present-12",
+    "photo-dev-present-13",
+    "photo-dev-present-14",
+    "photo-dev-present-15",
+    "photo-dev-present-16",
+    "photo-dev-absent-01",
+    "photo-dev-absent-02",
+    "photo-dev-absent-03",
+    "photo-dev-absent-04",
+    "ui-geany-oracle-dev-present-01",
+    "ui-geany-oracle-dev-present-02",
+    "ui-geany-oracle-dev-present-03",
+    "ui-geany-oracle-dev-present-04",
+    "ui-geany-oracle-dev-present-05",
+    "ui-geany-oracle-dev-present-06",
+    "ui-geany-oracle-dev-present-07",
+    "ui-geany-oracle-dev-absent-01",
+    "ui-geany-oracle-dev-absent-02",
+    "ui-geany-oracle-dev-absent-03"
+  ],
+  "completedCaseIds": [
+    "photo-dev-present-01",
+    "photo-dev-present-02",
+    "photo-dev-present-03",
+    "photo-dev-present-04",
+    "photo-dev-present-05",
+    "photo-dev-present-06",
+    "photo-dev-present-07",
+    "photo-dev-present-08",
+    "photo-dev-present-09",
+    "photo-dev-present-10",
+    "photo-dev-present-11",
+    "photo-dev-present-12",
+    "photo-dev-present-13",
+    "photo-dev-present-14",
+    "photo-dev-present-15",
+    "photo-dev-present-16",
+    "photo-dev-absent-01",
+    "photo-dev-absent-02",
+    "photo-dev-absent-03",
+    "photo-dev-absent-04",
+    "ui-geany-oracle-dev-present-01",
+    "ui-geany-oracle-dev-present-02",
+    "ui-geany-oracle-dev-present-03",
+    "ui-geany-oracle-dev-present-04",
+    "ui-geany-oracle-dev-present-05",
+    "ui-geany-oracle-dev-present-06",
+    "ui-geany-oracle-dev-present-07",
+    "ui-geany-oracle-dev-absent-01",
+    "ui-geany-oracle-dev-absent-02",
+    "ui-geany-oracle-dev-absent-03"
+  ],
+  "missingCaseIds": [],
+  "results": [
+    {
+      "caseId": "photo-dev-present-01",
+      "imageSha256": "71e781adb0c2d47d97e6fd5868e6dbe4de8c1375536e1753f897931ff90575dc",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 65.12565800000004,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-02",
+      "imageSha256": "a27d93b12fadd550899a1d1d8ce70d34ba3c692affebf09134eda838910fcab5",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 51.834600999999964,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-03",
+      "imageSha256": "e20c5e6f6a9334aca94289a99a56f3c0ee7cb8de8f5e00eff886cf772600250c",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 55.85571199999998,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-04",
+      "imageSha256": "66fe4e85ef638a2f28d5a2e7472ccebe46d2c8446304db73659d8af37f0d489c",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 57.35828399999997,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-05",
+      "imageSha256": "71b99532e14abb6098a704e9bd9c2c50eebba72588a49e60c8a4b89af4eea4c5",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 52.46864500000004,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-06",
+      "imageSha256": "ad0eb4bf4a6c2c1be585846a943aa06ec2440696b7e8874374904eb25dcc594a",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 59.63417699999991,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-07",
+      "imageSha256": "16cae5fc9b21c562a005d7e1a00809ea90e4b143ee13614aefffa75fb113e044",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 59.350235999999995,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-08",
+      "imageSha256": "74b944d3b7d88a046d01f2d813c88e8a6415296db938a343a83d86048f4c3a4f",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 52.16038600000002,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-09",
+      "imageSha256": "6710905e971316f4b0d0fe1535eb64702807bc4c041bc161ea1ce1208eff5a0f",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 58.73371199999997,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-10",
+      "imageSha256": "f118352c4bfeb65b0a2dae153428ce0f802a01a232d45d0be4b0a7176bfaa342",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 54.32109700000001,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-11",
+      "imageSha256": "07ab595c6482338b5982d61ac175450295be81338e9c641b218d7794b658249e",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 50.3027679999999,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-12",
+      "imageSha256": "65c38939211e8ae0d98e7d01fd3bc8d159fe8b96969940a169e82556071059c8",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 58.85967000000005,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-13",
+      "imageSha256": "750f09aeeb5d1113088eedaf47f201f0837ad64720f836a69fec9ed3e4f1e5a7",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 38.54182900000001,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-14",
+      "imageSha256": "77681ffeb78a27bb0d59111acb638254948ece8115f6e5f6d1438b50c319c4d1",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 38.68915300000003,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-15",
+      "imageSha256": "a0a80df65932f8cb7cf7367305372c04aa37f1991436e4f1cb7828c9138f708e",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 44.8257050000002,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-16",
+      "imageSha256": "4a0dffd0f9f85bacac77d4f372c1f3eb754ba6a7440de3bc7c7f6a42f4c53ecd",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 57.35407699999996,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-absent-01",
+      "imageSha256": "604b8fa9c30881acee7c67d078bb7d08f846aeac6152dc1bf23a41ddefe45988",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 27.421757999999954,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-absent-02",
+      "imageSha256": "8bcbc695bc113f645bb66dd2e03615764cd37d80e5794d8f9ffc79f1e364e077",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 58.037657999999965,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-absent-03",
+      "imageSha256": "f8c2cc736fd7941bf2bc51c73147aeec96deba4b22e6948fe088a2d9121c51a6",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 66.9581619999999,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "photo-dev-absent-04",
+      "imageSha256": "085ac7dc3243e28816e69f5e1ad56b9e8858c7135fac366f3172ad862e28eeae",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "failed",
+        "durationMs": 47.450481999999965,
+        "calls": 0,
+        "requestHashes": [],
+        "errorCode": "RESOURCE_LIMIT"
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-01",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "ok",
+        "value": "present",
+        "durationMs": 676.5943500000003,
+        "calls": 1,
+        "requestHashes": [
+          "d997352e34109700b90e17d88bb7592e2a7152316fe57016806b3c3ccfc81514"
+        ]
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-02",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "ok",
+        "value": "absent",
+        "durationMs": 548.3268800000001,
+        "calls": 1,
+        "requestHashes": [
+          "a92eb88bd7279b6f6d7dbb29e5900d2e46e0593696cf68a4f2b7872fe207fb8c"
+        ]
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-03",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "ok",
+        "value": "present",
+        "durationMs": 543.582238,
+        "calls": 1,
+        "requestHashes": [
+          "8aff467cc3e330bb57b3da9cf804ec746ef2485e1202e008e5fa59f2a1a9cec8"
+        ]
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-04",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "ok",
+        "value": "present",
+        "durationMs": 483.3235480000003,
+        "calls": 1,
+        "requestHashes": [
+          "950e16d4eaa5d979bcd8f4fdbef1593610bcbbf208297d2e03171b18219bca69"
+        ]
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-05",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "ok",
+        "value": "present",
+        "durationMs": 689.0567900000001,
+        "calls": 1,
+        "requestHashes": [
+          "7f03c689ab98f63ad5c298d4f04a72511c5c38321d987f74edfda60831f02e78"
+        ]
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-06",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "ok",
+        "value": "present",
+        "durationMs": 479.5259649999998,
+        "calls": 1,
+        "requestHashes": [
+          "5ae3b289bb0103d3f7511f44d1c93c15336c0f16257fafb3cd8f420774fd521a"
+        ]
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-07",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "ok",
+        "value": "present",
+        "durationMs": 534.76973,
+        "calls": 1,
+        "requestHashes": [
+          "69c35d982e1d6130ae7c17c9d251685f6ef991ca7100f82d97f62d0e2fd94465"
+        ]
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-01",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "ok",
+        "value": "absent",
+        "durationMs": 602.623208,
+        "calls": 1,
+        "requestHashes": [
+          "cba21c541b4c16c08e3aa053f078ca327648a1fd00840f80fb348562ad396f6b"
+        ]
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-02",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "ok",
+        "value": "absent",
+        "durationMs": 616.6032100000002,
+        "calls": 1,
+        "requestHashes": [
+          "a321c795838f25e1f62fbf16eac16f469ae1c49da7e63f1b58dea36530cad935"
+        ]
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-03",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "profileId": "ascii-svg-layered-v1",
+      "classify": {
+        "status": "ok",
+        "value": "absent",
+        "durationMs": 470.81975599999987,
+        "calls": 1,
+        "requestHashes": [
+          "1e07bf642901f4c6df94eaea6936356b1bab4fb3218a73002894c59356e4da5a"
+        ]
+      }
+    }
+  ],
+  "aggregate": {
+    "admittedPhysicalCalls": 10,
+    "knownCostUsd": 0.013166640000000004,
+    "unknownCostCalls": 0,
+    "inFlightCalls": 0,
+    "accountedExposureUsd": 0.013166640000000004,
+    "maxPhysicalCalls": 250,
+    "maxCostUsd": 5
+  },
+  "latencyEnvironment": "concurrent-development-unranked",
+  "latencyRankingEligible": false,
+  "physicalReceipts": [
+    {
+      "physicalId": 1,
+      "requestSha256": "d997352e34109700b90e17d88bb7592e2a7152316fe57016806b3c3ccfc81514",
+      "route": {
+        "id": "together-deepseek-flash-text-v1",
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "together",
+        "providerName": "Together",
+        "apiEndpoint": "/api/v1/chat/completions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "Together",
+        "requestId": "gen-1792494918-w5j367kmKmq1ZGLiktg8",
+        "costUsd": 0.001316604,
+        "durationMs": 659.8012529999999,
+        "attempts": 1
+      },
+      "wireReceipt": {
+        "responseModel": "deepseek/deepseek-v4.1-flash",
+        "responseProvider": "Together",
+        "responseId": "gen-1792494918-w5j367kmKmq1ZGLiktg8",
+        "usageCostUsd": 0.001316604,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "chat-json-object",
+        "finishReason": "stop",
+        "bodyRead": "parsed"
+      },
+      "errorCode": null,
+      "durationMs": 658.814412
+    },
+    {
+      "physicalId": 2,
+      "requestSha256": "a92eb88bd7279b6f6d7dbb29e5900d2e46e0593696cf68a4f2b7872fe207fb8c",
+      "route": {
+        "id": "together-deepseek-flash-text-v1",
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "together",
+        "providerName": "Together",
+        "apiEndpoint": "/api/v1/chat/completions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "Together",
+        "requestId": "gen-1792494919-mZbPqiLANgG9qZJv8lOw",
+        "costUsd": 0.001316604,
+        "durationMs": 531.3450899999998,
+        "attempts": 1
+      },
+      "wireReceipt": {
+        "responseModel": "deepseek/deepseek-v4.1-flash",
+        "responseProvider": "Together",
+        "responseId": "gen-1792494919-mZbPqiLANgG9qZJv8lOw",
+        "usageCostUsd": 0.001316604,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "chat-json-object",
+        "finishReason": "stop",
+        "bodyRead": "parsed"
+      },
+      "errorCode": null,
+      "durationMs": 530.793705
+    },
+    {
+      "physicalId": 3,
+      "requestSha256": "8aff467cc3e330bb57b3da9cf804ec746ef2485e1202e008e5fa59f2a1a9cec8",
+      "route": {
+        "id": "together-deepseek-flash-text-v1",
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "together",
+        "providerName": "Together",
+        "apiEndpoint": "/api/v1/chat/completions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "Together",
+        "requestId": "gen-1792494919-fNHePLtkyQf2Gp05go0G",
+        "costUsd": 0.001316604,
+        "durationMs": 529.4730650000001,
+        "attempts": 1
+      },
+      "wireReceipt": {
+        "responseModel": "deepseek/deepseek-v4.1-flash",
+        "responseProvider": "Together",
+        "responseId": "gen-1792494919-fNHePLtkyQf2Gp05go0G",
+        "usageCostUsd": 0.001316604,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "chat-json-object",
+        "finishReason": "stop",
+        "bodyRead": "parsed"
+      },
+      "errorCode": null,
+      "durationMs": 528.9466510000002
+    },
+    {
+      "physicalId": 4,
+      "requestSha256": "950e16d4eaa5d979bcd8f4fdbef1593610bcbbf208297d2e03171b18219bca69",
+      "route": {
+        "id": "together-deepseek-flash-text-v1",
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "together",
+        "providerName": "Together",
+        "apiEndpoint": "/api/v1/chat/completions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "Together",
+        "requestId": "gen-1792494920-GBar2xNs55sa65RTzXBd",
+        "costUsd": 0.001316904,
+        "durationMs": 468.1947070000001,
+        "attempts": 1
+      },
+      "wireReceipt": {
+        "responseModel": "deepseek/deepseek-v4.1-flash",
+        "responseProvider": "Together",
+        "responseId": "gen-1792494920-GBar2xNs55sa65RTzXBd",
+        "usageCostUsd": 0.001316904,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "chat-json-object",
+        "finishReason": "stop",
+        "bodyRead": "parsed"
+      },
+      "errorCode": null,
+      "durationMs": 467.692548
+    },
+    {
+      "physicalId": 5,
+      "requestSha256": "7f03c689ab98f63ad5c298d4f04a72511c5c38321d987f74edfda60831f02e78",
+      "route": {
+        "id": "together-deepseek-flash-text-v1",
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "together",
+        "providerName": "Together",
+        "apiEndpoint": "/api/v1/chat/completions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "Together",
+        "requestId": "gen-1792494920-NXqf3mt2POmN0p5MBOFX",
+        "costUsd": 0.001316604,
+        "durationMs": 673.6326690000005,
+        "attempts": 1
+      },
+      "wireReceipt": {
+        "responseModel": "deepseek/deepseek-v4.1-flash",
+        "responseProvider": "Together",
+        "responseId": "gen-1792494920-NXqf3mt2POmN0p5MBOFX",
+        "usageCostUsd": 0.001316604,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "chat-json-object",
+        "finishReason": "stop",
+        "bodyRead": "parsed"
+      },
+      "errorCode": null,
+      "durationMs": 673.0295859999997
+    },
+    {
+      "physicalId": 6,
+      "requestSha256": "5ae3b289bb0103d3f7511f44d1c93c15336c0f16257fafb3cd8f420774fd521a",
+      "route": {
+        "id": "together-deepseek-flash-text-v1",
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "together",
+        "providerName": "Together",
+        "apiEndpoint": "/api/v1/chat/completions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "Together",
+        "requestId": "gen-1792494921-P6ud1xkPWru3JYr69EVN",
+        "costUsd": 0.001316604,
+        "durationMs": 464.6370369999995,
+        "attempts": 1
+      },
+      "wireReceipt": {
+        "responseModel": "deepseek/deepseek-v4.1-flash",
+        "responseProvider": "Together",
+        "responseId": "gen-1792494921-P6ud1xkPWru3JYr69EVN",
+        "usageCostUsd": 0.001316604,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "chat-json-object",
+        "finishReason": "stop",
+        "bodyRead": "parsed"
+      },
+      "errorCode": null,
+      "durationMs": 464.1517300000005
+    },
+    {
+      "physicalId": 7,
+      "requestSha256": "69c35d982e1d6130ae7c17c9d251685f6ef991ca7100f82d97f62d0e2fd94465",
+      "route": {
+        "id": "together-deepseek-flash-text-v1",
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "together",
+        "providerName": "Together",
+        "apiEndpoint": "/api/v1/chat/completions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "Together",
+        "requestId": "gen-1792494922-4lVRJ4f9Wu2hwGwoHydH",
+        "costUsd": 0.001316604,
+        "durationMs": 521.9961669999993,
+        "attempts": 1
+      },
+      "wireReceipt": {
+        "responseModel": "deepseek/deepseek-v4.1-flash",
+        "responseProvider": "Together",
+        "responseId": "gen-1792494922-4lVRJ4f9Wu2hwGwoHydH",
+        "usageCostUsd": 0.001316604,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "chat-json-object",
+        "finishReason": "stop",
+        "bodyRead": "parsed"
+      },
+      "errorCode": null,
+      "durationMs": 521.4807470000005
+    },
+    {
+      "physicalId": 8,
+      "requestSha256": "cba21c541b4c16c08e3aa053f078ca327648a1fd00840f80fb348562ad396f6b",
+      "route": {
+        "id": "together-deepseek-flash-text-v1",
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "together",
+        "providerName": "Together",
+        "apiEndpoint": "/api/v1/chat/completions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "Together",
+        "requestId": "gen-1792494922-2PmJhmalg9h89sSdrGVn",
+        "costUsd": 0.001316604,
+        "durationMs": 589.3619870000002,
+        "attempts": 1
+      },
+      "wireReceipt": {
+        "responseModel": "deepseek/deepseek-v4.1-flash",
+        "responseProvider": "Together",
+        "responseId": "gen-1792494922-2PmJhmalg9h89sSdrGVn",
+        "usageCostUsd": 0.001316604,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "chat-json-object",
+        "finishReason": "stop",
+        "bodyRead": "parsed"
+      },
+      "errorCode": null,
+      "durationMs": 588.8640300000006
+    },
+    {
+      "physicalId": 9,
+      "requestSha256": "a321c795838f25e1f62fbf16eac16f469ae1c49da7e63f1b58dea36530cad935",
+      "route": {
+        "id": "together-deepseek-flash-text-v1",
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "together",
+        "providerName": "Together",
+        "apiEndpoint": "/api/v1/chat/completions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "Together",
+        "requestId": "gen-1792494923-9CQGYkTS6ZJhwmETa0Ec",
+        "costUsd": 0.001316904,
+        "durationMs": 602.5332839999992,
+        "attempts": 1
+      },
+      "wireReceipt": {
+        "responseModel": "deepseek/deepseek-v4.1-flash",
+        "responseProvider": "Together",
+        "responseId": "gen-1792494923-9CQGYkTS6ZJhwmETa0Ec",
+        "usageCostUsd": 0.001316904,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "chat-json-object",
+        "finishReason": "stop",
+        "bodyRead": "parsed"
+      },
+      "errorCode": null,
+      "durationMs": 602.0987940000005
+    },
+    {
+      "physicalId": 10,
+      "requestSha256": "1e07bf642901f4c6df94eaea6936356b1bab4fb3218a73002894c59356e4da5a",
+      "route": {
+        "id": "together-deepseek-flash-text-v1",
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "together",
+        "providerName": "Together",
+        "apiEndpoint": "/api/v1/chat/completions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "provider": "Together",
+        "requestId": "gen-1792494923-JJqOdZ9fiNw7vQFRp5ma",
+        "costUsd": 0.001316604,
+        "durationMs": 457.23745099999996,
+        "attempts": 1
+      },
+      "wireReceipt": {
+        "responseModel": "deepseek/deepseek-v4.1-flash",
+        "responseProvider": "Together",
+        "responseId": "gen-1792494923-JJqOdZ9fiNw7vQFRp5ma",
+        "usageCostUsd": 0.001316604,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "chat-json-object",
+        "finishReason": "stop",
+        "bodyRead": "parsed"
+      },
+      "errorCode": null,
+      "durationMs": 456.7877609999996
+    }
+  ]
+}

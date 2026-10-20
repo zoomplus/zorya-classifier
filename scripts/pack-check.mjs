@@ -68,7 +68,7 @@ import sharp from 'sharp'
 import { createClassifier, type DecisionPort, type DecisionResult } from 'zorya-classifier'
 import { createOpenRouterDecisions, type OpenRouterDecisionsOptions, createOpenRouterVision, type OpenRouterVisionOptions } from 'zorya-classifier/openrouter'
 import { createOpenAICompatibleVision, type OpenAICompatibleVisionOptions } from 'zorya-classifier/openai-compatible'
-import { createMobileSamSegmenter, createGrabCutSegmenter } from 'zorya-classifier/segmentation'
+import { createMobileSamSegmenter, createMobileSamObjectProposals, createGrabCutSegmenter, packBinaryMask, unpackBinaryMask } from 'zorya-classifier/segmentation'
 const native: (options: OpenRouterDecisionsOptions) => DecisionPort = createOpenRouterDecisions
 assert.equal(typeof native, 'function')
 const transport: (options: OpenRouterVisionOptions) => DecisionPort = createOpenRouterVision
@@ -136,6 +136,9 @@ const require = createRequire(import.meta.url)
 assert.throws(() => require.resolve('onnxruntime-node'), {code:'MODULE_NOT_FOUND'})
 assert.equal(typeof createGrabCutSegmenter,'function')
 await assert.rejects(createMobileSamSegmenter({encoderPath:'not-downloaded.onnx',decoderPath:'not-downloaded.onnx'}),{code:'UNSUPPORTED'})
+assert.equal(typeof createMobileSamObjectProposals,'function')
+assert.deepEqual(unpackBinaryMask(packBinaryMask(new Uint8Array([1,0,1,0]),2,2)),new Uint8Array([1,0,1,0]))
+await assert.rejects(createMobileSamObjectProposals({encoderPath:'not-downloaded.onnx',decoderPath:'not-downloaded.onnx'}),{code:'UNSUPPORTED'})
 let segmenterDisposals=0
 const whole=createClassifier({decision:{async decide(request){
  const answers:DecisionResult['answers']={}
@@ -168,6 +171,22 @@ try{
  console.log(JSON.stringify({wholeObject:'passed',extract:'passed',optionalOnnxAbsent:true,providerHttpCalls:0}))
 }finally{await whole.dispose()}
 assert.equal(segmenterDisposals,0)
+let proposalDisposals=0
+const proposals=createClassifier({decision,objectProposals:{async propose(input){
+ const pixels=input.image.width*input.image.height
+ const data=new Uint8Array(pixels);data.fill(1)
+ return {proposals:[{id:'C00',mask:packBinaryMask(data,input.image.width,input.image.height),qualityScore:-2}],metadata:{method:'fixture-proposals',backend:'fixture',durationMs:0,input:{width:input.image.width,height:input.image.height},qualityScore:-2}}
+},settle:async()=>{throw new Error('SDK must not globally settle a shared port')},dispose:async()=>{proposalDisposals++}}})
+try{
+ const location=await proposals.locate({image,target:'Synthetic rectangle',mode:'whole-object'})
+ assert.equal(location.status,'located')
+ if(location.status==='located')assert.equal(location.method,'pixel-mask-proposals-v1')
+ const cutout=await proposals.extract({image,target:'Synthetic rectangle'})
+ assert.equal(cutout.status,'extracted')
+ if(cutout.status==='extracted'){assert.equal(cutout.segmentation.qualityScore,-2);assert.deepEqual(cutout.region,{left:0,top:0,width:512,height:384})}
+ console.log(JSON.stringify({pixelMaskProposals:'passed',proposalExtract:'passed',optionalOnnxAbsent:true,providerHttpCalls:0}))
+}finally{await proposals.dispose()}
+assert.equal(proposalDisposals,0)
 `
 
 run(['run', 'build'])

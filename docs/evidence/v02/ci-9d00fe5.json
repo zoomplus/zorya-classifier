@@ -1,0 +1,25 @@
+{
+  "sourceSha": "9d00fe50d41fe74e4291a2a3c14f25254b0d73fb",
+  "runId": 39413786064,
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39413786064",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "verify (ubuntu-latest, 24)",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (windows-latest, 24)",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (windows-latest, 22)",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (ubuntu-latest, 22)",
+      "conclusion": "success"
+    }
+  ],
+  "scope": "Executed clean-install source checks, installed npm archive and formatting on Windows/Linux and Node22/24; native model resource evidence is separate."
+}

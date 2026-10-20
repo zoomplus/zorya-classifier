@@ -45,3 +45,10 @@ export type {
   ExtractionResult,
   ExtractInput,
 } from './entities/segmentation.js'
+export type {
+  PackedBinaryMask,
+  ObjectProposal,
+  ObjectProposalInput,
+  ObjectProposalBatch,
+  ObjectProposalPort,
+} from './entities/object-proposals.js'

@@ -1,7 +1,7 @@
 {
   "name": "zorya-classifier",
-  "version": "0.1.0",
-  "description": "Provider-independent text/image classification and coarse-to-fine object localization for Node.js",
+  "version": "0.2.0",
+  "description": "Provider-independent text/image classification, whole-object localization and optional transparent cutouts for Node.js",
   "type": "module",
   "license": "MIT",
   "engines": {
@@ -96,7 +96,10 @@
     "typescript",
     "vision",
     "openai-compatible",
-    "multimodal"
+    "multimodal",
+    "mobile-sam",
+    "segment-anything",
+    "binary-mask"
   ],
   "publishConfig": {
     "access": "public",

@@ -23,7 +23,7 @@ export class RunBudget {
     if (
       !Number.isInteger(maxPhysicalCalls) ||
       maxPhysicalCalls < 1 ||
-      maxPhysicalCalls > 250 ||
+      maxPhysicalCalls > 300 ||
       !Number.isFinite(maxCostUsd) ||
       maxCostUsd <= 0 ||
       maxCostUsd > 5 ||

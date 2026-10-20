@@ -39,6 +39,37 @@ The seed uses the existing three-stage locator. Each following request asks four
 
 `bounds` contains half-open intervals for the four extreme visible pixels; the rectangle conservatively covers those intervals. The seed must intersect the object, rather than contain it. Reversed bounds, ROI escape or a box missing the seed return `unknown/extent-inconsistent`; they are never sorted or clamped. Ambiguous identity gives `instance-ambiguous`; insufficient resolution or uncertain boundaries give `extent-uncertain`. `boundary-limited` warns that source/ROI edges may clip the visible extent.
 
+## Select whole-object bounds from pixel masks
+
+An explicit `objectProposals` adapter enables `pixel-mask-proposals-v1` instead of the boundary-interval algorithm. It first obtains a seed with the compatible region locator, computes 36 MobileSAM masks from nine seed points, then asks the configured model to choose a supplied mask or `none` and independently confirm completeness. The native process closes before the model request. Mask aliases and actual image pixels determine the result; the model never invents coordinates. Default region and classification operations are unchanged.
+
+```ts
+import { createClassifier } from 'zorya-classifier'
+import { createMobileSamObjectProposals } from 'zorya-classifier/segmentation'
+
+// decision is an explicitly configured DecisionPort; asset paths identify pinned local files.
+const proposals = await createMobileSamObjectProposals({ encoderPath, decoderPath, threads: 2 })
+const client = createClassifier({ decision, objectProposals: proposals })
+try {
+  const result = await client.locate({ image, target: 'the backpack', mode: 'whole-object' })
+  // extract performs its own localization and reuses that operation's selected mask.
+  const cutout = await client.extract({ image, target: 'the backpack' })
+  console.log(result.status, cutout.status)
+} finally {
+  try {
+    await client.dispose()
+  } finally {
+    await proposals.dispose()
+  }
+}
+```
+
+This adapter requires the same explicit pinned assets and optional ONNX Runtime installation described below. The proposal factory currently supports CPU only, at most 2,097,152 oriented source pixels, one active native task and two waiters. It returns at most 36 masks packed as row-major `binary-lsb0` bits, at most 10 MiB in total. A source larger than this fails explicitly rather than being silently resized. Up to four bounded presentation PNGs supplement the source image. All native work, rendering and model requests share the classifier deadline; up to five model requests are possible. The library performs no model/provider fallback or retry.
+
+The returned `bounds` are one-pixel intervals around the selected raster mask. This describes the mask's actual bounds, not a guarantee that the model found the true semantic boundary. `boxTolerancePx` and `maxExtentPasses` apply to the interval strategy, not this strategy. A correct box does not prove a good cutout: mask quality is measured separately. Empty, seed-disjoint or unconfirmed selections return a named `unknown`; native/backend errors throw.
+
+`ObjectProposalPort` supports other caller-owned proposal generators with the same limits. Its `propose` promise must settle only after its physical work closes. `packBinaryMask` and `unpackBinaryMask` from the segmentation entry validate and convert mask bytes. Importing them does not load ONNX Runtime. The caller disposes a shared proposal adapter; the classifier only cancels and joins its own operations. If both `objectProposals` and `segmentation` are explicitly configured, the selected proposal supplies the whole-object box and the segmenter performs a separate refinement; a refinement failure never falls back to the proposal mask.
+
 ## Extract with an explicit local backend
 
 Core runtime dependencies remain Sharp and Zod. MobileSAM requires the optional peer:

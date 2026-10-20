@@ -8,6 +8,46 @@ import { z } from 'zod'
 import { runBenchmark } from '../benchmarks/runner.js'
 import { offlineProvider } from '../benchmarks/recording.js'
 import { sha256 } from '../benchmarks/corpus.js'
+import { createDecisionTrace } from '../benchmarks/v02/protocol.js'
+
+await test('decision evidence accepts the closed contact-sheet aliases C00 through C35', () => {
+  const ids = [
+    'none',
+    ...Array.from({ length: 36 }, (_, index) => `C${String(index).padStart(2, '0')}`),
+  ]
+  const request = {
+    state: ['Select the mask that covers the full target.'],
+    questions: {
+      selection: {
+        type: 'choice' as const,
+        instructions: 'Choose one supplied alias.',
+        criteria: Object.fromEntries(ids.map((id) => [id, `Candidate ${id}`])),
+      },
+    },
+  }
+  const winner = 'C00'
+  const probabilities = Object.fromEntries(ids.map((id) => [id, id === winner ? 1 : 0]))
+  const traced = createDecisionTrace(request, {
+    answers: { selection: { type: 'choice', choice: winner, probabilities } },
+    metadata: {
+      model: 'fixture',
+      provider: 'fixture',
+      requestId: null,
+      durationMs: 0,
+      costUsd: 0,
+      attempts: 1,
+    },
+  })
+  assert.equal(traced.trace.status, 'recorded')
+  if (traced.trace.status === 'recorded') {
+    const question = traced.trace.questions[0]
+    assert.equal(question?.answerType, 'choice')
+    if (question?.answerType === 'choice') {
+      assert.equal(question.selected, winner)
+      assert.equal(question.probabilities?.length, 37)
+    }
+  }
+})
 
 async function fixtureCorpus(root: string): Promise<void> {
   for (const path of ['inputs', 'ground-truth', 'photos', 'text/inputs', 'text/ground-truth'])

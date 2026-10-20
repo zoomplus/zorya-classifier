@@ -1,0 +1,568 @@
+{
+  "runId": "evaluation-only-joined-svg-contours-v1-v1",
+  "profileId": "svg-contours-v1",
+  "complete": true,
+  "coverage": {
+    "planned": 30,
+    "reported": 30,
+    "missing": [],
+    "denominatorPolicy": "all planned cases; missing results fail qualification, not invented API calls"
+  },
+  "inputs": [
+    {
+      "sha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a",
+      "cases": 20
+    },
+    {
+      "sha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc",
+      "cases": 10
+    }
+  ],
+  "summarySha256": "c666030301e4119299204b2ae9674c1224bc477d21dcf7852475d48402ce0baa",
+  "runManifestSha256": "88b53835a29eef96b586670c0be42f3213d9b167b716b4b23fbf8934cd11e41c",
+  "truthSha256": [
+    "793e26845deaa2cb56748ef270b8cb02877218d680068573f02e5af92b26af6a",
+    "c7944190e1cadab695f2688351df10a14132986040dafb72794bb1df4571abfe"
+  ],
+  "classificationCorrect": 6,
+  "localization": {
+    "attempted": 30,
+    "positives": 23,
+    "negatives": 7,
+    "matched": 0,
+    "localizationRate": 0,
+    "falseLocations": 0,
+    "falseLocationRate": 0,
+    "unknown": 26,
+    "failed": 0,
+    "correct": 0,
+    "rows": [
+      {
+        "caseId": "photo-dev-present-01",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-02",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-03",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-04",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-05",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-06",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-07",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-08",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-09",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-10",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-11",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-12",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-13",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-14",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-15",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-16",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-01",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-02",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-03",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-04",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-01",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-02",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-03",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-04",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-05",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-06",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-07",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-01",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-02",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-03",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      }
+    ]
+  },
+  "photoLocalization": {
+    "attempted": 20,
+    "positives": 16,
+    "negatives": 4,
+    "matched": 0,
+    "localizationRate": 0,
+    "falseLocations": 0,
+    "falseLocationRate": 0,
+    "unknown": 20,
+    "failed": 0,
+    "correct": 0,
+    "rows": [
+      {
+        "caseId": "photo-dev-present-01",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-02",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-03",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-04",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-05",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-06",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-07",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-08",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-09",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-10",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-11",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-12",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-13",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-14",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-15",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-16",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-01",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-02",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-03",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-04",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      }
+    ]
+  },
+  "rows": [
+    {
+      "caseId": "photo-dev-present-01",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-02",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-03",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-04",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-05",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-06",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-07",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-08",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-09",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-10",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-11",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-12",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-13",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-14",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-15",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-16",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-absent-01",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-absent-02",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-absent-03",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-absent-04",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-01",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-02",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-03",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-04",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-05",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-06",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-07",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-01",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-02",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-03",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    }
+  ]
+}

@@ -2,7 +2,9 @@
 
 The public factory composes a DecisionPort and a Sharp-backed RasterPort. Processes orchestrate classify/locate; features contain pure Choice interpretation, grid geometry and prompt construction; entities define validated public contracts; infrastructure owns provider HTTP and image processing. No application runtime, game-state schema or workspace import is required.
 
-On the 0.2 branch, whole-object orchestration adds closed boundary intervals after the compatible region seed. Extraction composes that locator with a caller-owned `SegmentationPort` and a `CutoutRasterPort`; processes import neither Sharp nor native inference. Native providers own their workers, queues and assets. [Operation and ownership details](v02-usage.md) are explicit; no experimental text-image profile is publicly qualified yet.
+On the 0.2 branch, whole-object orchestration adds closed boundary intervals after the compatible region seed. An explicitly configured `ObjectProposalPort` provides an alternate whole-object path: the region seed is converted into packed pixel masks by an owned native task, then a presentation port renders closed aliases for model selection and a separate completeness check. Native inference ends before model dispatch; SDK processes retain packed masks and unpack only the selected candidate. Coordinates are derived from foreground pixels. Extraction reuses that selected mask or applies an explicitly configured refinement segmenter. No proposal is chosen by a native quality score.
+
+Extraction composes the selected locator with a caller-owned `SegmentationPort` and a `CutoutRasterPort`; processes import neither Sharp nor native inference. Native providers own their workers, queues and assets. [Operation and ownership details](v02-usage.md) are explicit; no experimental text-image profile is publicly qualified yet.
 
 ```mermaid
 flowchart LR

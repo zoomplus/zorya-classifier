@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "scope": "independent DEV-only evaluation: 20 licensed photos and 10 independently annotated controlled UI captures; no heldout or map stratum",
+  "stages": "Original localization is preserved; corrected classification-only followups are joined by exact case/image identity. This is not one end-to-end provider run.",
+  "route": {
+    "model": "deepseek/deepseek-v4.1-flash",
+    "provider": "Together",
+    "fallback": false,
+    "retries": 0
+  },
+  "decision": "No text encoder qualifies for image localization; public experimental-text remains UNSUPPORTED. All six have0/16 photo and0/7 UI whole-object matches, like the no-image control. No heldout winner is selected.",
+  "classifyHarnessRegression": "4b914c422d529e310503988c95e3c1720b96c1a2 and integrated9d00fe5; real-adapter wire fixture verifies encoding and absence of image parts",
+  "profiles": [
+    {
+      "profile": "ascii-luma-v1",
+      "classificationCorrect": 6,
+      "wholeMatched": 0,
+      "photoMatched": 0,
+      "falseLocations": 1,
+      "unknown": 20,
+      "failed": 0,
+      "denominator": 30,
+      "positiveDenominator": 23,
+      "photoPositiveDenominator": 16,
+      "originalClassificationStatus": "harness-rejected-before-fetch; omitted experimental selector",
+      "artifactSha256": {
+        "original-summary.json": "327aa91d6133421de5b2f2840a7686e40fe013e12e92e9d44710520b103a60b9",
+        "original-run-manifest.json": "8c3f432423a8b1b3f0d2ace604f3ec75d2948a7ca70c3b47a8a3903f457dcc1c",
+        "classify-followup-summary.json": "94b1d4ddd9e278133e5e94d99363fd5e9b47ee9d5b82005da20e02213b1a75f1",
+        "classify-followup-run-manifest.json": "b7c4dabca4cff5afced18b317fa6695b747a0762bee723c466cc4a8193181e8c",
+        "evaluation.json": "03853fc09fc9dc49ba81979ee781afc2dd29e4404cb9b11660a8fc975e8bd422"
+      },
+      "separateRunAggregates": [
+        {
+          "admittedPhysicalCalls": 99,
+          "knownCostUsd": 0.20300840400000003,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.20300840400000003,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        },
+        {
+          "admittedPhysicalCalls": 30,
+          "knownCostUsd": 0.013899024,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.013899024,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        }
+      ]
+    },
+    {
+      "profile": "palette-grid-v1",
+      "classificationCorrect": 10,
+      "wholeMatched": 0,
+      "photoMatched": 0,
+      "falseLocations": 0,
+      "unknown": 22,
+      "failed": 0,
+      "denominator": 30,
+      "positiveDenominator": 23,
+      "photoPositiveDenominator": 16,
+      "originalClassificationStatus": "harness-rejected-before-fetch; omitted experimental selector",
+      "artifactSha256": {
+        "original-summary.json": "d4fd3a626a35dfa3cf96cca550966e81fbb16538cda83cc2d86927a30d46cbbe",
+        "original-run-manifest.json": "dba7685d2ad845de0585cfd8fdd9a8ae193d25279abc7fb3162e124b7e07aef9",
+        "classify-followup-summary.json": "fdd4ffbaa1eb613d3016908063634ffbd39af09d21e19d680227a474be8d56c0",
+        "classify-followup-run-manifest.json": "fcb854a9272cc85aa4438397b110d9c0c2cab5bac131dcb2e67071b30ead50ba",
+        "evaluation.json": "65e6968c2f155b686c8fa5edc308bf0c3fa64a4e14a660e196c2679ec37213a5"
+      },
+      "separateRunAggregates": [
+        {
+          "admittedPhysicalCalls": 82,
+          "knownCostUsd": 0.1944044040000001,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.1944044040000001,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        },
+        {
+          "admittedPhysicalCalls": 30,
+          "knownCostUsd": 0.01634682,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.01634682,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        }
+      ]
+    },
+    {
+      "profile": "svg-contours-v1",
+      "classificationCorrect": 6,
+      "wholeMatched": 0,
+      "photoMatched": 0,
+      "falseLocations": 0,
+      "unknown": 26,
+      "failed": 0,
+      "denominator": 30,
+      "positiveDenominator": 23,
+      "photoPositiveDenominator": 16,
+      "originalClassificationStatus": "harness-rejected-before-fetch; omitted experimental selector",
+      "artifactSha256": {
+        "original-summary.json": "3e36e0a2e03ae585a810f5a69b2d71a7280247883f5885a775d3740e7d97d6b7",
+        "original-run-manifest.json": "43ae4f218f5c4e408a6ad2adb3041548430bdef20d78f150e7d3b5b0e793b6c0",
+        "classify-followup-summary.json": "a2739fe1d0a90214375923ab1a2a3108ce671e9eb16ed18ca2a13c00169ed04e",
+        "classify-followup-run-manifest.json": "4a77541d428f84798b0c9aa061634c073ce610c822d070c4851cda20703fe7ea",
+        "evaluation.json": "439da247c0408a71bd119d6d3d3c14187db2c8524034d2394a118a8d8926460a"
+      },
+      "separateRunAggregates": [
+        {
+          "admittedPhysicalCalls": 37,
+          "knownCostUsd": 0.062035092000000014,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.062035092000000014,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        },
+        {
+          "admittedPhysicalCalls": 10,
+          "knownCostUsd": 0.008384639999999999,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.008384639999999999,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        }
+      ]
+    },
+    {
+      "profile": "pixel-rle-v1",
+      "classificationCorrect": 11,
+      "wholeMatched": 0,
+      "photoMatched": 0,
+      "falseLocations": 3,
+      "unknown": 17,
+      "failed": 0,
+      "denominator": 30,
+      "positiveDenominator": 23,
+      "photoPositiveDenominator": 16,
+      "originalClassificationStatus": "harness-rejected-before-fetch; omitted experimental selector",
+      "artifactSha256": {
+        "original-summary.json": "95daadb7deba5973e33292699a5242d76fd3f5ae6efdf5580e64da04d586d4c3",
+        "original-run-manifest.json": "a995585477afbe3818963ca3bb33306a5b4c7ac7d58f4b6ff7d7f4d2baff6fcc",
+        "classify-followup-summary.json": "1dbf511c7a833c60942a063103fe325da6ac2bab273cfb7b7c12ac9770b91277",
+        "classify-followup-run-manifest.json": "1a34fb8d9d9906430631f6b9b6cbb2ad8f96cf5dff6df5e584dc9924243d5e71",
+        "evaluation.json": "1a9f9cabc3ba3bd3a355b9a113f3288383a0c32fffc1548cbe508bbadfd715d9"
+      },
+      "separateRunAggregates": [
+        {
+          "admittedPhysicalCalls": 106,
+          "knownCostUsd": 0.6526186920000009,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.6526186920000009,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        },
+        {
+          "admittedPhysicalCalls": 30,
+          "knownCostUsd": 0.13236792,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.13236792,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        }
+      ]
+    },
+    {
+      "profile": "ascii-contours-v1",
+      "classificationCorrect": 15,
+      "wholeMatched": 0,
+      "photoMatched": 0,
+      "falseLocations": 2,
+      "unknown": 19,
+      "failed": 1,
+      "denominator": 30,
+      "positiveDenominator": 23,
+      "photoPositiveDenominator": 16,
+      "originalClassificationStatus": "harness-rejected-before-fetch; omitted experimental selector",
+      "artifactSha256": {
+        "original-summary.json": "7fa87521652eafd46d77b55166b192c5785b4f8fa6c909828cbfcf8ca2b0d173",
+        "original-run-manifest.json": "99ea45e331828e7344fc094c25097b3ca3b7a21e21bcd7f89065d328a6a1c5ab",
+        "classify-followup-summary.json": "5f6c3caf3752a1b8fdd0f03df6f87c40cdcecf0c9fbe2ee0c8346945cce088b9",
+        "classify-followup-run-manifest.json": "eb2be3636b6f2552d45a57ba2c090a3c58bf40ae87030c955e51a8ffde8b685b",
+        "evaluation.json": "dd0e2f3802f49c752561db88dcb04b0deb37b1aee8bca300d0b811d1d70af432"
+      },
+      "separateRunAggregates": [
+        {
+          "admittedPhysicalCalls": 93,
+          "knownCostUsd": 0.2514754919999999,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.2514754919999999,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        },
+        {
+          "admittedPhysicalCalls": 30,
+          "knownCostUsd": 0.019617120000000002,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.019617120000000002,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        }
+      ]
+    },
+    {
+      "profile": "ascii-svg-layered-v1",
+      "classificationCorrect": 9,
+      "wholeMatched": 0,
+      "photoMatched": 0,
+      "falseLocations": 0,
+      "unknown": 28,
+      "failed": 0,
+      "denominator": 30,
+      "positiveDenominator": 23,
+      "photoPositiveDenominator": 16,
+      "originalClassificationStatus": "harness-rejected-before-fetch; omitted experimental selector",
+      "artifactSha256": {
+        "original-summary.json": "be6eae9b9270c0e3edf56b20cae0911b95cc47045fde614c723c2150ead51bce",
+        "original-run-manifest.json": "ead0a96c3b2fdb36cda6de35cc193f4a4ce0a32d3877f62ae12848d25e54dc2f",
+        "classify-followup-summary.json": "d1c639a643a18e0f8523c304cd26a4eaf8f0428918674d2f695a13edcfe195f2",
+        "classify-followup-run-manifest.json": "f05c09a702b281dd8d549abce0b8f0a3ba44fb89c7978caa9e8319e9ae2e5e1e",
+        "evaluation.json": "f0ae657c0f02a8c22376ffb9bce336d299f7fbfb98fd7ad5dcc6d4cbd1a9bdfa"
+      },
+      "separateRunAggregates": [
+        {
+          "admittedPhysicalCalls": 27,
+          "knownCostUsd": 0.057858719999999975,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.057858719999999975,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        },
+        {
+          "admittedPhysicalCalls": 10,
+          "knownCostUsd": 0.013166640000000004,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.013166640000000004,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        }
+      ]
+    },
+    {
+      "profile": "no-image-control",
+      "classificationCorrect": 7,
+      "wholeMatched": 0,
+      "photoMatched": 0,
+      "falseLocations": 0,
+      "unknown": 30,
+      "failed": 0,
+      "denominator": 30,
+      "positiveDenominator": 23,
+      "photoPositiveDenominator": 16,
+      "originalClassificationStatus": "valid-no-image-control",
+      "artifactSha256": {
+        "original-summary.json": "e1883c97aae300635180b9287d7c9cab1152417b00925c670a894a263855cb6d",
+        "original-run-manifest.json": "5efdf48993b3b544f43b2c674a4bfd00cf3bb03b555f5f0640b7aeadccd991d8",
+        "evaluation.json": "6a866317a0248eab48c7c3e39b24044445d70462dfc1a9a7353f8b10790afc3d"
+      },
+      "separateRunAggregates": [
+        {
+          "admittedPhysicalCalls": 83,
+          "knownCostUsd": 0.04598229599999997,
+          "unknownCostCalls": 0,
+          "inFlightCalls": 0,
+          "accountedExposureUsd": 0.04598229599999997,
+          "maxPhysicalCalls": 250,
+          "maxCostUsd": 5
+        }
+      ]
+    }
+  ]
+}
