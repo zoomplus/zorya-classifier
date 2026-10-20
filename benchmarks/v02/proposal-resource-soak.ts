@@ -20,7 +20,7 @@ import type { ObjectProposalPort } from '../../src/entities/object-proposals.js'
 import type { ExtractInput } from '../../src/entities/segmentation.js'
 import type { WholeObjectLocateInput } from '../../src/entities/whole-object.js'
 import { createMobileSamObjectProposals } from '../../src/infrastructure/segmentation/mobile-sam/index.js'
-import { ResourceRunner, type ResourceReport } from './resource-runner.js'
+import { ResourceRunner, runMonotonicPhase, type ResourceReport } from './resource-runner.js'
 
 interface CliOptions {
   encoderPath: string
@@ -516,8 +516,8 @@ async function parentLossSmoke(options: CliOptions): Promise<unknown> {
 }
 
 async function waitForProcessExit(pid: number, timeoutMs: number): Promise<boolean> {
-  const until = Date.now() + timeoutMs
-  while (Date.now() < until) {
+  const until = performance.now() + timeoutMs
+  while (performance.now() < until) {
     try {
       process.kill(pid, 0)
     } catch (error) {
@@ -620,6 +620,8 @@ async function main(): Promise<void> {
     return
   }
   const options = parseOptions(process.argv.slice(2))
+  const processStartedAtIso = new Date().toISOString()
+  const processStartedMonotonic = performance.now()
   const sourceBefore = await verifySourceManifest(
     options.sourceManifestPath,
     options.sourceManifestSha256,
@@ -687,43 +689,60 @@ async function main(): Promise<void> {
     return
   }
   const warmupStartedAt = new Date().toISOString()
-  const warmupUntil = Date.now() + options.warmupSeconds * 1000
+  const warmupStartedMonotonic = performance.now()
   const warmup: CycleRecord[] = []
-  while (Date.now() < warmupUntil) {
+  const warmupDurationMs = await runMonotonicPhase(options.warmupSeconds * 1000, async () => {
     const operation = warmup.length % 2 === 0 ? 'locate' : 'extract'
     warmup.push(await oneCycle(classifier, image, operation))
-  }
+  })
+  const warmupObservedMs = performance.now() - warmupStartedMonotonic
 
   const resources = new ResourceRunner(options.sampleMs)
   resources.start()
+  const measurementStartedMonotonic = performance.now()
   const controller = new AbortController()
   const onInterrupt = () => controller.abort(new ClassifierError('ABORTED', 'Soak interrupted'))
   process.once('SIGINT', onInterrupt)
   const records: CycleRecord[] = []
   const runStartedAt = new Date().toISOString()
+  const idleBeforeStartedMonotonic = performance.now()
+  let idleBeforeDurationMs = 0
+  let busyDurationMs = 0
+  let idleAfterDurationMs = 0
   let busyStartedAt = ''
+  let busyStartedMonotonic = 0
+  let idleAfterStartedAt = ''
   try {
     await delay(options.idleSeconds * 1000, undefined, { signal: controller.signal }).catch(
       () => undefined,
     )
+    idleBeforeDurationMs = performance.now() - idleBeforeStartedMonotonic
     resources.setPhase('busy')
     busyStartedAt = new Date().toISOString()
-    const busyUntil = Date.now() + options.durationSeconds * 1000
-    let nextProgressAt = Date.now() + 5 * 60 * 1000
-    while (Date.now() < busyUntil && !controller.signal.aborted) {
-      const operation = records.length % 2 === 0 ? 'locate' : 'extract'
-      records.push(await oneCycle(classifier, image, operation, controller.signal))
-      if (Date.now() >= nextProgressAt) {
-        console.error(
-          `proposal resource soak: ${Math.floor((Date.now() - Date.parse(busyStartedAt)) / 60_000)} busy minutes, ${records.length} operations`,
-        )
-        nextProgressAt += 5 * 60 * 1000
-      }
-    }
+    busyStartedMonotonic = performance.now()
+    let nextProgressAt = 5 * 60 * 1000
+    busyDurationMs = await runMonotonicPhase(
+      options.durationSeconds * 1000,
+      async () => {
+        const operation = records.length % 2 === 0 ? 'locate' : 'extract'
+        records.push(await oneCycle(classifier, image, operation, controller.signal))
+        const busyElapsedMs = performance.now() - busyStartedMonotonic
+        if (busyElapsedMs >= nextProgressAt) {
+          console.error(
+            `proposal resource soak: ${Math.floor(busyElapsedMs / 60_000)} busy minutes, ${records.length} operations`,
+          )
+          nextProgressAt += 5 * 60 * 1000
+        }
+      },
+      { shouldStop: () => controller.signal.aborted },
+    )
     resources.setPhase('idle-after')
+    idleAfterStartedAt = new Date().toISOString()
+    const idleAfterStartedMonotonic = performance.now()
     await delay(options.idleSeconds * 1000, undefined, { signal: controller.signal }).catch(
       () => undefined,
     )
+    idleAfterDurationMs = performance.now() - idleAfterStartedMonotonic
   } finally {
     process.off('SIGINT', onInterrupt)
     await classifier.dispose()
@@ -731,16 +750,57 @@ async function main(): Promise<void> {
     await delay(25)
   }
   const resourceReport: ResourceReport = resources.stop()
+  const measurementObservedMs = performance.now() - measurementStartedMonotonic
   if (
     resourceReport.childStarts !== resourceReport.childCloses ||
     resourceReport.childrenStillOwned.length > 0
   )
     throw new Error('Resource sampling found native children still owned or missing close events')
+  const sourceAfter = await verifySourceManifest(
+    options.sourceManifestPath,
+    options.sourceManifestSha256,
+  )
+  const endedAt = new Date().toISOString()
+  const totalObservedMs = performance.now() - processStartedMonotonic
+  const requestedDurationsMs = {
+    warmup: options.warmupSeconds * 1000,
+    idleBefore: options.idleSeconds * 1000,
+    busy: options.durationSeconds * 1000,
+    idleAfter: options.idleSeconds * 1000,
+  }
+  const phaseDurationValidation = {
+    warmupReachedDeadline:
+      warmupDurationMs >= requestedDurationsMs.warmup &&
+      warmupObservedMs >= requestedDurationsMs.warmup,
+    idleBeforeReachedDeadline: idleBeforeDurationMs >= requestedDurationsMs.idleBefore,
+    busyReachedDeadline: busyDurationMs >= requestedDurationsMs.busy,
+    idleAfterReachedDeadline: idleAfterDurationMs >= requestedDurationsMs.idleAfter,
+    measurementReachedRequested:
+      measurementObservedMs >=
+      requestedDurationsMs.idleBefore + requestedDurationsMs.busy + requestedDurationsMs.idleAfter,
+    totalObservedReachedRequested:
+      totalObservedMs >= Object.values(requestedDurationsMs).reduce((a, b) => a + b, 0),
+  }
+  const sourceProof = {
+    before: sourceBefore,
+    after: sourceAfter,
+    unchanged:
+      sourceBefore.revision === sourceAfter.revision &&
+      sourceBefore.manifestSha256 === sourceAfter.manifestSha256 &&
+      sourceBefore.sourceFileCount === sourceAfter.sourceFileCount,
+  }
+  const durationValidation = {
+    ...phaseDurationValidation,
+    sourceManifestUnchanged: sourceProof.unchanged,
+    noOwnedChildrenRemain: resourceReport.childrenStillOwned.length === 0,
+    allOwnedChildrenClosed: resourceReport.childStarts === resourceReport.childCloses,
+  }
+  const allDurationChecksPassed = Object.values(durationValidation).every(Boolean)
   const report: Record<string, unknown> = {
     schemaVersion: 1,
     benchmark: 'public-mobile-sam-object-proposal-resource-v1',
     executionSource: 'working-tree',
-    sourceManifest: { before: sourceBefore },
+    sourceProof,
     archiveReferenceSha256: options.archiveReferenceSha256,
     archiveInstalledByHarness: false,
     environment: {
@@ -761,13 +821,30 @@ async function main(): Promise<void> {
       maxPixels: 2_097_152,
       seedCell: 'C00',
       targetRegion,
+      clock: 'node:perf_hooks performance.now (monotonic); ISO timestamps are metadata only',
     },
     timestamps: {
+      processStartedAt: processStartedAtIso,
       warmupStartedAt,
       measurementStartedAt: runStartedAt,
       busyStartedAt,
-      endedAt: new Date().toISOString(),
+      idleAfterStartedAt,
+      endedAt,
     },
+    monotonicDurationsMs: {
+      processObservedMs: totalObservedMs,
+      measurementObservedMs,
+      warmupMs: warmupDurationMs,
+      measurementMs: resourceReport.observedDurationMs,
+      warmupObservedMs,
+      idleBeforeMs: idleBeforeDurationMs,
+      busyMs: busyDurationMs,
+      idleAfterMs: idleAfterDurationMs,
+      requestedTotalMs: Object.values(requestedDurationsMs).reduce((a, b) => a + b, 0),
+      resourcePhaseTransitions: resourceReport.phaseTransitions,
+    },
+    durationValidation,
+    durationAccepted: allDurationChecksPassed,
     lifecycle,
     warmup: { count: warmup.length, records: warmup },
     results: {
@@ -816,11 +893,6 @@ async function main(): Promise<void> {
     },
     resources: resourceReport,
   }
-  const sourceAfter = await verifySourceManifest(
-    options.sourceManifestPath,
-    options.sourceManifestSha256,
-  )
-  report.sourceManifestAfter = sourceAfter
   const json = `${JSON.stringify(report, null, 2)}\n`
   if (options.outputPath) {
     const output = await open(options.outputPath, 'wx')
@@ -831,6 +903,10 @@ async function main(): Promise<void> {
     }
   } else {
     process.stdout.write(json)
+  }
+  if (!allDurationChecksPassed) {
+    console.error('Resource soak did not meet every monotonic duration/source/cleanup check')
+    process.exitCode = 1
   }
 }
 

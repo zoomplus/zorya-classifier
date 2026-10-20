@@ -1,4 +1,5 @@
 import { channel } from 'node:diagnostics_channel'
+import { performance } from 'node:perf_hooks'
 import { setInterval, clearInterval } from 'node:timers'
 
 interface ChildMemorySample {
@@ -13,13 +14,25 @@ interface ChildMemorySample {
 }
 
 type SamplingPhase = 'idle-before' | 'busy' | 'idle-after'
+export type MonotonicClock = () => number
+
 interface ParentMemorySample extends NodeJS.MemoryUsage {
   timestampMs: number
   phase: SamplingPhase
 }
 
+interface PhaseTransition {
+  phase: SamplingPhase
+  timestampMs: number
+  timestampIso: string
+}
+
 export interface ResourceReport {
   sampleIntervalMs: number
+  startedAtIso: string
+  endedAtIso: string
+  observedDurationMs: number
+  phaseTransitions: PhaseTransition[]
   parentSamples: ParentMemorySample[]
   childSamples: (ChildMemorySample & { timestampMs: number })[]
   childStarts: number
@@ -33,27 +46,56 @@ export interface ResourceReport {
   childPeak: Record<'rss' | 'heapTotal' | 'heapUsed' | 'external' | 'arrayBuffers', number>
 }
 
+/** Run a phase against a monotonic clock; wall-clock changes cannot shorten its deadline. */
+export async function runMonotonicPhase(
+  durationMs: number,
+  onIteration: () => Promise<void>,
+  options: { now?: MonotonicClock; shouldStop?: () => boolean } = {},
+): Promise<number> {
+  if (!Number.isFinite(durationMs) || durationMs < 0)
+    throw new RangeError('Monotonic phase duration must be a finite nonnegative number')
+  const now = options.now ?? (() => performance.now())
+  const startedAt = now()
+  while (!hasMonotonicDeadlineElapsed(startedAt, durationMs, now()) && !options.shouldStop?.())
+    await onIteration()
+  return Math.max(0, now() - startedAt)
+}
+
+export function hasMonotonicDeadlineElapsed(
+  startedAtMs: number,
+  durationMs: number,
+  nowMs: number,
+): boolean {
+  return nowMs - startedAtMs >= durationMs
+}
+
 /** Starts only when called; importing this helper does not create timers or subscriptions. */
 export class ResourceRunner {
   readonly #intervalMs: number
   readonly #parentSamples: ParentMemorySample[] = []
   readonly #childSamples: (ChildMemorySample & { timestampMs: number })[] = []
   readonly #children = new Map<number, string>()
+  readonly #phaseTransitions: PhaseTransition[] = []
+  readonly #now: MonotonicClock
   #timer: NodeJS.Timeout | undefined
   #startedAt = 0
+  #startedAtIso = ''
   #phase: SamplingPhase = 'idle-before'
 
-  constructor(intervalMs: number) {
+  constructor(intervalMs: number, now: MonotonicClock = () => performance.now()) {
     if (!Number.isInteger(intervalMs) || intervalMs < 250)
       throw new RangeError('Resource sampling interval must be at least 250 ms')
     this.#intervalMs = intervalMs
+    this.#now = now
   }
 
   start(): void {
     if (this.#timer) throw new Error('Resource runner is already active')
     const childChannel = channel('zorya.segmentation.child-resource')
     childChannel.subscribe(this.#onChild)
-    this.#startedAt = Date.now()
+    this.#startedAt = this.#now()
+    this.#startedAtIso = new Date().toISOString()
+    this.#recordPhase('idle-before')
     this.#sampleParent()
     this.#timer = setInterval(() => this.#sampleParent(), this.#intervalMs)
     this.#timer.unref()
@@ -61,6 +103,7 @@ export class ResourceRunner {
 
   setPhase(phase: SamplingPhase): void {
     this.#phase = phase
+    this.#recordPhase(phase)
     this.#sampleParent()
   }
 
@@ -69,6 +112,8 @@ export class ResourceRunner {
     clearInterval(this.#timer)
     this.#timer = undefined
     this.#sampleParent()
+    const endedAtIso = new Date().toISOString()
+    const observedDurationMs = Math.max(0, this.#now() - this.#startedAt)
     channel('zorya.segmentation.child-resource').unsubscribe(this.#onChild)
     const parentKeys: (keyof NodeJS.MemoryUsage)[] = [
       'rss',
@@ -80,6 +125,10 @@ export class ResourceRunner {
     const childKeys = ['rss', 'heapTotal', 'heapUsed', 'external', 'arrayBuffers'] as const
     return {
       sampleIntervalMs: this.#intervalMs,
+      startedAtIso: this.#startedAtIso,
+      endedAtIso,
+      observedDurationMs,
+      phaseTransitions: [...this.#phaseTransitions],
       parentSamples: [...this.#parentSamples],
       childSamples: [...this.#childSamples],
       childStarts: this.#childSamples.filter((sample) => sample.type === 'start').length,
@@ -111,16 +160,28 @@ export class ResourceRunner {
       this.#children.set(sample.pid, sample.jobId)
     if (sample.type === 'close' && sample.pid !== undefined) this.#children.delete(sample.pid)
     if (sample.type === 'memory' || sample.rss !== undefined)
-      this.#childSamples.push({ ...sample, timestampMs: Date.now() - this.#startedAt })
+      this.#childSamples.push({ ...sample, timestampMs: this.#elapsedMs() })
     else if (sample.type === 'start' || sample.type === 'close')
-      this.#childSamples.push({ ...sample, timestampMs: Date.now() - this.#startedAt })
+      this.#childSamples.push({ ...sample, timestampMs: this.#elapsedMs() })
   }
 
   #sampleParent(): void {
     this.#parentSamples.push({
       ...process.memoryUsage(),
-      timestampMs: Date.now() - this.#startedAt,
+      timestampMs: this.#elapsedMs(),
       phase: this.#phase,
+    })
+  }
+
+  #elapsedMs(): number {
+    return Math.max(0, this.#now() - this.#startedAt)
+  }
+
+  #recordPhase(phase: SamplingPhase): void {
+    this.#phaseTransitions.push({
+      phase,
+      timestampMs: this.#elapsedMs(),
+      timestampIso: new Date().toISOString(),
     })
   }
 }
