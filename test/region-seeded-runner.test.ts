@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { test } from 'node:test'
 import type { DecisionPort, DecisionRequest, DecisionResult } from '../src/entities/contracts.js'
 import {
+  assertRecorderHealthy,
   assertNoImagePartsAtFetch,
   regionSeededDevManifests,
   regionSeededNoImageProfile,
@@ -10,6 +14,9 @@ import {
   regionSeededRecipe,
   removeImagesAtDecisionBoundary,
 } from '../benchmarks/v02/region-seeded-runner.js'
+import type { Recorder } from '../benchmarks/v02/recording.js'
+import { recordProvider } from '../benchmarks/v02/recording.js'
+import { RunBudget } from '../benchmarks/v02/budget.js'
 import { parseRegionSeededArgs } from '../benchmarks/v02/run-region-seeded-dev.js'
 
 await test('region-seeded and no-image controls are distinct named fixed recipes', () => {
@@ -76,6 +83,84 @@ await test('no-image DecisionPort strips image parts while preserving text state
   )
   assert.deepEqual(seen?.state, ['geometry metadata'])
   assert.deepEqual(seen?.questions, request.questions)
+})
+
+await test('receipt persistence failures fail closed before the next operation stage', () => {
+  const healthyAfterProviderError = {
+    port: {
+      decide: async () => {
+        throw new Error('provider error')
+      },
+    },
+    calls: [],
+    logicalCalls: [],
+    fetch: async () => new Response('{}'),
+    persistenceFailures: [],
+  } satisfies Recorder
+  assert.doesNotThrow(() => assertRecorderHealthy(healthyAfterProviderError))
+
+  const lostReceipt = {
+    ...healthyAfterProviderError,
+    persistenceFailures: [
+      {
+        stage: 'physical-receipt',
+        logicalId: 1,
+        physicalId: 1,
+        errorCode: 'PERSISTENCE_ERROR',
+      },
+    ],
+  } satisfies Recorder
+  assert.throws(
+    () => assertRecorderHealthy(lostReceipt),
+    (error: unknown) => {
+      assert.equal((error as { code?: string }).code, 'PERSISTENCE_FAILURE')
+      return true
+    },
+  )
+})
+
+await test('recordProvider exposes pre-fetch persistence failure without admitting a network call', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'region-seeded-receipt-failure-'))
+  try {
+    const blocker = join(root, 'not-a-directory')
+    await writeFile(blocker, 'fixture')
+    let fetchCalls = 0
+    const recorder = recordProvider(
+      () => ({
+        decide: async () => {
+          throw new Error('must not be called')
+        },
+      }),
+      new RunBudget(1, 1, 0.05, 'dev'),
+      blocker,
+      {
+        model: 'fixture-model',
+        provider: 'fixture-provider',
+        providerName: 'Fixture',
+        apiEndpoint: '/fixture',
+        allowFallbacks: false,
+      },
+      async () => {
+        fetchCalls++
+        return new Response('{}')
+      },
+    )
+    await assert.rejects(
+      recorder.port.decide({ state: ['fixture'], questions: {} }, new AbortController().signal),
+    )
+    assert.equal(fetchCalls, 0)
+    assert.equal(recorder.calls.length, 0)
+    assert.equal(recorder.persistenceFailures?.length, 1)
+    assert.throws(
+      () => assertRecorderHealthy(recorder),
+      (error: unknown) => {
+        assert.equal((error as { code?: string }).code, 'PERSISTENCE_FAILURE')
+        return true
+      },
+    )
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
 })
 
 await test('no-image fetch boundary verifies requests and rejects any image part', async () => {

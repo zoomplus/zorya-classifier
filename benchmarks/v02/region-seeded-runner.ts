@@ -235,8 +235,17 @@ function safeErrorCode(error: unknown): string {
     'PROVIDER',
     'AUTHENTICATION',
     'V02_RUN_BUDGET_EXHAUSTED',
+    'PERSISTENCE_FAILURE',
   ])
   return typeof code === 'string' && allowed.has(code) ? code : 'RUNNER_FAILURE'
+}
+
+export function assertRecorderHealthy(recorder: Recorder): void {
+  if (recorder.persistenceFailures?.length) {
+    throw Object.assign(new Error('Required benchmark receipt persistence failed'), {
+      code: 'PERSISTENCE_FAILURE',
+    })
+  }
 }
 
 function safeReason(value: unknown): string | undefined {
@@ -605,6 +614,9 @@ async function processCase(args: {
         safeErrorCode(error),
       )
     }
+    // A provider/JSON failure is an ordinary failed case. Losing the recorder's own
+    // request/receipt evidence is a run-level stop condition, before another stage.
+    assertRecorderHealthy(recorder)
 
     const extractionStarted = performance.now()
     const physicalStart = recorder.calls.length
@@ -737,6 +749,7 @@ async function processCase(args: {
         ),
       }
     }
+    assertRecorderHealthy(recorder)
   } finally {
     clearTimeout(deadline)
     signal.removeEventListener('abort', onAbort)
@@ -1011,6 +1024,7 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
             recorder,
             signal: controller.signal,
           })
+          assertRecorderHealthy(recorder)
           const row = results[index]!
           if (
             row.classify.logicalCalls > 1 ||
@@ -1064,12 +1078,29 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     .filter((item) => !completed.has(item.caseId))
     .map((item) => item.caseId)
   const aggregate = budget.snapshot() satisfies BudgetSnapshot
+  const recorderPersistenceFailures = corpus.cases.flatMap((item) =>
+    (recorders.get(item.caseId)?.persistenceFailures ?? []).map((failure) => ({
+      caseId: item.caseId,
+      ...failure,
+    })),
+  )
+  const caseWorkersSettled = true // Both workers are joined with Promise.allSettled above.
+  const nativeCleanupComplete = !segmenter || shutdownError === undefined
+  const classifierCleanupComplete = failed === undefined
   const summary = {
     runId,
     profileId: options.profileId,
     phase: options.phase,
     status:
-      failed || missingCaseIds.length || shutdownError || aggregate.inFlightCalls
+      failed ||
+      missingCaseIds.length ||
+      shutdownError ||
+      aggregate.inFlightCalls ||
+      recorderPersistenceFailures.length ||
+      !caseWorkersSettled ||
+      !nativeCleanupComplete ||
+      !classifierCleanupComplete ||
+      sourceAfterSha256 !== sourceBeforeSha256
         ? 'incomplete'
         : 'complete',
     producerSourceSha256: sourceBeforeSha256,
@@ -1082,6 +1113,10 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     results: results.filter((row): row is RegionSeededCaseResult => row !== undefined),
     aggregate,
     shutdownError: shutdownError ?? null,
+    caseWorkersSettled,
+    nativeCleanupComplete,
+    classifierCleanupComplete,
+    recorderPersistenceFailures,
     ...(options.variant === 'no-image-control'
       ? {
           imageFetchAudit: {

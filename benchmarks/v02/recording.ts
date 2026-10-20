@@ -100,6 +100,21 @@ export interface Recorder {
   calls: PhysicalCallRecord[]
   logicalCalls: LogicalCallRecord[]
   fetch: typeof globalThis.fetch
+  /** Optional for compatibility with previously captured/custom recorder objects. */
+  persistenceFailures?: RecorderPersistenceFailure[]
+}
+
+export interface RecorderPersistenceFailure {
+  stage:
+    | 'physical-admission'
+    | 'physical-http'
+    | 'logical-request'
+    | 'decision-trace'
+    | 'physical-receipt'
+    | 'logical-outcome'
+  logicalId: number | null
+  physicalId: number | null
+  errorCode: 'PERSISTENCE_ERROR'
 }
 
 const responseLimit = 1024 * 1024
@@ -490,6 +505,38 @@ export function recordProvider(
 ): Recorder {
   const calls: PhysicalCallRecord[] = []
   const logicalCalls: LogicalCallRecord[] = []
+  const persistenceFailures: RecorderPersistenceFailure[] = []
+  async function persist(
+    stage: RecorderPersistenceFailure['stage'],
+    path: string,
+    contents: string,
+    logicalId: number | null,
+    physicalId: number | null,
+  ): Promise<void> {
+    try {
+      await writeFile(path, contents, { flag: 'wx' })
+    } catch {
+      persistenceFailures.push({ stage, logicalId, physicalId, errorCode: 'PERSISTENCE_ERROR' })
+      throw new ClassifierError('RESOURCE_LIMIT', 'Benchmark receipt persistence failed')
+    }
+  }
+  async function ensureDirectory(
+    stage: RecorderPersistenceFailure['stage'],
+    logicalId: number | null,
+    physicalId: number | null,
+  ): Promise<void> {
+    try {
+      await mkdir(directory, { recursive: true })
+    } catch {
+      persistenceFailures.push({
+        stage,
+        logicalId,
+        physicalId,
+        errorCode: 'PERSISTENCE_ERROR',
+      })
+      throw new ClassifierError('RESOURCE_LIMIT', 'Benchmark receipt persistence failed')
+    }
+  }
   const currentLogical = new AsyncLocalStorage<LogicalCallRecord>()
   let trackedFetch: typeof globalThis.fetch = globalThis.fetch
   trackedFetch = async (input, init) => {
@@ -521,8 +568,9 @@ export function recordProvider(
     }
     const started = performance.now()
     try {
-      await mkdir(directory, { recursive: true })
-      await writeFile(
+      await ensureDirectory('physical-admission', logical.logicalId, record.physicalId)
+      await persist(
+        'physical-admission',
         join(directory, `physical-admission-${record.physicalId}.json`),
         JSON.stringify(
           {
@@ -539,7 +587,8 @@ export function recordProvider(
           null,
           2,
         ) + '\n',
-        { flag: 'wx' },
+        logical.logicalId,
+        record.physicalId,
       )
     } catch (error) {
       budget.cancelBeforeFetch(reservationId)
@@ -553,7 +602,8 @@ export function recordProvider(
       const captured = await readWireReceipt(response, init?.signal, wireReadTimeoutMs)
       record.wireReceipt = captured.wireReceipt
       record.durationMs = performance.now() - started
-      await writeFile(
+      await persist(
+        'physical-http',
         join(directory, `physical-http-${record.physicalId}.json`),
         JSON.stringify(
           {
@@ -565,13 +615,15 @@ export function recordProvider(
           null,
           2,
         ) + '\n',
-        { flag: 'wx' },
+        logical.logicalId,
+        record.physicalId,
       )
       return captured.response
     } catch (error) {
       record.errorCode = error instanceof ClassifierError ? error.code : 'HTTP_FETCH_ERROR'
       record.durationMs = performance.now() - started
-      await writeFile(
+      await persist(
+        'physical-http',
         join(directory, `physical-http-${record.physicalId}.json`),
         JSON.stringify(
           {
@@ -584,7 +636,8 @@ export function recordProvider(
           null,
           2,
         ) + '\n',
-        { flag: 'wx' },
+        logical.logicalId,
+        record.physicalId,
       )
       throw error
     }
@@ -604,8 +657,9 @@ export function recordProvider(
         physicalIds: [],
       }
       logicalCalls.push(logical)
-      await mkdir(directory, { recursive: true })
-      await writeFile(
+      await ensureDirectory('logical-request', logical.logicalId, null)
+      await persist(
+        'logical-request',
         join(directory, `logical-${logical.logicalId}.json`),
         JSON.stringify(
           {
@@ -616,17 +670,20 @@ export function recordProvider(
           null,
           2,
         ) + '\n',
-        { flag: 'wx' },
+        logical.logicalId,
+        null,
       )
       try {
         const rawResult = await currentLogical.run(logical, () =>
           provider.decide(structuredClone(request), signal),
         )
         const traced = createDecisionTrace(request, rawResult)
-        await writeFile(
+        await persist(
+          'decision-trace',
           join(directory, `decision-trace-${logical.logicalId}.json`),
           JSON.stringify(traced.trace, null, 2) + '\n',
-          { flag: 'wx' },
+          logical.logicalId,
+          logical.physicalIds[0] ?? null,
         )
         if (!traced.result)
           throw new ClassifierError('INVALID_RESPONSE', 'Decision result failed validation')
@@ -642,17 +699,20 @@ export function recordProvider(
             durationMs: result.metadata.durationMs,
             attempts: result.metadata.attempts,
           }
-          await writeFile(
+          await persist(
+            'physical-receipt',
             join(directory, `physical-receipt-${physicalId}.json`),
             JSON.stringify(physical, null, 2) + '\n',
-            { flag: 'wx' },
+            logical.logicalId,
+            physicalId,
           )
           budget.settle(physical.reservationId, physical.receipt.costUsd)
         }
         return result
       } catch (error) {
         logical.errorCode = error instanceof ClassifierError ? error.code : 'PROVIDER_ERROR'
-        await writeFile(
+        await persist(
+          'logical-outcome',
           join(directory, `logical-outcome-${logical.logicalId}.json`),
           JSON.stringify(
             {
@@ -664,16 +724,19 @@ export function recordProvider(
             null,
             2,
           ) + '\n',
-          { flag: 'wx' },
+          logical.logicalId,
+          logical.physicalIds[0] ?? null,
         )
         for (const physicalId of logical.physicalIds) {
           const physical = calls.find((item) => item.physicalId === physicalId)
           if (!physical) continue
           physical.errorCode = logical.errorCode
-          await writeFile(
+          await persist(
+            'physical-receipt',
             join(directory, `physical-receipt-${physicalId}.json`),
             JSON.stringify(physical, null, 2) + '\n',
-            { flag: 'wx' },
+            logical.logicalId,
+            physicalId,
           )
           budget.settle(physical.reservationId, physical.wireReceipt?.usageCostUsd ?? null)
         }
@@ -681,5 +744,5 @@ export function recordProvider(
       }
     },
   }
-  return { port, calls, logicalCalls, fetch: trackedFetch }
+  return { port, calls, logicalCalls, fetch: trackedFetch, persistenceFailures }
 }
