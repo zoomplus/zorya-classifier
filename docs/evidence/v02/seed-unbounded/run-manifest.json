@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "runId": "v02-seed-unbounded-2026-10-20T095412738Z-653a04cd",
+  "purpose": "seed-unbounded prompt-only development comparison; exposed old dev cases, not qualification",
+  "startedAt": "2026-10-20T09:54:12.739Z",
+  "variantId": "seed-unbounded-v1",
+  "variantSha256": "99b8c2f6818ddc61cf85ca45cd02f90b3ee022e9ee93af614227fdb70dbe40ba",
+  "sourceHashes": {
+    "./seedunboundedpilot.ts": "9d9b87b1434133b196e2a883f4371a42558829779ce63e27348a3c9206805cba",
+    "./seedunboundedvariant.ts": "c322a993615c8b4c53327bf595b64b2f4f5306a954c9d7e6565b1b6b2f97a6eb",
+    "./seedunboundedprompt.ts": "180d500f80d1c44e0c16b2008cf91f940ee3c6aa071531b661719ff51c39849d",
+    "./protocol.ts": "abb2383c1ee11589368ae613a3f49026415cad4beb66c8780cd2fff4dcb73692",
+    "./recording.ts": "7cf73a6e988491a443caeca6de33fa3824c2253d083d9155b9bde74b317d85f9",
+    "./presentationpilot.ts": "b4680fb0d2cc77e8cae009cf755837308a8068f73bc772a431693927af863944",
+    "../../src/app/create-classifier.ts": "c427b509a80172a4883bd0724e22fe2eb6af8e6784660f03e36ac6ea718e35d3",
+    "../../src/processes/whole-object.ts": "fdab7fd0c758d1d426356d88477eca4c3ecd99521724faba5503b462f40d269e",
+    "../../src/processes/boundary-state.ts": "77c636e2a2311ed989e514ee78adef66f80230d5eee394549917c9ff13fc99d7",
+    "../../src/processes/locate.ts": "a5a1320c2dff4060a3c5ab5e32cb5f0af2d94fcad458caba3818b6a0a28dab3d",
+    "../../src/features/prompts.ts": "b808ed8f42e8c92daf08060d2805da618f2b140f99b6a9b07df49622d57b62aa",
+    "../../src/features/choice.ts": "ff972121520a339b82895914242bf40f7b8dcd198b4305fd57e51b204b13952d",
+    "../../src/features/choice-beam-layout.ts": "8f61d6f784e0e6273467cea01315f17bbfa4fffa695dd7a7bb9cd5cac5354e1a",
+    "../../src/features/uniform-grid.ts": "8cee38aee52ba2c4ac2eaed909d5f53cc0e5aa2c04fe87585c66b29573e21c4d",
+    "../../src/infrastructure/openrouter.ts": "486a919853949e6789dd4035b7699fd89b9682cb3e928632c77b216656f44c55",
+    "../../src/infrastructure/openrouter-vision.ts": "b72e4699e132c1ac598772c49287edb0b5ca355ad2af33481f9c741ddcb13eaa",
+    "../../src/infrastructure/vision-chat.ts": "314e2c236a75ad43023c6ae34544a849df027f025eda32abdc2a7e1d49c742f3",
+    "../../src/infrastructure/boundary-view.ts": "2fb5546ae4a47a2a08f13ccad74c5a9cc7b9736ff052738637bfd65f1acd7775"
+  },
+  "producerSourceSha256": "8a28cbd5ecf838eb9eb9d718a7c82acffa395b6c85075bd24778c37affb058de",
+  "sourceManifestSha256": "d2a3ab497a9cff07e0199a7be9e8e91c844e2efc773cd3335bc248c334a6e7a9",
+  "selectedCaseIds": [
+    "photo-dev-02",
+    "photo-dev-03"
+  ],
+  "routes": [
+    {
+      "id": "native-luna-axis-seed-unbounded-v1",
+      "adapter": "native-decisions",
+      "model": "openai/gpt-6-luna-decisions",
+      "provider": "openai",
+      "providerName": "OpenAI",
+      "apiEndpoint": "/api/alpha/decisions",
+      "boundaryPresentation": "axis-rulers-v1"
+    },
+    {
+      "id": "ordinary-luna-axis-seed-unbounded-v1",
+      "adapter": "ordinary-vision",
+      "model": "openai/gpt-6-luna",
+      "provider": "openai",
+      "providerName": "OpenAI",
+      "apiEndpoint": "/api/v1/chat/completions",
+      "boundaryPresentation": "axis-rulers-v1",
+      "responseFormat": "json-schema",
+      "reasoningEffort": "none",
+      "maxOutputTokens": 1024
+    }
+  ],
+  "policy": {
+    "promptId": "seed-unbounded-v1",
+    "prompt": "The target means the entire visible physical target in ORIGINAL. SEED is only an interior witness for identifying the same instance; the SEED crop boundaries do not limit the target extent. Include every visible part of that same target outside SEED, subject only to HARD_ROI.",
+    "boxTolerancePx": 8,
+    "maxExtentPasses": 3,
+    "timeoutMs": 45000,
+    "retries": 0,
+    "allowFallbacks": false,
+    "latencyEnvironment": "concurrent-with-linux-native-soak",
+    "latencyRankingEligible": false
+  },
+  "limits": {
+    "maxPhysicalCalls": 64,
+    "maxCostUsd": 2,
+    "unknownCostReserveUsd": 0.04,
+    "operations": 4
+  },
+  "modelBoundary": {
+    "evaluatorTruthRead": false,
+    "retries": 0,
+    "fallback": false,
+    "conditionalSelection": false
+  }
+}

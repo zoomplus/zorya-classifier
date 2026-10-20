@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "runId": "v02-seed-outline-2026-10-20T100338853Z-d664bcde",
+  "purpose": "native Luna original-image seed-outline presentation; old exposed development Car/Boat diagnostic only",
+  "startedAt": "2026-10-20T10:03:38.855Z",
+  "variantId": "original-seed-outline-v1",
+  "variantSha256": "7d481d38ba48b84536869a781c3b5bee0407c2a9bd210c8a5de5abddbda30ffc",
+  "sourceHashes": {
+    "./seedoutlinepilot.ts": "6222cdb71ff65dcebbbee67b7f590770fcac440d44fbad5bdbaf535d99d13e83",
+    "./seedoutlinepresentation.ts": "244a7b88572950c2a76fb9fdfee1de0f1055768f33340883eb6b3c2ebd5fb9f1",
+    "./seedunboundedprompt.ts": "180d500f80d1c44e0c16b2008cf91f940ee3c6aa071531b661719ff51c39849d",
+    "./protocol.ts": "9b1679ddaf38e70aaf6672c4c59411fddd307281023f33c4ad2aa57f347667b2",
+    "./recording.ts": "7cf73a6e988491a443caeca6de33fa3824c2253d083d9155b9bde74b317d85f9",
+    "./presentationpilot.ts": "b4680fb0d2cc77e8cae009cf755837308a8068f73bc772a431693927af863944",
+    "../../src/app/create-classifier.ts": "c427b509a80172a4883bd0724e22fe2eb6af8e6784660f03e36ac6ea718e35d3",
+    "../../src/processes/whole-object.ts": "fdab7fd0c758d1d426356d88477eca4c3ecd99521724faba5503b462f40d269e",
+    "../../src/processes/boundary-state.ts": "77c636e2a2311ed989e514ee78adef66f80230d5eee394549917c9ff13fc99d7",
+    "../../src/processes/locate.ts": "a5a1320c2dff4060a3c5ab5e32cb5f0af2d94fcad458caba3818b6a0a28dab3d",
+    "../../src/features/prompts.ts": "b808ed8f42e8c92daf08060d2805da618f2b140f99b6a9b07df49622d57b62aa",
+    "../../src/features/choice.ts": "ff972121520a339b82895914242bf40f7b8dcd198b4305fd57e51b204b13952d",
+    "../../src/features/choice-beam-layout.ts": "8f61d6f784e0e6273467cea01315f17bbfa4fffa695dd7a7bb9cd5cac5354e1a",
+    "../../src/features/uniform-grid.ts": "8cee38aee52ba2c4ac2eaed909d5f53cc0e5aa2c04fe87585c66b29573e21c4d",
+    "../../src/infrastructure/openrouter.ts": "486a919853949e6789dd4035b7699fd89b9682cb3e928632c77b216656f44c55",
+    "../../src/infrastructure/boundary-view.ts": "2fb5546ae4a47a2a08f13ccad74c5a9cc7b9736ff052738637bfd65f1acd7775"
+  },
+  "producerSourceSha256": "2276c52a9aaeb840bcf5299f38fb2b31dc25aa2b310a25c456a0c59f523b01dd",
+  "sourceManifestSha256": "d2a3ab497a9cff07e0199a7be9e8e91c844e2efc773cd3335bc248c334a6e7a9",
+  "selectedCaseIds": [
+    "photo-dev-02",
+    "photo-dev-03"
+  ],
+  "route": {
+    "id": "native-luna-axis-seed-outline-v1",
+    "model": "openai/gpt-6-luna-decisions",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "apiEndpoint": "/api/alpha/decisions",
+    "allowFallbacks": false
+  },
+  "policy": {
+    "promptId": "seed-unbounded-v1",
+    "presentationId": "original-seed-outline-v1",
+    "boxTolerancePx": 8,
+    "maxExtentPasses": 3,
+    "timeoutMs": 45000,
+    "retries": 0,
+    "allowFallbacks": false,
+    "maxPhysicalCalls": 32,
+    "maxCostUsd": 1,
+    "unknownCostReserveUsd": 0.02,
+    "latencyEnvironment": "concurrent-with-linux-native-soak",
+    "latencyRankingEligible": false
+  },
+  "modelBoundary": {
+    "evaluatorTruthRead": false,
+    "retries": 0,
+    "fallback": false
+  }
+}

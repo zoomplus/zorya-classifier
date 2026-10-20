@@ -3,7 +3,10 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
+import sharp from 'sharp'
 import type { DecisionRequest, DecisionResult } from '../src/entities/contracts.js'
+import { createResearchClassifier } from '../src/app/create-classifier.js'
+import { createSharpBoundaryView } from '../src/infrastructure/boundary-view.js'
 import { RunBudget, RunBudgetExhausted } from '../benchmarks/v02/budget.js'
 import {
   createDecisionTrace,
@@ -18,6 +21,7 @@ import {
 } from '../benchmarks/v02/runner.js'
 import { parseV02RunnerArgs } from '../benchmarks/v02/run.js'
 import { evaluateDiagnostic } from '../benchmarks/v02/evaluate-diagnostic.js'
+import { withSeedUnboundedPrompt } from '../benchmarks/v02/seedunboundedprompt.js'
 
 await test('Luna native control uses the typed Decisions endpoint and preserves returned probabilities', async () => {
   let calls = 0
@@ -397,6 +401,7 @@ await test('decision trace preserves closed rankings and omits requests beyond t
     answerType: 'ranked-choice',
     ranking: ['P02', 'P01', 'P03'],
     selectedSourceRegions: [],
+    intervalOptions: [],
   })
 
   const criteria = Object.fromEntries(
@@ -450,7 +455,12 @@ await test('decision trace captures strict source seed, extent interval, and vie
     state: [
       'ORIGINAL AND SEED GEOMETRY',
       JSON.stringify({ seedRegion }),
-      JSON.stringify({ pass: 1, seedRegion, currentBounds }),
+      JSON.stringify({
+        pass: 1,
+        hardRoi: { left: 0, top: 0, width: 100, height: 80 },
+        seedRegion,
+        currentBounds,
+      }),
       transform({ width: 100, height: 80 }),
       transform({ width: 27, height: 29 }),
       'private target/class description must stay out of the trace',
@@ -580,6 +590,228 @@ await test('decision trace captures strict source seed, extent interval, and vie
       traceText,
       /private boundary instruction|private unknown description|private target\/class/u,
     )
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('integrated boundary request trace resolves hard ROI, seed bounds, and strict axis-view maps', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v02-boundary-trace-integration-'))
+  const decision = {
+    async decide(request: DecisionRequest): Promise<DecisionResult> {
+      const answers: DecisionResult['answers'] = {}
+      for (const [id, question] of Object.entries(request.questions)) {
+        if (question.type === 'noul') {
+          answers[id] = { type: 'noul', noul: 0.99 }
+          continue
+        }
+        const options = Object.keys(question.criteria)
+        const choice =
+          id === 'instance'
+            ? 'same'
+            : id === 'left'
+              ? options[0]!
+              : id === 'right'
+                ? options.at(-2)!
+                : id === 'top'
+                  ? options[0]!
+                  : id === 'bottom'
+                    ? options.at(-2)!
+                    : options[0]!
+        answers[id] = {
+          type: 'choice',
+          choice,
+          probabilities: Object.fromEntries(
+            options.map((option) => [option, option === choice ? 1 : 0]),
+          ),
+        }
+      }
+      return {
+        answers,
+        metadata: {
+          model: 'fixture',
+          provider: 'fixture',
+          requestId: null,
+          durationMs: 1,
+          costUsd: 0,
+          attempts: 1,
+        },
+      }
+    },
+  }
+  try {
+    const recorder = recordProvider(() => decision, new RunBudget(16, 1), directory, {
+      model: 'fixture',
+      provider: 'fixture',
+      providerName: 'fixture',
+      apiEndpoint: '/fixture',
+      allowFallbacks: false,
+    })
+    const classifier = createResearchClassifier(
+      { decision: recorder.port, timeoutMs: 10000 },
+      undefined,
+      createSharpBoundaryView(),
+    )
+    try {
+      await classifier.locate({
+        image: new Uint8Array(
+          await sharp({
+            create: { width: 400, height: 300, channels: 3, background: '#888888' },
+          })
+            .png()
+            .toBuffer(),
+        ),
+        target: 'fixture target',
+        mode: 'whole-object',
+        boxTolerancePx: 8,
+        maxExtentPasses: 1,
+      })
+    } finally {
+      await classifier.dispose()
+    }
+
+    const trace = JSON.parse(await readFile(join(directory, 'decision-trace-4.json'), 'utf8')) as {
+      geometry: {
+        seedRegion: { left: number; top: number; width: number; height: number } | null
+        currentBounds: { left: { start: number; endExclusive: number } } | null
+        imageTransforms: { role: string; sourceRegion: unknown; scaleX: number; scaleY: number }[]
+        boundaryViews: {
+          axis: string
+          sourceRegion: { left: number; top: number; width: number; height: number }
+          content: { left: number; top: number; width: number; height: number }
+          image: { width: number; height: number }
+          choices: { questionId: string; choiceId: string; display: string; interval: unknown }[]
+        }[]
+      }
+      questions: { questionId: string; intervalOptions?: { optionId: string }[] }[]
+    }
+    assert.ok(trace.geometry.seedRegion)
+    assert.ok(trace.geometry.seedRegion.width > 0 && trace.geometry.seedRegion.height > 0)
+    assert.ok(trace.geometry.seedRegion.left + trace.geometry.seedRegion.width <= 400)
+    assert.ok(trace.geometry.seedRegion.top + trace.geometry.seedRegion.height <= 300)
+    assert.deepEqual(trace.geometry.currentBounds?.left, { start: 0, endExclusive: 400 })
+    assert.equal(trace.geometry.boundaryViews.length, 2)
+    assert.equal(
+      trace.geometry.imageTransforms.filter((item) => item.role === 'boundary-view').length,
+      2,
+    )
+    const xView = trace.geometry.boundaryViews.find((view) => view.axis === 'X')
+    assert.ok(xView)
+    assert.ok(
+      xView.choices.some(
+        (item) => item.questionId === 'left' && item.choiceId === 'left00' && item.display === 'X0',
+      ),
+    )
+    assert.ok(
+      xView.choices.some(
+        (item) =>
+          item.questionId === 'right' && item.choiceId === 'right00' && item.display === 'X0',
+      ),
+    )
+    assert.deepEqual(
+      trace.questions.find((item) => item.questionId === 'left')?.intervalOptions?.[0],
+      { optionId: 'left00', start: 0, endExclusive: 25 },
+    )
+    const traceText = await readFile(join(directory, 'decision-trace-4.json'), 'utf8')
+    assert.doesNotMatch(traceText, /fixture target|boundaryInstruction|https?:/u)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('seed-unbounded prompt survives the real whole-object producer and ranked axis trace schema', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v02-seed-unbounded-trace-'))
+  let extentState: string[] | undefined
+  const decision = {
+    async decide(request: DecisionRequest): Promise<DecisionResult> {
+      const answers: DecisionResult['answers'] = {}
+      for (const [id, question] of Object.entries(request.questions)) {
+        if (question.type === 'noul') {
+          answers[id] = { type: 'noul', noul: 0.99 }
+          continue
+        }
+        const options = question.type === 'choice' ? Object.keys(question.criteria) : []
+        if (['left', 'right', 'top', 'bottom', 'instance'].includes(id))
+          extentState = request.state.filter((part): part is string => typeof part === 'string')
+        answers[id] = {
+          type: 'ranked-choice',
+          ranking: options.slice(0, Math.min(question.rankingSize ?? 4, options.length)),
+        }
+      }
+      return {
+        answers,
+        metadata: {
+          model: 'fixture',
+          provider: 'fixture',
+          requestId: null,
+          durationMs: 1,
+          costUsd: null,
+          attempts: 1,
+        },
+      }
+    },
+  }
+  try {
+    const recorder = recordProvider(() => decision, new RunBudget(8, 1), directory, {
+      model: 'fixture',
+      provider: 'fixture',
+      providerName: 'fixture',
+      apiEndpoint: '/fixture',
+      allowFallbacks: false,
+    })
+    const classifier = createResearchClassifier(
+      { decision: withSeedUnboundedPrompt(recorder.port), timeoutMs: 10000 },
+      undefined,
+      createSharpBoundaryView(),
+    )
+    try {
+      await classifier.locate({
+        image: new Uint8Array(
+          await sharp({
+            create: { width: 400, height: 300, channels: 3, background: '#888888' },
+          })
+            .png()
+            .toBuffer(),
+        ),
+        target: 'fixture target',
+        mode: 'whole-object',
+        boxTolerancePx: 8,
+        maxExtentPasses: 1,
+      })
+    } finally {
+      await classifier.dispose()
+    }
+    assert.ok(extentState)
+    assert.equal(
+      extentState.some((part) =>
+        part.includes('A matching fragment anywhere inside a cell counts; no center requirement.'),
+      ),
+      false,
+    )
+    assert.equal(
+      extentState.some((part) => part.includes('SEED crop boundaries do not limit')),
+      true,
+    )
+    const extentCall = recorder.logicalCalls.find((call) =>
+      call.request.questions.some((question) => question.id === 'left'),
+    )
+    assert.ok(extentCall)
+    const trace = JSON.parse(
+      await readFile(join(directory, `decision-trace-${extentCall.logicalId}.json`), 'utf8'),
+    ) as {
+      status: string
+      geometry: { seedRegion: unknown; currentBounds: unknown; boundaryViews: unknown[] }
+      questions: { questionId: string; intervalOptions?: { optionId: string }[] }[]
+    }
+    assert.equal(trace.status, 'recorded')
+    assert.ok(trace.geometry.seedRegion)
+    assert.ok(trace.geometry.currentBounds)
+    assert.equal(trace.geometry.boundaryViews.length, 2)
+    for (const axis of ['left', 'right', 'top', 'bottom']) {
+      const question = trace.questions.find((item) => item.questionId === axis)
+      assert.ok(question)
+      assert.ok((question.intervalOptions?.length ?? 0) > 0)
+    }
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

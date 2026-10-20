@@ -23,6 +23,7 @@ import type {
 } from '../entities/whole-object.js'
 import { wholeObjectSchema } from '../entities/whole-object.js'
 import { locateWholeObjectInput } from '../processes/whole-object.js'
+import type { WholeObjectIntervalPolicy } from '../processes/whole-object.js'
 import type { ImageRepresentationPort } from '../entities/representation.js'
 import { preparedTextSchema, representationLimits } from '../entities/representation.js'
 import type { ExtractInput, ExtractionResult, SegmentationPort } from '../entities/segmentation.js'
@@ -75,14 +76,16 @@ export function createResearchClassifier(
   options: ClassifierOptions,
   experimental?: ImageRepresentationPort,
   boundaryView?: BoundaryViewPort,
+  intervalPolicy?: WholeObjectIntervalPolicy,
 ): Classifier {
-  return composeClassifier(options, experimental, boundaryView)
+  return composeClassifier(options, experimental, boundaryView, intervalPolicy)
 }
 
 function composeClassifier(
   options: ClassifierOptions,
   experimental?: ImageRepresentationPort,
   boundaryView?: BoundaryViewPort,
+  intervalPolicy?: WholeObjectIntervalPolicy,
 ): Classifier {
   if (!options || typeof options.decision?.decide !== 'function')
     throw new ClassifierError('INVALID_INPUT', 'A DecisionPort is required')
@@ -200,6 +203,7 @@ function composeClassifier(
             s,
             representation,
             boundaryView,
+            intervalPolicy,
           ),
         )
       } finally {
@@ -281,6 +285,7 @@ function composeClassifier(
                   requestSignal,
                   representation,
                   boundaryView,
+                  intervalPolicy,
                 ),
             },
           ),

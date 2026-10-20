@@ -14,6 +14,10 @@ Hosted CI for source `32aa90d` passed every Windows/Linux × Node 22/24 job, inc
 
 All six text-image encoders remain research-only. No winner is promoted merely because JSON parses. Failed protocol/rate-limit/truncated-generation diagnostics remain recorded. The public experimental image selector rejects explicitly until qualification passes. Controlled map/UI renders with model-assisted labels remain an exploratory supplement: their source licensing and split are recorded, but they do not close the independent-ground-truth gate.
 
+Subsequent [whole-object prompt/presentation experiments](evidence/v02/boundary-variants.md) found one correctly bounded Car example after removing the separate seed crop and outlining that seed on the original. Boat still returned unknown; this is development evidence, not qualification. A [controlled real-UI oracle](../benchmarks/v02/corpus/dev-independent-ui/README.md) now independently derives seven button boxes from GTK accessibility allocations and verifies all painted edges in the captured pixels. Its three negatives are scoped to the completely inventoried visible toolbar. It is one controlled source family, not a diverse natural-UI benchmark.
+
+The five-photo native reports also retain a subsequently discovered fixture limitation: the original Hat seed contains zero ground-truth foreground pixels, and the Cat seed center is background. Their historical results are preserved. These invalid or ambiguous grounding prompts must not be interpreted as a clean segmentation-quality comparison; corrected oracle prompts require a separate manifest and report. This does not change the physical lifecycle/resource scope of the original run.
+
 ## Historical 0.1 executed checks and release gates
 
 | Check                 | Evidence                                                                                                                                                                                                                                                          |

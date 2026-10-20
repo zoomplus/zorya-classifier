@@ -9,7 +9,10 @@ import type {
 } from '../src/entities/contracts.js'
 import type { ImageRepresentationPort } from '../src/entities/representation.js'
 import { ClassifierError } from '../src/entities/errors.js'
-import { locateWholeObjectInput } from '../src/processes/whole-object.js'
+import {
+  locateWholeObjectInput,
+  type WholeObjectIntervalPolicy,
+} from '../src/processes/whole-object.js'
 
 const meta = {
   model: 'fixture',
@@ -150,6 +153,60 @@ await test('whole-object narrows all four boundaries for a large source and pres
     assert.ok(extentCalls >= 2)
     assert.equal(result.metadata.stages.length, 3 + extentCalls)
   }
+})
+
+await test('tolerance-aware extent partitions use fewer bands and leave already-tolerant axes intact', async () => {
+  const raster = fakeRaster(1024, 43)
+  const counts: Record<string, number>[] = []
+  const decision: DecisionPort = {
+    async decide(request) {
+      if (!['left', 'right', 'top', 'bottom'].every((id) => id in request.questions))
+        return answer(request, (_id, criteria) => Object.keys(criteria)[0]!)
+      counts.push(
+        Object.fromEntries(
+          ['left', 'right', 'top', 'bottom'].map((id) => {
+            const question = request.questions[id]
+            assert.ok(question?.type === 'choice')
+            return [id, Object.keys(question.criteria).filter((key) => key !== 'unknown').length]
+          }),
+        ),
+      )
+      const { seedRegion } = lastObject(request) as {
+        seedRegion: { left: number; top: number; width: number; height: number }
+      }
+      return answer(request, (id) => {
+        if (id === 'instance') return 'same'
+        const coordinate =
+          id === 'left'
+            ? seedRegion.left
+            : id === 'right'
+              ? seedRegion.left + seedRegion.width - 1
+              : id === 'top'
+                ? seedRegion.top
+                : seedRegion.top + seedRegion.height - 1
+        return chooseContainingCoordinate(request, id, coordinate)
+      })
+    },
+  }
+  const strategy: WholeObjectIntervalPolicy = 'tolerance-aware-v1'
+  const result = await locateWholeObjectInput(
+    {
+      image: new Uint8Array([1]),
+      target: 'object',
+      mode: 'whole-object',
+      boxTolerancePx: 8,
+      maxExtentPasses: 3,
+    },
+    decision,
+    raster,
+    new AbortController().signal,
+    undefined,
+    undefined,
+    strategy,
+  )
+  assert.ok(['located', 'unknown'].includes(result.status))
+  assert.deepEqual(counts[0], { left: 16, right: 16, top: 6, bottom: 6 })
+  assert.deepEqual(counts[1], { left: 8, right: 8, top: 1, bottom: 1 })
 })
 
 await test('whole-object accepts edge and one-pixel boundary intervals with stable categorical ties', async () => {

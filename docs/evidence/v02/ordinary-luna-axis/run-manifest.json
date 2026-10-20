@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "runId": "v02-ordinary-luna-axis-2026-10-20T094356905Z-5caea950",
+  "purpose": "ordinary Luna vision adapter on boundary-axis presentation; exposed diagnostic, not qualification",
+  "startedAt": "2026-10-20T09:43:56.906Z",
+  "variant": {
+    "id": "ordinary-luna-axis-v1",
+    "promptId": "ordinary-vision-closed-choice-v1",
+    "model": "openai/gpt-6-luna",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "apiEndpoint": "https://openrouter.ai/api/v1/chat/completions",
+    "allowFallbacks": false,
+    "responseFormat": "json-schema",
+    "reasoningEffort": "none",
+    "maxOutputTokens": 1024,
+    "boxTolerancePx": 8,
+    "maxExtentPasses": 3,
+    "timeoutMs": 45000,
+    "retries": 0,
+    "presentation": "axis-rulers-v1"
+  },
+  "variantSha256": "d83f6bfc666451123354830f968f3926582915c294413cdab00abcc35ab9dd9a",
+  "sourceHashes": {
+    "./ordinaryvisionpilot.ts": "8ad6804d6cf0f6a5357cfb02e1ddd42337e3d793d1d72386b0e0ad9af5f5b900",
+    "./ordinaryvisionvariant.ts": "007d4edf4932cdcb0652980d4590117836e32316c9bfb0659ba5205528971c9b",
+    "./run-ordinary-vision-axis-pilot.ts": "68fecbbe53d740add84959dbaa674e9740d4e1cd19fd88c47ee9703bf305d257",
+    "./presentationpilot.ts": "b4680fb0d2cc77e8cae009cf755837308a8068f73bc772a431693927af863944",
+    "./protocol.ts": "0bb02aab603b752ca77249be84f23aa532f7a574fb29fb5cb0e588ed7ec56eef",
+    "./recording.ts": "7cf73a6e988491a443caeca6de33fa3824c2253d083d9155b9bde74b317d85f9",
+    "../../src/app/create-classifier.ts": "c427b509a80172a4883bd0724e22fe2eb6af8e6784660f03e36ac6ea718e35d3",
+    "../../src/processes/whole-object.ts": "fdab7fd0c758d1d426356d88477eca4c3ecd99521724faba5503b462f40d269e",
+    "../../src/processes/boundary-state.ts": "77c636e2a2311ed989e514ee78adef66f80230d5eee394549917c9ff13fc99d7",
+    "../../src/processes/locate.ts": "a5a1320c2dff4060a3c5ab5e32cb5f0af2d94fcad458caba3818b6a0a28dab3d",
+    "../../src/features/prompts.ts": "b808ed8f42e8c92daf08060d2805da618f2b140f99b6a9b07df49622d57b62aa",
+    "../../src/features/choice.ts": "ff972121520a339b82895914242bf40f7b8dcd198b4305fd57e51b204b13952d",
+    "../../src/features/choice-beam-layout.ts": "8f61d6f784e0e6273467cea01315f17bbfa4fffa695dd7a7bb9cd5cac5354e1a",
+    "../../src/features/uniform-grid.ts": "8cee38aee52ba2c4ac2eaed909d5f53cc0e5aa2c04fe87585c66b29573e21c4d",
+    "../../src/infrastructure/vision-chat.ts": "314e2c236a75ad43023c6ae34544a849df027f025eda32abdc2a7e1d49c742f3",
+    "../../src/infrastructure/openrouter-vision.ts": "b72e4699e132c1ac598772c49287edb0b5ca355ad2af33481f9c741ddcb13eaa",
+    "../../src/infrastructure/openrouter-common.ts": "415462c42da7a3748c6bfe942ee99085fba71bc1f4158d369edda8269efeb124",
+    "../../src/infrastructure/boundary-view.ts": "2fb5546ae4a47a2a08f13ccad74c5a9cc7b9736ff052738637bfd65f1acd7775"
+  },
+  "producerSourceSha256": "306dc80ca49d0123d5de88e2fc32b0aef73bcff5e68acb01f1dc12abbc6969cd",
+  "sourceManifestSha256": "d2a3ab497a9cff07e0199a7be9e8e91c844e2efc773cd3335bc248c334a6e7a9",
+  "selectedCaseIds": [
+    "photo-dev-02",
+    "photo-dev-03",
+    "photo-dev-01",
+    "photo-dev-05"
+  ],
+  "initialPositiveCaseIds": [
+    "photo-dev-02",
+    "photo-dev-03"
+  ],
+  "conditionalCaseIds": [
+    "photo-dev-01",
+    "photo-dev-05"
+  ],
+  "route": {
+    "model": "openai/gpt-6-luna",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "apiEndpoint": "/api/v1/chat/completions",
+    "allowFallbacks": false
+  },
+  "transport": {
+    "responseFormat": "json-schema",
+    "reasoningEffort": "none",
+    "maxOutputTokens": 1024,
+    "promptId": "ordinary-vision-closed-choice-v1",
+    "promptSource": "src/infrastructure/vision-chat.ts",
+    "promptSourceSha256": "314e2c236a75ad43023c6ae34544a849df027f025eda32abdc2a7e1d49c742f3",
+    "modelEvidence": "https://openrouter.ai/openai/gpt-6-luna",
+    "transportEvidence": "https://openrouter.ai/docs/api/api-reference/chat/send-chat-completion-request?explorer=true"
+  },
+  "wholeObject": {
+    "boxTolerancePx": 8,
+    "maxExtentPasses": 3,
+    "timeoutMs": 45000,
+    "retries": 0,
+    "allowFallbacks": false
+  },
+  "limits": {
+    "maxPhysicalCalls": 32,
+    "maxCostUsd": 1,
+    "unknownCostReserveUsd": 0.02,
+    "firstPairCalls": 2,
+    "totalOperations": 4
+  },
+  "latencyEnvironment": "concurrent-with-linux-native-soak",
+  "latencyRankingEligible": false,
+  "modelBoundary": {
+    "evaluatorTruthRead": false,
+    "retries": 0,
+    "fallback": false,
+    "conditionalPairRunsOnlyIfOneInitialPositiveLocates": true
+  }
+}

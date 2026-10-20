@@ -30,6 +30,7 @@ import { locateInput } from './locate.js'
 const axisOrder = ['left', 'right', 'top', 'bottom'] as const
 type Axis = (typeof axisOrder)[number]
 type Interval = BoundaryInterval
+export type WholeObjectIntervalPolicy = 'fixed-16-v1' | 'tolerance-aware-v1'
 const boundaryResponseSchema = z
   .object({
     status: z.literal('known'),
@@ -37,10 +38,17 @@ const boundaryResponseSchema = z
   })
   .strict()
 
-function partition(interval: Interval): Interval[] {
+function partition(
+  interval: Interval,
+  tolerancePx: number,
+  policy: WholeObjectIntervalPolicy,
+): Interval[] {
   const length = interval.endExclusive - interval.start
   if (!Number.isSafeInteger(length) || length < 1) return []
-  const count = Math.min(16, length)
+  const count =
+    policy === 'tolerance-aware-v1'
+      ? Math.min(16, Math.max(1, Math.ceil(length / tolerancePx)))
+      : Math.min(16, length)
   return Array.from({ length: count }, (_, i) => {
     const start = interval.start + Math.floor((i * length) / count)
     const endExclusive = interval.start + Math.floor(((i + 1) * length) / count)
@@ -60,8 +68,14 @@ function boundaryInstruction(axis: Axis): string {
     axis === 'left' ? 'left' : axis === 'right' ? 'right' : axis === 'top' ? 'top' : 'bottom'
   return `Select the interval containing the ${edge}most visible pixel coordinate INSIDE HARD_ROI of the SAME physical instance identified by SEED. If the object continues outside HARD_ROI, locate only the visible intersection with that ROI; do not infer hidden parts. Coordinates use the original oriented source pixels. Choose only a supplied interval or unknown; do not infer free coordinates. The interval limits are half-open integer coordinate ranges. Current boundary intervals are candidate ranges, not new ROI limits.`
 }
-function choicesFor(axis: Axis, current: Interval, showBoundaryView = false) {
-  const intervals = partition(current)
+function choicesFor(
+  axis: Axis,
+  current: Interval,
+  tolerancePx: number,
+  policy: WholeObjectIntervalPolicy,
+  showBoundaryView = false,
+) {
+  const intervals = partition(current, tolerancePx, policy)
   const labels = intervals.map((_, i) => `${axis}${String(i).padStart(2, '0')}`)
   return {
     intervals,
@@ -207,6 +221,7 @@ export async function locateWholeObjectInput(
   signal: AbortSignal,
   representation?: ImageRepresentationPort,
   boundaryView?: BoundaryViewPort,
+  intervalPolicy: WholeObjectIntervalPolicy = 'fixed-16-v1',
 ): Promise<WholeObjectLocalizationResult> {
   const started = performance.now()
   const args = parse(wholeObjectSchema, input)
@@ -246,7 +261,13 @@ export async function locateWholeObjectInput(
       const specs = Object.fromEntries(
         axisOrder.map((axis) => [
           axis,
-          choicesFor(axis, current[axis], !!boundaryView && !representation),
+          choicesFor(
+            axis,
+            current[axis],
+            args.boxTolerancePx,
+            intervalPolicy,
+            !!boundaryView && !representation,
+          ),
         ]),
       ) as Record<Axis, ReturnType<typeof choicesFor>>
       const state =

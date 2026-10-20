@@ -141,10 +141,17 @@ const traceQuestionSchema = z.discriminatedUnion('answerType', [
       questionId: z.enum(traceQuestionIds),
       answerType: z.literal('ranked-choice'),
       ranking: z
-        .array(z.string().regex(/^(?:P\d{2}|C\d{3}|[A-H]|none|same|different|ambiguous)$/u))
+        .array(
+          z
+            .string()
+            .regex(
+              /^(?:P\d{2}|C\d{3}|[A-H]|none|same|different|ambiguous|(?:left|right|top|bottom)(?:0[0-9]|1[0-5])|unknown)$/u,
+            ),
+        )
         .min(1)
         .max(4),
       selectedSourceRegions: z.array(sourceRegionSchema).max(4).optional(),
+      intervalOptions: z.array(intervalOptionSchema).max(255).optional(),
     })
     .strict(),
   z
@@ -165,7 +172,7 @@ const traceQuestionSchema = z.discriminatedUnion('answerType', [
 const imageTransformSchema = z
   .object({
     viewId: z.string().nullable(),
-    role: z.enum(['source', 'crop', 'grid', 'image-state']),
+    role: z.enum(['source', 'crop', 'grid', 'image-state', 'boundary-view', 'seed-outline']),
     sourceRegion: pixelRectSchema.nullable(),
     source: z
       .object({
@@ -184,6 +191,31 @@ const imageTransformSchema = z
     scaleY: z.number().finite().positive(),
   })
   .strict()
+const seedOutlineMetadataSchema = z
+  .object({
+    seedOutlineView: z
+      .object({
+        source: z
+          .object({
+            width: z.number().int().positive().max(16384),
+            height: z.number().int().positive().max(16384),
+          })
+          .strict(),
+        output: z
+          .object({
+            width: z.number().int().positive().max(16384),
+            height: z.number().int().positive().max(16384),
+          })
+          .strict(),
+        content: pixelRectSchema,
+        scaleX: z.number().finite().positive(),
+        scaleY: z.number().finite().positive(),
+        seedRegion: pixelRectSchema,
+        lineWidthPx: z.number().int().min(1).max(8),
+      })
+      .strict(),
+  })
+  .strict()
 const boundsSchema = z
   .object({
     left: intervalSchema,
@@ -192,38 +224,6 @@ const boundsSchema = z
     bottom: intervalSchema,
   })
   .strict()
-const geometryTraceSchema = z
-  .object({
-    seedRegion: pixelRectSchema.nullable(),
-    currentBounds: boundsSchema.nullable(),
-    imageTransforms: z.array(imageTransformSchema).max(16),
-  })
-  .strict()
-const decisionTraceSchema = z.discriminatedUnion('status', [
-  z
-    .object({
-      status: z.literal('recorded'),
-      questions: z.array(traceQuestionSchema).max(16),
-      geometry: geometryTraceSchema,
-    })
-    .strict(),
-  z
-    .object({
-      status: z.literal('omitted'),
-      reason: z.enum([
-        'invalid-decision-result',
-        'unrecognized-question-id',
-        'unrecognized-option-id',
-        'question-limit-exceeded',
-        'option-limit-exceeded',
-        'byte-budget-exceeded',
-        'trace-build-failed',
-      ]),
-    })
-    .strict(),
-])
-export type DecisionTrace = z.infer<typeof decisionTraceSchema>
-
 const traceByteLimit = 64 * 1024
 const geometryScanByteLimit = 256 * 1024
 const geometryPartByteLimit = 64 * 1024
@@ -271,10 +271,60 @@ const seedMetadataSchema = z.object({ seedRegion: pixelRectSchema }).strict()
 const extentMetadataSchema = z
   .object({
     pass: z.number().int().min(1).max(3),
+    hardRoi: pixelRectSchema,
     seedRegion: pixelRectSchema,
     currentBounds: boundsSchema,
   })
   .strict()
+const boundaryMappingSchema = z
+  .object({
+    questionId: z.enum(axisIds),
+    choiceId: z.string().regex(/^(?:left|right|top|bottom)(?:0[0-9]|1[0-5])$/u),
+    display: z.string().regex(/^[XY][0-9A-F]$/u),
+    interval: intervalSchema,
+  })
+  .strict()
+const boundaryViewShapeSchema = z
+  .object({
+    axis: z.enum(['X', 'Y']),
+    sourceRegion: pixelRectSchema,
+    content: pixelRectSchema,
+    image: z
+      .object({
+        width: z.number().int().positive().max(16384),
+        height: z.number().int().positive().max(16384),
+      })
+      .strict(),
+    scaleX: z.number().finite().positive(),
+    scaleY: z.number().finite().positive(),
+    choices: z.array(boundaryMappingSchema).max(64),
+  })
+  .strict()
+const boundaryViewMetadataSchema = z
+  .object({ boundaryView: boundaryViewShapeSchema })
+  .strict()
+  .superRefine(({ boundaryView }, context) => {
+    const { axis, sourceRegion, content, image, scaleX, scaleY, choices } = boundaryView
+    if (
+      content.left + content.width > image.width ||
+      content.top + content.height > image.height ||
+      scaleX !== content.width / sourceRegion.width ||
+      scaleY !== content.height / sourceRegion.height
+    ) {
+      context.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid boundary view transform' })
+    }
+    for (const choice of choices) {
+      const isXChoice = choice.questionId === 'left' || choice.questionId === 'right'
+      if (
+        (axis === 'X') !== isXChoice ||
+        !choice.choiceId.startsWith(choice.questionId) ||
+        choice.display[0] !== axis
+      ) {
+        context.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid boundary choice map' })
+        return
+      }
+    }
+  })
 const transformMetadataSchema = z
   .object({
     sourceImageTransform: z
@@ -352,6 +402,39 @@ const textViewMetadataSchema = z
   })
   .strict()
 
+const geometryTraceSchema = z
+  .object({
+    seedRegion: pixelRectSchema.nullable(),
+    currentBounds: boundsSchema.nullable(),
+    imageTransforms: z.array(imageTransformSchema).max(16),
+    boundaryViews: z.array(boundaryViewShapeSchema).max(4),
+  })
+  .strict()
+const decisionTraceSchema = z.discriminatedUnion('status', [
+  z
+    .object({
+      status: z.literal('recorded'),
+      questions: z.array(traceQuestionSchema).max(16),
+      geometry: geometryTraceSchema,
+    })
+    .strict(),
+  z
+    .object({
+      status: z.literal('omitted'),
+      reason: z.enum([
+        'invalid-decision-result',
+        'unrecognized-question-id',
+        'unrecognized-option-id',
+        'question-limit-exceeded',
+        'option-limit-exceeded',
+        'byte-budget-exceeded',
+        'trace-build-failed',
+      ]),
+    })
+    .strict(),
+])
+export type DecisionTrace = z.infer<typeof decisionTraceSchema>
+
 interface RequestGeometry {
   seedRegion: PixelRect | null
   currentBounds: z.infer<typeof boundsSchema> | null
@@ -359,7 +442,7 @@ interface RequestGeometry {
   ambiguousGridLabels: Set<string>
   transforms: {
     viewId: string | null
-    role: 'source' | 'crop' | 'grid' | 'image-state'
+    role: 'source' | 'crop' | 'grid' | 'image-state' | 'boundary-view' | 'seed-outline'
     sourceRegion: PixelRect | null
     source: { width: number; height: number }
     output: { width: number; height: number }
@@ -367,6 +450,7 @@ interface RequestGeometry {
     scaleX: number
     scaleY: number
   }[]
+  boundaryViews: z.infer<typeof boundaryViewShapeSchema>[]
 }
 
 function requestGeometry(request: DecisionRequest): RequestGeometry {
@@ -376,6 +460,7 @@ function requestGeometry(request: DecisionRequest): RequestGeometry {
     grids: new Map(),
     ambiguousGridLabels: new Set(),
     transforms: [],
+    boundaryViews: [],
   }
   let scanned = 0
   for (const part of request.state) {
@@ -403,6 +488,37 @@ function requestGeometry(request: DecisionRequest): RequestGeometry {
     const grid = gridMetadataSchema.safeParse(parsed)
     if (grid.success) {
       for (const item of grid.data.labels) rememberGridLabel(result, item.id, item.sourceRegion)
+      continue
+    }
+    const boundaryView = boundaryViewMetadataSchema.safeParse(parsed)
+    if (boundaryView.success) {
+      const value = boundaryView.data.boundaryView
+      result.boundaryViews.push(value)
+      result.transforms.push({
+        viewId: null,
+        role: 'boundary-view',
+        sourceRegion: value.sourceRegion,
+        source: { width: value.sourceRegion.width, height: value.sourceRegion.height },
+        output: value.image,
+        content: value.content,
+        scaleX: value.scaleX,
+        scaleY: value.scaleY,
+      })
+      continue
+    }
+    const seedOutline = seedOutlineMetadataSchema.safeParse(parsed)
+    if (seedOutline.success) {
+      const value = seedOutline.data.seedOutlineView
+      result.transforms.push({
+        viewId: null,
+        role: 'seed-outline',
+        sourceRegion: value.seedRegion,
+        source: value.source,
+        output: value.output,
+        content: value.content,
+        scaleX: value.scaleX,
+        scaleY: value.scaleY,
+      })
       continue
     }
     const transform = transformMetadataSchema.safeParse(parsed)
@@ -541,6 +657,7 @@ function buildDecisionTrace(request: DecisionRequest, result: DecisionResult): D
         answerType: 'ranked-choice' as const,
         ranking: answer.ranking,
         selectedSourceRegions: selectedSourceRegions(answer.ranking, geometry),
+        intervalOptions: intervalOptions(questionId, question.criteria),
       }
     }
     if (answer.type !== 'choice')
@@ -575,6 +692,7 @@ function buildDecisionTrace(request: DecisionRequest, result: DecisionResult): D
       seedRegion: geometry.seedRegion,
       currentBounds: geometry.currentBounds,
       imageTransforms,
+      boundaryViews: geometry.boundaryViews,
     },
   })
   if (!candidate.success) return { status: 'omitted', reason: 'trace-build-failed' }
