@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "title": "Categorical presence split-port DEV6 pilot independent evaluation",
+  "verdict": "FAIL: ineligible for full DEV40; the predeclared pilot requires at least one of two positive whole-object locations and zero false locations among four negatives. This run located zero positives.",
+  "purpose": "six exposed DEV cases to evaluate caller-owned categorical presence over native Choice; not a release qualification run",
+  "phase": "dev-pilot",
+  "profileId": "split-sol-spatial-native-luna-categorical-presence-sam-v1",
+  "runId": "v02-categorical-presence-dev6-2026-10-20T161832712Z-98826bc1",
+  "pins": {
+    "summaryCanonicalSha256": "a5a0f03b8fb889868505ea5a94da75db06c43f4b71ed80bbaec900a2fce03bc2",
+    "summaryPrettyFileSha256": "33deeff7037e5cc43d0dce5148ecbd2f65241a5e66ac4aefe0a1e2f360045022",
+    "runManifestSha256": "5d9b535365ac30a9057f4fba4ab69164eb0c6f5eeb77438aba1d224cc9a5213f",
+    "completionMarkerSha256": "3a13028bdcf6ddefa03ca518d07299bc86b5b34b7496ad71d57c491488cb8416",
+    "selectedInputsSha256": "98c9cae05ce1e85cd3dba6fb93b86406caf258600ac7bef8d64c7edd4439bc12",
+    "parentTwentyPhotoInputsSha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a",
+    "devTruthSha256": "793e26845deaa2cb56748ef270b8cb02877218d680068573f02e5af92b26af6a",
+    "variantSha256": "069a6c1bd8b32cd86e6af5838282817626b69c9790f0bb8dd9c4868450d86e6c",
+    "producerSourceSha256": "23ba879559c3fb69fd704589c89b98e2e601abc2cacd0d811a0b94e021613221"
+  },
+  "completeness": {
+    "planned": 6,
+    "completed": 6,
+    "missing": 0,
+    "status": "complete"
+  },
+  "classification": {
+    "correct": 4,
+    "total": 6,
+    "accuracy": 0.6666666666666666,
+    "positiveCorrect": 2,
+    "positiveTotal": 2,
+    "negativeCorrect": 2,
+    "negativeTotal": 4,
+    "falsePresent": 2
+  },
+  "wholeObjectLocalization": {
+    "locatedPositive": 0,
+    "positiveTotal": 2,
+    "falseLocatedNegative": 0,
+    "negativeTotal": 4,
+    "unknownTotal": 6,
+    "reasonCounts": {
+      "extent-uncertain": 2,
+      "uncertain-presence": 1,
+      "candidate-union-empty": 2,
+      "contradictory-evidence": 1
+    },
+    "bboxMetric": "not available: no row returned a location"
+  },
+  "extraction": {
+    "extracted": 0,
+    "unknown": 6,
+    "maskArtifactCases": 0,
+    "maskMetric": "not available: no masks returned"
+  },
+  "budget": {
+    "physicalCalls": 39,
+    "knownCostUsd": 0.23919200000000004,
+    "unknownCostCalls": 0,
+    "inFlightCalls": 0,
+    "latencyRankingEligible": false,
+    "latencyEnvironment": "concurrent-development-screen-unranked",
+    "receiptsReconciled": true
+  },
+  "cases": [
+    {
+      "caseId": "photo-dev-present-01",
+      "imageSha256": "71e781adb0c2d47d97e6fd5868e6dbe4de8c1375536e1753f897931ff90575dc",
+      "expectedPresence": "present",
+      "classification": "present",
+      "classificationCorrect": true,
+      "locateStatus": "unknown",
+      "locateReason": "extent-uncertain",
+      "wholeObjectBox": null,
+      "extractStatus": "unknown",
+      "maskArtifactPresent": false
+    },
+    {
+      "caseId": "photo-dev-present-02",
+      "imageSha256": "a27d93b12fadd550899a1d1d8ce70d34ba3c692affebf09134eda838910fcab5",
+      "expectedPresence": "present",
+      "classification": "present",
+      "classificationCorrect": true,
+      "locateStatus": "unknown",
+      "locateReason": "uncertain-presence",
+      "wholeObjectBox": null,
+      "extractStatus": "unknown",
+      "maskArtifactPresent": false
+    },
+    {
+      "caseId": "photo-dev-absent-01",
+      "imageSha256": "604b8fa9c30881acee7c67d078bb7d08f846aeac6152dc1bf23a41ddefe45988",
+      "expectedPresence": "absent",
+      "classification": "absent",
+      "classificationCorrect": true,
+      "locateStatus": "unknown",
+      "locateReason": "candidate-union-empty",
+      "wholeObjectBox": null,
+      "extractStatus": "unknown",
+      "maskArtifactPresent": false
+    },
+    {
+      "caseId": "photo-dev-absent-02",
+      "imageSha256": "8bcbc695bc113f645bb66dd2e03615764cd37d80e5794d8f9ffc79f1e364e077",
+      "expectedPresence": "absent",
+      "classification": "present",
+      "classificationCorrect": false,
+      "locateStatus": "unknown",
+      "locateReason": "extent-uncertain",
+      "wholeObjectBox": null,
+      "extractStatus": "unknown",
+      "maskArtifactPresent": false
+    },
+    {
+      "caseId": "photo-dev-absent-03",
+      "imageSha256": "f8c2cc736fd7941bf2bc51c73147aeec96deba4b22e6948fe088a2d9121c51a6",
+      "expectedPresence": "absent",
+      "classification": "absent",
+      "classificationCorrect": true,
+      "locateStatus": "unknown",
+      "locateReason": "candidate-union-empty",
+      "wholeObjectBox": null,
+      "extractStatus": "unknown",
+      "maskArtifactPresent": false
+    },
+    {
+      "caseId": "photo-dev-absent-04",
+      "imageSha256": "085ac7dc3243e28816e69f5e1ad56b9e8858c7135fac366f3172ad862e28eeae",
+      "expectedPresence": "absent",
+      "classification": "present",
+      "classificationCorrect": false,
+      "locateStatus": "unknown",
+      "locateReason": "contradictory-evidence",
+      "wholeObjectBox": null,
+      "extractStatus": "unknown",
+      "maskArtifactPresent": false
+    }
+  ],
+  "limits": [
+    "Six exposed DEV cases only; this is a pilot and not a heldout evaluation.",
+    "No target boxes or masks were produced, so localization and extraction quality cannot be inferred from the classification answers.",
+    "The source-truth labels and original producer artifacts were left unchanged."
+  ]
+}
