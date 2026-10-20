@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "evidenceType": "native-installed-archive-component-wiring",
+  "workflow": "checked-region-segmentation",
+  "sourceCommit": "46283fea1f45725b47e3f883c3c4c1ab1455a172",
+  "harnessCommit": "6e7f132c61cc9600dabc94f627ed02ab5e50bb57",
+  "harnessSha256": "48ca587aa8e1b4f4b3bf255a856d555f2fe4f4dd051e0597d1c63e2f76eda74c",
+  "rawReportSha256": "b90a4205abb13745372112ae610694da555da580552657ab76d7d1de60fe6c06",
+  "rawReportBytes": 7211,
+  "runtime": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "v24.19.0",
+    "windowsBuild": "10.0.26200",
+    "backend": "MobileSAM CPU",
+    "threads": 2,
+    "optionalRuntime": "onnxruntime-node 1.23.2"
+  },
+  "archive": {
+    "package": "zorya-classifier",
+    "version": "0.2.0",
+    "bytes": 705469,
+    "sha256": "4156a92fcc27db53d39bfab710719af9a7f36d7deeb76b1731fb705b3b4335d8",
+    "installedDistFileCount": 115,
+    "installedDistManifestSha256": "4fcaea3aca9d0b90304fb2bb1d536f35965070984f04181617d7bd82ac397731",
+    "segmentationRuntimeSha256": "e39c772dce27978c99e86682c442c1082686d05be8b8384ec0e0ad9564bf0e01"
+  },
+  "independentInstalledArchiveParity": true,
+  "checks": {
+    "importWithoutNativeChild": true,
+    "backendProbeSettled": true,
+    "closedBoxVerification": true,
+    "nativeEnclosingMask": true,
+    "locate": true,
+    "extract": true,
+    "cancellationAndPhysicalJoin": true,
+    "capacity": true,
+    "callerOwnedAdapter": true,
+    "dispose": true,
+    "fixtureDecisionOffline": true,
+    "emptyTransparentIsValidEmptyMask": true,
+    "childOwnership": true,
+    "cleanup": true,
+    "worker": true,
+    "tempCleanup": true
+  },
+  "controlledFixture": {
+    "seed": {
+      "region": {
+        "left": 0,
+        "top": 0,
+        "width": 13,
+        "height": 13
+      },
+      "center": {
+        "x": 6.5,
+        "y": 6.5
+      },
+      "centerInsideSyntheticTarget": true
+    },
+    "located": {
+      "status": "located",
+      "durationMs": 4308,
+      "seedRegion": {
+        "left": 0,
+        "top": 0,
+        "width": 13,
+        "height": 13
+      },
+      "region": {
+        "left": 0,
+        "top": 0,
+        "width": 64,
+        "height": 64
+      },
+      "method": "region-checked-segmentation-v1",
+      "center": {
+        "x": 32,
+        "y": 32
+      },
+      "verification": {
+        "checks": [
+          {
+            "verdict": "complete",
+            "selection": {
+              "choice": "complete",
+              "nativeChoice": "complete",
+              "probabilities": {
+                "complete": 1,
+                "needs-expansion": 0,
+                "unknown": 0
+              },
+              "tied": ["complete"]
+            },
+            "metadata": {
+              "model": null,
+              "provider": null,
+              "requestId": null,
+              "durationMs": 0,
+              "costUsd": 0,
+              "attempts": 1
+            }
+          }
+        ],
+        "expansion": "not-needed"
+      }
+    },
+    "extracted": {
+      "status": "extracted",
+      "durationMs": 1527,
+      "region": {
+        "left": 0,
+        "top": 0,
+        "width": 64,
+        "height": 64
+      },
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "pngBytes": 267,
+      "maskBytes": 4096,
+      "segmentation": {
+        "method": "mobile-sam-seed-point-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1301.8304000000007,
+        "input": {
+          "width": 256,
+          "height": 256
+        }
+      },
+      "verification": {
+        "checks": [
+          {
+            "verdict": "complete",
+            "selection": {
+              "choice": "complete",
+              "nativeChoice": "complete",
+              "probabilities": {
+                "complete": 1,
+                "needs-expansion": 0,
+                "unknown": 0
+              },
+              "tied": ["complete"]
+            },
+            "metadata": {
+              "model": null,
+              "provider": null,
+              "requestId": null,
+              "durationMs": 0,
+              "costUsd": 0,
+              "attempts": 1
+            }
+          }
+        ],
+        "expansion": "not-needed"
+      }
+    },
+    "maskDerived": {
+      "sourceSize": {
+        "width": 256,
+        "height": 256
+      },
+      "segmenterInputSize": {
+        "width": 256,
+        "height": 256
+      },
+      "syntheticTarget": {
+        "left": 0,
+        "top": 0,
+        "width": 64,
+        "height": 64
+      },
+      "region": {
+        "left": 0,
+        "top": 0,
+        "width": 64,
+        "height": 64
+      },
+      "center": {
+        "x": 32,
+        "y": 32
+      },
+      "seedRegion": {
+        "left": 0,
+        "top": 0,
+        "width": 13,
+        "height": 13
+      },
+      "maskPixels": 4096,
+      "pngSize": {
+        "width": 64,
+        "height": 64
+      },
+      "method": "mobile-sam-seed-point-v1",
+      "cutoutAlphaMatchesMask": true,
+      "centerMatchesBounds": true,
+      "cropMatchesBounds": true,
+      "objectBoundsLargerThanSeed": true
+    },
+    "fixtureDecision": {
+      "calls": 8,
+      "providerHttpCalls": 0,
+      "noExtentSearchCalls": true,
+      "boxCheckRequests": 2,
+      "validRegionChoiceRequests": 6
+    },
+    "enclosingMaskComponent": {
+      "input": "controlled one-pixel fragment from actual native mask, not a photo-quality result",
+      "previousForeground": 1,
+      "point": {
+        "x": 0,
+        "y": 0
+      },
+      "status": "segmented",
+      "foreground": 4062,
+      "metadata": {
+        "method": "mobile-sam-enclosing-mask-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1288.6422999999995,
+        "input": {
+          "width": 256,
+          "height": 256
+        },
+        "qualityScore": 0.9341034889221191
+      }
+    }
+  },
+  "childOwnership": {
+    "starts": 10,
+    "closes": 10,
+    "stillOwnedPids": []
+  },
+  "cleanup": {
+    "ownedNativeTemp": "removed by coordinator after worker exit",
+    "ownedWindowsStageRemoved": true,
+    "earlierLaunchAttemptsPreserved": true
+  },
+  "coordinatorExitCode": 0,
+  "workerExitCode": 0,
+  "providerHttpCalls": 0,
+  "limitations": [
+    "Controlled synthetic/native component checks, not photo accuracy or a real game session.",
+    "Initial PowerShell launch attempts preserved as coordinator-exit-unverified; qualified repeat used native WSL interop and observed exit code zero.",
+    "Final published archive still requires parity against these 114 compiled runtime files plus final source and package checks."
+  ]
+}
