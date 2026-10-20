@@ -24,6 +24,8 @@ flowchart LR
 
 One deadline covers the whole operation, including queue time. AbortSignal passes through every boundary; guards after awaits reject late results. Physical Sharp/provider work retains its slot until its promise settles. Timers/listeners are cleared in finally. There is no import-time worker, automatic retry, persistent image cache, database or background polling loop.
 
+The box renderer preserves the full source canvas. The injected raster `imageState` then prepares the whole rendered image for the transport, preserving aspect ratio with explicit scale/padding metadata and prepared sides between 280 and 1568 pixels. This never crops to the selected box and never changes the mask's source-space coordinates. Public-adapter regressions exercise both 64×48 and 1920×1080 inputs; DecisionPort-only fixtures do not exercise transport size validation.
+
 Transport validates complete question/answer correspondence, probabilities, identity and byte limits. Errors omit credentials, provider bodies and raw user media. Raw images exist only for the active operation unless an explicit caller-owned diagnostic wrapper records requests. Scores are not mixed across Choice distributions or interpreted as pixel/pose confidence.
 
 Image handling normalizes EXIF orientation, validates bounded decode, crops in source pixels and prepares PNG presentations with recorded aspect-ratio/padding transforms. Labels map to exact canonical rectangles. Original and clean crops remain available alongside grid overlays. Final candidate pixels are source crops enlarged with integer nearest-neighbor scale.

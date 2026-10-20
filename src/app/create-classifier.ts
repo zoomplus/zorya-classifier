@@ -139,6 +139,7 @@ function composeClassifier(
       createSegmentationBoxCheck({
         decision: options.decision,
         presentation: createSharpSegmentationBoxPresentation(),
+        imageState: raster.imageState,
       }))
     : undefined
   const proposalDependencies = objectProposals

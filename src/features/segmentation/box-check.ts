@@ -5,8 +5,9 @@ import type {
   DecisionRequest,
   DecisionResult,
   PixelRect,
+  RasterPort,
 } from '../../entities/contracts.js'
-import { limits, pixelRectSchema } from '../../entities/contracts.js'
+import { limits, parse, pixelRectSchema } from '../../entities/contracts.js'
 import type {
   SegmentationBoxCheckInput,
   SegmentationBoxCheckPort,
@@ -19,6 +20,32 @@ import { validateDecision, selection } from '../choice.js'
 
 const verdicts = ['complete', 'needs-expansion', 'unknown'] as const
 const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10] as const
+const preparedStateSchema = z
+  .array(
+    z.union([
+      z.string().max(32000),
+      z
+        .object({
+          type: z.literal('image_url'),
+          image_url: z
+            .object({
+              url: z
+                .string()
+                .startsWith('data:image/png;base64,')
+                .max(Math.ceil(limits.imageBytes / 3) * 4 + 22),
+              detail: z.literal('high'),
+            })
+            .strict(),
+        })
+        .strict(),
+    ]),
+  )
+  .min(1)
+  .max(9)
+  .refine(
+    (parts) => parts.filter((part) => typeof part !== 'string').length === 1,
+    'Expected one prepared full-source image',
+  )
 const segmentationBoxCheckCriteria = Object.freeze({
   complete:
     'The complete visible target instance, limited to the caller-provided region of interest, is inside the magenta box.',
@@ -245,6 +272,7 @@ export function validateSegmentationBoxCheckResult(value: unknown): Segmentation
 interface CreateSegmentationBoxCheckOptions {
   decision: DecisionPort
   presentation: SegmentationBoxPresentationPort
+  imageState: RasterPort['imageState']
 }
 const createOptionsSchema = z
   .object({
@@ -262,6 +290,7 @@ const createOptionsSchema = z
         'render' in value &&
         typeof value.render === 'function',
     ),
+    imageState: z.custom<RasterPort['imageState']>((value) => typeof value === 'function'),
   })
   .strict()
 
@@ -274,7 +303,7 @@ export function createSegmentationBoxCheck(
       'INVALID_INPUT',
       'A caller-owned decision and box-presentation port are required',
     )
-  const { decision, presentation } = parsedOptions.data
+  const { decision, presentation, imageState } = parsedOptions.data
   return {
     async check(value: SegmentationBoxCheckInput): Promise<SegmentationBoxCheckResult> {
       const input = snapshotInput(value)
@@ -313,19 +342,26 @@ export function createSegmentationBoxCheck(
             'Box presentation must be a bounded full-source PNG',
           )
         presentationBytes = Uint8Array.from(image.bytes)
+        const preparedState = parse(
+          preparedStateSchema,
+          await imageState(
+            {
+              bytes: presentationBytes,
+              width: input.image.width,
+              height: input.image.height,
+            },
+            input.signal,
+          ),
+          'INVALID_RESPONSE',
+        )
+        assertActive(input.signal)
         const request: DecisionRequest = {
           state: [
             `Target class label (JSON string): ${JSON.stringify(input.target)}.`,
             `Exclusion labels (JSON strings): ${JSON.stringify(input.exclusions)}.`,
             'The magenta outline is the mask-derived box. The cyan cross marks the original seed of one target instance. Other instances do not count.',
             'The dashed amber outline is the caller-provided hard region of interest. Consider visible target content only within that region and do not infer parts beyond it.',
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:image/png;base64,${Buffer.from(presentationBytes).toString('base64')}`,
-                detail: 'high',
-              },
-            },
+            ...preparedState,
           ],
           questions: { box_check: question },
         }

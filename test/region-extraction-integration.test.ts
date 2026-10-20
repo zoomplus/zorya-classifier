@@ -2,10 +2,12 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import sharp from 'sharp'
 import { createClassifier } from '../src/app/create-classifier.js'
-import type { DecisionPort, DecisionResult } from '../src/entities/contracts.js'
+import type { DecisionPort, DecisionRequest, DecisionResult } from '../src/entities/contracts.js'
 import type { SegmentationPort } from '../src/entities/segmentation.js'
 import { ClassifierError } from '../src/entities/errors.js'
 import type { SegmentationBoxCheckResult } from '../src/entities/segmentation-verification.js'
+import { createOpenAICompatibleVision } from '../src/openai-compatible.js'
+import { createOpenRouterDecisions } from '../src/openrouter.js'
 
 await test('public extraction uses the original region search, full-source segmentation and one box check', async () => {
   let decisions = 0
@@ -262,3 +264,108 @@ await test('classifier dispose cancels a box check but retains its slot until th
   await segmenter.dispose()
   assert.equal(segmenterDisposals, 1)
 })
+
+for (const protocol of ['ordinary-vision', 'native-decisions'] as const) {
+  for (const dimensions of [
+    { width: 64, height: 48 },
+    { width: 1920, height: 1080 },
+  ]) {
+    await test(`default box check prepares ${dimensions.width}x${dimensions.height} through public ${protocol} with no provider HTTP`, async () => {
+      const model = `fixture/${protocol}`
+      let current: DecisionRequest | undefined
+      let calls = 0
+      let boxChecks = 0
+      const fetch: typeof globalThis.fetch = async (_url, init) => {
+        assert.ok(current)
+        calls++
+        const body = String(init?.body)
+        assert.ok(body.includes('image_url'))
+        if (current.questions['box_check']) {
+          boxChecks++
+          assert.ok(body.includes('box_check'))
+          assert.ok(body.includes('needs-expansion'))
+          if (protocol === 'ordinary-vision') assert.ok(body.includes('json_schema'))
+          else assert.equal(body.includes('rankingSize'), false)
+        }
+        const answers: Record<string, unknown> = {}
+        for (const [id, question] of Object.entries(current.questions)) {
+          if (question.type === 'noul') {
+            answers[id] =
+              protocol === 'ordinary-vision' ? { presence: 'present' } : { type: 'noul', noul: 1 }
+          } else {
+            const keys = Object.keys(question.criteria)
+            const first = keys[0]
+            assert.ok(first)
+            answers[id] =
+              protocol === 'ordinary-vision'
+                ? { ranking: keys.slice(0, question.rankingSize ?? 4) }
+                : {
+                    type: 'choice',
+                    choice: first,
+                    probabilities: Object.fromEntries(
+                      keys.map((key) => [key, key === first ? 1 : 0]),
+                    ),
+                  }
+          }
+        }
+        return new Response(
+          JSON.stringify(
+            protocol === 'ordinary-vision'
+              ? {
+                  model,
+                  choices: [
+                    {
+                      index: 0,
+                      finish_reason: 'stop',
+                      message: { content: JSON.stringify({ answers }) },
+                    },
+                  ],
+                }
+              : { model, provider: 'fixture', answers },
+          ),
+          { status: 200 },
+        )
+      }
+      const transport =
+        protocol === 'ordinary-vision'
+          ? createOpenAICompatibleVision({
+              endpoint: 'http://localhost:9/v1/chat/completions',
+              model,
+              responseFormat: 'json-schema',
+              fetch,
+            })
+          : createOpenRouterDecisions({ apiKey: 'fixture', model, provider: 'fixture', fetch })
+      const decision: DecisionPort = {
+        decide(request, signal) {
+          current = request
+          return transport.decide(request, signal)
+        },
+      }
+      const image = await sharp({
+        create: { ...dimensions, channels: 4, background: '#778899' },
+      })
+        .png()
+        .toBuffer()
+      const segmenter = fixtureSegmenter()
+      const client = createClassifier({ decision, segmentation: segmenter })
+      try {
+        const result = await client.extract({ image, target: 'fixture object' })
+        assert.equal(result.status, 'extracted')
+        assert.equal(calls, 4)
+        assert.equal(boxChecks, 1)
+        if (result.status !== 'extracted') throw new Error('Expected transport-verified extraction')
+        assert.equal(result.location.method, 'region-checked-segmentation-v1')
+        assert.deepEqual(result.region, { left: 0, top: 0, ...dimensions })
+        assert.equal(result.verification?.checks[0]?.verdict, 'complete')
+        assert.equal(result.verification?.checks[0]?.metadata.model, model)
+        assert.equal(
+          result.verification?.checks[0]?.selection.probabilities === null,
+          protocol === 'ordinary-vision',
+        )
+      } finally {
+        await client.dispose()
+        await segmenter.dispose()
+      }
+    })
+  }
+}

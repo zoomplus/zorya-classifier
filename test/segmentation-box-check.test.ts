@@ -17,6 +17,7 @@ import {
   validateSegmentationBoxCheckResult,
 } from '../src/features/segmentation/box-check.js'
 import { createSharpSegmentationBoxPresentation } from '../src/infrastructure/segmentation/box-presentation.js'
+import { createSharpRaster } from '../src/infrastructure/raster.js'
 
 const width = 64
 const height = 48
@@ -68,7 +69,7 @@ function ports(
 ) {
   const decision: DecisionPort = { decide }
   const presentation: SegmentationBoxPresentationPort = { render }
-  return { decision, presentation }
+  return { decision, presentation, imageState: createSharpRaster().imageState }
 }
 
 await test('Sharp presentation draws mask box, seed, and hard-ROI cues on full source', async () => {

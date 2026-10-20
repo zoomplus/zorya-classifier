@@ -23,6 +23,7 @@ import { createOpenRouterDecisions } from '../../src/infrastructure/openrouter.j
 import { createMobileSamSegmenter } from '../../src/infrastructure/segmentation/mobile-sam/index.js'
 import { createSegmentationBoxCheck } from '../../src/features/segmentation/box-check.js'
 import { createSharpSegmentationBoxPresentation } from '../../src/infrastructure/segmentation/box-presentation.js'
+import { createSharpRaster } from '../../src/infrastructure/raster.js'
 import { RunBudget } from './budget.js'
 import type { BudgetSnapshot } from './budget.js'
 import { freshProducerTask, loadFreshCorpus, loadFreshImage } from './fresh-corpus.js'
@@ -559,6 +560,7 @@ function observedBoxCheck(
   const delegate = createSegmentationBoxCheck({
     decision,
     presentation: createSharpSegmentationBoxPresentation(),
+    imageState: createSharpRaster().imageState,
   })
   return {
     async check(input) {
