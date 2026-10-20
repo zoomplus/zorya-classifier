@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "manifestId": "old-exposed-dev4-diagnostic-v1",
+  "cases": [
+    {
+      "caseId": "photo-dev-01",
+      "image": {
+        "path": "photos/fbe59eeb48094e5d.jpg",
+        "sha256": "acc3b42fd4c7df4943054ba462182133f22a773e397ed91ae7896c26344ef9ac",
+        "width": 1024,
+        "height": 901
+      },
+      "target": "Dog"
+    },
+    {
+      "caseId": "photo-dev-02",
+      "image": {
+        "path": "photos/6d60c9f1e937a105.jpg",
+        "sha256": "68d92b810be3205702e9ea527654ffbbb2eab3f48fd73f66770a0a0df4f484a1",
+        "width": 1024,
+        "height": 683
+      },
+      "target": "Car"
+    },
+    {
+      "caseId": "photo-dev-03",
+      "image": {
+        "path": "photos/6a202f97eba64a08.jpg",
+        "sha256": "974286e376815b28a70dd84fa47f03e2148db02b11d64e63c7ec39602f4b197b",
+        "width": 1024,
+        "height": 575
+      },
+      "target": "Boat"
+    },
+    {
+      "caseId": "photo-dev-05",
+      "image": {
+        "path": "photos/9d198c9c6fc1fc1b.jpg",
+        "sha256": "733472dc827ea4961a175e8bcb1c1c70b15f3cba131475eaa7721eef14ffafcc",
+        "width": 1024,
+        "height": 768
+      },
+      "target": "Tree"
+    }
+  ]
+}

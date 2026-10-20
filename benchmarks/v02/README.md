@@ -57,3 +57,25 @@ node --import tsx --test test/v02-metrics.test.ts
 ```
 
 These checks do not access network, consume keys, start native models or infer labels. They cover the crucial large-object/whole-image counterexamples, positive-denominator retention, mask format and deterministic paired comparison.
+
+## Exposed v1 diagnostic producer
+
+`run.ts` is the sole v0.2 paid dispatcher. It is deliberately an old, already-exposed development diagnostic, not a fresh qualification run. The frozen producer input is `input-manifest.json` (three varied positive objects and one explicitly verified negative); its separate `diagnostic-evaluator-dev4.json` file is evaluator-only and is never imported by `runner.ts`. Provider state contains the task, target, closed options and image representation only. It never contains case IDs, local paths, hashes, split labels or ground truth.
+
+Run the bounded two-case functional pilot first, choosing the first positive and explicit negative. For example:
+
+```sh
+node --import tsx benchmarks/v02/run.ts --allow-paid --max-physical-calls 125 --max-cost-usd 2.50 --cases 2
+```
+
+Run all four diagnostic cases only when coordinated with the CPU benchmark window:
+
+```sh
+node --import tsx benchmarks/v02/run.ts --allow-paid --max-physical-calls 250 --max-cost-usd 5 --cases 4
+```
+
+The default route is pinned DeepSeek Flash through Together, with OpenAI Luna Decisions as the native vision control. There is one request per provider decision, no route fallback and no retry. Classification output is capped at 1,024 tokens; localization output is capped at 4,096. The three prompt variants are `no-grammar`, `grammar`, and `grammar-plus-examples`; the final variant has two synthetic decoder examples without benchmark labels. Run each variant as a separately frozen run. Text candidates use all six registered encoders. The no-image control is a direct one-request presence probe plus a one-request no-image localization-feasibility probe; it does not invoke the image locator with a fabricated blank image.
+
+The budget reserves at the injected `fetch` boundary, after local request validation and immediately before network dispatch. Logical decisions and physical fetches have separate records. Every HTTP status is retained, including non-success responses; response bodies, URLs, headers, keys and image bytes are not written. A missing parsed provider receipt means unknown cost and consumes the configured unknown-cost reserve. The cap is a local admission limit, not an OpenRouter-side spending cap.
+
+Each run creates a new, immutable directory under `.run/v02/` by default. The run manifest freezes the selected case IDs locally, input manifest hash, prompt variant/hash, exact route identities, output caps and hard limits. Per-call records contain request hashes and text-part sizes/hashes rather than serialized private content. Failed runs and partial stage records remain for review. The final summary reports actual provider/model receipts, HTTP status, physical call count, known and unknown cost, and p50/p95 dispatch latency. Timings made while native CPU checks are active must be tagged as concurrent and excluded from route ranking.

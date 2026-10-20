@@ -1,0 +1,32 @@
+{
+  "artifactRole": "evaluator-only; never import into producer or send to provider",
+  "curation": "Three exposed development positives of different classes and one explicitly human-verified negative; old exposed corpus only, diagnostic use only.",
+  "cases": [
+    {
+      "caseId": "photo-dev-01",
+      "presence": "present",
+      "boxesNormalized": [
+        { "left": 0.19661017, "top": 0.078998074, "right": 0.8881356, "bottom": 1 }
+      ]
+    },
+    {
+      "caseId": "photo-dev-02",
+      "presence": "present",
+      "boxesNormalized": [
+        { "left": 0.06637168, "top": 0.37831858, "right": 0.9734513, "bottom": 0.8053097 }
+      ]
+    },
+    {
+      "caseId": "photo-dev-03",
+      "presence": "present",
+      "boxesNormalized": [
+        { "left": 0.08525034, "top": 0.05060241, "right": 0.661705, "bottom": 0.76144576 }
+      ]
+    },
+    {
+      "caseId": "photo-dev-05",
+      "presence": "absent",
+      "negativeEvidence": "explicit-human-verified-image-label; Confidence=0"
+    }
+  ]
+}
