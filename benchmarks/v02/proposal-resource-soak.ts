@@ -34,6 +34,7 @@ interface CliOptions {
   sourceManifestPath: string
   sourceManifestSha256: string
   archiveReferenceSha256: string
+  threads: number
   outputPath?: string
   warmupSeconds: number
   durationSeconds: number
@@ -98,6 +99,8 @@ function parseOptions(argv: readonly string[]): CliOptions {
   const warmupSeconds = integerOption('warmup-seconds', smoke ? 0 : 600, 0)
   const durationSeconds = integerOption('duration-seconds', smoke ? 1 : 6540, 1)
   const idleSeconds = integerOption('idle-seconds', smoke ? 1 : 30, 1)
+  const threads = integerOption('threads', 1, 1)
+  if (threads > 4) throw new Error('--threads must be an integer from 1 through 4')
   if (
     !smoke &&
     !parentLossChild &&
@@ -112,6 +115,7 @@ function parseOptions(argv: readonly string[]): CliOptions {
     sourceManifestPath: resolve(sourceManifestPath),
     sourceManifestSha256,
     archiveReferenceSha256,
+    threads,
     ...(outputPath ? { outputPath: resolve(outputPath) } : {}),
     warmupSeconds,
     durationSeconds,
@@ -430,7 +434,7 @@ async function abortJoinSmoke(options: CliOptions): Promise<unknown> {
   const adapter = await createMobileSamObjectProposals({
     encoderPath: options.encoderPath,
     decoderPath: options.decoderPath,
-    threads: 1,
+    threads: options.threads,
   })
   const controller = new AbortController()
   const start = waitForNativeStart(10_000)
@@ -461,7 +465,7 @@ async function queueAndDisposeSmoke(options: CliOptions): Promise<unknown> {
   const adapter = await createMobileSamObjectProposals({
     encoderPath: options.encoderPath,
     decoderPath: options.decoderPath,
-    threads: 1,
+    threads: options.threads,
   })
   const input = {
     image: {
@@ -507,6 +511,7 @@ async function parentLossSmoke(options: CliOptions): Promise<unknown> {
       `--source-manifest=${options.sourceManifestPath}`,
       `--source-manifest-sha256=${options.sourceManifestSha256}`,
       `--archive-sha=${options.archiveReferenceSha256}`,
+      `--threads=${options.threads}`,
     ],
     { stdio: ['ignore', 'pipe', 'pipe'] },
   )
@@ -550,7 +555,7 @@ async function runParentLossCoordinator(options: CliOptions): Promise<never> {
   const adapter = await createMobileSamObjectProposals({
     encoderPath: options.encoderPath,
     decoderPath: options.decoderPath,
-    threads: 1,
+    threads: options.threads,
   })
   const input = {
     image: {
@@ -593,7 +598,7 @@ async function lifecycleSmoke(
   const adapter = await createMobileSamObjectProposals({
     encoderPath: options.encoderPath,
     decoderPath: options.decoderPath,
-    threads: 1,
+    threads: options.threads,
   })
   const classifier = createClassifier(classifierOptions(decisionFixture.decision, adapter))
   const rejection = await oneCycle(classifier, image, 'locate')
@@ -604,7 +609,7 @@ async function lifecycleSmoke(
   const timeoutAdapter = await createMobileSamObjectProposals({
     encoderPath: options.encoderPath,
     decoderPath: options.decoderPath,
-    threads: 1,
+    threads: options.threads,
   })
   const timeoutClassifier = createClassifier(
     classifierOptions(timeoutDecision.decision, timeoutAdapter, 20),
@@ -632,7 +637,7 @@ async function lifecycleSmoke(
 async function main(): Promise<void> {
   if (process.argv.includes('--help')) {
     console.log(
-      'Usage: node --import tsx benchmarks/v02/proposal-resource-soak.ts --encoder=/path --decoder=/path --source-manifest=/path --source-manifest-sha256=<64hex> --archive-sha=<reference-64hex> [--smoke] [--warmup-seconds=600] [--duration-seconds=6540] [--idle-seconds=30] [--sample-ms=5000] [--out=new-report.json]',
+      'Usage: node --import tsx benchmarks/v02/proposal-resource-soak.ts --encoder=/path --decoder=/path --source-manifest=/path --source-manifest-sha256=<64hex> --archive-sha=<reference-64hex> [--threads=1..4] [--smoke] [--warmup-seconds=600] [--duration-seconds=6540] [--idle-seconds=30] [--sample-ms=5000] [--out=new-report.json]',
     )
     return
   }
@@ -656,7 +661,7 @@ async function main(): Promise<void> {
   const adapter = await createMobileSamObjectProposals({
     encoderPath: options.encoderPath,
     decoderPath: options.decoderPath,
-    threads: 1,
+    threads: options.threads,
   })
   const decisionFixture = closedDecision()
   const classifier = createClassifier(classifierOptions(decisionFixture.decision, adapter))
@@ -871,6 +876,7 @@ async function main(): Promise<void> {
       retainedSdkAndProposalAdapter: true,
       classifierTimeoutMs: 45_000,
       maxPixels: 2_097_152,
+      nativeThreads: options.threads,
       seedCell: 'C00',
       targetRegion,
       clock: 'node:perf_hooks performance.now (monotonic); ISO timestamps are metadata only',
