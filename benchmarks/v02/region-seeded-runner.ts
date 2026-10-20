@@ -567,34 +567,38 @@ function observedBoxCheck(
       const logicalStart = recorder.logicalCalls.length
       const physicalStart = recorder.calls.length
       const index = receipts.length
-      const settleReceipt = (result?: SegmentationBoxCheckResult, error?: unknown) => {
+      const settleReceipt = (
+        outcome:
+          | { status: 'ok'; result: SegmentationBoxCheckResult }
+          | { status: 'failed'; error: unknown },
+      ) => {
         const logical = recorder.logicalCalls.slice(logicalStart)
         const physicalIds = logical.flatMap((call) => call.physicalIds)
         const receipt: BoxCheckReceipt = {
           index,
-          status: error ? 'failed' : 'ok',
+          status: outcome.status,
           requestHash: logical.length === 1 ? logical[0]!.requestSha256 : null,
           logicalId: logical.length === 1 ? logical[0]!.logicalId : null,
           physicalIds,
           physicalCalls: recorder.calls.length - physicalStart,
-          ...(result
+          ...(outcome.status === 'ok'
             ? {
-                verdict: result.verdict,
-                selection: structuredClone(result.selection),
-                metadata: { ...result.metadata },
+                verdict: outcome.result.verdict,
+                selection: structuredClone(outcome.result.selection),
+                metadata: { ...outcome.result.metadata },
               }
             : {}),
-          ...(error ? { errorCode: safeErrorCode(error) } : {}),
+          ...(outcome.status === 'failed' ? { errorCode: safeErrorCode(outcome.error) } : {}),
         }
         receipts.push(receipt)
       }
       try {
         const result = await delegate.check(input)
         assertRecorderHealthy(recorder)
-        settleReceipt(result)
+        settleReceipt({ status: 'ok', result })
         return result
       } catch (error) {
-        settleReceipt(undefined, error)
+        settleReceipt({ status: 'failed', error })
         throw error
       }
     },

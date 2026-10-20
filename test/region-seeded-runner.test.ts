@@ -174,6 +174,7 @@ await test('failed box-check attempts retain zero-fetch evidence without a fabri
     variant: 'region-seeded-sam',
     checkedRegion: true,
     runBoxCheck: true,
+    boxCheckReject: true,
     boxCheckError: Object.assign(new Error('fixture local validation'), { code: 'INVALID_INPUT' }),
   })
   try {
@@ -192,6 +193,33 @@ await test('failed box-check attempts retain zero-fetch evidence without a fabri
       },
     ])
     assert.equal(result.extraction.verification, undefined)
+  } finally {
+    await fixture.dispose()
+  }
+})
+
+await test('falsy rejected box-check values are retained as failures, not successful verdicts', async () => {
+  const fixture = await makeProcessCaseFixture({
+    variant: 'region-seeded-sam',
+    checkedRegion: true,
+    runBoxCheck: true,
+    boxCheckReject: true,
+    boxCheckError: undefined,
+  })
+  try {
+    const result = await processRegionSeededCase(fixture.args)
+    assert.equal(result.extraction.status, 'failed')
+    assert.deepEqual(result.extraction.boxChecks, [
+      {
+        index: 0,
+        status: 'failed',
+        requestHash: null,
+        logicalId: null,
+        physicalIds: [],
+        physicalCalls: 0,
+        errorCode: 'RUNNER_FAILURE',
+      },
+    ])
   } finally {
     await fixture.dispose()
   }
@@ -571,7 +599,8 @@ async function makeProcessCaseFixture(input: {
   classifyError?: Error
   checkedRegion?: boolean
   runBoxCheck?: boolean
-  boxCheckError?: Error
+  boxCheckReject?: boolean
+  boxCheckError?: unknown
 }) {
   const root = await mkdtemp(join(tmpdir(), 'presence-first-case-'))
   const bytes = await sharp({
@@ -615,7 +644,7 @@ async function makeProcessCaseFixture(input: {
   }
   const decision: DecisionPort = {
     async decide(request) {
-      if (request.questions.box_check && input.boxCheckError) throw input.boxCheckError
+      if (request.questions.box_check && input.boxCheckReject) throw input.boxCheckError
       const answer = request.questions.box_check
         ? {
             type: 'choice' as const,
