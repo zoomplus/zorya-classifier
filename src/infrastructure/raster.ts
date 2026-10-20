@@ -9,6 +9,7 @@ import type {
 } from '../entities/contracts.js'
 import { limits } from '../entities/contracts.js'
 import { ClassifierError, assertActive } from '../entities/errors.js'
+import type { ImageRepresentationPort, RepresentationMetadata } from '../entities/representation.js'
 
 function contains(outer: PixelRect, inner: PixelRect): boolean {
   return (
@@ -26,7 +27,11 @@ async function normalizeImage(bytes: Uint8Array, signal: AbortSignal): Promise<R
     assertActive(signal)
     if (!['png', 'jpeg', 'webp'].includes(metadata.format ?? '') || (metadata.pages ?? 1) !== 1)
       throw new ClassifierError('INVALID_INPUT', 'Use a single PNG, JPEG or WebP image')
-    const normalized = await pipeline.rotate().png().toBuffer({ resolveWithObject: true })
+    const normalized = await pipeline
+      .rotate()
+      .ensureAlpha()
+      .png()
+      .toBuffer({ resolveWithObject: true })
     assertActive(signal)
     if (normalized.data.byteLength > limits.imageBytes)
       throw new ClassifierError('RESOURCE_LIMIT', 'Decoded presentation exceeds image byte limit')
@@ -149,4 +154,91 @@ async function renderGrid(
 
 export function createSharpRaster(): RasterPort {
   return { normalize: normalizeImage, crop: cropImage, imageState, grid: renderGrid }
+}
+
+/** Decode an oriented raster into the canonical RGBA8 pixel layout used by adapters. */
+export async function readCanonicalPixels(
+  image: RasterImage,
+  signal: AbortSignal,
+): Promise<{ data: Uint8Array; width: number; height: number }> {
+  assertActive(signal)
+  if (
+    !Number.isSafeInteger(image.width) ||
+    !Number.isSafeInteger(image.height) ||
+    image.width < 1 ||
+    image.height < 1 ||
+    image.width * image.height > limits.imagePixels
+  )
+    throw new ClassifierError('RESOURCE_LIMIT', 'Raster dimensions exceed pixel limits')
+  const pipeline = sharp(image.bytes, { limitInputPixels: limits.imagePixels, failOn: 'error' })
+    .rotate()
+    .ensureAlpha()
+    .raw()
+  try {
+    const result = await pipeline.toBuffer({ resolveWithObject: true })
+    assertActive(signal)
+    if (
+      result.info.width !== image.width ||
+      result.info.height !== image.height ||
+      result.info.channels !== 4 ||
+      result.data.byteLength !== image.width * image.height * 4
+    )
+      throw new ClassifierError('INVALID_INPUT', 'Raster dimensions do not match decoded pixels')
+    return { data: result.data, width: result.info.width, height: result.info.height }
+  } catch (error) {
+    assertActive(signal)
+    if (error instanceof ClassifierError) throw error
+    throw new ClassifierError('INVALID_INPUT', 'Raster cannot be decoded as canonical RGBA8')
+  } finally {
+    pipeline.destroy()
+  }
+}
+
+/** Vision adapter that retains the existing sharp imageState layout for every supplied view. */
+export function createVisionRepresentation(raster: RasterPort): ImageRepresentationPort {
+  return {
+    async prepare(input) {
+      assertActive(input.signal)
+      if (input.views.length > 9)
+        throw new ClassifierError(
+          'RESOURCE_LIMIT',
+          'A representation request may contain at most nine views',
+          {
+            component: 'representation',
+          },
+        )
+      const state: DecisionState = []
+      const metadata: RepresentationMetadata = { profile: 'vision', bytes: 0, views: [] }
+      for (const view of input.views) {
+        assertActive(input.signal)
+        const parts = await raster.imageState(view.image, input.signal)
+        state.push(...parts)
+        const imagePart = parts.find((part) => typeof part !== 'string')
+        const transformPart = parts.find((part) => typeof part === 'string')
+        if (imagePart?.type !== 'image_url' || !transformPart)
+          throw new ClassifierError(
+            'INVALID_RESPONSE',
+            'Vision raster did not produce an image and transform',
+          )
+        const payload = imagePart.image_url.url.slice('data:image/png;base64,'.length)
+        metadata.bytes += Buffer.from(payload, 'base64').byteLength
+        const transform = JSON.parse(transformPart) as {
+          sourceImageTransform: {
+            output: { width: number; height: number }
+            content: { left: number; top: number; width: number; height: number }
+          }
+        }
+        metadata.views.push({
+          id: view.id,
+          sourceRegion: view.sourceRegion,
+          width: transform.sourceImageTransform.output.width,
+          height: transform.sourceImageTransform.output.height,
+          scaleX: transform.sourceImageTransform.content.width / view.sourceRegion.width,
+          scaleY: transform.sourceImageTransform.content.height / view.sourceRegion.height,
+          content: transform.sourceImageTransform.content,
+        })
+      }
+      return { state, metadata }
+    },
+  }
 }
