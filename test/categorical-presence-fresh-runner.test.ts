@@ -14,6 +14,7 @@ import {
   categoricalTargetInstruction,
   freshProposalRoute,
   runCategoricalPresenceFreshDev,
+  runCategoricalPresenceFreshPair,
   targetForProfile,
   validateTargetPolicyTasks,
 } from '../benchmarks/v02/categorical-presence-fresh-runner.js'
@@ -62,6 +63,29 @@ function proposalPort(): ObjectProposalPort {
     },
     async settle() {},
     async dispose() {},
+  }
+}
+
+function proposalForInput(
+  input: Parameters<ObjectProposalPort['propose']>[0],
+): ObjectProposalBatch {
+  const pixels = input.image.width * input.image.height
+  const data = new Uint8Array(Math.ceil(pixels / 8))
+  data.fill(255)
+  if (pixels % 8) data[data.length - 1] = (1 << pixels % 8) - 1
+  return {
+    proposals: [
+      {
+        id: 'C00',
+        mask: { data, width: input.image.width, height: input.image.height, format: 'binary-lsb0' },
+      },
+    ],
+    metadata: {
+      method: 'mobile-sam-nine-point-proposals-v1',
+      backend: 'mobile-sam',
+      durationMs: 1,
+      input: { width: input.image.width, height: input.image.height },
+    },
   }
 }
 
@@ -246,6 +270,132 @@ await test('public classifier fixture records converted categorical Choices as t
       summary.aggregate.knownCostUsd + summary.aggregate.unknownCostCalls * 0.05,
     )
     assert.equal(summary.aggregate.inFlightCalls, 0)
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('persistence failure aborts and joins peers, attempts both cleanups, and stops profile B', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'zorya-categorical-cleanup-'))
+  try {
+    const image = await sharp({
+      create: { width: 64, height: 64, channels: 3, background: '#dddddd' },
+    })
+      .png()
+      .toBuffer()
+    const cases = ['fixture-a', 'fixture-b'].map((caseId) => ({
+      ...fixtureCase,
+      caseId,
+      image: { ...fixtureCase.image, sha256: digest(image) },
+    }))
+    await writeFile(join(root, 'fixture.png'), image, { flag: 'wx' })
+    const manifestBytes = Buffer.from(JSON.stringify(cases))
+    const manifestPath = join(root, 'inputs.json')
+    await writeFile(manifestPath, manifestBytes, { flag: 'wx' })
+
+    let fetchCount = 0
+    const fetch: typeof globalThis.fetch = async (_url, init) => {
+      fetchCount++
+      if (proposalCalls >= 2) throw new Error('offline transport failure')
+      const body = JSON.parse(String(init?.body)) as {
+        questions: Record<string, { criteria?: Record<string, string> }>
+      }
+      const answers = Object.fromEntries(
+        Object.entries(body.questions).map(([id, question]) => {
+          const ids = Object.keys(question.criteria ?? {})
+          const selected = ids[0]
+          assert.ok(selected)
+          return [
+            id,
+            {
+              type: 'choice',
+              choice: selected,
+              probabilities: Object.fromEntries(
+                ids.map((choice, index) => [choice, index ? 0 : 1]),
+              ),
+            },
+          ]
+        }),
+      )
+      return new Response(
+        JSON.stringify({
+          id: `offline-${fetchCount}`,
+          model: freshProposalRoute.model,
+          provider: freshProposalRoute.providerName,
+          usage: { cost: 0.001 },
+          answers,
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      )
+    }
+
+    let proposalCalls = 0
+    let pendingNative = 0
+    let settleCalls = 0
+    let disposeCalls = 0
+    const proposals: ObjectProposalPort = {
+      async propose(input) {
+        proposalCalls++
+        if (proposalCalls !== 1) return proposalForInput(input)
+        pendingNative++
+        return new Promise<ObjectProposalBatch>((_resolve, reject) => {
+          const aborted = () => {
+            pendingNative--
+            reject(Object.assign(new Error('aborted native fixture'), { code: 'ABORTED' }))
+          }
+          input.signal.addEventListener('abort', aborted, { once: true })
+          if (input.signal.aborted) aborted()
+        })
+      },
+      async settle() {
+        settleCalls++
+        assert.equal(pendingNative, 0, 'native promise must be joined before settle')
+        throw new Error('settle cleanup failure')
+      },
+      async dispose() {
+        disposeCalls++
+      },
+    }
+    const options = {
+      manifests: [{ path: manifestPath, sha256: digest(manifestBytes) }],
+      imageRoot: root,
+      outputRoot: join(root, 'runs'),
+      apiKey: 'offlinekey',
+      encoderPath: '/unused/encoder.onnx',
+      decoderPath: '/unused/decoder.onnx',
+      expectedCaseCount: 2,
+      fetch,
+      createObjectProposals: async () => proposals,
+      testHooks: {
+        async writeCaseResult(path: string, value: unknown) {
+          if (proposalCalls >= 2) throw new Error('immutable result write failure')
+          await writeFile(path, `${JSON.stringify(value)}\n`, { flag: 'wx' })
+        },
+      },
+    }
+    const result = await runCategoricalPresenceFreshPair(options)
+    assert.equal(result.preserve.status, 'incomplete')
+    assert.equal(result.targetOnly, null)
+    assert.equal(proposalCalls, 2, JSON.stringify(result.preserve))
+    assert.equal(pendingNative, 0)
+    assert.equal(settleCalls, 1)
+    assert.equal(disposeCalls, 1)
+    assert.equal(result.preserve.settleError, 'RUNNER_FAILURE')
+    assert.ok('workerFailureCodes' in result.preserve)
+    assert.ok(result.preserve.workerFailureCodes.length > 0)
+    assert.ok(result.preserve.aggregate.unknownCostCalls > 0)
+    assert.equal(result.preserve.aggregate.inFlightCalls, 0)
+
+    const files = await readdir(result.preserve.outputDirectory)
+    assert.ok(files.includes('incomplete-evidence.json'))
+    assert.equal(files.includes('summary.json'), false)
+    assert.equal(files.includes('run-complete.json'), false)
+    assert.equal(files.filter((name) => name.startsWith('v02-fresh-')).length, 0)
+    const evidence = JSON.parse(
+      await readFile(join(result.preserve.outputDirectory, 'incomplete-evidence.json'), 'utf8'),
+    ) as { aggregate: { unknownCostCalls: number }; status: string }
+    assert.equal(evidence.status, 'incomplete')
+    assert.ok(evidence.aggregate.unknownCostCalls > 0)
   } finally {
     await rm(root, { recursive: true, force: true })
   }

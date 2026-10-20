@@ -10,7 +10,7 @@ import {
   categoricalFreshProfiles,
   freshProposalManifestHashes,
   mobileSamProposalAssets,
-  readFreshProposalOpenRouterKey,
+  readFreshProposalOpenRouterKey as readKey,
   runCategoricalPresenceFreshPair,
   validateTargetPolicyTasks,
 } from './categorical-presence-fresh-runner.js'
@@ -79,12 +79,10 @@ export function parseCategoricalFreshArgs(args: readonly string[]) {
   }
 }
 
-async function preflight(options: ReturnType<typeof parseCategoricalFreshArgs>) {
-  const controller = new AbortController()
-  const corpus = await loadFreshCorpus(
-    { manifests: options.manifests, imageRoot: options.imageRoot },
-    controller.signal,
-  )
+export function assertCategoricalFreshDevCorpusShape(corpus: {
+  cases: readonly unknown[]
+  manifests: readonly { sha256: string; cases: number }[]
+}): void {
   if (
     corpus.cases.length !== 40 ||
     corpus.manifests.length !== 3 ||
@@ -96,6 +94,15 @@ async function preflight(options: ReturnType<typeof parseCategoricalFreshArgs>) 
     corpus.manifests[2]?.cases !== 10
   )
     throw new Error('Pinned DEV manifests must contain 20 photo, 10 UI and 10 map inputs')
+}
+
+async function preflight(options: ReturnType<typeof parseCategoricalFreshArgs>) {
+  const controller = new AbortController()
+  const corpus = await loadFreshCorpus(
+    { manifests: options.manifests, imageRoot: options.imageRoot },
+    controller.signal,
+  )
+  assertCategoricalFreshDevCorpusShape(corpus)
   validateTargetPolicyTasks(corpus.cases)
   const assetDigests = await Promise.all(
     [options.encoderPath, options.decoderPath].map(async (path) => {
@@ -164,7 +171,7 @@ async function preflight(options: ReturnType<typeof parseCategoricalFreshArgs>) 
 async function run(args: readonly string[]) {
   const options = parseCategoricalFreshArgs(args)
   if (options.dryRun) return preflight(options)
-  const apiKey = await readFreshProposalOpenRouterKey()
+  const apiKey = await readKey()
   return runCategoricalPresenceFreshPair({ ...options, apiKey })
 }
 

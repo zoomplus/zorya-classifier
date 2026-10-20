@@ -120,6 +120,11 @@ export interface FreshProposalRunnerOptions {
     encoderPath: string
     decoderPath: string
   }) => Promise<ObjectProposalPort>
+  /** Offline-only failure injection for persistence lifecycle tests. */
+  testHooks?: {
+    makeCaseDirectory?: (path: string) => Promise<void>
+    writeCaseResult?: (path: string, value: unknown) => Promise<void>
+  }
 }
 
 type StageStatus = 'ok' | 'failed' | 'located' | 'unknown' | 'not-found'
@@ -709,43 +714,65 @@ async function runCategoricalFreshProfile(
   }
   const recorders = new Map<string, Recorder>()
   const results = new Array<FreshProposalResult>(corpus.cases.length)
+  const runController = new AbortController()
+  const abortRun = () => runController.abort(signal.reason)
+  if (signal.aborted) abortRun()
+  else signal.addEventListener('abort', abortRun, { once: true })
   let next = 0
+  let firstWorkerFailure: unknown
   const worker = async () => {
-    while (next < corpus.cases.length) {
+    while (!runController.signal.aborted && next < corpus.cases.length) {
       const index = next++
       const item = corpus.cases[index]
       if (!item) continue
-      results[index] = await processFreshCase({
-        item,
-        profile,
-        policy,
-        options,
-        corpusRoot: corpus.imageRoot,
-        imageCheck: imageChecks.get(item.caseId),
-        caseDirectory: join(outputDirectory, item.caseId),
-        fetcher,
-        budget,
-        proposalPort,
-        recorders,
-        initializationError,
-        signal,
-      })
+      try {
+        results[index] = await processFreshCase({
+          item,
+          profile,
+          policy,
+          options,
+          corpusRoot: corpus.imageRoot,
+          imageCheck: imageChecks.get(item.caseId),
+          caseDirectory: join(outputDirectory, item.caseId),
+          fetcher,
+          budget,
+          proposalPort,
+          recorders,
+          initializationError,
+          signal: runController.signal,
+        })
+      } catch (error) {
+        firstWorkerFailure ??= error
+        runController.abort(error)
+        throw error
+      }
     }
   }
-  await Promise.all(Array.from({ length: policy.maxInFlightCases }, worker))
-  let shutdownError: string | undefined
+  let workerResults: PromiseSettledResult<void>[] = []
+  let settleError: string | undefined
+  let disposeError: string | undefined
   try {
-    await proposalPort?.settle()
-  } catch (error) {
-    shutdownError = safeErrorCode(error)
+    workerResults = await Promise.allSettled(
+      Array.from({ length: policy.maxInFlightCases }, worker),
+    )
+  } finally {
+    signal.removeEventListener('abort', abortRun)
+    try {
+      await proposalPort?.settle()
+    } catch (error) {
+      settleError = safeErrorCode(error)
+    }
+    try {
+      await proposalPort?.dispose()
+    } catch (error) {
+      disposeError = safeErrorCode(error)
+    }
   }
-  try {
-    await proposalPort?.dispose()
-  } catch (error) {
-    shutdownError ??= safeErrorCode(error)
-  }
+  const workerFailures = workerResults.flatMap((result) =>
+    result.status === 'rejected' ? [safeErrorCode(result.reason)] : [],
+  )
 
-  const completedCaseIds = results.map((row) => row.caseId)
+  const completedCaseIds = results.flatMap((row) => (row ? [row.caseId] : []))
   const completed = new Set(completedCaseIds)
   const missingCaseIds = plannedCaseIds.filter((caseId) => !completed.has(caseId))
   const aggregate = budget.snapshot() satisfies BudgetSnapshot
@@ -754,6 +781,33 @@ async function runCategoricalFreshProfile(
     Object.entries(sourceAfter).sort(([a], [b]) => a.localeCompare(b)),
   )
   const sourceUnchanged = sourceAfterSha256 === producerSourceSha256
+  if (firstWorkerFailure !== undefined || missingCaseIds.length > 0) {
+    const evidence = {
+      runId,
+      profileId,
+      phase: 'dev' as const,
+      status: 'incomplete' as const,
+      producerSourceSha256,
+      sourceAfterSha256,
+      sourceUnchanged,
+      plannedCaseIds,
+      completedCaseIds,
+      missingCaseIds,
+      workerFailureCodes: workerFailures,
+      firstWorkerFailureCode: firstWorkerFailure ? safeErrorCode(firstWorkerFailure) : null,
+      settleError: settleError ?? null,
+      disposeError: disposeError ?? null,
+      aggregate,
+      physicalReceipts: corpus.cases.flatMap((item) =>
+        (recorders.get(item.caseId)?.calls ?? []).map((call) => ({
+          caseId: item.caseId,
+          ...physicalSummary(call),
+        })),
+      ),
+    }
+    await writeImmutable(join(outputDirectory, 'incomplete-evidence.json'), evidence)
+    return { ...evidence, outputDirectory }
+  }
   const summary = {
     runId,
     profileId,
@@ -766,7 +820,8 @@ async function runCategoricalFreshProfile(
     status:
       missingCaseIds.length === 0 &&
       sourceUnchanged &&
-      !shutdownError &&
+      !settleError &&
+      !disposeError &&
       aggregate.inFlightCalls === 0
         ? 'complete'
         : 'incomplete',
@@ -778,7 +833,9 @@ async function runCategoricalFreshProfile(
     latencyEnvironment: policy.latencyEnvironment,
     latencyRankingEligible: policy.latencyRankingEligible,
     initializationError: initializationError ?? null,
-    shutdownError: shutdownError ?? null,
+    shutdownError: settleError ?? disposeError ?? null,
+    settleError: settleError ?? null,
+    disposeError: disposeError ?? null,
     physicalReceipts: corpus.cases.flatMap((item) =>
       (recorders.get(item.caseId)?.calls ?? []).map((call) => ({
         caseId: item.caseId,
@@ -830,8 +887,10 @@ async function processFreshCase(options: ProcessFreshCaseOptions): Promise<Fresh
     initializationError,
     signal,
   } = options
-  await mkdir(caseDirectory, { recursive: false })
-  let errorCode = initializationError
+  await (runner.testHooks?.makeCaseDirectory ?? ((path) => mkdir(path, { recursive: false })))(
+    caseDirectory,
+  )
+  const errorCode = initializationError
   let image: Uint8Array | undefined
   let classifier: Classifier | undefined
   let recorder: Recorder | undefined
@@ -860,17 +919,26 @@ async function processFreshCase(options: ProcessFreshCaseOptions): Promise<Fresh
   try {
     if (errorCode) {
       const row = failed(errorCode)
-      await writeImmutable(join(caseDirectory, 'result.json'), row)
+      await (runner.testHooks?.writeCaseResult ?? writeImmutable)(
+        join(caseDirectory, 'result.json'),
+        row,
+      )
       return row
     }
     if (!proposalPort) {
       const row = failed('RUNNER_FAILURE')
-      await writeImmutable(join(caseDirectory, 'result.json'), row)
+      await (runner.testHooks?.writeCaseResult ?? writeImmutable)(
+        join(caseDirectory, 'result.json'),
+        row,
+      )
       return row
     }
     if (!imageCheck?.ok) {
       const row = failed(imageCheck?.errorCode ?? 'INVALID_INPUT')
-      await writeImmutable(join(caseDirectory, 'result.json'), row)
+      await (runner.testHooks?.writeCaseResult ?? writeImmutable)(
+        join(caseDirectory, 'result.json'),
+        row,
+      )
       return row
     }
     const task = taskFor(item)
@@ -1030,12 +1098,10 @@ async function processFreshCase(options: ProcessFreshCaseOptions): Promise<Fresh
       locate,
       extract,
     }
-    await writeImmutable(join(caseDirectory, 'result.json'), row)
-    return row
-  } catch (error) {
-    errorCode = safeErrorCode(error)
-    const row = failed(errorCode)
-    await writeImmutable(join(caseDirectory, 'result.json'), row)
+    await (runner.testHooks?.writeCaseResult ?? writeImmutable)(
+      join(caseDirectory, 'result.json'),
+      row,
+    )
     return row
   } finally {
     image?.fill(0)
