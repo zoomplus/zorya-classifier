@@ -71,6 +71,8 @@ export interface FreshTextRunnerOptions {
   fetch?: typeof globalThis.fetch
   /** Offline-only seam used by tests; paid profiles use the pinned Together adapter. */
   createDecision?: (fetcher: typeof globalThis.fetch, maxOutputTokens: 1024 | 4096) => DecisionPort
+  /** Classification-only evidence follow-up; it deliberately emits no locate stage. */
+  stages?: 'classify-and-locate' | 'classify-only'
 }
 
 type StageStatus = 'ok' | 'failed' | 'located' | 'unknown' | 'not-found'
@@ -89,7 +91,7 @@ interface ResultRow {
   imageSha256: string
   profileId: FreshTextProfileId
   classify: StageResult
-  locate: StageResult
+  locate?: StageResult
 }
 
 const sourceFiles = [
@@ -245,7 +247,7 @@ async function persistCase(
   const caseDirectory = join(outputDirectory, item.caseId)
   await mkdir(caseDirectory, { recursive: false })
   let classify: StageResult
-  let locate: StageResult
+  let locate: StageResult | undefined
   const calls: PhysicalCallRecord[] = []
   {
     const noImage = profileId === 'no-image-control'
@@ -268,6 +270,14 @@ async function persistCase(
           { id: 'absent', description: 'The target is visibly absent from this image.' },
         ],
         instructions: 'Use only the supplied image representation. Choose one closed class.',
+        ...(encoder
+          ? {
+              representation: {
+                type: 'experimental-text' as const,
+                profile: 'text-image-v1' as const,
+              },
+            }
+          : {}),
       })
       classify = {
         status: 'ok',
@@ -289,59 +299,61 @@ async function persistCase(
     }
 
     calls.push(...classifyRecorder.calls)
-    const locateRecorder = recordProvider(
-      (fetchImpl) => providerFor(options, fetchImpl, freshTextPolicy.locateMaxOutputTokens),
-      budget,
-      join(caseDirectory, 'locate'),
-      route,
-      fetcher,
-    )
-    const locateClassifier = composeTextClassifier(locateRecorder.port, encoder, noImage)
-    const locateStarted = performance.now()
-    const locateLogicalStart = locateRecorder.logicalCalls.length
-    try {
-      const target = task.instruction ? `${task.target}\n${task.instruction}` : task.target
-      const l = await locateClassifier.locate({
-        image: bytes,
-        target,
-        mode: 'whole-object',
-        boxTolerancePx: freshTextPolicy.boxTolerancePx,
-        maxExtentPasses: freshTextPolicy.maxExtentPasses,
-        ...(encoder
-          ? {
-              representation: {
-                type: 'experimental-text' as const,
-                profile: 'text-image-v1' as const,
-              },
-            }
-          : {}),
-      })
-      const stage = wholeStage(l)
-      locate = {
-        ...stage,
-        durationMs: performance.now() - locateStarted,
-        calls: locateRecorder.calls.length,
-        requestHashes: stageRequestHashes(locateRecorder, locateLogicalStart),
+    if (options.stages !== 'classify-only') {
+      const locateRecorder = recordProvider(
+        (fetchImpl) => providerFor(options, fetchImpl, freshTextPolicy.locateMaxOutputTokens),
+        budget,
+        join(caseDirectory, 'locate'),
+        route,
+        fetcher,
+      )
+      const locateClassifier = composeTextClassifier(locateRecorder.port, encoder, noImage)
+      const locateStarted = performance.now()
+      const locateLogicalStart = locateRecorder.logicalCalls.length
+      try {
+        const target = task.instruction ? `${task.target}\n${task.instruction}` : task.target
+        const l = await locateClassifier.locate({
+          image: bytes,
+          target,
+          mode: 'whole-object',
+          boxTolerancePx: freshTextPolicy.boxTolerancePx,
+          maxExtentPasses: freshTextPolicy.maxExtentPasses,
+          ...(encoder
+            ? {
+                representation: {
+                  type: 'experimental-text' as const,
+                  profile: 'text-image-v1' as const,
+                },
+              }
+            : {}),
+        })
+        const stage = wholeStage(l)
+        locate = {
+          ...stage,
+          durationMs: performance.now() - locateStarted,
+          calls: locateRecorder.calls.length,
+          requestHashes: stageRequestHashes(locateRecorder, locateLogicalStart),
+        }
+      } catch (error) {
+        locate = {
+          status: 'failed',
+          durationMs: performance.now() - locateStarted,
+          calls: locateRecorder.calls.length,
+          requestHashes: stageRequestHashes(locateRecorder, locateLogicalStart),
+          errorCode: safeErrorCode(error),
+        }
+      } finally {
+        await locateClassifier.dispose()
       }
-    } catch (error) {
-      locate = {
-        status: 'failed',
-        durationMs: performance.now() - locateStarted,
-        calls: locateRecorder.calls.length,
-        requestHashes: stageRequestHashes(locateRecorder, locateLogicalStart),
-        errorCode: safeErrorCode(error),
-      }
-    } finally {
-      await locateClassifier.dispose()
+      calls.push(...locateRecorder.calls)
     }
-    calls.push(...locateRecorder.calls)
   }
   const row: ResultRow = {
     caseId: item.caseId,
     imageSha256: item.image.sha256,
     profileId,
     classify,
-    locate,
+    ...(locate ? { locate } : {}),
   }
   await writeImmutable(join(caseDirectory, 'result.json'), row)
   bytes.fill(0)
@@ -379,11 +391,16 @@ export async function runFreshTextProfile(
     prompt,
     transport,
     policy: freshTextPolicy,
+    stages: options.stages ?? 'classify-and-locate',
     manifestHashes: corpus.manifests,
     cases: manifestCases,
     sourceHashes: Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
   })
-  const runId = `v02-fresh-text-${profileId}-${new Date().toISOString().replaceAll(':', '').replaceAll('.', '')}-${randomUUID().slice(0, 8)}`
+  const runPrefix =
+    options.stages === 'classify-only'
+      ? `v02-fresh-text-classify-only-${profileId}`
+      : `v02-fresh-text-${profileId}`
+  const runId = `${runPrefix}-${new Date().toISOString().replaceAll(':', '').replaceAll('.', '')}-${randomUUID().slice(0, 8)}`
   const outputDirectory = resolve(options.outputRoot, runId)
   await mkdir(options.outputRoot, { recursive: true })
   await mkdir(outputDirectory, { recursive: false })
@@ -395,9 +412,13 @@ export async function runFreshTextProfile(
   await writeImmutable(join(outputDirectory, 'run-manifest.json'), {
     schemaVersion: 1,
     runId,
-    purpose: 'single-profile complete pinned fresh DEV text/no-image comparison',
+    purpose:
+      options.stages === 'classify-only'
+        ? 'classification-only follow-up for pinned fresh DEV text profiles'
+        : 'single-profile complete pinned fresh DEV text/no-image comparison',
     startedAt: new Date().toISOString(),
     profileId,
+    stages: options.stages ?? 'classify-and-locate',
     variantSha256,
     sourceHashes: source,
     producerSourceSha256: hashCanonical(
@@ -443,13 +464,17 @@ export async function runFreshTextProfile(
           calls: 0,
           requestHashes: [],
         },
-        locate: {
-          status: 'failed',
-          errorCode: safeErrorCode(error),
-          durationMs: 0,
-          calls: 0,
-          requestHashes: [],
-        },
+        ...(options.stages === 'classify-only'
+          ? {}
+          : {
+              locate: {
+                status: 'failed' as const,
+                errorCode: safeErrorCode(error),
+                durationMs: 0,
+                calls: 0,
+                requestHashes: [],
+              },
+            }),
       }
       results.push(failed)
       await writeImmutable(join(outputDirectory, item.caseId, 'result.json'), failed)

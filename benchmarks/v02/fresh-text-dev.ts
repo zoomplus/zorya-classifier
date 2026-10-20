@@ -30,6 +30,7 @@ export function parseFreshTextArgs(args: readonly string[]) {
       'allow-paid': { type: 'boolean', default: false },
       'dry-run': { type: 'boolean', default: false },
       profile: { type: 'string' },
+      'classify-only': { type: 'boolean', default: false },
       'image-root': { type: 'string', default: '/root/work/zorya-classifier-worktrees/v02/corpus' },
       out: { type: 'string', default: '.run/v02' },
     },
@@ -47,6 +48,7 @@ export function parseFreshTextArgs(args: readonly string[]) {
     outputRoot: resolve(z.string().min(1).parse(values.out)),
     manifests: pins.map((item) => ({ ...item, path: resolve(item.path) })),
     dryRun: values['dry-run'],
+    stages: values['classify-only'] ? ('classify-only' as const) : ('classify-and-locate' as const),
   }
 }
 

@@ -21,6 +21,10 @@ await test('fresh text CLI pins a single profile and refuses implicit paid dispa
     assert.equal(parsed.profile, profile)
     assert.equal(parsed.manifests.length, 2)
   }
+  assert.equal(
+    parseFreshTextArgs(['--allow-paid', '--profile', 'ascii-luma-v1', '--classify-only']).stages,
+    'classify-only',
+  )
 })
 
 await test('all six text encoders and no-image control preserve fresh tasks and strip only image parts', async () => {
@@ -98,7 +102,7 @@ await test('all six text encoders and no-image control preserve fresh tasks and 
       assert.equal(result.results[0]?.classify.status, 'ok', JSON.stringify(result.results[0]))
       assert.equal(result.results[0]?.classify.value, 'present')
       assert.ok(
-        ['located', 'unknown', 'not-found'].includes(result.results[0]?.locate.status ?? ''),
+        ['located', 'unknown', 'not-found'].includes(result.results[0]?.locate?.status ?? ''),
       )
       requestsByProfile.set(profile, requests)
       const serialized = JSON.stringify(requests)
@@ -127,6 +131,95 @@ await test('all six text encoders and no-image control preserve fresh tasks and 
       )
     assert.ok(JSON.stringify(textRequests).includes('toolbar icon'))
     assert.ok(JSON.stringify(noImageRequests).includes('toolbar icon'))
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('real text adapter sends the selected encoding over wire with no image parts', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'zorya-fresh-text-wire-'))
+  try {
+    const image = await sharp({
+      create: { width: 512, height: 384, channels: 3, background: '#b42631' },
+    })
+      .png()
+      .toBuffer()
+    const input = [
+      {
+        caseId: 'wire-fixture',
+        image: { path: 'image.png', sha256: digest(image), width: 512, height: 384 },
+        locate: { target: 'the complete red badge' },
+        classify: { question: 'Is the red badge present?', options: ['present', 'absent'] },
+      },
+    ]
+    await writeFile(join(root, 'image.png'), image, { flag: 'wx' })
+    const manifestBytes = Buffer.from(JSON.stringify(input))
+    const manifestPath = join(root, 'inputs.json')
+    await writeFile(manifestPath, manifestBytes, { flag: 'wx' })
+    let wireBody: Record<string, unknown> | undefined
+    const fetch: typeof globalThis.fetch = async (_url, init) => {
+      wireBody = JSON.parse(String(init?.body)) as Record<string, unknown>
+      const messages = wireBody.messages as Array<{
+        content: Array<{ type: string; text?: string }>
+      }>
+      const user = messages[1]!
+      const task = user.content.find((part) => part.text?.startsWith('CLASSIFICATION_TASK\n'))!
+      const document = JSON.parse(task.text!.slice('CLASSIFICATION_TASK\n'.length)) as {
+        questions: Record<
+          string,
+          { kind: string; options?: Record<string, string>; rankingSize?: number }
+        >
+      }
+      const answers = Object.fromEntries(
+        Object.entries(document.questions).map(([id, question]) => [
+          id,
+          question.kind === 'categorical'
+            ? { ranking: Object.keys(question.options ?? {}).slice(0, question.rankingSize ?? 1) }
+            : { presence: 'present' },
+        ]),
+      )
+      return new Response(
+        JSON.stringify({
+          id: 'wire-fixture-response',
+          model: 'deepseek/deepseek-v4.1-flash',
+          provider: 'Together',
+          choices: [
+            {
+              index: 0,
+              finish_reason: 'stop',
+              message: { content: JSON.stringify({ answers }) },
+            },
+          ],
+          usage: { cost: 0.001 },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      )
+    }
+    const result = await runFreshTextProfile(
+      {
+        manifests: [{ path: manifestPath, sha256: digest(manifestBytes) }],
+        imageRoot: root,
+        outputRoot: join(root, 'runs'),
+        apiKey: 'fixture-key',
+        fetch,
+        stages: 'classify-only',
+      },
+      'ascii-luma-v1',
+    )
+    assert.equal(result.status, 'complete')
+    assert.equal(result.results[0]?.classify.status, 'ok')
+    assert.equal(result.results[0]?.locate, undefined)
+    assert.ok(wireBody)
+    const messages = wireBody!.messages as Array<{
+      content: Array<{ type: string; text?: string }>
+    }>
+    const content = messages[1]!.content
+    assert.equal(
+      content.some((part) => part.type === 'image_url'),
+      false,
+    )
+    assert.ok(content.some((part) => part.text?.includes('ASCII_LUMA_V1')))
+    assert.ok(content.some((part) => part.text?.includes('CLASSIFICATION_TASK')))
   } finally {
     await rm(root, { recursive: true, force: true })
   }
