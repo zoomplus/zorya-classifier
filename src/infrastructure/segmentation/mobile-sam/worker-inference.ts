@@ -92,6 +92,19 @@ function inside(
   return x >= rect.left && y >= rect.top && x < rect.left + rect.width && y < rect.top + rect.height
 }
 
+interface MaskCandidate {
+  token: number
+  score: number
+  mask: Uint8Array
+}
+
+/** Sort by model quality and use decoder token order as a deterministic tie break. */
+export function selectBestMaskCandidate<T extends MaskCandidate>(
+  candidates: readonly T[],
+): T | undefined {
+  return [...candidates].sort((a, b) => b.score - a.score || a.token - b.token)[0]
+}
+
 export async function runMobileSamTask(
   request: Extract<NativeSegmentationRequest, { kind: 'mobile-sam' }>,
 ): Promise<NativeSegmentationReply> {
@@ -194,7 +207,7 @@ export async function runMobileSamTask(
       )
         throw new Error('Unexpected MobileSAM decoder output')
 
-      const candidates: { token: number; score: number; mask: Uint8Array }[] = []
+      const candidates: MaskCandidate[] = []
       for (let token = 0; token < 4; token++) {
         const mask = new Uint8Array(pixels)
         let seedHit = false
@@ -213,17 +226,8 @@ export async function runMobileSamTask(
         if (seedHit && score !== undefined) candidates.push({ token, score, mask })
       }
       if (!candidates.length) throw new Error('MobileSAM produced no seed-grounded mask')
-      candidates.sort((a, b) => b.score - a.score || a.token - b.token)
-      const best = candidates[0]
+      const best = selectBestMaskCandidate(candidates)
       if (!best) throw new Error('MobileSAM produced no mask candidate')
-      if (
-        candidates.some(
-          (candidate) =>
-            candidate.score === best.score &&
-            candidate.mask.some((value, index) => value !== best.mask[index]),
-        )
-      )
-        throw new Error('MobileSAM mask candidates are tied')
       result = {
         id: request.id,
         status: 'segmented',

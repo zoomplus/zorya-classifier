@@ -1,0 +1,568 @@
+{
+  "schemaVersion": 1,
+  "split": "dev",
+  "stratum": "controlled-real-game-map-independent-source-geometry-and-saved-world-inventory",
+  "sourceGroup": "controlled-game-map:freeciv-3.1-civ2civ3-generated-world",
+  "content": {
+    "description": "Fresh local Freeciv 3.1 generated worlds rendered by GTK3.22/hexemplio in owned Xvfb sessions as uid 65534, with private HOME/XDG and no network. Each input is a distinct captured map screen with a different decoded pixel hash. These are controlled-render cases, not natural gameplay captures or broad game/map diversity evidence.",
+    "gamePackage": "freeciv-client-gtk3 3.1.0+ds-1build5",
+    "dataPackage": "freeciv-data 3.1.0+ds-1build5",
+    "rendererSourceGroup": "renderer:freeciv-r3-1-0",
+    "license": "Freeciv data and ruleset GPL-2+ per installed copyright file; images, traces, and state saves are local ignored evidence and are not included in distributable package."
+  },
+  "captures": [
+    {
+      "caseId": "map-freeciv-oracle-dev-present-01",
+      "imagePath": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-14-20261020.png",
+      "imageSha256": "bfe6318454b7122c609e3672e87852df73b0778703ac28796ab6490cb7686460",
+      "captureEvidencePath": ".run/v02-freeciv-independent-map/a6-14/run-evidence.json",
+      "captureEvidenceSha256": "0ddbfbd5bebb19c625ed4d8c6dd3cac8f1da96b5cc8a7706f62af28af82c54cd",
+      "drawTracePath": ".run/v02-freeciv-independent-map/a6-14/draw.jsonl",
+      "drawTraceSha256": "7d0a17f273cd698bbeb59ae70233a02581356288385b8642b19e380f9b72277b",
+      "accessibilityTreePath": ".run/v02-freeciv-independent-map/a6-14/atspi.json",
+      "accessibilityTreeSha256": "97e198aee2ebcb7aaa86215efc10fadf7c017c5c2c0c4fbe8d4c937b45963e1b",
+      "sourceSurfacePath": ".run/v02-freeciv-independent-map/a6-14/1eda0932a4a65377.bin",
+      "sourceSurfaceSha256": "fac8dd08397d87f5d535df29cac154a48df1fac36dcc96b7649dddc50cb3db31",
+      "healthBarSurfacePath": ".run/v02-freeciv-independent-map/a6-14/323b7936a09935f8.bin",
+      "healthBarSurfaceSha256": "064dd31ff6d2eda77206aa9c3e3122939c599802df1b21a493db58b0cd1758b2",
+      "rendererBodySequence": 7674,
+      "rendererHealthbarSequence": 7675,
+      "sourceGeometry": {
+        "spriteSourceSize": [
+          64,
+          48
+        ],
+        "spriteDrawAt": [
+          527,
+          328
+        ],
+        "spriteAlphaXYXY": [
+          16,
+          2,
+          56,
+          45
+        ],
+        "screenDrawingAreaOrigin": [
+          166,
+          52
+        ],
+        "screenBoxXYXY": [
+          709,
+          382,
+          749,
+          425
+        ]
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-02",
+      "imagePath": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-16-20261020.png",
+      "imageSha256": "1d696fe4fd5ab990650da67c20b78d3240c048e4849ab8f043c398cfcf1ecc85",
+      "captureEvidencePath": ".run/v02-freeciv-independent-map/a6-16/run-evidence.json",
+      "captureEvidenceSha256": "4ed6733c4d116644c363cb0ff801208dcdb8dd63d257306e95fdb17993aa1789",
+      "drawTracePath": ".run/v02-freeciv-independent-map/a6-16/draw.jsonl",
+      "drawTraceSha256": "424df2bc8057fd2a3cbf200a21f40a91ecb085328d1815cfd537bf64758af376",
+      "accessibilityTreePath": ".run/v02-freeciv-independent-map/a6-16/atspi.json",
+      "accessibilityTreeSha256": "685ed9c5d94db587c1b4e7e2cce7daa9ae80c346d9d139380d0929dd31970da4",
+      "sourceSurfacePath": ".run/v02-freeciv-independent-map/a6-16/1eda0932a4a65377.bin",
+      "sourceSurfaceSha256": "fac8dd08397d87f5d535df29cac154a48df1fac36dcc96b7649dddc50cb3db31",
+      "healthBarSurfacePath": ".run/v02-freeciv-independent-map/a6-16/323b7936a09935f8.bin",
+      "healthBarSurfaceSha256": "064dd31ff6d2eda77206aa9c3e3122939c599802df1b21a493db58b0cd1758b2",
+      "rendererBodySequence": 12679,
+      "rendererHealthbarSequence": 12680,
+      "sourceGeometry": {
+        "spriteSourceSize": [
+          64,
+          48
+        ],
+        "spriteDrawAt": [
+          527,
+          328
+        ],
+        "spriteAlphaXYXY": [
+          16,
+          2,
+          56,
+          45
+        ],
+        "screenDrawingAreaOrigin": [
+          166,
+          52
+        ],
+        "screenBoxXYXY": [
+          709,
+          382,
+          749,
+          425
+        ]
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-03",
+      "imagePath": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-17-20261020.png",
+      "imageSha256": "bf553f5d9b693d654bed6d438bc1f548c6d7719a32e423695b599d603feb9367",
+      "captureEvidencePath": ".run/v02-freeciv-independent-map/a6-17/run-evidence.json",
+      "captureEvidenceSha256": "684c9eed3a64397e1817865dd34dc8929f3b659490c954668cce0f02e2ff624c",
+      "drawTracePath": ".run/v02-freeciv-independent-map/a6-17/draw.jsonl",
+      "drawTraceSha256": "9ecb0813ac5822d986a780d639558a02f75356e9864addecc4fdd9380c626fcb",
+      "accessibilityTreePath": ".run/v02-freeciv-independent-map/a6-17/atspi.json",
+      "accessibilityTreeSha256": "13eee435e716a74975c173e9cb97d3013f6ee712cd2e786f8416b3fc8b03d5e7",
+      "sourceSurfacePath": ".run/v02-freeciv-independent-map/a6-17/1eda0932a4a65377.bin",
+      "sourceSurfaceSha256": "fac8dd08397d87f5d535df29cac154a48df1fac36dcc96b7649dddc50cb3db31",
+      "healthBarSurfacePath": ".run/v02-freeciv-independent-map/a6-17/323b7936a09935f8.bin",
+      "healthBarSurfaceSha256": "064dd31ff6d2eda77206aa9c3e3122939c599802df1b21a493db58b0cd1758b2",
+      "rendererBodySequence": 10109,
+      "rendererHealthbarSequence": 10110,
+      "sourceGeometry": {
+        "spriteSourceSize": [
+          64,
+          48
+        ],
+        "spriteDrawAt": [
+          527,
+          328
+        ],
+        "spriteAlphaXYXY": [
+          16,
+          2,
+          56,
+          45
+        ],
+        "screenDrawingAreaOrigin": [
+          166,
+          52
+        ],
+        "screenBoxXYXY": [
+          709,
+          382,
+          749,
+          425
+        ]
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-04",
+      "imagePath": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-22-20261020.png",
+      "imageSha256": "64523faf973f4ee597b381152c1ca60fdf919e298af6627327ec0571219c7a79",
+      "captureEvidencePath": ".run/v02-freeciv-independent-map/a6-22/run-evidence.json",
+      "captureEvidenceSha256": "0be37917b4027f60188ac21c343f058c503e9d98cd9958ddcad8c8c19d017964",
+      "drawTracePath": ".run/v02-freeciv-independent-map/a6-22/draw.jsonl",
+      "drawTraceSha256": "b11dc155265699d1b97a85e271cab483c97187087592672071448117ec2f9a93",
+      "accessibilityTreePath": ".run/v02-freeciv-independent-map/a6-22/atspi.json",
+      "accessibilityTreeSha256": "999f362c3e7d43d3afd83514609a97a0237777d8ee9d85f41f384b5059d9a2c7",
+      "sourceSurfacePath": ".run/v02-freeciv-independent-map/a6-22/1eda0932a4a65377.bin",
+      "sourceSurfaceSha256": "fac8dd08397d87f5d535df29cac154a48df1fac36dcc96b7649dddc50cb3db31",
+      "healthBarSurfacePath": ".run/v02-freeciv-independent-map/a6-22/323b7936a09935f8.bin",
+      "healthBarSurfaceSha256": "064dd31ff6d2eda77206aa9c3e3122939c599802df1b21a493db58b0cd1758b2",
+      "rendererBodySequence": 4860,
+      "rendererHealthbarSequence": 4861,
+      "sourceGeometry": {
+        "spriteSourceSize": [
+          64,
+          48
+        ],
+        "spriteDrawAt": [
+          527,
+          328
+        ],
+        "spriteAlphaXYXY": [
+          16,
+          2,
+          56,
+          45
+        ],
+        "screenDrawingAreaOrigin": [
+          166,
+          52
+        ],
+        "screenBoxXYXY": [
+          709,
+          382,
+          749,
+          425
+        ]
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-05",
+      "imagePath": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-23-20261020.png",
+      "imageSha256": "a970216cbccf7456464e5ca25fc120e1e3994344e5fdc95607c1eb27d61ec205",
+      "captureEvidencePath": ".run/v02-freeciv-independent-map/a6-23/run-evidence.json",
+      "captureEvidenceSha256": "834d23eeb1ba6641742e7f4d85721939c91b98b556b6724d73aabc842c5b02b7",
+      "drawTracePath": ".run/v02-freeciv-independent-map/a6-23/draw.jsonl",
+      "drawTraceSha256": "a0a1def070304ef5dca55f068ed4ba72e7ec557bfda0a404a2571891e5ad0db9",
+      "accessibilityTreePath": ".run/v02-freeciv-independent-map/a6-23/atspi.json",
+      "accessibilityTreeSha256": "98326b3948f0d31b3d2270375ec473de1cbc7b3bdaa4f91327f20a3039d0c60e",
+      "sourceSurfacePath": ".run/v02-freeciv-independent-map/a6-23/1eda0932a4a65377.bin",
+      "sourceSurfaceSha256": "fac8dd08397d87f5d535df29cac154a48df1fac36dcc96b7649dddc50cb3db31",
+      "healthBarSurfacePath": ".run/v02-freeciv-independent-map/a6-23/323b7936a09935f8.bin",
+      "healthBarSurfaceSha256": "064dd31ff6d2eda77206aa9c3e3122939c599802df1b21a493db58b0cd1758b2",
+      "rendererBodySequence": 4121,
+      "rendererHealthbarSequence": 4122,
+      "sourceGeometry": {
+        "spriteSourceSize": [
+          64,
+          48
+        ],
+        "spriteDrawAt": [
+          527,
+          328
+        ],
+        "spriteAlphaXYXY": [
+          16,
+          2,
+          56,
+          45
+        ],
+        "screenDrawingAreaOrigin": [
+          166,
+          52
+        ],
+        "screenBoxXYXY": [
+          709,
+          382,
+          749,
+          425
+        ]
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-06",
+      "imagePath": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-24-20261020.png",
+      "imageSha256": "07e1ea0a28ea9e7e183e6c8c04797e0fee0995c9f91d0933293bac73f2ea4e2a",
+      "captureEvidencePath": ".run/v02-freeciv-independent-map/a6-24/run-evidence.json",
+      "captureEvidenceSha256": "c9ba327f987cb4ed1dc4dbb812af8f1a5071cc24c872e34a56c2c82c3c230d8a",
+      "drawTracePath": ".run/v02-freeciv-independent-map/a6-24/draw.jsonl",
+      "drawTraceSha256": "7cacaca7e1a21184bd419c5313ab4ffebbbe3e43336433d6e92e3213d30073e9",
+      "accessibilityTreePath": ".run/v02-freeciv-independent-map/a6-24/atspi.json",
+      "accessibilityTreeSha256": "10815d7445e9f7e9f4f3018f495a05f2a514acc76ff78d953fe1c6c4d8a1db6f",
+      "sourceSurfacePath": ".run/v02-freeciv-independent-map/a6-24/1eda0932a4a65377.bin",
+      "sourceSurfaceSha256": "fac8dd08397d87f5d535df29cac154a48df1fac36dcc96b7649dddc50cb3db31",
+      "healthBarSurfacePath": ".run/v02-freeciv-independent-map/a6-24/323b7936a09935f8.bin",
+      "healthBarSurfaceSha256": "064dd31ff6d2eda77206aa9c3e3122939c599802df1b21a493db58b0cd1758b2",
+      "rendererBodySequence": 5189,
+      "rendererHealthbarSequence": 5190,
+      "sourceGeometry": {
+        "spriteSourceSize": [
+          64,
+          48
+        ],
+        "spriteDrawAt": [
+          527,
+          328
+        ],
+        "spriteAlphaXYXY": [
+          16,
+          2,
+          56,
+          45
+        ],
+        "screenDrawingAreaOrigin": [
+          166,
+          52
+        ],
+        "screenBoxXYXY": [
+          709,
+          382,
+          749,
+          425
+        ]
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-07",
+      "imagePath": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-25-20261020.png",
+      "imageSha256": "c9ae28636545d886730514468e10daea0864720b28e812e332f9ea6f0a7c53b8",
+      "captureEvidencePath": ".run/v02-freeciv-independent-map/a6-25/run-evidence.json",
+      "captureEvidenceSha256": "acc529d7ffcea768492dfafbf111c137ecec0bdcbaf436177edb91477cc94be2",
+      "drawTracePath": ".run/v02-freeciv-independent-map/a6-25/draw.jsonl",
+      "drawTraceSha256": "5c5c649d7789a75a9f85d51584d2607aec295860fc2ce1b9e9d9eb2b23c84ff6",
+      "accessibilityTreePath": ".run/v02-freeciv-independent-map/a6-25/atspi.json",
+      "accessibilityTreeSha256": "9c69e7cf1ff2210e6a9481657cc619dabd91ada4b5ad388d960022bcbcbcfa4b",
+      "sourceSurfacePath": ".run/v02-freeciv-independent-map/a6-25/1eda0932a4a65377.bin",
+      "sourceSurfaceSha256": "fac8dd08397d87f5d535df29cac154a48df1fac36dcc96b7649dddc50cb3db31",
+      "healthBarSurfacePath": ".run/v02-freeciv-independent-map/a6-25/323b7936a09935f8.bin",
+      "healthBarSurfaceSha256": "064dd31ff6d2eda77206aa9c3e3122939c599802df1b21a493db58b0cd1758b2",
+      "rendererBodySequence": 5119,
+      "rendererHealthbarSequence": 5120,
+      "sourceGeometry": {
+        "spriteSourceSize": [
+          64,
+          48
+        ],
+        "spriteDrawAt": [
+          527,
+          328
+        ],
+        "spriteAlphaXYXY": [
+          16,
+          2,
+          56,
+          45
+        ],
+        "screenDrawingAreaOrigin": [
+          166,
+          52
+        ],
+        "screenBoxXYXY": [
+          709,
+          382,
+          749,
+          425
+        ]
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-absent-bomber",
+      "imagePath": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-inventory-a6-27-20261020.png",
+      "imageSha256": "7b3d2a97fe944836485af95efacd265d713ff68578b0c99029acd11d621a51e7",
+      "captureEvidencePath": ".run/v02-freeciv-independent-map/a6-27/run-evidence.json",
+      "captureEvidenceSha256": "bf18bbef8d88f93f17e5472a000b0b021c8a74358b4c7ae6c8719d9720c1af12",
+      "drawTracePath": ".run/v02-freeciv-independent-map/a6-27/draw.jsonl",
+      "drawTraceSha256": "2aed72fa758dba776ba66a5fe934429bda764bf47aac5b473797b1c9c5ceccc8",
+      "accessibilityTreePath": ".run/v02-freeciv-independent-map/a6-27/atspi.json",
+      "accessibilityTreeSha256": "e6b57fe7e3d0fc29cdd79e8dedc7cb309cf0b5191ab49cc76b9409e37ed73bd3",
+      "savedWorldPath": ".run/v02-freeciv-independent-map/a6-27/world.sav",
+      "savedWorldSha256": "364edbd80e4fad2026d7a72abf285409c051ae12ec4ee3a87bb821116fca12f1",
+      "compressedSavedWorldPath": ".run/v02-freeciv-independent-map/a6-27/manual.sav.xz",
+      "compressedSavedWorldSha256": "f3c3b859ee657d38f43cd3cbd1ec0abbe221195513d5d027d8b16b1fd898533d",
+      "worldInventory": {
+        "turn": 1,
+        "year": -4000,
+        "rulesetdir": "civ2civ3",
+        "unitCount": 24,
+        "playerCount": 6,
+        "playerUnitCounts": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ]
+      },
+      "unitTypesPresent": [
+        "Diplomat",
+        "Explorer",
+        "Settlers",
+        "Workers"
+      ],
+      "absentTargetType": "Bomber",
+      "rulesetSourceLine": {
+        "file": "/usr/share/games/freeciv/civ2civ3/units.ruleset",
+        "section": "unit_bomber",
+        "sha256": "5068a8b45472e42ccbf7812462e6431be44378e96087d37f6a3bcf6888026b08"
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-absent-battleship",
+      "imagePath": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-inventory-a6-28-20261020.png",
+      "imageSha256": "d137f8168d0bf1aa4d4a870ef3e883580ab9ca0131828235df5318e8ba6e832c",
+      "captureEvidencePath": ".run/v02-freeciv-independent-map/a6-28/run-evidence.json",
+      "captureEvidenceSha256": "cc60c4c31340d7dd1df3fdacb35b336b324bd731e4f5d950c148b74478542de6",
+      "drawTracePath": ".run/v02-freeciv-independent-map/a6-28/draw.jsonl",
+      "drawTraceSha256": "f5cadb7fd9db3c7059404305fb0faaefd572756765d2b210bc070a2d719ddf94",
+      "accessibilityTreePath": ".run/v02-freeciv-independent-map/a6-28/atspi.json",
+      "accessibilityTreeSha256": "f12812bbc8bb34fff9de69f3d1ad833dfffb06d3a93fda83fbaa1aa8386b1701",
+      "savedWorldPath": ".run/v02-freeciv-independent-map/a6-28/world.sav",
+      "savedWorldSha256": "db410cee08a6939120c44a4b355bef64594f6d18d05c6ac3328158937bdbd8eb",
+      "compressedSavedWorldPath": ".run/v02-freeciv-independent-map/a6-28/manual.sav.xz",
+      "compressedSavedWorldSha256": "274bdf97773889f9aac7ece57bd1e6696c73c0575f331793321e17fac60ad237",
+      "worldInventory": {
+        "turn": 1,
+        "year": -4000,
+        "rulesetdir": "civ2civ3",
+        "unitCount": 24,
+        "playerCount": 6,
+        "playerUnitCounts": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ]
+      },
+      "unitTypesPresent": [
+        "Diplomat",
+        "Explorer",
+        "Settlers",
+        "Workers"
+      ],
+      "absentTargetType": "Battleship",
+      "rulesetSourceLine": {
+        "file": "/usr/share/games/freeciv/civ2civ3/units.ruleset",
+        "section": "unit_battleship",
+        "sha256": "5068a8b45472e42ccbf7812462e6431be44378e96087d37f6a3bcf6888026b08"
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-absent-fighter",
+      "imagePath": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-inventory-a6-29-20261020.png",
+      "imageSha256": "4c48235b5a5c4413eccae22ad9ef2e89b697c073d40cf8c7b3c8978b662eacfa",
+      "captureEvidencePath": ".run/v02-freeciv-independent-map/a6-29/run-evidence.json",
+      "captureEvidenceSha256": "59dd8177d153a67bb32c15ff86b34672e01f1894797dad935a7955e62608d9b4",
+      "drawTracePath": ".run/v02-freeciv-independent-map/a6-29/draw.jsonl",
+      "drawTraceSha256": "b63a2717e0fa6f14d33725e50a37543af04f7856e6bf5088de00d50519ee4abf",
+      "accessibilityTreePath": ".run/v02-freeciv-independent-map/a6-29/atspi.json",
+      "accessibilityTreeSha256": "2c8d5dc81902f831da1f8b04309a632a7da3f198552589eadd0ea89bb26ff257",
+      "savedWorldPath": ".run/v02-freeciv-independent-map/a6-29/world.sav",
+      "savedWorldSha256": "2a4331b79b7c15ba619c39a004775517a93e981a3fc91bba7313a76035f77cbe",
+      "compressedSavedWorldPath": ".run/v02-freeciv-independent-map/a6-29/manual.sav.xz",
+      "compressedSavedWorldSha256": "7773683ae4e6fbf1877811ff99170c76a546acd558a3e31a24b3a7cf29963ab8",
+      "worldInventory": {
+        "turn": 1,
+        "year": -4000,
+        "rulesetdir": "civ2civ3",
+        "unitCount": 24,
+        "playerCount": 6,
+        "playerUnitCounts": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ]
+      },
+      "unitTypesPresent": [
+        "Diplomat",
+        "Explorer",
+        "Settlers",
+        "Workers"
+      ],
+      "absentTargetType": "Fighter",
+      "rulesetSourceLine": {
+        "file": "/usr/share/games/freeciv/civ2civ3/units.ruleset",
+        "section": "unit_fighter",
+        "sha256": "5068a8b45472e42ccbf7812462e6431be44378e96087d37f6a3bcf6888026b08"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "sourceGroup": "renderer:freeciv-r3-1-0",
+      "source": "https://github.com/freeciv/freeciv/tree/R3_1_0/client/gui-gtk-3.22",
+      "license": "GPL-2-or-later",
+      "files": [
+        {
+          "path": "client/gui-gtk-3.22/mapview.c",
+          "sha256": "706752d989d0a928b180262112fcc50d70344f1c3c0c28af742bfaf5be1e4c88",
+          "lines": "423-433",
+          "claim": "map_canvas_draw paints mapview.store->surface at local origin (0,0)",
+          "evidencePath": ".run/v02-freeciv-independent-map/source/mapview.c"
+        },
+        {
+          "path": "client/gui-gtk-3.22/canvas.c",
+          "sha256": "7f0812139ce778a0647f326e3e0867896e448794f4debbc95076358aed760a28",
+          "lines": "109-135",
+          "claim": "canvas_put_sprite scales by canvas zoom and paints the sprite source at canvas_x-offset_x, canvas_y-offset_y, clipped to the visible sprite dimensions",
+          "evidencePath": ".run/v02-freeciv-independent-map/source/canvas.c"
+        },
+        {
+          "path": "client/mapview_common.c",
+          "sha256": "30f8a4d7073e51bfa3150aa82cb2641d6afea8cb24d679acccaada5c92ff619c",
+          "lines": "1561-1580",
+          "claim": "put_one_tile obtains the drawable unit for a visible map tile and passes it through put_one_element",
+          "evidencePath": ".run/v02-freeciv-independent-map/source/mapview_common.c"
+        }
+      ]
+    },
+    {
+      "sourceGroup": "freeciv-civ2civ3-ruleset",
+      "source": "installed Freeciv 3.1 Civ2Civ3 units.ruleset",
+      "license": "GPL-2+ per freeciv-data copyright",
+      "path": "/usr/share/games/freeciv/civ2civ3/units.ruleset",
+      "sha256": "5068a8b45472e42ccbf7812462e6431be44378e96087d37f6a3bcf6888026b08",
+      "targetTypeMappings": [
+        {
+          "section": "unit_bomber",
+          "name": "Bomber",
+          "lines": "1564-1569"
+        },
+        {
+          "section": "unit_battleship",
+          "name": "Battleship",
+          "lines": "2004-2009"
+        },
+        {
+          "section": "unit_fighter",
+          "name": "Fighter",
+          "lines": "1525-1531"
+        }
+      ],
+      "evidencePath": ".run/v02-freeciv-independent-map/source/civ2civ3-units.ruleset"
+    },
+    {
+      "sourceGroup": "freeciv-hexemplio-assets",
+      "source": "installed Freeciv amplio2 unit atlas/spec and hexemplio tileset",
+      "license": "GPL-2+ per freeciv-data copyright",
+      "assets": [
+        {
+          "path": "/usr/share/games/freeciv/amplio2/units.png",
+          "sha256": "d326676b3a69dc00845207ba3edcbdf141881777fb91f0410477c1ab2189159c",
+          "evidencePath": ".run/v02-freeciv-independent-map/source/assets/units.png"
+        },
+        {
+          "path": "/usr/share/games/freeciv/amplio2/units.spec",
+          "sha256": "942fdb5391a4dd2315889f53bd45d9d1365fdacf8b4a1d7de67462271d344da7",
+          "lines": "84",
+          "claim": "atlas row 1, column 13 identifies u.explorer",
+          "evidencePath": ".run/v02-freeciv-independent-map/source/assets/units.spec"
+        },
+        {
+          "path": "/usr/share/games/freeciv/hexemplio.tilespec",
+          "sha256": "e158fb3ddd50125efc323ab46b07cf6d45b8ca7d0876a14d9923652f1dad9b2f",
+          "evidencePath": ".run/v02-freeciv-independent-map/source/assets/hexemplio.tilespec"
+        }
+      ]
+    },
+    {
+      "sourceGroup": "freeciv-data-package-license",
+      "source": "/usr/share/doc/freeciv-data/copyright",
+      "license": "GPL-2+ for Files:*",
+      "sha256": "a7595f514302728b9cf82de272a7f647cfa4049b254cacea9e2e30ee06dd5850",
+      "evidencePath": ".run/v02-freeciv-independent-map/source/freeciv-data-copyright"
+    }
+  ],
+  "geometryOracle": {
+    "method": "For positive cases, source-trace the exact 64x48 Explorer body surface. The source alpha support is [16,2,56,45), draw origin is [527,328] in a 1134x768 map store, and Freeciv map_canvas_draw paints that store at (0,0) with identity CTM. AT-SPI reports the visible drawing area at [166,52,1111,708], so the exact screen box is [709,382,749,425]. Per-image later draw audit finds only a health bar overlay whose own alpha support translates to [538,322,567,329), disjoint from the body; subsequent canvas/minimap work does not overwrite its map-store pixels. AT-SPI semantic unit panel says Explorer. For negatives, the same-turn complete server save lists all players and every unit type by name; absence of the target from the complete world inventory implies absence from the visible map view.",
+    "spriteSurfaceFnv64": "1eda0932a4a65377",
+    "spriteAlphaXYXY": [
+      16,
+      2,
+      56,
+      45
+    ],
+    "healthBarSurfaceFnv64": "323b7936a09935f8",
+    "healthBarAlphaXYXY": [
+      45,
+      32,
+      74,
+      39
+    ],
+    "healthBarStoreDrawAt": [
+      493,
+      290
+    ],
+    "healthBarStoreBoxXYXY": [
+      538,
+      322,
+      567,
+      329
+    ],
+    "screenBoxXYXY": [
+      709,
+      382,
+      749,
+      425
+    ]
+  },
+  "limitations": [
+    "All ten cases come from one game, one ruleset family, and one tileset; no broad game diversity claim.",
+    "Seven positive cases cover the same Explorer body sprite, with distinct generated world screenshots.",
+    "Three negatives cover only Bomber, Battleship, and Fighter units, justified by full same-turn inventories.",
+    "No segmentation masks or natural-user gameplay captures are claimed.",
+    "Label source is independent renderer/savegame state; no human annotator or candidate model quality is claimed."
+  ]
+}

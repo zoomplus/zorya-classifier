@@ -1,0 +1,221 @@
+[
+  {
+    "caseId": "map-freeciv-oracle-dev-present-01",
+    "expectedPresence": "present",
+    "targetClassId": "explorer-unit-body",
+    "targetBoxes": [
+      {
+        "className": "explorer-unit-body",
+        "xyxy": [
+          0.55390625,
+          0.4775,
+          0.58515625,
+          0.53125
+        ],
+        "pixelXYXY": [
+          709,
+          382,
+          749,
+          425
+        ],
+        "source": "Exact nonzero alpha support of the source sprite surface translated through the recorded renderer rectangle and AT-SPI drawing-area origin"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: actual Cairo sprite surface, exact alpha support, renderer draw rectangle, source-based occlusion check, Freeciv Explorer selection panel, and identity canvas-to-widget origin. No candidate/model output or human annotation claimed.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-civ2civ3-generated-world",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-02",
+    "expectedPresence": "present",
+    "targetClassId": "explorer-unit-body",
+    "targetBoxes": [
+      {
+        "className": "explorer-unit-body",
+        "xyxy": [
+          0.55390625,
+          0.4775,
+          0.58515625,
+          0.53125
+        ],
+        "pixelXYXY": [
+          709,
+          382,
+          749,
+          425
+        ],
+        "source": "Exact nonzero alpha support of the source sprite surface translated through the recorded renderer rectangle and AT-SPI drawing-area origin"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: actual Cairo sprite surface, exact alpha support, renderer draw rectangle, source-based occlusion check, Freeciv Explorer selection panel, and identity canvas-to-widget origin. No candidate/model output or human annotation claimed.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-civ2civ3-generated-world",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-03",
+    "expectedPresence": "present",
+    "targetClassId": "explorer-unit-body",
+    "targetBoxes": [
+      {
+        "className": "explorer-unit-body",
+        "xyxy": [
+          0.55390625,
+          0.4775,
+          0.58515625,
+          0.53125
+        ],
+        "pixelXYXY": [
+          709,
+          382,
+          749,
+          425
+        ],
+        "source": "Exact nonzero alpha support of the source sprite surface translated through the recorded renderer rectangle and AT-SPI drawing-area origin"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: actual Cairo sprite surface, exact alpha support, renderer draw rectangle, source-based occlusion check, Freeciv Explorer selection panel, and identity canvas-to-widget origin. No candidate/model output or human annotation claimed.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-civ2civ3-generated-world",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-04",
+    "expectedPresence": "present",
+    "targetClassId": "explorer-unit-body",
+    "targetBoxes": [
+      {
+        "className": "explorer-unit-body",
+        "xyxy": [
+          0.55390625,
+          0.4775,
+          0.58515625,
+          0.53125
+        ],
+        "pixelXYXY": [
+          709,
+          382,
+          749,
+          425
+        ],
+        "source": "Exact nonzero alpha support of the source sprite surface translated through the recorded renderer rectangle and AT-SPI drawing-area origin"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: actual Cairo sprite surface, exact alpha support, renderer draw rectangle, source-based occlusion check, Freeciv Explorer selection panel, and identity canvas-to-widget origin. No candidate/model output or human annotation claimed.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-civ2civ3-generated-world",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-05",
+    "expectedPresence": "present",
+    "targetClassId": "explorer-unit-body",
+    "targetBoxes": [
+      {
+        "className": "explorer-unit-body",
+        "xyxy": [
+          0.55390625,
+          0.4775,
+          0.58515625,
+          0.53125
+        ],
+        "pixelXYXY": [
+          709,
+          382,
+          749,
+          425
+        ],
+        "source": "Exact nonzero alpha support of the source sprite surface translated through the recorded renderer rectangle and AT-SPI drawing-area origin"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: actual Cairo sprite surface, exact alpha support, renderer draw rectangle, source-based occlusion check, Freeciv Explorer selection panel, and identity canvas-to-widget origin. No candidate/model output or human annotation claimed.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-civ2civ3-generated-world",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-06",
+    "expectedPresence": "present",
+    "targetClassId": "explorer-unit-body",
+    "targetBoxes": [
+      {
+        "className": "explorer-unit-body",
+        "xyxy": [
+          0.55390625,
+          0.4775,
+          0.58515625,
+          0.53125
+        ],
+        "pixelXYXY": [
+          709,
+          382,
+          749,
+          425
+        ],
+        "source": "Exact nonzero alpha support of the source sprite surface translated through the recorded renderer rectangle and AT-SPI drawing-area origin"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: actual Cairo sprite surface, exact alpha support, renderer draw rectangle, source-based occlusion check, Freeciv Explorer selection panel, and identity canvas-to-widget origin. No candidate/model output or human annotation claimed.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-civ2civ3-generated-world",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-07",
+    "expectedPresence": "present",
+    "targetClassId": "explorer-unit-body",
+    "targetBoxes": [
+      {
+        "className": "explorer-unit-body",
+        "xyxy": [
+          0.55390625,
+          0.4775,
+          0.58515625,
+          0.53125
+        ],
+        "pixelXYXY": [
+          709,
+          382,
+          749,
+          425
+        ],
+        "source": "Exact nonzero alpha support of the source sprite surface translated through the recorded renderer rectangle and AT-SPI drawing-area origin"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: actual Cairo sprite surface, exact alpha support, renderer draw rectangle, source-based occlusion check, Freeciv Explorer selection panel, and identity canvas-to-widget origin. No candidate/model output or human annotation claimed.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-civ2civ3-generated-world",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-absent-bomber",
+    "expectedPresence": "absent",
+    "targetClassId": "freeciv-unit-bomber",
+    "targetBoxes": [],
+    "negativeEvidence": "Complete Freeciv turn-1 save for this generated world records all six players and all 24 unit records by type name; no Bomber row occurs. The save and screenshot were captured in the same paused turn with no world action. The exact Civ2Civ3 ruleset section maps unit_bomber to Bomber.",
+    "annotationSource": "Independent complete saved-game unit inventory and official Freeciv Civ2Civ3 ruleset; no missing label, candidate prediction, or model output used.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-civ2civ3-generated-world",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-absent-battleship",
+    "expectedPresence": "absent",
+    "targetClassId": "freeciv-unit-battleship",
+    "targetBoxes": [],
+    "negativeEvidence": "Complete Freeciv turn-1 save for this generated world records all six players and all 24 unit records by type name; no Battleship row occurs. The save and screenshot were captured in the same paused turn with no world action. The exact Civ2Civ3 ruleset section maps unit_battleship to Battleship.",
+    "annotationSource": "Independent complete saved-game unit inventory and official Freeciv Civ2Civ3 ruleset; no missing label, candidate prediction, or model output used.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-civ2civ3-generated-world",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-absent-fighter",
+    "expectedPresence": "absent",
+    "targetClassId": "freeciv-unit-fighter",
+    "targetBoxes": [],
+    "negativeEvidence": "Complete Freeciv turn-1 save for this generated world records all six players and all 24 unit records by type name; no Fighter row occurs. The save and screenshot were captured in the same paused turn with no world action. The exact Civ2Civ3 ruleset section maps unit_fighter to Fighter.",
+    "annotationSource": "Independent complete saved-game unit inventory and official Freeciv Civ2Civ3 ruleset; no missing label, candidate prediction, or model output used.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-civ2civ3-generated-world",
+    "sceneStratum": "controlled-real-game-map"
+  }
+]

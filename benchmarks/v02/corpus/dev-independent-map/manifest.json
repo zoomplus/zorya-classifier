@@ -1,0 +1,14 @@
+{
+  "split": "dev",
+  "stratum": "controlled-real-game-map-independent-source-geometry-and-saved-world-inventory",
+  "cases": 10,
+  "present": 7,
+  "absent": 3,
+  "inputsSha256": "b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15",
+  "groundTruthSha256": "874971d3e9344f7c54207064115257e5c802260d2a996a53f96bb6a68b2afad3",
+  "sourceLedgerSha256": "254c5cd420d9e66bbfbf0727286cfe3fe971a3d1591efe9b3241d8e48fa0ad33",
+  "scope": "7 distinct positive map screenshots and 3 distinct turn-1 full-inventory negatives, from a single controlled Freeciv game/ruleset/tileset family; no broader diversity claim",
+  "priorInputCommit": "a019a299dd2843010d3bab85a24e7daf20c3bed2",
+  "priorInputsSha256": "66df2055a40258762457dfa5c4b671ed177eac3104260ce116067abb73eb41f8",
+  "wordingRevision": "pre-dispatch-parallel-target-template-v2"
+}

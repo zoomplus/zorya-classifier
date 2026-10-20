@@ -113,6 +113,28 @@ function getBytes(mat: { data?: unknown }, length: number): Uint8Array {
   return bytes
 }
 
+/** Run native GrabCut, then reacquire Mat.data before copying its post-call flags. */
+export function runGrabCutAndCopyMask(
+  mat: { data?: unknown },
+  width: number,
+  height: number,
+  roi: { left: number; top: number; width: number; height: number },
+  runNative: () => void,
+  labels: { foreground: number; probableForeground: number },
+): Uint8Array {
+  runNative()
+  const flags = getBytes(mat, width * height)
+  const output = new Uint8Array(width * height)
+  for (let y = roi.top; y < roi.top + roi.height; y++) {
+    for (let x = roi.left; x < roi.left + roi.width; x++) {
+      const at = y * width + x
+      const flag = flags[at]
+      if (flag === labels.foreground || flag === labels.probableForeground) output[at] = 1
+    }
+  }
+  return output
+}
+
 function seededComponents(
   mask: Uint8Array,
   width: number,
@@ -204,23 +226,23 @@ export async function runGrabCutTask(
       )
         flags[y * request.width + x] = cv.GC_FGD
     const rect = Reflect.construct(cv.Rect, [0, 0, 0, 0])
-    Reflect.apply(cv.grabCut, cv, [
-      rgb,
+    const maskResult = runGrabCutAndCopyMask(
       mask,
-      rect,
-      background,
-      foreground,
-      3,
-      cv.GC_INIT_WITH_MASK,
-    ])
-    const maskResult = new Uint8Array(pixels)
-    for (let y = request.roi.top; y < request.roi.top + request.roi.height; y++) {
-      for (let x = request.roi.left; x < request.roi.left + request.roi.width; x++) {
-        const at = y * request.width + x
-        const flag = flags[at]
-        if (flag === cv.GC_FGD || flag === cv.GC_PR_FGD) maskResult[at] = 1
-      }
-    }
+      request.width,
+      request.height,
+      request.roi,
+      () =>
+        Reflect.apply(cv.grabCut, cv, [
+          rgb,
+          mask,
+          rect,
+          background,
+          foreground,
+          3,
+          cv.GC_INIT_WITH_MASK,
+        ]),
+      { foreground: cv.GC_FGD, probableForeground: cv.GC_PR_FGD },
+    )
     const grounded = seededComponents(maskResult, request.width, request.height, request)
     if (!grounded.some((value) => value === 1))
       throw new Error('GrabCut produced no seed-grounded mask')

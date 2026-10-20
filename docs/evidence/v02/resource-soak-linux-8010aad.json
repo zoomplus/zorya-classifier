@@ -1,0 +1,125 @@
+{
+  "sourceCommit": "8010aad",
+  "scope": "native Linux CPU lifecycle/resource test with injected oracle locator; not end-to-end model localization",
+  "rawReportSha256": "47aff8d08f350e8b5ee68e7c1cd89a3afd0371b1a5ce5a9e9125bd170b13015e",
+  "gzipSha256": "e07d68a22eb544ef5c09f46289fdbc42f326bbd7a289899c5547fc0020d4dd71",
+  "rawBytes": 5771570,
+  "gzipBytes": 525516,
+  "compressionRoundtripVerified": true,
+  "backend": "mobile-sam",
+  "startedAt": "2026-10-20T08:42:18.208Z",
+  "busyStartedAt": "2026-10-20T08:42:51.795Z",
+  "endedAt": "2026-10-20T10:32:26.679Z",
+  "parameters": {
+    "warmupSeconds": 600,
+    "durationSeconds": 6540,
+    "idleSeconds": 30,
+    "sampleMs": 5000,
+    "warmupCount": 440,
+    "operationCount": 4756,
+    "forcedGc": false
+  },
+  "lifecycle": {
+    "positive": {
+      "caseId": "synthetic-red-panel-v1",
+      "status": "segmented",
+      "durationMs": 1194.7312439999998,
+      "maskPixels": 11244,
+      "maskIoU": 0.9996443812233285
+    },
+    "negative": {
+      "result": "not-found",
+      "segmentCalls": 0
+    },
+    "cancellationCode": "ABORTED",
+    "overloadCapacityRejected": 1,
+    "invalidInputCode": "INVALID_INPUT",
+    "assetFaultCode": "UNSUPPORTED",
+    "disposedTwice": true
+  },
+  "operations": {
+    "segmented": 4756,
+    "unknown": 0,
+    "failed": 0
+  },
+  "durationMs": {
+    "p50": 1239.7801669999026,
+    "p95": 1317.2693959996104,
+    "scope": "cold child/model initialization per call; concurrent development activity; not strategy ranking"
+  },
+  "resources": {
+    "childStarts": 4756,
+    "childCloses": 4756,
+    "childrenStillOwned": [],
+    "parentPeak": {
+      "rss": 385679360,
+      "heapTotal": 115851264,
+      "heapUsed": 51798688,
+      "external": 132379458,
+      "arrayBuffers": 100602768
+    },
+    "childPeak": {
+      "rss": 572256256,
+      "heapTotal": 52502528,
+      "heapUsed": 31166552,
+      "external": 90587169,
+      "arrayBuffers": 87738203
+    },
+    "phases": {
+      "idle-before": {
+        "count": 6,
+        "firstTimestampMs": 0,
+        "lastTimestampMs": 28602
+      },
+      "busy": {
+        "count": 1179,
+        "firstTimestampMs": 33587,
+        "lastTimestampMs": 6571767
+      },
+      "idle-after": {
+        "count": 8,
+        "firstTimestampMs": 6574850,
+        "lastTimestampMs": 6608462
+      }
+    },
+    "nominalSampleMs": 5000,
+    "largestObservedSampleGapMs": 10278,
+    "idleGates": {
+      "rss": {
+        "beforeBytes": 322502656,
+        "afterBytes": 368410624,
+        "deltaBytes": 45907968,
+        "thresholdBytes": 134217728,
+        "passes": true
+      },
+      "heapUsed": {
+        "beforeBytes": 15761520,
+        "afterBytes": 23485696,
+        "deltaBytes": 7724176,
+        "thresholdBytes": 16777216,
+        "passes": true
+      },
+      "external": {
+        "beforeBytes": 38210158,
+        "afterBytes": 49974808,
+        "deltaBytes": 11764650,
+        "thresholdBytes": 16777216,
+        "passes": true
+      },
+      "arrayBuffers": {
+        "beforeBytes": 31928204,
+        "afterBytes": 38449974,
+        "deltaBytes": 6521770,
+        "thresholdBytes": 16777216,
+        "passes": true
+      }
+    }
+  },
+  "fixtureCaveat": "The historical Hat seed has zero reference foreground and Cat seed center is background. Original fixture results are retained; this run proves resource/lifecycle behavior, not segmentation-quality qualification.",
+  "sourceHashes": {
+    "nativeSmoke": "fa5c93df68393cd3909f3149e141cfca602140df7a02c37daff425ca9a255b72",
+    "resourceRunner": "395ca44e104e6878080af81d1f3f465e4a363bafc22e2f5743f61f8383ac9da8",
+    "mobileSam": "e2d9d7071d045ceee6f4c5c95aadae3672a9971d15272a298fba65f3993e5772",
+    "nativeChild": "94f0ccea6aec1d93a93256553cae92c3f19220f1ffbd3ac14060c2daa8ee2f83"
+  }
+}

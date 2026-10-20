@@ -75,7 +75,7 @@ await test('fresh producer records both stages without sending controller IDs, p
         apiKey: 'private-secret-sentinel',
         createDecision: () => decision,
       },
-      'native-seed-outline-fixed16-v1',
+      'native-seed-outline-axis-fixed16-v1',
     )
     assert.equal(result.status, 'complete')
     assert.deepEqual(result.plannedCaseIds, [privateId])
@@ -92,8 +92,66 @@ await test('fresh producer records both stages without sending controller IDs, p
     ) as Record<string, unknown>
     assert.equal(JSON.stringify(runManifest).includes(root), false)
     assert.equal(JSON.stringify(runManifest).includes(sourceName), false)
+    const sourceHashes = runManifest.sourceHashes as Record<string, string>
+    for (const path of [
+      'src/infrastructure/boundary-view.ts',
+      'src/processes/boundary-state.ts',
+      'src/entities/boundary-view.ts',
+    ])
+      assert.match(sourceHashes[path] ?? '', /^[a-f0-9]{64}$/u)
     const caseFiles = await readdir(join(result.outputDirectory, privateId, 'calls'))
     assert.ok(caseFiles.some((name) => name.startsWith('decision-trace-')))
+
+    const extentRequests = requests.filter((request) =>
+      ['left', 'right', 'top', 'bottom'].every((id) => id in request.questions),
+    )
+    assert.ok(extentRequests.length > 0)
+    const firstExtent = extentRequests[0]!
+    assert.equal(
+      firstExtent.state.filter((part) => typeof part !== 'string' && part.type === 'image_url')
+        .length,
+      3,
+      'outline original plus two first-pass axis views; the SEED crop is removed',
+    )
+    assert.equal(firstExtent.state.includes('SEED'), false)
+    assert.ok(
+      firstExtent.state.some(
+        (part) => typeof part === 'string' && part.includes('seedOutlineView'),
+      ),
+    )
+    assert.equal(
+      firstExtent.state.filter((part) => typeof part === 'string' && part.includes('boundaryView'))
+        .length,
+      2,
+    )
+    const traces = await Promise.all(
+      caseFiles
+        .filter((name) => name.startsWith('decision-trace-') && name.endsWith('.json'))
+        .map(
+          async (name) =>
+            JSON.parse(
+              await readFile(join(result.outputDirectory, privateId, 'calls', name), 'utf8'),
+            ) as {
+              status?: string
+              questions?: Array<{ questionId: string }>
+              geometry?: {
+                boundaryViews?: unknown[]
+                imageTransforms?: Array<{ role?: string }>
+              }
+            },
+        ),
+    )
+    const boundaryTrace = traces.find((trace) => (trace.geometry?.boundaryViews?.length ?? 0) === 2)
+    assert.ok(boundaryTrace)
+    assert.deepEqual(
+      boundaryTrace.questions?.map((question) => question.questionId),
+      ['left', 'right', 'top', 'bottom', 'instance'],
+    )
+    assert.ok(
+      boundaryTrace.geometry?.imageTransforms?.some(
+        (transform) => transform.role === 'seed-outline',
+      ),
+    )
   } finally {
     await rm(root, { recursive: true, force: true })
   }

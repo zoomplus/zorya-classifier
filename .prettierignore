@@ -8,6 +8,7 @@ benchmarks/corpus/
 benchmarks/v02/corpus/dev/*.json
 benchmarks/v02/corpus/dev-controlled/*.json
 benchmarks/v02/corpus/dev-independent-ui/*.json
+benchmarks/v02/corpus/dev-independent-map/*.json
 # Immutable provider manifests retain the exact bytes hashed in the run evidence.
 docs/evidence/v02/ordinary-luna-axis/run-manifest.json
 docs/evidence/v02/seed-unbounded/run-manifest.json

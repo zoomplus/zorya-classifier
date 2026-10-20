@@ -1,12 +1,14 @@
 import { createHash, randomUUID } from 'node:crypto'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { join, resolve } from 'node:path'
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
+import { join, relative, resolve, sep } from 'node:path'
 import { parseEnv } from 'node:util'
+import { fileURLToPath } from 'node:url'
 import type { Classifier } from '../../src/app/create-classifier.js'
 import { createClassifier, createResearchClassifier } from '../../src/app/create-classifier.js'
 import type { DecisionPort } from '../../src/entities/contracts.js'
 import type { WholeObjectLocalizationResult } from '../../src/entities/whole-object.js'
 import { createOpenRouterDecisions } from '../../src/infrastructure/openrouter.js'
+import { createSharpBoundaryView } from '../../src/infrastructure/boundary-view.js'
 import { RunBudget } from './budget.js'
 import { freshProducerTask, loadFreshCorpus, loadFreshImage } from './fresh-corpus.js'
 import type { FreshCase } from './fresh-corpus.js'
@@ -36,15 +38,15 @@ export const freshProfilePolicy = Object.freeze({
   maxPhysicalCalls: 250,
   maxCostUsd: 5,
   unknownCostReserveUsd: 0.02,
-  latencyEnvironment: 'concurrent-with-linux-native-soak',
+  latencyEnvironment: 'concurrent-development-unranked',
   latencyRankingEligible: false,
 })
 
 export const freshProfileVariants = Object.freeze([
   Object.freeze({ id: 'native-numeric-v1', presentation: 'numeric-v1' }),
   Object.freeze({
-    id: 'native-seed-outline-fixed16-v1',
-    presentation: 'seed-outline-fixed16-v1',
+    id: 'native-seed-outline-axis-fixed16-v1',
+    presentation: 'seed-outline-axis-fixed16-v1',
   }),
 ])
 
@@ -57,18 +59,6 @@ const sourceFiles = [
   './protocol.ts',
   './seedoutlinepresentation.ts',
   './seedunboundedprompt.ts',
-  '../../src/app/create-classifier.ts',
-  '../../src/entities/contracts.ts',
-  '../../src/entities/whole-object.ts',
-  '../../src/processes/classify.ts',
-  '../../src/processes/locate.ts',
-  '../../src/processes/whole-object.ts',
-  '../../src/features/prompts.ts',
-  '../../src/features/choice.ts',
-  '../../src/features/choice-beam-layout.ts',
-  '../../src/features/uniform-grid.ts',
-  '../../src/infrastructure/openrouter.ts',
-  '../../src/infrastructure/raster.ts',
 ] as const
 
 export type FreshProfileId = (typeof freshProfileVariants)[number]['id']
@@ -112,6 +102,37 @@ function sha256(value: Uint8Array | string): string {
   return createHash('sha256').update(value).digest('hex')
 }
 
+async function allSourceHashes(): Promise<Record<string, string>> {
+  const hashes = await Promise.all(
+    sourceFiles.map(
+      async (path) => [path, sha256(await readFile(new URL(path, import.meta.url)))] as const,
+    ),
+  )
+  const srcRoot = fileURLToPath(new URL('../../src/', import.meta.url))
+  async function walk(directory: string): Promise<string[]> {
+    const entries = await readdir(directory, { withFileTypes: true })
+    const nested = await Promise.all(
+      entries.map(async (entry) => {
+        const path = join(directory, entry.name)
+        if (entry.isDirectory()) return walk(path)
+        return entry.isFile() && entry.name.endsWith('.ts') ? [path] : []
+      }),
+    )
+    return nested.flat()
+  }
+  const sourcePaths = (await walk(srcRoot)).sort()
+  const sourceHashes = await Promise.all(
+    sourcePaths.map(
+      async (path) =>
+        [
+          `src/${relative(srcRoot, path).split(sep).join('/')}`,
+          sha256(await readFile(path)),
+        ] as const,
+    ),
+  )
+  return Object.fromEntries([...hashes, ...sourceHashes])
+}
+
 async function writeImmutable(path: string, value: unknown) {
   await writeFile(path, JSON.stringify(value, null, 2) + '\n', { flag: 'wx' })
 }
@@ -134,10 +155,9 @@ function safeErrorCode(error: unknown): string {
   return typeof code === 'string' && allowed.has(code) ? code : 'RUNNER_FAILURE'
 }
 
-function summarizeWholeObject(result: WholeObjectLocalizationResult): Pick<
-  FreshStage,
-  'status' | 'region' | 'reason'
-> {
+function summarizeWholeObject(
+  result: WholeObjectLocalizationResult,
+): Pick<FreshStage, 'status' | 'region' | 'reason'> {
   if (result.status === 'located') return { status: 'located', region: result.region }
   if (result.status === 'not-found') return { status: 'not-found', reason: result.reason }
   return { status: 'unknown', reason: result.reason }
@@ -200,10 +220,7 @@ export async function preflightFreshCorpus(
   return { corpus, imageChecks }
 }
 
-function composeClassifier(
-  decision: DecisionPort,
-  profileId: FreshProfileId,
-): Classifier {
+function composeClassifier(decision: DecisionPort, profileId: FreshProfileId): Classifier {
   const options = {
     decision,
     timeoutMs: freshProfilePolicy.timeoutMs,
@@ -215,7 +232,7 @@ function composeClassifier(
   return createResearchClassifier(
     { ...options, decision: decorated },
     undefined,
-    undefined,
+    createSharpBoundaryView(),
     'fixed-16-v1',
   )
 }
@@ -240,11 +257,7 @@ export async function runFreshCorpusProfile(
   signal: AbortSignal = new AbortController().signal,
 ) {
   const { corpus, imageChecks: preflight } = await preflightFreshCorpus(options, signal)
-  const sourceHashes = Object.fromEntries(
-    await Promise.all(
-      sourceFiles.map(async (path) => [path, sha256(await readFile(new URL(path, import.meta.url)))]),
-    ),
-  )
+  const sourceHashes = await allSourceHashes()
   const profiles = freshProfileVariants.find((item) => item.id === profileId)
   if (!profiles) throw new TypeError('Fresh profile is not in the frozen profile registry')
 
@@ -350,7 +363,10 @@ export async function runFreshCorpusProfile(
           input: { image: bytes },
           classes: [
             { id: 'present', description: 'The target in the question is visible in this image.' },
-            { id: 'absent', description: 'The target in the question is not visible in this image.' },
+            {
+              id: 'absent',
+              description: 'The target in the question is not visible in this image.',
+            },
           ],
           instructions: task.question,
           signal: controller.signal,
@@ -381,9 +397,7 @@ export async function runFreshCorpusProfile(
       const locateLogicalStart = recorder.logicalCalls.length
       let locate: FreshStage
       try {
-        const locateTarget = task.instruction
-          ? `${task.target}\n${task.instruction}`
-          : task.target
+        const locateTarget = task.instruction ? `${task.target}\n${task.instruction}` : task.target
         const result = await classifier.locate({
           image: bytes,
           target: locateTarget,

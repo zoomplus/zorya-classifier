@@ -1,0 +1,13 @@
+# Independent controlled Freeciv map corpus
+
+This dev-only map stratum contains 10 distinct Freeciv 3.1 map screenshots: seven positive cases and three explicit negative cases. Each screenshot has a unique decoded-pixel hash and comes from a fresh local generated world, captured by the real GTK3.22/hexemplio client in an owned Xvfb session with a private HOME/XDG profile and no network. This is controlled game rendering, not natural gameplay capture.
+
+For the seven positives, the target is the visible body sprite of the selected Explorer unit; its health bar and selection brackets are excluded. A source-only Cairo trace identifies the exact 64×48 sprite surface, and the surface’s nonzero alpha extent determines the box. Freeciv’s draw code establishes the canvas-to-widget transform, AT-SPI provides the drawing-area origin and selected-unit name, and each case’s later draw records were checked for occlusion. The only later overlapping-region draw is a health-bar surface whose nonzero alpha does not intersect the Explorer body.
+
+For the three negatives, the target types are Bomber, Battleship, and Fighter. A manual save made at turn 1 / year −4000 lists every unit for all six players by the official Civ2Civ3 ruleset name. Each saved world has 24 unit records and none of the target type. The saved state and screenshot are from the same untouched turn; the state files are kept only in ignored evidence and are not included in candidate inputs.
+
+Inputs, ground truth, and source evidence are stored separately. No candidate output was used. This set meets the dev map count but has narrow coverage: all cases are from one game, one ruleset family, and one tileset; the seven positives all use the Explorer body sprite. It makes no claim about game diversity, natural user captures, human annotation, or segmentation masks. Earlier model-assisted map labels remain in their separate exploratory corpus unchanged.
+
+All seven positive boxes are at the same screen rectangle `[709,382,749,425)` because the game initially centers the selected unit. Different terrain backgrounds do not provide varied target geometry. This panel must not be described as evidence of positional diversity or general map accuracy. Before any provider dispatch, revision 2 also gives positive and negative targets the same wording template and scopes them to the main map canvas; the previous input bytes remain in commit `a019a29`. Annotation and captured pixels did not change.
+
+Run `python3 benchmarks/v02/corpus/tools/verify-freeciv-source-geometry.py` to verify image hashes, frozen manifest hashes, renderer traces, exact alpha extents and transforms, saved-game inventories, and type-name mappings.

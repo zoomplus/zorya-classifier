@@ -33,15 +33,20 @@ export function parseFreshDevArgs(args: readonly string[]) {
       'dry-run': { type: 'boolean', default: false },
       'image-root': { type: 'string', default: '/root/work/zorya-classifier-worktrees/v02/corpus' },
       out: { type: 'string', default: '.run/v02' },
+      profile: { type: 'string' },
     },
   })
   if (!values['allow-paid'] && !values['dry-run'])
     throw new Error('Fresh DEV run requires explicit --allow-paid or --dry-run')
+  const profile = values.profile
+  if (profile !== undefined && !freshProfileVariants.some((item) => item.id === profile))
+    throw new Error('Unknown fresh DEV profile')
   return {
     imageRoot: resolve(z.string().min(1).parse(values['image-root'])),
     outputRoot: resolve(z.string().min(1).parse(values.out)),
     manifests: manifestPins.map((item) => ({ ...item, path: resolve(item.path) })),
     dryRun: values['dry-run'],
+    profile,
   }
 }
 
@@ -65,14 +70,18 @@ async function runDryPreflight(options: ReturnType<typeof parseFreshDevArgs>) {
       status: preflight.imageChecks.get(item.caseId)?.ok ? 'verified' : 'failed',
       errorCode: preflight.imageChecks.get(item.caseId)?.ok
         ? null
-        : (preflight.imageChecks.get(item.caseId) as { errorCode: string } | undefined)
-            ?.errorCode ?? 'INVALID_INPUT',
+        : ((preflight.imageChecks.get(item.caseId) as { errorCode: string } | undefined)
+            ?.errorCode ?? 'INVALID_INPUT'),
     })),
     providerCalls: 0,
   }
-  await writeFile(join(outputDirectory, 'preflight.json'), JSON.stringify(summary, null, 2) + '\n', {
-    flag: 'wx',
-  })
+  await writeFile(
+    join(outputDirectory, 'preflight.json'),
+    JSON.stringify(summary, null, 2) + '\n',
+    {
+      flag: 'wx',
+    },
+  )
   const summarySha256 = createHash('sha256').update(JSON.stringify(summary)).digest('hex')
   await writeFile(
     join(outputDirectory, 'run-complete.json'),
@@ -93,11 +102,11 @@ async function runFromCommandLine(args: readonly string[]) {
   if (options.dryRun) return runDryPreflight(options)
   const apiKey = await readFreshOpenRouterKey()
   const results = []
-  for (const profile of freshProfileVariants) {
-    const result = await runFreshCorpusProfile(
-      { ...options, apiKey },
-      profile.id,
-    )
+  const selectedProfiles = options.profile
+    ? freshProfileVariants.filter((item) => item.id === options.profile)
+    : freshProfileVariants
+  for (const profile of selectedProfiles) {
+    const result = await runFreshCorpusProfile({ ...options, apiKey }, profile.id)
     results.push({
       runId: result.runId,
       profileId: result.profileId,

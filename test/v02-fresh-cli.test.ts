@@ -22,7 +22,12 @@ await test('fresh DEV CLI pins only photo and independent UI inputs and requires
   assert.equal(freshProfilePolicy.latencyRankingEligible, false)
   assert.deepEqual(
     freshProfileVariants.map((profile) => profile.id),
-    ['native-numeric-v1', 'native-seed-outline-fixed16-v1'],
+    ['native-numeric-v1', 'native-seed-outline-axis-fixed16-v1'],
   )
+  assert.equal(
+    parseFreshDevArgs(['--allow-paid', '--profile', 'native-seed-outline-axis-fixed16-v1']).profile,
+    'native-seed-outline-axis-fixed16-v1',
+  )
+  assert.throws(() => parseFreshDevArgs(['--allow-paid', '--profile', 'unknown-profile']))
   assert.equal(parseFreshDevArgs(['--dry-run']).dryRun, true)
 })

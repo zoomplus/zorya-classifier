@@ -1,0 +1,182 @@
+[
+  {
+    "caseId": "map-freeciv-oracle-dev-present-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-14-20261020.png",
+      "sha256": "bfe6318454b7122c609e3672e87852df73b0778703ac28796ab6490cb7686460",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-16-20261020.png",
+      "sha256": "1d696fe4fd5ab990650da67c20b78d3240c048e4849ab8f043c398cfcf1ecc85",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-17-20261020.png",
+      "sha256": "bf553f5d9b693d654bed6d438bc1f548c6d7719a32e423695b599d603feb9367",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-04",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-22-20261020.png",
+      "sha256": "64523faf973f4ee597b381152c1ca60fdf919e298af6627327ec0571219c7a79",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-05",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-23-20261020.png",
+      "sha256": "a970216cbccf7456464e5ca25fc120e1e3994344e5fdc95607c1eb27d61ec205",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-06",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-24-20261020.png",
+      "sha256": "07e1ea0a28ea9e7e183e6c8c04797e0fee0995c9f91d0933293bac73f2ea4e2a",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-present-07",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-25-20261020.png",
+      "sha256": "c9ae28636545d886730514468e10daea0864720b28e812e332f9ea6f0a7c53b8",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-absent-bomber",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-inventory-a6-27-20261020.png",
+      "sha256": "7b3d2a97fe944836485af95efacd265d713ff68578b0c99029acd11d621a51e7",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Bomber in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-absent-battleship",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-inventory-a6-28-20261020.png",
+      "sha256": "d137f8168d0bf1aa4d4a870ef3e883580ab9ca0131828235df5318e8ba6e832c",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Battleship in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-oracle-dev-absent-fighter",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-inventory-a6-29-20261020.png",
+      "sha256": "4c48235b5a5c4413eccae22ad9ef2e89b697c073d40cf8c7b3c8978b662eacfa",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Fighter in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  }
+]
