@@ -4,6 +4,7 @@ import { isAbsolute, relative, resolve, sep } from 'node:path'
 import sharp from 'sharp'
 import { z } from 'zod'
 import { assertActive } from '../../src/entities/errors.js'
+import { validateSegmentationBoxCheckResult } from '../../src/features/segmentation/box-check.js'
 import { loadFreshCorpus, readBoundedCorpusFile } from './fresh-corpus.js'
 import type { FreshCase } from './fresh-corpus.js'
 import { pairedBootstrap, wholeObjectMetrics } from './metrics.js'
@@ -11,6 +12,15 @@ import type { Box, LocalizationCase } from './metrics.js'
 import { hashCanonical } from './protocol.js'
 
 const sha = z.string().regex(/^[a-f0-9]{64}$/u)
+export const checkedRegionDevProfileIds = Object.freeze({
+  candidate: 'native-luna-presence-first-checked-region-sam-dev-v3',
+  control: 'native-luna-presence-first-region-no-image-control-dev-v3',
+})
+export const checkedRegionHeldoutProfileIds = Object.freeze({
+  candidate: 'native-luna-presence-first-checked-region-sam-heldout-v3',
+  control: 'native-luna-presence-first-region-no-image-control-heldout-v3',
+})
+
 const pinned = z.object({ path: z.string().min(1), sha256: sha }).strict()
 const box = z
   .object({
@@ -111,6 +121,42 @@ const maskDescriptor = z
     segmentation,
   })
   .strict()
+const boxCheckAttempt = z.discriminatedUnion('status', [
+  z
+    .object({
+      status: z.literal('ok'),
+      requestHash: sha,
+      logicalId: z.number().int().positive(),
+      physicalIds: z.array(z.number().int().positive()).max(1),
+      physicalCalls: z.literal(1),
+      verdict: z.enum(['complete', 'needs-expansion', 'unknown']),
+      selection: z.record(z.unknown()),
+      metadata: z.record(z.unknown()),
+    })
+    .strict(),
+  z
+    .object({
+      status: z.literal('failed'),
+      requestHash: sha,
+      logicalId: z.number().int().positive(),
+      physicalIds: z.array(z.number().int().positive()).max(1),
+      physicalCalls: z.union([z.literal(0), z.literal(1)]),
+      errorCode: z.string().min(1).max(100),
+    })
+    .strict(),
+])
+const verification = z
+  .object({
+    checks: z.array(z.record(z.unknown())).min(1).max(2),
+    expansion: z.enum([
+      'not-needed',
+      'unsupported',
+      'no-enclosing-mask',
+      'rejected-mask',
+      'expanded',
+    ]),
+  })
+  .strict()
 const extraction = z
   .object({
     status: z.enum(['extracted', 'region-only', 'unknown', 'not-found', 'failed']),
@@ -123,6 +169,8 @@ const extraction = z
     seed: regionStage,
     mask: maskDescriptor.optional(),
     segmentation: segmentation.optional(),
+    verification: verification.optional(),
+    boxChecks: z.array(boxCheckAttempt).max(2).optional(),
   })
   .strict()
   .superRefine((row, context) => {
@@ -170,8 +218,9 @@ const policySchema = routeSchema.extend({
   regionSearchPasses: z.literal(3),
   extentCalls: z.literal(0),
   sameInstanceCalls: z.literal(0),
-  maxLogicalCallsPerCase: z.literal(4),
-  maxPhysicalCallsPerCase: z.literal(4),
+  maxLogicalCallsPerCase: z.union([z.literal(4), z.literal(6)]),
+  maxPhysicalCallsPerCase: z.union([z.literal(4), z.literal(6)]),
+  maxBoxCheckCalls: z.union([z.literal(0), z.literal(2)]).optional(),
   maxPhysicalCalls: z.number().int().positive().max(600),
   maxCostUsd: z.number().positive().max(10),
   unknownCostReserveUsd: z.number().positive(),
@@ -385,6 +434,177 @@ function validateMaskBounds(mask: z.infer<typeof maskDescriptor>, source: FreshC
     throw new Error('Predicted mask bounds, offset, center or source canvas mismatch')
 }
 
+type V3ProfileKind = 'candidate' | 'control' | null
+
+function checkedRegionProfileKind(profileId: string, phase: 'dev' | 'heldout'): V3ProfileKind {
+  const profiles = phase === 'dev' ? checkedRegionDevProfileIds : checkedRegionHeldoutProfileIds
+  if (profileId === profiles.candidate) return 'candidate'
+  if (profileId === profiles.control) return 'control'
+  if (profileId.endsWith('-v3')) throw new Error('Unknown checked-region v3 profile ID')
+  return null
+}
+
+function enforceCheckedRegionPolicy(
+  profileKind: V3ProfileKind,
+  variant: 'region-seeded-sam' | 'no-image-control',
+  policyValue: z.infer<typeof policySchema>,
+): void {
+  if (profileKind === null) {
+    if (
+      policyValue.maxBoxCheckCalls !== undefined ||
+      policyValue.maxLogicalCallsPerCase !== 4 ||
+      policyValue.maxPhysicalCallsPerCase !== 4
+    )
+      throw new Error('Legacy region-seeded profile has checked-region policy fields')
+    return
+  }
+  const expectedKind = variant === 'region-seeded-sam' ? 'candidate' : 'control'
+  const cap = profileKind === 'candidate' ? 6 : 4
+  const boxCheckCap = profileKind === 'candidate' ? 2 : 0
+  if (
+    profileKind !== expectedKind ||
+    policyValue.requireClassifiedPresence !== true ||
+    policyValue.maxBoxCheckCalls !== boxCheckCap ||
+    policyValue.maxLogicalCallsPerCase !== cap ||
+    policyValue.maxPhysicalCallsPerCase !== cap
+  )
+    throw new Error('Checked-region v3 variant, presence guard, or per-case call policy mismatch')
+}
+
+function validateCheckedRegionCase(
+  row: z.infer<typeof caseResult>,
+  kind: V3ProfileKind,
+  receiptsById: ReadonlyMap<number, z.infer<typeof receipt>>,
+): {
+  attemptResults: Array<{ status: 'ok' | 'failed'; verdict?: string; errorCode?: string }>
+  expansion: string | null
+} {
+  const attempts = row.extraction.boxChecks ?? []
+  const savedVerification = row.extraction.verification
+  if (kind === null) {
+    if (attempts.length || savedVerification)
+      throw new Error('Legacy region-seeded output contains checked-region results')
+    return { attemptResults: [], expansion: null }
+  }
+  if (!row.extraction.boxChecks)
+    throw new Error('Checked-region v3 rows must preserve the box-check attempt array')
+  if (kind === 'control') {
+    if (!row.extraction.boxChecks)
+      throw new Error('Checked-region no-image rows must preserve an empty box-check array')
+    if (attempts.length || savedVerification)
+      throw new Error('Checked-region no-image control contains segmentation checks')
+    return { attemptResults: [], expansion: null }
+  }
+  if (attempts.length > 2) throw new Error('Checked-region v3 exceeded two box checks')
+  const extraction = row.extraction
+  if (
+    extraction.logicalCalls !== extraction.seed.logicalCalls + attempts.length ||
+    extraction.physicalCalls !==
+      extraction.seed.physicalCalls +
+        attempts.reduce((sum, attempt) => sum + attempt.physicalCalls, 0) ||
+    extraction.requestHashes.length !== extraction.seed.requestHashes.length + attempts.length ||
+    !same(
+      extraction.requestHashes.slice(0, extraction.seed.requestHashes.length),
+      extraction.seed.requestHashes,
+    )
+  )
+    throw new Error('Seed-stage and box-check call ledgers do not reconcile')
+  const successfulResults: ReturnType<typeof validateSegmentationBoxCheckResult>[] = []
+  const attemptResults: Array<{ status: 'ok' | 'failed'; verdict?: string; errorCode?: string }> =
+    []
+  for (const [index, attempt] of attempts.entries()) {
+    const logicalIndex = extraction.seed.logicalCalls + index
+    if (
+      extraction.requestHashes[logicalIndex] !== attempt.requestHash ||
+      attempt.logicalId !== row.classify.logicalCalls + logicalIndex + 1
+    )
+      throw new Error('Box-check request hash or logical ID does not match extraction order')
+    const matchingReceipts = [...receiptsById.values()].filter(
+      (receiptRow) =>
+        receiptRow.caseId === row.caseId && receiptRow.logicalId === attempt.logicalId,
+    )
+    if (
+      matchingReceipts.length !== attempt.physicalCalls ||
+      matchingReceipts.length !== attempt.physicalIds.length ||
+      matchingReceipts.some(
+        (receiptRow) =>
+          !attempt.physicalIds.includes(receiptRow.physicalId) ||
+          receiptRow.requestSha256 !== attempt.requestHash,
+      )
+    )
+      throw new Error('Box-check physical receipt attribution mismatch')
+    if (attempt.status === 'ok') {
+      const result = validateSegmentationBoxCheckResult({
+        verdict: attempt.verdict,
+        selection: attempt.selection,
+        metadata: attempt.metadata,
+      })
+      successfulResults.push(result)
+      attemptResults.push({ status: 'ok', verdict: result.verdict })
+    } else {
+      if (attempt.physicalCalls === 0 && matchingReceipts.length !== 0)
+        throw new Error('Unfetched failed box check has a physical receipt')
+      attemptResults.push({ status: 'failed', errorCode: attempt.errorCode })
+    }
+  }
+  if (savedVerification) {
+    const normalizedChecks = savedVerification.checks.map((check) =>
+      validateSegmentationBoxCheckResult(check),
+    )
+    if (
+      normalizedChecks.length !== successfulResults.length ||
+      normalizedChecks.some((check, index) => !same(check, successfulResults[index]))
+    )
+      throw new Error('Verification checks do not match the ordered successful call records')
+    validateExpansionSequence(
+      normalizedChecks.map((check) => check.verdict),
+      savedVerification.expansion,
+      attempts,
+    )
+  } else if (successfulResults.length > 0 && extraction.status !== 'failed') {
+    throw new Error('Successful checked-region output omitted its verification record')
+  }
+  if (
+    extraction.status === 'extracted' &&
+    (!savedVerification || savedVerification.checks.at(-1)?.verdict !== 'complete')
+  )
+    throw new Error('A cutout was published without a final complete box verdict')
+  if (extraction.status === 'extracted' && attempts.at(-1)?.status !== 'ok')
+    throw new Error('A cutout follows an unsuccessful last box-check attempt')
+  return {
+    attemptResults,
+    expansion: savedVerification?.expansion ?? null,
+  }
+}
+
+function validateExpansionSequence(
+  verdicts: readonly string[],
+  expansion: string,
+  attempts: readonly z.infer<typeof boxCheckAttempt>[],
+): void {
+  const first = verdicts[0]
+  if (first === undefined) throw new Error('Verification record has no successful checks')
+  if (first !== 'needs-expansion') {
+    if (verdicts.length !== 1 || expansion !== 'not-needed' || attempts.length !== 1)
+      throw new Error('Non-expansion verdict has an inconsistent expansion path')
+    return
+  }
+  if (expansion === 'expanded') {
+    if (attempts.length !== 2 || verdicts.length > 2)
+      throw new Error('Expanded mask must be checked at most once more')
+    if (verdicts.length === 2 && attempts[1]?.status === 'ok' && verdicts[1] !== 'needs-expansion')
+      return
+    if (verdicts.length === 1 && attempts[1]?.status === 'failed') return
+    throw new Error('Expanded-mask verdict sequence is inconsistent')
+  }
+  if (
+    !['unsupported', 'no-enclosing-mask', 'rejected-mask'].includes(expansion) ||
+    verdicts.length !== 1 ||
+    attempts.length !== 1
+  )
+    throw new Error('Needs-expansion verdict has an inconsistent expansion outcome')
+}
+
 export function measureSeedRegion(
   seed: z.infer<typeof regionStage>,
   expected: 'present' | 'absent',
@@ -534,6 +754,8 @@ export async function evaluateRegionSeededRun(
 ) {
   assertActive(signal)
   const options = optionsSchema.parse(input)
+  const checkedProfile = checkedRegionProfileKind(options.profileId, options.phase)
+  enforceCheckedRegionPolicy(checkedProfile, options.variant, options.expectedPolicy)
   const [rawManifest, rawSummary, rawSeal, corpus] = await Promise.all([
     readPinned(options.runManifest, signal),
     readPinned(options.summary, signal),
@@ -682,6 +904,7 @@ export async function evaluateRegionSeededRun(
   const truthById = new Map(truths.map((row) => [row.caseId, row]))
   const resultById = new Map(summary.results.map((row) => [row.caseId, row]))
   const receiptIds = new Set<number>()
+  const receiptsById = new Map<number, z.infer<typeof receipt>>()
   const receiptCounts = new Map<
     string,
     {
@@ -698,6 +921,7 @@ export async function evaluateRegionSeededRun(
   for (const call of summary.physicalReceipts) {
     if (receiptIds.has(call.physicalId)) throw new Error('Duplicate physical receipt ID')
     receiptIds.add(call.physicalId)
+    receiptsById.set(call.physicalId, call)
     if (!expectedIds.includes(call.caseId) || !same(call.route, run.route))
       throw new Error('Receipt case/route mismatch')
     const parsed = call.receipt?.costUsd ?? null
@@ -772,6 +996,8 @@ export async function evaluateRegionSeededRun(
     seedMaskForegroundHit: boolean | null
     wholeObjectBox: Box | null
     wholeObjectBoxCorrect: boolean
+    boxCheckAttempts?: Array<{ status: 'ok' | 'failed'; verdict?: string; errorCode?: string }>
+    boxExpansion?: string | null
   }> = []
   let classificationCorrect = 0
   let classificationAttempted = 0
@@ -812,17 +1038,20 @@ export async function evaluateRegionSeededRun(
       costUnknown: 0,
       hashes: [],
     }
+    const checkedCandidate = checkedProfile === 'candidate'
+    const maxCaseCalls = checkedCandidate ? 6 : 4
+    const maxExtractionCalls = checkedCandidate ? 5 : 3
     if (
       result.classify.physicalCalls + result.extraction.physicalCalls !==
         expectedReceipt.physical ||
       result.classify.physicalCalls > 1 ||
-      result.extraction.physicalCalls > 3 ||
+      result.extraction.physicalCalls > maxExtractionCalls ||
       result.classify.physicalCalls > result.classify.logicalCalls ||
       result.extraction.physicalCalls > result.extraction.logicalCalls ||
       result.classify.logicalCalls > 1 ||
-      result.extraction.logicalCalls > 3 ||
-      result.classify.physicalCalls + result.extraction.physicalCalls > 4 ||
-      result.classify.logicalCalls + result.extraction.logicalCalls > 4 ||
+      result.extraction.logicalCalls > maxExtractionCalls ||
+      result.classify.physicalCalls + result.extraction.physicalCalls > maxCaseCalls ||
+      result.classify.logicalCalls + result.extraction.logicalCalls > maxCaseCalls ||
       result.classify.requestHashes.length !== result.classify.logicalCalls ||
       result.extraction.requestHashes.length !== result.extraction.logicalCalls
     )
@@ -852,15 +1081,18 @@ export async function evaluateRegionSeededRun(
           'A logical request without a physical fetch is not a recorded stage failure',
         )
     }
-    if (
-      result.extraction.seed.physicalCalls !== result.extraction.physicalCalls ||
-      result.extraction.seed.logicalCalls !== result.extraction.logicalCalls ||
-      !same(
-        result.extraction.seed.requestHashes.toSorted(),
-        result.extraction.requestHashes.toSorted(),
+    const checkedEvaluation = validateCheckedRegionCase(result, checkedProfile, receiptsById)
+    if (checkedProfile === null || checkedProfile === 'control') {
+      if (
+        result.extraction.seed.physicalCalls !== result.extraction.physicalCalls ||
+        result.extraction.seed.logicalCalls !== result.extraction.logicalCalls ||
+        !same(
+          result.extraction.seed.requestHashes.toSorted(),
+          result.extraction.requestHashes.toSorted(),
+        )
       )
-    )
-      throw new Error('Seed and extraction call ledgers disagree')
+        throw new Error('Seed and extraction call ledgers disagree')
+    }
     if (options.expectedPolicy.requireClassifiedPresence === true) {
       const skippedByAbsence = result.classify.status === 'ok' && result.classify.value === 'absent'
       const skippedByFailure = result.classify.status === 'failed'
@@ -998,6 +1230,12 @@ export async function evaluateRegionSeededRun(
             },
           ]).rows[0]!.correct
         : false,
+      ...(checkedProfile !== null
+        ? {
+            boxCheckAttempts: checkedEvaluation.attemptResults,
+            boxExpansion: checkedEvaluation.expansion,
+          }
+        : {}),
     })
   }
   const localization = wholeObjectMetrics(wholeCases)
@@ -1039,8 +1277,67 @@ export async function evaluateRegionSeededRun(
       ]
     }),
   )
+  const boxVerification =
+    checkedProfile === null
+      ? null
+      : {
+          applicable: checkedProfile === 'candidate',
+          denominator: expectedIds.length,
+          casesWithAttempt: rows.filter((row) => (row.boxCheckAttempts?.length ?? 0) > 0).length,
+          casesWithoutAttempt: rows.filter((row) => (row.boxCheckAttempts?.length ?? 0) === 0)
+            .length,
+          successfulAttempts: rows
+            .flatMap((row) => row.boxCheckAttempts ?? [])
+            .filter((attempt) => attempt.status === 'ok').length,
+          failedAttempts: rows
+            .flatMap((row) => row.boxCheckAttempts ?? [])
+            .filter((attempt) => attempt.status === 'failed').length,
+          verdicts: Object.fromEntries(
+            (['complete', 'needs-expansion', 'unknown'] as const).map((verdict) => [
+              verdict,
+              rows
+                .flatMap((row) => row.boxCheckAttempts ?? [])
+                .filter((attempt) => attempt.status === 'ok' && attempt.verdict === verdict).length,
+            ]),
+          ),
+          expansionOutcomes: Object.fromEntries(
+            (
+              [
+                'not-needed',
+                'unsupported',
+                'no-enclosing-mask',
+                'rejected-mask',
+                'expanded',
+              ] as const
+            ).map((outcome) => [
+              outcome,
+              rows.filter((row) => row.boxExpansion === outcome).length,
+            ]),
+          ),
+          noVerificationRecord: rows.filter((row) => row.boxExpansion === null).length,
+          extractionStatusDenominator: expectedIds.length,
+          extractionStatuses: Object.fromEntries(
+            (['extracted', 'region-only', 'unknown', 'not-found', 'failed'] as const).map(
+              (status) => [status, rows.filter((row) => row.extractionStatus === status).length],
+            ),
+          ),
+          failedErrorCodes: Object.fromEntries(
+            rows
+              .flatMap((row) => row.boxCheckAttempts ?? [])
+              .filter((attempt) => attempt.status === 'failed')
+              .reduce((counts, attempt) => {
+                const code = attempt.errorCode ?? 'unknown-error'
+                counts.set(code, (counts.get(code) ?? 0) + 1)
+                return counts
+              }, new Map<string, number>()),
+          ),
+          metric: 'closed model box-containment verdicts; not a pixel-mask-purity score',
+        }
   const output = {
-    schema: 'region-seeded-independent-evaluation-v1',
+    schema:
+      checkedProfile === null
+        ? 'region-seeded-independent-evaluation-v1'
+        : 'region-seeded-independent-evaluation-v3',
     runId: run.runId,
     profileId: run.profileId,
     phase: run.phase,
@@ -1079,6 +1376,7 @@ export async function evaluateRegionSeededRun(
         'any positive-area intersection of seed cell and independent target box; coarse proxy only',
     },
     wholeObjectLocalization: options.variant === 'region-seeded-sam' ? localization : null,
+    boxVerification,
     mask: {
       referenceInstances: maskRows.reduce((sum, row) => sum + row.referenceInstances, 0),
       scored: maskRows.reduce(

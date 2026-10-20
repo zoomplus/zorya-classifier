@@ -9,6 +9,7 @@ import {
   compareRegionSeededPhotoSeeds,
   evaluateRegionSeededRun,
   measureSeedRegion,
+  checkedRegionDevProfileIds,
 } from '../benchmarks/v02/evaluate-region-seeded.js'
 import { hashCanonical } from '../benchmarks/v02/protocol.js'
 
@@ -73,8 +74,28 @@ async function fixture(
     classifiedAbsentSkip?: boolean
     classifiedFailureSkip?: boolean
     mismatchSkipClassifier?: boolean
+    checkedRegion?: boolean
   },
 ) {
+  const checkedRegion = altered?.checkedRegion === true
+  const fixtureProfileId = checkedRegion
+    ? variant === 'region-seeded-sam'
+      ? checkedRegionDevProfileIds.candidate
+      : checkedRegionDevProfileIds.control
+    : profileId
+  const fixturePolicy = checkedRegion
+    ? {
+        ...policy,
+        maxLogicalCallsPerCase: variant === 'region-seeded-sam' ? (6 as const) : (4 as const),
+        maxPhysicalCallsPerCase: variant === 'region-seeded-sam' ? (6 as const) : (4 as const),
+        maxBoxCheckCalls: variant === 'region-seeded-sam' ? (2 as const) : (0 as const),
+        requireClassifiedPresence: true as const,
+      }
+    : altered?.classifiedAbsentSkip ||
+        altered?.classifiedFailureSkip ||
+        altered?.mismatchSkipClassifier
+      ? { ...policy, requireClassifiedPresence: true as const }
+      : policy
   const ids = Array.from({ length: 40 }, (_, i) =>
     i < 20
       ? `photo-${String(i).padStart(2, '0')}`
@@ -274,14 +295,104 @@ async function fixture(
       extraction,
     }
   })
+  if (checkedRegion) {
+    const firstFixtureExtraction = results[0]!.extraction
+    const skipped = () => ({
+      status: 'failed' as const,
+      reason: 'classification-failed',
+      durationMs: 0,
+      physicalCalls: 0,
+      logicalCalls: 0,
+      requestHashes: [],
+      seed: {
+        status: 'not-reached' as const,
+        durationMs: 0,
+        physicalCalls: 0,
+        logicalCalls: 0,
+        requestHashes: [],
+      },
+      boxChecks: [],
+    })
+    for (const row of results) {
+      row.classify = {
+        status: 'failed',
+        durationMs: 1,
+        physicalCalls: 0,
+        logicalCalls: 0,
+        requestHashes: [],
+        errorCode: 'TIMEOUT',
+      }
+      row.extraction = skipped() as typeof row.extraction
+    }
+    if (variant === 'region-seeded-sam') {
+      const first = results[0]!
+      first.classify = {
+        status: 'ok',
+        value: 'present',
+        durationMs: 1,
+        physicalCalls: 1,
+        logicalCalls: 1,
+        requestHashes: ['6'.repeat(64)],
+      } as unknown as typeof first.classify
+      const selected = {
+        verdict: 'complete' as const,
+        selection: {
+          choice: 'complete' as const,
+          nativeChoice: 'complete' as const,
+          probabilities: { complete: 1, 'needs-expansion': 0, unknown: 0 },
+          tied: ['complete' as const],
+        },
+        metadata: {
+          model: 'fixture-model',
+          provider: 'fixture',
+          requestId: 'fixture-box-check',
+          durationMs: 1,
+          costUsd: 0.01,
+          attempts: 1,
+        },
+      }
+      const extracted = {
+        ...(firstFixtureExtraction as Record<string, unknown>),
+        status: 'extracted' as const,
+        durationMs: 2,
+        physicalCalls: 1,
+        logicalCalls: 1,
+        requestHashes: ['7'.repeat(64)],
+        seed: {
+          status: 'located' as const,
+          region: { left: 3, top: 3, width: 2, height: 2 },
+          sourceWidth: 10,
+          sourceHeight: 10,
+          prompt: 'seed-region' as const,
+          searchLimit: { left: 0, top: 0, width: 10, height: 10 },
+          durationMs: 1,
+          physicalCalls: 0,
+          logicalCalls: 0,
+          requestHashes: [],
+        },
+        boxChecks: [
+          {
+            status: 'ok' as const,
+            requestHash: '7'.repeat(64),
+            logicalId: 2,
+            physicalIds: [2],
+            physicalCalls: 1 as const,
+            ...selected,
+          },
+        ],
+        verification: { checks: [selected], expansion: 'not-needed' as const },
+      }
+      first.extraction = extracted as unknown as typeof first.extraction
+    }
+  }
   const receipts =
-    altered?.receipt || altered?.classifiedAbsentSkip
+    altered?.checkedRegion && variant === 'region-seeded-sam'
       ? [
           {
             caseId: ids[0]!,
             physicalId: 1,
             logicalId: 1,
-            requestSha256: altered?.classifiedAbsentSkip ? '9'.repeat(64) : '6'.repeat(64),
+            requestSha256: '6'.repeat(64),
             requestBodySha256: '7'.repeat(64),
             admittedAt: '2026-10-21T00:00:00.000Z',
             durationMs: 1,
@@ -291,11 +402,44 @@ async function fixture(
             wireReceipt: { usageCostUsd: 0.01 },
             errorCode: null,
           },
+          {
+            caseId: ids[0]!,
+            physicalId: 2,
+            logicalId: 2,
+            requestSha256: '7'.repeat(64),
+            requestBodySha256: '8'.repeat(64),
+            admittedAt: '2026-10-21T00:00:01.000Z',
+            durationMs: 1,
+            httpStatus: 200,
+            route,
+            receipt: { costUsd: 0.01 },
+            wireReceipt: { usageCostUsd: 0.01 },
+            errorCode: null,
+          },
         ]
-      : []
+      : altered?.checkedRegion
+        ? []
+        : altered?.receipt || altered?.classifiedAbsentSkip
+          ? [
+              {
+                caseId: ids[0]!,
+                physicalId: 1,
+                logicalId: 1,
+                requestSha256: altered?.classifiedAbsentSkip ? '9'.repeat(64) : '6'.repeat(64),
+                requestBodySha256: '7'.repeat(64),
+                admittedAt: '2026-10-21T00:00:00.000Z',
+                durationMs: 1,
+                httpStatus: 200,
+                route,
+                receipt: { costUsd: 0.01 },
+                wireReceipt: { usageCostUsd: 0.01 },
+                errorCode: null,
+              },
+            ]
+          : []
   const summary = {
     runId: 'fixture-run',
-    profileId,
+    profileId: fixtureProfileId,
     phase: 'dev',
     status: 'complete',
     producerSourceSha256,
@@ -309,10 +453,10 @@ async function fixture(
     results,
     aggregate: {
       admittedPhysicalCalls: receipts.length,
-      knownCostUsd: receipts.length ? 0.01 : 0,
+      knownCostUsd: receipts.length * 0.01,
       unknownCostCalls: 0,
       inFlightCalls: 0,
-      accountedExposureUsd: receipts.length ? 0.01 : 0,
+      accountedExposureUsd: receipts.length * 0.01,
       maxPhysicalCalls: 250,
       maxCostUsd: 5,
     },
@@ -331,7 +475,7 @@ async function fixture(
   const summaryFile = await putJson(directory, 'summary.json', summary)
   const run = {
     runId: 'fixture-run',
-    profileId,
+    profileId: fixtureProfileId,
     phase: 'dev',
     purpose: 'fixture purpose',
     targetPolicy: 'target-plus-neutral-instruction-v1',
@@ -346,12 +490,7 @@ async function fixture(
     variantSha256,
     route,
     variant,
-    policy:
-      altered?.classifiedAbsentSkip ||
-      altered?.classifiedFailureSkip ||
-      altered?.mismatchSkipClassifier
-        ? { ...policy, requireClassifiedPresence: true }
-        : policy,
+    policy: fixturePolicy,
     budget: { maxPhysicalCalls: 250, maxCostUsd: 5, unknownCostReserveUsd: 0.05 },
   }
   const runFile = await putJson(directory, 'run.json', run)
@@ -418,40 +557,59 @@ async function fixture(
   )
   const { readFile } = await import('node:fs/promises')
   truths[0] = { ...truths[0]!, sha256: digest(await readFile(truths[0]!.path)) }
-  await writeFile(summaryFile.path, JSON.stringify(summary))
-  summaryFile.sha256 = digest(JSON.stringify(summary))
+  const summaryBytes = JSON.stringify(summary)
+  await writeFile(summaryFile.path, summaryBytes)
+  const frozenSummaryFile = { path: summaryFile.path, sha256: digest(summaryBytes) }
   const seal = {
     runId: 'fixture-run',
     status: 'complete',
-    summarySha256: digest(JSON.stringify(summary)),
+    summarySha256: frozenSummaryFile.sha256,
     sourceBeforeSha256: producerSourceSha256,
     sourceAfterSha256: producerSourceSha256,
     sourceUnchanged: true,
   }
-  await writeFile(sealFile.path, JSON.stringify(seal))
-  sealFile.sha256 = digest(JSON.stringify(seal))
+  const sealBytes = JSON.stringify(seal)
+  await writeFile(sealFile.path, sealBytes)
+  const frozenSealFile = { path: sealFile.path, sha256: digest(sealBytes) }
   return {
     ids,
     results,
     summary,
+    async refreshSummaryAndSeal() {
+      const refreshedSummaryBytes = JSON.stringify(summary)
+      await writeFile(frozenSummaryFile.path, refreshedSummaryBytes)
+      const refreshedSummaryFile = {
+        path: frozenSummaryFile.path,
+        sha256: digest(refreshedSummaryBytes),
+      }
+      const refreshedSeal = {
+        runId: 'fixture-run',
+        status: 'complete',
+        summarySha256: refreshedSummaryFile.sha256,
+        sourceBeforeSha256: producerSourceSha256,
+        sourceAfterSha256: producerSourceSha256,
+        sourceUnchanged: true,
+      }
+      const sealBytes = JSON.stringify(refreshedSeal)
+      await writeFile(frozenSealFile.path, sealBytes)
+      return {
+        summary: refreshedSummaryFile,
+        completionSeal: { path: frozenSealFile.path, sha256: digest(sealBytes) },
+      }
+    },
     options: {
       phase: 'dev' as const,
       variant,
-      profileId,
+      profileId: fixtureProfileId,
       purpose: 'fixture purpose',
       expectedProducerSourceSha256: producerSourceSha256,
       expectedVariantSha256: variantSha256,
       expectedRoute: route,
-      expectedPolicy:
-        altered?.classifiedAbsentSkip ||
-        altered?.classifiedFailureSkip ||
-        altered?.mismatchSkipClassifier
-          ? { ...policy, requireClassifiedPresence: true as const }
-          : policy,
+      expectedPolicy: fixturePolicy,
       expectedTargetPolicy: 'target-plus-neutral-instruction-v1' as const,
-      summary: summaryFile,
+      summary: frozenSummaryFile,
       runManifest: runFile,
-      completionSeal: sealFile,
+      completionSeal: frozenSealFile,
       corpus: { manifests, imageRoot },
       truths,
       referenceRoot,
@@ -482,6 +640,153 @@ await test('seed-region box overlap counts edge fragments as a coarse proxy, nev
   assert.equal(absent.boxOverlap, true)
   assert.equal(absent.positiveBoxIntersection, false)
   assert.equal(absent.located, true)
+})
+
+await test('v3 checked-region candidate reports check verdicts without changing box or mask scoring', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-checked-v3-'))
+  try {
+    const value = await fixture(directory, 'region-seeded-sam', { checkedRegion: true })
+    const report = await evaluateRegionSeededRun(value.options, signal)
+    assert.equal(report.schema, 'region-seeded-independent-evaluation-v3')
+    assert.equal(report.denominator, 40)
+    assert.equal(report.wholeObjectLocalization?.attempted, 40)
+    assert.equal(report.wholeObjectLocalization?.matched, 1)
+    assert.equal(report.mask.referenceInstances, 1)
+    assert.equal(report.mask.scored, 1)
+    assert.equal(report.mask.passedAtIoU08, 1)
+    assert.deepEqual(report.boxVerification?.verdicts, {
+      complete: 1,
+      'needs-expansion': 0,
+      unknown: 0,
+    })
+    assert.equal(report.boxVerification?.casesWithAttempt, 1)
+    assert.equal(report.boxVerification?.casesWithoutAttempt, 39)
+    assert.equal(report.boxVerification?.expansionOutcomes['not-needed'], 1)
+    assert.equal(report.boxVerification?.extractionStatuses.failed, 39)
+    assert.equal(report.physical.count, 2)
+    assert.equal(report.physical.knownCostUsd, 0.02)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('v3 checked-region no-image profile requires zero box-check attempts', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-checked-v3-control-'))
+  try {
+    const value = await fixture(directory, 'no-image-control', { checkedRegion: true })
+    const report = await evaluateRegionSeededRun(value.options, signal)
+    assert.equal(report.schema, 'region-seeded-independent-evaluation-v3')
+    assert.equal(report.boxVerification?.applicable, false)
+    assert.equal(report.boxVerification?.denominator, 40)
+    assert.equal(report.boxVerification?.casesWithoutAttempt, 40)
+    assert.equal(report.boxVerification?.successfulAttempts, 0)
+    assert.equal(report.physical.count, 0)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('v3 checked-region attempts must reconcile to the actual physical receipt', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-checked-v3-receipt-'))
+  try {
+    const value = await fixture(directory, 'region-seeded-sam', { checkedRegion: true })
+    const first = value.summary.results[0]!
+    const extraction = first.extraction as unknown as {
+      boxChecks: Array<{ physicalIds: number[] }>
+    }
+    extraction.boxChecks[0]!.physicalIds = [999]
+    const refreshedPins = await value.refreshSummaryAndSeal()
+    value.options.summary = refreshedPins.summary
+    value.options.completionSeal = refreshedPins.completionSeal
+    await assert.rejects(
+      evaluateRegionSeededRun(value.options, signal),
+      /Box-check physical receipt attribution mismatch/u,
+    )
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('v3 checked-region cannot accept a second needs-expansion verdict', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-checked-v3-expansion-'))
+  try {
+    const value = await fixture(directory, 'region-seeded-sam', { checkedRegion: true })
+    const firstRow = value.summary.results[0]!
+    const extraction = firstRow.extraction as unknown as {
+      status: string
+      mask?: unknown
+      physicalCalls: number
+      logicalCalls: number
+      requestHashes: string[]
+      boxChecks: Array<Record<string, unknown>>
+      verification: { checks: Array<Record<string, unknown>>; expansion: string }
+    }
+    const verdictResult = {
+      verdict: 'needs-expansion',
+      selection: {
+        choice: 'needs-expansion',
+        nativeChoice: 'needs-expansion',
+        probabilities: { complete: 0, 'needs-expansion': 1, unknown: 0 },
+        tied: ['needs-expansion'],
+      },
+      metadata: {
+        model: 'fixture-model',
+        provider: 'fixture',
+        requestId: 'fixture-box-check-expand',
+        durationMs: 1,
+        costUsd: 0.01,
+        attempts: 1,
+      },
+    }
+    extraction.status = 'unknown'
+    delete extraction.mask
+    extraction.physicalCalls = 2
+    extraction.logicalCalls = 2
+    extraction.requestHashes = ['7'.repeat(64), '8'.repeat(64)]
+    extraction.boxChecks[0] = {
+      status: 'ok',
+      requestHash: '7'.repeat(64),
+      logicalId: 2,
+      physicalIds: [2],
+      physicalCalls: 1,
+      ...verdictResult,
+    }
+    extraction.boxChecks.push({
+      status: 'ok',
+      requestHash: '8'.repeat(64),
+      logicalId: 3,
+      physicalIds: [3],
+      physicalCalls: 1,
+      ...verdictResult,
+    })
+    extraction.verification = { checks: [verdictResult, verdictResult], expansion: 'expanded' }
+    value.summary.physicalReceipts.push({
+      caseId: firstRow.caseId,
+      physicalId: 3,
+      logicalId: 3,
+      requestSha256: '8'.repeat(64),
+      requestBodySha256: 'a'.repeat(64),
+      admittedAt: '2026-10-21T00:00:02.000Z',
+      durationMs: 1,
+      httpStatus: 200,
+      route,
+      receipt: { costUsd: 0.01 },
+      wireReceipt: { usageCostUsd: 0.01 },
+      errorCode: null,
+    })
+    value.summary.aggregate.admittedPhysicalCalls = 3
+    value.summary.aggregate.knownCostUsd = 0.03
+    value.summary.aggregate.accountedExposureUsd = 0.03
+    const refreshedPins = await value.refreshSummaryAndSeal()
+    value.options.summary = refreshedPins.summary
+    value.options.completionSeal = refreshedPins.completionSeal
+    await assert.rejects(
+      evaluateRegionSeededRun(value.options, signal),
+      /Expanded-mask verdict sequence is inconsistent/u,
+    )
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
 })
 
 await test('stage failures remain in the full denominator and receipt accounting includes known wire costs', async () => {
