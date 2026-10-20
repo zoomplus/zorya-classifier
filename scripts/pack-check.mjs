@@ -140,34 +140,44 @@ assert.equal(typeof createMobileSamObjectProposals,'function')
 assert.deepEqual(unpackBinaryMask(packBinaryMask(new Uint8Array([1,0,1,0]),2,2)),new Uint8Array([1,0,1,0]))
 await assert.rejects(createMobileSamObjectProposals({encoderPath:'not-downloaded.onnx',decoderPath:'not-downloaded.onnx'}),{code:'UNSUPPORTED'})
 let segmenterDisposals=0
+let regionExtractionCalls=0
+let segmentationCalls=0
 const whole=createClassifier({decision:{async decide(request){
+ regionExtractionCalls++
+ assert.deepEqual(Object.keys(request.questions).sort(),['presence','selection'])
  const answers:DecisionResult['answers']={}
  for(const [id,q] of Object.entries(request.questions)){
   if(q.type==='noul'){answers[id]={type:'presence',presence:'present'};continue}
-  if(id==='instance'){answers[id]={type:'ranked-choice',ranking:['same']};continue}
-  const coordinate=id==='right'?99:id==='bottom'?79:0
-  const boundary=Object.entries(q.criteria).find(([,text])=>{
-   const parts=/^Integer boundary coordinates in \\[(\\d+), (\\d+)\\)\\.$/.exec(text)
-   return parts!==null && coordinate>=Number(parts[1]) && coordinate<Number(parts[2])
-  })?.[0]
-  answers[id]={type:'ranked-choice',ranking:boundary?[boundary]:Object.keys(q.criteria).slice(0,q.rankingSize??4)}
+  answers[id]={type:'ranked-choice',ranking:Object.keys(q.criteria).slice(0,q.rankingSize??4)}
  }
  return {answers,metadata:{model:'fixture',provider:'fixture',requestId:null,durationMs:0,costUsd:0,attempts:1}}
 }},segmentation:{async segment(input){
+ segmentationCalls++
+ assert.equal(input.prompt,'seed-region')
+ assert.deepEqual([input.image.width,input.image.height],[512,384])
+ assert.deepEqual(input.wholeRegion,{left:0,top:0,width:512,height:384})
+ assert.ok(input.seedRegion.width<160 && input.seedRegion.height<100)
  const mask=new Uint8Array(input.image.width*input.image.height)
- for(let y=0;y<10;y++)for(let x=0;x<10;x++)mask[y*input.image.width+x]=1
+ for(let y=0;y<100;y++)for(let x=0;x<160;x++)mask[y*input.image.width+x]=1
  return {status:'segmented',mask:{data:mask,width:input.image.width,height:input.image.height,format:'binary-u8'},metadata:{method:'fixture',backend:'fixture',durationMs:0,input:{width:input.image.width,height:input.image.height}}}
 },settle:async()=>{},dispose:async()=>{segmenterDisposals++}}})
 try{
  const location=await whole.locate({image,target:'Synthetic rectangle',mode:'whole-object'})
  assert.equal(location.status,'located')
- if(location.status==='located'){assert.equal(location.kind,'whole-object');assert.ok(location.region.width>=100);assert.ok(location.region.height>=80)}
+ if(location.status==='located'){
+  assert.equal(location.method,'region-segmentation-v1')
+  assert.deepEqual(location.region,{left:0,top:0,width:160,height:100})
+  assert.deepEqual(location.center,{x:80,y:50})
+ }
  const extracted=await whole.extract({image,target:'Synthetic rectangle'})
  assert.equal(extracted.status,'extracted')
  if(extracted.status==='extracted'){
-  assert.equal(extracted.png[0],137);assert.equal(extracted.mask.data.length,100)
-  assert.deepEqual(extracted.region,{left:0,top:0,width:10,height:10})
+  assert.equal(extracted.png[0],137);assert.equal(extracted.mask.data.length,16000)
+  assert.deepEqual(extracted.region,{left:0,top:0,width:160,height:100})
+  assert.deepEqual(extracted.center,{x:80,y:50})
  }
+ assert.equal(regionExtractionCalls,6)
+ assert.equal(segmentationCalls,2)
  console.log(JSON.stringify({wholeObject:'passed',extract:'passed',optionalOnnxAbsent:true,providerHttpCalls:0}))
 }finally{await whole.dispose()}
 assert.equal(segmenterDisposals,0)
