@@ -1,0 +1,90 @@
+{
+  "schema": "zorya-v02-method-selection-v1",
+  "recordedAt": "2026-10-20T17:09:43.940667+00:00",
+  "selectedDevProfileId": "native-luna-categorical-presence-sam-target-plus-neutral-v1",
+  "targetPolicy": "target-plus-neutral-instruction-v1",
+  "producerRevision": "e4f55baa2c3c8a9ccc711a8aafc56d0c69f4af82",
+  "producerSourceSha256": "7ec64fb859b8e322bcd5e5b8956c4b7c0be5e2ceec36d19fc08906e3912ca46d",
+  "decisionRecipeSourceSha256": {
+    "./categorical-presence-port.ts": "0d85dcb5acb12d10c4fab888f7a0b81e16c594c940886794fecc2b9367c26512",
+    "./native-categorical-presence-port.ts": "0bf4fa6a16c52083f1a97a696eeead26a6710d82bbacb27af4380ae01143eb3a",
+    "src/features/prompts.ts": "b808ed8f42e8c92daf08060d2805da618f2b140f99b6a9b07df49622d57b62aa",
+    "src/processes/locate.ts": "a5a1320c2dff4060a3c5ab5e32cb5f0af2d94fcad458caba3818b6a0a28dab3d",
+    "src/processes/proposal-location.ts": "0670d56e30b2f42e499d3311149da8bb9b1af83368c0908ae1538bc6d04877a3",
+    "src/infrastructure/segmentation/proposal-presentation.ts": "c1e5ab928a97209e090b076db56d7fac69d5fa743dacbfd4288307e576990c25"
+  },
+  "route": {
+    "model": "openai/gpt-6-luna-decisions",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "endpoint": "/api/alpha/decisions",
+    "fallback": false
+  },
+  "method": "pixel-mask-proposals-v1",
+  "native": {
+    "method": "mobile-sam-nine-point-proposals-v1",
+    "executionProvider": "cpu",
+    "threads": 2,
+    "maxActive": 1,
+    "maxWaiting": 2,
+    "encoderSha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749",
+    "decoderSha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe"
+  },
+  "policy": {
+    "timeoutMs": 120000,
+    "maxInFlightCases": 2,
+    "boxTolerancePx": 8,
+    "maxExtentPasses": 3,
+    "retries": 0,
+    "fallback": false,
+    "categoricalPresence": "closed-choice-present-absent-unknown-v1",
+    "ranking": "existing validated maximum; stable supplied-order ties; raw scores retained"
+  },
+  "development": {
+    "profilesCompared": 2,
+    "photoMatches": {
+      "preserveInstruction": 3,
+      "targetOnly": 0
+    },
+    "photoPositiveDenominator": 16,
+    "classification": {
+      "preserveInstruction": 35,
+      "targetOnly": 35
+    },
+    "classificationDenominator": 40,
+    "falseLocations": {
+      "preserveInstruction": 0,
+      "targetOnly": 0
+    },
+    "negativeDenominator": 10,
+    "selectionRule": "Both passed the DEV negative condition; preserving the neutral instruction wins on photo whole-object matches before any latency/cost tie-break. All failures and unknowns count.",
+    "latencyUsedForRanking": false,
+    "pairedPreregistrationSha256": "c1f2000d59a0724acb41c5c46e647e8c964295e522e8722c2d2512723e02f69a",
+    "evaluationSha256": {
+      "preserveInstruction": "0779badea569409fad7f1938f1007bdea393a511a95b15661c0e310ca7af6e28",
+      "targetOnly": "dafce762ced70a0b877620a6ef1d473457aa03e099147e181539db77fd852c5b"
+    }
+  },
+  "heldoutExposureBeforeSelection": {
+    "newCasePixelsViewedByRootOrProducer": false,
+    "newPerCaseTruthViewedByRootOrProducer": false,
+    "curatorHasLabels": true,
+    "genericOracleSourceReviewed": true
+  },
+  "requiredBeforeBlindDispatch": [
+    "Reviewed complete executable producer/control source and source freeze",
+    "Canonical source-disjoint80input manifests and independent oracle integrity",
+    "Hosted final source checks",
+    "Completed monotonic native resource acceptance"
+  ],
+  "allowsHeldoutDispatch": false,
+  "heldoutQualified": false,
+  "releaseQualified": false,
+  "libraryModelDefault": null,
+  "limits": [
+    "Development selection is not a blind qualification or a universal quality claim.",
+    "This recipe is caller-owned and never installed as a library model/provider default.",
+    "Selected recipe settings and decision/source transformations must not change for blind qualification.",
+    "The later heldout run freeze must bind this selection digest, canonical input pins and its actual producer source closure."
+  ]
+}

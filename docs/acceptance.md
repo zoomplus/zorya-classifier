@@ -4,26 +4,28 @@ This acceptance concerns the extracted MIT Node.js library, not the Zorya deskto
 
 ## Current gate state
 
-The integrated source passed [412 Linux offline tests, formatting, source checks and the installed-archive consumer at `fa82e65`](evidence/v02/integration-fa82e65.json). Its additions are benchmark-only caller composition and independent routing/lifecycle tests; the runtime bytes are unchanged. The [35e3064 run](evidence/v02/ci-35e3064.json) passed both Linux jobs but failed a new benchmark CLI assertion on Windows because it assumed POSIX path separators. After using the platform path resolver, [2922caf passed all four Windows/Linux × Node 22/24 jobs](evidence/v02/ci-2922caf.json), including source, installed-archive and formatting steps. Final release CI remains required.
+The integrated source passed [425 Linux offline tests, formatting, source checks and the installed-archive consumer at `4331b1b`](evidence/v02/integration-4331b1b.json). Its additions are benchmark-only caller composition and independent routing/lifecycle tests; the runtime bytes are unchanged. [43b7426 passed all four Windows/Linux × Node 22/24 jobs](evidence/v02/ci-43b7426.json), including source, installed-archive and formatting steps. The later [4331b1b run](evidence/v02/ci-4331b1b.json) passed Linux but failed one new Windows CLI test that assumed POSIX separators. That assertion now uses `node:path.join`; its replacement and final release CI remain required. Earlier failed path checks remain preserved.
 
 All 53 runtime source files remain byte-identical to `0c365cb`, as do the 106 compiled runtime files. The first proposal resource run completed its configured wall-clock phases, but its observed process lifetime and summed monotonic operation durations did not prove the required physical duration. It is retained as historical evidence. Replacement harness `261dc23` uses monotonic phase deadlines, enforces the full duration minima, and has a separate kernel-uptime observer. Its fresh two-hour run is in progress.
 
 The [first frozen blind candidate](evidence/v02/heldout-evaluation-20261020.md) failed: 3/60 positive whole-object boxes matched, there were 2/20 false locations against a limit of one, and the paired photo bootstrap interval was [0, 0.20], whose lower bound must be positive. Four of six scored mask instances reached IoU 0.8; nineteen reference instances were unavailable. Mask and box metrics remain separate. The no-image control completed all 40 photos with no successful location. No alternative is selected from these revealed heldout results.
 
-The [six-case split Choice/NoUL pilot](evidence/v02/split-choice-noul-dev6.md) also failed its predeclared positive gate: classification 4/6, positive whole-object matches 0/2, false locations 0/4 verified negatives, and one failed localization. It does not proceed to the full DEV40 run. The [split categorical-presence follow-up](evidence/v02/categorical-presence-dev6.md) also produced no locations: all six were unknown, classification was 4/6, and every physical call has a known cost. The next offline comparison batches spatial Choice and converted categorical binary Choice in one actual native request, with two predeclared target-format policies on the complete original DEV40. It does not synthesize probabilities or change runtime/model defaults. Full DEV40 eligibility and fresh blind-cohort qualification remain unchanged. Model/provider choices remain benchmark configuration owned by the caller.
+The [six-case split Choice/NoUL pilot](evidence/v02/split-choice-noul-dev6.md) failed its predeclared positive gate: classification 4/6, positive whole-object matches 0/2, false locations 0/4 verified negatives, and one failed localization. The [split categorical-presence follow-up](evidence/v02/categorical-presence-dev6.md) also produced no locations. Neither failed split profile advanced to full DEV40.
+
+The distinct native categorical batch comparison completed both original DEV40 profiles: [preserving the neutral instruction](evidence/v02/categorical-dev40-preserve.json) reached 3/30 positive whole-object matches, while [target alone](evidence/v02/categorical-dev40-target-only.json) reached 0/30. Both classify 35/40 and have zero false locations on ten negatives. Preserving the instruction is [frozen as the development selection](evidence/v02/categorical-vision-method-selection.json), before new heldout pixels or per-case truth were opened. Its eight 502 failures and eight unknown charges remain counted. The second profile has four such failures. Timing is unranked under concurrent native stress; no latency tie-break was needed. This caller-owned recipe does not become a library default or qualify blind accuracy. The new cohort and unchanged heldout gates remain pending.
 
 A separate [reconstructed C03 diagnostic](evidence/v02/reconstructed-c03-box.json) finds box IoU 0.874 and reference-box coverage 0.986 against the original Dog annotation. The original producer rejected completeness and returned `unknown`; its mask was not saved. This replay does not repair that result, prove the original mask bytes, or measure mask IoU. A matching box alone cannot show that the mask-completeness verdict was wrong.
 
-| Gate                                 | Current status                                                                     |
-| ------------------------------------ | ---------------------------------------------------------------------------------- |
-| Source checks and installed consumer | Pass: 412 tests at `fa82e65`; runtime bytes unchanged                              |
-| Hosted Windows/Linux × Node 22/24    | Pass for `2922caf`; final release source still requires CI                         |
-| Windows native execution             | Passed on the identical runtime bytes; controlled input only                       |
-| Two-hour resource soak               | Replacement monotonic run in progress; earlier wall-clock run is not sufficient    |
-| First frozen blind vision candidate  | Failed both false-location and paired-bootstrap gates                              |
-| Next development candidate           | Split pilots failed; native batch/full-DEV target-policy comparison in preparation |
-| Text-only encoders                   | None qualified; public experimental image selector returns `UNSUPPORTED`           |
-| Publication                          | Pending all mandatory gates                                                        |
+| Gate                                 | Current status                                                                      |
+| ------------------------------------ | ----------------------------------------------------------------------------------- |
+| Source checks and installed consumer | Pass: 425 Linux tests at `4331b1b`; runtime bytes unchanged                         |
+| Hosted Windows/Linux × Node 22/24    | Pass for `43b7426`; later Windows CLI test repaired, replacement CI pending         |
+| Windows native execution             | Passed on the identical runtime bytes; controlled input only                        |
+| Two-hour resource soak               | Replacement monotonic run in progress; earlier wall-clock run is not sufficient     |
+| First frozen blind vision candidate  | Failed both false-location and paired-bootstrap gates                               |
+| Next development candidate           | Native categorical batch with neutral instruction selected; fresh blind run pending |
+| Text-only encoders                   | None qualified; public experimental image selector returns `UNSUPPORTED`            |
+| Publication                          | Pending all mandatory gates                                                         |
 
 ## 0.2 development snapshot, 2026-10-20
 

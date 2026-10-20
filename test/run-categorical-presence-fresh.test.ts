@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { join } from 'node:path'
 import test from 'node:test'
 import {
   assertCategoricalFreshDevCorpusShape,
@@ -15,9 +16,9 @@ await test('CLI requires explicit dry-run or paid mode and pins the three DEV in
     parsed.manifests.map((manifest) => manifest.sha256),
     freshProposalManifestHashes,
   )
-  assert.equal(parsed.manifests[0]?.path.endsWith('/dev/inputs.json'), true)
-  assert.equal(parsed.manifests[1]?.path.endsWith('/dev-independent-ui/inputs.json'), true)
-  assert.equal(parsed.manifests[2]?.path.endsWith('/dev-independent-map/inputs.json'), true)
+  assert.equal(parsed.manifests[0]?.path.endsWith(join('dev', 'inputs.json')), true)
+  assert.equal(parsed.manifests[1]?.path.endsWith(join('dev-independent-ui', 'inputs.json')), true)
+  assert.equal(parsed.manifests[2]?.path.endsWith(join('dev-independent-map', 'inputs.json')), true)
 })
 
 await test('CLI DEV gate requires exactly forty cases split 20 photo, 10 UI and 10 map', () => {
