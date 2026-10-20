@@ -72,23 +72,22 @@ export async function createGrabCutSegmenter(
   return {
     async segment(input): Promise<SegmentationResult> {
       const started = performance.now()
-      const image = snapshotInput(input)
       assertActive(input.signal)
-      const reply = nativeSegmentationReplySchema.parse(
-        await pool.run(
-          {
-            kind: 'grabcut',
-            width: image.width,
-            height: image.height,
-            rgba: Buffer.from(image.data).toString('base64'),
-            seedRegion: { ...input.seedRegion },
-            wholeRegion: { ...input.wholeRegion },
-            roi: { ...input.roi },
-            assetPath: parsed.assetPath,
-          },
-          input.signal,
-        ),
-      )
+      let image!: ReturnType<typeof snapshotInput>
+      const raw = await pool.runLazy(input.signal, () => {
+        image = snapshotInput(input)
+        return {
+          kind: 'grabcut' as const,
+          width: image.width,
+          height: image.height,
+          rgba: Buffer.from(image.data).toString('base64'),
+          seedRegion: { ...input.seedRegion },
+          wholeRegion: { ...input.wholeRegion },
+          roi: { ...input.roi },
+          assetPath: parsed.assetPath,
+        }
+      })
+      const reply = nativeSegmentationReplySchema.parse(raw)
       const mask = Buffer.from(reply.mask, 'base64')
       if (
         reply.width !== image.width ||

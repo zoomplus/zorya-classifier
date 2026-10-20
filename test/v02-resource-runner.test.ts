@@ -27,4 +27,16 @@ await test('resource runner captures parent and owned-child memory then observes
   assert.equal(report.childPeak.rss, 400)
   assert.ok(report.parentSamples.length >= 1)
   assert.ok(report.parentPeak.rss > 0)
+  const phased = new ResourceRunner(250)
+  phased.start()
+  phased.setPhase('busy')
+  phased.setPhase('idle-after')
+  const phasedReport = phased.stop()
+  assert.deepEqual(
+    phasedReport.parentSamples.map((sample) => sample.phase),
+    ['idle-before', 'busy', 'idle-after', 'idle-after'],
+  )
+  assert.ok(phasedReport.parentSamples.every((sample) => sample.timestampMs >= 0))
+  assert.ok(phasedReport.idleWindowMedian.before.heapUsed > 0)
+  assert.ok(phasedReport.idleWindowMedian.after.external > 0)
 })

@@ -95,10 +95,11 @@ export async function createMobileSamSegmenter(
   return {
     async segment(input): Promise<SegmentationResult> {
       const started = performance.now()
-      const image = snapshotInput(input)
       assertActive(input.signal)
-      const raw = await pool.run(
-        {
+      let image!: ReturnType<typeof snapshotInput>
+      const raw = await pool.runLazy(input.signal, () => {
+        image = snapshotInput(input)
+        return {
           kind: 'mobile-sam',
           width: image.width,
           height: image.height,
@@ -107,9 +108,8 @@ export async function createMobileSamSegmenter(
           wholeRegion: { ...input.wholeRegion },
           roi: { ...input.roi },
           options: parsed,
-        },
-        input.signal,
-      )
+        }
+      })
       const reply = nativeSegmentationReplySchema.parse(raw)
       const maskData = Buffer.from(reply.mask, 'base64')
       if (

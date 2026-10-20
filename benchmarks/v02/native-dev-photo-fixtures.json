@@ -1,0 +1,117 @@
+[
+  {
+    "id": "photo-dev-present-06",
+    "imagePath": "../../../corpus/benchmarks/cache/v02/corpus/photos/4f05ad23beaefd46.jpg",
+    "sha256": "ad0eb4bf4a6c2c1be585846a943aa06ec2440696b7e8874374904eb25dcc594a",
+    "sourceUrl": "https://www.flickr.com/photos/126942156@N08/15072003400",
+    "license": "CC-BY-2.0",
+    "target": "Bird",
+    "seedRegion": {
+      "left": 524,
+      "top": 333,
+      "width": 12,
+      "height": 12
+    },
+    "wholeRegion": {
+      "left": 354,
+      "top": 225,
+      "width": 352,
+      "height": 229
+    },
+    "referenceMaskPath": "../../../corpus/benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-06-01.png",
+    "referenceMaskFormat": "png-binary",
+    "referenceMaskSha256": "0a82516a43057329a7b2cafa4fcbe1c714d997a87a9e1dbe6d84ffcbf1bbbe26"
+  },
+  {
+    "id": "photo-dev-present-08",
+    "imagePath": "../../../corpus/benchmarks/cache/v02/corpus/photos/d8c13dba00bd5e65.jpg",
+    "sha256": "74b944d3b7d88a046d01f2d813c88e8a6415296db938a343a83d86048f4c3a4f",
+    "sourceUrl": "https://www.flickr.com/photos/jdqueen/6310191834",
+    "license": "CC-BY-2.0",
+    "target": "Bird",
+    "seedRegion": {
+      "left": 46,
+      "top": 476,
+      "width": 12,
+      "height": 12
+    },
+    "wholeRegion": {
+      "left": 0,
+      "top": 392,
+      "width": 105,
+      "height": 180
+    },
+    "referenceMaskPath": "../../../corpus/benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-08-01.png",
+    "referenceMaskFormat": "png-binary",
+    "referenceMaskSha256": "4e72cfb83de41421ed4a41c02ee4c700ca8bdf57f9c2f903017cf21ad6d4c772"
+  },
+  {
+    "id": "photo-dev-present-09",
+    "imagePath": "../../../corpus/benchmarks/cache/v02/corpus/photos/af403410b6934966.jpg",
+    "sha256": "6710905e971316f4b0d0fe1535eb64702807bc4c041bc161ea1ce1208eff5a0f",
+    "sourceUrl": "https://www.flickr.com/photos/vikingdread/3585699111",
+    "license": "CC-BY-2.0",
+    "target": "Knife",
+    "seedRegion": {
+      "left": 512,
+      "top": 401,
+      "width": 12,
+      "height": 12
+    },
+    "wholeRegion": {
+      "left": 136,
+      "top": 214,
+      "width": 764,
+      "height": 386
+    },
+    "referenceMaskPath": "../../../corpus/benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-09-01.png",
+    "referenceMaskFormat": "png-binary",
+    "referenceMaskSha256": "602668e56dd5ae8c5a0b7f24afe1b3da88d5e28446e96a870d6d0778478b0703"
+  },
+  {
+    "id": "photo-dev-present-13",
+    "imagePath": "../../../corpus/benchmarks/cache/v02/corpus/photos/5e432cf1a6415182.jpg",
+    "sha256": "750f09aeeb5d1113088eedaf47f201f0837ad64720f836a69fec9ed3e4f1e5a7",
+    "sourceUrl": "https://www.flickr.com/photos/favitia/6390569267",
+    "license": "CC-BY-2.0",
+    "target": "Hat",
+    "seedRegion": {
+      "left": 422,
+      "top": 294,
+      "width": 12,
+      "height": 12
+    },
+    "wholeRegion": {
+      "left": 0,
+      "top": 0,
+      "width": 857,
+      "height": 600
+    },
+    "referenceMaskPath": "../../../corpus/benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-13-01.png",
+    "referenceMaskFormat": "png-binary",
+    "referenceMaskSha256": "417bb4bf0272c4322e6dd5905505abd221ff8af286735b125e9c1c1f549dc9b0"
+  },
+  {
+    "id": "photo-dev-present-15",
+    "imagePath": "../../../corpus/benchmarks/cache/v02/corpus/photos/59987a562d6187c6.jpg",
+    "sha256": "a0a80df65932f8cb7cf7367305372c04aa37f1991436e4f1cb7828c9138f708e",
+    "sourceUrl": "https://www.flickr.com/photos/loqueveelojo/2905202023/",
+    "license": "CC-BY-2.0",
+    "target": "Cat",
+    "seedRegion": {
+      "left": 441,
+      "top": 306,
+      "width": 12,
+      "height": 12
+    },
+    "wholeRegion": {
+      "left": 249,
+      "top": 145,
+      "width": 396,
+      "height": 335
+    },
+    "referenceMaskPath": "../../../corpus/benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-15-02.png",
+    "referenceMaskFormat": "png-binary",
+    "referenceMaskSha256": "256b081bcf95f744d5524eb16ff1c21795bf5c9896ae0e43d3d4198d53f8e1e3"
+  }
+]

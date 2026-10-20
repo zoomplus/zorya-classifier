@@ -8,7 +8,9 @@ const resourceChannel = channel('zorya.segmentation.child-resource')
 
 interface Job<T> {
   id: string
-  payload: T
+  payload: T | undefined
+  buildPayload: () => T
+  payloadReady: boolean
   signal: AbortSignal
   resolve(value: unknown): void
   reject(error: unknown): void
@@ -24,7 +26,7 @@ interface Job<T> {
   failure?: unknown
 }
 
-export interface NativeChildPoolOptions<T> {
+interface NativeChildPoolOptions<T> {
   workerUrl: URL
   maxActive?: number
   maxWaiting?: number
@@ -61,6 +63,11 @@ export class NativeChildPool<T> {
   }
 
   public run(payload: T, signal: AbortSignal): Promise<unknown> {
+    return this.runLazy(signal, () => payload)
+  }
+
+  /** Admission is reserved before buildPayload can snapshot or serialize caller-owned data. */
+  public runLazy(signal: AbortSignal, buildPayload: () => T): Promise<unknown> {
     if (signal.aborted) return Promise.reject(cancelledError(signal.reason))
     if (this.#closing)
       return Promise.reject(new ClassifierError('DISPOSED', 'Native child pool is disposed'))
@@ -76,7 +83,9 @@ export class NativeChildPool<T> {
     })
     const job: Job<T> = {
       id: randomUUID(),
-      payload,
+      payload: undefined,
+      buildPayload,
+      payloadReady: false,
       signal: AbortSignal.any([signal, this.#lifetime.signal]),
       resolve,
       reject,
@@ -86,11 +95,22 @@ export class NativeChildPool<T> {
     }
     job.abortListener = () => this.#abort(job, cancelledError(job.signal.reason))
     job.signal.addEventListener('abort', job.abortListener, { once: true })
-    if (job.signal.aborted) job.abortListener()
-    else {
-      this.#queue.push(job)
+    this.#queue.push(job)
+    try {
+      job.payload = job.buildPayload()
+      job.payloadReady = true
+    } catch (error) {
+      this.#finishQueued(
+        job,
+        error instanceof ClassifierError
+          ? error
+          : new ClassifierError('INVALID_INPUT', 'Unable to snapshot native task input'),
+      )
       this.#pump()
+      return promise
     }
+    if (job.signal.aborted) job.abortListener()
+    else this.#pump()
     return promise
   }
 
@@ -107,6 +127,13 @@ export class NativeChildPool<T> {
   }
 
   #start(job: Job<T>): void {
+    if (!job.payloadReady) {
+      this.#finishQueued(
+        job,
+        new ClassifierError('INVALID_INPUT', 'Native task payload was not prepared'),
+      )
+      return
+    }
     job.started = true
     this.#active++
     this.#physical.add(job)
@@ -209,7 +236,7 @@ export class NativeChildPool<T> {
       this.#jobTimeoutMs,
     )
     try {
-      const bytes = this.#encode({ id: job.id, payload: job.payload })
+      const bytes = this.#encode({ id: job.id, payload: job.payload as T })
       if (bytes.byteLength > 96 * 1024 * 1024)
         throw new ClassifierError('RESOURCE_LIMIT', 'Native child input exceeded its size limit')
       child.stdin?.end(bytes)

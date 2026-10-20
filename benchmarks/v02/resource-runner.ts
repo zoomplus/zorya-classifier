@@ -12,25 +12,36 @@ interface ChildMemorySample {
   arrayBuffers?: number
 }
 
+type SamplingPhase = 'idle-before' | 'busy' | 'idle-after'
+interface ParentMemorySample extends NodeJS.MemoryUsage {
+  timestampMs: number
+  phase: SamplingPhase
+}
+
 export interface ResourceReport {
   sampleIntervalMs: number
-  parentSamples: NodeJS.MemoryUsage[]
+  parentSamples: ParentMemorySample[]
   childSamples: (ChildMemorySample & { timestampMs: number })[]
   childStarts: number
   childCloses: number
   childrenStillOwned: number[]
   parentPeak: Record<keyof NodeJS.MemoryUsage, number>
+  idleWindowMedian: Record<
+    'before' | 'after',
+    Pick<NodeJS.MemoryUsage, 'rss' | 'heapUsed' | 'external' | 'arrayBuffers'>
+  >
   childPeak: Record<'rss' | 'heapTotal' | 'heapUsed' | 'external' | 'arrayBuffers', number>
 }
 
 /** Starts only when called; importing this helper does not create timers or subscriptions. */
 export class ResourceRunner {
   readonly #intervalMs: number
-  readonly #parentSamples: NodeJS.MemoryUsage[] = []
+  readonly #parentSamples: ParentMemorySample[] = []
   readonly #childSamples: (ChildMemorySample & { timestampMs: number })[] = []
   readonly #children = new Map<number, string>()
   #timer: NodeJS.Timeout | undefined
   #startedAt = 0
+  #phase: SamplingPhase = 'idle-before'
 
   constructor(intervalMs: number) {
     if (!Number.isInteger(intervalMs) || intervalMs < 250)
@@ -46,6 +57,11 @@ export class ResourceRunner {
     this.#sampleParent()
     this.#timer = setInterval(() => this.#sampleParent(), this.#intervalMs)
     this.#timer.unref()
+  }
+
+  setPhase(phase: SamplingPhase): void {
+    this.#phase = phase
+    this.#sampleParent()
   }
 
   stop(): ResourceReport {
@@ -75,6 +91,10 @@ export class ResourceRunner {
           Math.max(...this.#parentSamples.map((sample) => sample[key])),
         ]),
       ) as Record<keyof NodeJS.MemoryUsage, number>,
+      idleWindowMedian: {
+        before: idleMedian(this.#parentSamples.filter((sample) => sample.phase === 'idle-before')),
+        after: idleMedian(this.#parentSamples.filter((sample) => sample.phase === 'idle-after')),
+      },
       childPeak: Object.fromEntries(
         childKeys.map((key) => [
           key,
@@ -97,6 +117,29 @@ export class ResourceRunner {
   }
 
   #sampleParent(): void {
-    this.#parentSamples.push(process.memoryUsage())
+    this.#parentSamples.push({
+      ...process.memoryUsage(),
+      timestampMs: Date.now() - this.#startedAt,
+      phase: this.#phase,
+    })
   }
+}
+
+function idleMedian(
+  samples: readonly ParentMemorySample[],
+): ResourceReport['idleWindowMedian']['before'] {
+  const keys = ['rss', 'heapUsed', 'external', 'arrayBuffers'] as const
+  return Object.fromEntries(
+    keys.map((key) => {
+      const ordered = samples.map((sample) => sample[key]).sort((a, b) => a - b)
+      const middle = Math.floor(ordered.length / 2)
+      const median =
+        ordered.length === 0
+          ? 0
+          : ordered.length % 2 === 0
+            ? ((ordered[middle - 1] ?? 0) + (ordered[middle] ?? 0)) / 2
+            : (ordered[middle] ?? 0)
+      return [key, median]
+    }),
+  ) as ResourceReport['idleWindowMedian']['before']
 }

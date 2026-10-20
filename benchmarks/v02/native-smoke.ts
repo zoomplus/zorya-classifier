@@ -39,6 +39,7 @@ const fixtureSchema = z
     wholeRegion: rectSchema,
     roi: rectSchema.optional(),
     referenceMaskPath: z.string().min(1).optional(),
+    referenceMaskFormat: z.enum(['binary-u8', 'png-binary']).optional(),
     referenceMaskSha256: z
       .string()
       .regex(/^[a-f0-9]{64}$/)
@@ -50,6 +51,11 @@ const fixtureSchema = z
       context.addIssue({
         code: 'custom',
         message: 'Reference mask path and SHA256 must be supplied together',
+      })
+    if (item.referenceMaskFormat !== undefined && item.referenceMaskPath === undefined)
+      context.addIssue({
+        code: 'custom',
+        message: 'Reference mask format requires a reference mask path',
       })
   })
 
@@ -81,6 +87,7 @@ interface CliOptions {
   outputPath?: string
   warmupSeconds: number
   durationSeconds: number
+  idleSeconds: number
   sampleMs: number
 }
 
@@ -114,7 +121,8 @@ function parseOptions(argv: readonly string[]): CliOptions {
     ...(fixtureManifest ? { fixtureManifest } : {}),
     ...(outputPath ? { outputPath } : {}),
     warmupSeconds: integerOption('warmup-seconds', 600, 0),
-    durationSeconds: integerOption('duration-seconds', 7200, 1),
+    durationSeconds: integerOption('duration-seconds', 6540, 1),
+    idleSeconds: integerOption('idle-seconds', 30, 1),
     sampleMs: integerOption('sample-ms', 5000, 250),
   }
 }
@@ -202,14 +210,33 @@ async function readFixtures(path: string): Promise<SampleCase[]> {
       const maskBytes = await readFile(resolve(root, item.referenceMaskPath))
       if (createHash('sha256').update(maskBytes).digest('hex') !== item.referenceMaskSha256)
         throw new Error(`Fixture ${item.id} mask hash does not match its manifest`)
-      if (
-        maskBytes.length !== image.width * image.height ||
-        [...maskBytes].some((value) => value !== 0 && value !== 1)
-      )
-        throw new Error(
-          `Fixture ${item.id} reference mask must be oriented source-sized binary bytes`,
+      if (item.referenceMaskFormat === 'png-binary') {
+        const decodedMask = await sharp(maskBytes, {
+          limitInputPixels: 16_777_216,
+          failOn: 'error',
+        })
+          .greyscale()
+          .raw()
+          .toBuffer({ resolveWithObject: true })
+        if (
+          decodedMask.info.width !== image.width ||
+          decodedMask.info.height !== image.height ||
+          [...decodedMask.data].some((value) => value !== 0 && value !== 255)
         )
-      referenceMask = new Uint8Array(maskBytes)
+          throw new Error(
+            `Fixture ${item.id} PNG reference mask must be source-sized with binary 0/255 values`,
+          )
+        referenceMask = Uint8Array.from(decodedMask.data, (value) => (value === 255 ? 1 : 0))
+      } else {
+        if (
+          maskBytes.length !== image.width * image.height ||
+          [...maskBytes].some((value) => value !== 0 && value !== 1)
+        )
+          throw new Error(
+            `Fixture ${item.id} reference mask must be oriented source-sized binary bytes`,
+          )
+        referenceMask = new Uint8Array(maskBytes)
+      }
     }
     cases.push({
       id: item.id,
@@ -405,7 +432,7 @@ function percentile(values: readonly number[], fraction: number): number | null 
 async function main(): Promise<void> {
   if (process.argv.includes('--help')) {
     console.log(
-      'Usage: node --import tsx benchmarks/v02/native-smoke.ts --backend=mobile-sam --encoder=/path --decoder=/path [--fixtures=/manifest.json] [--warmup-seconds=600] [--duration-seconds=7200] [--sample-ms=5000] [--out=result.json]',
+      'Usage: node --import tsx benchmarks/v02/native-smoke.ts --backend=mobile-sam --encoder=/path --decoder=/path [--fixtures=/manifest.json] [--warmup-seconds=600] [--duration-seconds=6540] [--idle-seconds=30] [--sample-ms=5000] [--out=result.json]',
     )
     return
   }
@@ -429,15 +456,25 @@ async function main(): Promise<void> {
   const onInterrupt = () => control.abort(new ClassifierError('ABORTED', 'Benchmark interrupted'))
   process.once('SIGINT', onInterrupt)
   const records: RunRecord[] = []
-  const measuredStarted = Date.now()
-  const until = measuredStarted + options.durationSeconds * 1000
+  const measurementStarted = Date.now()
+  let measuredStarted = measurementStarted
   try {
+    await delay(options.idleSeconds * 1000, undefined, { signal: control.signal }).catch(
+      () => undefined,
+    )
+    resources.setPhase('busy')
+    measuredStarted = Date.now()
+    const until = measuredStarted + options.durationSeconds * 1000
     while (Date.now() < until && !control.signal.aborted) {
       for (const sample of samples) {
         if (Date.now() >= until || control.signal.aborted) break
         records.push(await runOne(adapter, sample!, control.signal))
       }
     }
+    resources.setPhase('idle-after')
+    await delay(options.idleSeconds * 1000, undefined, { signal: control.signal }).catch(
+      () => undefined,
+    )
   } finally {
     process.off('SIGINT', onInterrupt)
   }
@@ -449,11 +486,13 @@ async function main(): Promise<void> {
   const report = {
     schemaVersion: 1,
     backend: options.backend,
-    startedAt: new Date(measuredStarted).toISOString(),
+    startedAt: new Date(measurementStarted).toISOString(),
+    busyStartedAt: new Date(measuredStarted).toISOString(),
     endedAt,
     parameters: {
       warmupSeconds: options.warmupSeconds,
       durationSeconds: options.durationSeconds,
+      idleSeconds: options.idleSeconds,
       sampleMs: options.sampleMs,
       warmupCount,
       operationCount: records.length,

@@ -129,3 +129,52 @@ await test('early child exit rejects and drains queued work without leaking stdi
   await pool.dispose()
   await rm(directory, { recursive: true, force: true })
 })
+
+await test('capacity, disposal and pre-abort reject before lazy payload snapshots', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'zorya-native-admission-'))
+  const workerPath = join(directory, 'worker.mjs')
+  await writeFile(
+    workerPath,
+    "let text=''; for await (const c of process.stdin) text+=c; const input=JSON.parse(text); setTimeout(()=>process.stdout.write(JSON.stringify({id:input.id})), input.delayMs);",
+  )
+  const pool = new NativeChildPool<{ delayMs: number }>({
+    workerUrl: pathToFileURL(workerPath),
+    maxActive: 1,
+    maxWaiting: 2,
+    encode: (job) => Buffer.from(JSON.stringify({ id: job.id, ...job.payload })),
+    decode: (value, id) => {
+      assert.deepEqual(value, { id })
+      return id
+    },
+  })
+  let snapshots = 0
+  const build = (delayMs: number) => {
+    snapshots++
+    return { delayMs }
+  }
+  const first = pool.runLazy(new AbortController().signal, () => build(250))
+  const second = pool.runLazy(new AbortController().signal, () => build(250))
+  const third = pool.runLazy(new AbortController().signal, () => build(250))
+  const rejected = pool.runLazy(new AbortController().signal, () => build(0))
+  await assert.rejects(
+    rejected,
+    (error: unknown) => error instanceof Error && 'code' in error && error.code === 'CAPACITY',
+  )
+  assert.equal(snapshots, 3, 'a capacity rejection must not invoke the payload snapshot')
+  await Promise.all([first, second, third])
+  await pool.dispose()
+  const disposed = pool.runLazy(new AbortController().signal, () => build(0))
+  await assert.rejects(
+    disposed,
+    (error: unknown) => error instanceof Error && 'code' in error && error.code === 'DISPOSED',
+  )
+  const aborted = new AbortController()
+  aborted.abort(new Error('already aborted'))
+  const cancelled = pool.runLazy(aborted.signal, () => build(0))
+  await assert.rejects(
+    cancelled,
+    (error: unknown) => error instanceof Error && 'code' in error && error.code === 'ABORTED',
+  )
+  assert.equal(snapshots, 3, 'disposed and aborted rejections must not invoke the payload snapshot')
+  await rm(directory, { recursive: true, force: true })
+})
