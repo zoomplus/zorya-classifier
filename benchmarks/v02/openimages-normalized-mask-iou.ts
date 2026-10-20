@@ -1,6 +1,7 @@
 import { hasCompatibleIntegerRoundedAspect } from './categorical-photo-mask-truth.js'
 
-const MAX_PIXELS = 2_097_152
+const MAX_SOURCE_OR_PREDICTION_PIXELS = 2_097_152
+const MAX_ANNOTATION_CANVAS_PIXELS = 2048 * 2048
 
 export interface NormalizedCanvasMaskInput {
   /** Binary 0/1 prediction in its cropped region. */
@@ -39,8 +40,14 @@ export function scoreOpenImagesNormalizedCanvasMaskIoU(input: NormalizedCanvasMa
     input.sourceWidth * input.sourceHeight,
     input.referenceWidth * input.referenceHeight,
   ]
-  if (pixelCounts.some((n) => !Number.isSafeInteger(n) || n > MAX_PIXELS))
-    throw new Error('Normalized mask canvas exceeds the 2,097,152-pixel limit')
+  if (
+    pixelCounts
+      .slice(0, 2)
+      .some((n) => !Number.isSafeInteger(n) || n > MAX_SOURCE_OR_PREDICTION_PIXELS)
+  )
+    throw new Error('Source or prediction mask exceeds the 2,097,152-pixel limit')
+  if (pixelCounts[2]! > MAX_ANNOTATION_CANVAS_PIXELS)
+    throw new Error('Annotation canvas exceeds the 2048-by-2048-pixel limit')
   if (
     !Number.isSafeInteger(input.sourceOffsetX) ||
     !Number.isSafeInteger(input.sourceOffsetY) ||

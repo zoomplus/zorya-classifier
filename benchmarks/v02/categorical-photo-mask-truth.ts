@@ -4,6 +4,8 @@ import { z } from 'zod'
 import type { FreshCase } from './fresh-corpus.js'
 
 const digest = z.string().regex(/^[a-f0-9]{64}$/u)
+const MAX_EXPLORATORY_SOURCE_PIXELS = 2_097_152
+const MAX_ANNOTATION_CANVAS_PIXELS = 2048 * 2048
 const indexRowSchema = z
   .object({
     caseId: z
@@ -27,7 +29,6 @@ const indexRowSchema = z
       .max(16 * 1024 * 1024),
   })
   .strict()
-  .refine((row) => row.width * row.height <= 2_097_152)
 const maskIndexSchema = z
   .object({
     sourceUrl: z.literal(
@@ -95,8 +96,12 @@ function joinPhotoMaskTruth(
   digest.parse(input.maskIndexSha256)
   if (input.producerImageBindings.length !== 40 || truth.length !== 40)
     throw new Error('Photo mask join requires the frozen 40-case photo source')
-  if (input.producerImageBindings.some((item) => item.image.width * item.image.height > 2_097_152))
-    throw new Error('Producer image canvas exceeds the 2,097,152-pixel exploratory limit')
+  if (
+    input.producerImageBindings.some(
+      (item) => item.image.width * item.image.height > MAX_EXPLORATORY_SOURCE_PIXELS,
+    )
+  )
+    throw new Error('Producer image canvas exceeds the 2,097,152-pixel source limit')
 
   const truthById = new Map<string, (typeof truth)[number]>()
   for (const row of truth) {
@@ -146,15 +151,20 @@ function joinPhotoMaskTruth(
     if (canvasPolicy === 'exact-source-canvas') {
       if (row.width !== binding.image.width || row.height !== binding.image.height)
         throw new Error('Official mask dimensions differ from the frozen producer image')
-    } else if (
-      !hasCompatibleIntegerRoundedAspect(
-        binding.image.width,
-        binding.image.height,
-        row.width,
-        row.height,
+      if (row.width * row.height > MAX_EXPLORATORY_SOURCE_PIXELS)
+        throw new Error('Exact-source reference mask exceeds the 2,097,152-pixel limit')
+    } else {
+      if (row.width * row.height > MAX_ANNOTATION_CANVAS_PIXELS)
+        throw new Error('Official annotation canvas exceeds the 2048-by-2048-pixel limit')
+      if (
+        !hasCompatibleIntegerRoundedAspect(
+          binding.image.width,
+          binding.image.height,
+          row.width,
+          row.height,
+        )
       )
-    ) {
-      throw new Error('Official mask canvas is not aspect-compatible under integer rounding')
+        throw new Error('Official mask canvas is not aspect-compatible under integer rounding')
     }
     if (
       row.maskPath.startsWith(`${row.imageId}_`) === false ||

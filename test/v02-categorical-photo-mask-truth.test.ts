@@ -138,11 +138,11 @@ await test('normalized-canvas join is explicit, keeps every pinned reference, an
   const fixture = fixtures()
   for (const item of fixture.cases) {
     item.image.width = 1024
-    item.image.height = 768
+    item.image.height = 885
   }
   for (const row of fixture.maskIndex.rows) {
     row.width = 1600
-    row.height = 1200
+    row.height = 1383
   }
   const originalTruth = structuredClone(fixture.canonicalTruth)
   const originalIndex = structuredClone(fixture.maskIndex)
@@ -164,10 +164,16 @@ await test('normalized-canvas join is explicit, keeps every pinned reference, an
     32,
   )
   assert.equal(joined.truth[0]!.referenceMasks![0]!.sourceWidth, 1024)
+  assert.equal(joined.truth[0]!.referenceMasks![0]!.sourceHeight, 885)
+  assert.equal(
+    joined.truth[0]!.referenceMasks![0]!.sourceImageSha256,
+    fixture.cases[0]!.image.sha256,
+  )
   assert.equal(joined.truth[0]!.referenceMasks![0]!.width, 1600)
+  assert.equal(joined.truth[0]!.referenceMasks![0]!.height, 1383)
   assert.deepEqual(fixture.canonicalTruth, originalTruth)
   assert.deepEqual(fixture.maskIndex, originalIndex)
-  assert.equal(hasCompatibleIntegerRoundedAspect(1024, 768, 1600, 1200), true)
+  assert.equal(hasCompatibleIntegerRoundedAspect(1024, 885, 1600, 1383), true)
   assert.equal(hasCompatibleIntegerRoundedAspect(1920, 1080, 1600, 1200), false)
 
   fixture.maskIndex.rows[0]!.width = 1500
@@ -175,6 +181,39 @@ await test('normalized-canvas join is explicit, keeps every pinned reference, an
   assert.throws(
     () => joinCategoricalPhotoMaskTruthNormalizedCanvas({ ...input, maskIndex: fixture.maskIndex }),
     /aspect-compatible/u,
+  )
+  const oversizedSource = fixtures()
+  for (const item of oversizedSource.cases) {
+    item.image.width = 2048
+    item.image.height = 1025
+  }
+  for (const row of oversizedSource.maskIndex.rows) {
+    row.width = 2048
+    row.height = 1025
+  }
+  assert.throws(
+    () =>
+      joinCategoricalPhotoMaskTruthNormalizedCanvas({
+        canonicalPhotoTruth: oversizedSource.canonicalTruth,
+        canonicalPhotoTruthSha256: '1'.repeat(64),
+        maskIndex: oversizedSource.maskIndex,
+        maskIndexSha256: '2'.repeat(64),
+        producerImageBindings: oversizedSource.cases,
+      }),
+    /source limit/u,
+  )
+  const oversizedAnnotation = fixtures()
+  oversizedAnnotation.maskIndex.rows[0]!.width = 2049
+  assert.throws(
+    () =>
+      joinCategoricalPhotoMaskTruthNormalizedCanvas({
+        canonicalPhotoTruth: oversizedAnnotation.canonicalTruth,
+        canonicalPhotoTruthSha256: '1'.repeat(64),
+        maskIndex: oversizedAnnotation.maskIndex,
+        maskIndexSha256: '2'.repeat(64),
+        producerImageBindings: oversizedAnnotation.cases,
+      }),
+    /too_big/u,
   )
 })
 
@@ -220,6 +259,20 @@ await test('normalized-canvas IoU uses nearest pixel centers and supports croppe
     referenceHeight: 4,
   })
   assert.equal(cropped.iou, 1)
+  const largeAnnotationCanvas = scoreOpenImagesNormalizedCanvasMaskIoU({
+    predictedMask: new Uint8Array(1024 * 885),
+    predictedWidth: 1024,
+    predictedHeight: 885,
+    sourceOffsetX: 0,
+    sourceOffsetY: 0,
+    sourceWidth: 1024,
+    sourceHeight: 885,
+    referenceMask: new Uint8Array(1600 * 1383),
+    referenceWidth: 1600,
+    referenceHeight: 1383,
+  })
+  assert.equal(largeAnnotationCanvas.union, 0)
+  assert.equal(largeAnnotationCanvas.iou, 0)
   assert.throws(
     () =>
       scoreOpenImagesNormalizedCanvasMaskIoU({
@@ -235,6 +288,22 @@ await test('normalized-canvas IoU uses nearest pixel centers and supports croppe
         referenceHeight: 10,
       }),
     /aspect compatibility/u,
+  )
+  assert.throws(
+    () =>
+      scoreOpenImagesNormalizedCanvasMaskIoU({
+        predictedMask: Uint8Array.from([0]),
+        predictedWidth: 1,
+        predictedHeight: 1,
+        sourceOffsetX: 0,
+        sourceOffsetY: 0,
+        sourceWidth: 2048,
+        sourceHeight: 1025,
+        referenceMask: Uint8Array.from([0]),
+        referenceWidth: 1,
+        referenceHeight: 1,
+      }),
+    /Source or prediction/u,
   )
 })
 
