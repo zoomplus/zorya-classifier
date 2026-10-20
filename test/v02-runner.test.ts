@@ -534,6 +534,38 @@ await test('wire capture reads once and preserves physical receipts for oversize
     assert.equal(stalledCancelled, true)
     assert.equal(stalledBudget.snapshot().unknownCostCalls, 1)
 
+    let slowStreamCancelled = false
+    const slowBudget = new RunBudget(1, 0.1)
+    const slowStream = recordProvider(
+      makeProvider(new AbortController().signal),
+      slowBudget,
+      join(directory, 'slow-stream'),
+      route,
+      async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            async pull(controller) {
+              await new Promise<void>((resolve) => setTimeout(resolve, 12))
+              controller.enqueue(new Uint8Array([65]))
+            },
+            cancel() {
+              slowStreamCancelled = true
+            },
+          }),
+          { status: 200 },
+        ),
+      35,
+    )
+    await assert.rejects(slowStream.port.decide(request, new AbortController().signal))
+    const slowReceipt = JSON.parse(
+      await readFile(join(directory, 'slow-stream', 'physical-receipt-1.json'), 'utf8'),
+    ) as { wireReceipt: { bodyRead: string; usageCostUsd: number | null }; receipt: unknown }
+    assert.equal(slowReceipt.wireReceipt.bodyRead, 'stalled')
+    assert.equal(slowReceipt.wireReceipt.usageCostUsd, null)
+    assert.equal(slowReceipt.receipt, null)
+    assert.equal(slowStreamCancelled, true)
+    assert.equal(slowBudget.snapshot().unknownCostCalls, 1)
+
     const controller = new AbortController()
     let abortStreamCancelled = false
     const abortBudget = new RunBudget(1, 0.1)

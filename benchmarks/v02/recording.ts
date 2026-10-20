@@ -337,6 +337,7 @@ async function readWireReceipt(
     return { response: replay(new Uint8Array()), wireReceipt: emptyWireReceipt(response, 'empty') }
   const chunks: Uint8Array[] = []
   let bytes = 0
+  const deadline = performance.now() + timeoutMs
   let disposition: 'oversize' | 'stalled' | 'cancelled' | 'stream-error' | null = null
   let timer: ReturnType<typeof setTimeout> | undefined
   let abortHandler: (() => void) | undefined
@@ -357,14 +358,19 @@ async function readWireReceipt(
         break
       }
       pending = reader.read()
+      const remainingMs = Math.max(0, deadline - performance.now())
       const result = await Promise.race([
         pending.then((value) => ({ kind: 'read' as const, value })),
         new Promise<{ kind: 'timeout' | 'cancelled' }>((resolve) => {
-          timer = setTimeout(() => resolve({ kind: 'timeout' }), timeoutMs)
           if (signal) {
             abortHandler = () => resolve({ kind: 'cancelled' })
             signal.addEventListener('abort', abortHandler, { once: true })
+            if (signal.aborted) {
+              resolve({ kind: 'cancelled' })
+              return
+            }
           }
+          timer = setTimeout(() => resolve({ kind: 'timeout' }), remainingMs)
         }),
       ])
       if (timer) clearTimeout(timer)
@@ -480,7 +486,7 @@ export function recordProvider(
   directory: string,
   route: PhysicalCallRecord['route'],
   baseFetch: typeof globalThis.fetch = globalThis.fetch,
-  wireReadTimeoutMs = 5_000,
+  wireReadTimeoutMs = 45_000,
 ): Recorder {
   const calls: PhysicalCallRecord[] = []
   const logicalCalls: LogicalCallRecord[] = []
