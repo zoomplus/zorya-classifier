@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "benchmark": "public-mobile-sam-region-segmentation-resource-v1",
+  "attempt": "0ba4c87-threads2-20261020T2146Z",
+  "status": "completed-baseline-workflow",
+  "qualifiedWorkflow": "region-segmentation",
+  "notEvidenceFor": ["region-checked-segmentation"],
+  "execution": {
+    "sourceCommit": "0ba4c87779c9ea1003fb3e7a9beb678d8db4b304",
+    "sourceManifestSha256": "3e7f8a2f1dc1c68bd48072fe66a835cc17287bd2acb8a70052c29787c4a79f65",
+    "sourceFileCount": 56,
+    "sourceManifestUnchanged": true,
+    "archiveReferenceSha256": "002eb72b5d0c234b97be4b473cfca6d902413fb3c6298e82bd72e5a3fd5a9541",
+    "archiveInstalledByHarness": false,
+    "platform": "Linux 6.6.87.2 WSL2 x64",
+    "node": "v24.12.0",
+    "nativeThreads": 2,
+    "forcedGc": false,
+    "providerHttpCalls": 0,
+    "latencyUse": "Diagnostic only; no ranking claim."
+  },
+  "physicalRun": {
+    "pid": 1453233,
+    "startTicks": 19485495,
+    "clockTicksPerSecond": 100,
+    "startedAtUtc": "2026-10-20T21:46:20.568Z",
+    "measurementStartedAtUtc": "2026-10-20T21:57:04.874Z",
+    "busyStartedAtUtc": "2026-10-20T21:57:34.877Z",
+    "endedAtUtc": "2026-10-20T23:56:22.058Z",
+    "kernelWitnessLastLiveAgeSeconds": 7208.47,
+    "kernelWitnessTerminalStatus": "process-exited",
+    "samePidAndStartTicksVerified": true
+  },
+  "durationAcceptance": {
+    "accepted": true,
+    "monotonic": true,
+    "forcedGc": false,
+    "warmupMs": 600177.922848,
+    "idleBeforeMs": 30003.333023,
+    "busyMs": 6540810.042987,
+    "idleAfterMs": 30000.650354,
+    "measurementObservedMs": 6600847.204218,
+    "processObservedMs": 7208677.616898,
+    "requestedTotalMs": 7200000
+  },
+  "work": {
+    "syntheticFixtureSha256": "7a923b8e09ed0605bbf77897369e3bc6118cd5b421d035dc805cb00ceb1c84c8",
+    "operations": 4537,
+    "located": 2269,
+    "extracted": 2268,
+    "failed": 0,
+    "timeouts": 0,
+    "providerHttpCalls": 0
+  },
+  "ownedChildLifecycle": {
+    "starts": 4537,
+    "closes": 4537,
+    "stillOwnedAtExit": 0,
+    "passed": true
+  },
+  "idleMemory": {
+    "sampleIntervalMs": 5000,
+    "before": {
+      "sampleCount": 6,
+      "firstTimestampMs": 0.145787,
+      "lastTimestampMs": 25004.563218,
+      "rssBytesMedian": 264335360,
+      "heapUsedBytesMedian": 15180516,
+      "externalBytesMedian": 12730891,
+      "arrayBuffersBytesMedian": 1599991,
+      "sampleGapMs": {
+        "min": 5000.5601,
+        "median": 5000.886749,
+        "max": 5001.317427
+      }
+    },
+    "after": {
+      "sampleCount": 8,
+      "firstTimestampMs": 6570813.954328,
+      "lastTimestampMs": 6600840.357363,
+      "rssBytesMedian": 330006528,
+      "heapUsedBytesMedian": 21202792,
+      "externalBytesMedian": 12736560,
+      "arrayBuffersBytesMedian": 1605169,
+      "sampleGapMs": {
+        "min": 373.319115,
+        "median": 5000.65305,
+        "max": 5003.95667
+      }
+    },
+    "deltas": {
+      "rssBytes": 65671168,
+      "rssMiB": 62.62890625,
+      "heapUsedBytes": 6022276,
+      "heapUsedMiB": 5.743289947509766,
+      "externalBytes": 5669,
+      "externalMiB": 0.005406379699707031,
+      "arrayBuffersBytes": 5178,
+      "arrayBuffersMiB": 0.0049381256103515625
+    },
+    "investigationThresholds": {
+      "rssRule": "max(20% of before-idle median, 128 MiB)",
+      "rssThresholdBytes": 134217728,
+      "rssThresholdMiB": 128,
+      "rssIncreaseBelowThreshold": true,
+      "heapExternalArrayBuffersRule": "max(10% of before-idle median, 16 MiB)",
+      "heapExternalArrayBuffersThresholdBytes": 16777216,
+      "allThreeHeapRelatedIncreasesBelowThreshold": true,
+      "interpretation": "RSS rose by 62.63 MiB and remains visible in the final idle median; this is below the configured 128 MiB investigation threshold. Heap, external, and ArrayBuffer increases are also below their 16 MiB thresholds. This is threshold evidence, not proof that the process has no retained memory."
+    },
+    "parentPeakBytes": {
+      "rss": 335339520,
+      "heapUsed": 43929536,
+      "external": 23263033,
+      "arrayBuffers": 15363941
+    },
+    "ownedChildPeakRssBytes": 580599808
+  },
+  "host": {
+    "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+    "logicalCpus": 16,
+    "physicalMemoryBytesBefore": 33185517568,
+    "availableMemoryBytesBefore": 27481964544,
+    "swapTotalBytesBefore": 8589934592,
+    "cgroupLimits": "unavailable",
+    "hostAfterSnapshot": "Captured at 2026-10-20T23:57:28Z, about 66 seconds after process exit; host memory available 26839678976 bytes."
+  },
+  "rawArtifacts": {
+    "report": {
+      "path": ".run/v02/region-segmentation-soak-0ba4c87-threads2-20261020T2146Z/report.json",
+      "sha256": "041747733e0a2e0cafdd9febf77acb7f0f9387af7904c69b66563c249aca48a8"
+    },
+    "kernelWitness": {
+      "path": ".run/v02/region-segmentation-soak-0ba4c87-threads2-20261020T2146Z/proc-dense-witness.tsv",
+      "sha256": "9caf83a0736ae73f998d454da681b294104689824b404da48c4f18c6cb027dfe"
+    },
+    "sourceManifest": {
+      "path": ".run/v02/region-segmentation-soak-0ba4c87-threads2-20261020T2146Z/source-manifest.json",
+      "sha256": "3e7f8a2f1dc1c68bd48072fe66a835cc17287bd2acb8a70052c29787c4a79f65"
+    },
+    "hostBefore": {
+      "path": ".run/v02/region-segmentation-soak-0ba4c87-threads2-20261020T2146Z/host-before.json",
+      "sha256": "3df9e530f6837653ae5e530e980c959979e4416d07ba157317523cb104fd515a"
+    },
+    "hostAfterPostrun": {
+      "path": ".run/v02/region-segmentation-soak-0ba4c87-threads2-20261020T2146Z/host-after-postrun.json",
+      "sha256": "2aa60f232886befc99bd9ff0dd4f4b627f3110642a2ba6984ef78f5b958ff3bf"
+    }
+  },
+  "scopeLimitations": [
+    "This evidence qualifies only the baseline public region-segmentation workflow from source commit 0ba4c87.",
+    "The later checked-containment runtime composition was not present in the pinned source, so this run does not qualify that changed flow.",
+    "The 5-second sampler’s last idle-after gap includes the runner’s final 373 ms sample at shutdown; the dense kernel witness independently confirms the full physical process lifetime.",
+    "The host-after snapshot was captured after process exit and is context metadata, not a process measurement."
+  ]
+}
