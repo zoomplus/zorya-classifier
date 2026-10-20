@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "evidenceType": "native-installed-archive-component-wiring",
+  "workflow": "checked-region-segmentation",
+  "sourceCommit": "987ac32a50150399ef9e4cd75d8ae0c74ac85a74",
+  "harnessSha256": "48ca587aa8e1b4f4b3bf255a856d555f2fe4f4dd051e0597d1c63e2f76eda74c",
+  "rawReportSha256": "6053aade82fd02e2c965ea130b8c3efe789f33b4853a27d321595e6f13bf63fb",
+  "rawReportBytes": 7193,
+  "runtime": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "v24.19.0",
+    "windowsBuild": "10.0.26200",
+    "backend": "MobileSAM CPU",
+    "threads": 2,
+    "optionalRuntime": "onnxruntime-node 1.23.2"
+  },
+  "archive": {
+    "version": "0.2.0",
+    "sha256": "265de82fc4f4bdbc0bc5036efb268382c69681a945c42ac8a28c033bb31fcaa0",
+    "bytes": 709254,
+    "installedDistFileCount": 115,
+    "installedDistManifestSha256": "afa6710e14747335c32fe9ebc6dddbedc5fbb16423438111dfb72be633445c92"
+  },
+  "checks": {
+    "importWithoutNativeChild": true,
+    "backendProbeSettled": true,
+    "closedBoxVerification": true,
+    "nativeEnclosingMask": true,
+    "locate": true,
+    "extract": true,
+    "cancellationAndPhysicalJoin": true,
+    "capacity": true,
+    "callerOwnedAdapter": true,
+    "dispose": true,
+    "fixtureDecisionOffline": true,
+    "emptyTransparentIsValidEmptyMask": true,
+    "childOwnership": true,
+    "cleanup": true,
+    "worker": true,
+    "tempCleanup": true
+  },
+  "controlledFixture": {
+    "seed": {
+      "region": {
+        "left": 0,
+        "top": 0,
+        "width": 13,
+        "height": 13
+      },
+      "center": {
+        "x": 6.5,
+        "y": 6.5
+      },
+      "centerInsideSyntheticTarget": true
+    },
+    "maskDerived": {
+      "sourceSize": {
+        "width": 256,
+        "height": 256
+      },
+      "segmenterInputSize": {
+        "width": 256,
+        "height": 256
+      },
+      "syntheticTarget": {
+        "left": 0,
+        "top": 0,
+        "width": 64,
+        "height": 64
+      },
+      "region": {
+        "left": 0,
+        "top": 0,
+        "width": 64,
+        "height": 64
+      },
+      "center": {
+        "x": 32,
+        "y": 32
+      },
+      "seedRegion": {
+        "left": 0,
+        "top": 0,
+        "width": 13,
+        "height": 13
+      },
+      "maskPixels": 4096,
+      "pngSize": {
+        "width": 64,
+        "height": 64
+      },
+      "method": "mobile-sam-seed-point-v1",
+      "cutoutAlphaMatchesMask": true,
+      "centerMatchesBounds": true,
+      "cropMatchesBounds": true,
+      "objectBoundsLargerThanSeed": true
+    },
+    "fixtureDecision": {
+      "calls": 8,
+      "providerHttpCalls": 0,
+      "noExtentSearchCalls": true,
+      "boxCheckRequests": 2,
+      "validRegionChoiceRequests": 6
+    },
+    "enclosingMaskComponent": {
+      "input": "controlled one-pixel fragment from actual native mask, not a photo-quality result",
+      "previousForeground": 1,
+      "point": {
+        "x": 0,
+        "y": 0
+      },
+      "status": "segmented",
+      "foreground": 4062,
+      "metadata": {
+        "method": "mobile-sam-enclosing-mask-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1232.7554,
+        "input": {
+          "width": 256,
+          "height": 256
+        },
+        "qualityScore": 0.9341034889221191
+      }
+    }
+  },
+  "childOwnership": {
+    "starts": 10,
+    "closes": 10,
+    "stillOwnedPids": []
+  },
+  "providerHttpCalls": 0,
+  "nativeCoordinatorExitCode": 0,
+  "nativeWorkerExitCode": 0,
+  "limitations": [
+    "Controlled synthetic/native wiring and lifecycle checks; not real-photo accuracy or game navigation.",
+    "Source presentation preparation is also tested through public native/ordinary adapters with controlled fetches in 557 source tests.",
+    "Final release archive must preserve the 114 compiled runtime files verified here and pass its own package/source/secret checks."
+  ]
+}

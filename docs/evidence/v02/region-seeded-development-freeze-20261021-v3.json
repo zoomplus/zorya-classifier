@@ -1,0 +1,205 @@
+{
+  "schema": "region-seeded-development-freeze-v3",
+  "sourceCommit": "d4b84b9fa025e5a5238968f99fb685633c837c7d",
+  "sourceUnmodified": true,
+  "phase": "dev",
+  "plannedCases": 40,
+  "profileIds": {
+    "candidate": "native-luna-presence-first-checked-region-sam-dev-v3",
+    "control": "native-luna-presence-first-region-no-image-control-dev-v3"
+  },
+  "inputs": [
+    {
+      "sha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a",
+      "cases": 20
+    },
+    {
+      "sha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc",
+      "cases": 10
+    },
+    {
+      "sha256": "b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15",
+      "cases": 10
+    }
+  ],
+  "producerSourceFileCount": 68,
+  "producerSourceSha256": "be43090b13951e9a6ffa65daffb9413a6a539d8dae335925dc885733a467fb20",
+  "route": {
+    "model": "openai/gpt-6-luna-decisions",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "apiEndpoint": "/api/alpha/decisions",
+    "allowFallbacks": false
+  },
+  "promptPolicy": {
+    "targetPolicy": "target-plus-neutral-instruction-v1",
+    "classificationClasses": [
+      {
+        "id": "present",
+        "description": "The target in the question is visible in this image."
+      },
+      {
+        "id": "absent",
+        "description": "The target in the question is not visible in this image."
+      }
+    ],
+    "classificationInstruction": "Use only the supplied image. Choose exactly one closed label.",
+    "extraction": "Original three-choice region search once; full-source MobileSAM seed-region extraction; up to two closed visible-box containment checks, with at most one native enclosing-mask expansion and one recheck; no separate extent search.",
+    "noImageControl": "Remove all image parts at DecisionPort boundary; assert no image part at actual fetch; no segmentation, OCR, or hidden CV.",
+    "presenceFirstGate": "Reuse the existing closed classification result. Run no region search or segmentation unless classification succeeded with value present; absent and failed classifications are retained with extraction skipped."
+  },
+  "policy": {
+    "timeoutMs": 120000,
+    "maxInFlightCases": 2,
+    "nativeMaxActive": 1,
+    "nativeMaxWaiting": 2,
+    "nativeThreads": 2,
+    "maxPhysicalCalls": 250,
+    "maxCostUsd": 5,
+    "unknownCostReserveUsd": 0.05,
+    "retries": 0,
+    "fallback": false,
+    "latencyRankingEligible": false,
+    "candidate": {
+      "maxPhysicalCallsPerCase": 6,
+      "maxLogicalCallsPerCase": 6,
+      "maxBoxCheckCalls": 2,
+      "segmenter": "caller-owned CPU MobileSAM; seed-region over full oriented source"
+    },
+    "control": {
+      "maxPhysicalCallsPerCase": 4,
+      "maxLogicalCallsPerCase": 4,
+      "maxBoxCheckCalls": 0,
+      "segmenter": "none; remove all image parts at DecisionPort and assert at actual fetch"
+    }
+  },
+  "assets": {
+    "encoder": {
+      "bytes": 28157093,
+      "sha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749"
+    },
+    "decoder": {
+      "bytes": 16496559,
+      "sha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe"
+    }
+  },
+  "variantSha256": {
+    "candidate": "f4ed437c17160ab1a694961e9b38b63ad76a290a21dbe82aa79d51e169c19697",
+    "control": "5a64ebc3f0261dd7ece37d8428ccae77c9e0c47019216d3cf2876f5b30983511"
+  },
+  "offlinePreflights": {
+    "candidate": {
+      "path": ".run/v02/region-seeded-dev-v3-offline-candidate/v02-region-seeded-preflight-2026-10-20T235029862Z-81f9c3d9/preflight.json",
+      "sha256": "3f77db296436ac70d68b2edf9ab24a182b94386b60c9bce096d4c6688d1c0278",
+      "runId": "v02-region-seeded-preflight-2026-10-20T235029862Z-81f9c3d9"
+    },
+    "control": {
+      "path": ".run/v02/region-seeded-dev-v3-offline-control/v02-region-seeded-preflight-2026-10-20T235032228Z-564c9b4e/preflight.json",
+      "sha256": "09742a111ab005c6fadd0aaee36f6de658e0906a579d540ee3ad16aa327b1867",
+      "runId": "v02-region-seeded-preflight-2026-10-20T235032228Z-564c9b4e"
+    }
+  },
+  "physicalProviderCalls": 0,
+  "createdAt": "2026-10-20T23:52:15.076Z",
+  "producerSourceFiles": {
+    "./region-seeded-runner.ts": "81514788fcb3f76cd1004fe09bf9ff9fac7646a2adf71e0fb6d2b9017ce0de75",
+    "./run-region-seeded-dev.ts": "0863a44e51aa4423fd721eac992fed13a939b17d9d12a08f9b253013d5080ac5",
+    "./fresh-corpus.ts": "7f1bcb21a2d933f1ad01d77b2188c9531987c557b3c0d474428ce512b9127779",
+    "./recording.ts": "3543f1e05cdaa1860f754fcd64362cd75a0cd18f4293fa8e9a7269bc43db3496",
+    "./budget.ts": "c1b1b84125bc8dc7890b353cb71ad2cc5332715766a76f0e6131208bd1826218",
+    "./protocol.ts": "2cd0a66e3f27b60484924bc97d7d9a5ade012f7df3d6e8436bf3739b347bd957",
+    "./native-categorical-presence-port.ts": "0bf4fa6a16c52083f1a97a696eeead26a6710d82bbacb27af4380ae01143eb3a",
+    "./categorical-presence-port.ts": "0d85dcb5acb12d10c4fab888f7a0b81e16c594c940886794fecc2b9367c26512",
+    "./region-seeded-runner.md": "3c7211456f97a36f1c9ce09d4d079c30f71de7e3fcc656b1ddaac0234abc3f9a",
+    "../../package.json": "11d19ae22e106be1ae2cb2c5e1c08a7359d9f89c2ca943846b29d415c45a69bd",
+    "../../package-lock.json": "61543b204b5fe38a94b32f4528e4d1e32b0061a304beab6e5ee5f19887868baf",
+    "src/app/cli-arguments.ts": "cc072ada300d459ca070dce6312e0205afb1125888a4be7373c9c6a50a5498a4",
+    "src/app/cli-route.ts": "769b0f2e8fa6d1fabbf2e7bd000fec724c1b94a3c6233eea7b93d55503052aad",
+    "src/app/create-classifier.ts": "060087fac98c1a2538fc202699c6ba5e82f8b12a1ab64ab809c690e12a15c870",
+    "src/app/extraction-files.ts": "e86d9ef07eda5537572398a2d4d0a9fb41a8f3dff447279f6a55b6b1f9136c69",
+    "src/cli.ts": "887dbf2a987f1241e2f1e1a659321ea87a5148a03956438678969923579206eb",
+    "src/entities/boundary-view.ts": "187ae80d2952cc2452752f06bbb1eeba200c715c12f8dd9ada4fd29156141655",
+    "src/entities/contracts.ts": "7710dad19cd6caa1d10516babb2f9d9f108af1c7040302f09bf53b9b478187cd",
+    "src/entities/cutout-raster.ts": "51fc476ced53f451f82eb9a2881c124d751b9d1b071c32d4b82cbd2d0edfbe45",
+    "src/entities/errors.ts": "1c92c94c9ed6917953ac5192bfd2d8896cdb6fe13b7d05593573b7f2103330b0",
+    "src/entities/object-proposals.ts": "112e182eedc46a402f9f94b776494c2afad8194dc692ed045a2d286d15775434",
+    "src/entities/representation.ts": "67cfafea702e28b25bc472b4d961914102628db24679b6099d31c4d32ebf5088",
+    "src/entities/segmentation-metadata.ts": "b8cc02740523e90d1b9493c6d9d8c6a33f963e6b08b5b1c8636e3fed3aa8b270",
+    "src/entities/segmentation-verification.ts": "ceb66b36360d4b5be0d32ee23568bbb7d6aff179fa62c6a1ff1710c8d5e80561",
+    "src/entities/segmentation.ts": "d99c765bd2524459d257babb8e1ee08140bba2d11821a74f0b5eab6981ea7194",
+    "src/entities/whole-object.ts": "cbf4d489890f9c18ba75312d93e865f7edf921ad3a4528006235e052541a2002",
+    "src/features/choice-beam-layout.ts": "8f61d6f784e0e6273467cea01315f17bbfa4fffa695dd7a7bb9cd5cac5354e1a",
+    "src/features/choice.ts": "2ec3e20a00966bafdd0793fc895109a2c7a10be465a11d56cc45dcb6599b47eb",
+    "src/features/prompts.ts": "b808ed8f42e8c92daf08060d2805da618f2b140f99b6a9b07df49622d57b62aa",
+    "src/features/segmentation/box-check.ts": "8467a240b42a3a641ad50ba81eb4b5aa103c4bb5db785a0404e1a25a2fdd51c6",
+    "src/features/segmentation/mask.ts": "5d13115284bb6474e2312409d4464891eb4cf55174a9da6a92fe89d62aececc9",
+    "src/features/segmentation/packed-mask.ts": "38dc9a7d15f07e9e11c31598df3e1c8369330f6e46722f04fe3e35fc216ef523",
+    "src/features/uniform-grid.ts": "8cee38aee52ba2c4ac2eaed909d5f53cc0e5aa2c04fe87585c66b29573e21c4d",
+    "src/index.ts": "4907d97e97a0620c9224050d35384dbd6305903603f1d4f6ffc8a234b2108619",
+    "src/infrastructure/boundary-view.ts": "2fb5546ae4a47a2a08f13ccad74c5a9cc7b9736ff052738637bfd65f1acd7775",
+    "src/infrastructure/openrouter-common.ts": "415462c42da7a3748c6bfe942ee99085fba71bc1f4158d369edda8269efeb124",
+    "src/infrastructure/openrouter-vision.ts": "b72e4699e132c1ac598772c49287edb0b5ca355ad2af33481f9c741ddcb13eaa",
+    "src/infrastructure/openrouter.ts": "486a919853949e6789dd4035b7699fd89b9682cb3e928632c77b216656f44c55",
+    "src/infrastructure/raster.ts": "615626e6fe04e377712ec7a3e3d8f2ea5e35ec17c2fd3982ea9df940ce5303dd",
+    "src/infrastructure/segmentation/box-presentation.ts": "bc2151c3a0f27ed84f26f2fc23327bd561c65e035c4c6f8d75b27901790043ea",
+    "src/infrastructure/segmentation/cutout-raster.ts": "f0ff7e1dd8b6670bb6320813ed4a0bb17d8054b766fc016bcedb17d097eafbfe",
+    "src/infrastructure/segmentation/grabcut/index.ts": "87e6ce49bc9dcfb085fc3e4ba9abc7d13effd3e45976a307a1de0b950766482a",
+    "src/infrastructure/segmentation/grabcut/worker-inference.ts": "b34d9ec1c23145f7c380a71634ea2d53c191e13a35c6765dbf8d2e381a31db29",
+    "src/infrastructure/segmentation/index.ts": "91f683e7b4cd73c79534c141858a50d376c606f15845dc48340a4462f83deed4",
+    "src/infrastructure/segmentation/mobile-sam/index.ts": "a0cb47c7eea53cbcc156fc9994c3d2a58425f5e6cf2b5b43ddd375a2ad1c8340",
+    "src/infrastructure/segmentation/mobile-sam/worker-inference.ts": "0f9ce9156aad4fd498b428eafc4e1533a6ab8374cfd5cb482f9159683b0ff63b",
+    "src/infrastructure/segmentation/native-child.ts": "94f0ccea6aec1d93a93256553cae92c3f19220f1ffbd3ac14060c2daa8ee2f83",
+    "src/infrastructure/segmentation/native-protocol.ts": "91177cfdb7760ad376496e3f56087306b9e8057be5c2f6b8f998dc787862e881",
+    "src/infrastructure/segmentation/native-worker.ts": "44751f75741a2ebee092682e4c83b41d076ab357e8effb680fa6e980aa42f17e",
+    "src/infrastructure/segmentation/probe-backend.ts": "32cfee334bd014b16134f7efae5cbb9ca1953e5b578fd466105e869ce73a66ff",
+    "src/infrastructure/segmentation/proposal-presentation.ts": "7bc50776ff1ae52496923014ae621e030dcde45c47e9216277f6617faa8de707",
+    "src/infrastructure/segmentation/verify-asset.ts": "2a8479dabf84622003a5eb01f3c1a116347e808108e8a0c8971129b18e1c5ef1",
+    "src/infrastructure/text-representation.ts": "7f392f1bcdb77969eaccf40be4b6d5c8a4a11a8b3708dda9b91ff1d8584c2061",
+    "src/infrastructure/vision-chat.ts": "314e2c236a75ad43023c6ae34544a849df027f025eda32abdc2a7e1d49c742f3",
+    "src/openai-compatible.ts": "5461c54dbf3a691b3391834511d06baaf511b07487849f3d823b357fed9d8513",
+    "src/openrouter.ts": "8b28a235bacec5ad7c00ab0ac72fcabdc58658dd72971a5935f2a1572f572bf9",
+    "src/processes/boundary-state.ts": "77c636e2a2311ed989e514ee78adef66f80230d5eee394549917c9ff13fc99d7",
+    "src/processes/classify.ts": "0edf3e8a05333c2325f53ddd06c1c903d3daca80ca082ba2e3609ff9de6ffb9d",
+    "src/processes/extract-from-region.ts": "15587884eea7f75f006d1834d0efdb5d98f2332d00ef8a030f46de0599f3a1d1",
+    "src/processes/extract.ts": "9e1b2b3a4b36cc938d081f2a2e1deadd26576fcacccf17218c9364adbd749d8b",
+    "src/processes/locate.ts": "a5a1320c2dff4060a3c5ab5e32cb5f0af2d94fcad458caba3818b6a0a28dab3d",
+    "src/processes/proposal-location.ts": "a037c63a92db2df54ccd573af6cfa7926dcda869398ce7be9770219aa33f849e",
+    "src/processes/whole-object.ts": "548a0de8ee72956da3162023f43983d7596a2df9ec2756e33c952ca27b3fc320",
+    "src/segmentation.ts": "5ca90e5f6cc1a688667d1ee3bf041654404a80129fab93677106fa55dea2b253",
+    "src/shared/choice-mass.ts": "7f645998d9cd2688ca425b4765ec0bf7d125e932f085f9e84599b4c3b97743a3",
+    "src/shared/gate.ts": "97e4e32749dc9d3a9def6faaea2566b5d0ed831ba4451999740c719fafa8e576",
+    "src/shared/input-budget.ts": "f47f084681d0a559b2154ce731d1897d9dde0c293a5d52c885236b9eb459e050",
+    "src/shared/scope.ts": "cc557e9fd83a838f5366c64d026859db119491d927dfb3a84ef4320b2f0b0beb"
+  },
+  "readinessSha256": "a2ea0bc6eb1a9bc790a089fa7f4ebef7258d5dcc10b0d7da4a347088c30083c0",
+  "dispatch": "Authorized complete DEV candidate40 followed serially by paired image-free control40; no blind dispatch.",
+  "checks": {
+    "source": "npm run check: 559 tests, strict source/build gates passed at d4b84b9",
+    "format": "passed",
+    "publicProducerEvaluatorFixture": "passed with real public adapters and controlled fetches",
+    "runtimeAudit": "no reproducible blocker in focused read-only review; 31 focused tests",
+    "runtimeCi": "ci-987ac32.json",
+    "nativeWindows": "native-checked-region-windows-987ac32.json",
+    "resource": "corrected two-hour checked workflow active; not yet qualified"
+  },
+  "acceptance": {
+    "devCases": 40,
+    "positiveCases": 30,
+    "verifiedNegatives": 10,
+    "maxFalseSeedLocations": 0,
+    "maxFalseExtractions": 0,
+    "allUnknownAndErrorsCount": true,
+    "boxMatch": {
+      "iouAtLeast": 0.5,
+      "referenceCoverageAtLeast": 0.9
+    },
+    "exactMaskMatch": {
+      "iouAtLeast": 0.8
+    },
+    "primaryRegionAndMaskMetricsSeparate": true,
+    "latencyRankingEligible": false
+  },
+  "libraryConnectsModels": false,
+  "heldoutDispatched": false,
+  "releaseQualified": false
+}
