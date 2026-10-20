@@ -433,6 +433,10 @@ export async function runFreshTextProfile(
     options.stages ?? 'classify-and-locate',
   )
   const policy = freshTextPolicyForPhase(phase)
+  const runPurpose =
+    options.stages === 'classify-only'
+      ? 'classification-only follow-up for pinned fresh DEV text profiles'
+      : purpose
   const corpus = await loadFreshCorpus(
     { manifests: options.manifests, imageRoot: options.imageRoot },
     signal,
@@ -479,10 +483,7 @@ export async function runFreshTextProfile(
     schemaVersion: 1,
     runId,
     phase,
-    purpose:
-      options.stages === 'classify-only'
-        ? 'classification-only follow-up for pinned fresh DEV text profiles'
-        : purpose,
+    purpose: runPurpose,
     startedAt: new Date().toISOString(),
     profileId,
     stages: options.stages ?? 'classify-and-locate',
@@ -564,7 +565,7 @@ export async function runFreshTextProfile(
     runId,
     profileId,
     phase,
-    purpose,
+    purpose: runPurpose,
     variantSha256,
     status: missingCaseIds.length === 0 ? 'complete' : 'incomplete',
     plannedCaseIds,
