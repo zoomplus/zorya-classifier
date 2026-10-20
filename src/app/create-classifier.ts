@@ -14,12 +14,14 @@ import { classifyInput } from '../processes/classify.js'
 import { locateInput } from '../processes/locate.js'
 import { OperationGate } from '../shared/gate.js'
 import { OperationScope } from '../shared/scope.js'
+import { InputBudget } from '../shared/input-budget.js'
 
 export interface ClassifierOptions {
   decision: DecisionPort
   timeoutMs?: number
   concurrency?: number
   maxQueue?: number
+  maxInputBytes?: number
   refinement?: RefinementPort
 }
 export interface Classifier {
@@ -31,6 +33,12 @@ const configSchema = z.object({
   timeoutMs: z.number().int().min(1).max(120000).default(45000),
   concurrency: z.number().int().min(1).max(4).default(2),
   maxQueue: z.number().int().min(0).max(32).default(16),
+  maxInputBytes: z
+    .number()
+    .int()
+    .min(1)
+    .max(256 * 1024 * 1024)
+    .default(64 * 1024 * 1024),
 })
 function signalOf(value: unknown): AbortSignal | undefined {
   if (value === undefined) return undefined
@@ -45,8 +53,10 @@ export function createClassifier(options: ClassifierOptions): Classifier {
     timeoutMs: options.timeoutMs,
     concurrency: options.concurrency,
     maxQueue: options.maxQueue,
+    maxInputBytes: options.maxInputBytes,
   })
   const gate = new OperationGate(config.concurrency, config.maxQueue)
+  const inputBudget = new InputBudget(config.maxInputBytes)
   const raster = createSharpRaster()
   const owned = new Map<OperationScope, Promise<unknown>>()
   let disposed = false
@@ -86,18 +96,27 @@ export function createClassifier(options: ClassifierOptions): Classifier {
       const { signal, ...rest } = input
       const parent = signalOf(signal)
       const parsed = parse(classifySchema, rest)
-      const media =
+      const byteCount =
         typeof parsed.input === 'string'
-          ? parsed.input
-          : {
-              ...parsed.input,
-              ...(parsed.input.image === undefined
-                ? {}
-                : { image: new Uint8Array(parsed.input.image) }),
-            }
-      return run(parent, (s) =>
-        classifyInput({ ...parsed, input: media }, options.decision, raster, s),
-      )
+          ? Buffer.byteLength(parsed.input)
+          : (parsed.input.image?.byteLength ?? 0) + Buffer.byteLength(parsed.input.text ?? '')
+      const release = inputBudget.reserve(byteCount)
+      try {
+        const media =
+          typeof parsed.input === 'string'
+            ? parsed.input
+            : {
+                ...parsed.input,
+                ...(parsed.input.image === undefined
+                  ? {}
+                  : { image: new Uint8Array(parsed.input.image) }),
+              }
+        return await run(parent, (s) =>
+          classifyInput({ ...parsed, input: media }, options.decision, raster, s),
+        )
+      } finally {
+        release()
+      }
     },
     async locate(input) {
       if (disposed) throw new ClassifierError('DISPOSED', 'Classifier has been disposed')
@@ -107,10 +126,15 @@ export function createClassifier(options: ClassifierOptions): Classifier {
       const { signal, ...rest } = input
       const parent = signalOf(signal)
       const parsed = parse(locateSchema, rest)
-      const snapshot = { ...parsed, image: new Uint8Array(parsed.image) }
-      return run(parent, (s) =>
-        locateInput(snapshot, options.decision, raster, s, options.refinement),
-      )
+      const release = inputBudget.reserve(parsed.image.byteLength)
+      try {
+        const snapshot = { ...parsed, image: new Uint8Array(parsed.image) }
+        return await run(parent, (s) =>
+          locateInput(snapshot, options.decision, raster, s, options.refinement),
+        )
+      } finally {
+        release()
+      }
     },
     async dispose() {
       disposed = true

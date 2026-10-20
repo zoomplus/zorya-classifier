@@ -24,6 +24,7 @@ export interface RepresentationMetadata {
     height: number
     scaleX: number
     scaleY: number
+    content?: PixelRect
   }[]
 }
 /** Prepare once for the entire decision request, including all candidate views. */
