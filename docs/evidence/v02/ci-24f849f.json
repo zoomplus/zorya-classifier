@@ -1,0 +1,95 @@
+{
+  "schema": "hosted-ci-evidence-v1",
+  "runId": 39431706865,
+  "sourceCommit": "24f849fcf3d41ec6cebdaf50b96297e0b9ef1a58",
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39431706865",
+  "status": "completed",
+  "conclusion": "failure",
+  "createdAt": "2026-10-20T13:35:23Z",
+  "updatedAt": "2026-10-20T13:38:45Z",
+  "rawMetadataSha256": "bcb6dc72601ced638e5f294c9e4fbd9a4aa75e0e58fe9be5aa41a2b9425343fb",
+  "failureLogSha256": "e0a43841c9b2ae209cba4c8cbf1d45455f6f6b0a946dd6453e35e75430a0ef01",
+  "failure": {
+    "gate": "npm run pack:check",
+    "file": "docs/evidence/v02/heldout-input-derivation.md",
+    "reason": "Archive inspection rejected a machine-local image-root path in public documentation. No scanner rule was weakened."
+  },
+  "jobs": [
+    {
+      "name": "verify (ubuntu-latest, 22)",
+      "conclusion": "failure",
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39431706865/job/118658123069",
+      "steps": [
+        {
+          "name": "Run npm run check",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run pack:check",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Run npm run format:check",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "name": "verify (windows-latest, 22)",
+      "conclusion": "failure",
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39431706865/job/118658123142",
+      "steps": [
+        {
+          "name": "Run npm run check",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run pack:check",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Run npm run format:check",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "name": "verify (ubuntu-latest, 24)",
+      "conclusion": "failure",
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39431706865/job/118658123450",
+      "steps": [
+        {
+          "name": "Run npm run check",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run pack:check",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Run npm run format:check",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "name": "verify (windows-latest, 24)",
+      "conclusion": "failure",
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39431706865/job/118658123534",
+      "steps": [
+        {
+          "name": "Run npm run check",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run pack:check",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Run npm run format:check",
+          "conclusion": "skipped"
+        }
+      ]
+    }
+  ]
+}
