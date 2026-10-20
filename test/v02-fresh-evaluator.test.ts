@@ -159,6 +159,38 @@ await test('fresh evaluator rejects mismatched source, profile, identity and uns
   }
 })
 
+await test('fresh evaluator accepts pinned textual negative evidence and rejects blank descriptions', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'zorya-fresh-negative-text-'))
+  try {
+    const { options, truth } = await fixture(directory)
+    const textual = truth.map((row, index) => ({
+      ...row,
+      negativeEvidence: index === 2 ? 'Independent inventory confirms no target instance.' : null,
+    }))
+    const result = await evaluateFreshRun(
+      { ...options, truths: [await pinned(directory, 'textual-truth.json', textual)] },
+      signal,
+    )
+    assert.equal(result.localization.falseLocations, 1)
+    assert.equal(result.localization.positives, 3)
+    for (const [index, invalid] of ['', '   ', 'x'.repeat(4001)].entries()) {
+      textual[2]!.negativeEvidence = invalid
+      await assert.rejects(
+        evaluateFreshRun(
+          {
+            ...options,
+            output: join(directory, `invalid-${index}.json`),
+            truths: [await pinned(directory, `invalid-truth-${index}.json`, textual)],
+          },
+          signal,
+        ),
+      )
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
 await test('paired fresh localization compares positive photos only and refuses incomplete or different snapshots', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'zorya-fresh-paired-'))
   try {

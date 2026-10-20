@@ -1,0 +1,30 @@
+{
+  "kind": "offline-native-protocol-base64-stack-reproduction",
+  "revision": "fd2cd53c0f9aeec6000fd4cd5cf09b03b6c20d55",
+  "source": "src/infrastructure/segmentation/native-protocol.ts",
+  "sourceSha256": "b79299afb9b3951db524675f2b69b0faaf77fbb94efc6a826ba820e728bf1a30",
+  "node": "v24.12.0",
+  "platform": "linux",
+  "arch": "x64",
+  "modelCalls": 0,
+  "nativeChildren": 0,
+  "assetFilesOpened": 0,
+  "cases": [
+    {
+      "width": 640,
+      "height": 480,
+      "rawBytes": 1228800,
+      "base64Chars": 1638400,
+      "outcome": "accepted",
+      "durationMs": 5.256616000000008
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "rawBytes": 4096000,
+      "base64Chars": 5461336,
+      "outcome": "accepted",
+      "durationMs": 11.648692000000011
+    }
+  ]
+}

@@ -79,7 +79,16 @@ const truthSchema = z
         caseId: z.string().min(1),
         expectedPresence: z.enum(['present', 'absent']),
         targetBoxes: z.array(z.object({ xyxy: xyxySchema }).passthrough()).max(10000),
-        negativeEvidence: z.record(z.unknown()).nullable(),
+        negativeEvidence: z
+          .union([
+            z.record(z.unknown()),
+            z
+              .string()
+              .min(1)
+              .max(4000)
+              .refine((value) => value.trim().length > 0),
+          ])
+          .nullable(),
       })
       .passthrough()
       .superRefine((value, context) => {
@@ -88,7 +97,9 @@ const truthSchema = z
             ? value.targetBoxes.length === 0
             : value.targetBoxes.length !== 0 ||
               value.negativeEvidence === null ||
-              Object.keys(value.negativeEvidence).length === 0
+              (typeof value.negativeEvidence === 'string'
+                ? value.negativeEvidence.trim().length === 0
+                : Object.keys(value.negativeEvidence).length === 0)
         )
           context.addIssue({
             code: 'custom',

@@ -1,0 +1,32 @@
+{
+  "kind": "offline-native-protocol-base64-stack-reproduction",
+  "revision": "bbf46a0fb7bc921bd17a25b9480f8ff40a648188",
+  "source": "src/infrastructure/segmentation/native-protocol.ts",
+  "sourceSha256": "fda35ec675b1d5c1c1bccd7b00f2a02aea04efb90717be9e7d9e46521b964609",
+  "node": "v24.12.0",
+  "platform": "linux",
+  "arch": "x64",
+  "modelCalls": 0,
+  "nativeChildren": 0,
+  "assetFilesOpened": 0,
+  "cases": [
+    {
+      "width": 640,
+      "height": 480,
+      "rawBytes": 1228800,
+      "base64Chars": 1638400,
+      "outcome": "accepted",
+      "durationMs": 32.666562
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "rawBytes": 4096000,
+      "base64Chars": 5461336,
+      "outcome": "unexpected-throw",
+      "errorName": "RangeError",
+      "errorMessage": "Maximum call stack size exceeded",
+      "durationMs": 80.84951900000002
+    }
+  ]
+}

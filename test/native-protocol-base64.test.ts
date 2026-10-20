@@ -44,6 +44,24 @@ await test('native request schema accepts full UI and map RGBA payloads', () => 
   const map = mobileSamRequest(1920, 1080, zeroBytesBase64(1920 * 1080 * 4))
   assert.equal(map.rgba.length, 11_059_200)
   assert.equal(nativeSegmentationRequestSchema.safeParse(map).success, true)
+
+  for (const source of [ui, map]) {
+    const { wholeRegion: _wholeRegion, ...proposal } = source
+    assert.equal(
+      nativeSegmentationRequestSchema.safeParse({ ...proposal, kind: 'mobile-sam-proposals' })
+        .success,
+      true,
+    )
+    const { options: _options, ...grabCut } = source
+    assert.equal(
+      nativeSegmentationRequestSchema.safeParse({
+        ...grabCut,
+        kind: 'grabcut',
+        assetPath: '/models/opencv.js',
+      }).success,
+      true,
+    )
+  }
 })
 
 await test('native base64 validation rejects malformed alphabet, padding and pad bits', () => {
