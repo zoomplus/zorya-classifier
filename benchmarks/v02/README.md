@@ -1,6 +1,6 @@
 # v0.2 independent acceptance preparation
 
-This directory contains evaluator code and the frozen **intended** corpus policy, not a completed corpus or a model-quality report. `corpus-policy.json` has `planned-not-acquired`; no new images, independently reviewed map/UI labels or heldout outputs are present. No paid requests were made during this audit.
+This directory contains evaluator code, the frozen **intended** corpus policy, and partial acquisition evidence, not a completed corpus or model-quality report. Fresh Open Images photos have been acquired and structurally validated; real map and UI cases remain open. No model calls were made. See [corpus-status.md](./corpus-status.md) for the acquisition record and blind input-manifest commitment.
 
 ## Fresh source acquisition
 
@@ -13,9 +13,9 @@ The existing 60-photo v1 corpus and all historical provider outputs are developm
 | Maps            | Public, permissively licensed rendered map screenshots with independently reviewed symbols                                                              | Reviewer-drawn visible-instance bbox/mask and explicit target-absence review | A map tile's geospatial geometry is not automatically the pixel extent of a rendered icon; per-image attribution and review are required |
 | Interfaces      | Public screenshots with adequate individual-content license and independently verified target labels, or clearly separated authored fixture diagnostics | Independently reviewed pixel bounds/masks and explicit target-absence review | DOM bounds alone may include invisible padding, occlusion or clipped content; WebSight is synthetic, not real app UI                     |
 
-Photo sources are concrete and practical: the official Open Images download page lists per-image downloads, boxes, explicit human labels and binary masks. The main repository already retains the frozen validation annotation CSVs in ignored local cache. Use a bounded exact-ID fetcher, not a full image-dataset download. Before acquisition, choose positive examples with instance masks where the cutout metric is required; otherwise a bbox-only item cannot qualify mask quality. Existing code can establish the same photo-specific CC-BY evidence as v1, but admission must be new and independently frozen.
+The acquired photo cases use Open Images V5 validation boxes, explicit human labels and the official instance-mask index. They are new relative to v1 by image ID, byte hash and photographer profile. Current Flickr photo pages were individually checked for a photo-ID-matching CC-BY 2.0 `ImageObject`; 21 positive cases have 32 official source masks. Bounded acquisition and validation scripts are in this directory. Raw photos, license evidence and separated manifests/truth are in gitignored local cache and are not part of the MIT archive.
 
-**Acquisition gap:** no currently admitted, independently annotated **real map or real UI** corpus was identified during this preparation. Do not silently replace those 60 required combined cases with hand-generated diagrams and report real-world success. Authored renderings are useful reproducible fixtures with exact source geometry, but must be identified as synthetic and reported separately. The release's experimental quality gate remains pending until the intended corpus is populated and independently checked.
+**Acquisition gap:** no currently admitted, individually licensed **real map or real UI** corpus has been established. Do not silently replace those 60 required combined cases with hand-generated diagrams and report real-world success. Authored renderings are useful reproducible fixtures with exact source geometry, but must be identified as synthetic and reported separately. The release's experimental quality gate remains pending until the intended corpus is populated and independently checked.
 
 ## Source and licensing facts
 

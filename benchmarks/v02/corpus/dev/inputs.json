@@ -1,0 +1,402 @@
+[
+  {
+    "caseId": "photo-dev-present-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/5a44ac2b3f074d53.jpg",
+      "sha256": "71e781adb0c2d47d97e6fd5868e6dbe4de8c1375536e1753f897931ff90575dc",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Dog",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Dog?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/1be63da150641ede.jpg",
+      "sha256": "a27d93b12fadd550899a1d1d8ce70d34ba3c692affebf09134eda838910fcab5",
+      "width": 1024,
+      "height": 717
+    },
+    "locate": {
+      "target": "Person",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Person?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/897485e4e7699ab2.jpg",
+      "sha256": "e20c5e6f6a9334aca94289a99a56f3c0ee7cb8de8f5e00eff886cf772600250c",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Tree",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Tree?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-04",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/92142a7ead74b3a5.jpg",
+      "sha256": "66fe4e85ef638a2f28d5a2e7472ccebe46d2c8446304db73659d8af37f0d489c",
+      "width": 1024,
+      "height": 687
+    },
+    "locate": {
+      "target": "Tree",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Tree?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-05",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/e4cb43222c9bee50.jpg",
+      "sha256": "71b99532e14abb6098a704e9bd9c2c50eebba72588a49e60c8a4b89af4eea4c5",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Car",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Car?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-06",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/4f05ad23beaefd46.jpg",
+      "sha256": "ad0eb4bf4a6c2c1be585846a943aa06ec2440696b7e8874374904eb25dcc594a",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Bird",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bird?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-07",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/1d57e40d40f18464.jpg",
+      "sha256": "16cae5fc9b21c562a005d7e1a00809ea90e4b143ee13614aefffa75fb113e044",
+      "width": 1024,
+      "height": 680
+    },
+    "locate": {
+      "target": "Car",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Car?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-08",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/d8c13dba00bd5e65.jpg",
+      "sha256": "74b944d3b7d88a046d01f2d813c88e8a6415296db938a343a83d86048f4c3a4f",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Bird",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bird?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-09",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/af403410b6934966.jpg",
+      "sha256": "6710905e971316f4b0d0fe1535eb64702807bc4c041bc161ea1ce1208eff5a0f",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Knife",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Knife?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-10",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/e73a7d4187158151.jpg",
+      "sha256": "f118352c4bfeb65b0a2dae153428ce0f802a01a232d45d0be4b0a7176bfaa342",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Person",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Person?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-11",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/96c20bd12d26b464.jpg",
+      "sha256": "07ab595c6482338b5982d61ac175450295be81338e9c641b218d7794b658249e",
+      "width": 1024,
+      "height": 678
+    },
+    "locate": {
+      "target": "Car",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Car?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-12",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/a38af41029dbc3b8.jpg",
+      "sha256": "65c38939211e8ae0d98e7d01fd3bc8d159fe8b96969940a169e82556071059c8",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Person",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Person?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-13",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/5e432cf1a6415182.jpg",
+      "sha256": "750f09aeeb5d1113088eedaf47f201f0837ad64720f836a69fec9ed3e4f1e5a7",
+      "width": 1024,
+      "height": 681
+    },
+    "locate": {
+      "target": "Hat",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Hat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-14",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/491ebe40c3cb3b4e.jpg",
+      "sha256": "77681ffeb78a27bb0d59111acb638254948ece8115f6e5f6d1438b50c319c4d1",
+      "width": 1024,
+      "height": 682
+    },
+    "locate": {
+      "target": "Car",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Car?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-15",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/59987a562d6187c6.jpg",
+      "sha256": "a0a80df65932f8cb7cf7367305372c04aa37f1991436e4f1cb7828c9138f708e",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Cat",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Cat?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-present-16",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/b0a59eeab8c5166c.jpg",
+      "sha256": "4a0dffd0f9f85bacac77d4f372c1f3eb754ba6a7440de3bc7c7f6a42f4c53ecd",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Person",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Person?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-absent-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/42160e79f033b998.jpg",
+      "sha256": "604b8fa9c30881acee7c67d078bb7d08f846aeac6152dc1bf23a41ddefe45988",
+      "width": 1024,
+      "height": 721
+    },
+    "locate": {
+      "target": "Table",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Table?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-absent-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/988bcf4b4bd68909.jpg",
+      "sha256": "8bcbc695bc113f645bb66dd2e03615764cd37d80e5794d8f9ffc79f1e364e077",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Tree",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Tree?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-absent-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/8d02d9a2d960228a.jpg",
+      "sha256": "f8c2cc736fd7941bf2bc51c73147aeec96deba4b22e6948fe088a2d9121c51a6",
+      "width": 816,
+      "height": 1024
+    },
+    "locate": {
+      "target": "Tree",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Tree?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "photo-dev-absent-04",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/398a3ffc8a7e36a8.jpg",
+      "sha256": "085ac7dc3243e28816e69f5e1ad56b9e8858c7135fac366f3172ad862e28eeae",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Bowl",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bowl?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  }
+]

@@ -1,7 +1,27 @@
 {
   "schemaVersion": 1,
-  "status": "planned-not-acquired",
+  "status": "partial-photos-acquired-maps-ui-pending",
   "modelCalls": 0,
+  "acquired": {
+    "photos": {
+      "status": "acquired-and-structurally-validated",
+      "dev": { "present": 16, "absent": 4 },
+      "heldout": { "present": 30, "absent": 10 },
+      "positiveCasesWithOfficialSourceMasks": 21,
+      "maskInstances": 32,
+      "oldCorpusIdsHashesAndAuthorGroupsExcluded": true,
+      "localAssets": "benchmarks/cache/v02/corpus (gitignored; individual licenses retained in source ledger)",
+      "inputAndTruthSplit": true
+    },
+    "maps": {
+      "status": "not-acquired",
+      "reason": "No source with both verifiable per-screenshot image rights and a defensible full-map/icon annotation has been admitted. DayZ minimap public code does not establish screenshot-content rights; map center-marker coordinates do not define the marker bbox."
+    },
+    "ui": {
+      "status": "not-acquired",
+      "reason": "RICO Semantics establishes CC-BY-SA 4.0 for its human annotation dataset, but the RICO screenshots are a separate dataset and the sampled app screenshot rights have not been established individually. No images admitted."
+    }
+  },
   "oldCorpusUse": "development-regression-only",
   "quotas": {
     "dev": {

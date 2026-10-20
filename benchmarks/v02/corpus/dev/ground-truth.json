@@ -1,0 +1,5230 @@
+[
+  {
+    "caseId": "photo-dev-present-01",
+    "expectedPresence": "present",
+    "targetClassId": "/m/0bt9lr",
+    "targetBoxes": [
+      {
+        "classId": "/m/0bt9lr",
+        "className": "Dog",
+        "xyxy": [
+          0.115625,
+          0.114583336,
+          1.0,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 107755,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/0bt9lr",
+        "className": "Dog",
+        "xyxy": [
+          0.115625,
+          0.114583336,
+          1.0,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 107755,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.359375,
+          0.0,
+          1.0,
+          0.425
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 107756,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.3609375,
+          0.0,
+          0.775,
+          0.41875
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 107757,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.7078125,
+          0.25416666,
+          1.0,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 107758,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-present-02",
+    "expectedPresence": "present",
+    "targetClassId": "/m/01g317",
+    "targetBoxes": [
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.16012084,
+          0.2138229,
+          0.41993958,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33017,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.46223566,
+          0.4038877,
+          0.71601206,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33018,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/0dzct",
+        "className": "Human face",
+        "xyxy": [
+          0.30362538,
+          0.26781857,
+          0.36706948,
+          0.39308855
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33011,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzct",
+        "className": "Human face",
+        "xyxy": [
+          0.54833835,
+          0.537797,
+          0.5755287,
+          0.5615551
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33012,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzct",
+        "className": "Human face",
+        "xyxy": [
+          0.6978852,
+          0.12095033,
+          0.7583082,
+          0.2224622
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33013,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/03q69",
+        "className": "Human hair",
+        "xyxy": [
+          0.2734139,
+          0.22462203,
+          0.36102718,
+          0.3563715
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33014,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/03q69",
+        "className": "Human hair",
+        "xyxy": [
+          0.570997,
+          0.44924405,
+          0.6450151,
+          0.55939525
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33015,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/03q69",
+        "className": "Human hair",
+        "xyxy": [
+          0.6993958,
+          0.058315333,
+          0.7945619,
+          0.20086393
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33016,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.16012084,
+          0.2138229,
+          0.41993958,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33017,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.46223566,
+          0.4038877,
+          0.71601206,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33018,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k0pj",
+        "className": "Human nose",
+        "xyxy": [
+          0.34138972,
+          0.32181427,
+          0.35649547,
+          0.3412527
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33019,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k0pj",
+        "className": "Human nose",
+        "xyxy": [
+          0.7024169,
+          0.15550756,
+          0.71903324,
+          0.18142548
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33020,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.16012084,
+          0.33045357,
+          0.40785497,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33021,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.5181269,
+          0.5075594,
+          0.71903324,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33022,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.6042296,
+          0.18790497,
+          0.8549849,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33023,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.16163142,
+          0.2224622,
+          0.41993958,
+          0.99784017
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33024,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.46072507,
+          0.40172786,
+          0.7175227,
+          0.99784017
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33025,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.602719,
+          0.058315333,
+          0.8504532,
+          0.99784017
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33026,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04hgtk",
+        "className": "Human head",
+        "xyxy": [
+          0.27643505,
+          0.2224622,
+          0.36404833,
+          0.3887689
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33027,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04hgtk",
+        "className": "Human head",
+        "xyxy": [
+          0.6978852,
+          0.060475163,
+          0.7975831,
+          0.21598272
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33028,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.1510574,
+          0.2138229,
+          0.41540787,
+          0.99784017
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33029,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.4531722,
+          0.39308855,
+          0.71903324,
+          0.99784017
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33030,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.5996979,
+          0.043196544,
+          0.8610272,
+          0.99784017
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33031,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0152hh",
+        "className": "Snowman",
+        "xyxy": [
+          0.042296074,
+          0.099352054,
+          0.8202417,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33032,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/03bt1vf",
+        "className": "Woman",
+        "xyxy": [
+          0.60120845,
+          0.051835854,
+          0.85196376,
+          0.99784017
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33033,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/07j7r",
+        "className": "Tree",
+        "xyxy": [
+          0.0,
+          0.0,
+          1.0,
+          0.5334773
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 33034,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 1,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-present-03",
+    "expectedPresence": "present",
+    "targetClassId": "/m/07j7r",
+    "targetBoxes": [
+      {
+        "classId": "/m/07j7r",
+        "className": "Tree",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.34513274,
+          0.71681416
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162085,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/07j7r",
+        "className": "Tree",
+        "xyxy": [
+          0.84513277,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162086,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/07mhn",
+        "className": "Trousers",
+        "xyxy": [
+          0.3539823,
+          0.42256638,
+          0.5737463,
+          0.9977876
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162067,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01d40f",
+        "className": "Dress",
+        "xyxy": [
+          0.3480826,
+          0.0,
+          0.6061947,
+          0.9977876
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162068,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01d40f",
+        "className": "Dress",
+        "xyxy": [
+          0.6106195,
+          0.0022123894,
+          0.9985251,
+          0.9977876
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162069,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/035r7c",
+        "className": "Human leg",
+        "xyxy": [
+          0.35545722,
+          0.42699116,
+          0.5722714,
+          0.9977876
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162070,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/035r7c",
+        "className": "Human leg",
+        "xyxy": [
+          0.6179941,
+          0.710177,
+          0.6932153,
+          0.9977876
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162071,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/035r7c",
+        "className": "Human leg",
+        "xyxy": [
+          0.65929204,
+          0.6438053,
+          0.9380531,
+          0.9977876
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162072,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/05r655",
+        "className": "Girl",
+        "xyxy": [
+          0.30973452,
+          0.0,
+          0.61946905,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162073,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0fly7",
+        "className": "Jeans",
+        "xyxy": [
+          0.35693216,
+          0.5663717,
+          0.5722714,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162074,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0fly7",
+        "className": "Jeans",
+        "xyxy": [
+          0.61651915,
+          0.63274336,
+          0.93952805,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162075,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.30973452,
+          0.0,
+          0.62094396,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162076,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.43657818,
+          0.0,
+          0.99705017,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162077,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k65p",
+        "className": "Human hand",
+        "xyxy": [
+          0.43657818,
+          0.19911504,
+          0.59292036,
+          0.40707964
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162078,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k65p",
+        "className": "Human hand",
+        "xyxy": [
+          0.45132744,
+          0.49778762,
+          0.54867256,
+          0.65486723
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162079,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.30088496,
+          0.0,
+          0.62094396,
+          0.9977876
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162080,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.42477876,
+          0.0,
+          0.9985251,
+          0.9977876
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162081,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzf4",
+        "className": "Human arm",
+        "xyxy": [
+          0.30235988,
+          0.0,
+          0.55309737,
+          0.6637168
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162082,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzf4",
+        "className": "Human arm",
+        "xyxy": [
+          0.4321534,
+          0.0,
+          0.97492623,
+          0.4159292
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162083,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/03bt1vf",
+        "className": "Woman",
+        "xyxy": [
+          0.30973452,
+          0.0,
+          0.6224189,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162084,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 1,
+        "inside": 0
+      },
+      {
+        "classId": "/m/07j7r",
+        "className": "Tree",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.34513274,
+          0.71681416
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162085,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/07j7r",
+        "className": "Tree",
+        "xyxy": [
+          0.84513277,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162086,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04yx4",
+        "className": "Man",
+        "xyxy": [
+          0.43657818,
+          0.0,
+          0.9985251,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 162087,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-present-04",
+    "expectedPresence": "present",
+    "targetClassId": "/m/07j7r",
+    "targetBoxes": [
+      {
+        "classId": "/m/07j7r",
+        "className": "Tree",
+        "xyxy": [
+          0.17455621,
+          0.0,
+          0.99852073,
+          0.13465783
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 172438,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.0,
+          0.0794702,
+          0.3106509,
+          0.36644593
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 172433,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.05029586,
+          0.13024282,
+          0.9304734,
+          0.94260484
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 172434,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.21449704,
+          0.25607064,
+          0.2766272,
+          0.33774835
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 172435,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.5502958,
+          0.580574,
+          0.69822484,
+          0.94260484
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 172436,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.86242604,
+          0.41280353,
+          0.92011833,
+          0.589404
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 172437,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/07j7r",
+        "className": "Tree",
+        "xyxy": [
+          0.17455621,
+          0.0,
+          0.99852073,
+          0.13465783
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 172438,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-present-05",
+    "expectedPresence": "present",
+    "targetClassId": "/m/0k4j",
+    "targetBoxes": [
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.0,
+          0.10176991,
+          0.16961652,
+          0.47123894
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272574,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.053097345,
+          0.0,
+          0.96902657,
+          0.94690263
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272575,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.9292035,
+          0.14159292,
+          1.0,
+          0.40486726
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272576,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/035r7c",
+        "className": "Human leg",
+        "xyxy": [
+          0.83480823,
+          0.10176991,
+          0.87905604,
+          0.30530974
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272572,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/035r7c",
+        "className": "Human leg",
+        "xyxy": [
+          0.86725664,
+          0.053097345,
+          0.9262537,
+          0.3539823
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272573,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.0,
+          0.10176991,
+          0.16961652,
+          0.47123894
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272574,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.053097345,
+          0.0,
+          0.96902657,
+          0.94690263
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272575,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.9292035,
+          0.14159292,
+          1.0,
+          0.40486726
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272576,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0fly7",
+        "className": "Jeans",
+        "xyxy": [
+          0.83923304,
+          0.057522126,
+          0.9262537,
+          0.32964602
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272577,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.82743365,
+          0.0,
+          0.9336283,
+          0.34292036
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272578,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.095870204,
+          0.22123894,
+          0.16224189,
+          0.40265486
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272579,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.9454277,
+          0.23451327,
+          0.9985251,
+          0.40707964
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272580,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j5n",
+        "className": "Footwear",
+        "xyxy": [
+          0.8938053,
+          0.3119469,
+          0.92330384,
+          0.34292036
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272581,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.11356932,
+          0.23230088,
+          0.15634218,
+          0.36504424
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272582,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.9483776,
+          0.23672566,
+          0.9985251,
+          0.3938053
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 272583,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-present-06",
+    "expectedPresence": "present",
+    "targetClassId": "/m/015p6",
+    "targetBoxes": [
+      {
+        "classId": "/m/015p6",
+        "className": "Bird",
+        "xyxy": [
+          0.34660766,
+          0.32964602,
+          0.68879056,
+          0.6637168
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 93866,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/015p6",
+        "className": "Bird",
+        "xyxy": [
+          0.34660766,
+          0.32964602,
+          0.68879056,
+          0.6637168
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 93866,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/07j7r",
+        "className": "Tree",
+        "xyxy": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 93867,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/",
+    "referenceMasks": [
+      {
+        "path": "benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-06-01.png",
+        "sha256": "0a82516a43057329a7b2cafa4fcbe1c714d997a87a9e1dbe6d84ffcbf1bbbe26",
+        "bytes": 2203,
+        "width": 1024,
+        "height": 683,
+        "sourceMaskPath": "4f05ad23beaefd46_m015p6_38f28f91.png",
+        "sourceMaskSha256": "2549d7be36b75bcbbf24faf94311273caa8a9a9a524954193164ea405990c1b1",
+        "sourceMaskDimensions": [
+          1600,
+          1066
+        ],
+        "maskExtentPixelsHalfOpen": [
+          355,
+          226,
+          701,
+          456
+        ],
+        "maskExtentNormalized": [
+          0.3466796875,
+          0.3308931185944363,
+          0.6845703125,
+          0.6676427525622255
+        ],
+        "resampling": "nearest-neighbor to the acquired Open Images JPEG raster; verified 0/255 binary values"
+      }
+    ]
+  },
+  {
+    "caseId": "photo-dev-present-07",
+    "expectedPresence": "present",
+    "targetClassId": "/m/0k4j",
+    "targetBoxes": [
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.29749632,
+          0.24168514,
+          0.99558175,
+          0.8159645
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 34932,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.29749632,
+          0.24168514,
+          0.99558175,
+          0.8159645
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 34932,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.9985272,
+          0.5321508
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 34933,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 1,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.5478645,
+          0.29711753,
+          0.65243006,
+          0.41463414
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 34934,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.7172312,
+          0.31707317,
+          0.8306333,
+          0.4390244
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 34935,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-present-08",
+    "expectedPresence": "present",
+    "targetClassId": "/m/015p6",
+    "targetBoxes": [
+      {
+        "classId": "/m/015p6",
+        "className": "Bird",
+        "xyxy": [
+          0.0,
+          0.57522124,
+          0.10176991,
+          0.8362832
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 258230,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/015p6",
+        "className": "Bird",
+        "xyxy": [
+          0.20501475,
+          0.3561947,
+          0.44247788,
+          0.6460177
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 258231,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/015p6",
+        "className": "Bird",
+        "xyxy": [
+          0.0,
+          0.57522124,
+          0.10176991,
+          0.8362832
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 258230,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/015p6",
+        "className": "Bird",
+        "xyxy": [
+          0.20501475,
+          0.3561947,
+          0.44247788,
+          0.6460177
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 258231,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/012074",
+        "className": "Magpie",
+        "xyxy": [
+          0.39675516,
+          0.32964602,
+          0.7522124,
+          0.6681416
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 258232,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/07j7r",
+        "className": "Tree",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.9985251,
+          0.99557525
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 258233,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 1,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/",
+    "referenceMasks": [
+      {
+        "path": "benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-08-01.png",
+        "sha256": "4e72cfb83de41421ed4a41c02ee4c700ca8bdf57f9c2f903017cf21ad6d4c772",
+        "bytes": 1278,
+        "width": 1024,
+        "height": 683,
+        "sourceMaskPath": "d8c13dba00bd5e65_m015p6_6d45d328.png",
+        "sourceMaskSha256": "1610a7a43229ac512d3330a32b0bd2ebb2ef554a4da42a2f6646b47717b4ff5d",
+        "sourceMaskDimensions": [
+          1600,
+          1066
+        ],
+        "maskExtentPixelsHalfOpen": [
+          0,
+          420,
+          105,
+          568
+        ],
+        "maskExtentNormalized": [
+          0.0,
+          0.6149341142020498,
+          0.1025390625,
+          0.8316251830161054
+        ],
+        "resampling": "nearest-neighbor to the acquired Open Images JPEG raster; verified 0/255 binary values"
+      },
+      {
+        "path": "benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-08-02.png",
+        "sha256": "7ca014cd837aca50d98e8d97420e4d9566f1cf75d9ddb9b4f1ef11d5b226d947",
+        "bytes": 1571,
+        "width": 1024,
+        "height": 683,
+        "sourceMaskPath": "d8c13dba00bd5e65_m015p6_502f2ecf.png",
+        "sourceMaskSha256": "0daa372745f47143512d51b6d4a17970ecf1660f32a6ae74f7c4167435f416d1",
+        "sourceMaskDimensions": [
+          1600,
+          1066
+        ],
+        "maskExtentPixelsHalfOpen": [
+          212,
+          245,
+          455,
+          434
+        ],
+        "maskExtentNormalized": [
+          0.20703125,
+          0.35871156661786235,
+          0.4443359375,
+          0.6354319180087847
+        ],
+        "resampling": "nearest-neighbor to the acquired Open Images JPEG raster; verified 0/255 binary values"
+      }
+    ]
+  },
+  {
+    "caseId": "photo-dev-present-09",
+    "expectedPresence": "present",
+    "targetClassId": "/m/04ctx",
+    "targetBoxes": [
+      {
+        "classId": "/m/04ctx",
+        "className": "Knife",
+        "xyxy": [
+          0.1328125,
+          0.27916667,
+          0.878125,
+          0.78125
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 209084,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/02gzp",
+        "className": "Dagger",
+        "xyxy": [
+          0.134375,
+          0.28125,
+          0.8765625,
+          0.77916664
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 209083,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04ctx",
+        "className": "Knife",
+        "xyxy": [
+          0.1328125,
+          0.27916667,
+          0.878125,
+          0.78125
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 209084,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/058qzx",
+        "className": "Kitchen knife",
+        "xyxy": [
+          0.134375,
+          0.27916667,
+          0.8765625,
+          0.78333336
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 209085,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/",
+    "referenceMasks": [
+      {
+        "path": "benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-09-01.png",
+        "sha256": "602668e56dd5ae8c5a0b7f24afe1b3da88d5e28446e96a870d6d0778478b0703",
+        "bytes": 3104,
+        "width": 1024,
+        "height": 768,
+        "sourceMaskPath": "af403410b6934966_m04ctx_27a499f4.png",
+        "sourceMaskSha256": "6a49f01f6608e86eefd60c47bd3acf536ca4688f62780f3a3c3fbbde51c4dd2f",
+        "sourceMaskDimensions": [
+          1600,
+          1200
+        ],
+        "maskExtentPixelsHalfOpen": [
+          136,
+          213,
+          899,
+          606
+        ],
+        "maskExtentNormalized": [
+          0.1328125,
+          0.27734375,
+          0.8779296875,
+          0.7890625
+        ],
+        "resampling": "nearest-neighbor to the acquired Open Images JPEG raster; verified 0/255 binary values"
+      }
+    ]
+  },
+  {
+    "caseId": "photo-dev-present-10",
+    "expectedPresence": "present",
+    "targetClassId": "/m/01g317",
+    "targetBoxes": [
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.032448377,
+          0.13716814
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275248,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.026548672,
+          0.0,
+          0.073746316,
+          0.28097346
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275249,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.26106194,
+          0.15707965,
+          0.6342183,
+          0.6792035
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275250,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.4321534,
+          0.0,
+          0.5707965,
+          0.37831858
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275251,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.5176991,
+          0.15044248,
+          0.8215339,
+          0.6637168
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275252,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.9705015,
+          0.024336284,
+          1.0,
+          0.27654868
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275253,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/04_sv",
+        "className": "Motorcycle",
+        "xyxy": [
+          0.29351032,
+          0.31858408,
+          0.6415929,
+          0.82522124
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275246,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04_sv",
+        "className": "Motorcycle",
+        "xyxy": [
+          0.6076696,
+          0.29646018,
+          0.8775811,
+          0.71460176
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275247,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.032448377,
+          0.13716814
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275248,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.026548672,
+          0.0,
+          0.073746316,
+          0.28097346
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275249,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.26106194,
+          0.15707965,
+          0.6342183,
+          0.6792035
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275250,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.4321534,
+          0.0,
+          0.5707965,
+          0.37831858
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275251,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.5176991,
+          0.15044248,
+          0.8215339,
+          0.6637168
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275252,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.9705015,
+          0.024336284,
+          1.0,
+          0.27654868
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275253,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.038348082,
+          0.13274336
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275254,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.032448377,
+          0.0,
+          0.06784661,
+          0.23672566
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275255,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.26253688,
+          0.20353982,
+          0.59144545,
+          0.67699116
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275256,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.42625368,
+          0.0,
+          0.5678466,
+          0.35176992
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275257,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.5221239,
+          0.22123894,
+          0.7625369,
+          0.63495576
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275258,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.9705015,
+          0.057522126,
+          1.0,
+          0.27654868
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275259,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04hgtk",
+        "className": "Human head",
+        "xyxy": [
+          0.26696166,
+          0.15707965,
+          0.36578172,
+          0.33849558
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275260,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04hgtk",
+        "className": "Human head",
+        "xyxy": [
+          0.5427729,
+          0.15265487,
+          0.6224189,
+          0.30752212
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275261,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.42477876,
+          0.5707965,
+          0.58702064,
+          0.8141593
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275262,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.5899705,
+          0.66150445,
+          0.63716817,
+          0.7743363
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275263,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.7345133,
+          0.50663716,
+          0.87905604,
+          0.71460176
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275264,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0zvk5",
+        "className": "Helmet",
+        "xyxy": [
+          0.26548672,
+          0.15486726,
+          0.36725664,
+          0.33849558
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275265,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0zvk5",
+        "className": "Helmet",
+        "xyxy": [
+          0.5412979,
+          0.15265487,
+          0.6224189,
+          0.32522124
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 275266,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-present-11",
+    "expectedPresence": "present",
+    "targetClassId": "/m/0k4j",
+    "targetBoxes": [
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.0,
+          0.05321508,
+          0.052863438,
+          0.09534368
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178253,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.0,
+          0.19290465,
+          0.15712188,
+          0.5698448
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178254,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.010279002,
+          0.12195122,
+          0.9089574,
+          0.902439
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178255,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.042584434,
+          0.06873614,
+          0.0969163,
+          0.1286031
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178256,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.09251101,
+          0.070953436,
+          0.17474303,
+          0.1286031
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178257,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.16593245,
+          0.07317073,
+          0.4185022,
+          0.2616408
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178258,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.825257,
+          0.11086474,
+          1.0,
+          0.29933482
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178259,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.0,
+          0.05321508,
+          0.052863438,
+          0.09534368
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178253,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.0,
+          0.19290465,
+          0.15712188,
+          0.5698448
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178254,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.010279002,
+          0.12195122,
+          0.9089574,
+          0.902439
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178255,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.042584434,
+          0.06873614,
+          0.0969163,
+          0.1286031
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178256,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.09251101,
+          0.070953436,
+          0.17474303,
+          0.1286031
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178257,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.16593245,
+          0.07317073,
+          0.4185022,
+          0.2616408
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178258,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.825257,
+          0.11086474,
+          1.0,
+          0.29933482
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178259,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01prls",
+        "className": "Land vehicle",
+        "xyxy": [
+          0.0,
+          0.046563193,
+          0.057268724,
+          0.10643016
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178260,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01prls",
+        "className": "Land vehicle",
+        "xyxy": [
+          0.045521293,
+          0.06430155,
+          0.10279001,
+          0.124168515
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178261,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.0,
+          0.37694013,
+          0.051395006,
+          0.57649666
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178262,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.06167401,
+          0.11529934,
+          0.07195301,
+          0.12195122
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178263,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.07782672,
+          0.09977827,
+          0.09251101,
+          0.12638581
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178264,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.111600585,
+          0.10643016,
+          0.11894273,
+          0.1286031
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178265,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.12922174,
+          0.101995565,
+          0.14684288,
+          0.124168515
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178266,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.17180617,
+          0.17738359,
+          0.19089574,
+          0.23059867
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178267,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.2716593,
+          0.19955654,
+          0.29809105,
+          0.2549889
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178268,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.34948605,
+          0.57649666,
+          0.52716595,
+          0.9002217
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178269,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.8002937,
+          0.42793792,
+          0.876652,
+          0.6141907
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178270,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0h9mv",
+        "className": "Tire",
+        "xyxy": [
+          0.8443465,
+          0.20177384,
+          0.8781204,
+          0.26385808
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178271,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.029368576,
+          0.4767184,
+          0.066079296,
+          0.58314854
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178272,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.07195301,
+          0.5166297,
+          0.14390603,
+          0.616408
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178273,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.07929515,
+          0.27272728,
+          0.15565345,
+          0.31263858
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178274,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.14537445,
+          0.55210644,
+          0.33920705,
+          0.6496674
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178275,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.17474303,
+          0.1751663,
+          0.20117474,
+          0.23059867
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178276,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.18795888,
+          0.7361419,
+          0.23788546,
+          0.7849224
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178277,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.27459618,
+          0.19733925,
+          0.3069016,
+          0.2594235
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178278,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.29955947,
+          0.15521064,
+          0.6328928,
+          0.38137472
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178279,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.3113069,
+          0.25277162,
+          0.3318649,
+          0.27051
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178280,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.31864905,
+          0.15964523,
+          0.35095447,
+          0.18625277
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178281,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.40969163,
+          0.15521064,
+          0.4185022,
+          0.17073171
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178282,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.5873715,
+          0.1751663,
+          0.7488987,
+          0.6674058
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178283,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.5947136,
+          0.1751663,
+          0.74449337,
+          0.3858093
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178284,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.6049926,
+          0.32815966,
+          0.6901615,
+          0.37915742
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178285,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.72246695,
+          0.37028825,
+          0.7591777,
+          0.3991131
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178286,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.74596184,
+          0.17738359,
+          0.8443465,
+          0.32815966
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178287,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.8223201,
+          0.32815966,
+          0.85022026,
+          0.35254988
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178288,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.8428781,
+          0.22616407,
+          0.8854626,
+          0.2682927
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178289,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.8957416,
+          0.31707317,
+          0.90161526,
+          0.35698447
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178290,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/08dz3q",
+        "className": "Auto part",
+        "xyxy": [
+          0.9148311,
+          0.124168515,
+          0.99265784,
+          0.18403548
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178291,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.0,
+          0.383592,
+          0.057268724,
+          0.5720621
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178292,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.076358296,
+          0.10421286,
+          0.09544787,
+          0.1330377
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178293,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.1277533,
+          0.09756097,
+          0.1483113,
+          0.1286031
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178294,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.17327459,
+          0.17073171,
+          0.2041116,
+          0.22616407
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178295,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.2701909,
+          0.19068736,
+          0.30983847,
+          0.2616408
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178296,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.34508076,
+          0.57871395,
+          0.52422905,
+          0.90687364
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178297,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.78707784,
+          0.41685143,
+          0.8781204,
+          0.6141907
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178298,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.83994126,
+          0.20620842,
+          0.8883994,
+          0.2682927
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 178299,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-present-12",
+    "expectedPresence": "present",
+    "targetClassId": "/m/01g317",
+    "targetBoxes": [
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.6546875,
+          0.42291668,
+          0.709375,
+          0.6645833
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194587,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.7,
+          0.44375,
+          0.80625,
+          0.8
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194588,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/03q69",
+        "className": "Human hair",
+        "xyxy": [
+          0.0453125,
+          0.20625,
+          0.2328125,
+          0.40208334
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194583,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/03q69",
+        "className": "Human hair",
+        "xyxy": [
+          0.7515625,
+          0.4375,
+          0.80625,
+          0.50625
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194584,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/03q69",
+        "className": "Human hair",
+        "xyxy": [
+          0.76875,
+          0.27291667,
+          0.9015625,
+          0.42916667
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194585,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/03q69",
+        "className": "Human hair",
+        "xyxy": [
+          0.896875,
+          0.35625,
+          0.9296875,
+          0.37708333
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194586,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.6546875,
+          0.42291668,
+          0.709375,
+          0.6645833
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194587,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.7,
+          0.44375,
+          0.80625,
+          0.8
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194588,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.0,
+          0.35833332,
+          0.3078125,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194589,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.6625,
+          0.42291668,
+          0.696875,
+          0.52916664
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194590,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.7390625,
+          0.5,
+          0.8046875,
+          0.61875
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194591,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.76875,
+          0.43333334,
+          0.9859375,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194592,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.88125,
+          0.42083332,
+          0.9609375,
+          0.5229167
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194593,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.0,
+          0.033333335,
+          0.446875,
+          0.99791664
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194594,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.603125,
+          0.27291667,
+          0.9859375,
+          0.99791664
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194595,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.659375,
+          0.42291668,
+          0.6953125,
+          0.65416664
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194596,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.725,
+          0.43958333,
+          0.8046875,
+          0.6145833
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194597,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.8890625,
+          0.35416666,
+          0.959375,
+          0.51458335
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194598,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.0015625,
+          0.039583333,
+          0.984375,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194599,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 1,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzf4",
+        "className": "Human arm",
+        "xyxy": [
+          0.00625,
+          0.0375,
+          0.1796875,
+          0.44791666
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194600,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzf4",
+        "className": "Human arm",
+        "xyxy": [
+          0.16875,
+          0.57708335,
+          0.4453125,
+          0.7708333
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194601,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzf4",
+        "className": "Human arm",
+        "xyxy": [
+          0.60625,
+          0.5520833,
+          0.9328125,
+          0.79375
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194602,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzf4",
+        "className": "Human arm",
+        "xyxy": [
+          0.6625,
+          0.59166664,
+          0.7828125,
+          0.6791667
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194603,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzf4",
+        "className": "Human arm",
+        "xyxy": [
+          0.6671875,
+          0.425,
+          0.69375,
+          0.47708333
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194604,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzf4",
+        "className": "Human arm",
+        "xyxy": [
+          0.7265625,
+          0.50416666,
+          0.75625,
+          0.575
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194605,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzf4",
+        "className": "Human arm",
+        "xyxy": [
+          0.9265625,
+          0.43333334,
+          0.9546875,
+          0.5104167
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194606,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04yx4",
+        "className": "Man",
+        "xyxy": [
+          0.0,
+          0.0375,
+          0.45,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194607,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04yx4",
+        "className": "Man",
+        "xyxy": [
+          0.6,
+          0.27083334,
+          0.9796875,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194608,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04yx4",
+        "className": "Man",
+        "xyxy": [
+          0.8890625,
+          0.35625,
+          0.9609375,
+          0.51666665
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 194609,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-present-13",
+    "expectedPresence": "present",
+    "targetClassId": "/m/02dl1y",
+    "targetBoxes": [
+      {
+        "classId": "/m/02dl1y",
+        "className": "Hat",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.8365243,
+          0.88053095
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111940,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/02dl1y",
+        "className": "Hat",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.8365243,
+          0.88053095
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111940,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzct",
+        "className": "Human face",
+        "xyxy": [
+          0.24594992,
+          0.1659292,
+          0.6509573,
+          0.8606195
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111941,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0dzct",
+        "className": "Human face",
+        "xyxy": [
+          0.3298969,
+          0.15265487,
+          0.66126657,
+          0.8561947
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111942,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/03q69",
+        "className": "Human hair",
+        "xyxy": [
+          0.09867452,
+          0.11504425,
+          0.6833579,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111943,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0463sg",
+        "className": "Fashion accessory",
+        "xyxy": [
+          0.27540502,
+          0.59513277,
+          0.3210604,
+          0.6659292
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111944,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/05r655",
+        "className": "Girl",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.8306333,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111945,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k0pj",
+        "className": "Human nose",
+        "xyxy": [
+          0.5228277,
+          0.39823008,
+          0.6215022,
+          0.61283183
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111946,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.8306333,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111947,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.24594992,
+          0.15044248,
+          0.6509573,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111948,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/014sv8",
+        "className": "Human eye",
+        "xyxy": [
+          0.38733432,
+          0.41150442,
+          0.5154639,
+          0.5132743
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111949,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/014sv8",
+        "className": "Human eye",
+        "xyxy": [
+          0.5699558,
+          0.36725664,
+          0.6421208,
+          0.44469026
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111950,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.7658321,
+          0.99557525
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111951,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0283dt1",
+        "className": "Human mouth",
+        "xyxy": [
+          0.49484536,
+          0.6261062,
+          0.6185567,
+          0.75442475
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111952,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/03bt1vf",
+        "className": "Woman",
+        "xyxy": [
+          0.0,
+          0.0022123894,
+          0.81590575,
+          0.99557525
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 111953,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/",
+    "referenceMasks": [
+      {
+        "path": "benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-13-01.png",
+        "sha256": "417bb4bf0272c4322e6dd5905505abd221ff8af286735b125e9c1c1f549dc9b0",
+        "bytes": 6704,
+        "width": 1024,
+        "height": 681,
+        "sourceMaskPath": "5e432cf1a6415182_m02dl1y_e1717d91.png",
+        "sourceMaskSha256": "9f68d28832cccbcf570a30594d8d81cdf23b5a15ce0e3f11625184b47f2e58c2",
+        "sourceMaskDimensions": [
+          1600,
+          1064
+        ],
+        "maskExtentPixelsHalfOpen": [
+          0,
+          0,
+          840,
+          598
+        ],
+        "maskExtentNormalized": [
+          0.0,
+          0.0,
+          0.8203125,
+          0.8781204111600588
+        ],
+        "resampling": "nearest-neighbor to the acquired Open Images JPEG raster; verified 0/255 binary values"
+      }
+    ]
+  },
+  {
+    "caseId": "photo-dev-present-14",
+    "expectedPresence": "present",
+    "targetClassId": "/m/0k4j",
+    "targetBoxes": [
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.17256637,
+          0.23451327,
+          1.0,
+          0.74557525
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 87029,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/0k4j",
+        "className": "Car",
+        "xyxy": [
+          0.17256637,
+          0.23451327,
+          1.0,
+          0.74557525
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 87029,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.1740413,
+          0.40707964,
+          0.22271386,
+          0.57522124
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 87030,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/083wq",
+        "className": "Wheel",
+        "xyxy": [
+          0.37315634,
+          0.41150442,
+          0.49557522,
+          0.7300885
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 87031,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-present-15",
+    "expectedPresence": "present",
+    "targetClassId": "/m/01yrx",
+    "targetBoxes": [
+      {
+        "classId": "/m/01yrx",
+        "className": "Cat",
+        "xyxy": [
+          0.24375,
+          0.18958333,
+          0.6296875,
+          0.625
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 107164,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01yrx",
+        "className": "Cat",
+        "xyxy": [
+          0.25625,
+          0.35208333,
+          0.6515625,
+          0.975
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 107165,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/01yrx",
+        "className": "Cat",
+        "xyxy": [
+          0.24375,
+          0.18958333,
+          0.6296875,
+          0.625
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 107164,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01yrx",
+        "className": "Cat",
+        "xyxy": [
+          0.25625,
+          0.35208333,
+          0.6515625,
+          0.975
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 107165,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/",
+    "referenceMasks": [
+      {
+        "path": "benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-15-01.png",
+        "sha256": "320e6d8ac5db8ea72033cbdbd8e4a3a77d05f892042d34d5731bff10b74cce65",
+        "bytes": 3382,
+        "width": 1024,
+        "height": 768,
+        "sourceMaskPath": "59987a562d6187c6_m01yrx_f173d401.png",
+        "sourceMaskSha256": "32a887ef1a9f505ee9eaedca4930d6e2deb66b6ad87e97caa96447e96131637c",
+        "sourceMaskDimensions": [
+          1600,
+          1200
+        ],
+        "maskExtentPixelsHalfOpen": [
+          266,
+          275,
+          672,
+          714
+        ],
+        "maskExtentNormalized": [
+          0.259765625,
+          0.3580729166666667,
+          0.65625,
+          0.9296875
+        ],
+        "resampling": "nearest-neighbor to the acquired Open Images JPEG raster; verified 0/255 binary values"
+      },
+      {
+        "path": "benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-15-02.png",
+        "sha256": "256b081bcf95f744d5524eb16ff1c21795bf5c9896ae0e43d3d4198d53f8e1e3",
+        "bytes": 2607,
+        "width": 1024,
+        "height": 768,
+        "sourceMaskPath": "59987a562d6187c6_m01yrx_7f1c8fea.png",
+        "sourceMaskSha256": "cd8db887ada40034c46d73d7491e380c039ade3eee414bc783fedf467859ce82",
+        "sourceMaskDimensions": [
+          1600,
+          1200
+        ],
+        "maskExtentPixelsHalfOpen": [
+          252,
+          149,
+          640,
+          484
+        ],
+        "maskExtentNormalized": [
+          0.24609375,
+          0.19401041666666666,
+          0.625,
+          0.6302083333333334
+        ],
+        "resampling": "nearest-neighbor to the acquired Open Images JPEG raster; verified 0/255 binary values"
+      }
+    ]
+  },
+  {
+    "caseId": "photo-dev-present-16",
+    "expectedPresence": "present",
+    "targetClassId": "/m/01g317",
+    "targetBoxes": [
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.0,
+          0.0020833334,
+          0.3765625,
+          0.50625
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210505,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.128125,
+          0.0,
+          0.453125,
+          0.5416667
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210506,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.440625,
+          0.23125,
+          0.634375,
+          0.41041666
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210507,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.465625,
+          0.022916667,
+          0.925,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210508,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.496875,
+          0.06458333,
+          0.6953125,
+          0.3875
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210509,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "negativeEvidence": null,
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/0cgh4",
+        "className": "Building",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.9984375,
+          0.99791664
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210504,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 1
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.0,
+          0.0020833334,
+          0.3765625,
+          0.50625
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210505,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.128125,
+          0.0,
+          0.453125,
+          0.5416667
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210506,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.440625,
+          0.23125,
+          0.634375,
+          0.41041666
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210507,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.465625,
+          0.022916667,
+          0.925,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210508,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01g317",
+        "className": "Person",
+        "xyxy": [
+          0.496875,
+          0.06458333,
+          0.6953125,
+          0.3875
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210509,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/09j2d",
+        "className": "Clothing",
+        "xyxy": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210510,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 1,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.3734375,
+          0.49791667
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210511,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.128125,
+          0.0,
+          0.4515625,
+          0.54375
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210512,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.4453125,
+          0.23333333,
+          0.6296875,
+          0.40625
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210513,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.465625,
+          0.03125,
+          0.91875,
+          0.99791664
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210514,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/02p0tk3",
+        "className": "Human body",
+        "xyxy": [
+          0.4984375,
+          0.07083333,
+          0.69375,
+          0.38541666
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210515,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/014sv8",
+        "className": "Human eye",
+        "xyxy": [
+          0.1875,
+          0.083333336,
+          0.2046875,
+          0.1
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210516,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/014sv8",
+        "className": "Human eye",
+        "xyxy": [
+          0.2609375,
+          0.0875,
+          0.2890625,
+          0.10208333
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210517,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/014sv8",
+        "className": "Human eye",
+        "xyxy": [
+          0.3015625,
+          0.08541667,
+          0.3171875,
+          0.1
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210518,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/014sv8",
+        "className": "Human eye",
+        "xyxy": [
+          0.55625,
+          0.15208334,
+          0.575,
+          0.16875
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210519,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/014sv8",
+        "className": "Human eye",
+        "xyxy": [
+          0.5875,
+          0.15625,
+          0.6046875,
+          0.16458334
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210520,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k65p",
+        "className": "Human hand",
+        "xyxy": [
+          0.271875,
+          0.46458334,
+          0.334375,
+          0.5104167
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210521,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k65p",
+        "className": "Human hand",
+        "xyxy": [
+          0.30625,
+          0.38125,
+          0.3828125,
+          0.46458334
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210522,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k65p",
+        "className": "Human hand",
+        "xyxy": [
+          0.3203125,
+          0.43541667,
+          0.3921875,
+          0.5104167
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210523,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k65p",
+        "className": "Human hand",
+        "xyxy": [
+          0.3984375,
+          0.39583334,
+          0.453125,
+          0.46458334
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210524,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k65p",
+        "className": "Human hand",
+        "xyxy": [
+          0.4640625,
+          0.29166666,
+          0.5390625,
+          0.42291668
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210525,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k65p",
+        "className": "Human hand",
+        "xyxy": [
+          0.5140625,
+          0.22916667,
+          0.54375,
+          0.28958333
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210526,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/0k65p",
+        "className": "Human hand",
+        "xyxy": [
+          0.5671875,
+          0.25,
+          0.6609375,
+          0.36875
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210527,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.0,
+          0.0,
+          0.390625,
+          0.5104167
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210528,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.1359375,
+          0.0,
+          0.4484375,
+          0.43958333
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210529,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.4421875,
+          0.2375,
+          0.628125,
+          0.40625
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210530,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.465625,
+          0.025,
+          0.9203125,
+          0.99791664
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210531,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04rky",
+        "className": "Mammal",
+        "xyxy": [
+          0.5,
+          0.06875,
+          0.69375,
+          0.37916666
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210532,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.0,
+          0.50208336,
+          0.08125,
+          0.5375
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210533,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.0,
+          0.55,
+          0.121875,
+          0.6020833
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210534,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.0,
+          0.5708333,
+          0.128125,
+          0.6020833
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210535,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.0,
+          0.6125,
+          0.115625,
+          0.65625
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210536,
+        "occluded": 1,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.065625,
+          0.48125,
+          0.13125,
+          0.56458336
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210537,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.0765625,
+          0.48333332,
+          0.165625,
+          0.54583335
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210538,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.10625,
+          0.5708333,
+          0.3796875,
+          0.74375
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210539,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.1125,
+          0.5708333,
+          0.2265625,
+          0.64166665
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210540,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.1328125,
+          0.53333336,
+          0.2984375,
+          0.62083334
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210541,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.1546875,
+          0.64375,
+          0.3515625,
+          0.78333336
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210542,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.1609375,
+          0.5083333,
+          0.2828125,
+          0.57916665
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210543,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.3375,
+          0.37916666,
+          0.428125,
+          0.43125
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210544,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.3828125,
+          0.114583336,
+          0.496875,
+          0.39166668
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210545,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/01xgg_",
+        "className": "Medical equipment",
+        "xyxy": [
+          0.4515625,
+          0.4,
+          0.4890625,
+          0.45208332
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 210546,
+        "occluded": 1,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-absent-01",
+    "expectedPresence": "absent",
+    "targetClassId": "/m/04bcr3",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "type": "explicit-human-verified-image-label",
+      "source": "verification",
+      "confidence": 0,
+      "sourceCsvRow": 68226,
+      "sourceFile": "source/labels.csv"
+    },
+    "allAnnotatedBoxes": [],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-absent-02",
+    "expectedPresence": "absent",
+    "targetClassId": "/m/07j7r",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "type": "explicit-human-verified-image-label",
+      "source": "verification",
+      "confidence": 0,
+      "sourceCsvRow": 153918,
+      "sourceFile": "source/labels.csv"
+    },
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/05s2s",
+        "className": "Plant",
+        "xyxy": [
+          0.0,
+          0.0,
+          1.0,
+          0.9977876
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 180348,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-absent-03",
+    "expectedPresence": "absent",
+    "targetClassId": "/m/07j7r",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "type": "explicit-human-verified-image-label",
+      "source": "verification",
+      "confidence": 0,
+      "sourceCsvRow": 141954,
+      "sourceFile": "source/labels.csv"
+    },
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/06j2d",
+        "className": "Raven",
+        "xyxy": [
+          0.16396761,
+          0.103225805,
+          0.8016194,
+          0.6887097
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 166281,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "caseId": "photo-dev-absent-04",
+    "expectedPresence": "absent",
+    "targetClassId": "/m/04kkgm",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "type": "explicit-human-verified-image-label",
+      "source": "verification",
+      "confidence": 0,
+      "sourceCsvRow": 59385,
+      "sourceFile": "source/labels.csv"
+    },
+    "allAnnotatedBoxes": [
+      {
+        "classId": "/m/04brg2",
+        "className": "Tableware",
+        "xyxy": [
+          0.0,
+          0.17699115,
+          0.22271386,
+          0.75663716
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 68421,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04brg2",
+        "className": "Tableware",
+        "xyxy": [
+          0.0,
+          0.45132744,
+          0.18289086,
+          1.0
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 68422,
+        "occluded": 0,
+        "truncated": 1,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04brg2",
+        "className": "Tableware",
+        "xyxy": [
+          0.019174041,
+          0.0,
+          0.359882,
+          0.6216814
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 68423,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      },
+      {
+        "classId": "/m/04brg2",
+        "className": "Tableware",
+        "xyxy": [
+          0.24483776,
+          0.15929204,
+          0.8333333,
+          0.75442475
+        ],
+        "source": "xclick",
+        "sourceCsvRow": 68424,
+        "occluded": 0,
+        "truncated": 0,
+        "groupOf": 0,
+        "depiction": 0,
+        "inside": 0
+      }
+    ],
+    "annotationSource": "Open Images V5 validation human boxes / verification labels",
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "status": "dev-photo-only",
+  "caseCount": 20,
+  "present": 16,
+  "absent": 4,
+  "officialMaskCases": 5,
+  "officialMaskInstances": 7,
+  "inputsSha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a",
+  "groundTruthSha256": "793e26845deaa2cb56748ef270b8cb02877218d680068573f02e5af92b26af6a",
+  "sourceLedgerSha256": "745cf5290679337faaf25788e892dea95a3f33e3be02091024e202c924299001",
+  "modelsInvoked": 0,
+  "assets": "benchmarks/cache/v02/corpus (gitignored; not part of the MIT archive)"
+}
