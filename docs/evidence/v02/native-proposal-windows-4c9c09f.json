@@ -1,0 +1,52 @@
+{
+  "rawReportSha256": "7b379f98e11ddbe3fecfba6cf1653077870bfc9f08590f0b05561d97cff7ce87",
+  "redactedFields": [".archive.path", ".assets.encoder.path", ".tempRoot"],
+  "report": {
+    "schemaVersion": 1,
+    "benchmark": "installed-archive-mobile-sam-proposal-windows-v1",
+    "backend": "mobile-sam-object-proposals",
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v24.19.0",
+    "osRelease": "10.0.26200",
+    "startedAt": "2026-10-20T12:15:25.912Z",
+    "executionProvider": "CPU",
+    "sourceCommitReference": "4c9c09f84591805b4dec2c55470968bbdb0de8ed",
+    "archive": {
+      "path": "[owned-local-path]",
+      "bytes": 466136,
+      "sha256": "77faf6404499d3d23d5ad0e05c9388f7c3091d5138182acbba4e72f3e2990f80"
+    },
+    "assets": {
+      "encoder": {
+        "path": "[owned-local-path]",
+        "bytes": 28157093,
+        "sha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749"
+      }
+    },
+    "installedPackage": null,
+    "checks": {
+      "childOwnership": true,
+      "cleanup": true,
+      "worker": true,
+      "tempCleanup": true
+    },
+    "located": null,
+    "extracted": null,
+    "lifecycle": null,
+    "childOwnership": {
+      "starts": 0,
+      "closes": 0,
+      "stillOwnedPids": []
+    },
+    "cleanupErrors": [],
+    "tempRoot": "[owned-local-path]",
+    "failure": "sam_mask_decoder_multi.onnx failed its pinned size/hash check",
+    "endedAt": "2026-10-20T12:15:26.349Z",
+    "acceptance": false,
+    "tempCleanup": "removed by coordinator after worker exit",
+    "workerStatus": 0,
+    "workerSignal": null,
+    "workerError": null
+  }
+}

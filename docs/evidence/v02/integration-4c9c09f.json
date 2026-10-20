@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "4c9c09f84591805b4dec2c55470968bbdb0de8ed",
+  "sourceChecks": {
+    "tests": 353,
+    "passed": 353,
+    "failed": 0,
+    "secrets": "passed",
+    "types": "passed",
+    "eslint": "passed",
+    "boundaries": "passed",
+    "deadCode": "passed",
+    "build": "passed",
+    "rawLogSha256": "addbbaa14aceb75b79df7c27f1e4ecb39279c35b5f3da950c3281d652283d721"
+  },
+  "archive": {
+    "sha256": "77faf6404499d3d23d5ad0e05c9388f7c3091d5138182acbba4e72f3e2990f80",
+    "bytes": 466136,
+    "files": 230,
+    "runtimeDistFiles": 106,
+    "runtimeDistSha256": "2c9a9c819734e0730457d3d3a94f25896c6320654febcb91325c08a7c5363c8e",
+    "installedConsumer": "passed",
+    "declarations": "passed",
+    "optionalOnnxAbsent": true,
+    "proposalWholeObject": "passed-fixture",
+    "proposalExtract": "passed-fixture",
+    "providerHttpCalls": 0,
+    "rawLogSha256": "77a793efa1ea0a7adcd2de8fdd7e4fb5f6288c42cd039d01aacf7038c6f60c6d"
+  },
+  "nativeLinuxSmoke": {
+    "rawReportSha256": "24fd01db408397377d05994c04f2b9687c15aa8422eb8798b2af9ed01cba9e2b",
+    "sourceManifestSha256": "aa29edfab8079b8d5091faae0431b1e501602da88b0140dfa98e872b4becefdd",
+    "locate": "located",
+    "extract": "extracted",
+    "abortPhysicalClose": "passed",
+    "queueCapacity": "passed",
+    "parentLoss": "passed",
+    "providerHttpCalls": 0
+  },
+  "limitations": [
+    "This archive is a development qualification artifact, not an npm publication receipt.",
+    "Synthetic fixtures verify lifecycle and API wiring, not real-provider object accuracy.",
+    "The matching hosted CI source/pack steps passed, but formatting of one test failed; the failed run is preserved.",
+    "New-path two-hour resources, native Windows and live development/heldout qualification are separate gates."
+  ]
+}

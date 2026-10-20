@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "4c9c09f84591805b4dec2c55470968bbdb0de8ed",
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39420271386",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "name": "ubuntu-22",
+      "sourceChecks": "passed",
+      "installedArchive": "passed",
+      "format": "failed"
+    },
+    {
+      "name": "ubuntu-24",
+      "sourceChecks": "passed",
+      "installedArchive": "passed",
+      "format": "failed"
+    },
+    {
+      "name": "windows-22",
+      "sourceChecks": "passed",
+      "installedArchive": "passed",
+      "format": "failed"
+    },
+    {
+      "name": "windows-24",
+      "sourceChecks": "passed",
+      "installedArchive": "passed",
+      "format": "failed"
+    }
+  ],
+  "failure": "Prettier: test/v02-fresh-proposal-runner.test.ts; no runtime/source/archive test failure",
+  "rawFailedLogSha256": "5ebad7459cecff7c3035ff485c517642f20888a66cdb414b1b3783eb70ddc0a7"
+}

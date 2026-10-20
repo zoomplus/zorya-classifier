@@ -50,7 +50,7 @@
     "prepare": "husky",
     "secrets:check": "node scripts/secrets.mjs --worktree",
     "secrets:staged": "node scripts/secrets.mjs --staged",
-    "prepublishOnly": "npm run check && npm run pack:check"
+    "prepublishOnly": "npm run check && npm run pack:check && npm run format:check"
   },
   "dependencies": {
     "sharp": "0.34.5",

@@ -134,17 +134,40 @@ await test('fresh proposal workflow uses the public classifier, fixed route and 
     assert.ok(['located', 'unknown'].includes(result.results[0]?.locate.status ?? ''))
     assert.equal(result.results[0]?.locate.nativeProposal?.backend, 'mobile-sam')
     assert.equal(result.results[0]?.locate.nativeProposal?.candidateCount, 1)
+    assert.equal(result.results[0]?.extract.status, 'extracted')
+    assert.ok(result.results[0]?.extract.mask)
+    assert.equal(result.results[0]?.extract.segmentation?.backend, 'mobile-sam')
+    assert.equal(
+      (result.results[0]?.classify.physicalCalls ?? 0) +
+        (result.results[0]?.locate.physicalCalls ?? 0),
+      fetchRequests.length,
+    )
+    const caseDirectory = join(result.outputDirectory, caseId)
+    const maskBytes = await readFile(join(caseDirectory, 'mask.u8'))
+    const cutoutBytes = await readFile(join(caseDirectory, 'cutout.png'))
+    assert.equal(maskBytes.length, 64 * 64)
+    assert.equal(
+      [...new Set(maskBytes)].every((value) => value === 0 || value === 1),
+      true,
+    )
+    assert.equal(digest(maskBytes), result.results[0]?.extract.mask?.sha256)
+    assert.equal(digest(cutoutBytes), result.results[0]?.extract.mask?.pngSha256)
+    assert.deepEqual(result.results[0]?.extract.mask?.sourceRegion, {
+      left: 0,
+      top: 0,
+      width: 64,
+      height: 64,
+    })
+    assert.deepEqual(result.results[0]?.extract.mask?.sourceOffset, { x: 0, y: 0 })
+    const resultJson = await readFile(join(caseDirectory, 'result.json'), 'utf8')
+    assert.equal(resultJson.includes('data'), false)
     assert.equal(result.aggregate.knownCostUsd, fetchRequests.length * 0.001)
     assert.equal(result.aggregate.admittedPhysicalCalls, fetchRequests.length)
     assert.ok(fetchRequests.length > 0)
     assert.ok(
       fetchRequests.every((request) => request.url === 'https://openrouter.ai/api/alpha/decisions'),
     )
-    assert.ok(
-      fetchRequests.every(
-        (request) => request.authorization === 'Bearer offlinekey',
-      ),
-    )
+    assert.ok(fetchRequests.every((request) => request.authorization === 'Bearer offlinekey'))
     for (const request of fetchRequests) {
       assert.equal(request.body.includes(caseId), false)
       assert.equal(request.body.includes(imagePath), false)

@@ -17,7 +17,7 @@ const ENCODER = {
 const DECODER = {
   name: 'sam_mask_decoder_multi.onnx',
   bytes: 16_496_559,
-  sha256: '8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcced259e1294c622ffe',
+  sha256: '8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe',
 }
 const resourceChannel = channel('zorya.segmentation.child-resource')
 const WIDTH = 256
@@ -291,6 +291,7 @@ async function runWorker(options) {
     startedAt: new Date().toISOString(),
     executionProvider: 'CPU',
     sourceCommitReference: options.sourceCommit,
+    harnessSha256: null,
     archive: null,
     assets: {},
     installedPackage: null,
@@ -319,6 +320,7 @@ async function runWorker(options) {
   let classifier
   let outputPath
   try {
+    report.harnessSha256 = digest(await readBoundedFile(fileURLToPath(import.meta.url), 1_000_000))
     outputPath = path.resolve(options.report)
     const reportRelative = path.relative(tempRoot, outputPath)
     if (!reportRelative || (!reportRelative.startsWith('..') && !path.isAbsolute(reportRelative)))

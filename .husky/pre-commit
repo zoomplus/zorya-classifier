@@ -1,2 +1,3 @@
 npm run secrets:staged
 npm run check
+npm run format:check

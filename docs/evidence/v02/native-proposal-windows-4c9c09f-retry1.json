@@ -1,0 +1,147 @@
+{
+  "rawReportSha256": "0f9d6a848470fa426a7557438fe75be50c2d12cdab2c5ea46884011557c0b23e",
+  "redactedFields": [".archive.path", ".assets.encoder.path", ".assets.decoder.path", ".tempRoot"],
+  "report": {
+    "schemaVersion": 1,
+    "benchmark": "installed-archive-mobile-sam-proposal-windows-v1",
+    "backend": "mobile-sam-object-proposals",
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v24.19.0",
+    "osRelease": "10.0.26200",
+    "startedAt": "2026-10-20T12:15:54.667Z",
+    "executionProvider": "CPU",
+    "sourceCommitReference": "4c9c09f84591805b4dec2c55470968bbdb0de8ed",
+    "harnessSha256": "9e63a10b325160ef422e60122569685b9d02f8efb1070b773d3ed080d4fd5748",
+    "archive": {
+      "path": "[owned-local-path]",
+      "bytes": 466136,
+      "sha256": "77faf6404499d3d23d5ad0e05c9388f7c3091d5138182acbba4e72f3e2990f80"
+    },
+    "assets": {
+      "encoder": {
+        "path": "[owned-local-path]",
+        "bytes": 28157093,
+        "sha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749"
+      },
+      "decoder": {
+        "path": "[owned-local-path]",
+        "bytes": 16496559,
+        "sha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe"
+      }
+    },
+    "installedPackage": {
+      "name": "zorya-classifier",
+      "version": "0.2.0",
+      "onnxruntimeNodeVersion": "1.23.2",
+      "archiveSha256": "77faf6404499d3d23d5ad0e05c9388f7c3091d5138182acbba4e72f3e2990f80",
+      "segmentationRuntimeSha256": "e39c772dce27978c99e86682c442c1082686d05be8b8384ec0e0ad9564bf0e01",
+      "installedDistFileCount": 107,
+      "installedDistManifestSha256": "b19ace3a2e7c10a92e27a0f8f104b85ac43fdd805cdd768edf2d3c077a557c2d",
+      "exportsSegmentation": true,
+      "declarations": {
+        "path": "dist/segmentation.d.ts",
+        "sha256": "a461fcc214d6d929b89776564a0c11c1c450b5e0bfb5d5709fe8a71dc0a5288e"
+      }
+    },
+    "checks": {
+      "importWithoutNativeChild": true,
+      "backendProbeSettled": true,
+      "locate": true,
+      "extract": true,
+      "cancellationAndPhysicalJoin": true,
+      "capacity": true,
+      "callerOwnedAdapter": true,
+      "dispose": true,
+      "fixtureDecisionOffline": true,
+      "childOwnership": true,
+      "cleanup": true,
+      "worker": true,
+      "tempCleanup": true
+    },
+    "located": {
+      "status": "located",
+      "durationMs": 6025,
+      "seedRegion": {
+        "left": 0,
+        "top": 0,
+        "width": 13,
+        "height": 13
+      },
+      "region": {
+        "left": 8,
+        "top": 8,
+        "width": 48,
+        "height": 48
+      },
+      "method": "pixel-mask-proposals-v1",
+      "proposalMetadata": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 2183.405700000001,
+        "input": {
+          "width": 256,
+          "height": 256
+        }
+      }
+    },
+    "extracted": {
+      "status": "extracted",
+      "durationMs": 2771,
+      "region": {
+        "left": 8,
+        "top": 8,
+        "width": 48,
+        "height": 48
+      },
+      "offset": {
+        "x": 8,
+        "y": 8
+      },
+      "pngBytes": 213,
+      "maskBytes": 2304,
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 2201.5847999999987,
+        "input": {
+          "width": 256,
+          "height": 256
+        }
+      }
+    },
+    "lifecycle": {
+      "cancellationCode": "ABORTED",
+      "cancellationChildPid": 8100,
+      "cancellationPhysicalCloseConfirmed": true,
+      "queue": {
+        "submitted": 4,
+        "fulfilled": 3,
+        "capacityRejected": 1,
+        "otherFailures": 0
+      },
+      "callerOwnedAdapterAfterClassifierDispose": 36,
+      "afterAdapterDispose": "DISPOSED"
+    },
+    "childOwnership": {
+      "starts": 8,
+      "closes": 8,
+      "stillOwnedPids": []
+    },
+    "cleanupErrors": [],
+    "tempRoot": "[owned-local-path]",
+    "failure": null,
+    "npm": "11.17.0",
+    "fixtureDecision": {
+      "calls": 10,
+      "providerHttpCalls": 0,
+      "selectionUsesRenderedSyntheticForegroundPixels": true
+    },
+    "endedAt": "2026-10-20T12:16:20.312Z",
+    "acceptance": true,
+    "tempCleanup": "removed by coordinator after worker exit",
+    "workerStatus": 0,
+    "workerSignal": null,
+    "workerError": null
+  }
+}

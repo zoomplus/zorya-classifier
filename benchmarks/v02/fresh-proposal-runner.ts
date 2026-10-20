@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url'
 import type { Classifier } from '../../src/app/create-classifier.js'
 import { createClassifier } from '../../src/app/create-classifier.js'
 import type { DecisionPort } from '../../src/entities/contracts.js'
+import type { SegmentationMetadata } from '../../src/entities/segmentation.js'
+import type { ExtractionResult } from '../../src/entities/segmentation.js'
 import type {
   ObjectProposalBatch,
   ObjectProposalInput,
@@ -122,6 +124,33 @@ export interface FreshProposalResult {
   imageSha256: string
   classify: StageRecord
   locate: StageRecord
+  extract: ExtractRecord
+}
+
+export interface ExtractRecord {
+  status: 'extracted' | 'unknown' | 'not-found' | 'failed'
+  durationMs: number
+  reason?: string
+  errorCode?: string
+  nativeProposal?: NonNullable<StageRecord['nativeProposal']>
+  segmentation?: {
+    method: string
+    backend: string
+    durationMs: number
+    input: { width: number; height: number }
+    qualityScore?: number
+  }
+  mask?: {
+    file: 'mask.u8'
+    sha256: string
+    format: 'binary-u8'
+    width: number
+    height: number
+    sourceRegion: { left: number; top: number; width: number; height: number }
+    sourceOffset: { x: number; y: number }
+    pngFile: 'cutout.png'
+    pngSha256: string
+  }
 }
 
 const errorCodes = new Set([
@@ -204,6 +233,85 @@ function summarizeLocation(
   return { status: 'unknown', reason: result.reason }
 }
 
+function locationFromExtraction(result: ExtractionResult): WholeObjectLocalizationResult {
+  if (result.status === 'extracted') return result.location
+  if (result.status === 'unknown' && 'location' in result) return result.location
+  return result
+}
+
+function safeReason(reason: string): string | undefined {
+  const allowed = new Set([
+    'absent-in-evaluated-region',
+    'uncertain-presence',
+    'candidate-union-empty',
+    'contradictory-evidence',
+    'layout-limit',
+    'instance-ambiguous',
+    'extent-uncertain',
+    'extent-inconsistent',
+    'representation-limit',
+    'segmentation-uncertain',
+  ])
+  return allowed.has(reason) ? reason : undefined
+}
+
+async function persistExtractedMask(
+  caseDirectory: string,
+  result: ExtractedResult,
+  source: { width: number; height: number },
+): Promise<NonNullable<ExtractRecord['mask']>> {
+  const { mask, region, offset, png, location } = result
+  if (
+    mask.format !== 'binary-u8' ||
+    !Number.isSafeInteger(mask.width) ||
+    !Number.isSafeInteger(mask.height) ||
+    mask.width !== region.width ||
+    mask.height !== region.height ||
+    mask.data.length !== mask.width * mask.height ||
+    offset.x !== region.left ||
+    offset.y !== region.top ||
+    region.left < 0 ||
+    region.top < 0 ||
+    region.left + region.width > source.width ||
+    region.top + region.height > source.height ||
+    location.metadata.image.width !== source.width ||
+    location.metadata.image.height !== source.height ||
+    mask.data.some((value) => value !== 0 && value !== 1) ||
+    png.length < 8 ||
+    ![137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => png[index] === byte)
+  )
+    throw Object.assign(new Error('Extracted mask geometry or bytes are invalid'), {
+      code: 'INVALID_RESPONSE',
+    })
+
+  const maskBytes = new Uint8Array(mask.data)
+  const pngBytes = new Uint8Array(png)
+  try {
+    const maskHash = sha256(maskBytes)
+    const pngHash = sha256(pngBytes)
+    await writeFile(join(caseDirectory, 'mask.u8'), maskBytes, { flag: 'wx' })
+    await writeFile(join(caseDirectory, 'cutout.png'), pngBytes, { flag: 'wx' })
+    return {
+      file: 'mask.u8',
+      sha256: maskHash,
+      format: 'binary-u8',
+      width: mask.width,
+      height: mask.height,
+      sourceRegion: { ...region },
+      sourceOffset: { x: offset.x, y: offset.y },
+      pngFile: 'cutout.png',
+      pngSha256: pngHash,
+    }
+  } finally {
+    maskBytes.fill(0)
+    pngBytes.fill(0)
+    mask.data.fill(0)
+    png.fill(0)
+  }
+}
+
+type ExtractedResult = Extract<ExtractionResult, { status: 'extracted' }>
+
 function captureNativeProposal(batch: ObjectProposalBatch, input: ObjectProposalInput) {
   const { metadata } = batch
   if (
@@ -227,6 +335,31 @@ function captureNativeProposal(batch: ObjectProposalBatch, input: ObjectProposal
     durationMs: metadata.durationMs,
     input: { ...metadata.input },
     candidateCount: batch.proposals.length,
+  }
+}
+
+function captureSegmentation(
+  metadata: SegmentationMetadata,
+  source: { width: number; height: number },
+) {
+  if (
+    metadata.method !== mobileSamProposalAssets.method ||
+    metadata.backend !== 'mobile-sam' ||
+    !Number.isFinite(metadata.durationMs) ||
+    metadata.durationMs < 0 ||
+    metadata.input.width !== source.width ||
+    metadata.input.height !== source.height ||
+    (metadata.qualityScore !== undefined && !Number.isFinite(metadata.qualityScore))
+  )
+    throw Object.assign(new Error('Segmentation metadata is malformed'), {
+      code: 'INVALID_RESPONSE',
+    })
+  return {
+    method: metadata.method,
+    backend: metadata.backend,
+    durationMs: metadata.durationMs,
+    input: { width: metadata.input.width, height: metadata.input.height },
+    ...(metadata.qualityScore !== undefined ? { qualityScore: metadata.qualityScore } : {}),
   }
 }
 
@@ -477,6 +610,11 @@ export async function runFreshProposalDev(
             requestHashes: [],
             errorCode: initializationError ?? 'RUNNER_FAILURE',
           },
+          extract: {
+            status: 'failed',
+            durationMs: 0,
+            errorCode: initializationError ?? 'RUNNER_FAILURE',
+          },
         }
         results.push(failure)
         await writeImmutable(join(caseDirectory, 'result.json'), failure)
@@ -504,6 +642,7 @@ export async function runFreshProposalDev(
             requestHashes: [],
             errorCode,
           },
+          extract: { status: 'failed', durationMs: 0, errorCode },
         }
         results.push(failed)
         await writeImmutable(join(caseDirectory, 'result.json'), failed)
@@ -546,14 +685,15 @@ export async function runFreshProposalDev(
           )
         }
 
-        const locateStarted = performance.now()
+        const extractStarted = performance.now()
         currentProposalMetadata = undefined
-        const locatePhysicalStart = recorder.calls.length
-        const locateLogicalStart = recorder.logicalCalls.length
+        const extractPhysicalStart = recorder.calls.length
+        const extractLogicalStart = recorder.logicalCalls.length
         let locate: StageRecord
+        let extract: ExtractRecord
         try {
           const target = task.instruction ? `${task.target}\n${task.instruction}` : task.target
-          const result = await classifier.locate({
+          const result = await classifier.extract({
             image,
             target,
             mode: 'whole-object',
@@ -561,29 +701,92 @@ export async function runFreshProposalDev(
             maxExtentPasses: freshProposalPolicy.maxExtentPasses,
             signal,
           })
+          const elapsedMs = performance.now() - extractStarted
+          const location = locationFromExtraction(result)
           locate = {
             ...stageRecord(
               recorder,
-              locatePhysicalStart,
-              locateLogicalStart,
-              performance.now() - locateStarted,
-              summarizeLocation(result),
+              extractPhysicalStart,
+              extractLogicalStart,
+              elapsedMs,
+              summarizeLocation(location),
             ),
             ...(currentProposalMetadata ? { nativeProposal: currentProposalMetadata } : {}),
           }
+          if (result.status === 'extracted') {
+            let segmentation: ExtractRecord['segmentation']
+            try {
+              segmentation = captureSegmentation(result.segmentation, item.image)
+              const artifact = await persistExtractedMask(caseDirectory, result, {
+                width: item.image.width,
+                height: item.image.height,
+              })
+              extract = {
+                status: 'extracted',
+                durationMs: elapsedMs,
+                ...(currentProposalMetadata ? { nativeProposal: currentProposalMetadata } : {}),
+                segmentation,
+                mask: artifact,
+              }
+            } catch (error) {
+              result.mask.data.fill(0)
+              result.png.fill(0)
+              extract = {
+                status: 'failed',
+                durationMs: elapsedMs,
+                errorCode: safeErrorCode(error),
+                ...(currentProposalMetadata ? { nativeProposal: currentProposalMetadata } : {}),
+                ...(segmentation ? { segmentation } : {}),
+              }
+            }
+          } else if (result.status === 'unknown' && 'location' in result) {
+            extract = {
+              status: 'unknown',
+              durationMs: elapsedMs,
+              reason: 'segmentation-uncertain',
+              ...(currentProposalMetadata ? { nativeProposal: currentProposalMetadata } : {}),
+              segmentation: captureSegmentation(result.segmentation, item.image),
+            }
+          } else if (result.status === 'not-found') {
+            const reason = safeReason(result.reason)
+            extract = {
+              status: 'not-found',
+              durationMs: elapsedMs,
+              ...(reason ? { reason } : {}),
+              ...(currentProposalMetadata ? { nativeProposal: currentProposalMetadata } : {}),
+            }
+          } else {
+            const reason = safeReason(result.reason)
+            extract = {
+              status: 'unknown',
+              durationMs: elapsedMs,
+              ...(reason ? { reason } : {}),
+              ...(currentProposalMetadata ? { nativeProposal: currentProposalMetadata } : {}),
+            }
+          }
         } catch (error) {
+          const elapsedMs = performance.now() - extractStarted
           locate = {
-            ...stageRecord(
-              recorder,
-              locatePhysicalStart,
-              locateLogicalStart,
-              performance.now() - locateStarted,
-              { status: 'failed', errorCode: safeErrorCode(error) },
-            ),
+            ...stageRecord(recorder, extractPhysicalStart, extractLogicalStart, elapsedMs, {
+              status: 'failed',
+              errorCode: safeErrorCode(error),
+            }),
+            ...(currentProposalMetadata ? { nativeProposal: currentProposalMetadata } : {}),
+          }
+          extract = {
+            status: 'failed',
+            durationMs: elapsedMs,
+            errorCode: safeErrorCode(error),
             ...(currentProposalMetadata ? { nativeProposal: currentProposalMetadata } : {}),
           }
         }
-        const row = { caseId: item.caseId, imageSha256: item.image.sha256, classify, locate }
+        const row = {
+          caseId: item.caseId,
+          imageSha256: item.image.sha256,
+          classify,
+          locate,
+          extract,
+        }
         results.push(row)
         await writeImmutable(join(caseDirectory, 'result.json'), row)
       } catch (error) {
@@ -607,6 +810,7 @@ export async function runFreshProposalDev(
             requestHashes: [],
             errorCode,
           },
+          extract: { status: 'failed', durationMs: 0, errorCode },
         }
         results.push(row)
         await writeImmutable(join(caseDirectory, 'result.json'), row)
