@@ -1,0 +1,34 @@
+{
+  "schema": "hosted-ci-receipt-v1",
+  "sourceCommit": "9837888f3e25814f7c78195e0ba792c8c3ccb4e0",
+  "runId": 39507254286,
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39507254286",
+  "status": "completed",
+  "conclusion": "failure",
+  "rawSha256": "7c76b04524263e71eec907d9f5412262dc5ce019031ed1d70944900738fc7648",
+  "failedLogSha256": "f8d546c810523713282c0e145bd4c305ceb7bb39c7aada4ba3c7aef4bc81cd70",
+  "jobs": [
+    {
+      "name": "verify (ubuntu-latest, 24)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (windows-latest, 22)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "name": "verify (ubuntu-latest, 22)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (windows-latest, 24)",
+      "status": "completed",
+      "conclusion": "failure"
+    }
+  ],
+  "failure": "Windows-only test assertion concatenated a POSIX path suffix. CLI correctly returned Windows paths; one component-parser regression failed on each Windows job. Runtime code and all model results are unchanged.",
+  "repair": "Use target-platform node:path.join in assertions. Preserve this failure and rerun every required OS/Node job."
+}

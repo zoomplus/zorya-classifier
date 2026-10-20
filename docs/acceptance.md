@@ -4,20 +4,22 @@ This acceptance concerns the extracted MIT Node.js library, not the Zorya deskto
 
 ## Current gate state
 
-The agreed primary flow is now the original three-Choice region search followed by one caller-owned segmentation of the full oriented source. The selected cell is a prompt, not a crop limiting the object. Cutout pixels, bounding rectangle and centre come from the mask. The implementation is integrated at `c6b8069`; all 486 offline tests, strict TypeScript/ESLint, boundaries, dead-code checks, build and formatting pass. Caller-owned model/segmenter configuration and default region behavior are retained.
+The agreed primary flow is the original three-Choice region search followed by one caller-owned segmentation of the full oriented source. The selected cell is a prompt, not a crop limiting the object. Cutout pixels, bounding rectangle and centre come from the mask. The implementation was integrated at `c6b8069`; its 54 runtime source files remain unchanged. At `65c785f`, all 512 offline tests, strict TypeScript/ESLint, boundaries, dead-code checks, build and formatting pass. Caller-owned model/segmenter configuration and default region behavior are retained.
 
-The native CPU point-prompt smoke returned a full-size mask extending beyond its seed and handled an empty transparent source, with balanced child starts/closes. This is wiring evidence, not photo accuracy. Real development evaluation and current-byte Windows/archive/resource gates remain pending. The old box-confirmation blind run was [cancelled before dispatch](evidence/v02/box-heldout-cancelled-before-dispatch-20261021-v1.json); its unused 80-case cohort remains sealed. No release or new accuracy claim is made yet.
+The [native Windows installed-archive check](evidence/v02/native-region-windows-efc9318.json) passed with the new full-source point-prompt flow: the mask extended beyond its seed, PNG alpha and mask/bounds/center/offset agreed, transparent input produced a valid empty mask, and nine owned child starts matched nine closes. Physical cancellation, bounded queuing, caller ownership and cleanup passed with zero HTTP. This is wiring/lifecycle evidence, not photo accuracy. [All four hosted Windows/Linux × Node 22/24 jobs passed for `c5eddd8`](evidence/v02/ci-c5eddd8.json); final release-source CI and archive parity remain mandatory.
 
-The two-hour `450439c` proposal baseline has now terminated after 7,210.99 monotonic seconds and 3,022 successful measured operations, with 3,022 child starts/closes and none retained. Idle RSS grew about 228.4 MiB, exceeding the investigation threshold; it requires investigation and does not qualify the new region-segmentation flow. A new flow-specific run is being prepared. Historical receipts below apply only to their recorded bytes.
+The [first complete region-seeded DEV40](evidence/v02/region-seeded-dev-v1/README.md) failed: 5/30 positive mask-derived boxes matched, 1/10 verified negatives produced a false seed and cutout, and 1/7 exact-canvas mask references reached IoU 0.8. The separately recorded classification correctly rejected that false target. A [new presence-first caller recipe](evidence/v02/region-seeded-development-freeze-20261021-v2.json) reuses that existing classification to skip localization after absence or error, without changing the library or adding a request. Its complete candidate/control DEV40 rerun passed independent development admission: zero false seeds/extractions on ten negatives, 18/30 coarse seed-box intersections, 5/30 mask-derived box matches, and 1/7 exact-canvas masks reaching IoU 0.8. The paired positive-photo seed proxy is +0.625 with 95% interval [0.375, 0.875]; it does not measure whole-object accuracy. Six 502s and unknown charges remain counted. This new run, rather than the earlier post-hoc filter, is the development evidence; mask/box quality remains low. The old box-confirmation blind run was [cancelled before dispatch](evidence/v02/box-heldout-cancelled-before-dispatch-20261021-v1.json); its unused 80-case cohort remains sealed. No release or blind accuracy qualification is claimed.
 
-| Gate                               | Current replacement workflow                                          |
-| ---------------------------------- | --------------------------------------------------------------------- |
-| Source checks                      | Pass: 486 tests and strict checks at `c6b8069`                        |
-| Real image quality                 | Pending separately named development/qualification runs               |
-| Installed archive / Windows native | Pending for the replacement runtime                                   |
-| Two-hour resources                 | Pending; old proposal baseline triggered RSS investigation            |
-| Text-only encoders                 | None qualified; experimental public image selector rejects explicitly |
-| Publication                        | Pending mandatory gates                                               |
+The [two-hour `450439c` proposal baseline](evidence/v02/proposal-resource-soak-450439c-receipt.md) terminated after 7,210.99 monotonic seconds and 3,022 successful measured operations, with 3,022 child starts/closes and none retained. Idle RSS grew 228.3 MiB, exceeding the investigation threshold; that research path remains unqualified for sustained resource use. This does not establish its cause or qualify the new region-segmentation flow. A new flow-specific two-hour run is active against the unchanged primary runtime bytes, with no terminal pass claimed. Historical receipts below apply only to their recorded bytes.
+
+| Gate                               | Current replacement workflow                                                               |
+| ---------------------------------- | ------------------------------------------------------------------------------------------ |
+| Source checks                      | Pass: 512 tests and strict checks at `65c785f`; final release checks remain                |
+| Real image quality                 | DEV v1 failed; presence-first v2 passed development admission; blind qualification pending |
+| Installed archive / Windows native | Native new-flow wiring passed; final release archive and runtime parity still required     |
+| Two-hour resources                 | New-flow run active; old proposal RSS investigation is preserved separately                |
+| Text-only encoders                 | None qualified; experimental public image selector rejects explicitly                      |
+| Publication                        | Pending mandatory gates                                                                    |
 
 ## Historical gate state before the region-segmentation clarification
 

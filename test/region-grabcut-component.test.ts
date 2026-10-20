@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { join } from 'node:path'
 import { test } from 'node:test'
 import { foregroundRect, fullRoiBounds } from '../benchmarks/v02/region-grabcut-component.js'
 import { parseRegionGrabCutComponentArgs } from '../benchmarks/v02/run-region-grabcut-component.js'
@@ -52,12 +53,12 @@ await test('native component CLI requires explicit opt-in and all frozen source 
       'out',
     ]),
     {
-      summaryPath: process.cwd() + '/summary.json',
-      originalRunDir: process.cwd() + '/source-run',
-      imageRoot: process.cwd() + '/images',
-      corpusRoot: process.cwd() + '/corpus',
-      assetPath: process.cwd() + '/opencv.js',
-      outputRoot: process.cwd() + '/out',
+      summaryPath: join(process.cwd(), 'summary.json'),
+      originalRunDir: join(process.cwd(), 'source-run'),
+      imageRoot: join(process.cwd(), 'images'),
+      corpusRoot: join(process.cwd(), 'corpus'),
+      assetPath: join(process.cwd(), 'opencv.js'),
+      outputRoot: join(process.cwd(), 'out'),
     },
   )
 })

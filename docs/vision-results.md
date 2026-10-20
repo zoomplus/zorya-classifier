@@ -1,5 +1,11 @@
 # Tested models and results
 
+## Current 0.2 region and extraction evidence
+
+The primary 0.2 flow retains the original three-Choice region search and uses that seed to segment the full oriented source. Only actual mask pixels determine its cutout, bounds and center. The caller chooses both ports; no model extent search or confirmation is added. The [first complete DEV40 report](evidence/v02/region-seeded-dev-v1/README.md) failed its negative-case gate. It records 18/30 coarse seed-box intersections, 5/30 mask-derived box matches, one false seed/extraction on ten negatives, and 1/7 exact-canvas masks reaching IoU 0.8. These are different metrics, not interchangeable accuracy rates.
+
+The same-seed native component comparison favored MobileSAM over GrabCut on this exposed set: 5 versus 0 box matches among the 22 positive cases with predicted seeds, and 1 versus 0 passing mask references. This supplies development evidence for an explicitly configured backend, not universal superiority or end-to-end qualification. A separately frozen caller presence guard reuses the already-recorded classification; its full rerun and blind qualification are tracked in [acceptance](acceptance.md). The historical 0.1 classification results below remain unchanged.
+
 ## Historical 0.1 classification comparison
 
 The routes in this report are explicit benchmark configurations, not library defaults. The caller selects and connects every model through an injected `DecisionPort` or an adapter they configure. **Luna Decisions was the selected 0.1 classification recipe:** it matched the historical photo/text counts on this corpus, while ordinary vision chat models remain configurable alternatives. This is an observed result on a small public corpus, not a statistical non-inferiority or universal-accuracy guarantee.
