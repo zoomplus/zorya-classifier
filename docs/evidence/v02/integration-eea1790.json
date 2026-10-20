@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-20",
+  "kind": "source-and-installed-archive-integration",
+  "sourceCommit": "eea17907c01023f7bc51c1c5aedb28a304e88895",
+  "published": false,
+  "packageVersion": "0.1.0",
+  "host": { "platform": "linux", "arch": "x64", "node": "24.12.0" },
+  "sourceGates": {
+    "stagedSecrets": "pass",
+    "worktreeSecrets": "pass",
+    "typecheck": "pass",
+    "eslint": "pass",
+    "boundaries": "pass",
+    "deadCode": "pass",
+    "tests": { "passed": 275, "failed": 0, "skipped": 0 },
+    "build": "pass"
+  },
+  "installedArchive": {
+    "status": "pass",
+    "sha256": "f41de58a35763910f912859a3ad823a4a4e23e40ee60be70adb7c4752eb5d7c3",
+    "files": 154,
+    "unpackedBytes": 1301035,
+    "runtimeDistFiles": 96,
+    "runtimeDistSha256": "1faa296467ec837fa4f73cecec7c7810c5adc82ee74a5b397ff1f4e8ef9dee75",
+    "consumerDeclarationFiles": 194,
+    "providerHttpCalls": 0,
+    "checks": [
+      "classification-and-compatible-region-localization",
+      "ordinary-chat-and-native-Decisions-fixture-adapters",
+      "whole-object-and-extract",
+      "transparent-png-and-binary-mask",
+      "caller-owned-segmenter",
+      "core-and-segmentation-import-without-optional-onnx-peer",
+      "installed-byte-secret-scan-and-declaration-isolation"
+    ]
+  },
+  "limits": [
+    "This is an unpublished development snapshot, not the 0.2 release.",
+    "The archive hash predates this evidence file and later documentation formatting fixes.",
+    "Axis rulers are available only through the internal research composition; the public numeric baseline is unchanged pending model-quality comparison.",
+    "Fixture and integration tests do not establish live model accuracy.",
+    "The two-hour Linux native run and Windows native acceptance are separate pending reports.",
+    "Experimental text-image encoders and model-assisted map/UI annotations remain unqualified."
+  ]
+}

@@ -113,10 +113,7 @@
         "absent": 5
       }
     },
-    "strata": [
-      "controlled-real-game-map",
-      "controlled-real-application"
-    ],
+    "strata": ["controlled-real-game-map", "controlled-real-application"],
     "annotationMethod": "model-assisted pixel review, no candidate/model outputs",
     "limitations": [
       "one game and one app source group per stratum/split",
