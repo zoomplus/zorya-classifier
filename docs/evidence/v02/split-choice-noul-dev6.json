@@ -1,0 +1,72 @@
+{
+  "schema": "zorya-v02-independent-pilot-evaluation-v1",
+  "evaluation": {
+    "evaluator": "manual independent application of frozen DEV truth and benchmark gate",
+    "evaluatorSourceSha256": "6e12a97f476551d4414e6ab04e187c7a274696ce3e91d1547ab7bd77b366cb8e",
+    "truthSha256": "793e26845deaa2cb56748ef270b8cb02877218d680068573f02e5af92b26af6a",
+    "inputManifestSha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a"
+  },
+  "producer": {
+    "profileId": "split-choice-sol-noul-native-luna-sam-v1",
+    "runId": "v02-fresh-split-choice-noul-dev6-2026-10-20T154929763Z-35a3ef5c",
+    "status": "complete",
+    "plannedCases": 6,
+    "completedCases": 6,
+    "missingCases": 0,
+    "canonicalSummarySha256": "a62bd4452aa703c83ebc920f0b8b7521ebe3e6909750425391756f384bfb49f1",
+    "prettySummaryFileSha256": "5b9557c12b60d2ffb8c22cb617da4c4c5e2f13bbe57255c399629af5f5cb4402",
+    "runManifestSha256": "267e74c2e62ec05ba9de316618d59e9d85010d364edc1a0679d41166927ab826",
+    "completionMarkerSha256": "557abe705ec31c8d8bacfb6be62f585dc606d9ff250d62a09bd8f30e4438aebe",
+    "outerFinalSealSha256": "e69a26ff9fe1e501b0edfbb6dc5c2469e598456ccf969761f6754c1320f6a9cb",
+    "variantSha256": "f400457eb7778b8a57a51153a15654d3d4bcda63ad4a797674804b57d1514dfd",
+    "producerSourceSha256": "d19ab5e6c17bfd84d81d4389302dc2d0f301aa2a833aee9770aceeac22340368",
+    "pilotControllerSha256": "35102c61a45c64440231ac1cfc7a974c34101986040d08f5aa8dc18edda2fb69",
+    "pilotRunnerSha256": "b8b7c49aaf527a00baa7cb11a009424d278aec7d1c9e67427930c5886fb40810",
+    "choiceNoulPortSha256": "27e8a6d9c5819315f98749fb27e15568f6d301bc1d2c91e1c022c50183e5cfe4",
+    "policy": {
+      "maxPhysicalCalls": 100,
+      "maxCostUsd": 5,
+      "admittedPhysicalCalls": 26,
+      "knownCostUsd": 0.1424405,
+      "unknownCostCalls": 1,
+      "reservedUnknownCostUsd": 0.05,
+      "inFlightCallsAtClose": 0
+    }
+  },
+  "metrics": {
+    "classification": {
+      "correct": 4,
+      "denominator": 6,
+      "accuracy": 0.6666666667,
+      "errors": ["photo-dev-absent-02", "photo-dev-absent-04"]
+    },
+    "wholeObjectPositiveLocalization": {
+      "correct": 0,
+      "denominator": 2,
+      "caseOutcomes": {
+        "photo-dev-present-01": "unknown:extent-uncertain",
+        "photo-dev-present-02": "not-found:absent-in-evaluated-region"
+      }
+    },
+    "negativeFalseLocations": {
+      "falseLocations": 0,
+      "denominator": 4,
+      "caseOutcomes": {
+        "photo-dev-absent-01": "not-found",
+        "photo-dev-absent-02": "not-found",
+        "photo-dev-absent-03": "failed:INVALID_RESPONSE",
+        "photo-dev-absent-04": "not-found"
+      }
+    },
+    "mask": {
+      "successfulExtractions": 0,
+      "scoredInstances": 0,
+      "reason": "No case produced an extraction mask; no mask-quality claim is available."
+    }
+  },
+  "decision": {
+    "status": "FAIL",
+    "reason": "Pilot gate required at least one correct whole-object positive localization of two and zero false locations among four verified negatives; positive localization was 0/2.",
+    "full40DispatchEligible": false
+  }
+}
