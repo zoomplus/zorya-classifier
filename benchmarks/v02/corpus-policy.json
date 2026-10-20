@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "status": "planned-not-acquired",
+  "modelCalls": 0,
+  "oldCorpusUse": "development-regression-only",
+  "quotas": {
+    "dev": {
+      "photo": { "present": 16, "absent": 4 },
+      "map": { "present": 7, "absent": 3 },
+      "ui": { "present": 7, "absent": 3 }
+    },
+    "heldout": {
+      "photo": { "present": 30, "absent": 10 },
+      "map": { "present": 15, "absent": 5 },
+      "ui": { "present": 15, "absent": 5 }
+    }
+  },
+  "splitRules": [
+    "Exclude every previously exposed image ID, image SHA256 and source author/group.",
+    "A source group belongs to exactly one split; source URL alone is not sufficient grouping.",
+    "Freeze image bytes, annotations, manifests, routes, representation parameters and prompts before heldout execution.",
+    "Producer requests contain pixels or candidate encoding plus semantic target/classes only, never IDs, filenames, source provenance, split or truth.",
+    "Evaluator loads truth only after producer outputs are durably recorded.",
+    "No model-derived boxes/masks, unverified missing-class negatives or corpus-dependent color/position rules.",
+    "Changing algorithm after revealed heldout requires an unseen heldout for a new blind claim."
+  ],
+  "metrics": {
+    "localization": {
+      "minimumBoxIoU": 0.5,
+      "minimumReferenceCoverage": 0.9,
+      "assignment": "same-single-visible-instance"
+    },
+    "mask": { "minimumIoU": 0.8, "format": "source-sized-binary-0-or-1" },
+    "failedAndUnknown": "retain-in-all-attempt-and-positive-denominators",
+    "devEligibility": { "maximumFalseLocations": 0, "negativeCases": 10 },
+    "heldoutEligibility": {
+      "maximumFalseLocations": 1,
+      "negativeCases": 20,
+      "pairedBootstrapIterations": 10000,
+      "pairedBootstrapSeed": "0x5a4f5259",
+      "minimumLower95PercentDifferenceAgainstTextControl": 0
+    }
+  }
+}
