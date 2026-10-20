@@ -1,0 +1,168 @@
+import { createHash } from 'node:crypto'
+import { basename } from 'node:path'
+import { z } from 'zod'
+import type { FreshCase } from './fresh-corpus.js'
+
+const digest = z.string().regex(/^[a-f0-9]{64}$/u)
+const indexRowSchema = z
+  .object({
+    caseId: z
+      .string()
+      .min(1)
+      .max(128)
+      .regex(/^[A-Za-z0-9_-]+$/u),
+    imageId: z.string().regex(/^[a-f0-9]{16}$/u),
+    targetClassId: z.string().regex(/^\/m\/[a-z0-9_]+$/u),
+    maskPath: z.string().regex(/^[a-f0-9]{16}_[A-Za-z0-9_]+_[a-f0-9]{8}\.png$/u),
+    sourceCsvRow: z.number().int().positive(),
+    maskFormat: z.literal(''),
+    width: z.number().int().positive().max(2048),
+    height: z.number().int().positive().max(2048),
+    file: z.string().min(1).max(512),
+    sha256: digest,
+    bytes: z
+      .number()
+      .int()
+      .positive()
+      .max(16 * 1024 * 1024),
+  })
+  .strict()
+const maskIndexSchema = z
+  .object({
+    sourceUrl: z.literal(
+      'https://storage.googleapis.com/openimages/v5/validation-annotations-object-segmentation.csv',
+    ),
+    sourceCsvSha256: z.literal('a876ff7a1a68de771e668baa9886f0ca2331992cd4af5497401be41828a5de89'),
+    annotationLicense: z.literal('https://creativecommons.org/licenses/by/4.0/'),
+    caseCount: z.literal(21),
+    maskInstanceCount: z.literal(32),
+    rows: z.array(indexRowSchema).length(32),
+    downloadMethod: z.literal(
+      'official per-leading-character archive; only selected mask PNG entries retained',
+    ),
+  })
+  .strict()
+const photoTruthSchema = z.array(
+  z
+    .object({
+      caseId: z.string().min(1).max(128),
+      targetClassId: z.string().regex(/^\/m\/[a-z0-9_]+$/u),
+      expectedPresence: z.enum(['present', 'absent']),
+      referenceMasks: z.never().optional(),
+    })
+    .passthrough(),
+)
+
+function sha256(value: string): string {
+  return createHash('sha256').update(value).digest('hex')
+}
+
+/**
+ * Join the separately pinned official mask index to canonical photo truth and frozen producer
+ * image bindings. The original truth/index objects are never mutated or rewritten.
+ */
+export function joinCategoricalPhotoMaskTruth(input: {
+  canonicalPhotoTruth: unknown
+  canonicalPhotoTruthSha256: string
+  maskIndex: unknown
+  maskIndexSha256: string
+  producerImageBindings: readonly FreshCase[]
+}) {
+  const truth = photoTruthSchema.parse(input.canonicalPhotoTruth)
+  const index = maskIndexSchema.parse(input.maskIndex)
+  digest.parse(input.canonicalPhotoTruthSha256)
+  digest.parse(input.maskIndexSha256)
+  if (input.producerImageBindings.length !== 40 || truth.length !== 40)
+    throw new Error('Photo mask join requires the frozen 40-case photo source')
+
+  const truthById = new Map<string, (typeof truth)[number]>()
+  for (const row of truth) {
+    if (truthById.has(row.caseId)) throw new Error('Duplicate canonical photo truth case ID')
+    truthById.set(row.caseId, row)
+  }
+  const bindingById = new Map<string, FreshCase>()
+  for (const item of input.producerImageBindings) {
+    if (bindingById.has(item.caseId)) throw new Error('Duplicate producer photo image binding')
+    bindingById.set(item.caseId, item)
+  }
+  if (
+    truthById.size !== bindingById.size ||
+    [...truthById.keys()].some((id) => !bindingById.has(id))
+  )
+    throw new Error('Canonical photo truth and producer image case sets differ')
+
+  const referencesByCase = new Map<
+    string,
+    Array<{ path: string; sha256: string; bytes: number; width: number; height: number }>
+  >()
+  const sourceRows = new Set<number>()
+  const paths = new Set<string>()
+  const hashesByCase = new Map<string, Set<string>>()
+  for (const row of index.rows) {
+    const expected = truthById.get(row.caseId)
+    const binding = bindingById.get(row.caseId)
+    if (!expected || !binding)
+      throw new Error('Official mask index contains an unmatched producer/truth case')
+    if (expected.expectedPresence !== 'present')
+      throw new Error('Official reference mask is attached to an absent photo truth')
+    if (expected.targetClassId !== row.targetClassId)
+      throw new Error('Official mask target class differs from canonical photo truth')
+    const imageId = /^([a-f0-9]{16})\.jpe?g$/u.exec(basename(binding.image.path))?.[1]
+    if (!imageId || imageId !== row.imageId)
+      throw new Error('Official mask image ID differs from the frozen producer image binding')
+    if (row.width !== binding.image.width || row.height !== binding.image.height)
+      throw new Error('Official mask dimensions differ from the frozen producer image')
+    if (
+      row.maskPath.startsWith(`${row.imageId}_`) === false ||
+      row.file !== `sealed/masks/${row.caseId}/${row.maskPath}`
+    )
+      throw new Error('Official mask path does not match its image and case IDs')
+    if (sourceRows.has(row.sourceCsvRow) || paths.has(row.file))
+      throw new Error('Duplicate official source row or mask path')
+    sourceRows.add(row.sourceCsvRow)
+    paths.add(row.file)
+    const hashes = hashesByCase.get(row.caseId) ?? new Set<string>()
+    if (hashes.has(row.sha256)) throw new Error('Duplicate official mask reference for case')
+    hashes.add(row.sha256)
+    hashesByCase.set(row.caseId, hashes)
+    const refs = referencesByCase.get(row.caseId) ?? []
+    refs.push({
+      path: row.file,
+      sha256: row.sha256,
+      bytes: row.bytes,
+      width: row.width,
+      height: row.height,
+    })
+    referencesByCase.set(row.caseId, refs)
+  }
+  if (referencesByCase.size !== index.caseCount || sourceRows.size !== index.maskInstanceCount)
+    throw new Error('Official mask index counts do not match its declared metadata')
+
+  const derivedTruth = truth.map((row) => {
+    const references = referencesByCase.get(row.caseId)
+    return references ? { ...row, referenceMasks: references } : { ...row }
+  })
+  const bindingRows = input.producerImageBindings
+    .map((item) => ({
+      caseId: item.caseId,
+      imagePath: item.image.path,
+      imageSha256: item.image.sha256,
+      width: item.image.width,
+      height: item.image.height,
+      target: item.locate.target,
+    }))
+    .sort((a, b) => a.caseId.localeCompare(b.caseId))
+  return {
+    truth: derivedTruth,
+    provenance: {
+      schema: 'categorical-photo-mask-reference-join-v1',
+      canonicalPhotoTruthSha256: input.canonicalPhotoTruthSha256,
+      maskIndexSha256: input.maskIndexSha256,
+      sourceCsvSha256: index.sourceCsvSha256,
+      producerImageBindingsSha256: sha256(JSON.stringify(bindingRows)),
+      caseCount: referencesByCase.size,
+      maskInstanceCount: index.rows.length,
+      annotationLicense: index.annotationLicense,
+    },
+  }
+}
