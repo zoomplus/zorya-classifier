@@ -113,6 +113,54 @@ function getBytes(mat: { data?: unknown }, length: number): Uint8Array {
   return bytes
 }
 
+export function initializeGrabCutMask(input: {
+  flags: Uint8Array
+  width: number
+  height: number
+  seedRegion: { left: number; top: number; width: number; height: number }
+  wholeRegion: { left: number; top: number; width: number; height: number }
+  roi: { left: number; top: number; width: number; height: number }
+  prompt: 'whole-region' | 'seed-region'
+  labels: {
+    background: number
+    foreground: number
+    probableBackground: number
+    probableForeground: number
+  }
+}) {
+  if (input.flags.length !== input.width * input.height)
+    throw new Error('GrabCut mask dimensions do not match source')
+  input.flags.fill(input.labels.background)
+  if (input.prompt === 'whole-region') {
+    for (let y = input.wholeRegion.top; y < input.wholeRegion.top + input.wholeRegion.height; y++)
+      for (
+        let x = input.wholeRegion.left;
+        x < input.wholeRegion.left + input.wholeRegion.width;
+        x++
+      )
+        input.flags[y * input.width + x] = input.labels.probableForeground
+  } else {
+    for (let y = input.roi.top; y < input.roi.top + input.roi.height; y++)
+      for (let x = input.roi.left; x < input.roi.left + input.roi.width; x++)
+        input.flags[y * input.width + x] = input.labels.probableBackground
+  }
+  const seedLeft = Math.max(input.seedRegion.left, input.roi.left)
+  const seedTop = Math.max(input.seedRegion.top, input.roi.top)
+  const seedRight = Math.min(
+    input.seedRegion.left + input.seedRegion.width,
+    input.roi.left + input.roi.width,
+  )
+  const seedBottom = Math.min(
+    input.seedRegion.top + input.seedRegion.height,
+    input.roi.top + input.roi.height,
+  )
+  if (seedLeft >= seedRight || seedTop >= seedBottom)
+    throw new Error('GrabCut seed region does not intersect hard ROI')
+  for (let y = seedTop; y < seedBottom; y++)
+    for (let x = seedLeft; x < seedRight; x++)
+      input.flags[y * input.width + x] = input.labels.foreground
+}
+
 /** Run native GrabCut, then reacquire Mat.data before copying its post-call flags. */
 export function runGrabCutAndCopyMask(
   mat: { data?: unknown },
@@ -202,29 +250,21 @@ export async function runGrabCutTask(
     getBytes(rgba, pixels * 4).set(rgbaBytes)
     Reflect.apply(cv.cvtColor, cv, [rgba, rgb, cv.COLOR_RGBA2RGB])
     const flags = getBytes(mask, pixels)
-    flags.fill(cv.GC_BGD)
-    for (
-      let y = request.wholeRegion.top;
-      y < request.wholeRegion.top + request.wholeRegion.height;
-      y++
-    )
-      for (
-        let x = request.wholeRegion.left;
-        x < request.wholeRegion.left + request.wholeRegion.width;
-        x++
-      )
-        flags[y * request.width + x] = cv.GC_PR_FGD
-    for (
-      let y = request.seedRegion.top;
-      y < request.seedRegion.top + request.seedRegion.height;
-      y++
-    )
-      for (
-        let x = request.seedRegion.left;
-        x < request.seedRegion.left + request.seedRegion.width;
-        x++
-      )
-        flags[y * request.width + x] = cv.GC_FGD
+    initializeGrabCutMask({
+      flags,
+      width: request.width,
+      height: request.height,
+      seedRegion: request.seedRegion,
+      wholeRegion: request.wholeRegion,
+      roi: request.roi,
+      prompt: request.prompt,
+      labels: {
+        background: cv.GC_BGD,
+        foreground: cv.GC_FGD,
+        probableBackground: cv.GC_PR_BGD,
+        probableForeground: cv.GC_PR_FGD,
+      },
+    })
     const rect = Reflect.construct(cv.Rect, [0, 0, 0, 0])
     const maskResult = runGrabCutAndCopyMask(
       mask,
@@ -252,7 +292,7 @@ export async function runGrabCutTask(
       width: request.width,
       height: request.height,
       mask: Buffer.from(grounded).toString('base64'),
-      method: 'grabcut-seeded-box-v1',
+      method: request.prompt === 'seed-region' ? 'grabcut-seed-mask-v1' : 'grabcut-seeded-box-v1',
     }
   } finally {
     let failed = false

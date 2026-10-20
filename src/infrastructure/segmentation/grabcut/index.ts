@@ -23,6 +23,7 @@ interface SerializedTask {
   seedRegion: SegmentationInput['seedRegion']
   wholeRegion: SegmentationInput['wholeRegion']
   roi: SegmentationInput['roi']
+  prompt: 'whole-region' | 'seed-region'
   assetPath: string
 }
 
@@ -81,9 +82,10 @@ export async function createGrabCutSegmenter(
           width: image.width,
           height: image.height,
           rgba: Buffer.from(image.data).toString('base64'),
-          seedRegion: { ...input.seedRegion },
-          wholeRegion: { ...input.wholeRegion },
-          roi: { ...input.roi },
+          seedRegion: image.seedRegion,
+          wholeRegion: image.wholeRegion,
+          roi: image.roi,
+          prompt: image.prompt,
           assetPath: parsed.assetPath,
         }
       })
@@ -123,6 +125,7 @@ export async function createGrabCutSegmenter(
 function snapshotInput(input: SegmentationInput) {
   const image = input.image
   const pixels = image.width * image.height
+  const prompt = input.prompt ?? 'whole-region'
   if (
     image.format !== 'rgba8' ||
     !Number.isSafeInteger(image.width) ||
@@ -138,6 +141,7 @@ function snapshotInput(input: SegmentationInput) {
       'Segmentation requires canonical RGBA8 within the image pixel limit',
     )
   if (
+    (prompt !== 'whole-region' && prompt !== 'seed-region') ||
     !pixelRectSchema.safeParse(input.seedRegion).success ||
     !pixelRectSchema.safeParse(input.wholeRegion).success ||
     !pixelRectSchema.safeParse(input.roi).success
@@ -152,5 +156,13 @@ function snapshotInput(input: SegmentationInput) {
         'INVALID_INPUT',
         'Segmentation region lies outside the source image',
       )
-  return { data: new Uint8Array(image.data), width: image.width, height: image.height }
+  return {
+    data: new Uint8Array(image.data),
+    width: image.width,
+    height: image.height,
+    seedRegion: { ...input.seedRegion },
+    wholeRegion: { ...input.wholeRegion },
+    roi: { ...input.roi },
+    prompt,
+  }
 }

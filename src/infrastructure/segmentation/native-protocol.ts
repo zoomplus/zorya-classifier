@@ -73,6 +73,7 @@ const mobileSamRequestSchema = z
     seedRegion: pixelRectSchema,
     wholeRegion: pixelRectSchema,
     roi: pixelRectSchema,
+    prompt: z.enum(['whole-region', 'seed-region']).default('whole-region'),
     options: modelOptionsSchema,
   })
   .strict()
@@ -116,6 +117,7 @@ const grabCutRequestSchema = z
     seedRegion: pixelRectSchema,
     wholeRegion: pixelRectSchema,
     roi: pixelRectSchema,
+    prompt: z.enum(['whole-region', 'seed-region']).default('whole-region'),
     assetPath: z.string().min(1).max(4096),
   })
   .strict()

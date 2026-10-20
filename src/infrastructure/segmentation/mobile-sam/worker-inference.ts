@@ -108,6 +108,73 @@ export function selectBestMaskCandidate<T extends MaskCandidate>(
   return [...candidates].sort((a, b) => b.score - a.score || a.token - b.token)[0]
 }
 
+export function mobileSamSegmentationPrompt(input: {
+  prompt: 'whole-region' | 'seed-region'
+  seedRegion: { left: number; top: number; width: number; height: number }
+  wholeRegion: { left: number; top: number; width: number; height: number }
+  xScale: number
+  yScale: number
+}) {
+  if (input.prompt === 'whole-region')
+    return {
+      coordinates: Float32Array.of(
+        input.wholeRegion.left * input.xScale,
+        input.wholeRegion.top * input.yScale,
+        (input.wholeRegion.left + input.wholeRegion.width) * input.xScale,
+        (input.wholeRegion.top + input.wholeRegion.height) * input.yScale,
+      ),
+      labels: Float32Array.of(2, 3),
+    }
+  const centerX = input.seedRegion.left + (input.seedRegion.width - 1) / 2
+  const centerY = input.seedRegion.top + (input.seedRegion.height - 1) / 2
+  const pointX = centerX * input.xScale
+  const pointY = centerY * input.yScale
+  return {
+    coordinates: Float32Array.of(pointX, pointY, pointX, pointY),
+    labels: Float32Array.of(1, -1),
+  }
+}
+
+export function collectMobileSamSegmentationCandidates(input: {
+  width: number
+  height: number
+  rgba: Uint8Array
+  logits: Float32Array
+  scores: Float32Array
+  roi: { left: number; top: number; width: number; height: number }
+  seedRegion: { left: number; top: number; width: number; height: number }
+  prompt: 'whole-region' | 'seed-region'
+}): MaskCandidate[] {
+  const pixels = input.width * input.height
+  if (
+    input.rgba.length !== pixels * 4 ||
+    input.logits.length !== pixels * 4 ||
+    input.scores.length !== 4
+  )
+    throw new Error('Invalid MobileSAM decoder output dimensions')
+  const candidates: MaskCandidate[] = []
+  for (let token = 0; token < 4; token++) {
+    const mask = new Uint8Array(pixels)
+    let seedHit = false
+    for (let index = 0; index < pixels; index++) {
+      const value = input.logits[token * pixels + index]
+      if (value === undefined || !Number.isFinite(value)) throw new Error('Non-finite mask logit')
+      if (value <= 0) continue
+      const x = index % input.width
+      const y = Math.floor(index / input.width)
+      if (!inside(input.roi, x, y)) continue
+      if (input.prompt === 'seed-region' && input.rgba[index * 4 + 3] === 0) continue
+      mask[index] = 1
+      if (inside(input.seedRegion, x, y)) seedHit = true
+    }
+    const score = input.scores[token]
+    if (score === undefined || !Number.isFinite(score))
+      throw new Error('Non-finite MobileSAM quality diagnostic')
+    if (seedHit) candidates.push({ token, score, mask })
+  }
+  return candidates
+}
+
 export async function runMobileSamTask(
   request: Extract<NativeSegmentationRequest, { kind: 'mobile-sam' }>,
 ): Promise<NativeSegmentationReply> {
@@ -178,16 +245,17 @@ export async function runMobileSamTask(
         throw new Error('Unexpected MobileSAM encoder output')
       const xScale = resizedWidth / request.width
       const yScale = resizedHeight / request.height
-      const coordinates = Float32Array.of(
-        request.wholeRegion.left * xScale,
-        request.wholeRegion.top * yScale,
-        (request.wholeRegion.left + request.wholeRegion.width) * xScale,
-        (request.wholeRegion.top + request.wholeRegion.height) * yScale,
-      )
+      const prompt = mobileSamSegmentationPrompt({
+        prompt: request.prompt,
+        seedRegion: request.seedRegion,
+        wholeRegion: request.wholeRegion,
+        xScale,
+        yScale,
+      })
       const decoded = await decoder.run({
         image_embeddings: embedding,
-        point_coords: new ort.Tensor('float32', coordinates, [1, 2, 2]),
-        point_labels: new ort.Tensor('float32', Float32Array.of(2, 3), [1, 2]),
+        point_coords: new ort.Tensor('float32', prompt.coordinates, [1, 2, 2]),
+        point_labels: new ort.Tensor('float32', prompt.labels, [1, 2]),
         mask_input: new ort.Tensor('float32', new Float32Array(256 * 256), [1, 1, 256, 256]),
         has_mask_input: new ort.Tensor('float32', Float32Array.of(0), [1]),
         orig_im_size: new ort.Tensor('float32', Float32Array.of(request.height, request.width), [
@@ -196,7 +264,6 @@ export async function runMobileSamTask(
       })
       const masks = decoded.masks
       const scores = decoded.iou_predictions
-      const pixels = request.width * request.height
       if (
         !(masks instanceof ort.Tensor) ||
         masks.type !== 'float32' ||
@@ -210,24 +277,16 @@ export async function runMobileSamTask(
       )
         throw new Error('Unexpected MobileSAM decoder output')
 
-      const candidates: MaskCandidate[] = []
-      for (let token = 0; token < 4; token++) {
-        const mask = new Uint8Array(pixels)
-        let seedHit = false
-        for (let index = 0; index < pixels; index++) {
-          const value = masks.data[token * pixels + index]
-          if (value === undefined || !Number.isFinite(value))
-            throw new Error('Non-finite mask logit')
-          if (value <= 0) continue
-          const x = index % request.width
-          const y = Math.floor(index / request.width)
-          if (!inside(request.roi, x, y)) continue
-          mask[index] = 1
-          if (inside(request.seedRegion, x, y)) seedHit = true
-        }
-        const score = scores.data[token]
-        if (seedHit && score !== undefined) candidates.push({ token, score, mask })
-      }
+      const candidates = collectMobileSamSegmentationCandidates({
+        width: request.width,
+        height: request.height,
+        rgba,
+        logits: masks.data,
+        scores: scores.data,
+        roi: request.roi,
+        seedRegion: request.seedRegion,
+        prompt: request.prompt,
+      })
       if (!candidates.length) throw new Error('MobileSAM produced no seed-grounded mask')
       const best = selectBestMaskCandidate(candidates)
       if (!best) throw new Error('MobileSAM produced no mask candidate')
@@ -237,7 +296,8 @@ export async function runMobileSamTask(
         width: request.width,
         height: request.height,
         mask: Buffer.from(best.mask).toString('base64'),
-        method: 'mobile-sam-box-prompt',
+        method:
+          request.prompt === 'seed-region' ? 'mobile-sam-seed-point-v1' : 'mobile-sam-box-prompt',
       }
     } finally {
       imageTensor.dispose()

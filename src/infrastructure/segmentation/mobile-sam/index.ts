@@ -121,9 +121,10 @@ export async function createMobileSamSegmenter(
           width: image.width,
           height: image.height,
           rgba: Buffer.from(image.data).toString('base64'),
-          seedRegion: { ...input.seedRegion },
-          wholeRegion: { ...input.wholeRegion },
-          roi: { ...input.roi },
+          seedRegion: image.seedRegion,
+          wholeRegion: image.wholeRegion,
+          roi: image.roi,
+          prompt: image.prompt,
           options: parsed,
         }
       })
@@ -283,6 +284,7 @@ export async function createMobileSamObjectProposals(
 function snapshotInput(input: SegmentationInput) {
   const image = input.image
   const pixels = image.width * image.height
+  const prompt = input.prompt ?? 'whole-region'
   if (
     image.format !== 'rgba8' ||
     !(image.data instanceof Uint8Array) ||
@@ -299,6 +301,7 @@ function snapshotInput(input: SegmentationInput) {
       'Segmentation requires canonical RGBA8 within the image pixel limit',
     )
   if (
+    (prompt !== 'whole-region' && prompt !== 'seed-region') ||
     !pixelRectSchema.safeParse(input.seedRegion).success ||
     !pixelRectSchema.safeParse(input.wholeRegion).success ||
     !pixelRectSchema.safeParse(input.roi).success
@@ -317,6 +320,10 @@ function snapshotInput(input: SegmentationInput) {
     data: new Uint8Array(image.data),
     width: image.width,
     height: image.height,
+    seedRegion: { ...input.seedRegion },
+    wholeRegion: { ...input.wholeRegion },
+    roi: { ...input.roi },
+    prompt,
   }
 }
 
