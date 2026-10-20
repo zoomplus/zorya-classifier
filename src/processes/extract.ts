@@ -8,6 +8,7 @@ import type {
   SegmentationMetadata,
   SegmentationInput,
   SegmentationPort,
+  SegmentationResult,
 } from '../entities/segmentation.js'
 import type { RgbaRaster } from '../entities/representation.js'
 import { ClassifierError, assertActive } from '../entities/errors.js'
@@ -149,32 +150,7 @@ export async function extractObject(
   }
   const rawResult: unknown = await dependencies.segmenter.segment(segmentInput)
   assertActive(signal)
-  const validation = segmentationResultSchema.safeParse(rawResult)
-  if (!validation.success)
-    throw new ClassifierError('INVALID_RESPONSE', 'Segmenter returned an invalid result', {
-      paths: validation.error.issues.map((issue) => issue.path.join('.')),
-    })
-  if (
-    validation.data.metadata.input.width !== image.width ||
-    validation.data.metadata.input.height !== image.height
-  )
-    throw new ClassifierError(
-      'INVALID_RESPONSE',
-      'Segmenter metadata dimensions do not match the source image',
-    )
-  const result =
-    validation.data.status === 'segmented'
-      ? {
-          status: 'segmented' as const,
-          mask: { ...validation.data.mask, data: new Uint8Array(validation.data.mask.data) },
-          metadata: {
-            ...snapshotMetadata(validation.data.metadata),
-          },
-        }
-      : {
-          ...validation.data,
-          metadata: snapshotMetadata(validation.data.metadata),
-        }
+  const result = validateSegmentationResult(rawResult, image.width, image.height)
   if (result.status === 'unknown')
     return {
       status: 'unknown',
@@ -230,7 +206,38 @@ export async function extractObject(
   }
 }
 
-function assertRasterImage(image: RasterImage): void {
+/** Validates and owns a segmenter's result before any subsequent asynchronous work. */
+export function validateSegmentationResult(
+  value: unknown,
+  width: number,
+  height: number,
+): SegmentationResult {
+  const validation = segmentationResultSchema.safeParse(value)
+  if (!validation.success)
+    throw new ClassifierError('INVALID_RESPONSE', 'Segmenter returned an invalid result', {
+      paths: validation.error.issues.map((issue) => issue.path.join('.')),
+    })
+  if (
+    validation.data.metadata.input.width !== width ||
+    validation.data.metadata.input.height !== height
+  )
+    throw new ClassifierError(
+      'INVALID_RESPONSE',
+      'Segmenter metadata dimensions do not match the source image',
+    )
+  return validation.data.status === 'segmented'
+    ? {
+        status: 'segmented',
+        mask: { ...validation.data.mask, data: new Uint8Array(validation.data.mask.data) },
+        metadata: snapshotMetadata(validation.data.metadata),
+      }
+    : {
+        ...validation.data,
+        metadata: snapshotMetadata(validation.data.metadata),
+      }
+}
+
+export function assertRasterImage(image: RasterImage): void {
   if (
     !Number.isSafeInteger(image.width) ||
     !Number.isSafeInteger(image.height) ||
@@ -245,7 +252,7 @@ function assertRasterImage(image: RasterImage): void {
     )
 }
 
-function validateAndSnapshotRgba(value: unknown, width: number, height: number): RgbaRaster {
+export function validateAndSnapshotRgba(value: unknown, width: number, height: number): RgbaRaster {
   const image = parse(rgbaSchema, value, 'INVALID_RESPONSE')
   if (
     image.format !== 'rgba8' ||
@@ -261,7 +268,7 @@ function validateAndSnapshotRgba(value: unknown, width: number, height: number):
   return { data: new Uint8Array(image.data), width, height, format: 'rgba8' }
 }
 
-function contains(outer: PixelRect, inner: PixelRect): boolean {
+export function contains(outer: PixelRect, inner: PixelRect): boolean {
   return (
     inner.left >= outer.left &&
     inner.top >= outer.top &&
