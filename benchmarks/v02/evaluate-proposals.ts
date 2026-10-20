@@ -606,6 +606,21 @@ export function normalizeFreshProposalOutput(
     summary.aggregate.accountedExposureUsd > phaseConfig.budget.maxCostUsd
   )
     throw new Error('Fresh proposal run exceeded its frozen phase budget')
+  const measuredReceiptCosts = summary.physicalReceipts.map((call) => call.receipt?.costUsd ?? null)
+  const measuredKnownCost = measuredReceiptCosts.reduce<number>((sum, cost) => sum + (cost ?? 0), 0)
+  const measuredUnknownCostCalls = measuredReceiptCosts.filter((cost) => cost === null).length
+  const measuredExposure =
+    measuredKnownCost +
+    (measuredUnknownCostCalls + summary.aggregate.inFlightCalls) * run.policy.unknownCostReserveUsd
+  const costTolerance = Math.max(1, measuredExposure) * 1e-9
+  if (
+    Math.abs(summary.aggregate.knownCostUsd - measuredKnownCost) > costTolerance ||
+    summary.aggregate.unknownCostCalls !== measuredUnknownCostCalls ||
+    Math.abs(summary.aggregate.accountedExposureUsd - measuredExposure) > costTolerance
+  )
+    throw new Error('Fresh proposal cost ledger does not match physical receipts')
+  if (measuredExposure > phaseConfig.budget.maxCostUsd)
+    throw new Error('Fresh proposal run exceeded its frozen phase budget')
   const stageRequestHashes = summary.results.flatMap((row) => [
     ...row.classify.requestHashes,
     ...row.locate.requestHashes,

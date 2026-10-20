@@ -382,8 +382,15 @@ await test('DEV normalization rejects mismatched policy and actual spend limits'
     assert.throws(() => normalize(wrongLatency), /budget or latency-ranking/u)
 
     const overBudget = structuredClone(fixture.summary)
+    overBudget.physicalReceipts[0]!.receipt!.costUsd = 5.01
+    overBudget.aggregate.knownCostUsd = 5.01
     overBudget.aggregate.accountedExposureUsd = 5.01
     assert.throws(() => normalize(overBudget), /exceeded its frozen phase budget/u)
+
+    const inconsistentLedger = structuredClone(fixture.summary)
+    inconsistentLedger.aggregate.knownCostUsd = 0.25
+    inconsistentLedger.aggregate.accountedExposureUsd = 0.25
+    assert.throws(() => normalize(inconsistentLedger), /cost ledger does not match/u)
 
     const overCalls = structuredClone(fixture.summary)
     const overReceipts: typeof fixture.summary.physicalReceipts = []
