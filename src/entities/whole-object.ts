@@ -35,7 +35,9 @@ export interface WholeObjectLocated {
   seedRegion: PixelRect
   bounds: ObjectBounds
   completeness: 'visible-object' | 'boundary-limited'
-  method: 'grid-object-extent-v1' | 'pixel-mask-proposals-v1'
+  method: 'grid-object-extent-v1' | 'pixel-mask-proposals-v1' | 'region-segmentation-v1'
+  /** Available when the bounds have been derived from actual segmented foreground. */
+  center?: { x: number; y: number }
   /** Present only for the explicitly configured, caller-owned mask proposal workflow. */
   proposalMetadata?: SegmentationMetadata
   metadata: LocalizationMetadata
@@ -49,6 +51,7 @@ export type WholeObjectFailure =
         | 'extent-uncertain'
         | 'extent-inconsistent'
         | 'representation-limit'
+        | 'segmentation-uncertain'
       metadata: LocalizationMetadata
     }
 export type WholeObjectLocalizationResult = WholeObjectLocated | WholeObjectFailure

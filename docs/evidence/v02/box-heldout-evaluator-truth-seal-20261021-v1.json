@@ -1,0 +1,61 @@
+{
+  "schema": "sealed-independent-evaluator-truth-arrays-v1",
+  "status": "sealed-before-both-provider-runs",
+  "sourceInputFreezeSha256": "31e6b96b485b1dccbbe10b2c5e222ca0c20f3adbe25ee027a682595a136d8650",
+  "opaquePins": [
+    {
+      "file": "photoTruth.json",
+      "role": "canonical evaluator array",
+      "sha256": "8bd4db0d5818df6902c99c2d6cb1d338e662af29903d9885dcffa17a8f0b344a",
+      "bytes": 128525,
+      "cases": 40,
+      "rootParsed": false
+    },
+    {
+      "file": "uiTruth.json",
+      "role": "original source wrapper",
+      "sha256": "c749e524854ab34e37abe36d83d91078a1ee31297a67af5cc7a26e019f851548",
+      "bytes": 8004,
+      "cases": 20,
+      "rootParsed": false
+    },
+    {
+      "file": "ui-evaluator-truth.json",
+      "role": "derived canonical evaluator array",
+      "sha256": "dbfa76930880361a54c87baf6b652d832b1999af2bcf68a6aaaea4595e558df2",
+      "bytes": 3366,
+      "cases": 20,
+      "rootParsed": false
+    },
+    {
+      "file": "mapTruth.json",
+      "role": "canonical evaluator array",
+      "sha256": "f57629035545b8d3ac36c24b7f19faf8ddf25cf1a1f86fd89eac226b92515f42",
+      "bytes": 17355,
+      "cases": 20,
+      "rootParsed": false
+    }
+  ],
+  "curatorValidation": {
+    "schema": "Actual evaluate-fresh.ts truthSchema semantics",
+    "groups": 3,
+    "cases": 80,
+    "positive": 60,
+    "verifiedNegative": 20,
+    "sourceRasterDimensionsVerified": 80,
+    "issues": 0,
+    "uiConversion": "Original authored paint-edge box coordinates normalized by matching raster dimensions; source wrapper preserved"
+  },
+  "rootReview": {
+    "hashesRecomputed": true,
+    "perCaseTruthParsed": false,
+    "newCohortPixelsViewedOrDecoded": false,
+    "providerCalls": 0
+  },
+  "constraints": [
+    "Use ui-evaluator-truth.json, not the original uiTruth.json source wrapper, as evaluator input.",
+    "Only the independent curator may access per-case truth before both provider runs are terminal.",
+    "Truth arrays are evaluator-only and never passed to the producer or model.",
+    "A successful schema validation is not model-quality qualification."
+  ]
+}

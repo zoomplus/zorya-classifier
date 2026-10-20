@@ -1,0 +1,32 @@
+{
+  "schema": "box-confirmation-blind-dispatch-cancelled-v1",
+  "status": "cancelled-before-dispatch-by-owner-algorithm-clarification",
+  "supersededFreezeFile": "box-heldout-run-freeze-20261021-v1.json",
+  "supersededFreezeSha256": "31e6b96b485b1dccbbe10b2c5e222ca0c20f3adbe25ee027a682595a136d8650",
+  "sourceSha256AtPreparation": "661cfe53782105d99423cfba70466121f76fcd4c6f09fb35ec7a888389e5ce0f",
+  "preparedProfiles": {
+    "candidateCases": 80,
+    "noImageControlCases": 40,
+    "candidateStarted": false,
+    "noImageControlStarted": false,
+    "physicalProviderCalls": 0,
+    "evidence": "Runner preparation explicitly reported zero dispatches; integrator never issued GO."
+  },
+  "replacementWorkflow": [
+    "Original three-Choice region locator",
+    "Segmentation on the full oriented source image using the found region as a prompt",
+    "Cutout, bounding rectangle and its centre derived from actual foreground mask pixels"
+  ],
+  "removedFromReplacement": [
+    "Separate model-based object extent search",
+    "Additional model-based whole-object confirmation"
+  ],
+  "preservation": {
+    "immutableOldFreezeUnchanged": true,
+    "failedDevelopmentEvidenceRetained": true,
+    "heldoutImagesAndTruthStillBlindOutsideIndependentCurator": true,
+    "sealedUndispatchedCohortMayBeReusedAfterNewDevelopmentSelection": true,
+    "activeResourceRunScope": "Existing frozen proposal pipeline/native lifecycle baseline only; not proof of the replacement orchestration."
+  },
+  "releaseQualified": false
+}

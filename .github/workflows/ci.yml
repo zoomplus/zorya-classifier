@@ -18,5 +18,8 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run check
+      - name: Controlled oracle geometry (offline)
+        if: runner.os == 'Linux'
+        run: python3 -m unittest discover -s benchmarks/v02/controlled_oracles -p 'test_*.py' -v
       - run: npm run pack:check
       - run: npm run format:check

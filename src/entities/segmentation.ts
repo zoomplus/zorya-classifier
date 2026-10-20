@@ -1,4 +1,4 @@
-import type { PixelRect } from './contracts.js'
+import type { LocalizationMetadata, LocalizationResult, PixelRect } from './contracts.js'
 import type { RgbaRaster } from './representation.js'
 import type { ObjectBounds, WholeObjectFailure, WholeObjectLocated } from './whole-object.js'
 import { wholeObjectSchema } from './whole-object.js'
@@ -20,6 +20,8 @@ export interface BinaryMask {
 export interface SegmentationInput {
   image: RgbaRaster
   seedRegion: PixelRect
+  /** A seed prompt identifies the instance on the full image; wholeRegion then limits search. */
+  prompt?: 'whole-region' | 'seed-region'
   wholeRegion: PixelRect
   bounds: ObjectBounds
   roi: PixelRect
@@ -44,6 +46,8 @@ export type ExtractionResult =
       png: Uint8Array
       mask: BinaryMask
       region: PixelRect
+      /** Centre of the mask-derived source-space bounding rectangle. */
+      center: { x: number; y: number }
       offset: { x: number; y: number }
       segmentation: SegmentationMetadata
     }
@@ -52,5 +56,13 @@ export type ExtractionResult =
       status: 'unknown'
       reason: 'segmentation-uncertain'
       location: WholeObjectLocated
+      segmentation: SegmentationMetadata
+    }
+  | {
+      status: 'unknown'
+      reason: 'segmentation-uncertain'
+      /** The original grid result remains a seed, never an inferred object box. */
+      seedLocation: Extract<LocalizationResult, { status: 'located' }>
+      metadata: LocalizationMetadata
       segmentation: SegmentationMetadata
     }

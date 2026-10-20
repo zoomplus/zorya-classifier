@@ -224,6 +224,7 @@ export async function extractObject(
     png,
     mask: croppedMask,
     region: box,
+    center: { x: box.left + box.width / 2, y: box.top + box.height / 2 },
     offset: { x: box.left, y: box.top },
     segmentation: result.metadata,
   }
