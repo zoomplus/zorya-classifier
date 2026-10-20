@@ -229,18 +229,7 @@ function fixtureDecision(sharp, enforceRegionChoiceContract = false) {
       if (signal.aborted)
         throw Object.assign(new Error('Fixture decision aborted'), { code: 'ABORTED' })
       if (enforceRegionChoiceContract) {
-        const questionIds = Object.keys(request.questions).sort()
-        if (JSON.stringify(questionIds) !== JSON.stringify(['presence', 'selection']))
-          throw new Error(
-            'Region workflow changed the original presence + selection Choice contract',
-          )
-        if (
-          request.questions.presence?.type !== 'noul' ||
-          request.questions.selection?.type !== 'ranked-choice'
-        )
-          throw new Error(
-            'Region workflow changed the original Noul + ranked Choice question types',
-          )
+        assertRegionChoiceContract(request)
         validRegionChoiceRequests++
       }
       const answers = {}
@@ -291,6 +280,14 @@ function fixtureDecision(sharp, enforceRegionChoiceContract = false) {
 
 function errorCode(error) {
   return error && typeof error === 'object' && 'code' in error ? String(error.code) : 'UNEXPECTED'
+}
+
+function assertRegionChoiceContract(request) {
+  const questionIds = Object.keys(request.questions).sort()
+  if (JSON.stringify(questionIds) !== JSON.stringify(['presence', 'selection']))
+    throw new Error('Region workflow changed the original presence + selection Choice contract')
+  if (request.questions.presence?.type !== 'noul' || request.questions.selection?.type !== 'choice')
+    throw new Error('Region workflow changed the original Noul + Choice question types')
 }
 
 async function waitForNativeStart(timeoutMs = 10_000) {
@@ -920,9 +917,12 @@ async function main() {
   if (!report.acceptance) process.exitCode = 1
 }
 
-main().catch((error) => {
-  process.stderr.write(
-    `${error instanceof Error ? error.message : 'Windows proposal acceptance failed'}\n`,
-  )
-  process.exitCode = 1
-})
+export { assertRegionChoiceContract }
+
+if (path.resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url))
+  main().catch((error) => {
+    process.stderr.write(
+      `${error instanceof Error ? error.message : 'Windows proposal acceptance failed'}\n`,
+    )
+    process.exitCode = 1
+  })

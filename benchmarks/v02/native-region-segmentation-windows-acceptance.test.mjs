@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { assertRegionChoiceContract } from './native-proposal-windows-acceptance.mjs'
 
 const harness = fileURLToPath(new URL('./native-proposal-windows-acceptance.mjs', import.meta.url))
 
@@ -55,4 +56,25 @@ test('native Windows acceptance rejects duplicate workflow arguments', () => {
   )
   assert.notEqual(result.status, 0)
   assert.match(result.stderr, /Duplicate argument: --workflow/u)
+})
+
+test('region workflow checks the DecisionPort request Choice type, not its ranked answer type', () => {
+  assert.doesNotThrow(() =>
+    assertRegionChoiceContract({
+      questions: {
+        presence: { type: 'noul' },
+        selection: { type: 'choice' },
+      },
+    }),
+  )
+  assert.throws(
+    () =>
+      assertRegionChoiceContract({
+        questions: {
+          presence: { type: 'noul' },
+          selection: { type: 'ranked-choice' },
+        },
+      }),
+    /Noul \+ Choice/u,
+  )
 })
