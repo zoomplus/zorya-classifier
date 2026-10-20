@@ -110,6 +110,42 @@ await test('Sharp renderer snapshots caller pixels and geometry before awaiting'
   assert.deepEqual(pixel(45, 35), [110, 120, 130, 255])
 })
 
+await test('thin and one-pixel boxes at source edges stay within their actual bounds', async () => {
+  const cases = [
+    { region: { left: 0, top: 0, width: 1, height: 1 } },
+    { region: { left: width - 1, top: 0, width: 1, height: 2 } },
+    { region: { left: 0, top: height - 2, width: 2, height: 2 } },
+    { region: { left: width - 2, top: height - 1, width: 2, height: 1 } },
+  ]
+  for (const item of cases) {
+    const candidate = input()
+    candidate.region = item.region
+    candidate.seedRegion = {
+      left: item.region.left,
+      top: item.region.top,
+      width: 1,
+      height: 1,
+    }
+    candidate.roi = { left: 0, top: 0, width, height }
+    const rendered = await createSharpSegmentationBoxPresentation().render(candidate)
+    const decoded = await sharp(rendered.bytes).raw().toBuffer({ resolveWithObject: true })
+    assert.deepEqual([decoded.info.width, decoded.info.height], [width, height])
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const offset = (y * width + x) * 4
+        const isMagenta =
+          decoded.data[offset] === 255 &&
+          decoded.data[offset + 1] === 0 &&
+          decoded.data[offset + 2] === 255
+        if (isMagenta) {
+          assert.ok(x >= item.region.left && x < item.region.left + item.region.width)
+          assert.ok(y >= item.region.top && y < item.region.top + item.region.height)
+        }
+      }
+    }
+  }
+})
+
 await test('box checker issues one closed choice, maps its stable tie, and reports provider metadata', async () => {
   let calls = 0
   let captured: DecisionRequest | undefined
@@ -197,6 +233,8 @@ await test('strict result validator accepts a genuine one-item ranking and rejec
 
 await test('input geometry is owned before presentation awaits and caller mutation cannot change the request', async () => {
   const inputValue = input()
+  inputValue.target = 'Car\n(class label)'
+  ;(inputValue.exclusions as string[])[0] = 'toy car\t(class label)'
   let finish!: (value: RasterImage) => void
   let observed: SegmentationBoxCheckInput | undefined
   const rendered = png()
@@ -209,8 +247,8 @@ await test('input geometry is owned before presentation awaits and caller mutati
         const text = request.state
           .filter((part): part is string => typeof part === 'string')
           .join('\n')
-        assert.match(text, /"Car"/u)
-        assert.match(text, /"toy car"/u)
+        assert.ok(text.includes(JSON.stringify('Car\n(class label)')))
+        assert.ok(text.includes(JSON.stringify(['toy car\t(class label)'])))
         return response('unknown', { complete: 0, 'needs-expansion': 0, unknown: 1 })
       },
       async (value) => {
@@ -230,8 +268,8 @@ await test('input geometry is owned before presentation awaits and caller mutati
   assert.deepEqual(observed?.region, geometry.region)
   assert.deepEqual(observed?.seedRegion, geometry.seedRegion)
   assert.deepEqual(observed?.roi, geometry.roi)
-  assert.equal(observed?.target, 'Car')
-  assert.deepEqual(observed?.exclusions, ['toy car'])
+  assert.equal(observed?.target, 'Car\n(class label)')
+  assert.deepEqual(observed?.exclusions, ['toy car\t(class label)'])
   finish(await rendered)
   const result = await pending
   assert.equal(result.verdict, 'unknown')

@@ -86,18 +86,24 @@ function snapshot(value: unknown): SegmentationBoxCheckInput {
 
 function overlaySvg(input: SegmentationBoxCheckInput): Buffer {
   const { image, region, seedRegion, roi } = input
-  const x = region.left + Math.min(1.5, region.width / 2)
-  const y = region.top + Math.min(1.5, region.height / 2)
-  const w = Math.max(0, region.width - Math.min(3, region.width))
-  const h = Math.max(0, region.height - Math.min(3, region.height))
-  const roiX = roi.left + 1
-  const roiY = roi.top + 1
-  const roiW = Math.max(0, roi.width - 2)
-  const roiH = Math.max(0, roi.height - 2)
-  const cx = seedRegion.left + seedRegion.width / 2
-  const cy = seedRegion.top + seedRegion.height / 2
+  const boxStroke = Math.min(3, region.width, region.height)
+  const x = region.left + boxStroke / 2
+  const y = region.top + boxStroke / 2
+  const w = Math.max(0, region.width - boxStroke)
+  const h = Math.max(0, region.height - boxStroke)
+  const roiStroke = Math.min(2, roi.width, roi.height)
+  const roiX = roi.left + roiStroke / 2
+  const roiY = roi.top + roiStroke / 2
+  const roiW = Math.max(0, roi.width - roiStroke)
+  const roiH = Math.max(0, roi.height - roiStroke)
+  // Use the same pixel-center convention as the native seed point: (size - 1) / 2.
+  const cx = seedRegion.left + (seedRegion.width - 1) / 2
+  const cy = seedRegion.top + (seedRegion.height - 1) / 2
+  const seedSize = Math.min(seedRegion.width, seedRegion.height)
+  const crossArm = Math.min(5, Math.max(0.5, (seedSize - 1) / 2))
+  const crossStroke = Math.min(2, Math.max(1, seedSize))
   return Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${image.width}" height="${image.height}"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#ff00ff" stroke-width="3"/><rect x="${roiX}" y="${roiY}" width="${roiW}" height="${roiH}" fill="none" stroke="#ffbf00" stroke-width="2" stroke-dasharray="7 5"/><path d="M ${cx - 5} ${cy} H ${cx + 5} M ${cx} ${cy - 5} V ${cy + 5}" fill="none" stroke="#00ffff" stroke-width="2"/></svg>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${image.width}" height="${image.height}"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#ff00ff" stroke-width="${boxStroke}"/><rect x="${roiX}" y="${roiY}" width="${roiW}" height="${roiH}" fill="none" stroke="#ffbf00" stroke-width="${roiStroke}" stroke-dasharray="7 5"/><path d="M ${cx - crossArm} ${cy} H ${cx + crossArm} M ${cx} ${cy - crossArm} V ${cy + crossArm}" fill="none" stroke="#00ffff" stroke-width="${crossStroke}"/></svg>`,
   )
 }
 
@@ -106,17 +112,20 @@ export function createSharpSegmentationBoxPresentation(): SegmentationBoxPresent
     async render(value: SegmentationBoxCheckInput) {
       const input = snapshot(value)
       const owned = input.image.data
-      const pipeline = sharp(owned, {
-        raw: { width: input.image.width, height: input.image.height, channels: 4 },
-        limitInputPixels: limits.imagePixels,
-        failOn: 'error',
-      })
-        .composite([{ input: overlaySvg(input) }])
-        .png({ compressionLevel: 6 })
-      const abort = () => pipeline.destroy()
-      input.signal.addEventListener('abort', abort, { once: true })
+      let pipeline: ReturnType<typeof sharp> | undefined
+      const abort = () => pipeline?.destroy()
+      let listenerAdded = false
       try {
         assertActive(input.signal)
+        pipeline = sharp(owned, {
+          raw: { width: input.image.width, height: input.image.height, channels: 4 },
+          limitInputPixels: limits.imagePixels,
+          failOn: 'error',
+        })
+          .composite([{ input: overlaySvg(input) }])
+          .png({ compressionLevel: 6 })
+        input.signal.addEventListener('abort', abort, { once: true })
+        listenerAdded = true
         const { data, info } = await pipeline.toBuffer({ resolveWithObject: true })
         assertActive(input.signal)
         if (
@@ -132,10 +141,11 @@ export function createSharpSegmentationBoxPresentation(): SegmentationBoxPresent
         return { bytes: Uint8Array.from(data), width: info.width, height: info.height }
       } catch (error) {
         assertActive(input.signal)
-        throw error
+        if (error instanceof ClassifierError) throw error
+        throw new ClassifierError('PROVIDER', 'Box presentation renderer failed')
       } finally {
-        input.signal.removeEventListener('abort', abort)
-        pipeline.destroy()
+        if (listenerAdded) input.signal.removeEventListener('abort', abort)
+        pipeline?.destroy()
         owned.fill(0)
       }
     },
