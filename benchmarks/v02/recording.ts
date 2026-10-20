@@ -60,7 +60,14 @@ export interface PhysicalCallRecord {
     retryAfterSeconds: number | null
     responseDisposition: ResponseDisposition | null
     finishReason: string | null
-    bodyRead: 'parsed' | 'invalid-json' | 'oversize' | 'empty'
+    bodyRead:
+      | 'parsed'
+      | 'invalid-json'
+      | 'oversize'
+      | 'stalled'
+      | 'cancelled'
+      | 'stream-error'
+      | 'empty'
   }
   route: {
     model: string
@@ -101,6 +108,60 @@ function safeField(value: unknown): string | null {
   return typeof value === 'string' && value.length <= 256 && /^[\w./:-]+$/u.test(value)
     ? value
     : null
+}
+
+const wireErrorTypes = new Set([
+  'invalid_request_error',
+  'authentication_error',
+  'permission_error',
+  'not_found_error',
+  'request_timeout',
+  'conflict_error',
+  'rate_limit_error',
+  'server_error',
+  'api_error',
+  'provider_error',
+])
+
+const wireErrorCodes = new Set([
+  'unsupported_parameter',
+  'invalid_request',
+  'invalid_json',
+  'invalid_json_schema',
+  'model_not_found',
+  'model_unavailable',
+  'no_provider_available',
+  'rate_limit_exceeded',
+  'context_length_exceeded',
+  'authentication_error',
+  'permission_denied',
+  'server_error',
+])
+
+const wireErrorParameters = new Set([
+  'model',
+  'messages',
+  'prompt',
+  'max_tokens',
+  'max_completion_tokens',
+  'temperature',
+  'top_p',
+  'n',
+  'stream',
+  'stop',
+  'presence_penalty',
+  'frequency_penalty',
+  'logit_bias',
+  'user',
+  'response_format',
+  'reasoning_effort',
+  'tools',
+  'tool_choice',
+  'seed',
+])
+
+function safeWireValue(value: unknown, allowlist: ReadonlySet<string>): string | null {
+  return typeof value === 'string' && allowlist.has(value) ? value : null
 }
 
 function errorCategory(message: unknown, type: unknown, code: unknown): WireErrorCategory {
@@ -228,115 +289,149 @@ function errorReason(message: unknown, type: unknown, code: unknown): WireErrorR
   return 'other'
 }
 
+const emptyWireReceipt = (
+  response: Response,
+  bodyRead: NonNullable<PhysicalCallRecord['wireReceipt']>['bodyRead'],
+): NonNullable<PhysicalCallRecord['wireReceipt']> => ({
+  responseModel: null,
+  responseProvider: null,
+  responseId: null,
+  usageCostUsd: null,
+  errorType: null,
+  errorCode: null,
+  errorParameter: null,
+  errorCategory: null,
+  errorReason: null,
+  rateLimitScope: null,
+  retryAfterSeconds: retryAfter(response),
+  responseDisposition: null,
+  finishReason: null,
+  bodyRead,
+})
+
+interface CapturedResponse {
+  response: Response
+  wireReceipt: NonNullable<PhysicalCallRecord['wireReceipt']>
+}
+
+/** Read the wire body once, then replay only the bounded captured bytes to the adapter. */
 async function readWireReceipt(
   response: Response,
-): Promise<NonNullable<PhysicalCallRecord['wireReceipt']>> {
+  signal: AbortSignal | null | undefined,
+  timeoutMs: number,
+): Promise<CapturedResponse> {
+  const replay = (bytes: Uint8Array): Response => {
+    const headers = new Headers(response.headers)
+    headers.delete('content-length')
+    const bodyless = [204, 205, 304].includes(response.status)
+    return new Response(bodyless ? null : Buffer.from(bytes), {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    })
+  }
   if (!response.body)
-    return {
-      responseModel: null,
-      responseProvider: null,
-      responseId: null,
-      usageCostUsd: null,
-      errorType: null,
-      errorCode: null,
-      errorParameter: null,
-      errorCategory: null,
-      errorReason: null,
-      rateLimitScope: null,
-      retryAfterSeconds: retryAfter(response),
-      responseDisposition: null,
-      finishReason: null,
-      bodyRead: 'empty',
-    }
-  const reader = response.clone().body?.getReader()
+    return { response: replay(new Uint8Array()), wireReceipt: emptyWireReceipt(response, 'empty') }
+  const reader = response.body.getReader()
   if (!reader)
-    return {
-      responseModel: null,
-      responseProvider: null,
-      responseId: null,
-      usageCostUsd: null,
-      errorType: null,
-      errorCode: null,
-      errorParameter: null,
-      errorCategory: null,
-      errorReason: null,
-      rateLimitScope: null,
-      retryAfterSeconds: retryAfter(response),
-      responseDisposition: null,
-      finishReason: null,
-      bodyRead: 'empty',
-    }
+    return { response: replay(new Uint8Array()), wireReceipt: emptyWireReceipt(response, 'empty') }
   const chunks: Uint8Array[] = []
   let bytes = 0
+  let disposition: 'oversize' | 'stalled' | 'cancelled' | 'stream-error' | null = null
+  let timer: ReturnType<typeof setTimeout> | undefined
+  let abortHandler: (() => void) | undefined
+  let pending: Promise<ReadableStreamReadResult<Uint8Array>> | undefined
+  const cancelRead = (reason: unknown): void => {
+    // Do not await cancel(): user streams may have a stalled cancel algorithm.
+    try {
+      void reader.cancel(reason).catch(() => undefined)
+    } catch {
+      // The stream may already have completed or errored.
+    }
+  }
   try {
     while (true) {
-      const part = await reader.read()
-      if (part.done) break
-      bytes += part.value.byteLength
-      if (bytes > responseLimit) {
-        await reader.cancel()
-        return {
-          responseModel: null,
-          responseProvider: null,
-          responseId: null,
-          usageCostUsd: null,
-          errorType: null,
-          errorCode: null,
-          errorParameter: null,
-          errorCategory: null,
-          errorReason: null,
-          rateLimitScope: null,
-          retryAfterSeconds: retryAfter(response),
-          responseDisposition: null,
-          finishReason: null,
-          bodyRead: 'oversize',
-        }
+      if (signal?.aborted) {
+        disposition = 'cancelled'
+        cancelRead(signal.reason)
+        break
       }
-      chunks.push(part.value)
+      pending = reader.read()
+      const result = await Promise.race([
+        pending.then((value) => ({ kind: 'read' as const, value })),
+        new Promise<{ kind: 'timeout' | 'cancelled' }>((resolve) => {
+          timer = setTimeout(() => resolve({ kind: 'timeout' }), timeoutMs)
+          if (signal) {
+            abortHandler = () => resolve({ kind: 'cancelled' })
+            signal.addEventListener('abort', abortHandler, { once: true })
+          }
+        }),
+      ])
+      if (timer) clearTimeout(timer)
+      timer = undefined
+      if (signal && abortHandler) signal.removeEventListener('abort', abortHandler)
+      abortHandler = undefined
+      if (result.kind !== 'read') {
+        disposition = result.kind === 'cancelled' ? 'cancelled' : 'stalled'
+        cancelRead(result.kind === 'cancelled' ? signal?.reason : 'wire body read deadline')
+        break
+      }
+      pending = undefined
+      const part = result.value
+      if (part.done) break
+      const remaining = responseLimit - bytes
+      const captured =
+        part.value.byteLength > remaining
+          ? new Uint8Array(part.value.subarray(0, remaining))
+          : part.value
+      if (captured.byteLength > 0) {
+        chunks.push(captured)
+        bytes += captured.byteLength
+      }
+      if (part.value.byteLength > remaining) {
+        disposition = 'oversize'
+        cancelRead('wire body exceeded capture limit')
+        break
+      }
     }
+  } catch {
+    disposition = signal?.aborted ? 'cancelled' : 'stream-error'
+    cancelRead(signal?.reason ?? 'wire body read error')
   } finally {
-    reader.releaseLock()
+    if (timer) clearTimeout(timer)
+    if (signal && abortHandler) signal.removeEventListener('abort', abortHandler)
+    if (pending) {
+      // A timed-out read may still be pending. Let cancellation settle it before unlocking.
+      void pending
+        .catch(() => undefined)
+        .finally(() => {
+          try {
+            reader.releaseLock()
+          } catch {
+            // Ignore an already released reader.
+          }
+        })
+    } else {
+      try {
+        reader.releaseLock()
+      } catch {
+        // Ignore an already released reader.
+      }
+    }
   }
+  const raw = Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)))
+  if (disposition)
+    return { response: replay(raw), wireReceipt: emptyWireReceipt(response, disposition) }
   let parsed: unknown
   try {
-    parsed = JSON.parse(Buffer.concat(chunks.map((chunk) => Buffer.from(chunk))).toString('utf8'))
+    parsed = JSON.parse(raw.toString('utf8'))
   } catch {
-    return {
-      responseModel: null,
-      responseProvider: null,
-      responseId: null,
-      usageCostUsd: null,
-      errorType: null,
-      errorCode: null,
-      errorParameter: null,
-      errorCategory: null,
-      errorReason: null,
-      rateLimitScope: null,
-      retryAfterSeconds: retryAfter(response),
-      responseDisposition: null,
-      finishReason: null,
-      bodyRead: 'invalid-json',
-    }
+    return { response: replay(raw), wireReceipt: emptyWireReceipt(response, 'invalid-json') }
   }
   if (!parsed || typeof parsed !== 'object')
-    return {
-      responseModel: null,
-      responseProvider: null,
-      responseId: null,
-      usageCostUsd: null,
-      errorType: null,
-      errorCode: null,
-      errorParameter: null,
-      errorCategory: null,
-      errorReason: null,
-      rateLimitScope: null,
-      retryAfterSeconds: retryAfter(response),
-      responseDisposition: null,
-      finishReason: null,
-      bodyRead: 'invalid-json',
-    }
+    return { response: replay(raw), wireReceipt: emptyWireReceipt(response, 'invalid-json') }
   const object = parsed as Record<string, unknown>
-  const disposition = responseDisposition(object)
+  const parsedDisposition = responseDisposition(object)
   const usage =
     object.usage && typeof object.usage === 'object'
       ? (object.usage as Record<string, unknown>)
@@ -358,20 +453,23 @@ async function readWireReceipt(
       ? /(?:parameter|param)\s+["'`]?([a-zA-Z0-9_.-]{1,80})/iu.exec(message)?.[1]
       : undefined)
   return {
-    responseModel: safeField(object.model),
-    responseProvider: safeField(object.provider),
-    responseId: safeField(object.id),
-    usageCostUsd: typeof cost === 'number' && Number.isFinite(cost) && cost >= 0 ? cost : null,
-    errorType: safeField(error?.type),
-    errorCode: safeField(error?.code),
-    errorParameter: safeField(parameter),
-    errorCategory: error || message ? errorCategory(message, error?.type, error?.code) : null,
-    errorReason: error || message ? errorReason(message, error?.type, error?.code) : null,
-    rateLimitScope: rateLimitScope(message),
-    retryAfterSeconds: retryAfter(response),
-    responseDisposition: disposition.disposition,
-    finishReason: disposition.finishReason,
-    bodyRead: 'parsed',
+    response: replay(raw),
+    wireReceipt: {
+      responseModel: safeField(object.model),
+      responseProvider: safeField(object.provider),
+      responseId: safeField(object.id),
+      usageCostUsd: typeof cost === 'number' && Number.isFinite(cost) && cost >= 0 ? cost : null,
+      errorType: safeWireValue(error?.type, wireErrorTypes),
+      errorCode: safeWireValue(error?.code, wireErrorCodes),
+      errorParameter: safeWireValue(parameter, wireErrorParameters),
+      errorCategory: error || message ? errorCategory(message, error?.type, error?.code) : null,
+      errorReason: error || message ? errorReason(message, error?.type, error?.code) : null,
+      rateLimitScope: rateLimitScope(message),
+      retryAfterSeconds: retryAfter(response),
+      responseDisposition: parsedDisposition.disposition,
+      finishReason: parsedDisposition.finishReason,
+      bodyRead: 'parsed',
+    },
   }
 }
 
@@ -382,6 +480,7 @@ export function recordProvider(
   directory: string,
   route: PhysicalCallRecord['route'],
   baseFetch: typeof globalThis.fetch = globalThis.fetch,
+  wireReadTimeoutMs = 5_000,
 ): Recorder {
   const calls: PhysicalCallRecord[] = []
   const logicalCalls: LogicalCallRecord[] = []
@@ -445,7 +544,8 @@ export function recordProvider(
     try {
       const response = await baseFetch(input, init)
       record.httpStatus = response.status
-      record.wireReceipt = await readWireReceipt(response)
+      const captured = await readWireReceipt(response, init?.signal, wireReadTimeoutMs)
+      record.wireReceipt = captured.wireReceipt
       record.durationMs = performance.now() - started
       await writeFile(
         join(directory, `physical-http-${record.physicalId}.json`),
@@ -461,7 +561,7 @@ export function recordProvider(
         ) + '\n',
         { flag: 'wx' },
       )
-      return response
+      return captured.response
     } catch (error) {
       record.errorCode = error instanceof ClassifierError ? error.code : 'HTTP_FETCH_ERROR'
       record.durationMs = performance.now() - started

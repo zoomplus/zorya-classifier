@@ -389,3 +389,189 @@ await test('wire diagnostics classify retry scope and truncated output without r
     await rm(directory, { recursive: true, force: true })
   }
 })
+
+await test('wire diagnostics drop unrecognized error fields instead of serializing arbitrary provider text', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v02-wire-allowlist-'))
+  const request: DecisionRequest = {
+    state: ['fixture'],
+    questions: { pick: { type: 'choice', instructions: 'Choose', criteria: { a: 'A', b: 'B' } } },
+  }
+  const route = {
+    model: 'pinned/model',
+    provider: 'provider',
+    providerName: 'Pinned',
+    apiEndpoint: '/chat',
+    allowFallbacks: false as const,
+  }
+  const secretLike = 'OPENROUTER_API_KEY=private-wire-value'
+  try {
+    const recorder = recordProvider(
+      (fetch) => ({
+        async decide() {
+          await fetch(route.apiEndpoint, { method: 'POST', body: '{}' })
+          throw new Error('expected provider response failure')
+        },
+      }),
+      new RunBudget(1, 0.1),
+      directory,
+      route,
+      async () =>
+        new Response(
+          JSON.stringify({
+            error: {
+              type: secretLike,
+              code: secretLike,
+              param: secretLike,
+              message: 'Unsupported parameter',
+            },
+          }),
+          { status: 400 },
+        ),
+    )
+    await assert.rejects(recorder.port.decide(request, new AbortController().signal))
+    const receipt = await readFile(join(directory, 'physical-receipt-1.json'), 'utf8')
+    assert.match(receipt, /"errorCategory": "unsupported-parameter"/u)
+    assert.match(receipt, /"errorType": null/u)
+    assert.match(receipt, /"errorCode": null/u)
+    assert.match(receipt, /"errorParameter": null/u)
+    assert.doesNotMatch(receipt, /OPENROUTER_API_KEY|private-wire-value/u)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('wire capture reads once and preserves physical receipts for oversized, stalled, and cancelled streams', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v02-wire-streams-'))
+  const request: DecisionRequest = {
+    state: ['fixture'],
+    questions: { pick: { type: 'choice', instructions: 'Choose', criteria: { a: 'A', b: 'B' } } },
+  }
+  const route = {
+    model: 'pinned/model',
+    provider: 'provider',
+    providerName: 'Pinned',
+    apiEndpoint: '/chat',
+    allowFallbacks: false as const,
+  }
+  const makeProvider = (signal: AbortSignal) => (fetch: typeof globalThis.fetch) => ({
+    async decide() {
+      const response = await fetch(route.apiEndpoint, { method: 'POST', body: '{}', signal })
+      await response.arrayBuffer()
+      throw new Error('expected fixture response failure')
+    },
+  })
+  try {
+    let oversizeCancelled = false
+    const oversizeBudget = new RunBudget(1, 0.1)
+    const oversize = recordProvider(
+      makeProvider(new AbortController().signal),
+      oversizeBudget,
+      join(directory, 'oversize'),
+      route,
+      async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(new Uint8Array(1024 * 1024 + 1).fill(65))
+            },
+            cancel() {
+              oversizeCancelled = true
+            },
+          }),
+          { status: 200 },
+        ),
+      100,
+    )
+    await assert.rejects(oversize.port.decide(request, new AbortController().signal))
+    const oversizeHttp = JSON.parse(
+      await readFile(join(directory, 'oversize', 'physical-http-1.json'), 'utf8'),
+    ) as { httpStatus: number }
+    const oversizeReceipt = JSON.parse(
+      await readFile(join(directory, 'oversize', 'physical-receipt-1.json'), 'utf8'),
+    ) as { wireReceipt: { bodyRead: string; usageCostUsd: number | null }; receipt: unknown }
+    assert.equal(oversizeHttp.httpStatus, 200)
+    assert.equal(oversizeReceipt.wireReceipt.bodyRead, 'oversize')
+    assert.equal(oversizeReceipt.wireReceipt.usageCostUsd, null)
+    assert.equal(oversizeReceipt.receipt, null)
+    assert.equal(oversizeCancelled, true)
+    assert.equal(oversize.calls.length, 1)
+    assert.equal(oversize.calls[0]?.dispatched, true)
+    assert.equal(oversize.calls[0]?.wireReceipt?.usageCostUsd, null)
+    assert.equal(oversizeBudget.snapshot().unknownCostCalls, 1)
+
+    let stalledCancelled = false
+    const stalledBudget = new RunBudget(1, 0.1)
+    const stalled = recordProvider(
+      makeProvider(new AbortController().signal),
+      stalledBudget,
+      join(directory, 'stalled'),
+      route,
+      async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            pull() {
+              return new Promise<void>(() => undefined)
+            },
+            cancel() {
+              stalledCancelled = true
+            },
+          }),
+          { status: 200 },
+        ),
+      10,
+    )
+    await assert.rejects(stalled.port.decide(request, new AbortController().signal))
+    const stalledHttp = JSON.parse(
+      await readFile(join(directory, 'stalled', 'physical-http-1.json'), 'utf8'),
+    ) as { httpStatus: number }
+    const stalledReceipt = JSON.parse(
+      await readFile(join(directory, 'stalled', 'physical-receipt-1.json'), 'utf8'),
+    ) as { wireReceipt: { bodyRead: string; usageCostUsd: number | null }; receipt: unknown }
+    assert.equal(stalledHttp.httpStatus, 200)
+    assert.equal(stalledReceipt.wireReceipt.bodyRead, 'stalled')
+    assert.equal(stalledReceipt.wireReceipt.usageCostUsd, null)
+    assert.equal(stalledReceipt.receipt, null)
+    assert.equal(stalledCancelled, true)
+    assert.equal(stalledBudget.snapshot().unknownCostCalls, 1)
+
+    const controller = new AbortController()
+    let abortStreamCancelled = false
+    const abortBudget = new RunBudget(1, 0.1)
+    const cancelled = recordProvider(
+      makeProvider(controller.signal),
+      abortBudget,
+      join(directory, 'cancelled'),
+      route,
+      async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            pull() {
+              return new Promise<void>(() => undefined)
+            },
+            cancel() {
+              abortStreamCancelled = true
+            },
+          }),
+          { status: 200 },
+        ),
+      1_000,
+    )
+    const pendingDecision = cancelled.port.decide(request, controller.signal)
+    setTimeout(() => controller.abort(new Error('fixture abort')), 10)
+    await assert.rejects(pendingDecision)
+    const cancelledHttp = JSON.parse(
+      await readFile(join(directory, 'cancelled', 'physical-http-1.json'), 'utf8'),
+    ) as { httpStatus: number }
+    const cancelledReceipt = JSON.parse(
+      await readFile(join(directory, 'cancelled', 'physical-receipt-1.json'), 'utf8'),
+    ) as { wireReceipt: { bodyRead: string; usageCostUsd: number | null }; receipt: unknown }
+    assert.equal(cancelledHttp.httpStatus, 200)
+    assert.equal(cancelledReceipt.wireReceipt.bodyRead, 'cancelled')
+    assert.equal(cancelledReceipt.wireReceipt.usageCostUsd, null)
+    assert.equal(cancelledReceipt.receipt, null)
+    assert.equal(abortStreamCancelled, true)
+    assert.equal(abortBudget.snapshot().unknownCostCalls, 1)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
