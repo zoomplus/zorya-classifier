@@ -1,0 +1,41 @@
+{
+  "schema": "zorya-reconstructed-proposal-box-diagnostic-v1",
+  "recordedAt": "2026-10-20T16:12:46.713Z",
+  "caseId": "photo-dev-present-01",
+  "inputSha256": "71e781adb0c2d47d97e6fd5868e6dbe4de8c1375536e1753f897931ff90575dc",
+  "truthSha256": "793e26845deaa2cb56748ef270b8cb02877218d680068573f02e5af92b26af6a",
+  "reconstructionSha256": "b2f6909901185ad6e80421d0afdf0b2130225889ceaf64109fb361fff017ab4a",
+  "maskSha256": "4a3ff522f1623eb7b9f02f8e56f127755275371597fb76d344177cc4f024d3ed",
+  "metricSourceSha256": "c22e5ff58ac13f9c54ce064fe839ca690de6c511384cf3a2546ef3de0d761416",
+  "predicted": {
+    "left": 130,
+    "top": 0,
+    "width": 894,
+    "height": 767
+  },
+  "references": [
+    {
+      "left": 118.4,
+      "top": 88.000002048,
+      "width": 905.6,
+      "height": 679.999997952
+    }
+  ],
+  "boxMetric": {
+    "matched": true,
+    "instances": [
+      {
+        "index": 0,
+        "iou": 0.8740726848719232,
+        "coverage": 0.9857390615212981,
+        "matched": true
+      }
+    ]
+  },
+  "maskMetric": {
+    "status": "not-computed",
+    "reason": "This diagnostic admits official box annotations only, not a reference segmentation mask."
+  },
+  "providerHttpCalls": 0,
+  "scope": "Counterfactual component diagnostic only. The original model rejected completeness, returned unknown and saved no accepted mask. The reconstructed mask cannot prove original mask-byte identity or repair original end-to-end accuracy."
+}
