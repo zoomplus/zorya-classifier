@@ -1,0 +1,215 @@
+{
+  "schema": "categorical-heldout-admission-v1",
+  "createdAt": "2026-10-20T18:13:21.174Z",
+  "freeze": {
+    "file": "categorical-heldout-run-freeze-20261020-v3.json",
+    "sha256": "d621530a0bea286d7ae3df83af7d74f7ecb2b94b7873f1cd3397ef085e695a9a"
+  },
+  "methodSelectionSha256": "fabb05c2c472c30a8cb20a5f9b6d697b932d94aedc43976359746463ef8708b9",
+  "rootSourceRevision": "e551253376ff4658696a58a1f78ec7605d8ef670",
+  "sealedProducerRevision": "6e398aecdbe8e34ade71ed83a7d64b7ab85a02d3",
+  "producerSource": {
+    "candidate": {
+      "files": 67,
+      "sha256": "1de61734a9c7144d17ea2b2ff32047a28edaba0a1a01cc9040207e82535c8b53"
+    },
+    "noImage": {
+      "files": 73,
+      "sha256": "9c4a1e56369091fd7f745a120aabc81c45a76b6c7a2d44596484e15a79ab2bb8"
+    },
+    "rootAndSealedBytesMatch": true
+  },
+  "noImagePrompt": {
+    "variant": "grammar-plus-examples",
+    "sha256": "e442e9dc2bb920db4bf91b11e6b1e7f507f78f3a778af19fcdb79e98eb87cf5d"
+  },
+  "preDispatchGates": {
+    "localTests": 451,
+    "failed": 0,
+    "skipped": 0,
+    "check": "passed",
+    "format": "passed",
+    "ci": {
+      "receipt": "ci-e551253.json",
+      "jobs": 4,
+      "passed": 4
+    },
+    "installedArchive": {
+      "revision": "e551253376ff4658696a58a1f78ec7605d8ef670",
+      "sha256": "a667f43544e327eda17c5b1f7ab7a0e97da9ae0ab5e944d89813b5da84c5f6c3",
+      "files": 273,
+      "unpackedBytes": 3771154,
+      "consumer": "passed",
+      "httpCalls": 0,
+      "archiveRetained": false
+    },
+    "resource": "proposal-resource-soak-261dc23.json",
+    "runtimeParity": {
+      "unchangedSourceFiles": 53,
+      "sinceRevision": "0c365cb13173e290365a5aa2a1aec122c42b0b4d",
+      "distFiles": 106,
+      "distManifestSha256": "87f6a18d46107ca08b37170db1e9204514dfc72a1dfc3181f59e8ffe76d85c95"
+    },
+    "gitleaksHistory": {
+      "version": "8.30.1",
+      "revision": "e551253376ff4658696a58a1f78ec7605d8ef670",
+      "commits": 91,
+      "findings": 0
+    }
+  },
+  "exposure": {
+    "rootAndDispatcherInspectedFreshPixels": false,
+    "rootAndDispatcherInspectedPerCaseTruth": false,
+    "rootMetadataOnly": true,
+    "curatorRoleOwnsLabels": true,
+    "admissionBeforeAnyHeldoutProviderDispatch": true,
+    "priorFailedBlindCohortExcluded": true
+  },
+  "sourceAdmission": {
+    "originalPrivateReceiptSha256": "8952e3ec254f69a72620d550c831929fb3a704b8c9da3f860f9488919634c57f",
+    "metadata": {
+      "aggregateCounts": {
+        "cases": 80,
+        "negative": 20,
+        "photoCasesWithAtLeastOneReferenceMask": 21,
+        "photoReferenceMaskInstances": 32,
+        "positive": 60
+      },
+      "candidateOrder": ["photo", "ui", "map"],
+      "caseCounts": {
+        "map": {
+          "cases": 20,
+          "freshTruthSha256": "9710edd246a9c2253172bfbd6205b9b2ded393dbd54e0d7a73d301c8f69b6f78",
+          "inputSha256": "2c18d2c1bae481d0a1239802f32d4ac985bc0d33a028eaafb490fd5995de7a3b",
+          "negative": 5,
+          "positive": 15,
+          "sourceLedgerSha256": "8dc35d0afd4918c80d96fe263729454bf096b470779bd4c05c4b8e6b0cc215ef",
+          "sourceTruthSha256": "ee279f6568613c0255984f89d636df23fff02a1c98f041fcb266dbd2201a03c3"
+        },
+        "photo": {
+          "cases": 40,
+          "freshTruthSha256": "e0b6b8b977ac31e41e74d1f73044e8638bbfeb8c76fae5732a1207112c7b7caa",
+          "inputSha256": "93cf40732075ab63fd26b77806a7b118382e816c6ab691bf3e5ee68a2acbf013",
+          "negative": 10,
+          "positive": 30,
+          "sourceLedgerSha256": "19507c1c53c7eec76791ae0cd2997db839867afc564d15fc92829b43436d79fe",
+          "sourceTruthSha256": "e0b6b8b977ac31e41e74d1f73044e8638bbfeb8c76fae5732a1207112c7b7caa"
+        },
+        "ui": {
+          "cases": 20,
+          "freshTruthSha256": "047011b2e15c1f43f6d0ab3aff413ffc7cb24fe9c2c08e9ce8be2c12ee3e176c",
+          "inputSha256": "1bf7940fd92fdc1f7fa295296dfc5f84c5f4c32ccc41b7a2e80a0059bff918c3",
+          "negative": 5,
+          "positive": 15,
+          "sourceLedgerSha256": "6ee2d979470127330460f1c95bf4d11b6bd54addd43a6c9ee242f5770dfd7fc6",
+          "sourceTruthSha256": "41fe8ac9769aa7d1c0d8dd4d11a62cdd7ff47ee3e9eac0e046a00f9140b0f680"
+        }
+      },
+      "combinedPins": {
+        "inputs": {
+          "bytes": 45933,
+          "sha256": "6b6cbcf6347fd906f06c78d2b4a36e131344fadb7a06327d7e41ecec8b73f822"
+        },
+        "source-ledger": {
+          "bytes": 176215,
+          "sha256": "0382399d8c4184e3ea411f645b0df948efacad820c5982c1119c7f1e67f54133"
+        },
+        "truth": {
+          "bytes": 188218,
+          "sha256": "1d14963f8743604b5a78181744e56abe1cee53a9e8d259c529279824742912e3"
+        }
+      },
+      "commonImageRoot": "private staging; 112 hash-verified files (80 images and 32 masks); no out-of-root links",
+      "individualInputs": {
+        "map": {
+          "path": ".run/v03-heldout-curation/minetest/heldout-v3/map-oracle-v6/inputs.json",
+          "sha256": "2c18d2c1bae481d0a1239802f32d4ac985bc0d33a028eaafb490fd5995de7a3b"
+        },
+        "photo": {
+          "path": ".run/v03-heldout-curation/heldout80-photo-v3/inputs.json",
+          "sha256": "93cf40732075ab63fd26b77806a7b118382e816c6ab691bf3e5ee68a2acbf013"
+        },
+        "ui": {
+          "path": ".run/v03-heldout-curation/mousepad/heldout-v3/ui-oracle-v2/inputs.json",
+          "sha256": "1bf7940fd92fdc1f7fa295296dfc5f84c5f4c32ccc41b7a2e80a0059bff918c3"
+        }
+      },
+      "limitations": [
+        "Controlled UI and map families do not claim natural-capture diversity.",
+        "Photo mask coverage is incomplete; all available official masks are retained and scored separately.",
+        "Map capture uses one controlled Minetest minimap family with stable source-verified marker support."
+      ],
+      "mapAdmission": {
+        "all20WorldmodInitFilesMatchGenericOracle": true,
+        "captureHistory": {
+          "allSourceAttemptsPreserved": true,
+          "baseV5Cases": 20,
+          "baseV5SourceStabilityRejects": 2,
+          "baseV5StrictPass": 18,
+          "boundedRetryCaptures": 3,
+          "excludedOriginalCaseAfterMaxAttempts": 1,
+          "preservedV4MismatchRun": true,
+          "replacementAttempts": {
+            "setupIncomplete": 1,
+            "strictSourcePass": 1
+          },
+          "replacementCaseAccepted": true,
+          "retryPasses": 1,
+          "setupIncompleteSeparateFromSourceStability": true,
+          "sourceStabilityRejectsAcrossBaseAndRetries": 5
+        },
+        "captureSourceSha256": "67aad0d41786d033f99ef63a521f269404df38368dcdfde8fe4376a0aa0cd45c",
+        "cases": 20,
+        "controlledMapFamilyLimit": "single Minetest 5.6.1 engine/game family; 150x150 minimap crop",
+        "derivationSourceSha256": "ff4720c3256f31e39f8f2207dbffd626695313b181acec6bb731abcbf09366a7",
+        "genericWorldmodOracleSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+        "officialMarkerAssetSha256": "17386c72db28b5ed7c99a60fcbfa5b3fa7286cab7c1228d895bb54f0a5985ad5",
+        "oracleSourceSha256": "cab8f3f62179fafaf0b4083790179c7d7a5e3d285e4a5fc9c501b9bc433ed79c",
+        "rendererSourceSha256": "ded29762ae3c723dd923a89a01c5b8a197bb30443a0155bf0cc22b3bff13f855",
+        "sourceGroup": "controlled-map:minetest-5.6.1-minetest-game",
+        "stratum": "controlled-real-2d-minimap"
+      },
+      "photoAdmission": {
+        "exposureExclusion": "source ledger records exclusion of old v1/v2 image and photographer groups",
+        "license": "CC-BY-2.0 Flickr sources, per-image provenance recorded",
+        "negativeContradictions": 0,
+        "negativeRule": "explicit absence; exclude any negative with target-class box or segmentation row",
+        "source": "Open Images V5 validation",
+        "uniqueImages": 40,
+        "uniquePhotographerSourceGroups": 40
+      },
+      "schemaVersion": 1,
+      "status": "ready-for-root-freeze",
+      "uiAdmission": {
+        "cases": 20,
+        "controlledCssPaintOracle": "AT-SPI control identity/allocation plus exact four painted magenta edges and opaque fill",
+        "naturalCaptureClaim": false,
+        "provenance": {
+          "appLicenseEvidenceSha256": "026d2237c9b625a5de60dcc5f794c8b760788df4137d731a4aa391068a4dd30c",
+          "captureAndOracleSourceSha256": {
+            "capture.py": "6482195c3039a73e006406ef8f3e76f43b3ab7304bafbfc007e468e11206860a",
+            "derive.py": "0de05c65bbba52773094c6658554640edcd7347c0b76b3a77c87d6c273630fe9",
+            "paint-provider.c": "d94138e461226ac09d3de0f9f808d24b3194236ec7e6e685405fc6fcd0c8a9db",
+            "prepare_inputs.py": "737719c8dbe2e332cc81b7a146cc7d0b389e2989cc1a5381a9734f225ee30dea"
+          }
+        },
+        "sourceGroup": "controlled-ui:mousepad-0.6.1",
+        "stratum": "controlled-real-application"
+      }
+    }
+  },
+  "dispatchAuthorization": {
+    "status": "approved-after-freeze-commit",
+    "producer": "A5 sole paid dispatcher",
+    "order": ["candidate 80 cases", "photo-only no-image control 40 cases"],
+    "retry": 0,
+    "fallback": false,
+    "ordinaryFailurePolicy": "preserve all errors and charges; no restart/reselection"
+  },
+  "limitations": [
+    "One controlled Mousepad UI family and one controlled Minetest minimap family do not establish natural game/UI diversity.",
+    "Native vision candidate and no-image control use different models; the comparison is between recipes, not a causal image ablation.",
+    "Provider timing under concurrent source/CI work is unranked.",
+    "This admission receipt authorizes measurement; it does not qualify accuracy or authorize a release without the unchanged quality gates."
+  ]
+}
