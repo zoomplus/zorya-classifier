@@ -17,4 +17,30 @@ export type {
   PixelRect,
   RefinementPort,
   RefinementResult,
+  LocalizationMetadata,
+  Representation,
 } from './entities/contracts.js'
+export type {
+  RegionLocateInput,
+  WholeObjectLocateInput,
+  AnyLocateInput,
+  BoundaryInterval,
+  ObjectBounds,
+  WholeObjectLocated,
+  WholeObjectFailure,
+  WholeObjectLocalizationResult,
+} from './entities/whole-object.js'
+export type {
+  RgbaRaster,
+  RepresentationView,
+  RepresentationMetadata,
+  ImageRepresentationPort,
+} from './entities/representation.js'
+export type {
+  BinaryMask,
+  SegmentationInput,
+  SegmentationMetadata,
+  SegmentationResult,
+  SegmentationPort,
+  ExtractionResult,
+} from './entities/segmentation.js'

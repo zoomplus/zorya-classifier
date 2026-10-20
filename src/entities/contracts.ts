@@ -48,6 +48,11 @@ const imageSchema = z
     (v) => v.byteLength > 0 && v.byteLength <= limits.imageBytes,
     'Expected 1..16MiB image bytes',
   )
+export const representationSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('vision') }).strict(),
+  z.object({ type: z.literal('experimental-text'), profile: z.literal('text-image-v1') }).strict(),
+])
+export type Representation = z.infer<typeof representationSchema>
 const mediaInputSchema = z
   .object({ text: z.string().trim().min(1).max(32000).optional(), image: imageSchema.optional() })
   .strict()
@@ -61,6 +66,7 @@ export const classifySchema = z
       .max(limits.maxClasses)
       .refine((v) => new Set(v.map((c) => c.id)).size === v.length, 'Class IDs must be unique'),
     instructions: z.string().trim().min(1).max(4000).optional(),
+    representation: representationSchema.optional(),
   })
   .strict()
 export type ClassifyInput = z.input<typeof classifySchema> & { signal?: AbortSignal }
@@ -70,6 +76,8 @@ export const locateSchema = z
     target: z.string().trim().min(1).max(2000),
     exclusions: z.array(z.string().trim().min(1).max(500)).max(16).default([]),
     roi: pixelRectSchema.optional(),
+    mode: z.literal('region').optional(),
+    representation: representationSchema.optional(),
   })
   .strict()
 export type LocateInput = z.input<typeof locateSchema> & { signal?: AbortSignal }
@@ -140,7 +148,7 @@ export interface ChoiceSelection {
 export interface ClassificationResult extends ChoiceSelection {
   metadata: DecisionMetadata
 }
-interface LocalizationMetadata {
+export interface LocalizationMetadata {
   image: { width: number; height: number; coordinateSpace: 'oriented-source-pixels' }
   stages: DecisionMetadata[]
   durationMs: number

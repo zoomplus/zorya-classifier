@@ -1,5 +1,7 @@
 # Accepted open-source extraction plan
 
+Current implementation: [accepted 0.2 plan](0.2.0-plan.md), whole-object bounds, extraction and comparative text-only image experiments. The first-release plan below is retained as history.
+
 First deliver an independent MIT Node.js/TypeScript library with classify(text/image/both) and locate(image,target), powered by Jev 1.14/TypeSafe. Preserve three Choice stages for localization, stable maxima/ties and source coordinates; no implicit model/provider fallback or retries. Classification is one native Choice. Separate heavy optional refinement and game/application dependencies.
 
 Prepare public contracts, strict schemas, source rules, architecture/API/operations documentation, examples/CLI, offline regressions and Windows/Linux CI. Package into a clean npm archive and test installation outside the repository. Scan release contents for secrets, private paths and unwanted assets. Prepare a clean source repository; public GitHub/npm publishing is a separate action.
