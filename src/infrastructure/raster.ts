@@ -1,4 +1,5 @@
 import sharp from 'sharp'
+import { z } from 'zod'
 import type {
   DecisionState,
   GridCell,
@@ -7,7 +8,7 @@ import type {
   RasterImage,
   RasterPort,
 } from '../entities/contracts.js'
-import { limits } from '../entities/contracts.js'
+import { limits, parse, pixelRectSchema } from '../entities/contracts.js'
 import { ClassifierError, assertActive } from '../entities/errors.js'
 import type { ImageRepresentationPort, RepresentationMetadata } from '../entities/representation.js'
 
@@ -222,12 +223,35 @@ export function createVisionRepresentation(raster: RasterPort): ImageRepresentat
           )
         const payload = imagePart.image_url.url.slice('data:image/png;base64,'.length)
         metadata.bytes += Buffer.from(payload, 'base64').byteLength
-        const transform = JSON.parse(transformPart) as {
-          sourceImageTransform: {
-            output: { width: number; height: number }
-            content: { left: number; top: number; width: number; height: number }
-          }
+        let json: unknown
+        try {
+          json = JSON.parse(transformPart)
+        } catch {
+          throw new ClassifierError(
+            'INVALID_RESPONSE',
+            'Vision raster returned invalid transform JSON',
+          )
         }
+        const transform = parse(
+          z.object({
+            sourceImageTransform: z.object({
+              output: z.object({
+                width: z.number().int().positive().max(16384),
+                height: z.number().int().positive().max(16384),
+              }),
+              content: pixelRectSchema,
+            }),
+          }),
+          json,
+          'INVALID_RESPONSE',
+        )
+        if (
+          !contains(
+            { left: 0, top: 0, ...transform.sourceImageTransform.output },
+            transform.sourceImageTransform.content,
+          )
+        )
+          throw new ClassifierError('INVALID_RESPONSE', 'Vision raster content lies outside output')
         metadata.views.push({
           id: view.id,
           sourceRegion: view.sourceRegion,

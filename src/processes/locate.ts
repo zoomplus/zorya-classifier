@@ -99,13 +99,17 @@ async function gridPass(context: Context, panels: readonly GridPanel[], pass: 1 
       ]
     : []
   for (const panel of panels) {
-    state.push(
-      JSON.stringify({
-        panel: panel.id,
-        sourceRegion: panel.region,
-        labels: panel.cells.map((cell) => ({ id: labels.get(cell.id), sourceRegion: cell.region })),
-      }),
-    )
+    if (!context.representation)
+      state.push(
+        JSON.stringify({
+          panel: panel.id,
+          sourceRegion: panel.region,
+          labels: panel.cells.map((cell) => ({
+            id: labels.get(cell.id),
+            sourceRegion: cell.region,
+          })),
+        }),
+      )
     if (context.representation) {
       const clean = await context.raster.crop(context.image, panel.region, context.signal)
       views.push({
@@ -147,7 +151,7 @@ async function gridPass(context: Context, panels: readonly GridPanel[], pass: 1 
       views,
       signal: context.signal,
     })
-    state.push(JSON.stringify({ representation: prepared.metadata }), ...prepared.state)
+    state.push(...prepared.state)
   }
   const answer = await decide(context, { state, questions: gridQuestions(cells, labels) })
   return {
@@ -211,7 +215,7 @@ async function finalPass(
       views,
       signal: context.signal,
     })
-    state.push(JSON.stringify({ representation: prepared.metadata }), ...prepared.state)
+    state.push(...prepared.state)
   }
   const answer = await decide(context, { state, questions: candidateQuestions(labels) })
   const result = selection(answer, [...labels, 'none'], 1)
@@ -312,7 +316,7 @@ export async function locateInput(
     raster,
     signal,
     image,
-    original: await raster.imageState(image, signal),
+    original: representation ? [] : await raster.imageState(image, signal),
     stages: [],
     target: input.target,
     exclusions: input.exclusions ?? [],

@@ -102,11 +102,12 @@ async function prepareState(
   signal: AbortSignal,
   representation?: ImageRepresentationPort,
 ): Promise<DecisionState> {
-  const original = await raster.imageState(image, signal)
   const seedImage = await raster.crop(image, seed, signal)
-  const seedState = await raster.imageState(seedImage, signal)
-  if (!representation)
+  if (!representation) {
+    const original = await raster.imageState(image, signal)
+    const seedState = await raster.imageState(seedImage, signal)
     return [...targetState(target, exclusions), 'ORIGINAL', ...original, 'SEED', ...seedState]
+  }
   const views: RepresentationView[] = [
     {
       id: 'source',
@@ -120,7 +121,7 @@ async function prepareState(
   return [
     ...targetState(target, exclusions),
     'ORIGINAL AND SEED GEOMETRY',
-    JSON.stringify({ seedRegion: seed, representation: prepared.metadata }),
+    JSON.stringify({ seedRegion: seed }),
     ...prepared.state,
   ]
 }

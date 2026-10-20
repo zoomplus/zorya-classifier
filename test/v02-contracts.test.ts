@@ -3,6 +3,7 @@ import test from 'node:test'
 import { classifySchema, locateSchema, representationSchema } from '../src/entities/contracts.js'
 import { representationLimits } from '../src/entities/representation.js'
 import { wholeObjectSchema } from '../src/entities/whole-object.js'
+import { extractSchema } from '../src/entities/segmentation.js'
 
 await test('whole-object defaults are explicit and region input remains separate', () => {
   const input = { image: new Uint8Array([1]), target: 'object' }
@@ -11,6 +12,8 @@ await test('whole-object defaults are explicit and region input remains separate
   const whole = wholeObjectSchema.parse({ ...input, mode: 'whole-object' })
   assert.equal(whole.boxTolerancePx, 8)
   assert.equal(whole.maxExtentPasses, 3)
+  assert.equal(extractSchema.parse(input).mode, undefined)
+  assert.equal(extractSchema.safeParse({ ...input, mode: 'region' }).success, false)
   for (const extra of [
     { maxExtentPasses: 4 },
     { maxExtentPasses: 0 },

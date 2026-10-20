@@ -6,6 +6,7 @@ import type {
   LocalizationResult,
   LocateInput,
   RefinementPort,
+  Representation,
 } from '../entities/contracts.js'
 import { classifySchema, locateSchema, parse } from '../entities/contracts.js'
 import { ClassifierError } from '../entities/errors.js'
@@ -15,6 +16,15 @@ import { locateInput } from '../processes/locate.js'
 import { OperationGate } from '../shared/gate.js'
 import { OperationScope } from '../shared/scope.js'
 import { InputBudget } from '../shared/input-budget.js'
+import type {
+  AnyLocateInput,
+  WholeObjectLocateInput,
+  WholeObjectLocalizationResult,
+} from '../entities/whole-object.js'
+import { wholeObjectSchema } from '../entities/whole-object.js'
+import { locateWholeObjectInput } from '../processes/whole-object.js'
+import type { ImageRepresentationPort } from '../entities/representation.js'
+import { preparedTextSchema, representationLimits } from '../entities/representation.js'
 
 export interface ClassifierOptions {
   decision: DecisionPort
@@ -26,7 +36,9 @@ export interface ClassifierOptions {
 }
 export interface Classifier {
   classify(input: ClassifyInput): Promise<ClassificationResult>
+  locate(input: WholeObjectLocateInput): Promise<WholeObjectLocalizationResult>
   locate(input: LocateInput): Promise<LocalizationResult>
+  locate(input: AnyLocateInput): Promise<LocalizationResult | WholeObjectLocalizationResult>
   dispose(): Promise<void>
 }
 const configSchema = z.object({
@@ -47,6 +59,21 @@ function signalOf(value: unknown): AbortSignal | undefined {
   return value
 }
 export function createClassifier(options: ClassifierOptions): Classifier {
+  return composeClassifier(options)
+}
+
+/** Internal benchmark composition. No research codec is exported by the npm entry points. */
+export function createResearchClassifier(
+  options: ClassifierOptions,
+  experimental: ImageRepresentationPort,
+): Classifier {
+  return composeClassifier(options, experimental)
+}
+
+function composeClassifier(
+  options: ClassifierOptions,
+  experimental?: ImageRepresentationPort,
+): Classifier {
   if (!options || typeof options.decision?.decide !== 'function')
     throw new ClassifierError('INVALID_INPUT', 'A DecisionPort is required')
   const config = parse(configSchema, {
@@ -60,6 +87,44 @@ export function createClassifier(options: ClassifierOptions): Classifier {
   const raster = createSharpRaster()
   const owned = new Map<OperationScope, Promise<unknown>>()
   let disposed = false
+  const textRepresentation: ImageRepresentationPort | undefined = experimental
+    ? {
+        async prepare(input) {
+          const result = parse(
+            preparedTextSchema,
+            await experimental.prepare(input),
+            'INVALID_RESPONSE',
+          )
+          const bytes = result.state.reduce((sum, part) => sum + Buffer.byteLength(part, 'utf8'), 0)
+          if (bytes > representationLimits.totalBytes || bytes !== result.metadata.bytes)
+            throw new ClassifierError(
+              'INVALID_RESPONSE',
+              'Representation byte accounting is inconsistent',
+            )
+          return {
+            state: result.state,
+            metadata: {
+              ...result.metadata,
+              views: result.metadata.views.map(({ content, ...view }) => ({
+                ...view,
+                ...(content === undefined ? {} : { content }),
+              })),
+            },
+          }
+        },
+      }
+    : undefined
+  function representationFor(
+    value: Representation | undefined,
+  ): ImageRepresentationPort | undefined {
+    if (value?.type !== 'experimental-text') return undefined
+    if (!textRepresentation)
+      throw new ClassifierError(
+        'UNSUPPORTED',
+        'No text-image profile has passed release qualification yet',
+      )
+    return textRepresentation
+  }
   async function run<T>(
     signal: AbortSignal | undefined,
     task: (signal: AbortSignal) => Promise<T>,
@@ -87,6 +152,45 @@ export function createClassifier(options: ClassifierOptions): Classifier {
     owned.set(scope, job)
     return job
   }
+  function locate(input: WholeObjectLocateInput): Promise<WholeObjectLocalizationResult>
+  function locate(input: LocateInput): Promise<LocalizationResult>
+  function locate(
+    input: AnyLocateInput,
+  ): Promise<LocalizationResult | WholeObjectLocalizationResult>
+  async function locate(
+    input: AnyLocateInput,
+  ): Promise<LocalizationResult | WholeObjectLocalizationResult> {
+    if (disposed) throw new ClassifierError('DISPOSED', 'Classifier has been disposed')
+    gate.assertAvailable()
+    if (!input || typeof input !== 'object')
+      throw new ClassifierError('INVALID_INPUT', 'Expected locate input object')
+    const { signal, ...rest } = input
+    const parent = signalOf(signal)
+    if (rest.mode === 'whole-object') {
+      const parsed = parse(wholeObjectSchema, rest)
+      const representation = representationFor(parsed.representation)
+      const release = inputBudget.reserve(parsed.image.byteLength)
+      try {
+        const snapshot = { ...parsed, image: new Uint8Array(parsed.image) }
+        return await run(parent, (s) =>
+          locateWholeObjectInput(snapshot, options.decision, raster, s, representation),
+        )
+      } finally {
+        release()
+      }
+    }
+    const parsed = parse(locateSchema, rest)
+    const representation = representationFor(parsed.representation)
+    const release = inputBudget.reserve(parsed.image.byteLength)
+    try {
+      const snapshot = { ...parsed, image: new Uint8Array(parsed.image) }
+      return await run(parent, (s) =>
+        locateInput(snapshot, options.decision, raster, s, options.refinement, representation),
+      )
+    } finally {
+      release()
+    }
+  }
   return {
     async classify(input) {
       if (disposed) throw new ClassifierError('DISPOSED', 'Classifier has been disposed')
@@ -96,6 +200,8 @@ export function createClassifier(options: ClassifierOptions): Classifier {
       const { signal, ...rest } = input
       const parent = signalOf(signal)
       const parsed = parse(classifySchema, rest)
+      const hasImage = typeof parsed.input !== 'string' && parsed.input.image !== undefined
+      const representation = hasImage ? representationFor(parsed.representation) : undefined
       const byteCount =
         typeof parsed.input === 'string'
           ? Buffer.byteLength(parsed.input)
@@ -112,30 +218,13 @@ export function createClassifier(options: ClassifierOptions): Classifier {
                   : { image: new Uint8Array(parsed.input.image) }),
               }
         return await run(parent, (s) =>
-          classifyInput({ ...parsed, input: media }, options.decision, raster, s),
+          classifyInput({ ...parsed, input: media }, options.decision, raster, s, representation),
         )
       } finally {
         release()
       }
     },
-    async locate(input) {
-      if (disposed) throw new ClassifierError('DISPOSED', 'Classifier has been disposed')
-      gate.assertAvailable()
-      if (!input || typeof input !== 'object')
-        throw new ClassifierError('INVALID_INPUT', 'Expected locate input object')
-      const { signal, ...rest } = input
-      const parent = signalOf(signal)
-      const parsed = parse(locateSchema, rest)
-      const release = inputBudget.reserve(parsed.image.byteLength)
-      try {
-        const snapshot = { ...parsed, image: new Uint8Array(parsed.image) }
-        return await run(parent, (s) =>
-          locateInput(snapshot, options.decision, raster, s, options.refinement),
-        )
-      } finally {
-        release()
-      }
-    },
+    locate,
     async dispose() {
       disposed = true
       for (const scope of owned.keys()) scope.abort()

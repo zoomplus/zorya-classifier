@@ -43,4 +43,5 @@ export type {
   SegmentationResult,
   SegmentationPort,
   ExtractionResult,
+  ExtractInput,
 } from './entities/segmentation.js'

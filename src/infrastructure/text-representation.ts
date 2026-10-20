@@ -191,7 +191,6 @@ function makePlan(
           id: alias.id,
           role: alias.role,
           sourceRegion: alias.sourceRegion,
-          ...(alias.grid ? { grid: gridMetadata(alias.grid) } : {}),
         })),
         sourceRegion: group.sourceRegion,
         dimensions: size,

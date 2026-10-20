@@ -22,16 +22,16 @@ These changes do not depend on new whole-object or segmentation contracts and ne
 
 ## Existing limits and integration implications
 
-| Boundary | Current limit | Consequence |
-| --- | --- | --- |
-| State parts | 1–64 | Account for codec grammar, metadata, and all views together. |
-| Each state string | 1–64,000 UTF-16 code units | A single 64 KiB ASCII payload may exceed this; split on meaningful complete view boundaries within this limit. |
-| Prepared image parts | At most 9 | A library policy, not the provider's universal maximum. Text mode allows zero. |
-| Decision questions | 1–16 | Four extent questions fit in one call. |
-| Choice options | 2–255 | Closed interval IDs and `unknown` fit. |
-| Request body | At most 32 MiB | Includes task schema, escaping, headers excluded; text representation has its own tighter 64 KiB budget. |
-| Response body | At most 1 MiB | Bounded reading also applies to error responses. |
-| Ranking size | Exactly 1 or 4, capped at option count | Whole-object sides need rank 1; spatial beam needs rank 4. |
+| Boundary             | Current limit                          | Consequence                                                                                                    |
+| -------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| State parts          | 1–64                                   | Account for codec grammar, metadata, and all views together.                                                   |
+| Each state string    | 1–64,000 UTF-16 code units             | A single 64 KiB ASCII payload may exceed this; split on meaningful complete view boundaries within this limit. |
+| Prepared image parts | At most 9                              | A library policy, not the provider's universal maximum. Text mode allows zero.                                 |
+| Decision questions   | 1–16                                   | Four extent questions fit in one call.                                                                         |
+| Choice options       | 2–255                                  | Closed interval IDs and `unknown` fit.                                                                         |
+| Request body         | At most 32 MiB                         | Includes task schema, escaping, headers excluded; text representation has its own tighter 64 KiB budget.       |
+| Response body        | At most 1 MiB                          | Bounded reading also applies to error responses.                                                               |
+| Ranking size         | Exactly 1 or 4, capped at option count | Whole-object sides need rank 1; spatial beam needs rank 4.                                                     |
 
 The 64 KiB representation budget is a UTF-8 byte budget and includes all textual image views, not arbitrary task text. It must not be confused with the current 64,000-code-unit individual string schema. No byte truncation should attempt to repair an over-budget view: reduce and declare its resolution before serialization, or return a representation-limit result.
 

@@ -1,6 +1,13 @@
 import type { PixelRect } from './contracts.js'
 import type { RgbaRaster } from './representation.js'
 import type { ObjectBounds, WholeObjectFailure, WholeObjectLocated } from './whole-object.js'
+import { wholeObjectSchema } from './whole-object.js'
+import { z } from 'zod'
+
+export const extractSchema = wholeObjectSchema.extend({
+  mode: z.literal('whole-object').optional(),
+})
+export type ExtractInput = z.input<typeof extractSchema> & { signal?: AbortSignal }
 
 export interface BinaryMask {
   data: Uint8Array
