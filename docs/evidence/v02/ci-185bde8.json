@@ -1,0 +1,32 @@
+{
+  "schema": "hosted-ci-receipt-v1",
+  "sourceCommit": "185bde8432b61cd0184ab4b1c8a4c6c187680515",
+  "runId": 39508310927,
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39508310927",
+  "status": "completed",
+  "conclusion": "success",
+  "rawSha256": "055e53cfa8b3fecfcef92bb1d0b6d24ec22060bc88bdfa1c2050595cafe7fb8c",
+  "jobs": [
+    {
+      "name": "verify (ubuntu-latest, 24)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (ubuntu-latest, 22)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (windows-latest, 22)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (windows-latest, 24)",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "scope": "Source/offline/installed-consumer/format checks. Includes repaired target-platform component assertions. No paid model accuracy, native-asset inference or real game claim. Earlier Windows CI failure ci-9837888.json is preserved."
+}
