@@ -1,15 +1,13 @@
-'use strict'
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
+import * as fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+import sharp from 'sharp'
+import { truthSchema, validateEvaluatorTruth } from './validate_evaluator_truth.mjs'
 
-const test = require('node:test')
-const assert = require('node:assert/strict')
-const crypto = require('node:crypto')
-const fs = require('node:fs/promises')
-const os = require('node:os')
-const path = require('node:path')
-const sharp = require('sharp')
-const { truthSchema, validateEvaluatorTruth } = require('./validate_evaluator_truth.cjs')
-
-const digest = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex')
+const digest = (bytes) => createHash('sha256').update(bytes).digest('hex')
 
 test('truth schema accepts positive and verified negative rows', () => {
   const parsed = truthSchema.parse([
@@ -88,6 +86,6 @@ test('dataset validation binds truth IDs, declared dimensions, pixels, and box e
   await fs.writeFile(inputPath, JSON.stringify(wrongDimensions))
   await assert.rejects(
     validateEvaluatorTruth({ inputs: inputPath, truth: truthPath, imageRoot }),
-    /box escapes source dimensions|Decoded input image dimensions differ/u,
+    /box escapes source dimensions|Fully decoded input image dimensions differ/u,
   )
 })

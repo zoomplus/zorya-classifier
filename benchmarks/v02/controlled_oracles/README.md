@@ -47,13 +47,16 @@ From a checkout with the project Node dependencies available:
 
 ```sh
 python3 -m unittest discover -s benchmarks/v02/controlled_oracles -p 'test_*.py' -v
-node --test benchmarks/v02/controlled_oracles/validate_evaluator_truth.test.cjs
+node --test benchmarks/v02/controlled_oracles/validate_evaluator_truth.test.mjs
 ```
 
-`validate_evaluator_truth.cjs` accepts explicit `--inputs`, `--truth`, and
+`validate_evaluator_truth.mjs` accepts explicit `--inputs`, `--truth`, and
 `--image-root` paths. It enforces the evaluator truth schema, exact case ID
 coverage, image-root containment, file hashes, decoded dimensions, and box
-extent. Its output is aggregate only.
+extent. It reads each bounded image file once into owned bytes, checks the
+digest, and fully decodes those bytes to raw pixels under the source pixel cap.
+Owned encoded and decoded buffers are cleared after validation. Its output is
+aggregate only.
 
 The Calculator source wrapper is retained verbatim. Create a distinct
 evaluator-format derivative with explicit paths before validation:

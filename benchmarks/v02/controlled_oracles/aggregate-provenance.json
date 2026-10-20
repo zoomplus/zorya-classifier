@@ -61,7 +61,8 @@
     "Float32 accumulated minimap sampling has regression coverage; source projection is support-only and boxes derive from stable A/B/A visible pixel deltas.",
     "UI source wrapper remains unchanged; evaluator-normalized rows are separately saved and pinned.",
     "Combined imageRoot copies preserve source image hashes and use photo/, ui/, map/ prefixes; 30 official masks remain in private data.",
-    "No source images, masks, weights, per-case records, local paths, credentials, or provider outcomes are in this receipt."
+    "No source images, masks, weights, per-case records, local paths, credentials, or provider outcomes are in this receipt.",
+    "The reusable validator uses ESM and fully decodes owned image bytes after a bounded 16 MiB read with a 2,097,152-pixel limit; it checks decoded dimensions, clears encoded and decoded buffers, and has regression tests. The historical CommonJS validator bytes remain pinned by commit for provenance."
   ],
   "scriptPins": {
     "prePortabilityExecutedBytes": [
@@ -101,7 +102,7 @@
     "reusableToolBytes": [
       {
         "file": "README.md",
-        "sha256": "ac12c064f70b06d7b9ac30cf4371e57245d0688642d5627868c04aa69f1d1633"
+        "sha256": "1b7329a956387660da9c7a6be9dd4e5c619fd61de1ba51d6a1dc80dbb213319b"
       },
       {
         "file": "acquire_photo40.py",
@@ -140,8 +141,8 @@
         "sha256": "a896c46ba385156ff0fd6b33f8975f27fb34dfa9340ea7daec977b19d277212a"
       },
       {
-        "file": "validate_evaluator_truth.cjs",
-        "sha256": "38e75c2b18de7bac4ce881b670e8eac1d457859c3b95eb21f791024bc3ad3fe1"
+        "file": "validate_evaluator_truth.mjs",
+        "sha256": "140bd56267d714f3519f82bda565436e78442de7e035846568dba18c828051ed"
       },
       {
         "file": "oracle.py",
@@ -152,10 +153,23 @@
         "sha256": "d1fc88102df8822f8c511231d9cde3414e8e379b82c9b6de3655f959e1accc43"
       },
       {
-        "file": "validate_evaluator_truth.test.cjs",
-        "sha256": "460fa6271bc51c5869437c8f365a7bd05940b6857a54a45d7761a1c0ad46063c"
+        "file": "validate_evaluator_truth.test.mjs",
+        "sha256": "f0e6bf408f1056e7362755ecb01989d34cdb89b817d3587ff81875f0ba66b257"
       }
-    ]
+    ],
+    "historicalValidatorCjs": {
+      "commit": "bd5da4d66e3c9c205dfb49b44c7614c851fafe26",
+      "files": [
+        {
+          "file": "validate_evaluator_truth.cjs",
+          "sha256": "38e75c2b18de7bac4ce881b670e8eac1d457859c3b95eb21f791024bc3ad3fe1"
+        },
+        {
+          "file": "validate_evaluator_truth.test.cjs",
+          "sha256": "460fa6271bc51c5869437c8f365a7bd05940b6857a54a45d7761a1c0ad46063c"
+        }
+      ]
+    }
   },
   "primarySourceUrls": {
     "openImagesV5": "https://storage.googleapis.com/openimages/web/download_v5.html",
