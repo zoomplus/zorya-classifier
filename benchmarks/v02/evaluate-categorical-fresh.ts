@@ -18,6 +18,7 @@ const pinnedFile = z.object({ path: z.string().min(1), sha256: digest }).strict(
 const profile = z.enum([
   'native-luna-categorical-presence-sam-target-plus-neutral-v1',
   'native-luna-categorical-presence-sam-target-only-v1',
+  'native-luna-box-confirmation-sam-target-plus-neutral-v1',
 ])
 const targetPolicy = z.enum(['target-plus-neutral-instruction-v1', 'target-only-v1'])
 const neutralInstruction =
@@ -138,6 +139,7 @@ const expectedAssets = {
 const requiredSources = [
   './categorical-presence-fresh-runner.ts',
   './run-categorical-presence-fresh.ts',
+  './run-categorical-box-confirmation-dev.ts',
   './fresh-corpus.ts',
   './recording.ts',
   './budget.ts',
@@ -145,6 +147,9 @@ const requiredSources = [
   './categorical-presence-port.ts',
   './native-categorical-presence-port.ts',
   './categorical-presence-fresh-pair.md',
+  './categorical-heldout-plan.ts',
+  './fresh-text-runner.ts',
+  './run-categorical-heldout.ts',
   '../../package.json',
   '../../package-lock.json',
 ]
@@ -196,7 +201,7 @@ export function normalizeCategoricalFreshOutput(
       commitments.expectedProducerSourceSha256 ||
     requiredSources.some((path) => !Object.hasOwn(run.sourceHashes, path)) ||
     Object.keys(run.sourceHashes).filter((path) => path.startsWith('src/')).length !== 53 ||
-    Object.keys(run.sourceHashes).length !== 64
+    Object.keys(run.sourceHashes).length !== 68
   )
     throw new Error('Categorical DEV profile or frozen source mismatch')
   if (

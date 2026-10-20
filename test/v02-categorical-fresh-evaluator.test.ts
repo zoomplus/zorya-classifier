@@ -25,6 +25,7 @@ async function fixture() {
   const required = [
     './categorical-presence-fresh-runner.ts',
     './run-categorical-presence-fresh.ts',
+    './run-categorical-box-confirmation-dev.ts',
     './fresh-corpus.ts',
     './recording.ts',
     './budget.ts',
@@ -32,6 +33,9 @@ async function fixture() {
     './categorical-presence-port.ts',
     './native-categorical-presence-port.ts',
     './categorical-presence-fresh-pair.md',
+    './categorical-heldout-plan.ts',
+    './fresh-text-runner.ts',
+    './run-categorical-heldout.ts',
     '../../package.json',
     '../../package-lock.json',
   ]
@@ -222,15 +226,26 @@ async function fixture() {
   return { corpus, manifest, summary, commitments }
 }
 
-await test('categorical DEV normalization preserves both distinct profile identities and all 40 cases', async () => {
+await test('categorical DEV normalization preserves three distinct profile identities and all 40 cases', async () => {
   const f = await fixture()
-  for (const targetOnly of [false, true]) {
+  for (const profile of [
+    {
+      id: 'native-luna-categorical-presence-sam-target-plus-neutral-v1',
+      targetPolicy: 'target-plus-neutral-instruction-v1',
+    },
+    {
+      id: 'native-luna-categorical-presence-sam-target-only-v1',
+      targetPolicy: 'target-only-v1',
+    },
+    {
+      id: 'native-luna-box-confirmation-sam-target-plus-neutral-v1',
+      targetPolicy: 'target-plus-neutral-instruction-v1',
+    },
+  ]) {
     const manifest = structuredClone(f.manifest),
       summary = structuredClone(f.summary)
-    if (targetOnly) {
-      manifest.profileId = summary.profileId = 'native-luna-categorical-presence-sam-target-only-v1'
-      manifest.targetPolicy = summary.targetPolicy = 'target-only-v1'
-    }
+    manifest.profileId = summary.profileId = profile.id
+    manifest.targetPolicy = summary.targetPolicy = profile.targetPolicy
     const result = normalizeCategoricalFreshOutput(
       summary,
       manifest,

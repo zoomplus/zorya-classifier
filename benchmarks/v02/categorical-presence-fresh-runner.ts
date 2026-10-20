@@ -96,7 +96,14 @@ export const categoricalFreshProfiles = Object.freeze({
     id: 'native-luna-categorical-presence-sam-target-only-v1',
     targetPolicy: 'target-only-v1',
   }),
+  boxConfirmation: Object.freeze({
+    id: 'native-luna-box-confirmation-sam-target-plus-neutral-v1',
+    targetPolicy: 'target-plus-neutral-instruction-v1',
+  }),
 })
+
+type CategoricalFreshProfile =
+  (typeof categoricalFreshProfiles)[keyof typeof categoricalFreshProfiles]
 
 function heldoutProfile(plan: HeldoutCandidatePlan): {
   id: string
@@ -127,9 +134,10 @@ export const freshProposalManifestHashes = Object.freeze([
   'b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15',
 ] as const)
 
-const sourceFiles = [
+export const categoricalFreshProducerSourceFiles = [
   './categorical-presence-fresh-runner.ts',
   './run-categorical-presence-fresh.ts',
+  './run-categorical-box-confirmation-dev.ts',
   './fresh-corpus.ts',
   './recording.ts',
   './budget.ts',
@@ -247,9 +255,9 @@ function writeImmutable(path: string, value: unknown): Promise<void> {
   return writeFile(path, `${JSON.stringify(value, null, 2)}\n`, { flag: 'wx' })
 }
 
-async function sourceHashes(): Promise<Record<string, string>> {
+export async function categoricalFreshProducerSourceManifest(): Promise<Record<string, string>> {
   const bench = await Promise.all(
-    sourceFiles.map(
+    categoricalFreshProducerSourceFiles.map(
       async (path) => [path, sha256(await readFile(new URL(path, import.meta.url)))] as const,
     ),
   )
@@ -279,7 +287,7 @@ async function sourceHashes(): Promise<Record<string, string>> {
 }
 
 export async function categoricalFreshProducerSourceSha256(): Promise<string> {
-  const hashes = await sourceHashes()
+  const hashes = await categoricalFreshProducerSourceManifest()
   return hashCanonical(Object.entries(hashes).sort(([a], [b]) => a.localeCompare(b)))
 }
 
@@ -589,10 +597,18 @@ function createProposals(options: FreshProposalRunnerOptions) {
 /** One immutable 40-case DEV producer pass. It never loads truth or source-ledger files. */
 export async function runCategoricalPresenceFreshDev(
   options: FreshProposalRunnerOptions,
-  profile: (typeof categoricalFreshProfiles)[keyof typeof categoricalFreshProfiles],
+  profile: CategoricalFreshProfile,
   signal: AbortSignal = new AbortController().signal,
 ) {
   return runCategoricalFreshProfile(options, profile, signal)
+}
+
+/** Runs the separately named box-confirmation DEV recipe without changing the paired profiles. */
+export async function runCategoricalPresenceFreshBoxConfirmationDev(
+  options: FreshProposalRunnerOptions,
+  signal: AbortSignal = new AbortController().signal,
+) {
+  return runCategoricalFreshProfile(options, categoricalFreshProfiles.boxConfirmation, signal)
 }
 
 /** The distinct HELDOUT path requires a frozen config before it can read producer inputs. */
@@ -603,7 +619,7 @@ export async function runCategoricalPresenceFreshHeldout(
 ) {
   assertVerifiedHeldoutFreeze(freezeInput)
   const plans = buildHeldoutPlans(freezeInput)
-  const source = await sourceHashes()
+  const source = await categoricalFreshProducerSourceManifest()
   const actualSourceSha256 = hashCanonical(
     Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
   )
@@ -627,7 +643,7 @@ export async function runCategoricalPresenceFreshPair(
   options: FreshProposalRunnerOptions,
   signal: AbortSignal = new AbortController().signal,
 ) {
-  const pairedSource = await sourceHashes()
+  const pairedSource = await categoricalFreshProducerSourceManifest()
   const expectedSourceSha256 = hashCanonical(
     Object.entries(pairedSource).sort(([a], [b]) => a.localeCompare(b)),
   )
@@ -660,7 +676,7 @@ async function runCategoricalFreshProfile(
     { manifests: options.manifests, imageRoot: options.imageRoot },
     signal,
   )
-  const source = await sourceHashes()
+  const source = await categoricalFreshProducerSourceManifest()
   const producerSourceSha256 = hashCanonical(
     Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
   )
@@ -895,7 +911,7 @@ async function runCategoricalFreshProfile(
   const completed = new Set(completedCaseIds)
   const missingCaseIds = plannedCaseIds.filter((caseId) => !completed.has(caseId))
   const aggregate = budget.snapshot() satisfies BudgetSnapshot
-  const sourceAfter = await sourceHashes()
+  const sourceAfter = await categoricalFreshProducerSourceManifest()
   const sourceAfterSha256 = hashCanonical(
     Object.entries(sourceAfter).sort(([a], [b]) => a.localeCompare(b)),
   )

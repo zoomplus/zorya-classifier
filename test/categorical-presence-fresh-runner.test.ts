@@ -11,6 +11,8 @@ import {
   CategoricalFreshCaseBudget,
   assertCategoricalFreshCallBound,
   categoricalFreshProfiles,
+  categoricalFreshProducerSourceFiles,
+  categoricalFreshProducerSourceManifest,
   categoricalTargetInstruction,
   freshProposalRoute,
   runCategoricalPresenceFreshDev,
@@ -105,11 +107,35 @@ await test('the paired target profiles differ only by omitting the approved neut
     targetForProfile(emptyInstruction, categoricalFreshProfiles.preserveInstruction),
     emptyInstruction.locate.target,
   )
+  assert.equal(
+    categoricalFreshProfiles.boxConfirmation.id,
+    'native-luna-box-confirmation-sam-target-plus-neutral-v1',
+  )
+  assert.equal(
+    categoricalFreshProfiles.boxConfirmation.targetPolicy,
+    categoricalFreshProfiles.preserveInstruction.targetPolicy,
+  )
+  assert.equal(
+    targetForProfile(instructed, categoricalFreshProfiles.boxConfirmation),
+    targetForProfile(instructed, categoricalFreshProfiles.preserveInstruction),
+  )
+  assert.notEqual(
+    categoricalFreshProfiles.boxConfirmation.id,
+    categoricalFreshProfiles.preserveInstruction.id,
+  )
   assert.throws(() => {
     validateTargetPolicyTasks([
       { ...instructed, locate: { ...instructed.locate, instruction: 'Keep the red object.' } },
     ])
   }, /unapproved locate instruction/u)
+})
+
+await test('producer closure pins the dedicated box-confirmation CLI directly', async () => {
+  const relativePath = './run-categorical-box-confirmation-dev.ts'
+  assert.ok(categoricalFreshProducerSourceFiles.includes(relativePath))
+  const source = await categoricalFreshProducerSourceManifest()
+  assert.equal(source[relativePath]?.length, 64)
+  assert.equal(Object.keys(source).filter((path) => path.startsWith('src/')).length, 53)
 })
 
 await test('six-call per-case ceiling composes with the 300-call DEV ledger without ID collisions', () => {
@@ -219,9 +245,16 @@ await test('public classifier fixture records converted categorical Choices as t
         fetch,
         createObjectProposals: async () => proposalPort(),
       },
-      categoricalFreshProfiles.preserveInstruction,
+      categoricalFreshProfiles.boxConfirmation,
     )
     assert.equal(result.status, 'complete')
+    assert.equal(result.profileId, categoricalFreshProfiles.boxConfirmation.id)
+    assert.equal(result.targetPolicy, 'target-plus-neutral-instruction-v1')
+    const manifest = JSON.parse(
+      await readFile(join(result.outputDirectory, 'run-manifest.json'), 'utf8'),
+    ) as { profileId: string; targetPolicy: string }
+    assert.equal(manifest.profileId, categoricalFreshProfiles.boxConfirmation.id)
+    assert.equal(manifest.targetPolicy, 'target-plus-neutral-instruction-v1')
     assert.equal(result.results.length, 1)
     assert.ok(observed.length > 0)
     assert.ok(observed.every((item) => item.endsWith(':choice')))
