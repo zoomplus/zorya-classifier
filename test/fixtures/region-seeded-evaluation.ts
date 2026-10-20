@@ -4,6 +4,57 @@ import { join } from 'node:path'
 import sharp from 'sharp'
 import { checkedRegionDevProfileIds } from '../../benchmarks/v02/evaluate-region-seeded.js'
 import { hashCanonical } from '../../benchmarks/v02/protocol.js'
+import type { RegionSeededCaseResult } from '../../benchmarks/v02/region-seeded-runner.js'
+import type { PhysicalCallRecord } from '../../benchmarks/v02/recording.js'
+
+export type RegionSeededFixturePhysicalReceipt = Pick<
+  PhysicalCallRecord,
+  | 'physicalId'
+  | 'logicalId'
+  | 'requestSha256'
+  | 'requestBodySha256'
+  | 'admittedAt'
+  | 'durationMs'
+  | 'httpStatus'
+  | 'route'
+> & {
+  caseId: string
+  errorCode: string | null
+  receipt: { costUsd: number | null } | PhysicalCallRecord['receipt']
+  wireReceipt: { usageCostUsd: number | null } | PhysicalCallRecord['wireReceipt']
+}
+
+export interface RegionSeededEvaluatorFixtureSummary {
+  runId: string
+  profileId: string
+  phase: 'dev'
+  status: 'complete' | 'incomplete'
+  producerSourceSha256: string
+  sourceBeforeSha256: string
+  sourceAfterSha256: string
+  sourceUnchanged: boolean
+  plannedCaseIds: string[]
+  imageChecks: Array<{ caseId: string; status: 'verified' | 'failed'; errorCode: string | null }>
+  completedCaseIds: string[]
+  missingCaseIds: string[]
+  results: RegionSeededCaseResult[]
+  aggregate: {
+    admittedPhysicalCalls: number
+    knownCostUsd: number
+    unknownCostCalls: number
+    inFlightCalls: number
+    accountedExposureUsd: number
+    maxPhysicalCalls: number
+    maxCostUsd: number
+  }
+  shutdownError: string | null
+  physicalReceipts: RegionSeededFixturePhysicalReceipt[]
+  imageFetchAudit?: {
+    checkedFetches: number
+    imagePartFetches: number
+    allRequestsVerifiedImageFree: boolean
+  }
+}
 
 const profileId = 'fixture-region-profile'
 const sourceFiles = { 'src/fake.ts': '1'.repeat(64) }
@@ -143,7 +194,7 @@ export async function createRegionSeededEvaluatorFixture(
       ),
     ),
   )
-  const results = ids.map((caseId, index) => {
+  const results: RegionSeededCaseResult[] = ids.map((caseId, index) => {
     const hasPresencePolicy =
       altered?.classifiedAbsentSkip === true ||
       altered?.classifiedFailureSkip === true ||
@@ -347,7 +398,7 @@ export async function createRegionSeededEvaluatorFixture(
         },
       }
       const extracted = {
-        ...(firstFixtureExtraction as Record<string, unknown>),
+        ...firstFixtureExtraction,
         status: 'extracted' as const,
         durationMs: 2,
         physicalCalls: 1,
@@ -381,7 +432,7 @@ export async function createRegionSeededEvaluatorFixture(
       first.extraction = extracted as unknown as typeof first.extraction
     }
   }
-  const receipts =
+  const receipts: RegionSeededFixturePhysicalReceipt[] =
     altered?.checkedRegion && variant === 'region-seeded-sam'
       ? [
           {
@@ -433,7 +484,7 @@ export async function createRegionSeededEvaluatorFixture(
               },
             ]
           : []
-  const summary = {
+  const summary: RegionSeededEvaluatorFixtureSummary = {
     runId: 'fixture-run',
     profileId: fixtureProfileId,
     phase: 'dev',
