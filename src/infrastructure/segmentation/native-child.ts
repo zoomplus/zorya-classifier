@@ -2,6 +2,9 @@ import { fork, type ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { ClassifierError } from '../../entities/errors.js'
 import { fileURLToPath } from 'node:url'
+import { channel } from 'node:diagnostics_channel'
+
+const resourceChannel = channel('zorya.segmentation.child-resource')
 
 interface Job<T> {
   id: string
@@ -121,6 +124,8 @@ export class NativeChildPool<T> {
       return
     }
     job.child = child
+    if (child.pid !== undefined)
+      resourceChannel.publish({ type: 'start', jobId: job.id, pid: child.pid })
     let output = ''
     let outputBytes = 0
     child.stdout?.setEncoding('utf8')
@@ -140,19 +145,32 @@ export class NativeChildPool<T> {
     child.stdin?.on('error', (error) => {
       job.failure ??= nativeFailure(error)
     })
+    let telemetryConfigured = false
     child.on('message', (message: unknown) => {
-      if (
-        typeof message !== 'object' ||
-        message === null ||
-        !('type' in message) ||
-        message.type !== 'ready'
-      ) {
+      if (typeof message !== 'object' || message === null || !('type' in message)) {
         job.failure ??= new ClassifierError(
           'INVALID_RESPONSE',
           'Native child sent an invalid control message',
         )
         child.kill()
+        return
       }
+      if (message.type === 'ready' && !telemetryConfigured) {
+        telemetryConfigured = true
+        child.send({ type: 'telemetry', enabled: resourceChannel.hasSubscribers })
+        return
+      }
+      if (message.type === 'memory' && 'memory' in message) {
+        const memory = message.memory
+        if (typeof memory === 'object' && memory !== null && isMemoryUsage(memory))
+          resourceChannel.publish({ type: 'memory', jobId: job.id, pid: child.pid, ...memory })
+        return
+      }
+      job.failure ??= new ClassifierError(
+        'INVALID_RESPONSE',
+        'Native child sent an invalid control message',
+      )
+      child.kill()
     })
     child.on('error', (error) => {
       job.failure ??= nativeFailure(error)
@@ -240,6 +258,8 @@ export class NativeChildPool<T> {
 
   #endPhysical(job: Job<T>): void {
     if (!this.#physical.delete(job)) return
+    if (job.child?.pid !== undefined)
+      resourceChannel.publish({ type: 'close', jobId: job.id, pid: job.child.pid })
     this.#active--
     clearTimeout(job.timer)
     clearTimeout(job.abortTimer)
@@ -291,4 +311,10 @@ function nativeFailure(error: unknown): ClassifierError {
   if (code === 'ENOENT')
     return new ClassifierError('UNSUPPORTED', 'Native worker executable is unavailable')
   return new ClassifierError('PROVIDER', 'Native child process failed')
+}
+
+function isMemoryUsage(value: object): value is NodeJS.MemoryUsage {
+  return ['rss', 'heapTotal', 'heapUsed', 'external', 'arrayBuffers'].every(
+    (key) => key in value && typeof Reflect.get(value, key) === 'number',
+  )
 }

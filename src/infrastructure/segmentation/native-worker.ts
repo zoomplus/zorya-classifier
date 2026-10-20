@@ -6,7 +6,29 @@ import { probeGrabCut, runGrabCutTask } from './grabcut/worker-inference.js'
 const stopOnParentLoss = () => {
   process.exit(1)
 }
+let telemetryTimer: NodeJS.Timeout | undefined
 process.on('disconnect', stopOnParentLoss)
+process.on('message', (message: unknown) => {
+  if (
+    typeof message !== 'object' ||
+    message === null ||
+    !('type' in message) ||
+    message.type !== 'telemetry' ||
+    !('enabled' in message)
+  )
+    return
+  if (message.enabled === true && !telemetryTimer) {
+    sendMemory()
+    telemetryTimer = setInterval(
+      () => process.send?.({ type: 'memory', memory: process.memoryUsage() }),
+      1000,
+    )
+    telemetryTimer.unref()
+  } else if (message.enabled === false && telemetryTimer) {
+    clearInterval(telemetryTimer)
+    telemetryTimer = undefined
+  }
+})
 process.send?.({ type: 'ready' })
 
 async function main(): Promise<void> {
@@ -31,12 +53,14 @@ async function main(): Promise<void> {
               status: 'ready',
               backend: 'grabcut',
             }))
+  sendMemory()
   await new Promise<void>((resolve, reject) => {
     process.stdout.write(JSON.stringify(reply), (error) => {
       if (error) reject(error)
       else resolve()
     })
   })
+  if (telemetryTimer) clearInterval(telemetryTimer)
   process.off('disconnect', stopOnParentLoss)
   process.disconnect()
 }
@@ -48,11 +72,15 @@ main().catch(async (error: unknown) => {
       resolve(),
     )
   })
+  if (telemetryTimer) clearInterval(telemetryTimer)
   process.off('disconnect', stopOnParentLoss)
   process.disconnect()
 })
 
 let activeId = ''
+function sendMemory(): void {
+  process.send?.({ type: 'memory', memory: process.memoryUsage() })
+}
 function classifyFailure(error: unknown): { code: ErrorCode; message: string } {
   if (error instanceof ClassifierError)
     return { code: error.code, message: error.message.slice(0, 300) }
