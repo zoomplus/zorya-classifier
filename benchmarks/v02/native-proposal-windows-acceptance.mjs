@@ -30,7 +30,7 @@ function usage() {
   return [
     'Usage: node native-proposal-windows-acceptance.mjs --archive=<verified .tgz> --sha256=<archive sha256> --source-commit=<frozen source commit>',
     '       --encoder=<pinned MobileSAM encoder> --decoder=<pinned MobileSAM decoder> --report=<new report path>',
-    '       [--workflow=proposals|region-segmentation] (default: proposals)',
+    '       [--workflow=proposals|region-segmentation|checked-region-segmentation] (default: proposals)',
   ].join('\n')
 }
 
@@ -60,8 +60,14 @@ function parseArgs(argv) {
   if (!/^[a-f0-9]{40}$/u.test(result.sourceCommit))
     throw new Error('--source-commit must be a full lowercase Git SHA')
   result.workflow ??= 'proposals'
-  if (!['proposals', 'region-segmentation'].includes(result.workflow))
-    throw new Error('--workflow must be proposals or region-segmentation')
+  if (
+    !['proposals', 'region-segmentation', 'checked-region-segmentation'].includes(result.workflow)
+  )
+    throw new Error(
+      '--workflow must be proposals or region-segmentation or checked-region-segmentation',
+    )
+  result.checkedBoxes = result.workflow === 'checked-region-segmentation'
+  if (result.checkedBoxes) result.workflow = 'region-segmentation'
   return result
 }
 
@@ -220,17 +226,23 @@ async function foregroundScores(sharp, state) {
   return scores
 }
 
-function fixtureDecision(sharp, enforceRegionChoiceContract = false) {
+function fixtureDecision(sharp, enforceRegionChoiceContract = false, checkedBoxes = false) {
   let calls = 0
   let validRegionChoiceRequests = 0
+  let boxCheckRequests = 0
   const decision = {
     async decide(request, signal) {
       calls++
       if (signal.aborted)
         throw Object.assign(new Error('Fixture decision aborted'), { code: 'ABORTED' })
       if (enforceRegionChoiceContract) {
-        assertRegionChoiceContract(request)
-        validRegionChoiceRequests++
+        if (checkedBoxes && Object.hasOwn(request.questions, 'box_check')) {
+          assertSegmentationBoxChoiceContract(request)
+          boxCheckRequests++
+        } else {
+          assertRegionChoiceContract(request)
+          validRegionChoiceRequests++
+        }
       }
       const answers = {}
       for (const [id, question] of Object.entries(request.questions)) {
@@ -275,6 +287,7 @@ function fixtureDecision(sharp, enforceRegionChoiceContract = false) {
     decision,
     calls: () => calls,
     validRegionChoiceRequests: () => validRegionChoiceRequests,
+    boxCheckRequests: () => boxCheckRequests,
   }
 }
 
@@ -288,6 +301,19 @@ function assertRegionChoiceContract(request) {
     throw new Error('Region workflow changed the original presence + selection Choice contract')
   if (request.questions.presence?.type !== 'noul' || request.questions.selection?.type !== 'choice')
     throw new Error('Region workflow changed the original Noul + Choice question types')
+}
+
+function assertSegmentationBoxChoiceContract(request) {
+  const question = request.questions.box_check
+  if (
+    JSON.stringify(Object.keys(request.questions)) !== JSON.stringify(['box_check']) ||
+    question?.type !== 'choice' ||
+    question.rankingSize !== 1 ||
+    JSON.stringify(Object.keys(question.criteria)) !==
+      JSON.stringify(['complete', 'needs-expansion', 'unknown']) ||
+    !request.state.some((part) => typeof part === 'object' && part.type === 'image_url')
+  )
+    throw new Error('Box verification must use one closed Choice and the source presentation')
 }
 
 async function waitForNativeStart(timeoutMs = 10_000) {
@@ -313,11 +339,14 @@ async function runWorker(options) {
   const tempRoot = createOwnedTemp()
   const report = {
     schemaVersion: 1,
-    benchmark:
-      options.workflow === 'region-segmentation'
+    benchmark: options.checkedBoxes
+      ? 'installed-archive-mobile-sam-checked-region-windows-v1'
+      : options.workflow === 'region-segmentation'
         ? 'installed-archive-mobile-sam-region-segmentation-windows-v1'
         : 'installed-archive-mobile-sam-proposal-windows-v1',
-    ...(options.workflow === 'region-segmentation' ? { workflow: options.workflow } : {}),
+    ...(options.workflow === 'region-segmentation'
+      ? { workflow: options.checkedBoxes ? 'checked-region-segmentation' : options.workflow }
+      : {}),
     backend:
       options.workflow === 'region-segmentation'
         ? 'mobile-sam-seed-region'
@@ -531,7 +560,11 @@ async function runWorker(options) {
     const png = await sharp(rgba, { raw: { width: WIDTH, height: HEIGHT, channels: 4 } })
       .png()
       .toBuffer()
-    const fixture = fixtureDecision(sharp, options.workflow === 'region-segmentation')
+    const fixture = fixtureDecision(
+      sharp,
+      options.workflow === 'region-segmentation',
+      options.checkedBoxes,
+    )
     classifier = createClassifier({
       decision: fixture.decision,
       ...(options.workflow === 'region-segmentation'
@@ -557,6 +590,7 @@ async function runWorker(options) {
             region: location.region,
             method: location.method,
             ...(location.center ? { center: location.center } : {}),
+            ...(location.verification ? { verification: location.verification } : {}),
             ...(location.proposalMetadata ? { proposalMetadata: location.proposalMetadata } : {}),
           }
         : { reason: location.reason }),
@@ -595,6 +629,7 @@ async function runWorker(options) {
             pngBytes: extraction.png.byteLength,
             maskBytes: extraction.mask.data.byteLength,
             segmentation: extraction.segmentation,
+            ...(extraction.verification ? { verification: extraction.verification } : {}),
           }
         : { reason: extraction.reason }),
     }
@@ -657,17 +692,101 @@ async function runWorker(options) {
       providerHttpCalls: 0,
       ...(options.workflow === 'region-segmentation'
         ? {
-            noExtentOrMaskConfirmationCalls: true,
+            ...(options.checkedBoxes
+              ? { noExtentSearchCalls: true, boxCheckRequests: fixture.boxCheckRequests() }
+              : { noExtentOrMaskConfirmationCalls: true }),
             validRegionChoiceRequests: fixture.validRegionChoiceRequests(),
           }
         : { selectionUsesRenderedSyntheticForegroundPixels: true }),
     }
-    if (options.workflow === 'region-segmentation' && fixture.calls() !== 6)
-      throw new Error(
-        `Expected six locator calls across locate + extract, received ${fixture.calls()}`,
-      )
+    if (
+      options.workflow === 'region-segmentation' &&
+      fixture.calls() !== (options.checkedBoxes ? 8 : 6)
+    )
+      throw new Error(`Unexpected total request count across locate + extract: ${fixture.calls()}`)
     if (options.workflow === 'region-segmentation' && fixture.validRegionChoiceRequests() !== 6)
       throw new Error('Not all six requests used the original presence + selection Choices')
+
+    if (options.checkedBoxes) {
+      const verified = [location.verification, extraction.verification].every(
+        (value) =>
+          value?.checks.length === 1 &&
+          value.checks[0]?.verdict === 'complete' &&
+          value.expansion === 'not-needed',
+      )
+      report.checks.closedBoxVerification =
+        verified &&
+        fixture.boxCheckRequests() === 2 &&
+        location.method === 'region-checked-segmentation-v1'
+      if (!report.checks.closedBoxVerification)
+        throw new Error('Checked region did not retain both containment decisions')
+      if (typeof adapter.expand !== 'function')
+        throw new Error('Installed MobileSAM omits enclosing-mask expansion')
+      const previous = new Uint8Array(WIDTH * HEIGHT)
+      let point
+      for (
+        let y = location.seedRegion.top;
+        y < location.seedRegion.top + location.seedRegion.height && !point;
+        y++
+      )
+        for (
+          let x = location.seedRegion.left;
+          x < location.seedRegion.left + location.seedRegion.width;
+          x++
+        ) {
+          const localX = x - extraction.offset.x
+          const localY = y - extraction.offset.y
+          if (
+            localX >= 0 &&
+            localY >= 0 &&
+            localX < extraction.mask.width &&
+            localY < extraction.mask.height &&
+            extraction.mask.data[localY * extraction.mask.width + localX] === 1
+          ) {
+            point = { x, y }
+            previous[y * WIDTH + x] = 1
+            break
+          }
+        }
+      if (!point) throw new Error('Native mask omitted all seed foreground')
+      const expanded = await adapter.expand(
+        {
+          image: { data: new Uint8Array(rgba), width: WIDTH, height: HEIGHT, format: 'rgba8' },
+          prompt: 'seed-region',
+          seedRegion: location.seedRegion,
+          wholeRegion: { left: 0, top: 0, width: WIDTH, height: HEIGHT },
+          bounds: location.bounds,
+          roi: { left: 0, top: 0, width: WIDTH, height: HEIGHT },
+          target: 'controlled visible target',
+          exclusions: [],
+          completeness: 'visible-object',
+          signal: new globalThis.AbortController().signal,
+        },
+        { data: previous, width: WIDTH, height: HEIGHT, format: 'binary-u8' },
+      )
+      const area =
+        expanded.status === 'segmented'
+          ? expanded.mask.data.reduce((sum, value) => sum + value, 0)
+          : 0
+      report.enclosingMaskComponent = {
+        input: 'controlled one-pixel fragment from actual native mask, not a photo-quality result',
+        previousForeground: 1,
+        point,
+        status: expanded.status,
+        ...(expanded.status === 'segmented'
+          ? { foreground: area, metadata: expanded.metadata }
+          : { reason: expanded.reason }),
+      }
+      report.checks.nativeEnclosingMask =
+        expanded.status === 'segmented' &&
+        area > 1 &&
+        expanded.mask.data[point.y * WIDTH + point.x] === 1 &&
+        expanded.metadata.method === 'mobile-sam-enclosing-mask-v1'
+      previous.fill(0)
+      if (expanded.status === 'segmented') expanded.mask.data.fill(0)
+      if (!report.checks.nativeEnclosingMask)
+        throw new Error('Native enclosing-mask component did not retain its prior fragment')
+    }
 
     if (options.workflow === 'region-segmentation') {
       const emptyRgba = new Uint8Array(WIDTH * HEIGHT * 4)
@@ -918,7 +1037,7 @@ async function main() {
   if (!report.acceptance) process.exitCode = 1
 }
 
-export { assertRegionChoiceContract }
+export { assertRegionChoiceContract, assertSegmentationBoxChoiceContract }
 
 if (path.resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url))
   main().catch((error) => {
