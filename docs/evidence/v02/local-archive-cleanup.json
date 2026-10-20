@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "scope": "completed v0.1 local public-corpus raw runs; immutable gzip archives kept locally, never bundled into npm",
+  "profiles": [
+    {
+      "profile": "decisions-completion-v1",
+      "status": "archived-byte-verified-original-purged",
+      "members": 244,
+      "originalBytes": 83619116,
+      "archiveBytes": 63081235,
+      "archiveSha256": "ab01014181cf4a703eabdb01575ba90161d84ee379a5f374a9e2aa891ea7863b",
+      "manifestSha256": "9d5b7099c3dae65c1a6978a26f201ce2003707eecd78330f170ae2d959bc65e9",
+      "elapsedSeconds": 2.295099973678589,
+      "restoreCommand": "tar -xzf .run/archive/v01/decisions-completion-v1.tar.gz -C .run",
+      "scope": "completed v0.1 local public-corpus runs; no current v0.2 inputs altered"
+    },
+    {
+      "profile": "decisions-selection-v1",
+      "status": "archived-byte-verified-original-purged",
+      "members": 262,
+      "originalBytes": 197849519,
+      "archiveBytes": 149422000,
+      "archiveSha256": "96308f21b92a5c696c0e27b4aa17cbfe540c08d25a405c2bba006419487d5e40",
+      "manifestSha256": "689105bc49db8fb3fd0b747ec1e0d2db548a4de9b3ae9fdc3aac0a5835679d67",
+      "elapsedSeconds": 5.277841329574585,
+      "restoreCommand": "tar -xzf .run/archive/v01/decisions-selection-v1.tar.gz -C .run",
+      "scope": "completed v0.1 local public-corpus runs; no current v0.2 inputs altered"
+    },
+    {
+      "profile": "live-v1",
+      "status": "archived-byte-verified-original-purged",
+      "members": 1004,
+      "originalBytes": 1011651069,
+      "archiveBytes": 782516901,
+      "archiveSha256": "c823bc7e84a9db9a2d2bf16049ce446a510d75498867db157d27a5bd861a4e67",
+      "manifestSha256": "9b9b123695793519f5973602f07771b51643763e36862a563526013c8b4e9dfc",
+      "elapsedSeconds": 29.739623546600342,
+      "restoreCommand": "tar -xzf .run/archive/v01/live-v1.tar.gz -C .run",
+      "scope": "completed v0.1 local public-corpus runs; no current v0.2 inputs altered"
+    },
+    {
+      "profile": "vision-selection-v1",
+      "status": "archived-byte-verified-original-purged",
+      "members": 983,
+      "originalBytes": 533416739,
+      "archiveBytes": 402668243,
+      "archiveSha256": "dbbc78532076ea5c9d8b2c8e46867bee48807090aca1eb6b7940e803bde3bf2f",
+      "manifestSha256": "71a4974918b02265f7e650e9d59c1d1dc93aff79198c28fa8fa2575994417429",
+      "elapsedSeconds": 14.500654697418213,
+      "restoreCommand": "tar -xzf .run/archive/v01/vision-selection-v1.tar.gz -C .run",
+      "scope": "completed v0.1 local public-corpus runs; no current v0.2 inputs altered"
+    }
+  ],
+  "originalBytes": 1826536443,
+  "archiveBytes": 1397688379,
+  "savedBytes": 428848064,
+  "validation": "Every archive member was compared bytewise by SHA256 against unchanged source inventory before the original directory was atomically quarantined and purged. Per-member SHA256 manifests and restoration commands are kept beside archives.",
+  "concurrency": "Archival occurred during the new source resource run warmup; route-screen latency is unranked."
+}

@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "0c365cb13173e290365a5aa2a1aec122c42b0b4d",
+  "sourceChecks": {
+    "tests": 366,
+    "passed": 366,
+    "failed": 0,
+    "secrets": "passed",
+    "types": "passed",
+    "eslint": "passed",
+    "boundaries": "passed",
+    "deadCode": "passed",
+    "build": "passed",
+    "format": "passed",
+    "rawLogSha256": "f5f71851348ca35270e97874e959af0d9b7957acd497d08b438c57285291123f"
+  },
+  "archive": {
+    "archiveSha256": "095552d0613c2b2e25b9c412fc29658f96458d5091e34060644e802e320bd872",
+    "archiveBytes": 471776,
+    "runtimeDistFiles": 106,
+    "runtimeDistSha256": "87f6a18d46107ca08b37170db1e9204514dfc72a1dfc3181f59e8ffe76d85c95",
+    "files": 237,
+    "unpackedSize": 3520710,
+    "installedConsumer": "passed",
+    "declarations": "passed",
+    "optionalOnnxAbsent": true,
+    "proposalWholeObject": "passed-fixture",
+    "proposalExtract": "passed-fixture",
+    "providerHttpCalls": 0,
+    "rawLogSha256": "1663b91a5a56de9445d6fa629d846650fe67c4d3e55edd66cfef47174531e7d7"
+  },
+  "resourceSourcePin": {
+    "sourceFiles": 55,
+    "manifestSha256": "035755379bbf11c751ca626daa3d6dc84e006ea5041ed92a2a06c0c8750ce274",
+    "status": "two-hour run started; final outcome recorded separately"
+  },
+  "nativeWindows": {
+    "rawReportSha256": "28851eab1f12de7060c12d2c2ded703186bb68220ac7f72a212efc9d07ae1d34",
+    "report": "native-proposal-windows-0c365cb.json",
+    "status": "passed",
+    "checks": {
+      "importWithoutNativeChild": true,
+      "backendProbeSettled": true,
+      "locate": true,
+      "extract": true,
+      "cancellationAndPhysicalJoin": true,
+      "capacity": true,
+      "callerOwnedAdapter": true,
+      "dispose": true,
+      "fixtureDecisionOffline": true,
+      "childOwnership": true,
+      "cleanup": true,
+      "worker": true,
+      "tempCleanup": true
+    },
+    "fixtureProviderHttpCalls": 0,
+    "actualInstalledFileCount": 107,
+    "installedRuntimeAndPackageJsonSha256": "c886564a772d173fc8b1b9802dc6b42a9dc6261ad09fd7cef5942a8e00a14385",
+    "installedBytesMatchVerifiedArchiveAndSource": true,
+    "rawAcceptance": true
+  },
+  "ci": {
+    "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39428860025",
+    "status": "success",
+    "jobs": [
+      {
+        "name": "verify (ubuntu-latest, 24)",
+        "conclusion": "success"
+      },
+      {
+        "name": "verify (windows-latest, 22)",
+        "conclusion": "success"
+      },
+      {
+        "name": "verify (ubuntu-latest, 22)",
+        "conclusion": "success"
+      },
+      {
+        "name": "verify (windows-latest, 24)",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "limitations": [
+    "Development archive, not an npm publication receipt.",
+    "Offline fixture/native Windows acceptance establishes lifecycle and composition, not factual accuracy of live image localization.",
+    "The two-hour retention test and independent live quality qualification remain separate gates.",
+    "Runtime bytes are frozen for the resource run; benchmark/test/documentation updates do not claim to have been soaked."
+  ]
+}

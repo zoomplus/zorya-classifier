@@ -6,11 +6,11 @@ The raw producer run is `v02-fresh-native-mobile-sam-proposals-v1-2026-10-20T125
 
 All 40 planned cases were reported. Classification was correct on 35/40. Whole-object localization matched 1/30 positive cases (3.33%); there were 0/10 false locations on verified negatives. The complete localization denominator also includes 21 unknowns, 9 failed results, 7 not-found results, and 2 located-but-incorrect boxes. Six of 40 outcomes were correct when verified negative cases are included.
 
-| Stratum | Cases | Classification correct | Positive boxes matched | Localization outcomes |
-| --- | ---: | ---: | ---: | --- |
-| Photos | 20 | 17/20 | 1/16 (6.25%) | {"unknown":5,"failed":8,"not-found":5,"located":2} |
-| Controlled real UI | 10 | 8/10 | 0/7 | {"unknown":9,"failed":1} |
-| Controlled real map | 10 | 10/10 | 0/7 | {"located":1,"unknown":7,"not-found":2} |
+| Stratum             | Cases | Classification correct | Positive boxes matched | Localization outcomes                              |
+| ------------------- | ----: | ---------------------: | ---------------------: | -------------------------------------------------- |
+| Photos              |    20 |                  17/20 |           1/16 (6.25%) | {"unknown":5,"failed":8,"not-found":5,"located":2} |
+| Controlled real UI  |    10 |                   8/10 |                    0/7 | {"unknown":9,"failed":1}                           |
+| Controlled real map |    10 |                  10/10 |                    0/7 | {"located":1,"unknown":7,"not-found":2}            |
 
 The producer returned 21 unknown, 9 failed, 7 not-found, 3 extracted extraction outcomes; failures were 6 `PROVIDER`, 3 `TIMEOUT`. It made 172 physical calls against a 300-call cap. Known cost was $0.0779143; 9 unknown-cost calls reserved a total accounted exposure of $0.2579143 against the $5 cap. Reserved exposure is not an invoice. Latency ranking was marked eligible by the run policy, but these measurements do not change the quality conclusion.
 

@@ -1,0 +1,148 @@
+{
+  "rawReportSha256": "28851eab1f12de7060c12d2c2ded703186bb68220ac7f72a212efc9d07ae1d34",
+  "redactedFields": [".archive.path", ".assets.encoder.path", ".assets.decoder.path", ".tempRoot"],
+  "installedManifestNote": "installedDistFileCount includes package.json: 106 dist files plus package.json",
+  "report": {
+    "schemaVersion": 1,
+    "benchmark": "installed-archive-mobile-sam-proposal-windows-v1",
+    "backend": "mobile-sam-object-proposals",
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v24.19.0",
+    "osRelease": "10.0.26200",
+    "startedAt": "2026-10-20T13:16:35.867Z",
+    "executionProvider": "CPU",
+    "sourceCommitReference": "0c365cb13173e290365a5aa2a1aec122c42b0b4d",
+    "harnessSha256": "9e63a10b325160ef422e60122569685b9d02f8efb1070b773d3ed080d4fd5748",
+    "archive": {
+      "path": "[owned-local-path]",
+      "bytes": 471776,
+      "sha256": "095552d0613c2b2e25b9c412fc29658f96458d5091e34060644e802e320bd872"
+    },
+    "assets": {
+      "encoder": {
+        "path": "[owned-local-path]",
+        "bytes": 28157093,
+        "sha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749"
+      },
+      "decoder": {
+        "path": "[owned-local-path]",
+        "bytes": 16496559,
+        "sha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe"
+      }
+    },
+    "installedPackage": {
+      "name": "zorya-classifier",
+      "version": "0.2.0",
+      "onnxruntimeNodeVersion": "1.23.2",
+      "archiveSha256": "095552d0613c2b2e25b9c412fc29658f96458d5091e34060644e802e320bd872",
+      "segmentationRuntimeSha256": "e39c772dce27978c99e86682c442c1082686d05be8b8384ec0e0ad9564bf0e01",
+      "installedDistFileCount": 107,
+      "installedDistManifestSha256": "c886564a772d173fc8b1b9802dc6b42a9dc6261ad09fd7cef5942a8e00a14385",
+      "exportsSegmentation": true,
+      "declarations": {
+        "path": "dist/segmentation.d.ts",
+        "sha256": "a461fcc214d6d929b89776564a0c11c1c450b5e0bfb5d5709fe8a71dc0a5288e"
+      }
+    },
+    "checks": {
+      "importWithoutNativeChild": true,
+      "backendProbeSettled": true,
+      "locate": true,
+      "extract": true,
+      "cancellationAndPhysicalJoin": true,
+      "capacity": true,
+      "callerOwnedAdapter": true,
+      "dispose": true,
+      "fixtureDecisionOffline": true,
+      "childOwnership": true,
+      "cleanup": true,
+      "worker": true,
+      "tempCleanup": true
+    },
+    "located": {
+      "status": "located",
+      "durationMs": 5658,
+      "seedRegion": {
+        "left": 0,
+        "top": 0,
+        "width": 13,
+        "height": 13
+      },
+      "region": {
+        "left": 8,
+        "top": 8,
+        "width": 48,
+        "height": 48
+      },
+      "method": "pixel-mask-proposals-v1",
+      "proposalMetadata": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 2401.1438,
+        "input": {
+          "width": 256,
+          "height": 256
+        }
+      }
+    },
+    "extracted": {
+      "status": "extracted",
+      "durationMs": 2926,
+      "region": {
+        "left": 8,
+        "top": 8,
+        "width": 48,
+        "height": 48
+      },
+      "offset": {
+        "x": 8,
+        "y": 8
+      },
+      "pngBytes": 213,
+      "maskBytes": 2304,
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 2301.0203,
+        "input": {
+          "width": 256,
+          "height": 256
+        }
+      }
+    },
+    "lifecycle": {
+      "cancellationCode": "ABORTED",
+      "cancellationChildPid": 59916,
+      "cancellationPhysicalCloseConfirmed": true,
+      "queue": {
+        "submitted": 4,
+        "fulfilled": 3,
+        "capacityRejected": 1,
+        "otherFailures": 0
+      },
+      "callerOwnedAdapterAfterClassifierDispose": 36,
+      "afterAdapterDispose": "DISPOSED"
+    },
+    "childOwnership": {
+      "starts": 8,
+      "closes": 8,
+      "stillOwnedPids": []
+    },
+    "cleanupErrors": [],
+    "tempRoot": "[owned-local-path]",
+    "failure": null,
+    "npm": "11.17.0",
+    "fixtureDecision": {
+      "calls": 10,
+      "providerHttpCalls": 0,
+      "selectionUsesRenderedSyntheticForegroundPixels": true
+    },
+    "endedAt": "2026-10-20T13:17:03.116Z",
+    "acceptance": true,
+    "tempCleanup": "removed by coordinator after worker exit",
+    "workerStatus": 0,
+    "workerSignal": null,
+    "workerError": null
+  }
+}
