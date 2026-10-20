@@ -9,3 +9,11 @@ The array schema is the acquired corpus's strict `{caseId,image,locate,classify}
 Use `freshProducerTask(case)` to obtain only `{target,instruction?,question,classes}` for a model task. Keep `caseId`, paths, hashes, split and provenance in the controller's immutable run manifest. A case ID can reveal a positive/negative label; forwarding the whole controller case to a provider is forbidden. Evaluators read labels in a separate step after predictions have been frozen.
 
 The loader does not dispatch requests or qualify a method. Offline tests exercise byte/hash/dimension checks, cancellation, traversal and duplicate rejection, model-facing field separation, and symlink escape rejection (the latter is skipped on unprivileged Windows hosts, where creating the test symlink is not assumed).
+
+## Independent evaluation
+
+`evaluateFreshRun` in `evaluate-fresh.ts` is an evaluator-only module. Pass pinned `{path,sha256}` files for the producer summary, run manifest and separate truth arrays, plus the pinned producer corpus and a new output path. It requires the frozen `runId`, `profileId`, planned case IDs, completed/missing IDs and prediction/source hashes to agree. Outputs use exclusive creation and never overwrite earlier evidence.
+
+It joins normalized reference boxes to the matching source dimensions and applies both IoU≥0.5 and same-instance visible coverage≥0.9. Explicit, independently verified negative evidence is required. Unknowns, errors and missing cases remain in the planned denominator; missing predictions are separately labeled `not-attempted`, not invented provider calls. An incomplete corpus cannot qualify a method.
+
+`compareFreshPhotoLocalization(candidate,control)` uses only positive photograph cases, matching the primary `matched/positives` localization metric. It requires identical input and annotation snapshots, a complete pair and the same case IDs. Negatives remain in their separate false-location gate. The fixed 10,000-resample paired bootstrap reports its bounds; this helper does not choose or promote a winner.

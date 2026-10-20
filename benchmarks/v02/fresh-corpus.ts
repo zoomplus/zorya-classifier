@@ -62,12 +62,14 @@ function digest(bytes: Uint8Array): string {
 }
 
 /** One descriptor, bounded allocation, and detection of growth while reading. */
-async function readBoundedFile(
+export async function readBoundedCorpusFile(
   path: string,
   maximumBytes: number,
   signal: AbortSignal,
 ): Promise<Buffer> {
   assertActive(signal)
+  if (!Number.isSafeInteger(maximumBytes) || maximumBytes < 1 || maximumBytes > limits.imageBytes)
+    throw new RangeError('Invalid corpus file byte budget')
   const handle = await open(path, 'r')
   let bytes: Buffer | undefined
   try {
@@ -120,7 +122,7 @@ export async function loadFreshCorpus(
   const manifests: FreshCorpus['manifests'] = []
   const ids = new Set<string>()
   for (const manifest of options.manifests) {
-    const bytes = await readBoundedFile(manifest.path, 1024 * 1024, signal)
+    const bytes = await readBoundedCorpusFile(manifest.path, 1024 * 1024, signal)
     try {
       if (digest(bytes) !== manifest.sha256)
         throw new ClassifierError('INVALID_INPUT', 'Producer manifest hash mismatch')
@@ -170,7 +172,7 @@ export async function loadFreshImage(
   const path = await realpath(resolve(root, item.image.path))
   assertActive(signal)
   assertWithin(root, path)
-  const bytes = await readBoundedFile(path, limits.imageBytes, signal)
+  const bytes = await readBoundedCorpusFile(path, limits.imageBytes, signal)
   const pipeline = sharp(bytes, { limitInputPixels: limits.imagePixels, failOn: 'error' })
   try {
     if (digest(bytes) !== item.image.sha256)
