@@ -351,6 +351,66 @@ await test('normalizes raw physical call counts and preserves unknown/failed sta
     assert.equal(normalized.proposalExtractions[2]!.mask?.sourceOffset.x, 12)
     assert.equal(normalized.rawProposalProvenance.physicalCalls, 1)
     assert.equal(normalized.rawProposalProvenance.logicalCalls, 1)
+    assert.deepEqual(freshProposalPhasePins.dev.budget, {
+      maxPhysicalCalls: 300,
+      maxCostUsd: 5,
+      latencyRankingEligible: true,
+    })
+  } finally {
+    await rm(fixture.directory, { recursive: true, force: true })
+  }
+})
+
+await test('DEV normalization rejects mismatched policy and actual spend limits', async () => {
+  const fixture = await setup()
+  const normalize = (summary: unknown, run: unknown = fixture.runManifest) =>
+    normalizeFreshProposalOutput(summary, run, fixture.cases, fixture.corpus.manifests, {
+      summarySha256: '7'.repeat(64),
+      runManifestSha256: '8'.repeat(64),
+    })
+  try {
+    const wrongCalls = structuredClone(fixture.runManifest)
+    wrongCalls.policy.maxPhysicalCalls = 301
+    assert.throws(() => normalize(fixture.summary, wrongCalls), /budget or latency-ranking/u)
+
+    const wrongCost = structuredClone(fixture.runManifest)
+    wrongCost.policy.maxCostUsd = 6
+    assert.throws(() => normalize(fixture.summary, wrongCost), /budget or latency-ranking/u)
+
+    const wrongLatency = structuredClone(fixture.summary)
+    wrongLatency.latencyRankingEligible = false
+    assert.throws(() => normalize(wrongLatency), /budget or latency-ranking/u)
+
+    const overBudget = structuredClone(fixture.summary)
+    overBudget.aggregate.accountedExposureUsd = 5.01
+    assert.throws(() => normalize(overBudget), /exceeded its frozen phase budget/u)
+
+    const overCalls = structuredClone(fixture.summary)
+    const overReceipts: typeof fixture.summary.physicalReceipts = []
+    overCalls.physicalReceipts = overReceipts
+    overCalls.results.forEach((row) => {
+      row.classify.physicalCalls = 0
+      row.classify.logicalCalls = 0
+      row.classify.requestHashes = []
+      row.locate.physicalCalls = 0
+      row.locate.logicalCalls = 0
+      row.locate.requestHashes = []
+    })
+    for (let index = 0; index < 301; index++) {
+      const requestHash = index.toString(16).padStart(64, '0')
+      const row = overCalls.results[index % overCalls.results.length]!
+      row.classify.physicalCalls++
+      row.classify.logicalCalls++
+      row.classify.requestHashes = [...row.classify.requestHashes, requestHash]
+      overReceipts.push({
+        ...fixture.summary.physicalReceipts[0]!,
+        physicalId: index + 1,
+        logicalId: index + 1,
+        requestSha256: requestHash,
+      })
+    }
+    overCalls.aggregate.admittedPhysicalCalls = 301
+    assert.throws(() => normalize(overCalls), /exceeded its frozen phase budget/u)
   } finally {
     await rm(fixture.directory, { recursive: true, force: true })
   }
@@ -455,6 +515,7 @@ await test('heldout pairing reports all 40 photos and bootstraps the 30 positive
   const heldoutPins = freshProposalPhasePins.heldout.manifests
   const photoRows = Array.from({ length: 40 }, (_, index) => ({
     caseId: `photo-heldout-${String(index).padStart(2, '0')}`,
+    imageSha256: `${'a'.repeat(63)}${index.toString(16)}`,
     expectedPresence: index < 30 ? ('present' as const) : ('absent' as const),
     sourceStatus: index === 30 ? 'located' : 'not-found',
     classificationCorrect: true,
@@ -471,7 +532,11 @@ await test('heldout pairing reports all 40 photos and bootstraps the 30 positive
     rows: [
       ...photoRows,
       ...Array.from({ length: 40 }, (_, index) => ({
-        ...photoRows[index % photoRows.length]!,
+        imageSha256: 'b'.repeat(64),
+        expectedPresence: index < 10 ? ('absent' as const) : ('present' as const),
+        sourceStatus: index === 0 ? ('located' as const) : ('not-found' as const),
+        classificationCorrect: true,
+        localizationCorrect: true,
         caseId: `other-heldout-${String(index).padStart(2, '0')}`,
       })),
     ],
@@ -490,9 +555,25 @@ await test('heldout pairing reports all 40 photos and bootstraps the 30 positive
   assert.equal(paired.positivePairs, 30)
   assert.equal(paired.negativeCases, 10)
   assert.equal(paired.allGroupsNegativeCases, 20)
+  assert.equal(paired.candidateFalseLocationsAllGroupsCount, 2)
+  assert.equal(paired.maximumAllowedFalseLocationsAllGroups, 1)
+  assert.equal(paired.allGroupsNegativeGatePasses, false)
   assert.equal(paired.candidateFalseLocations.length, 1)
   assert.equal(paired.bootstrap.iterations, 10_000)
   assert.equal(paired.bootstrap.seed, '0x5a4f5259')
+
+  const withOneAllGroupsFalseLocation = structuredClone(candidate)
+  withOneAllGroupsFalseLocation.rows[40]!.sourceStatus = 'not-found'
+  const oneFalse = compareHeldoutPhotoLocalization(withOneAllGroupsFalseLocation, control)
+  assert.equal(oneFalse.candidateFalseLocationsAllGroupsCount, 1)
+  assert.equal(oneFalse.allGroupsNegativeGatePasses, true)
+
+  const wrongControlImage = structuredClone(control)
+  wrongControlImage.rows[0]!.imageSha256 = 'c'.repeat(64)
+  assert.throws(
+    () => compareHeldoutPhotoLocalization(candidate, wrongControlImage),
+    /photo image hash mismatch/u,
+  )
 })
 
 await test('incomplete raw output retains missing cases and rejects inconsistent coverage', async () => {
@@ -622,6 +703,7 @@ await test('adapter writes exclusive derived artifacts and invokes the strict in
     )
     assert.equal(result.complete, true)
     assert.equal(result.coverage.reported, 40)
+    assert.equal(result.rows[2]!.imageSha256, fixture.cases[2]!.image.sha256)
     assert.equal(result.provenance.rawSummarySha256, rawSummary.sha256)
     assert.equal(result.provenance.runManifestSha256, runManifest.sha256)
     assert.equal(result.provenance.physicalCalls, 1)

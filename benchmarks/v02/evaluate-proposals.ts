@@ -38,7 +38,7 @@ export const freshProposalPhasePins = Object.freeze({
     totalCases: 40,
     purpose: 'full fresh DEV photo, independent UI and independent map producer pass',
     manifests: freshProposalInputPins,
-    budget: { maxPhysicalCalls: 300, maxCostUsd: 5, latencyRankingEligible: false },
+    budget: { maxPhysicalCalls: 300, maxCostUsd: 5, latencyRankingEligible: true },
   },
   heldout: {
     totalCases: 80,
@@ -536,15 +536,14 @@ export function normalizeFreshProposalOutput(
   if (summary.variantSha256 !== run.variantSha256)
     throw new Error('Fresh proposal variant digest mismatch')
   if (
-    phase === 'heldout' &&
-    (run.policy.maxPhysicalCalls !== phaseConfig.budget.maxPhysicalCalls ||
-      run.policy.maxCostUsd !== phaseConfig.budget.maxCostUsd ||
-      run.policy.latencyRankingEligible ||
-      summary.aggregate.maxPhysicalCalls !== phaseConfig.budget.maxPhysicalCalls ||
-      summary.aggregate.maxCostUsd !== phaseConfig.budget.maxCostUsd ||
-      summary.latencyRankingEligible)
+    run.policy.maxPhysicalCalls !== phaseConfig.budget.maxPhysicalCalls ||
+    run.policy.maxCostUsd !== phaseConfig.budget.maxCostUsd ||
+    run.policy.latencyRankingEligible !== phaseConfig.budget.latencyRankingEligible ||
+    summary.aggregate.maxPhysicalCalls !== phaseConfig.budget.maxPhysicalCalls ||
+    summary.aggregate.maxCostUsd !== phaseConfig.budget.maxCostUsd ||
+    summary.latencyRankingEligible !== phaseConfig.budget.latencyRankingEligible
   )
-    throw new Error('Heldout budget or latency-ranking policy mismatch')
+    throw new Error('Fresh proposal budget or latency-ranking policy mismatch')
   if (
     !/^[a-f0-9]{64}$/u.test(rawHashes.summarySha256) ||
     !/^[a-f0-9]{64}$/u.test(rawHashes.runManifestSha256)
@@ -602,6 +601,11 @@ export function normalizeFreshProposalOutput(
       summary.physicalReceipts.length
   )
     throw new Error('Fresh proposal physical-call accounting does not close')
+  if (
+    summary.aggregate.admittedPhysicalCalls > phaseConfig.budget.maxPhysicalCalls ||
+    summary.aggregate.accountedExposureUsd > phaseConfig.budget.maxCostUsd
+  )
+    throw new Error('Fresh proposal run exceeded its frozen phase budget')
   const stageRequestHashes = summary.results.flatMap((row) => [
     ...row.classify.requestHashes,
     ...row.locate.requestHashes,
@@ -990,7 +994,12 @@ export function compareHeldoutPhotoLocalization(
     throw new Error('Candidate and no-image control do not share the frozen heldout photo truth')
   const candidatePhotos = candidate.rows.slice(0, 40)
   const controlPhotos = control.rows
-  if (candidatePhotos.length !== 40 || controlPhotos.length !== 40)
+  if (
+    candidate.rows.length !== 80 ||
+    control.rows.length !== 40 ||
+    candidatePhotos.length !== 40 ||
+    controlPhotos.length !== 40
+  )
     throw new Error('Heldout photo group does not contain exactly 40 paired cases')
   sameIds(
     candidatePhotos.map((item) => item.caseId),
@@ -999,8 +1008,11 @@ export function compareHeldoutPhotoLocalization(
   )
   const controlsById = new Map(controlPhotos.map((item) => [item.caseId, item]))
   for (const item of candidatePhotos) {
-    if (item.expectedPresence !== controlsById.get(item.caseId)!.expectedPresence)
+    const control = controlsById.get(item.caseId)!
+    if (item.expectedPresence !== control.expectedPresence)
       throw new Error('Candidate/control photo truth presence mismatch')
+    if (item.imageSha256 !== control.imageSha256)
+      throw new Error('Candidate/control photo image hash mismatch')
   }
   const positiveCandidate = candidatePhotos.filter((item) => item.expectedPresence === 'present')
   if (positiveCandidate.length !== 30 || candidatePhotos.length - positiveCandidate.length !== 10)
@@ -1024,6 +1036,7 @@ export function compareHeldoutPhotoLocalization(
   const candidateFalseLocationsAllGroups = allCandidateNegatives
     .filter((item) => item.sourceStatus === 'located')
     .map((item) => item.caseId)
+  const maximumAllowedFalseLocationsAllGroups = 1
   return {
     photoCases: 40,
     positivePairs: bootstrap.pairs,
@@ -1032,6 +1045,10 @@ export function compareHeldoutPhotoLocalization(
     controlFalseLocations,
     allGroupsNegativeCases: allCandidateNegatives.length,
     candidateFalseLocationsAllGroups,
+    candidateFalseLocationsAllGroupsCount: candidateFalseLocationsAllGroups.length,
+    maximumAllowedFalseLocationsAllGroups,
+    allGroupsNegativeGatePasses:
+      candidateFalseLocationsAllGroups.length <= maximumAllowedFalseLocationsAllGroups,
     bootstrap,
     denominator: 'positive heldout photo cases only; negative photo behavior reported separately',
   }
