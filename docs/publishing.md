@@ -20,3 +20,11 @@ For later CI releases, configure [npm trusted publishing](https://docs.npmjs.com
 6. Verify the published version and `latest` dist-tag with the registry. Add the matching version tag and GitHub release notes. Keep the package's `repository`, `homepage` and `bugs` links correct, link npm prominently from GitHub, and update npm keywords plus GitHub Topics for the capabilities actually shipped. Examples include classification, object localization, whole-object bounding boxes, optional segmentation/cutouts, TypeScript and provider-independent model integration. Do not advertise an unqualified text-image research profile as supported.
 
 Both GitHub and npm publication are authorized for this project. A local archive remains useful for pre-release installation, but does not complete the requested release.
+
+## 0.2 release evidence
+
+Use the original-region/full-source-segmentation workflow in the current usage guide. Older interval/proposal experiments and their failed reports remain historical evidence; do not relabel them as measurements of the new flow. Record region hits separately from mask-derived object boxes and pixel-mask quality. The image-free control produces regions only.
+
+Before release, match every runtime file in the final archive to the bytes covered by native/resource acceptance, and require green Windows/Linux × Node 22/24 CI for the release source. A later documentation-only archive can have a different package SHA while retaining the tested runtime; record both complete archive hashes and the explicit runtime-file parity proof. Keep a final independently installed consumer check for the actual release archive.
+
+Keep the final release manifest outside its own archives to avoid self-reference. It records the clean source commit, archive hashes/integrities, model recipe and corpus seals, preserved failures, native/resource receipts, CI run and redacted secret scan. Publish those exact archive bytes, verify the registry response and dist-tag, then attach the matching source and npm artifact to the GitHub release. Do not replace failed accuracy or resource gates with an offline test count.

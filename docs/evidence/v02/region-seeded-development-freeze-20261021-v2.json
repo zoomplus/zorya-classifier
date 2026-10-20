@@ -1,0 +1,186 @@
+{
+  "schema": "region-seeded-development-freeze-v2",
+  "createdAt": "2026-10-20T22:16:47.824Z",
+  "sourceCommit": "92ee707",
+  "producerSourceSha256": "99beadec729003691c6861166b4738db2cc1ee92699040c98254468b24c998e9",
+  "sourceFiles": {
+    "./region-seeded-runner.ts": "180f8393eb05fab6495582b3cbdf83dd9b5deabeb44161a0e72d920c5fecd2c5",
+    "./run-region-seeded-dev.ts": "985784c711d376a5a435b8fb715304321b601e46ef2fad78e65da2e8cd2b040a",
+    "./fresh-corpus.ts": "7f1bcb21a2d933f1ad01d77b2188c9531987c557b3c0d474428ce512b9127779",
+    "./recording.ts": "3543f1e05cdaa1860f754fcd64362cd75a0cd18f4293fa8e9a7269bc43db3496",
+    "./budget.ts": "c1b1b84125bc8dc7890b353cb71ad2cc5332715766a76f0e6131208bd1826218",
+    "./protocol.ts": "2cd0a66e3f27b60484924bc97d7d9a5ade012f7df3d6e8436bf3739b347bd957",
+    "./native-categorical-presence-port.ts": "0bf4fa6a16c52083f1a97a696eeead26a6710d82bbacb27af4380ae01143eb3a",
+    "./categorical-presence-port.ts": "0d85dcb5acb12d10c4fab888f7a0b81e16c594c940886794fecc2b9367c26512",
+    "./region-seeded-runner.md": "30dd118b6c2bb90c6d44e114e1f0eef8f69f1863bf1769547dce606142f5834a",
+    "../../package.json": "11d19ae22e106be1ae2cb2c5e1c08a7359d9f89c2ca943846b29d415c45a69bd",
+    "../../package-lock.json": "61543b204b5fe38a94b32f4528e4d1e32b0061a304beab6e5ee5f19887868baf",
+    "src/app/cli-arguments.ts": "cc072ada300d459ca070dce6312e0205afb1125888a4be7373c9c6a50a5498a4",
+    "src/app/cli-route.ts": "769b0f2e8fa6d1fabbf2e7bd000fec724c1b94a3c6233eea7b93d55503052aad",
+    "src/app/create-classifier.ts": "34cfc29e3fab4cca66b5fc446daae978612900a97248e04edf0506f40aabe1c9",
+    "src/app/extraction-files.ts": "e86d9ef07eda5537572398a2d4d0a9fb41a8f3dff447279f6a55b6b1f9136c69",
+    "src/cli.ts": "887dbf2a987f1241e2f1e1a659321ea87a5148a03956438678969923579206eb",
+    "src/entities/boundary-view.ts": "187ae80d2952cc2452752f06bbb1eeba200c715c12f8dd9ada4fd29156141655",
+    "src/entities/contracts.ts": "7710dad19cd6caa1d10516babb2f9d9f108af1c7040302f09bf53b9b478187cd",
+    "src/entities/cutout-raster.ts": "51fc476ced53f451f82eb9a2881c124d751b9d1b071c32d4b82cbd2d0edfbe45",
+    "src/entities/errors.ts": "1c92c94c9ed6917953ac5192bfd2d8896cdb6fe13b7d05593573b7f2103330b0",
+    "src/entities/object-proposals.ts": "112e182eedc46a402f9f94b776494c2afad8194dc692ed045a2d286d15775434",
+    "src/entities/representation.ts": "67cfafea702e28b25bc472b4d961914102628db24679b6099d31c4d32ebf5088",
+    "src/entities/segmentation-metadata.ts": "b8cc02740523e90d1b9493c6d9d8c6a33f963e6b08b5b1c8636e3fed3aa8b270",
+    "src/entities/segmentation.ts": "007e4cb5edfb745492b692e18853a451de8815521fbf09a51cb5b458fbd857e3",
+    "src/entities/whole-object.ts": "a7e12ab3303801257f914dab7c22137bc858ac21b778caf029c8aebb98756e2d",
+    "src/features/choice-beam-layout.ts": "8f61d6f784e0e6273467cea01315f17bbfa4fffa695dd7a7bb9cd5cac5354e1a",
+    "src/features/choice.ts": "ff972121520a339b82895914242bf40f7b8dcd198b4305fd57e51b204b13952d",
+    "src/features/prompts.ts": "b808ed8f42e8c92daf08060d2805da618f2b140f99b6a9b07df49622d57b62aa",
+    "src/features/segmentation/mask.ts": "5d13115284bb6474e2312409d4464891eb4cf55174a9da6a92fe89d62aececc9",
+    "src/features/segmentation/packed-mask.ts": "38dc9a7d15f07e9e11c31598df3e1c8369330f6e46722f04fe3e35fc216ef523",
+    "src/features/uniform-grid.ts": "8cee38aee52ba2c4ac2eaed909d5f53cc0e5aa2c04fe87585c66b29573e21c4d",
+    "src/index.ts": "77e5a8b85bf6aa549b700e113c77ab6032f52a8611161b2c1ee62f35644aabb1",
+    "src/infrastructure/boundary-view.ts": "2fb5546ae4a47a2a08f13ccad74c5a9cc7b9736ff052738637bfd65f1acd7775",
+    "src/infrastructure/openrouter-common.ts": "415462c42da7a3748c6bfe942ee99085fba71bc1f4158d369edda8269efeb124",
+    "src/infrastructure/openrouter-vision.ts": "b72e4699e132c1ac598772c49287edb0b5ca355ad2af33481f9c741ddcb13eaa",
+    "src/infrastructure/openrouter.ts": "486a919853949e6789dd4035b7699fd89b9682cb3e928632c77b216656f44c55",
+    "src/infrastructure/raster.ts": "615626e6fe04e377712ec7a3e3d8f2ea5e35ec17c2fd3982ea9df940ce5303dd",
+    "src/infrastructure/segmentation/cutout-raster.ts": "f0ff7e1dd8b6670bb6320813ed4a0bb17d8054b766fc016bcedb17d097eafbfe",
+    "src/infrastructure/segmentation/grabcut/index.ts": "87e6ce49bc9dcfb085fc3e4ba9abc7d13effd3e45976a307a1de0b950766482a",
+    "src/infrastructure/segmentation/grabcut/worker-inference.ts": "b34d9ec1c23145f7c380a71634ea2d53c191e13a35c6765dbf8d2e381a31db29",
+    "src/infrastructure/segmentation/index.ts": "91f683e7b4cd73c79534c141858a50d376c606f15845dc48340a4462f83deed4",
+    "src/infrastructure/segmentation/mobile-sam/index.ts": "6bb3fe761e002f01949af84c5d64f099be541814e66993fad11d118b451afa6e",
+    "src/infrastructure/segmentation/mobile-sam/worker-inference.ts": "03be2fd4f4885dd783297e9b45f0a3e2e42aa7b7f90b77c9116c2fe1fb5770ea",
+    "src/infrastructure/segmentation/native-child.ts": "94f0ccea6aec1d93a93256553cae92c3f19220f1ffbd3ac14060c2daa8ee2f83",
+    "src/infrastructure/segmentation/native-protocol.ts": "182137db8c47dbd56d1484d438f7bba7fe6328551426f4c02b3986383a566ac8",
+    "src/infrastructure/segmentation/native-worker.ts": "aad23684157420f81a863b4b1484b86cec72c83c802cab01f2732c59a9912bb7",
+    "src/infrastructure/segmentation/probe-backend.ts": "32cfee334bd014b16134f7efae5cbb9ca1953e5b578fd466105e869ce73a66ff",
+    "src/infrastructure/segmentation/proposal-presentation.ts": "7bc50776ff1ae52496923014ae621e030dcde45c47e9216277f6617faa8de707",
+    "src/infrastructure/segmentation/verify-asset.ts": "2a8479dabf84622003a5eb01f3c1a116347e808108e8a0c8971129b18e1c5ef1",
+    "src/infrastructure/text-representation.ts": "7f392f1bcdb77969eaccf40be4b6d5c8a4a11a8b3708dda9b91ff1d8584c2061",
+    "src/infrastructure/vision-chat.ts": "314e2c236a75ad43023c6ae34544a849df027f025eda32abdc2a7e1d49c742f3",
+    "src/openai-compatible.ts": "5461c54dbf3a691b3391834511d06baaf511b07487849f3d823b357fed9d8513",
+    "src/openrouter.ts": "8b28a235bacec5ad7c00ab0ac72fcabdc58658dd72971a5935f2a1572f572bf9",
+    "src/processes/boundary-state.ts": "77c636e2a2311ed989e514ee78adef66f80230d5eee394549917c9ff13fc99d7",
+    "src/processes/classify.ts": "0edf3e8a05333c2325f53ddd06c1c903d3daca80ca082ba2e3609ff9de6ffb9d",
+    "src/processes/extract-from-region.ts": "cef5f70e2e30e8e679d7baecfeca7fa6371a414bfdb03ea62ddb122d2df0d404",
+    "src/processes/extract.ts": "9e1b2b3a4b36cc938d081f2a2e1deadd26576fcacccf17218c9364adbd749d8b",
+    "src/processes/locate.ts": "a5a1320c2dff4060a3c5ab5e32cb5f0af2d94fcad458caba3818b6a0a28dab3d",
+    "src/processes/proposal-location.ts": "a037c63a92db2df54ccd573af6cfa7926dcda869398ce7be9770219aa33f849e",
+    "src/processes/whole-object.ts": "548a0de8ee72956da3162023f43983d7596a2df9ec2756e33c952ca27b3fc320",
+    "src/segmentation.ts": "5ca90e5f6cc1a688667d1ee3bf041654404a80129fab93677106fa55dea2b253",
+    "src/shared/choice-mass.ts": "7f645998d9cd2688ca425b4765ec0bf7d125e932f085f9e84599b4c3b97743a3",
+    "src/shared/gate.ts": "97e4e32749dc9d3a9def6faaea2566b5d0ed831ba4451999740c719fafa8e576",
+    "src/shared/input-budget.ts": "f47f084681d0a559b2154ce731d1897d9dde0c293a5d52c885236b9eb459e050",
+    "src/shared/scope.ts": "cc557e9fd83a838f5366c64d026859db119491d927dfb3a84ef4320b2f0b0beb"
+  },
+  "profiles": [
+    {
+      "id": "native-luna-presence-first-region-seeded-sam-dev-v2",
+      "phase": "dev",
+      "targetPolicy": "target-plus-neutral-instruction-v1",
+      "purpose": "full original exposed DEV pass with existing closed classification gating region search"
+    },
+    {
+      "id": "native-luna-presence-first-region-no-image-control-dev-v2",
+      "phase": "dev",
+      "purpose": "paired original exposed DEV no-image control with the same classification gate"
+    }
+  ],
+  "recipe": {
+    "model": "openai/gpt-6-luna-decisions",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "apiEndpoint": "/api/alpha/decisions",
+    "allowFallbacks": false,
+    "native": "MobileSAM CPU segmentation, seed-region prompt on full oriented source image",
+    "timeoutMs": 120000,
+    "maxInFlightCases": 2,
+    "nativeMaxActive": 1,
+    "nativeMaxWaiting": 2,
+    "nativeThreads": 2,
+    "regionSearchPasses": 3,
+    "extentCalls": 0,
+    "sameInstanceCalls": 0,
+    "maxLogicalCallsPerCase": 4,
+    "maxPhysicalCallsPerCase": 4,
+    "maxPhysicalCalls": 250,
+    "maxCostUsd": 5,
+    "unknownCostReserveUsd": 0.05,
+    "retries": 0,
+    "fallback": false,
+    "latencyRankingEligible": false,
+    "requireClassifiedPresence": true
+  },
+  "nativeAssets": {
+    "method": "mobile-sam-seed-point-v1",
+    "executionProvider": "cpu",
+    "encoder": {
+      "bytes": 28157093,
+      "sha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749"
+    },
+    "decoder": {
+      "bytes": 16496559,
+      "sha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe"
+    }
+  },
+  "inputs": [
+    {
+      "path": "benchmarks/v02/corpus/dev/inputs.json",
+      "sha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a",
+      "cases": 20
+    },
+    {
+      "path": "benchmarks/v02/corpus/dev-independent-ui/inputs.json",
+      "sha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc",
+      "cases": 10
+    },
+    {
+      "path": "benchmarks/v02/corpus/dev-independent-map/inputs.json",
+      "sha256": "b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15",
+      "cases": 10
+    }
+  ],
+  "sourceState": "Immutable caller composition before first v2 dispatch. Full exposed DEV40 rerun; no new heldout pixels or truth opened.",
+  "perProfileBudget": {
+    "maxPhysicalCalls": 250,
+    "maxCostUsd": 5,
+    "unknownCostReserveUsd": 0.05
+  },
+  "metrics": {
+    "region": "Any visible target fragment in the selected seed. Report source-box overlap as a coarse proxy, and actual foreground intersection where exact source-sized independent masks exist. Never require an object-center hit.",
+    "objectBox": "Only actual segmented-mask bounds: IoU >= 0.5 AND reference coverage >= 0.9 for the same independent instance.",
+    "mask": "Pixel IoU >= 0.8 per independent exact-canvas reference; no canvas fitting. Missing predictions, unsupported canvases and failures remain explicit.",
+    "control": "Same explicit Luna/OpenAI tasks and text/geometry, with all image parts removed and verified at actual fetch. No native segmentation/OCR/semantic image processing. Ordinary raster presentation may execute but its image parts are discarded. Emits seed regions only, never object boxes.",
+    "paired": "Paired candidate/control seed-region outcomes, never candidate cutout versus an invented control box. Frozen bootstrap on the photo stratum for blind qualification."
+  },
+  "developmentAdmission": {
+    "completeCases": 40,
+    "positives": 30,
+    "verifiedNegatives": 10,
+    "maxFalseSeedLocations": 0,
+    "maxFalseExtractions": 0,
+    "atLeastOnePositiveSeedHit": true,
+    "atLeastOneMaskDerivedBoxMatch": true,
+    "atLeastOneMaskReferenceAtIoU08": true
+  },
+  "latencyRankingEligible": false,
+  "providerRetries": 0,
+  "fallback": false,
+  "libraryConnectsModels": false,
+  "releaseQualified": false,
+  "presenceFirst": {
+    "owner": "caller/benchmark composition; no change to public extract or locate",
+    "rule": "Reuse the existing successful closed classification. Only present permits the unchanged original three-Choice locator followed by one full-source segmenter. Absent or failed classification skips localization with zero localization calls and preserves its reason.",
+    "additionalModelCalls": 0,
+    "libraryModelDefault": false
+  },
+  "preservedFailure": "region-seeded-dev-v1/README.md",
+  "heldoutProfilesPreparedButNotAuthorized": [
+    {
+      "id": "native-luna-presence-first-region-seeded-sam-heldout-v2",
+      "phase": "heldout",
+      "targetPolicy": "target-plus-neutral-instruction-v1"
+    },
+    {
+      "id": "native-luna-presence-first-region-no-image-control-heldout-v2",
+      "phase": "heldout"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "hosted-ci-receipt-v1",
+  "sourceCommit": "c5eddd8c3c0227cca9617db6da8dfdf36ede3156",
+  "runId": 39504057327,
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39504057327",
+  "status": "completed",
+  "conclusion": "success",
+  "rawSha256": "97d00ec82e60f502f6cdeb7de07569c0fda6163c46d1eb755d79815b40c08221",
+  "jobs": [
+    {
+      "name": "verify (windows-latest, 24)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (ubuntu-latest, 24)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (windows-latest, 22)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (ubuntu-latest, 22)",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "scope": "Source/offline/installed-consumer/format checks; no paid model, native-asset inference or real game evidence."
+}
