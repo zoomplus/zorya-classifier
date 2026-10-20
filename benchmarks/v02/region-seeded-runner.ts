@@ -44,6 +44,15 @@ export const regionPresenceFirstNoImageProfile = Object.freeze({
   phase: 'dev',
   purpose: 'paired original exposed DEV no-image control with the same classification gate',
 })
+export const regionPresenceFirstHeldoutProfile = Object.freeze({
+  id: 'native-luna-presence-first-region-seeded-sam-heldout-v2',
+  phase: 'heldout',
+  targetPolicy: 'target-plus-neutral-instruction-v1',
+})
+export const regionPresenceFirstNoImageHeldoutProfile = Object.freeze({
+  id: 'native-luna-presence-first-region-no-image-control-heldout-v2',
+  phase: 'heldout',
+})
 export const regionSeededHeldoutProfile = Object.freeze({
   id: 'native-luna-region-seeded-sam-heldout-v1',
   phase: 'heldout',
@@ -99,6 +108,7 @@ const heldoutAuthorizationSchema = z
     profileId: z.string().min(1).max(128),
     phase: z.literal('heldout'),
     variant: z.enum(['region-seeded-sam', 'no-image-control']),
+    requireClassifiedPresence: z.literal(true).optional(),
     producerSourceSha256: z.string().regex(/^[a-f0-9]{64}$/u),
     manifests: z
       .array(
@@ -812,12 +822,14 @@ function skippedExtraction(
 
 export async function runRegionSeededProfile(options: RegionSeededRunnerOptions) {
   const requireClassifiedPresence = options.requireClassifiedPresence === true
-  if (requireClassifiedPresence && options.phase !== 'dev')
-    throw new TypeError('Presence-first gating is a separate DEV-only recipe')
   const expectedProfile = requireClassifiedPresence
     ? options.variant === 'region-seeded-sam'
-      ? regionPresenceFirstProfile.id
-      : regionPresenceFirstNoImageProfile.id
+      ? options.phase === 'dev'
+        ? regionPresenceFirstProfile.id
+        : regionPresenceFirstHeldoutProfile.id
+      : options.phase === 'dev'
+        ? regionPresenceFirstNoImageProfile.id
+        : regionPresenceFirstNoImageHeldoutProfile.id
     : options.variant === 'region-seeded-sam'
       ? options.phase === 'dev'
         ? regionSeededProfile.id
@@ -851,6 +863,7 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     authorization &&
     (authorization.profileId !== options.profileId ||
       authorization.variant !== options.variant ||
+      (authorization.requireClassifiedPresence === true) !== requireClassifiedPresence ||
       authorization.maxPhysicalCalls !== options.maxPhysicalCalls ||
       authorization.maxCostUsd !== options.maxCostUsd ||
       authorization.unknownCostReserveUsd !== options.unknownCostReserveUsd)
@@ -970,7 +983,14 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     variant: options.variant,
     ...(requireClassifiedPresence ? { requireClassifiedPresence: true as const } : {}),
     route,
-    policy: regionSeededRecipe,
+    policy: requireClassifiedPresence
+      ? {
+          ...regionSeededRecipe,
+          maxPhysicalCalls: options.maxPhysicalCalls,
+          maxCostUsd: options.maxCostUsd,
+          requireClassifiedPresence: true as const,
+        }
+      : regionSeededRecipe,
     promptPolicy,
     manifests: corpus.manifests,
     taskHashes,
@@ -990,7 +1010,9 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
           : options.variant === 'region-seeded-sam'
             ? regionSeededProfile.purpose
             : regionSeededNoImageProfile.purpose
-        : 'frozen heldout photo, independent UI and independent map pass',
+        : requireClassifiedPresence
+          ? 'frozen heldout photo, independent UI and independent map pass with existing classification gate'
+          : 'frozen heldout photo, independent UI and independent map pass',
     targetPolicy: regionSeededProfile.targetPolicy,
     producerSourceSha256: sourceBeforeSha256,
     producerSourceFiles: before,
@@ -1003,7 +1025,12 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     route,
     variant: options.variant,
     policy: requireClassifiedPresence
-      ? { ...regionSeededRecipe, requireClassifiedPresence: true }
+      ? {
+          ...regionSeededRecipe,
+          maxPhysicalCalls: options.maxPhysicalCalls,
+          maxCostUsd: options.maxCostUsd,
+          requireClassifiedPresence: true,
+        }
       : regionSeededRecipe,
     ...(verifiedAssetManifest
       ? { nativeAssets: verifiedAssetManifest }

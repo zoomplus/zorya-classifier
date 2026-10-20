@@ -16,6 +16,8 @@ import {
   regionSeededProducerSourceManifest,
   regionPresenceFirstNoImageProfile,
   regionPresenceFirstProfile,
+  regionPresenceFirstHeldoutProfile,
+  regionPresenceFirstNoImageHeldoutProfile,
   runRegionSeededProfile,
 } from './region-seeded-runner.js'
 
@@ -59,12 +61,14 @@ export function parseRegionSeededArgs(args: readonly string[]) {
   const phase = z.enum(['dev', 'heldout']).parse(values.phase)
   const variant = z.enum(['region-seeded-sam', 'no-image-control']).parse(values.variant)
   const requireClassifiedPresence = values['presence-first']
-  if (requireClassifiedPresence && phase !== 'dev')
-    throw new TypeError('Presence-first is a separate DEV-only profile')
   const expectedProfile = requireClassifiedPresence
     ? variant === 'region-seeded-sam'
-      ? regionPresenceFirstProfile.id
-      : regionPresenceFirstNoImageProfile.id
+      ? phase === 'dev'
+        ? regionPresenceFirstProfile.id
+        : regionPresenceFirstHeldoutProfile.id
+      : phase === 'dev'
+        ? regionPresenceFirstNoImageProfile.id
+        : regionPresenceFirstNoImageHeldoutProfile.id
     : variant === 'region-seeded-sam'
       ? phase === 'dev'
         ? regionSeededProfile.id

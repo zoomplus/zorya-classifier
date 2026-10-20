@@ -22,9 +22,12 @@ import {
   regionSeededProfile,
   regionPresenceFirstNoImageProfile,
   regionPresenceFirstProfile,
+  regionPresenceFirstHeldoutProfile,
+  regionPresenceFirstNoImageHeldoutProfile,
   regionSeededProducerSourceManifest,
   regionSeededRecipe,
   processRegionSeededCase,
+  runRegionSeededProfile,
   removeImagesAtDecisionBoundary,
 } from '../benchmarks/v02/region-seeded-runner.js'
 import type { Recorder } from '../benchmarks/v02/recording.js'
@@ -39,6 +42,14 @@ await test('region-seeded and no-image controls are distinct named fixed recipes
   assert.equal(
     regionPresenceFirstNoImageProfile.id,
     'native-luna-presence-first-region-no-image-control-dev-v2',
+  )
+  assert.equal(
+    regionPresenceFirstHeldoutProfile.id,
+    'native-luna-presence-first-region-seeded-sam-heldout-v2',
+  )
+  assert.equal(
+    regionPresenceFirstNoImageHeldoutProfile.id,
+    'native-luna-presence-first-region-no-image-control-heldout-v2',
   )
   assert.equal(regionSeededRecipe.model, 'openai/gpt-6-luna-decisions')
   assert.equal(regionSeededRecipe.provider, 'openai')
@@ -296,18 +307,39 @@ await test('CLI defaults to the pinned complete exposed DEV candidate and requir
     () => parseRegionSeededArgs(['--dry-run', '--phase', 'heldout']),
     /HELDOUT requires --freeze/u,
   )
-  assert.throws(
-    () =>
-      parseRegionSeededArgs([
-        '--dry-run',
-        '--phase',
-        'heldout',
-        '--presence-first',
-        '--freeze',
-        '/tmp/freeze.json',
-      ]),
-    /Presence-first is a separate DEV-only profile/u,
-  )
+  const heldoutArgs = [
+    '--dry-run',
+    '--phase',
+    'heldout',
+    '--presence-first',
+    '--freeze',
+    '/tmp/freeze.json',
+    '--image-root',
+    '/tmp/image-root',
+    '--photo-inputs',
+    '/tmp/photo.json',
+    '--photo-sha256',
+    'a'.repeat(64),
+    '--ui-inputs',
+    '/tmp/ui.json',
+    '--ui-sha256',
+    'b'.repeat(64),
+    '--map-inputs',
+    '/tmp/map.json',
+    '--map-sha256',
+    'c'.repeat(64),
+  ]
+  const heldoutCandidate = parseRegionSeededArgs(heldoutArgs)
+  assert.equal(heldoutCandidate.profileId, regionPresenceFirstHeldoutProfile.id)
+  assert.equal(heldoutCandidate.phase, 'heldout')
+  assert.equal(heldoutCandidate.expectedCaseCount, 80)
+  assert.equal(heldoutCandidate.maxPhysicalCalls, 600)
+  assert.equal(heldoutCandidate.maxCostUsd, 10)
+  assert.equal(heldoutCandidate.requireClassifiedPresence, true)
+  const heldoutControl = parseRegionSeededArgs([...heldoutArgs, '--variant', 'no-image-control'])
+  assert.equal(heldoutControl.profileId, regionPresenceFirstNoImageHeldoutProfile.id)
+  assert.equal(heldoutControl.maxPhysicalCalls, 600)
+  assert.equal(heldoutControl.maxCostUsd, 10)
   assert.throws(
     () =>
       parseRegionSeededArgs(['--dry-run', '--phase', 'heldout', '--freeze', '/tmp/freeze.json']),
@@ -315,6 +347,43 @@ await test('CLI defaults to the pinned complete exposed DEV candidate and requir
   )
   assert.throws(() => parseRegionSeededArgs([]), /Choose exactly one/u)
   assert.throws(() => parseRegionSeededArgs(['--dry-run', '--allow-paid']), /Choose exactly one/u)
+})
+
+await test('presence-first HELDOUT rejects an authorization that omits its required policy bit', async () => {
+  await assert.rejects(
+    runRegionSeededProfile({
+      manifests: [],
+      imageRoot: '/unused/image-root',
+      outputRoot: '/unused/output',
+      apiKey: 'offline-fixture-key',
+      encoderPath: '/unused/encoder.onnx',
+      decoderPath: '/unused/decoder.onnx',
+      profileId: regionPresenceFirstHeldoutProfile.id,
+      variant: 'region-seeded-sam',
+      requireClassifiedPresence: true,
+      phase: 'heldout',
+      expectedCaseCount: 80,
+      maxPhysicalCalls: 600,
+      maxCostUsd: 10,
+      unknownCostReserveUsd: 0.05,
+      authorization: {
+        schemaVersion: 1,
+        profileId: regionPresenceFirstHeldoutProfile.id,
+        phase: 'heldout',
+        variant: 'region-seeded-sam',
+        producerSourceSha256: 'a'.repeat(64),
+        manifests: [
+          { sha256: 'b'.repeat(64), cases: 40 },
+          { sha256: 'c'.repeat(64), cases: 20 },
+          { sha256: 'd'.repeat(64), cases: 20 },
+        ],
+        maxPhysicalCalls: 600,
+        maxCostUsd: 10,
+        unknownCostReserveUsd: 0.05,
+      },
+    }),
+    /external frozen authorization/u,
+  )
 })
 
 await test('source seal includes the new runner, CLI, no-image guard and policy document', async () => {
