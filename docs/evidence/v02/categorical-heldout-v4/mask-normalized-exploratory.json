@@ -1,0 +1,682 @@
+{
+  "schema": "openimages-normalized-canvas-exploratory-evaluation-v1",
+  "qualifiedMaskAccuracy": false,
+  "releaseQualificationChanged": false,
+  "providerCallsAdded": 0,
+  "policy": {
+    "schema": "categorical-photo-mask-reference-join-v1",
+    "canonicalPhotoTruthSha256": "e0b6b8b977ac31e41e74d1f73044e8638bbfeb8c76fae5732a1207112c7b7caa",
+    "maskIndexSha256": "e58ac07494683301232dcc767411d134e6abc82c293fa35e212cc92658d61fbc",
+    "sourceCsvSha256": "a876ff7a1a68de771e668baa9886f0ca2331992cd4af5497401be41828a5de89",
+    "producerImageBindingsSha256": "81e896bc2cc7b3d015fb61647d4cf4e4485396c600f6495f10cf9ac6c3c702a0",
+    "caseCount": 21,
+    "maskInstanceCount": 32,
+    "annotationLicense": "https://creativecommons.org/licenses/by/4.0/",
+    "coordinatePolicy": "openimages-v5-normalized-canvas-exploratory",
+    "alignment": "normalized-pixel-center-nearest-neighbor-v1",
+    "caveats": [
+      "Aspect compatibility permits only overlapping integer-rounding ratio intervals.",
+      "Exact Open Images annotation pixel sampling and source-asset rotation history are not independently verified.",
+      "This exploratory component score does not qualify mask accuracy or change whole-object/classification gates."
+    ]
+  },
+  "canonicalValuesOtherThanReferencesUnchanged": true,
+  "initialCandidateEvaluationSha256": "f5ac16c65b63115b22fe753a69a1b340a108e521df49b37aa678f8e2c1db4484",
+  "physicalProducerSummarySha256": "1fb307aef68c93231b3d7fb10b415b4e4aa7d85b5a37ca3fa941bd0beeac28e4",
+  "referenceInstances": 32,
+  "annotatedCases": 21,
+  "exactCanvasInstances": 2,
+  "differentCanvasInstances": 30,
+  "scoredReferenceInstances": 7,
+  "unavailableReferenceInstances": 25,
+  "passingReferenceInstances": 3,
+  "threshold": 0.8,
+  "denominatorPolicy": "All 32 official reference instances remain recorded; missing predictions count as unavailable and not passing. Normalized canvas IoU is exploratory, not qualified alignment.",
+  "rows": [
+    {
+      "caseId": "photo-heldout-v3-present-01",
+      "sourceImageSha256": "28035a1bbae8f5372c7195daa138471de59e1ba3361ae69088767a042b2a1ccb",
+      "referenceMaskSha256": "46b25a139f50ce5394cd47d4ef9cc6ea9d255bb0dfa0ea41d35ddc4092c7f817",
+      "source": {
+        "width": 768,
+        "height": 768
+      },
+      "annotation": {
+        "width": 1024,
+        "height": 1024
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-01",
+      "sourceImageSha256": "28035a1bbae8f5372c7195daa138471de59e1ba3361ae69088767a042b2a1ccb",
+      "referenceMaskSha256": "107357103831133ba944b09b00b03653635efcc9be9c59f75a84bce2d2dbdffa",
+      "source": {
+        "width": 768,
+        "height": 768
+      },
+      "annotation": {
+        "width": 1024,
+        "height": 1024
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-02",
+      "sourceImageSha256": "598a4aaaf4b724442ab34ebbfe857a946e9c65015fb08b227cddeed203c16ba9",
+      "referenceMaskSha256": "27d60708d08daae0b4cbbb6b4e183ae8715a3087c5d5beb987b9cc5cbdbcf2b0",
+      "source": {
+        "width": 1024,
+        "height": 768
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1200
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-02",
+      "sourceImageSha256": "598a4aaaf4b724442ab34ebbfe857a946e9c65015fb08b227cddeed203c16ba9",
+      "referenceMaskSha256": "3053a4abde58bc14fa2777d759f17e74ea995fbc6de448a7259c85b3eb4ab926",
+      "source": {
+        "width": 1024,
+        "height": 768
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1200
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-03",
+      "sourceImageSha256": "4055c444e25db4c5f0bdb72e3346b5069fb5abfe5530a6647c85b559b6f733b7",
+      "referenceMaskSha256": "e01bbbaab099a95bce8610966b281c2932b7198c71af7c1aa1881f2fbf0ee53b",
+      "source": {
+        "width": 1024,
+        "height": 768
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1200
+      },
+      "exactCanvas": false,
+      "status": "scored",
+      "predictionMaskSha256": "23b75e62317471f1d4a9ff4917976e68340b20310e1ece90b922ca3cf4131722",
+      "intersection": 3,
+      "union": 295995,
+      "iou": 1.0135306339634116e-5,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-03",
+      "sourceImageSha256": "4055c444e25db4c5f0bdb72e3346b5069fb5abfe5530a6647c85b559b6f733b7",
+      "referenceMaskSha256": "88af707a4977a735933ea4a4d1733f304f94e4f5652fba6ba630402dcc74187b",
+      "source": {
+        "width": 1024,
+        "height": 768
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1200
+      },
+      "exactCanvas": false,
+      "status": "scored",
+      "predictionMaskSha256": "23b75e62317471f1d4a9ff4917976e68340b20310e1ece90b922ca3cf4131722",
+      "intersection": 130003,
+      "union": 283693,
+      "iou": 0.45825240665085143,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-04",
+      "sourceImageSha256": "49ccbbf3fa0a9f1dccd95355a877aa10dd137e7fd9a1189a3ed8f28ad8a849de",
+      "referenceMaskSha256": "592caba6fb1152ae7104f40f3f1e9ceef860619040a5290b9e2d298d0411b4bc",
+      "source": {
+        "width": 1024,
+        "height": 844
+      },
+      "annotation": {
+        "width": 580,
+        "height": 478
+      },
+      "exactCanvas": false,
+      "status": "scored",
+      "predictionMaskSha256": "d2ef563de32ea7fe3e4bb86a6df246a93b65a584048808c549df5b53e644f9bb",
+      "intersection": 84487,
+      "union": 86690,
+      "iou": 0.9745876110278002,
+      "meetsThreshold": true
+    },
+    {
+      "caseId": "photo-heldout-v3-present-04",
+      "sourceImageSha256": "49ccbbf3fa0a9f1dccd95355a877aa10dd137e7fd9a1189a3ed8f28ad8a849de",
+      "referenceMaskSha256": "20b51a9b1985389724dde4c06a6e7609b04839f51647d71509abfa7bf5827bd5",
+      "source": {
+        "width": 1024,
+        "height": 844
+      },
+      "annotation": {
+        "width": 580,
+        "height": 478
+      },
+      "exactCanvas": false,
+      "status": "scored",
+      "predictionMaskSha256": "d2ef563de32ea7fe3e4bb86a6df246a93b65a584048808c549df5b53e644f9bb",
+      "intersection": 0,
+      "union": 171837,
+      "iou": 0,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-05",
+      "sourceImageSha256": "bcdbb7a0a17365a5f20930f718508184b376061ab419aae9bec0e8e7d5706072",
+      "referenceMaskSha256": "9a8f17532450444ed08459592f8de2acacbab60a0ee7554cc7505dd6c1ffc521",
+      "source": {
+        "width": 1024,
+        "height": 683
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1066
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-05",
+      "sourceImageSha256": "bcdbb7a0a17365a5f20930f718508184b376061ab419aae9bec0e8e7d5706072",
+      "referenceMaskSha256": "e2a9068b7cbafdfe64e498ffab3f8b068de3ef2f3528e3e91065da281f8e902d",
+      "source": {
+        "width": 1024,
+        "height": 683
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1066
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-06",
+      "sourceImageSha256": "b06a76e0cf88c370d356505441f626484b189d348d4da204338f3e436051b88b",
+      "referenceMaskSha256": "e230042f46bd48a7e99ed8413d24a4e180f6ac42a072ce6e977a4b6a642b8258",
+      "source": {
+        "width": 1024,
+        "height": 768
+      },
+      "annotation": {
+        "width": 1024,
+        "height": 768
+      },
+      "exactCanvas": true,
+      "status": "scored",
+      "predictionMaskSha256": "36d1f2cb4a067095a98db8b3e8569b1f95081b49adde0e8f010caf84f38bc03f",
+      "intersection": 44507,
+      "union": 51985,
+      "iou": 0.8561508127344426,
+      "meetsThreshold": true
+    },
+    {
+      "caseId": "photo-heldout-v3-present-06",
+      "sourceImageSha256": "b06a76e0cf88c370d356505441f626484b189d348d4da204338f3e436051b88b",
+      "referenceMaskSha256": "8e39094ee85c31bec9e6dc31a544e9a0851f94191381913a7646534b6b87f377",
+      "source": {
+        "width": 1024,
+        "height": 768
+      },
+      "annotation": {
+        "width": 1024,
+        "height": 768
+      },
+      "exactCanvas": true,
+      "status": "scored",
+      "predictionMaskSha256": "36d1f2cb4a067095a98db8b3e8569b1f95081b49adde0e8f010caf84f38bc03f",
+      "intersection": 118,
+      "union": 97420,
+      "iou": 0.0012112502566208171,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-07",
+      "sourceImageSha256": "46d61246073b01215fdcd2855de007a76c990e950dc89055c0e46365d348c4a1",
+      "referenceMaskSha256": "49af3d00185e0f4772c3c57487b2806f7adb0689a2b2952f54f9b4e9934855ed",
+      "source": {
+        "width": 1024,
+        "height": 748
+      },
+      "annotation": {
+        "width": 1127,
+        "height": 823
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-07",
+      "sourceImageSha256": "46d61246073b01215fdcd2855de007a76c990e950dc89055c0e46365d348c4a1",
+      "referenceMaskSha256": "4f0149a18ddbfb2b20bee5e616d6544729f26ea4966edc7cda7190e0404bb158",
+      "source": {
+        "width": 1024,
+        "height": 748
+      },
+      "annotation": {
+        "width": 1127,
+        "height": 823
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-08",
+      "sourceImageSha256": "fecd2e51edfd13401f3670c66caed6289231609f25a4b048076877eeadb3d5e3",
+      "referenceMaskSha256": "0619034496d32d4c30c7ffda103598c86c8e09f3bdfea4721425023faf55a371",
+      "source": {
+        "width": 1024,
+        "height": 791
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1235
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-08",
+      "sourceImageSha256": "fecd2e51edfd13401f3670c66caed6289231609f25a4b048076877eeadb3d5e3",
+      "referenceMaskSha256": "6e95c1080499b3dfa43c3ff68e905d1fe95decb3b6b3c70c2b4f634d777e504a",
+      "source": {
+        "width": 1024,
+        "height": 791
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1235
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-09",
+      "sourceImageSha256": "9c47cc619e269370c9d8626f6dd1e468a672f245ae29f6d8f8ba76273bb47fdb",
+      "referenceMaskSha256": "17c109c1876c24b7d44709328d66f7c67391dceaa1d4131be666688f4e15ebb2",
+      "source": {
+        "width": 1024,
+        "height": 1024
+      },
+      "annotation": {
+        "width": 640,
+        "height": 640
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-09",
+      "sourceImageSha256": "9c47cc619e269370c9d8626f6dd1e468a672f245ae29f6d8f8ba76273bb47fdb",
+      "referenceMaskSha256": "02daeb2512b362dc7b61e8defb98cc7e3de08f6453311d7a43c98ea4a1118118",
+      "source": {
+        "width": 1024,
+        "height": 1024
+      },
+      "annotation": {
+        "width": 640,
+        "height": 640
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-10",
+      "sourceImageSha256": "0da18ff473b80319ac0e9c0c0f51095915facbaf49114fa25781137cbdb954db",
+      "referenceMaskSha256": "f09be082b9024f92bb7c164bc35fb2532d084babeb5f4c5ddfed7393a4314a2c",
+      "source": {
+        "width": 1024,
+        "height": 768
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1200
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-11",
+      "sourceImageSha256": "f68cdfc5820f12decb02f62ddfc2c853e5d7b2bfeb072b14842b9842dad0d4e1",
+      "referenceMaskSha256": "95f94850672273de08a0e458aa54e9d14de57eaae62475e50dbb640b4c36b3be",
+      "source": {
+        "width": 1024,
+        "height": 886
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1383
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-12",
+      "sourceImageSha256": "d585c7c75ab7dd5348dd1261d7f6cda2affd98fdfb7be42a0644bf889c408cad",
+      "referenceMaskSha256": "f46eee9ad939e18e213057b57f99fdddd9886114e8a6a095ca9af301d71e0e08",
+      "source": {
+        "width": 1024,
+        "height": 768
+      },
+      "annotation": {
+        "width": 800,
+        "height": 600
+      },
+      "exactCanvas": false,
+      "status": "scored",
+      "predictionMaskSha256": "fb70535187b58cf2cee0cc9d0293cc3997753c396729b844c28540455fa95ffc",
+      "intersection": 200021,
+      "union": 241638,
+      "iou": 0.8277712942500766,
+      "meetsThreshold": true
+    },
+    {
+      "caseId": "photo-heldout-v3-present-13",
+      "sourceImageSha256": "e8a897b9d12878e0729a0574aa1df3b06186cecd5362afb980eed1210d6bff85",
+      "referenceMaskSha256": "636d685676a47f5215c4f0a41c6f6b3154989cf8e2ba474a53b0fe4906b80de0",
+      "source": {
+        "width": 1024,
+        "height": 683
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1066
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-14",
+      "sourceImageSha256": "538f4a21e7a6c23249474e05ecbf82f1955b2c5a1b698f3d6be23787ca97fc70",
+      "referenceMaskSha256": "e4ac8fb785d734f00746b4b7cce7f4065fdb0630d57625e4a0a10f7499c9a261",
+      "source": {
+        "width": 1024,
+        "height": 768
+      },
+      "annotation": {
+        "width": 400,
+        "height": 300
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-15",
+      "sourceImageSha256": "b2ef44734531b9602071d47c7dda30ff5e958006e4b51cb0459e8cbbe58a1970",
+      "referenceMaskSha256": "2382efbca89222586a27d37d70f319b8e889db3d438c581580305978449c6278",
+      "source": {
+        "width": 1024,
+        "height": 752
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1174
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-16",
+      "sourceImageSha256": "b05801fcf83726d8431b447ab5e9b967a8dc324156af2b0a673b007a9b70b941",
+      "referenceMaskSha256": "d0e55be0f34d9574feaafa960be9a22bbe3891890139c03b7423e1e36f4d8340",
+      "source": {
+        "width": 1024,
+        "height": 779
+      },
+      "annotation": {
+        "width": 510,
+        "height": 388
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-21",
+      "sourceImageSha256": "f68184cc53b67990345f53572ff5c7d122c6300aca61f4c054f72dca13e3e4ec",
+      "referenceMaskSha256": "3852fc7cd4ca8d4a8ca0d4f8e0fb6d074e2685ede71435a4b0f0a1744b20d2da",
+      "source": {
+        "width": 1024,
+        "height": 683
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1066
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-26",
+      "sourceImageSha256": "b482fcb9598e988aab6432ac5d2a95fd83f5e10f04a748c11d42c50d13452344",
+      "referenceMaskSha256": "e7af6d4a178dbb0e6c5cb3994d9c3cdef265942de9dfd58486300987fe513c3a",
+      "source": {
+        "width": 1024,
+        "height": 731
+      },
+      "annotation": {
+        "width": 800,
+        "height": 571
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-26",
+      "sourceImageSha256": "b482fcb9598e988aab6432ac5d2a95fd83f5e10f04a748c11d42c50d13452344",
+      "referenceMaskSha256": "357396082089ca6d0c49045964fae644f1dc6b9f5ce578df02fa21ef3ec7ee33",
+      "source": {
+        "width": 1024,
+        "height": 731
+      },
+      "annotation": {
+        "width": 800,
+        "height": 571
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-27",
+      "sourceImageSha256": "d24a581d9f382bcfc79c59b3a88394f62588eb37c13f7bbfb79d17f8c90d7b8b",
+      "referenceMaskSha256": "181d2e862ae7f81923b96955a9ef527ccf1a948643066ed70260f70fbffe3582",
+      "source": {
+        "width": 1024,
+        "height": 1024
+      },
+      "annotation": {
+        "width": 612,
+        "height": 612
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-28",
+      "sourceImageSha256": "aaac18f14a7b217cd291666e62e673941ef88708f71c4bffe918dd68f24343b9",
+      "referenceMaskSha256": "aefcae2dae49d29d9ad814bf000f2e1985c099dcdd60f0920697b77863986514",
+      "source": {
+        "width": 1024,
+        "height": 683
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1066
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-28",
+      "sourceImageSha256": "aaac18f14a7b217cd291666e62e673941ef88708f71c4bffe918dd68f24343b9",
+      "referenceMaskSha256": "27979a038c9b0736afd354d862907351b43b7b11d6a8b634afd9236d622329a3",
+      "source": {
+        "width": 1024,
+        "height": 683
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1066
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-30",
+      "sourceImageSha256": "182c1508d1a216179c32bd8ad2b2c362b6eead67acde360d187fa8d242600f4a",
+      "referenceMaskSha256": "4d4fb4dd465f4a59183e7ed827b50ababcfb99a671f5a82239280c2bf9d408ad",
+      "source": {
+        "width": 1024,
+        "height": 683
+      },
+      "annotation": {
+        "width": 1600,
+        "height": 1066
+      },
+      "exactCanvas": false,
+      "status": "not-extracted",
+      "predictionMaskSha256": null,
+      "intersection": null,
+      "union": null,
+      "iou": null,
+      "meetsThreshold": false
+    }
+  ],
+  "privateOperatorOutputSha256": "914e4548232593eb74a004d073f87e5d5a7bc011fcccf4dcbdeef8a9176cf618",
+  "helperSourceSha256": {
+    "benchmarks/v02/categorical-photo-mask-truth.ts": "297ed01cdd7a14e1fbe8b0e13712b6dd4917ee4773e6b98b403e0200db2f5a03",
+    "benchmarks/v02/openimages-normalized-mask-iou.ts": "101750501a7dcaae8835ac3e476cc4c18235378e1edff0cc511b49cd14e36c2b"
+  }
+}

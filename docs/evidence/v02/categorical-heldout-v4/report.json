@@ -152,7 +152,11 @@
     "differentFullFrameCanvasInstances": 30,
     "strictJoinStatus": "rejected-different-source-and-annotation-dimensions",
     "qualifiedMaskAccuracy": false,
-    "explanation": "Canonical photo truth and official mask index are separate. Initial evaluation did not join references. Strict join rejects 30 differently sized full-frame masks. Raw outputs stay unchanged; any normalized-canvas calculation is separate exploratory evidence and cannot change whole-box or paired results."
+    "explanation": "Canonical photo truth and official mask index are separate. Initial evaluation did not join references. Strict join rejects 30 differently sized full-frame masks. Raw outputs stay unchanged; any normalized-canvas calculation is separate exploratory evidence and cannot change whole-box or paired results.",
+    "exploratoryEvaluation": "mask-normalized-exploratory.json",
+    "exploratoryScoredReferenceInstances": 7,
+    "exploratoryUnavailableReferenceInstances": 25,
+    "exploratoryPassingReferenceInstances": 3
   },
   "costAccounting": {
     "physicalCalls": 456,
