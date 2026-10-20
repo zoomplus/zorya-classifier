@@ -413,6 +413,7 @@ async function persistCase(
   profileId: FreshTextProfileId,
   item: FreshCase,
   bytes: Uint8Array,
+  signal: AbortSignal,
   budget: RunBudget,
   outputDirectory: string,
   fetcher: typeof globalThis.fetch,
@@ -455,6 +456,7 @@ async function persistCase(
     try {
       const c = await classifyClassifier.classify({
         input: { image: bytes, text: task.question },
+        signal,
         classes: [
           { id: 'present', description: 'The target is visibly present in this image.' },
           { id: 'absent', description: 'The target is visibly absent from this image.' },
@@ -490,7 +492,7 @@ async function persistCase(
     }
 
     calls.push(...classifyRecorder.calls)
-    if (options.stages !== 'classify-only') {
+    if (options.stages !== 'classify-only' && !signal.aborted) {
       const locateRecorder = recordProvider(
         (fetchImpl) => providerFor(options, fetchImpl, policy.locateMaxOutputTokens),
         caseBudget,
@@ -514,6 +516,7 @@ async function persistCase(
           mode: 'whole-object',
           boxTolerancePx: policy.boxTolerancePx,
           maxExtentPasses: policy.maxExtentPasses,
+          signal,
           ...(encoder
             ? {
                 representation: {
@@ -543,6 +546,14 @@ async function persistCase(
         await options.testHooks?.afterClassifierDispose?.()
       }
       calls.push(...locateRecorder.calls)
+    } else if (options.stages !== 'classify-only' && signal.aborted) {
+      locate = {
+        status: 'failed',
+        durationMs: 0,
+        calls: 0,
+        requestHashes: [],
+        errorCode: 'ABORTED',
+      }
     }
   }
   const row: ResultRow = {
@@ -773,6 +784,7 @@ export async function runFreshTextProfile(
         }
       : undefined
   for (const item of corpus.cases) {
+    if (signal.aborted) break
     let bytes: Uint8Array | undefined
     try {
       bytes = await loadFreshImage(item, corpus.imageRoot, signal)
@@ -781,6 +793,7 @@ export async function runFreshTextProfile(
         profileId,
         item,
         bytes,
+        signal,
         budget,
         outputDirectory,
         options.fetch ?? globalThis.fetch,
@@ -790,6 +803,7 @@ export async function runFreshTextProfile(
         recordersByCase,
       )
       results.push(outcome.result)
+      if (signal.aborted) break
     } catch (error) {
       bytes?.fill(0)
       const errorCode = safeErrorCode(error)
@@ -882,13 +896,14 @@ export async function runFreshTextProfile(
       missingCaseIds.length === 0 &&
       sourceUnchanged &&
       noImageAuditComplete &&
-      fatalCaseFailure === undefined
+      fatalCaseFailure === undefined &&
+      !signal.aborted
         ? 'complete'
         : 'incomplete',
     plannedCaseIds,
     completedCaseIds,
     missingCaseIds,
-    failure: fatalCaseFailure ?? null,
+    failure: fatalCaseFailure ?? (signal.aborted ? { errorCode: 'ABORTED' } : null),
     results,
     aggregate: budget.snapshot(),
     policy,
@@ -939,7 +954,7 @@ export async function runFreshTextProfile(
       runId,
       phase,
       status: 'incomplete',
-      failure: fatalCaseFailure ?? null,
+      failure: summary.failure,
       summarySha256: sha256(JSON.stringify(summary)),
       plannedCaseIds,
       completedCaseIds,

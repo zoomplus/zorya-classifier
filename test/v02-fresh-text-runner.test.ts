@@ -431,6 +431,77 @@ await test('fresh text persistence and disposal failures retain paid receipts an
   }
 })
 
+await test('fresh text cancellation reaches the active fetch and prevents later stages and cases', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'zorya-fresh-text-abort-'))
+  try {
+    const image = await sharp({
+      create: { width: 64, height: 48, channels: 3, background: '#718293' },
+    })
+      .png()
+      .toBuffer()
+    const input = ['first-case', 'must-not-run'].map((caseId) => ({
+      caseId,
+      image: { path: 'image.png', sha256: digest(image), width: 64, height: 48 },
+      locate: { target: 'the full red marker' },
+      classify: { question: 'Is the red marker present?', options: ['present', 'absent'] },
+    }))
+    await writeFile(join(root, 'image.png'), image, { flag: 'wx' })
+    const manifestBytes = Buffer.from(JSON.stringify(input))
+    const manifestPath = join(root, 'inputs.json')
+    await writeFile(manifestPath, manifestBytes, { flag: 'wx' })
+    const controller = new AbortController()
+    let fetchCalls = 0
+    let observedSignal: AbortSignal | undefined
+    const fetch: typeof globalThis.fetch = async (_input, init) => {
+      fetchCalls += 1
+      observedSignal = init?.signal ?? undefined
+      controller.abort('fixture cancellation')
+      assert.equal(observedSignal?.aborted, true)
+      throw new DOMException('fixture aborted fetch', 'AbortError')
+    }
+    const result = await runFreshTextProfile(
+      {
+        manifests: [{ path: manifestPath, sha256: digest(manifestBytes) }],
+        imageRoot: root,
+        outputRoot: join(root, 'runs'),
+        apiKey: 'fixture-key',
+        fetch,
+        createDecision: (fetcher) => ({
+          async decide(request, signal) {
+            await fetcher('https://provider.invalid/decisions', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ questions: request.questions }),
+              signal,
+            })
+            throw new Error('fetch should have aborted')
+          },
+        }),
+      },
+      'no-image-control',
+      controller.signal,
+    )
+    assert.equal(fetchCalls, 1)
+    assert.equal(observedSignal?.aborted, true)
+    assert.equal(result.status, 'incomplete')
+    assert.deepEqual(result.completedCaseIds, ['first-case'])
+    assert.deepEqual(result.missingCaseIds, ['must-not-run'])
+    assert.equal(result.results[0]?.classify.errorCode, 'ABORTED')
+    assert.equal(result.results[0]?.locate?.errorCode, 'ABORTED')
+    assert.equal(result.results[0]?.locate?.calls, 0)
+    assert.equal(result.aggregate.admittedPhysicalCalls, 1)
+    assert.equal(result.aggregate.unknownCostCalls, 1)
+    assert.equal(result.aggregate.inFlightCalls, 0)
+    assert.equal(result.physicalReceipts.length, 1)
+    assert.equal(result.physicalReceipts[0]?.caseId, 'first-case')
+    assert.equal(result.physicalReceipts[0]?.httpStatus, null)
+    assert.equal(result.physicalReceipts[0]?.wireReceipt, null)
+    assert.ok(await readFile(join(result.outputDirectory, 'incomplete-evidence.json'), 'utf8'))
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
 await test('real text adapter sends the selected encoding over wire with no image parts', async () => {
   const root = await mkdtemp(join(tmpdir(), 'zorya-fresh-text-wire-'))
   try {
