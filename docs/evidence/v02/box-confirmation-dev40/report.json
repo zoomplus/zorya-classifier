@@ -1,0 +1,127 @@
+{
+  "schema": "box-confirmation-dev40-evaluation-v1",
+  "profileId": "native-luna-box-confirmation-sam-target-plus-neutral-v1",
+  "phase": "dev",
+  "complete": true,
+  "sourceQualified": true,
+  "producerSourceSha256": "95eee1257ee8111cf97f60abc0297239789aee2f3d7db33c2eb80f6857faa277",
+  "rawSummarySha256": "001456121e04ebbb00858c59e37e9d7d70f38ce9c83712a24e1ea4798eee9d0d",
+  "rawManifestSha256": "4d371d2fcd46b9d0dde7856d64618d2f19eafcc881d3cf8c9ecc122db9f6fff3",
+  "predispatchFreezeSha256": "9213e6c637d2e157c85903d5c235cf64b65fcf2f96a398342227441b79beeb9e",
+  "classificationCorrect": 35,
+  "wholeObject": {
+    "attempted": 40,
+    "positives": 30,
+    "negatives": 10,
+    "matched": 5,
+    "localizationRate": 0.16666666666666666,
+    "falseLocations": 0,
+    "falseLocationRate": 0,
+    "unknown": 22,
+    "failed": 8,
+    "correct": 7
+  },
+  "photoLocalization": {
+    "attempted": 20,
+    "positives": 16,
+    "negatives": 4,
+    "matched": 4,
+    "localizationRate": 0.25,
+    "falseLocations": 0,
+    "falseLocationRate": 0,
+    "unknown": 8,
+    "failed": 7,
+    "correct": 4
+  },
+  "byStratum": [
+    {
+      "group": "photo",
+      "cases": 20,
+      "classificationCorrect": 17,
+      "positiveCases": 16,
+      "wholeMatches": 4,
+      "falseLocations": 0
+    },
+    {
+      "group": "ui",
+      "cases": 10,
+      "classificationCorrect": 8,
+      "positiveCases": 7,
+      "wholeMatches": 0,
+      "falseLocations": 0
+    },
+    {
+      "group": "map",
+      "cases": 10,
+      "classificationCorrect": 10,
+      "positiveCases": 7,
+      "wholeMatches": 1,
+      "falseLocations": 0
+    }
+  ],
+  "maskMetrics": {
+    "threshold": 0.8,
+    "truthCases": 5,
+    "scoredCases": 1,
+    "unavailableAnnotatedCases": 4,
+    "unannotatedCases": 35,
+    "referenceInstances": 7,
+    "scoredReferenceInstances": 2,
+    "unavailableReferenceInstances": 5,
+    "passingReferenceInstances": 0,
+    "passedCases": 0,
+    "meanBestInstanceIoU": 0.00020878763977172552,
+    "matching": "Place each cropped 0/1 prediction at its absolute sourceOffset; compare pixelwise against every independent source-sized Open Images instance mask. Emit one IoU per reference-mask SHA; case pass is the maximum instance IoU >= 0.8. This is separate from bbox correctness."
+  },
+  "budget": {
+    "admittedPhysicalCalls": 187,
+    "knownCostUsd": 0.08675559999999997,
+    "unknownCostCalls": 8,
+    "inFlightCalls": 0,
+    "accountedExposureUsd": 0.4867556,
+    "maxPhysicalCalls": 300,
+    "maxCostUsd": 5
+  },
+  "physicalCalls": 187,
+  "allUnknownCostsRetained": true,
+  "devNegativeGatePassed": true,
+  "heldoutQualified": false,
+  "releaseQualified": false,
+  "latencyRankingEligible": false,
+  "evaluatorMetadataCorrection": {
+    "reason": "Frozen producer records sourceBeforeSha256 on manifest/summary and explicit nativeThreads=2. The new profile requires these actual fields; historical 64-file profile shapes remain strict. No producer/output rewrite or scoring change.",
+    "beforePinsRequiredAndMatched": true,
+    "newProfileRequiresTwoThreads": true,
+    "sourceSha256": {
+      "benchmarks/v02/evaluate-categorical-fresh.ts": "90fdc29250bc3b743d4ef0e6039ac34b0598cd533eac9e0d5265a70e5965b85c",
+      "benchmarks/v02/evaluate-proposals.ts": "78ff41aae9634b002cc9fe3e065d462c482e1359d1a5786433743e195bc44e54",
+      "benchmarks/v02/evaluate-fresh.ts": "6e12a97f476551d4414e6ab04e187c7a274696ce3e91d1547ab7bd77b366cb8e",
+      "benchmarks/v02/metrics.ts": "c22e5ff58ac13f9c54ce064fe839ca690de6c511384cf3a2546ef3de0d761416"
+    }
+  },
+  "startupAttempt": {
+    "successfulRunIsSeparate": true,
+    "recordedPhysicalCallsFirstBackgroundAttempt": 0,
+    "providerAdmissionFirstAttempt": "unknown; original empty-log startup receipt retained, no calls invented",
+    "firstAttemptReplacedInReport": false
+  },
+  "limitations": [
+    "Observed DEV photo matches 4/16 versus previous recipe3/16; not statistical superiority or blind qualification.",
+    "All eight failed localizations and eight unknown charges count.",
+    "Only one of five mask-annotated DEV cases produced a saved mask; neither of its two reference instances meets0.8. Unavailable predictions do not pass.",
+    "Refinement through the existing explicit caller-owned segmenter requires a separately identified component/pipeline experiment.",
+    "No model/provider is selected or connected by the library."
+  ],
+  "artifacts": [
+    {
+      "path": "evaluation.json",
+      "sha256": "87042d2701a712c8f7eab97b63ae1ffac444aad5f24c9d92d2908ff8c3958401",
+      "bytes": 47543
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "84fb502810ec0487b84834fde57d403e6f708dc7fca751b9db2fb9e4408e8e2e",
+      "bytes": 9491
+    }
+  ]
+}

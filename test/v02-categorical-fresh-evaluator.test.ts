@@ -12,6 +12,7 @@ import {
 import { freshProposalInputPins } from '../benchmarks/v02/evaluate-proposals.js'
 import { freshProducerTask, loadFreshCorpus } from '../benchmarks/v02/fresh-corpus.js'
 import { hashCanonical } from '../benchmarks/v02/protocol.js'
+import { categoricalFreshPolicy } from '../benchmarks/v02/categorical-presence-fresh-runner.js'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const signal = new AbortController().signal
@@ -87,6 +88,7 @@ async function fixture(sourceClosure: 'legacy' | 'box' = 'legacy') {
     maxInFlightCases: 2,
     nativeMaxActive: 1,
     nativeMaxWaiting: 2,
+    ...(sourceClosure === 'box' ? { nativeThreads: 2 } : {}),
     boxTolerancePx: 8,
     maxExtentPasses: 3,
     maxPhysicalCallsPerCase: 6,
@@ -108,6 +110,7 @@ async function fixture(sourceClosure: 'legacy' | 'box' = 'legacy') {
     startedAt: '2026-10-20T00:00:00.000Z',
     variantSha256: '2'.repeat(64),
     producerSourceSha256: sourceDigest,
+    ...(sourceClosure === 'box' ? { sourceBeforeSha256: sourceDigest } : {}),
     sourceHashes,
     manifests: corpus.manifests,
     plannedCaseIds: corpus.cases.map((item) => item.caseId),
@@ -178,6 +181,7 @@ async function fixture(sourceClosure: 'legacy' | 'box' = 'legacy') {
     targetPolicy: manifest.targetPolicy,
     variantSha256: manifest.variantSha256,
     producerSourceSha256: sourceDigest,
+    ...(sourceClosure === 'box' ? { sourceBeforeSha256: sourceDigest } : {}),
     sourceAfterSha256: sourceDigest,
     sourceUnchanged: true,
     status: 'complete',
@@ -333,6 +337,44 @@ await test('categorical DEV source closures cannot be relabeled across historica
       ),
     /source mismatch/u,
   )
+})
+
+await test('box DEV validates actual before-source fields and explicit native thread metadata', async () => {
+  const base = await fixture('box')
+  base.manifest.profileId = base.summary.profileId =
+    'native-luna-box-confirmation-sam-target-plus-neutral-v1'
+  assert.deepEqual(base.manifest.policy, categoricalFreshPolicy)
+  const normalize = (value: typeof base) =>
+    normalizeCategoricalFreshOutput(
+      value.summary,
+      value.manifest,
+      value.corpus.cases,
+      value.corpus.manifests,
+      value.commitments,
+    )
+  assert.equal(normalize(base).results.length, 40)
+  const mutations: Array<(value: typeof base) => void> = [
+    (value) => {
+      delete value.manifest.sourceBeforeSha256
+    },
+    (value) => {
+      value.summary.sourceBeforeSha256 = '0'.repeat(64)
+    },
+    (value) => {
+      delete value.summary.sourceBeforeSha256
+    },
+    (value) => {
+      delete value.manifest.policy.nativeThreads
+    },
+    (value) => {
+      value.manifest.policy.nativeThreads = 1
+    },
+  ]
+  for (const mutate of mutations) {
+    const value = structuredClone(base)
+    mutate(value)
+    assert.throws(() => normalize(value))
+  }
 })
 
 await test('categorical evaluator rejects missing/duplicate cases, identity, task, policy and source drift', async () => {

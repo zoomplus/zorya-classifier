@@ -63,6 +63,7 @@ const classification = z
     ]),
   })
   .strict()
+const boxConfirmationPolicy = policy.extend({ nativeThreads: z.literal(2) }).strict()
 const runSchema = z
   .object({
     schemaVersion: z.literal(1),
@@ -73,6 +74,7 @@ const runSchema = z
     startedAt: z.string().datetime(),
     variantSha256: digest,
     producerSourceSha256: digest,
+    sourceBeforeSha256: digest.optional(),
     sourceHashes: z.record(z.string().min(1), digest),
     manifests: z
       .array(z.object({ sha256: digest, cases: z.number().int().positive() }).strict())
@@ -81,7 +83,7 @@ const runSchema = z
     plannedCases: z.array(proposalArtifactSchemas.plannedCase).length(40),
     route: proposalArtifactSchemas.route,
     mobileSam: proposalArtifactSchemas.assets,
-    policy,
+    policy: z.union([policy, boxConfirmationPolicy]),
     targetPolicy,
     classification,
     taskManifest: proposalArtifactSchemas.taskManifest,
@@ -104,6 +106,7 @@ const summarySchema = z
     targetPolicy,
     variantSha256: digest,
     producerSourceSha256: digest,
+    sourceBeforeSha256: digest.optional(),
     sourceAfterSha256: digest,
     sourceUnchanged: z.literal(true),
     status: z.literal('complete'),
@@ -210,6 +213,13 @@ export function normalizeCategoricalFreshOutput(
     summary.producerSourceSha256 !== commitments.expectedProducerSourceSha256 ||
     run.producerSourceSha256 !== commitments.expectedProducerSourceSha256 ||
     summary.sourceAfterSha256 !== commitments.expectedProducerSourceSha256 ||
+    (isBoxConfirmation &&
+      (run.sourceBeforeSha256 !== commitments.expectedProducerSourceSha256 ||
+        summary.sourceBeforeSha256 !== commitments.expectedProducerSourceSha256)) ||
+    (run.sourceBeforeSha256 !== undefined &&
+      run.sourceBeforeSha256 !== commitments.expectedProducerSourceSha256) ||
+    (summary.sourceBeforeSha256 !== undefined &&
+      summary.sourceBeforeSha256 !== commitments.expectedProducerSourceSha256) ||
     hashCanonical(Object.entries(run.sourceHashes).sort(([a], [b]) => a.localeCompare(b))) !==
       commitments.expectedProducerSourceSha256 ||
     expectedRequiredSources.some((path) => !Object.hasOwn(run.sourceHashes, path)) ||
@@ -218,6 +228,10 @@ export function normalizeCategoricalFreshOutput(
     Object.keys(run.sourceHashes).length !== expectedSourceCount
   )
     throw new Error('Categorical DEV profile or frozen source mismatch')
+  // The new executable records its explicit two-thread native policy; historical receipts
+  // retain their original strict policy shape and do not acquire inferred metadata.
+  if (isBoxConfirmation) boxConfirmationPolicy.parse(run.policy)
+  else policy.parse(run.policy)
   if (
     cases.length !== 40 ||
     !same(manifests, freshProposalInputPins) ||

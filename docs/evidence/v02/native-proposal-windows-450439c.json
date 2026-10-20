@@ -1,0 +1,156 @@
+{
+  "rawReportSha256": "1668a2558524262bd82a484886ce38e290c4717b04275d7629e6c47ffe14d50f",
+  "redactedFields": [".archive.path", ".assets.encoder.path", ".assets.decoder.path", ".tempRoot"],
+  "scope": "Native Windows installed archive; synthetic image and local injected decision; no personal/game-session acceptance. Native smoke uses one CPU thread, while the separate two-hour resource run explicitly uses two.",
+  "reviewedRuntimeDistManifestSha256": "2bddcf04ff0831e6252f57c522b696e2f7e5d36a9357eea7e14703a17e54d38c",
+  "installedArchiveParity": {
+    "schema": "windows-installed-archive-parity-v1",
+    "files": 107,
+    "manifestSha256": "8c69fd4696c89d64b7c26e4784833c1ff8897c447a061ca471cacd53beae3572",
+    "archiveSha256": "86875d3c32cac8aaa1a8112a9026365b68a4b4cf11f7f8211dec838a25f6f189",
+    "actualWindowsInstalledFilesMatchReviewedArchive": true
+  },
+  "report": {
+    "schemaVersion": 1,
+    "benchmark": "installed-archive-mobile-sam-proposal-windows-v1",
+    "backend": "mobile-sam-object-proposals",
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v24.19.0",
+    "osRelease": "10.0.26200",
+    "startedAt": "2026-10-20T19:28:10.005Z",
+    "executionProvider": "CPU",
+    "sourceCommitReference": "450439cacf9cc09832cc56371c2dda11f91184ba",
+    "harnessSha256": "9e63a10b325160ef422e60122569685b9d02f8efb1070b773d3ed080d4fd5748",
+    "archive": {
+      "path": "[owned-local-path]",
+      "bytes": 630950,
+      "sha256": "86875d3c32cac8aaa1a8112a9026365b68a4b4cf11f7f8211dec838a25f6f189"
+    },
+    "assets": {
+      "encoder": {
+        "path": "[owned-local-path]",
+        "bytes": 28157093,
+        "sha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749"
+      },
+      "decoder": {
+        "path": "[owned-local-path]",
+        "bytes": 16496559,
+        "sha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe"
+      }
+    },
+    "installedPackage": {
+      "name": "zorya-classifier",
+      "version": "0.2.0",
+      "onnxruntimeNodeVersion": "1.23.2",
+      "archiveSha256": "86875d3c32cac8aaa1a8112a9026365b68a4b4cf11f7f8211dec838a25f6f189",
+      "segmentationRuntimeSha256": "e39c772dce27978c99e86682c442c1082686d05be8b8384ec0e0ad9564bf0e01",
+      "installedDistFileCount": 107,
+      "installedDistManifestSha256": "8c69fd4696c89d64b7c26e4784833c1ff8897c447a061ca471cacd53beae3572",
+      "exportsSegmentation": true,
+      "declarations": {
+        "path": "dist/segmentation.d.ts",
+        "sha256": "a461fcc214d6d929b89776564a0c11c1c450b5e0bfb5d5709fe8a71dc0a5288e"
+      }
+    },
+    "checks": {
+      "importWithoutNativeChild": true,
+      "backendProbeSettled": true,
+      "locate": true,
+      "extract": true,
+      "cancellationAndPhysicalJoin": true,
+      "capacity": true,
+      "callerOwnedAdapter": true,
+      "dispose": true,
+      "fixtureDecisionOffline": true,
+      "childOwnership": true,
+      "cleanup": true,
+      "worker": true,
+      "tempCleanup": true
+    },
+    "located": {
+      "status": "located",
+      "durationMs": 5829,
+      "seedRegion": {
+        "left": 0,
+        "top": 0,
+        "width": 13,
+        "height": 13
+      },
+      "region": {
+        "left": 0,
+        "top": 0,
+        "width": 256,
+        "height": 256
+      },
+      "method": "pixel-mask-proposals-v1",
+      "proposalMetadata": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 2379.142100000001,
+        "input": {
+          "width": 256,
+          "height": 256
+        }
+      }
+    },
+    "extracted": {
+      "status": "extracted",
+      "durationMs": 3012,
+      "region": {
+        "left": 0,
+        "top": 0,
+        "width": 256,
+        "height": 256
+      },
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "pngBytes": 1942,
+      "maskBytes": 65536,
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 2367.7210000000014,
+        "input": {
+          "width": 256,
+          "height": 256
+        }
+      }
+    },
+    "lifecycle": {
+      "cancellationCode": "ABORTED",
+      "cancellationChildPid": 56532,
+      "cancellationPhysicalCloseConfirmed": true,
+      "queue": {
+        "submitted": 4,
+        "fulfilled": 3,
+        "capacityRejected": 1,
+        "otherFailures": 0
+      },
+      "callerOwnedAdapterAfterClassifierDispose": 36,
+      "afterAdapterDispose": "DISPOSED"
+    },
+    "childOwnership": {
+      "starts": 8,
+      "closes": 8,
+      "stillOwnedPids": []
+    },
+    "cleanupErrors": [],
+    "tempRoot": "[owned-local-path]",
+    "failure": null,
+    "npm": "11.17.0",
+    "fixtureDecision": {
+      "calls": 10,
+      "providerHttpCalls": 0,
+      "selectionUsesRenderedSyntheticForegroundPixels": true
+    },
+    "endedAt": "2026-10-20T19:28:36.062Z",
+    "acceptance": true,
+    "tempCleanup": "removed by coordinator after worker exit",
+    "workerStatus": 0,
+    "workerSignal": null,
+    "workerError": null
+  }
+}

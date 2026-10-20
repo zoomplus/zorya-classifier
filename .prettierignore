@@ -23,6 +23,9 @@ docs/evidence/v02/categorical-heldout-v4/control-provenance.json
 docs/evidence/v02/categorical-heldout-v4/paired-qualification.json
 docs/evidence/v02/categorical-heldout-v4/candidate-physical-receipts.json
 docs/evidence/v02/categorical-heldout-v4/control-physical-receipts.json
+# Immutable DEV evaluation outputs retain the exact hashes in their report.
+docs/evidence/v02/box-confirmation-dev40/evaluation.json
+docs/evidence/v02/box-confirmation-dev40/provenance.json
 
 # Frozen fresh producer/evaluator artifacts retain their recorded byte hashes.
 docs/evidence/v02/fresh-native-numeric/summary.json

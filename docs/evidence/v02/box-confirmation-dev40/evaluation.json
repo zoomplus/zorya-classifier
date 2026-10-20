@@ -1,0 +1,1663 @@
+{
+  "runId": "v02-fresh-native-luna-box-confirmation-sam-target-plus-neutral-v1-2026-10-20T192621319Z-169c00d8",
+  "profileId": "native-luna-box-confirmation-sam-target-plus-neutral-v1",
+  "complete": true,
+  "coverage": {
+    "planned": 40,
+    "reported": 40,
+    "missing": [],
+    "denominatorPolicy": "all planned cases; missing results fail qualification, not invented API calls"
+  },
+  "inputs": [
+    {
+      "sha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a",
+      "cases": 20
+    },
+    {
+      "sha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc",
+      "cases": 10
+    },
+    {
+      "sha256": "b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15",
+      "cases": 10
+    }
+  ],
+  "summarySha256": "750964b872d81719855d4e14c099b065919e69a02924b448c177cb91c0c8f7ec",
+  "runManifestSha256": "4d371d2fcd46b9d0dde7856d64618d2f19eafcc881d3cf8c9ecc122db9f6fff3",
+  "truthSha256": [
+    "793e26845deaa2cb56748ef270b8cb02877218d680068573f02e5af92b26af6a",
+    "c7944190e1cadab695f2688351df10a14132986040dafb72794bb1df4571abfe",
+    "874971d3e9344f7c54207064115257e5c802260d2a996a53f96bb6a68b2afad3"
+  ],
+  "classificationCorrect": 35,
+  "localization": {
+    "attempted": 40,
+    "positives": 30,
+    "negatives": 10,
+    "matched": 5,
+    "localizationRate": 0.16666666666666666,
+    "falseLocations": 0,
+    "falseLocationRate": 0,
+    "unknown": 22,
+    "failed": 8,
+    "correct": 7,
+    "rows": [
+      {
+        "caseId": "photo-dev-present-01",
+        "presence": "present",
+        "status": "located",
+        "correct": true
+      },
+      {
+        "caseId": "photo-dev-present-02",
+        "presence": "present",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-03",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-04",
+        "presence": "present",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-05",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-06",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-07",
+        "presence": "present",
+        "status": "located",
+        "correct": true
+      },
+      {
+        "caseId": "photo-dev-present-08",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-09",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-10",
+        "presence": "present",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-11",
+        "presence": "present",
+        "status": "located",
+        "correct": true
+      },
+      {
+        "caseId": "photo-dev-present-12",
+        "presence": "present",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-13",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-14",
+        "presence": "present",
+        "status": "located",
+        "correct": true
+      },
+      {
+        "caseId": "photo-dev-present-15",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-16",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-01",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-02",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-03",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-04",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-01",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-02",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-03",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-04",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-05",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-06",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-07",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-01",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-02",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-03",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-01",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-02",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-03",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-04",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-05",
+        "presence": "present",
+        "status": "located",
+        "correct": true
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-06",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-07",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-absent-bomber",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-absent-battleship",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-absent-fighter",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      }
+    ]
+  },
+  "photoLocalization": {
+    "attempted": 20,
+    "positives": 16,
+    "negatives": 4,
+    "matched": 4,
+    "localizationRate": 0.25,
+    "falseLocations": 0,
+    "falseLocationRate": 0,
+    "unknown": 8,
+    "failed": 7,
+    "correct": 4,
+    "rows": [
+      {
+        "caseId": "photo-dev-present-01",
+        "presence": "present",
+        "status": "located",
+        "correct": true
+      },
+      {
+        "caseId": "photo-dev-present-02",
+        "presence": "present",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-03",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-04",
+        "presence": "present",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-05",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-06",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-07",
+        "presence": "present",
+        "status": "located",
+        "correct": true
+      },
+      {
+        "caseId": "photo-dev-present-08",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-09",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-10",
+        "presence": "present",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-11",
+        "presence": "present",
+        "status": "located",
+        "correct": true
+      },
+      {
+        "caseId": "photo-dev-present-12",
+        "presence": "present",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-13",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-14",
+        "presence": "present",
+        "status": "located",
+        "correct": true
+      },
+      {
+        "caseId": "photo-dev-present-15",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-present-16",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-01",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-02",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-03",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-dev-absent-04",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      }
+    ]
+  },
+  "rows": [
+    {
+      "caseId": "photo-dev-present-01",
+      "imageSha256": "71e781adb0c2d47d97e6fd5868e6dbe4de8c1375536e1753f897931ff90575dc",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "photo-dev-present-02",
+      "imageSha256": "a27d93b12fadd550899a1d1d8ce70d34ba3c692affebf09134eda838910fcab5",
+      "expectedPresence": "present",
+      "sourceStatus": "failed",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-03",
+      "imageSha256": "e20c5e6f6a9334aca94289a99a56f3c0ee7cb8de8f5e00eff886cf772600250c",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-04",
+      "imageSha256": "66fe4e85ef638a2f28d5a2e7472ccebe46d2c8446304db73659d8af37f0d489c",
+      "expectedPresence": "present",
+      "sourceStatus": "failed",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-05",
+      "imageSha256": "71b99532e14abb6098a704e9bd9c2c50eebba72588a49e60c8a4b89af4eea4c5",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-06",
+      "imageSha256": "ad0eb4bf4a6c2c1be585846a943aa06ec2440696b7e8874374904eb25dcc594a",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-07",
+      "imageSha256": "16cae5fc9b21c562a005d7e1a00809ea90e4b143ee13614aefffa75fb113e044",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "photo-dev-present-08",
+      "imageSha256": "74b944d3b7d88a046d01f2d813c88e8a6415296db938a343a83d86048f4c3a4f",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-09",
+      "imageSha256": "6710905e971316f4b0d0fe1535eb64702807bc4c041bc161ea1ce1208eff5a0f",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-10",
+      "imageSha256": "f118352c4bfeb65b0a2dae153428ce0f802a01a232d45d0be4b0a7176bfaa342",
+      "expectedPresence": "present",
+      "sourceStatus": "failed",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-11",
+      "imageSha256": "07ab595c6482338b5982d61ac175450295be81338e9c641b218d7794b658249e",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "photo-dev-present-12",
+      "imageSha256": "65c38939211e8ae0d98e7d01fd3bc8d159fe8b96969940a169e82556071059c8",
+      "expectedPresence": "present",
+      "sourceStatus": "failed",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-13",
+      "imageSha256": "750f09aeeb5d1113088eedaf47f201f0837ad64720f836a69fec9ed3e4f1e5a7",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-14",
+      "imageSha256": "77681ffeb78a27bb0d59111acb638254948ece8115f6e5f6d1438b50c319c4d1",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "photo-dev-present-15",
+      "imageSha256": "a0a80df65932f8cb7cf7367305372c04aa37f1991436e4f1cb7828c9138f708e",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-present-16",
+      "imageSha256": "4a0dffd0f9f85bacac77d4f372c1f3eb754ba6a7440de3bc7c7f6a42f4c53ecd",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-absent-01",
+      "imageSha256": "604b8fa9c30881acee7c67d078bb7d08f846aeac6152dc1bf23a41ddefe45988",
+      "expectedPresence": "absent",
+      "sourceStatus": "failed",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-absent-02",
+      "imageSha256": "8bcbc695bc113f645bb66dd2e03615764cd37d80e5794d8f9ffc79f1e364e077",
+      "expectedPresence": "absent",
+      "sourceStatus": "failed",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-absent-03",
+      "imageSha256": "f8c2cc736fd7941bf2bc51c73147aeec96deba4b22e6948fe088a2d9121c51a6",
+      "expectedPresence": "absent",
+      "sourceStatus": "failed",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-dev-absent-04",
+      "imageSha256": "085ac7dc3243e28816e69f5e1ad56b9e8858c7135fac366f3172ad862e28eeae",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-01",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-02",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-03",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-04",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-05",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-06",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-07",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-01",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-02",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-03",
+      "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "expectedPresence": "absent",
+      "sourceStatus": "failed",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-01",
+      "imageSha256": "bfe6318454b7122c609e3672e87852df73b0778703ac28796ab6490cb7686460",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-02",
+      "imageSha256": "1d696fe4fd5ab990650da67c20b78d3240c048e4849ab8f043c398cfcf1ecc85",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-03",
+      "imageSha256": "bf553f5d9b693d654bed6d438bc1f548c6d7719a32e423695b599d603feb9367",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-04",
+      "imageSha256": "64523faf973f4ee597b381152c1ca60fdf919e298af6627327ec0571219c7a79",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-05",
+      "imageSha256": "a970216cbccf7456464e5ca25fc120e1e3994344e5fdc95607c1eb27d61ec205",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-06",
+      "imageSha256": "07e1ea0a28ea9e7e183e6c8c04797e0fee0995c9f91d0933293bac73f2ea4e2a",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-07",
+      "imageSha256": "c9ae28636545d886730514468e10daea0864720b28e812e332f9ea6f0a7c53b8",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-absent-bomber",
+      "imageSha256": "7b3d2a97fe944836485af95efacd265d713ff68578b0c99029acd11d621a51e7",
+      "expectedPresence": "absent",
+      "sourceStatus": "not-found",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-absent-battleship",
+      "imageSha256": "d137f8168d0bf1aa4d4a870ef3e883580ab9ca0131828235df5318e8ba6e832c",
+      "expectedPresence": "absent",
+      "sourceStatus": "not-found",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-absent-fighter",
+      "imageSha256": "4c48235b5a5c4413eccae22ad9ef2e89b697c073d40cf8c7b3c8978b662eacfa",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    }
+  ],
+  "proposalExtractions": [
+    {
+      "caseId": "photo-dev-present-01",
+      "status": "extracted",
+      "durationMs": 35140.053102,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1699.5301070000005,
+        "input": {
+          "width": 1024,
+          "height": 768
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1699.5301070000005,
+        "input": {
+          "width": 1024,
+          "height": 768
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "4a48c37cea97198b4cde632f3e075a5a129d9b1f30d4dc8fda1362444597e15b",
+        "format": "binary-u8",
+        "width": 900,
+        "height": 704,
+        "sourceRegion": {
+          "left": 124,
+          "top": 58,
+          "width": 900,
+          "height": 704
+        },
+        "sourceOffset": {
+          "x": 124,
+          "y": 58
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "8a908d3581d1ad202c9031d2cfe8eced81a36d00465d005adc4a3aad6b77c21e"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-02",
+      "status": "failed",
+      "durationMs": 1613.518497,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-dev-present-03",
+      "status": "unknown",
+      "durationMs": 7334.444309999999,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "photo-dev-present-04",
+      "status": "failed",
+      "durationMs": 24136.279637,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-dev-present-05",
+      "status": "unknown",
+      "durationMs": 42091.426274000005,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1754.2034920000006,
+        "input": {
+          "width": 1024,
+          "height": 683
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-dev-present-06",
+      "status": "unknown",
+      "durationMs": 38293.808436,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1686.2038500000053,
+        "input": {
+          "width": 1024,
+          "height": 683
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-dev-present-07",
+      "status": "extracted",
+      "durationMs": 44178.982882,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1824.380742999987,
+        "input": {
+          "width": 1024,
+          "height": 680
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1824.380742999987,
+        "input": {
+          "width": 1024,
+          "height": 680
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "d4135cd5459e987beed3e2270c03a5df4cd0887ed5c3e13ba8b98e4075fa8eeb",
+        "format": "binary-u8",
+        "width": 714,
+        "height": 377,
+        "sourceRegion": {
+          "left": 306,
+          "top": 176,
+          "width": 714,
+          "height": 377
+        },
+        "sourceOffset": {
+          "x": 306,
+          "y": 176
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "2f1468a5dbbcdebb3d5b2c51b7f077b9f7691352447603ef8827b75e80f9993a"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-08",
+      "status": "extracted",
+      "durationMs": 38079.73786299999,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1783.6178900000086,
+        "input": {
+          "width": 1024,
+          "height": 683
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1783.6178900000086,
+        "input": {
+          "width": 1024,
+          "height": 683
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "0e0c250494c36bb8359edf7277736bf1ab3b85bdfe6418c78bb136a6c6090d02",
+        "format": "binary-u8",
+        "width": 351,
+        "height": 191,
+        "sourceRegion": {
+          "left": 408,
+          "top": 225,
+          "width": 351,
+          "height": 191
+        },
+        "sourceOffset": {
+          "x": 408,
+          "y": 225
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "7568ee7331fa87821a37e29989e19291adb6d197d7556cf65b59302c8cf5d02c"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-09",
+      "status": "unknown",
+      "durationMs": 40484.33927899999,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1746.1795489999931,
+        "input": {
+          "width": 1024,
+          "height": 768
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-dev-present-10",
+      "status": "failed",
+      "durationMs": 5022.533775999997,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-dev-present-11",
+      "status": "extracted",
+      "durationMs": 34617.49055300001,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1730.659970000008,
+        "input": {
+          "width": 1024,
+          "height": 678
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1730.659970000008,
+        "input": {
+          "width": 1024,
+          "height": 678
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "98233a6c0f5465d68ac6df4f034b1c6cf0b48626bb4241481cc744aa362119c4",
+        "format": "binary-u8",
+        "width": 920,
+        "height": 550,
+        "sourceRegion": {
+          "left": 7,
+          "top": 61,
+          "width": 920,
+          "height": 550
+        },
+        "sourceOffset": {
+          "x": 7,
+          "y": 61
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "9cc515336a000d6e899fcc95cf35c7797f9a263fd8420553b8efe12b0f730e9d"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-12",
+      "status": "failed",
+      "durationMs": 6271.050941000023,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-dev-present-13",
+      "status": "unknown",
+      "durationMs": 25379.60048600001,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1749.1641609999933,
+        "input": {
+          "width": 1024,
+          "height": 681
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-dev-present-14",
+      "status": "extracted",
+      "durationMs": 26844.963159000006,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1691.1172059999953,
+        "input": {
+          "width": 1024,
+          "height": 682
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1691.1172059999953,
+        "input": {
+          "width": 1024,
+          "height": 682
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "741875480d714274c99d12d8ff0868981adf31fd68bd6e24d4f3da85446b5959",
+        "format": "binary-u8",
+        "width": 845,
+        "height": 347,
+        "sourceRegion": {
+          "left": 179,
+          "top": 160,
+          "width": 845,
+          "height": 347
+        },
+        "sourceOffset": {
+          "x": 179,
+          "y": 160
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "0577d0808e414be8b4a439fcc07549ab727f2d45a00fb47a8a53d39a0b003534"
+      }
+    },
+    {
+      "caseId": "photo-dev-present-15",
+      "status": "unknown",
+      "durationMs": 30779.102386000013,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1838.6620499999844,
+        "input": {
+          "width": 1024,
+          "height": 768
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-dev-present-16",
+      "status": "unknown",
+      "durationMs": 4855.604824000009,
+      "reason": "uncertain-presence"
+    },
+    {
+      "caseId": "photo-dev-absent-01",
+      "status": "failed",
+      "durationMs": 4278.477723999997,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-dev-absent-02",
+      "status": "failed",
+      "durationMs": 15952.647549000016,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-dev-absent-03",
+      "status": "failed",
+      "durationMs": 16190.326958999998,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-dev-absent-04",
+      "status": "unknown",
+      "durationMs": 17257.842170999997,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-01",
+      "status": "unknown",
+      "durationMs": 7411.7760220000055,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1851.8220180000062,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-02",
+      "status": "unknown",
+      "durationMs": 9373.493033999985,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1902.040730000008,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-03",
+      "status": "unknown",
+      "durationMs": 9583.706673999957,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 3602.9980410000426,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-04",
+      "status": "extracted",
+      "durationMs": 10134.300293000008,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1878.4082070000004,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1878.4082070000004,
+        "input": {
+          "width": 1280,
+          "height": 800
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "ca9fcea8a33f61a6aa96f096c20957fa067302bba1723b1e74541ec6ad3738fd",
+        "format": "binary-u8",
+        "width": 45,
+        "height": 36,
+        "sourceRegion": {
+          "left": 851,
+          "top": 137,
+          "width": 45,
+          "height": 36
+        },
+        "sourceOffset": {
+          "x": 851,
+          "y": 137
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "af545fa434d4b382f569e54f18804ecee1c9153ed64ef9b27aae57250aedc730"
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-05",
+      "status": "extracted",
+      "durationMs": 13976.954593999952,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1851.608774000022,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1851.608774000022,
+        "input": {
+          "width": 1280,
+          "height": 800
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "b332642318439dd36d44f8c23f6dc23f3d43be330c5bb73cfc1b9b66f5d404e7",
+        "format": "binary-u8",
+        "width": 45,
+        "height": 38,
+        "sourceRegion": {
+          "left": 851,
+          "top": 136,
+          "width": 45,
+          "height": 38
+        },
+        "sourceOffset": {
+          "x": 851,
+          "y": 136
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "b5c48913576099735593e6aba5be563e59c84a6879ab52ec74f7c184e102036d"
+      }
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-06",
+      "status": "unknown",
+      "durationMs": 4279.170423000003,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-present-07",
+      "status": "unknown",
+      "durationMs": 2974.1098290000227,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-01",
+      "status": "unknown",
+      "durationMs": 4440.972830999992,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-02",
+      "status": "unknown",
+      "durationMs": 2382.062514999998,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "ui-geany-oracle-dev-absent-03",
+      "status": "failed",
+      "durationMs": 1572.0335590000032,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-01",
+      "status": "unknown",
+      "durationMs": 9563.179700999986,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1799.2410880000098,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-02",
+      "status": "unknown",
+      "durationMs": 15578.04067300004,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1881.151727999968,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-03",
+      "status": "unknown",
+      "durationMs": 11761.089584000001,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1779.7698559999699,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-04",
+      "status": "unknown",
+      "durationMs": 13240.692685000016,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1830.2133840000024,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-05",
+      "status": "extracted",
+      "durationMs": 16429.361896999995,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1769.5179500000086,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1769.5179500000086,
+        "input": {
+          "width": 1280,
+          "height": 800
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "b464a666eee0616baddba1095f302b0a32247d7944083059b00a92cad574201f",
+        "format": "binary-u8",
+        "width": 57,
+        "height": 51,
+        "sourceRegion": {
+          "left": 691,
+          "top": 375,
+          "width": 57,
+          "height": 51
+        },
+        "sourceOffset": {
+          "x": 691,
+          "y": 375
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "bb1759d07ccac8a7cfbdd084483fdd4e1a216738d46e45b0e45c4c7fbd8b7636"
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-06",
+      "status": "unknown",
+      "durationMs": 14387.994203000038,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1864.5450410000049,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-present-07",
+      "status": "unknown",
+      "durationMs": 13747.277948000003,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1752.6205740000005,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-absent-bomber",
+      "status": "not-found",
+      "durationMs": 1652.3333220000495,
+      "reason": "absent-in-evaluated-region"
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-absent-battleship",
+      "status": "not-found",
+      "durationMs": 1898.5484239999787,
+      "reason": "absent-in-evaluated-region"
+    },
+    {
+      "caseId": "map-freeciv-oracle-dev-absent-fighter",
+      "status": "unknown",
+      "durationMs": 15693.45430099999,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1804.6781750000082,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    }
+  ],
+  "proposalMaskMetrics": {
+    "threshold": 0.8,
+    "truthCases": 5,
+    "scoredCases": 1,
+    "unavailableAnnotatedCases": 4,
+    "unannotatedCases": 35,
+    "referenceInstances": 7,
+    "scoredReferenceInstances": 2,
+    "unavailableReferenceInstances": 5,
+    "passingReferenceInstances": 0,
+    "passedCases": 0,
+    "meanBestInstanceIoU": 0.00020878763977172552,
+    "matching": "Place each cropped 0/1 prediction at its absolute sourceOffset; compare pixelwise against every independent source-sized Open Images instance mask. Emit one IoU per reference-mask SHA; case pass is the maximum instance IoU >= 0.8. This is separate from bbox correctness.",
+    "rows": [
+      {
+        "caseId": "photo-dev-present-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-05",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-06",
+        "status": "not-extracted",
+        "referenceInstances": 1
+      },
+      {
+        "caseId": "photo-dev-present-07",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-08",
+        "status": "scored",
+        "referenceInstances": 2,
+        "instanceIoUs": [
+          {
+            "referenceMaskSha256": "4e72cfb83de41421ed4a41c02ee4c700ca8bdf57f9c2f903017cf21ad6d4c772",
+            "iou": 0,
+            "meetsThreshold": false
+          },
+          {
+            "referenceMaskSha256": "7ca014cd837aca50d98e8d97420e4d9566f1cf75d9ddb9b4f1ef11d5b226d947",
+            "iou": 0.00020878763977172552,
+            "meetsThreshold": false
+          }
+        ],
+        "bestInstanceIoU": 0.00020878763977172552,
+        "meetsThreshold": false
+      },
+      {
+        "caseId": "photo-dev-present-09",
+        "status": "not-extracted",
+        "referenceInstances": 1
+      },
+      {
+        "caseId": "photo-dev-present-10",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-11",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-12",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-13",
+        "status": "not-extracted",
+        "referenceInstances": 1
+      },
+      {
+        "caseId": "photo-dev-present-14",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-15",
+        "status": "not-extracted",
+        "referenceInstances": 2
+      },
+      {
+        "caseId": "photo-dev-present-16",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-absent-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-absent-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-absent-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-absent-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-05",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-06",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-07",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-05",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-06",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-07",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-absent-bomber",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-absent-battleship",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-absent-fighter",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      }
+    ]
+  },
+  "sourceQualified": true,
+  "latencyRankingEligible": false
+}

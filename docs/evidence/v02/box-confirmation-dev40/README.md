@@ -1,0 +1,13 @@
+# Box-confirmation DEV40
+
+The separately frozen box-confirmation recipe completed all 40 original development cases. Independent evaluation finds 5/30 correct positive whole-object boxes: 4/16 photographs, 1/7 controlled Freeciv map cases and 0/7 controlled Geany UI cases. There are no false locations on ten negatives; classification is 35/40. The previous neutral-instruction recipe found 3/16 photographs. These are observed development results, not proof of superiority or blind release qualification.
+
+The [numeric report](report.json) pins the [unchanged producer freeze](../box-confirmation-dev40-freeze-20261020-v1.json), raw run, exact [evaluation](evaluation.json) and [provenance](provenance.json). The successful run made 187 physical requests with no retry or fallback: known cost $0.0867556, eight unknown-cost calls and accounted exposure $0.4867556. All eight failed localizations remain in the denominator. Timing remains unranked.
+
+Only one of five mask-annotated DEV cases returned a mask. Neither of its two official reference instances reaches IoU 0.8; the five remaining reference instances have no returned prediction. A correct bounding rectangle does not establish cutout accuracy. A native-only refinement component investigation will use the original model-predicted boxes and seeds without ground-truth prompts, preserving these original masks and results. It is not a replacement end-to-end run.
+
+Before scoring, the independent evaluator was corrected to validate metadata actually emitted by the frozen producer: matching `sourceBeforeSha256` on both manifest and summary, and the explicit two-thread native policy. Historical profiles still require their original 64-source closure; this new profile requires 68. No input, producer output, box/mask threshold or scoring function was changed. Tests cover absent/mismatched source pins and missing/wrong thread count; the report records evaluator-source hashes.
+
+An earlier shell-background startup returned without a run manifest or physical receipt. Its separate terminal receipt retains admission as unknown and zero recorded calls. It is not overwritten by this successful foreground run or represented as a successful model attempt. Source control flow persists the run manifest before any native initialization/provider dispatch; no request is invented from missing evidence.
+
+The library still accepts the caller's model/port and optional segmenters. This is an explicit Luna/OpenAI and CPU MobileSAM benchmark recipe, not a library default. A new source-group-disjoint blind qualification and all final release gates remain required.
