@@ -1,0 +1,166 @@
+[
+  {
+    "file": "mobile_sam_image_encoder.onnx",
+    "initializationMs": 119.023259,
+    "inputs": [
+      {
+        "name": "input_image",
+        "isTensor": true,
+        "type": "float32",
+        "shape": ["image_height", "image_width", 3]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "image_embeddings",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [1, 256, 64, 64]
+      }
+    ]
+  },
+  {
+    "file": "sam_mask_decoder_multi.onnx",
+    "initializationMs": 83.34738200000001,
+    "inputs": [
+      {
+        "name": "image_embeddings",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [1, 256, 64, 64]
+      },
+      {
+        "name": "point_coords",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [1, "num_points", 2]
+      },
+      {
+        "name": "point_labels",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [1, "num_points"]
+      },
+      {
+        "name": "mask_input",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [1, 1, 256, 256]
+      },
+      {
+        "name": "has_mask_input",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [1]
+      },
+      {
+        "name": "orig_im_size",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [2]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "masks",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [
+          "Resizemasks_dim_0",
+          "Resizemasks_dim_1",
+          "Resizemasks_dim_2",
+          "Resizemasks_dim_3"
+        ]
+      },
+      {
+        "name": "iou_predictions",
+        "isTensor": true,
+        "type": "float32",
+        "shape": ["Gemmiou_predictions_dim_0", 4]
+      },
+      {
+        "name": "low_res_masks",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [
+          "Reshapelow_res_masks_dim_0",
+          "Reshapelow_res_masks_dim_1",
+          "Reshapelow_res_masks_dim_2",
+          "Reshapelow_res_masks_dim_3"
+        ]
+      }
+    ]
+  },
+  {
+    "file": "sam_mask_decoder_single.onnx",
+    "initializationMs": 89.630123,
+    "inputs": [
+      {
+        "name": "image_embeddings",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [1, 256, 64, 64]
+      },
+      {
+        "name": "point_coords",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [1, "num_points", 2]
+      },
+      {
+        "name": "point_labels",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [1, "num_points"]
+      },
+      {
+        "name": "mask_input",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [1, 1, 256, 256]
+      },
+      {
+        "name": "has_mask_input",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [1]
+      },
+      {
+        "name": "orig_im_size",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [2]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "masks",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [
+          "Resizemasks_dim_0",
+          "Resizemasks_dim_1",
+          "Resizemasks_dim_2",
+          "Resizemasks_dim_3"
+        ]
+      },
+      {
+        "name": "iou_predictions",
+        "isTensor": true,
+        "type": "float32",
+        "shape": ["Unsqueezeiou_predictions_dim_0", 1]
+      },
+      {
+        "name": "low_res_masks",
+        "isTensor": true,
+        "type": "float32",
+        "shape": [
+          "Unsqueezelow_res_masks_dim_0",
+          1,
+          "Unsqueezelow_res_masks_dim_2",
+          "Unsqueezelow_res_masks_dim_3"
+        ]
+      }
+    ]
+  }
+]

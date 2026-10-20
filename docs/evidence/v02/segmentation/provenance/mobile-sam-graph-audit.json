@@ -1,0 +1,214 @@
+[
+  {
+    "file": "sam_mask_decoder_single.onnx",
+    "irVersion": 8,
+    "producer": "pytorch",
+    "producerVersion": "2.0.1",
+    "opsets": [
+      {
+        "domain": "",
+        "version": 17
+      }
+    ],
+    "nodes": 1199,
+    "operators": {
+      ":Constant": 362,
+      ":Add": 69,
+      ":Div": 36,
+      ":Mul": 40,
+      ":Sub": 6,
+      ":MatMul": 49,
+      ":Sin": 2,
+      ":Cos": 2,
+      ":Concat": 48,
+      ":Unsqueeze": 109,
+      ":Shape": 116,
+      ":Expand": 6,
+      ":Equal": 11,
+      ":Not": 1,
+      ":Cast": 56,
+      ":Conv": 3,
+      ":ReduceMean": 6,
+      ":Pow": 3,
+      ":Sqrt": 3,
+      ":Erf": 4,
+      ":Transpose": 32,
+      ":Gather": 119,
+      ":Reshape": 40,
+      ":ConstantOfShape": 5,
+      ":Where": 5,
+      ":Split": 4,
+      ":Slice": 7,
+      ":Softmax": 7,
+      ":LayerNormalization": 9,
+      ":Relu": 12,
+      ":ConvTranspose": 2,
+      ":Gemm": 15,
+      ":ArgMax": 1,
+      ":Range": 2,
+      ":Flatten": 2,
+      ":Resize": 2,
+      ":ReduceMax": 1,
+      ":Reciprocal": 1,
+      ":Floor": 1
+    },
+    "firstOperators": [
+      "Constant",
+      "Constant",
+      "Add",
+      "Constant",
+      "Div",
+      "Constant",
+      "Mul",
+      "Constant",
+      "Sub",
+      "MatMul"
+    ],
+    "resizeAttributes": [
+      {
+        "coordinate_transformation_mode": "half_pixel",
+        "cubic_coeff_a": null,
+        "mode": "linear",
+        "nearest_mode": "floor"
+      },
+      {
+        "coordinate_transformation_mode": "half_pixel",
+        "cubic_coeff_a": null,
+        "mode": "linear",
+        "nearest_mode": "floor"
+      }
+    ],
+    "externalInitializerNames": []
+  },
+  {
+    "file": "mobile_sam_image_encoder.onnx",
+    "irVersion": 8,
+    "producer": "pytorch",
+    "producerVersion": "2.0.1",
+    "opsets": [
+      {
+        "domain": "",
+        "version": 17
+      }
+    ],
+    "nodes": 1887,
+    "operators": {
+      ":Constant": 767,
+      ":Sub": 6,
+      ":Div": 26,
+      ":Transpose": 98,
+      ":Shape": 58,
+      ":Gather": 55,
+      ":Unsqueeze": 227,
+      ":Concat": 117,
+      ":Cast": 12,
+      ":ConstantOfShape": 11,
+      ":Reshape": 128,
+      ":Slice": 34,
+      ":Pad": 11,
+      ":Conv": 29,
+      ":Erf": 23,
+      ":Add": 99,
+      ":Mul": 78,
+      ":LayerNormalization": 20,
+      ":MatMul": 60,
+      ":Split": 10,
+      ":Softmax": 10,
+      ":ReduceMean": 4,
+      ":Pow": 2,
+      ":Sqrt": 2
+    },
+    "firstOperators": [
+      "Constant",
+      "Sub",
+      "Constant",
+      "Div",
+      "Transpose",
+      "Shape",
+      "Constant",
+      "Gather",
+      "Shape",
+      "Constant"
+    ],
+    "resizeAttributes": [],
+    "externalInitializerNames": []
+  },
+  {
+    "file": "sam_mask_decoder_multi.onnx",
+    "irVersion": 8,
+    "producer": "pytorch",
+    "producerVersion": "2.0.1",
+    "opsets": [
+      {
+        "domain": "",
+        "version": 17
+      }
+    ],
+    "nodes": 1142,
+    "operators": {
+      ":Constant": 345,
+      ":Add": 66,
+      ":Div": 36,
+      ":Mul": 37,
+      ":Sub": 5,
+      ":MatMul": 49,
+      ":Sin": 2,
+      ":Cos": 2,
+      ":Concat": 45,
+      ":Unsqueeze": 107,
+      ":Shape": 109,
+      ":Expand": 6,
+      ":Equal": 11,
+      ":Not": 1,
+      ":Cast": 53,
+      ":Conv": 3,
+      ":ReduceMean": 6,
+      ":Pow": 3,
+      ":Sqrt": 3,
+      ":Erf": 4,
+      ":Transpose": 32,
+      ":Gather": 110,
+      ":Reshape": 36,
+      ":ConstantOfShape": 5,
+      ":Where": 5,
+      ":Split": 4,
+      ":Slice": 7,
+      ":Softmax": 7,
+      ":LayerNormalization": 9,
+      ":Relu": 12,
+      ":ConvTranspose": 2,
+      ":Gemm": 15,
+      ":Resize": 2,
+      ":ReduceMax": 1,
+      ":Reciprocal": 1,
+      ":Floor": 1
+    },
+    "firstOperators": [
+      "Constant",
+      "Constant",
+      "Add",
+      "Constant",
+      "Div",
+      "Constant",
+      "Mul",
+      "Constant",
+      "Sub",
+      "MatMul"
+    ],
+    "resizeAttributes": [
+      {
+        "coordinate_transformation_mode": "half_pixel",
+        "cubic_coeff_a": null,
+        "mode": "linear",
+        "nearest_mode": "floor"
+      },
+      {
+        "coordinate_transformation_mode": "half_pixel",
+        "cubic_coeff_a": null,
+        "mode": "linear",
+        "nearest_mode": "floor"
+      }
+    ],
+    "externalInitializerNames": []
+  }
+]
