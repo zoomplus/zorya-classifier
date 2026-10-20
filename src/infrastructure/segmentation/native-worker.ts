@@ -2,6 +2,7 @@ import { nativeSegmentationRequestSchema } from './native-protocol.js'
 import { ClassifierError, type ErrorCode } from '../../entities/errors.js'
 import {
   probeMobileSam,
+  runMobileSamExpandTask,
   runMobileSamObjectProposalTask,
   runMobileSamTask,
 } from './mobile-sam/worker-inference.js'
@@ -42,23 +43,25 @@ async function main(): Promise<void> {
   const request = nativeSegmentationRequestSchema.parse(raw)
   activeId = request.id
   const reply =
-    request.kind === 'mobile-sam-proposals'
-      ? await runMobileSamObjectProposalTask(request)
-      : request.kind === 'mobile-sam'
-        ? await runMobileSamTask(request)
-        : request.kind === 'grabcut'
-          ? await runGrabCutTask(request)
-          : request.kind === 'probe-mobile-sam'
-            ? await probeMobileSam(request.options).then(() => ({
-                id: request.id,
-                status: 'ready',
-                backend: 'mobile-sam',
-              }))
-            : await probeGrabCut(request.assetPath).then(() => ({
-                id: request.id,
-                status: 'ready',
-                backend: 'grabcut',
-              }))
+    request.kind === 'mobile-sam-expand'
+      ? await runMobileSamExpandTask(request)
+      : request.kind === 'mobile-sam-proposals'
+        ? await runMobileSamObjectProposalTask(request)
+        : request.kind === 'mobile-sam'
+          ? await runMobileSamTask(request)
+          : request.kind === 'grabcut'
+            ? await runGrabCutTask(request)
+            : request.kind === 'probe-mobile-sam'
+              ? await probeMobileSam(request.options).then(() => ({
+                  id: request.id,
+                  status: 'ready',
+                  backend: 'mobile-sam',
+                }))
+              : await probeGrabCut(request.assetPath).then(() => ({
+                  id: request.id,
+                  status: 'ready',
+                  backend: 'grabcut',
+                }))
   sendMemory()
   await new Promise<void>((resolve, reject) => {
     process.stdout.write(JSON.stringify(reply), (error) => {

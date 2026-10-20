@@ -3,7 +3,11 @@ import { open } from 'node:fs/promises'
 import sharp from 'sharp'
 import type { InferenceSession } from 'onnxruntime-node'
 
-import type { NativeSegmentationReply, NativeSegmentationRequest } from '../native-protocol.js'
+import type {
+  NativeMobileSamExpansionReply,
+  NativeSegmentationReply,
+  NativeSegmentationRequest,
+} from '../native-protocol.js'
 import { packBinaryMask } from '../../../features/segmentation/packed-mask.js'
 import type { NativeObjectProposalReply } from '../native-protocol.js'
 import { objectProposalLimits } from '../../../entities/object-proposals.js'
@@ -187,6 +191,188 @@ export function selectMobileSamSegmentationMask(input: {
   throw new Error('MobileSAM produced no seed-grounded mask')
 }
 
+export interface EnclosingMobileSamCandidate {
+  token: number
+  score: number
+  mask: Uint8Array
+  area: number
+  bounds: { left: number; top: number; right: number; bottom: number }
+}
+
+/** Full-source segmentation masks use the segmentation pixel cap, not the proposal cap. */
+export function packFullSourceBinaryMask(
+  mask: Uint8Array,
+  width: number,
+  height: number,
+): Uint8Array {
+  const pixels = width * height
+  if (
+    !Number.isSafeInteger(width) ||
+    !Number.isSafeInteger(height) ||
+    width < 1 ||
+    height < 1 ||
+    pixels > 16_777_216 ||
+    mask.length !== pixels
+  )
+    throw new Error('Invalid full-source mask dimensions')
+  const packed = new Uint8Array(Math.ceil(pixels / 8))
+  for (let index = 0; index < pixels; index++) {
+    const value = mask[index]
+    if (value !== 0 && value !== 1) throw new Error('Full-source mask is not binary')
+    if (value === 1) packed[index >> 3] = (packed[index >> 3] ?? 0) | (1 << (index & 7))
+  }
+  return packed
+}
+
+/** Strictly decode the LSB-first full-source mask representation used by expansion IPC. */
+export function unpackFullSourceBinaryMask(
+  data: Uint8Array,
+  width: number,
+  height: number,
+): Uint8Array {
+  const pixels = width * height
+  const expectedBytes = Math.ceil(pixels / 8)
+  if (
+    !Number.isSafeInteger(width) ||
+    !Number.isSafeInteger(height) ||
+    width < 1 ||
+    height < 1 ||
+    pixels > 16_777_216 ||
+    data.length !== expectedBytes
+  )
+    throw new Error('Invalid packed full-source mask dimensions')
+  const unusedBits = expectedBytes * 8 - pixels
+  if (unusedBits > 0) {
+    const allowed = (1 << (8 - unusedBits)) - 1
+    if (((data[expectedBytes - 1] ?? 0) & ~allowed) !== 0)
+      throw new Error('Packed full-source mask has nonzero padding bits')
+  }
+  const output = new Uint8Array(pixels)
+  for (let index = 0; index < pixels; index++)
+    output[index] = ((data[index >> 3] ?? 0) >> (index & 7)) & 1
+  return output
+}
+
+/** Validate a prior full-source mask and return its foreground area and bounds. */
+export function validateMobileSamPreviousMask(input: {
+  width: number
+  height: number
+  rgba: Uint8Array
+  previousMask: Uint8Array
+  roi: { left: number; top: number; width: number; height: number }
+}): { area: number; bounds: { left: number; top: number; right: number; bottom: number } } {
+  const pixels = input.width * input.height
+  if (
+    !Number.isSafeInteger(input.width) ||
+    !Number.isSafeInteger(input.height) ||
+    input.width < 1 ||
+    input.height < 1 ||
+    pixels > 16_777_216 ||
+    input.rgba.length !== pixels * 4 ||
+    input.previousMask.length !== pixels ||
+    input.roi.left < 0 ||
+    input.roi.top < 0 ||
+    input.roi.width < 1 ||
+    input.roi.height < 1 ||
+    input.roi.left + input.roi.width > input.width ||
+    input.roi.top + input.roi.height > input.height
+  )
+    throw new Error('Invalid previous mask dimensions or ROI')
+  let area = 0
+  let left = input.width
+  let top = input.height
+  let right = -1
+  let bottom = -1
+  for (let index = 0; index < pixels; index++) {
+    const value = input.previousMask[index]
+    if (value !== 0 && value !== 1) throw new Error('Previous mask is not binary')
+    if (value === 0) continue
+    const x = index % input.width
+    const y = Math.floor(index / input.width)
+    if (!inside(input.roi, x, y) || input.rgba[index * 4 + 3] === 0)
+      throw new Error('Previous mask foreground is outside visible ROI pixels')
+    area++
+    left = Math.min(left, x)
+    top = Math.min(top, y)
+    right = Math.max(right, x)
+    bottom = Math.max(bottom, y)
+  }
+  if (area === 0) throw new Error('Previous mask has no foreground')
+  return { area, bounds: { left, top, right, bottom } }
+}
+
+/** Select the smallest actual decoder mask that strictly encloses prior foreground. */
+export function selectEnclosingMobileSamCandidate(input: {
+  width: number
+  height: number
+  rgba: Uint8Array
+  logits: Float32Array
+  scores: Float32Array
+  previousMask: Uint8Array
+  roi: { left: number; top: number; width: number; height: number }
+}): EnclosingMobileSamCandidate | undefined {
+  const pixels = input.width * input.height
+  const previous = validateMobileSamPreviousMask(input)
+  if (input.logits.length !== pixels * 4 || input.scores.length !== 4)
+    throw new Error('Invalid MobileSAM decoder output dimensions')
+  let best: EnclosingMobileSamCandidate | undefined
+  for (let token = 0; token < 4; token++) {
+    const score = input.scores[token]
+    if (score === undefined || !Number.isFinite(score))
+      throw new Error('Non-finite MobileSAM quality diagnostic')
+    const mask = new Uint8Array(pixels)
+    let area = 0
+    let left = input.width
+    let top = input.height
+    let right = -1
+    let bottom = -1
+    let containsPrevious = true
+    const base = token * pixels
+    for (let index = 0; index < pixels; index++) {
+      const value = input.logits[base + index]
+      if (value === undefined || !Number.isFinite(value))
+        throw new Error('Non-finite MobileSAM mask logit')
+      const x = index % input.width
+      const y = Math.floor(index / input.width)
+      const foreground = value > 0 && input.rgba[index * 4 + 3] !== 0 && inside(input.roi, x, y)
+      if (input.previousMask[index] === 1 && !foreground) containsPrevious = false
+      if (!foreground) continue
+      mask[index] = 1
+      area++
+      left = Math.min(left, x)
+      top = Math.min(top, y)
+      right = Math.max(right, x)
+      bottom = Math.max(bottom, y)
+    }
+    const strictBoundsGrowth =
+      left <= previous.bounds.left &&
+      top <= previous.bounds.top &&
+      right >= previous.bounds.right &&
+      bottom >= previous.bounds.bottom &&
+      (left < previous.bounds.left ||
+        top < previous.bounds.top ||
+        right > previous.bounds.right ||
+        bottom > previous.bounds.bottom)
+    if (!containsPrevious || area <= previous.area || !strictBoundsGrowth) {
+      mask.fill(0)
+      continue
+    }
+    const candidate = { token, score, mask, area, bounds: { left, top, right, bottom } }
+    if (
+      !best ||
+      candidate.area < best.area ||
+      (candidate.area === best.area && candidate.score > best.score) ||
+      (candidate.area === best.area &&
+        candidate.score === best.score &&
+        candidate.token < best.token)
+    ) {
+      best?.mask.fill(0)
+      best = candidate
+    } else mask.fill(0)
+  }
+  return best
+}
+
 export async function runMobileSamTask(
   request: Extract<NativeSegmentationRequest, { kind: 'mobile-sam' }>,
 ): Promise<NativeSegmentationReply> {
@@ -326,6 +512,207 @@ export async function runMobileSamTask(
   }
   if (releaseFailed) throw new Error('MobileSAM native session release failed')
   if (!result) throw new Error('MobileSAM completed without a mask result')
+  return result
+}
+
+type ExpansionRequest = Extract<NativeSegmentationRequest, { kind: 'mobile-sam-expand' }>
+
+/** Run one same-seed decode and return only the smallest strict enclosing mask. */
+export async function runMobileSamExpandTask(
+  request: ExpansionRequest,
+): Promise<NativeMobileSamExpansionReply> {
+  const ort = await import('onnxruntime-node')
+  if (
+    !ort
+      .listSupportedBackends()
+      .some((item) => item.name === request.options.executionProvider && item.bundled)
+  )
+    throw new Error('Explicitly requested ONNX execution provider is unavailable')
+  const sessionOptions: InferenceSession.SessionOptions = {
+    executionProviders:
+      request.options.executionProvider === 'dml'
+        ? [{ name: 'dml', deviceId: request.options.deviceId ?? 0 }]
+        : ['cpu'],
+    intraOpNumThreads: request.options.threads,
+    interOpNumThreads: 1,
+    executionMode: 'sequential',
+    enableMemPattern: request.options.executionProvider !== 'dml',
+    graphOptimizationLevel: 'all',
+  }
+  const encoder = await ort.InferenceSession.create(
+    await verifiedBytes(request.options.encoderPath, encoderIdentity),
+    sessionOptions,
+  )
+  let decoder: InferenceSession | undefined
+  let imageTensor: InstanceType<typeof ort.Tensor> | undefined
+  let embedding: InstanceType<typeof ort.Tensor> | undefined
+  let result: NativeMobileSamExpansionReply | undefined
+  let releaseFailed = false
+  let rgba: Buffer | undefined
+  let packedPrevious: Buffer | undefined
+  let previousMask: Uint8Array | undefined
+  let selectedMask: Uint8Array | undefined
+  try {
+    decoder = await ort.InferenceSession.create(
+      await verifiedBytes(request.options.decoderPath, decoderIdentity),
+      sessionOptions,
+    )
+    rgba = Buffer.from(request.rgba, 'base64')
+    packedPrevious = Buffer.from(request.previousMask, 'base64')
+    if (rgba.length !== request.width * request.height * 4)
+      throw new Error('Invalid expansion RGBA input size')
+    previousMask = unpackFullSourceBinaryMask(packedPrevious, request.width, request.height)
+    validateMobileSamPreviousMask({
+      width: request.width,
+      height: request.height,
+      rgba,
+      previousMask,
+      roi: request.roi,
+    })
+    const scale = 1024 / Math.max(request.width, request.height)
+    const resizedWidth = Math.round(request.width * scale)
+    const resizedHeight = Math.round(request.height * scale)
+    if (resizedWidth < 1 || resizedHeight < 1) throw new Error('Unrepresentable image aspect ratio')
+    const pipeline = sharp(rgba, {
+      raw: { width: request.width, height: request.height, channels: 4 },
+    })
+    let rgb: Buffer
+    try {
+      rgb = await pipeline
+        .removeAlpha()
+        .resize(resizedWidth, resizedHeight, { fit: 'fill', kernel: 'linear' })
+        .raw()
+        .toBuffer()
+    } finally {
+      pipeline.destroy()
+    }
+    if (rgb.length !== resizedWidth * resizedHeight * 3) throw new Error('Invalid resized RGB data')
+    imageTensor = new ort.Tensor('float32', Float32Array.from(rgb), [
+      resizedHeight,
+      resizedWidth,
+      3,
+    ])
+    rgb.fill(0)
+    const encoded = await encoder.run({ input_image: imageTensor })
+    const embeddingTensor = encoded.image_embeddings
+    if (
+      !(embeddingTensor instanceof ort.Tensor) ||
+      embeddingTensor.type !== 'float32' ||
+      JSON.stringify(embeddingTensor.dims) !== JSON.stringify([1, 256, 64, 64]) ||
+      !(embeddingTensor.data instanceof Float32Array)
+    )
+      throw new Error('Unexpected MobileSAM encoder output')
+    embedding = embeddingTensor
+    const prompt = mobileSamSegmentationPrompt({
+      prompt: request.prompt,
+      seedRegion: request.seedRegion,
+      wholeRegion: request.wholeRegion,
+      xScale: resizedWidth / request.width,
+      yScale: resizedHeight / request.height,
+    })
+    const pointCoords = new ort.Tensor('float32', prompt.coordinates, [1, 2, 2])
+    const pointLabels = new ort.Tensor('float32', prompt.labels, [1, 2])
+    const maskInput = new ort.Tensor('float32', new Float32Array(256 * 256), [1, 1, 256, 256])
+    const hasMaskInput = new ort.Tensor('float32', Float32Array.of(0), [1])
+    const originalSize = new ort.Tensor('float32', Float32Array.of(request.height, request.width), [
+      2,
+    ])
+    let decoded: Awaited<ReturnType<InferenceSession['run']>> | undefined
+    try {
+      decoded = await decoder.run({
+        image_embeddings: embedding,
+        point_coords: pointCoords,
+        point_labels: pointLabels,
+        mask_input: maskInput,
+        has_mask_input: hasMaskInput,
+        orig_im_size: originalSize,
+      })
+      const masks = decoded.masks
+      const scores = decoded.iou_predictions
+      if (
+        !(masks instanceof ort.Tensor) ||
+        masks.type !== 'float32' ||
+        JSON.stringify(masks.dims) !== JSON.stringify([1, 4, request.height, request.width]) ||
+        !(masks.data instanceof Float32Array) ||
+        !(scores instanceof ort.Tensor) ||
+        scores.type !== 'float32' ||
+        JSON.stringify(scores.dims) !== JSON.stringify([1, 4]) ||
+        !(scores.data instanceof Float32Array)
+      )
+        throw new Error('Unexpected MobileSAM expansion decoder output')
+      const candidate = selectEnclosingMobileSamCandidate({
+        width: request.width,
+        height: request.height,
+        rgba,
+        logits: masks.data,
+        scores: scores.data,
+        previousMask,
+        roi: request.roi,
+      })
+      if (candidate) {
+        selectedMask = candidate.mask
+        const packed = packFullSourceBinaryMask(selectedMask, request.width, request.height)
+        const packedBuffer = Buffer.from(packed)
+        try {
+          result = {
+            id: request.id,
+            status: 'expanded',
+            width: request.width,
+            height: request.height,
+            mask: packedBuffer.toString('base64'),
+            method: 'mobile-sam-enclosing-mask-v1',
+            qualityScore: candidate.score,
+          }
+        } finally {
+          packedBuffer.fill(0)
+          packed.fill(0)
+        }
+      } else {
+        result = {
+          id: request.id,
+          status: 'unknown',
+          reason: 'no-enclosing-mask',
+          width: request.width,
+          height: request.height,
+          method: 'mobile-sam-enclosing-mask-v1',
+        }
+      }
+    } finally {
+      prompt.coordinates.fill(0)
+      prompt.labels.fill(0)
+      for (const tensor of [pointCoords, pointLabels, maskInput, hasMaskInput, originalSize])
+        if (tensor.data instanceof Float32Array) tensor.data.fill(0)
+      pointCoords.dispose()
+      pointLabels.dispose()
+      maskInput.dispose()
+      hasMaskInput.dispose()
+      originalSize.dispose()
+      if (decoded)
+        for (const tensor of Object.values(decoded))
+          if (tensor instanceof ort.Tensor) {
+            if (tensor.data instanceof Float32Array || tensor.data instanceof Uint8Array)
+              tensor.data.fill(0)
+            tensor.dispose()
+          }
+    }
+  } finally {
+    imageTensor?.dispose()
+    if (embedding && embedding !== imageTensor) {
+      if (embedding.data instanceof Float32Array) embedding.data.fill(0)
+      embedding.dispose()
+    }
+    previousMask?.fill(0)
+    selectedMask?.fill(0)
+    rgba?.fill(0)
+    packedPrevious?.fill(0)
+    const releases = await Promise.allSettled([
+      encoder.release(),
+      ...(decoder ? [decoder.release()] : []),
+    ])
+    releaseFailed = releases.some((release) => release.status === 'rejected')
+  }
+  if (releaseFailed) throw new Error('MobileSAM expansion session release failed')
+  if (!result) throw new Error('MobileSAM completed without an expansion result')
   return result
 }
 

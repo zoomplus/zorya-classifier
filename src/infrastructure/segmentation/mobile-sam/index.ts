@@ -3,6 +3,7 @@ import { ClassifierError, assertActive } from '../../../entities/errors.js'
 import { z } from 'zod'
 
 import type {
+  BinaryMask,
   SegmentationInput,
   SegmentationPort,
   SegmentationResult,
@@ -19,10 +20,16 @@ import { verifyPinnedAsset } from '../verify-asset.js'
 import { probeBackend } from '../probe-backend.js'
 import {
   nativeErrorReplySchema,
+  nativeMobileSamExpansionReplySchema,
   nativeObjectProposalReplySchema,
   nativeSegmentationReplySchema,
   type NativeSegmentationRequest,
 } from '../native-protocol.js'
+import {
+  packFullSourceBinaryMask,
+  unpackFullSourceBinaryMask,
+  validateMobileSamPreviousMask,
+} from './worker-inference.js'
 
 const optionsSchema = z
   .object({
@@ -45,10 +52,13 @@ const proposalOptionsSchema = z
   .strict()
 export type MobileSamObjectProposalsOptions = z.input<typeof proposalOptionsSchema>
 
-interface SerializedTask
-  extends Omit<Extract<NativeSegmentationRequest, { kind: 'mobile-sam' }>, 'id' | 'rgba'> {
-  rgba: string
-}
+type SerializedTask =
+  | (Omit<Extract<NativeSegmentationRequest, { kind: 'mobile-sam' }>, 'id' | 'rgba'> & {
+      rgba: string
+    })
+  | (Omit<Extract<NativeSegmentationRequest, { kind: 'mobile-sam-expand' }>, 'id' | 'rgba'> & {
+      rgba: string
+    })
 
 /** Explicit pinned MobileSAM inference in a separately owned Node child process. */
 export async function createMobileSamSegmenter(
@@ -101,12 +111,14 @@ export async function createMobileSamSegmenter(
         throw new ClassifierError(error.data.code, error.data.message)
       }
       const reply = nativeSegmentationReplySchema.safeParse(raw)
-      if (!reply.success || reply.data.id !== id)
+      if (reply.success && reply.data.id === id) return reply.data
+      const expansion = nativeMobileSamExpansionReplySchema.safeParse(raw)
+      if (!expansion.success || expansion.data.id !== id)
         throw new ClassifierError(
           'INVALID_RESPONSE',
           'Native child returned an invalid or mismatched reply',
         )
-      return reply.data
+      return expansion.data
     },
   })
   return {
@@ -154,6 +166,152 @@ export async function createMobileSamSegmenter(
           durationMs: Math.max(0, performance.now() - started),
           input: { width: image.width, height: image.height },
         },
+      }
+    },
+    async expand(input, previousMask): Promise<SegmentationResult> {
+      const started = performance.now()
+      assertActive(input.signal)
+      let image: ReturnType<typeof snapshotInput> | undefined
+      let previous: Uint8Array | undefined
+      try {
+        const raw = await pool.runLazy(input.signal, () => {
+          image = snapshotInput(input)
+          previous = snapshotPreviousMask(input, previousMask, image)
+          const packedPrevious = packFullSourceBinaryMask(previous, image.width, image.height)
+          let previousMaskBase64: string
+          try {
+            const packedBuffer = Buffer.from(packedPrevious)
+            try {
+              previousMaskBase64 = packedBuffer.toString('base64')
+            } finally {
+              packedBuffer.fill(0)
+            }
+          } finally {
+            packedPrevious.fill(0)
+          }
+          const rgbaBuffer = Buffer.from(image.data)
+          let rgbaBase64: string
+          try {
+            rgbaBase64 = rgbaBuffer.toString('base64')
+          } finally {
+            rgbaBuffer.fill(0)
+          }
+          return {
+            kind: 'mobile-sam-expand',
+            width: image.width,
+            height: image.height,
+            rgba: rgbaBase64,
+            previousMask: previousMaskBase64,
+            seedRegion: image.seedRegion,
+            wholeRegion: image.wholeRegion,
+            roi: image.roi,
+            prompt: image.prompt,
+            options: parsed,
+          }
+        })
+        if (!image || !previous)
+          throw new ClassifierError(
+            'INVALID_RESPONSE',
+            'Native expansion omitted its input snapshot',
+          )
+        const checkedReply = nativeMobileSamExpansionReplySchema.safeParse(raw)
+        if (
+          !checkedReply.success ||
+          checkedReply.data.width !== image.width ||
+          checkedReply.data.height !== image.height
+        )
+          throw new ClassifierError(
+            'INVALID_RESPONSE',
+            'Native child returned an invalid expansion reply',
+          )
+        if (checkedReply.data.status === 'unknown')
+          return {
+            status: 'unknown',
+            reason: 'no-enclosing-mask',
+            metadata: {
+              method: checkedReply.data.method,
+              backend: 'mobile-sam',
+              durationMs: Math.max(0, performance.now() - started),
+              input: { width: image.width, height: image.height },
+            },
+          }
+        const packedBytes = Buffer.from(checkedReply.data.mask, 'base64')
+        let data: Uint8Array
+        try {
+          if (packedBytes.toString('base64') !== checkedReply.data.mask)
+            throw new ClassifierError(
+              'INVALID_RESPONSE',
+              'Native expansion mask encoding is invalid',
+            )
+          try {
+            data = unpackFullSourceBinaryMask(packedBytes, image.width, image.height)
+          } catch {
+            throw new ClassifierError('INVALID_RESPONSE', 'Native expansion packed mask is invalid')
+          }
+        } finally {
+          packedBytes.fill(0)
+        }
+        let oldStats: ReturnType<typeof validateMobileSamPreviousMask>
+        let newStats: ReturnType<typeof validateMobileSamPreviousMask>
+        try {
+          oldStats = validateMobileSamPreviousMask({
+            width: image.width,
+            height: image.height,
+            rgba: image.data,
+            previousMask: previous,
+            roi: image.roi,
+          })
+          newStats = validateMobileSamPreviousMask({
+            width: image.width,
+            height: image.height,
+            rgba: image.data,
+            previousMask: data,
+            roi: image.roi,
+          })
+        } catch {
+          data.fill(0)
+          throw new ClassifierError('INVALID_RESPONSE', 'Native expanded mask is invalid')
+        }
+        let hasNewForeground = false
+        for (let index = 0; index < data.length; index++) {
+          if (previous[index] === 1 && data[index] !== 1) {
+            data.fill(0)
+            throw new ClassifierError('INVALID_RESPONSE', 'Native expansion lost prior foreground')
+          }
+          if (data[index] === 1 && previous[index] === 0) hasNewForeground = true
+        }
+        if (
+          !hasNewForeground ||
+          newStats.area <= oldStats.area ||
+          newStats.bounds.left > oldStats.bounds.left ||
+          newStats.bounds.top > oldStats.bounds.top ||
+          newStats.bounds.right < oldStats.bounds.right ||
+          newStats.bounds.bottom < oldStats.bounds.bottom ||
+          (newStats.bounds.left === oldStats.bounds.left &&
+            newStats.bounds.top === oldStats.bounds.top &&
+            newStats.bounds.right === oldStats.bounds.right &&
+            newStats.bounds.bottom === oldStats.bounds.bottom)
+        ) {
+          data.fill(0)
+          throw new ClassifierError(
+            'INVALID_RESPONSE',
+            'Native expansion is not a strict enclosing mask',
+          )
+        }
+        return {
+          status: 'segmented',
+          mask: { data, width: image.width, height: image.height, format: 'binary-u8' },
+          metadata: {
+            method: checkedReply.data.method,
+            backend: 'mobile-sam',
+            durationMs: Math.max(0, performance.now() - started),
+            input: { width: image.width, height: image.height },
+            qualityScore: checkedReply.data.qualityScore,
+          },
+        }
+      } finally {
+        image?.data.fill(0)
+        previous?.fill(0)
       }
     },
     settle: () => pool.settle(),
@@ -325,6 +483,37 @@ function snapshotInput(input: SegmentationInput) {
     roi: { ...input.roi },
     prompt,
   }
+}
+
+function snapshotPreviousMask(
+  input: SegmentationInput,
+  previousMask: BinaryMask,
+  image: ReturnType<typeof snapshotInput>,
+) {
+  if (
+    !previousMask ||
+    previousMask.format !== 'binary-u8' ||
+    !(previousMask.data instanceof Uint8Array) ||
+    previousMask.width !== image.width ||
+    previousMask.height !== image.height ||
+    previousMask.data.length !== image.width * image.height
+  )
+    throw new ClassifierError('INVALID_INPUT', 'Expansion requires a full-source binary mask')
+  try {
+    validateMobileSamPreviousMask({
+      width: image.width,
+      height: image.height,
+      rgba: image.data,
+      previousMask: previousMask.data,
+      roi: image.roi,
+    })
+  } catch {
+    throw new ClassifierError(
+      'INVALID_INPUT',
+      'Expansion mask must be nonempty binary foreground inside visible ROI pixels',
+    )
+  }
+  return new Uint8Array(previousMask.data)
 }
 
 interface SerializedProposalTask

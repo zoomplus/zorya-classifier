@@ -85,6 +85,37 @@ const mobileSamRequestSchema = z
         context.addIssue({ code: 'custom', message: 'Segmentation region is outside the source' })
   })
 
+const mobileSamExpandRequestSchema = z
+  .object({
+    id: z.string().uuid(),
+    kind: z.literal('mobile-sam-expand'),
+    width: z.number().int().positive().max(16384),
+    height: z.number().int().positive().max(16384),
+    rgba: base64Schema(90_000_000),
+    previousMask: base64Schema(2_796_204),
+    seedRegion: pixelRectSchema,
+    wholeRegion: pixelRectSchema,
+    roi: pixelRectSchema,
+    prompt: z.enum(['whole-region', 'seed-region']).default('whole-region'),
+    options: modelOptionsSchema,
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.width * value.height > 16_777_216)
+      context.addIssue({ code: 'custom', message: 'Image exceeds segmentation pixel limit' })
+    const expectedMaskBytes = Math.ceil((value.width * value.height) / 8)
+    const padding = value.previousMask.endsWith('==') ? 2 : value.previousMask.endsWith('=') ? 1 : 0
+    const decodedMaskBytes = (value.previousMask.length / 4) * 3 - padding
+    if (decodedMaskBytes !== expectedMaskBytes)
+      context.addIssue({
+        code: 'custom',
+        message: 'Previous mask length does not match dimensions',
+      })
+    for (const region of [value.seedRegion, value.wholeRegion, value.roi])
+      if (region.left + region.width > value.width || region.top + region.height > value.height)
+        context.addIssue({ code: 'custom', message: 'Segmentation region is outside the source' })
+  })
+
 // Proposal replies are deliberately packed before IPC; 36 full-resolution byte masks
 // would exceed the native child stdout budget by a wide margin.
 const mobileSamProposalsRequestSchema = z
@@ -134,6 +165,7 @@ export const nativeSegmentationRequestSchema = z.union([
   grabCutProbeSchema,
   mobileSamProposalsRequestSchema,
   mobileSamRequestSchema,
+  mobileSamExpandRequestSchema,
   grabCutRequestSchema,
 ])
 
@@ -149,6 +181,31 @@ export const nativeSegmentationReplySchema = z
   .strict()
 export type NativeSegmentationRequest = z.infer<typeof nativeSegmentationRequestSchema>
 export type NativeSegmentationReply = z.infer<typeof nativeSegmentationReplySchema>
+
+export const nativeMobileSamExpansionReplySchema = z.discriminatedUnion('status', [
+  z
+    .object({
+      id: z.string().uuid(),
+      status: z.literal('expanded'),
+      width: z.number().int().positive().max(16384),
+      height: z.number().int().positive().max(16384),
+      mask: base64Schema(2_796_204),
+      method: z.literal('mobile-sam-enclosing-mask-v1'),
+      qualityScore: z.number().finite(),
+    })
+    .strict(),
+  z
+    .object({
+      id: z.string().uuid(),
+      status: z.literal('unknown'),
+      reason: z.literal('no-enclosing-mask'),
+      width: z.number().int().positive().max(16384),
+      height: z.number().int().positive().max(16384),
+      method: z.literal('mobile-sam-enclosing-mask-v1'),
+    })
+    .strict(),
+])
+export type NativeMobileSamExpansionReply = z.infer<typeof nativeMobileSamExpansionReplySchema>
 
 export const nativeObjectProposalReplySchema = z
   .object({
