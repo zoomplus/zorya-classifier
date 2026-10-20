@@ -1,0 +1,48 @@
+{
+  "schema": "sealed-controlled-map20-cohort-v1",
+  "status": "sealed-before-blind-dispatch-not-model-qualified",
+  "pins": [
+    {
+      "file": "inputs.json",
+      "sha256": "d7c0e31f0b798a1e79d79d56434b4622f1bd09ee48debb2a5047b6d92a03abe8",
+      "bytes": 11553,
+      "parsed": false
+    },
+    {
+      "file": "ground-truth.json",
+      "sha256": "f57629035545b8d3ac36c24b7f19faf8ddf25cf1a1f86fd89eac226b92515f42",
+      "bytes": 17355,
+      "parsed": false
+    },
+    {
+      "file": "source-ledger.json",
+      "sha256": "4de33829171cb0807bc7430efd388e7d6771c5d6662c334eaa7b80c2ed8f7a87",
+      "bytes": 46057,
+      "parsed": false
+    }
+  ],
+  "curatorReported": {
+    "cases": 20,
+    "positive": 15,
+    "verifiedNegative": 5,
+    "distinctOfficialMapSourceGroups": 20,
+    "gameEditorFamilies": 1,
+    "ownedScreenshots": 60,
+    "failedCaptures": 0,
+    "modelCalls": 0,
+    "positiveOracle": "Isolated marker A/B/A minimap delta inside exact source-projected support using repeated float32 sampling; visible delta box rather than full projection",
+    "negativeOracle": "No village token in source map and zero village-toggle minimap delta"
+  },
+  "rootReview": {
+    "pinBytesRehashed": true,
+    "newMapImagesOpened": false,
+    "perCaseTruthParsed": false,
+    "independentExcludedProof": "wesnoth-proof-root-review-20261020-v1.json"
+  },
+  "limits": [
+    "Controlled actual Wesnoth 1.16.11 editor captures, not diverse natural gameplay.",
+    "Per-case oracle validation remains separately pinned to curator source and ledger; this receipt independently verifies bytes only.",
+    "Image-root path canonicalization will derive new input manifest pins and retain these originals.",
+    "No model accuracy, mask quality or release qualification is established by acquisition."
+  ]
+}

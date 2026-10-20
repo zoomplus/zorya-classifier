@@ -1,0 +1,61 @@
+{
+  "schema": "categorical-box-heldout-run-freeze-v1",
+  "phase": "heldout",
+  "profileId": "native-luna-box-confirmation-sam-target-plus-neutral-heldout-v1",
+  "selectionVersion": "box-confirmation-dev-method-selection-v1",
+  "methodSelectionSha256": "3b576871c36d904203ef06e0cf26af5847a71a92c2df3647725d532238258c5e",
+  "targetPolicy": "target-plus-neutral-instruction-v1",
+  "manifests": [
+    {
+      "group": "photo",
+      "sha256": "ce0d7af70cace50fbee83d3cc21cc83fa4c213759f49758ba53397509660906c",
+      "cases": 40
+    },
+    {
+      "group": "ui",
+      "sha256": "9f31d033fe1b48d2d312c8bfb0274b5f30494978e6c95115508b283d38ce76d2",
+      "cases": 20
+    },
+    {
+      "group": "map",
+      "sha256": "d7c0e31f0b798a1e79d79d56434b4622f1bd09ee48debb2a5047b6d92a03abe8",
+      "cases": 20
+    }
+  ],
+  "producerSourceSha256": "661cfe53782105d99423cfba70466121f76fcd4c6f09fb35ec7a888389e5ce0f",
+  "noImageProducerSourceSha256": "661cfe53782105d99423cfba70466121f76fcd4c6f09fb35ec7a888389e5ce0f",
+  "candidateBudget": {
+    "maxPhysicalCalls": 600,
+    "maxCostUsd": 10,
+    "unknownCostReserveUsd": 0.05,
+    "maxPhysicalCallsPerCase": 6,
+    "maxInFlightCases": 2,
+    "timeoutMs": 120000,
+    "nativeMaxActive": 1,
+    "nativeMaxWaiting": 2,
+    "nativeThreads": 2,
+    "boxTolerancePx": 8,
+    "maxExtentPasses": 3,
+    "retries": 0,
+    "fallback": false
+  },
+  "noImageBudget": {
+    "maxPhysicalCalls": 300,
+    "maxCostUsd": 5,
+    "unknownCostReserveUsd": 0.05,
+    "maxPhysicalCallsPerCase": 6,
+    "maxInFlightCases": 1,
+    "timeoutMs": 120000,
+    "boxTolerancePx": 8,
+    "maxExtentPasses": 3,
+    "retries": 0,
+    "fallback": false,
+    "classifyMaxOutputTokens": 1024,
+    "locateMaxOutputTokens": 4096,
+    "imagePartsRemoved": true,
+    "imageEncoder": null,
+    "objectProposals": null,
+    "segmentation": false,
+    "ocr": false
+  }
+}

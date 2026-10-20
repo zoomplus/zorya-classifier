@@ -1,0 +1,89 @@
+{
+  "schema": "box-heldout-combined-corpus-and-assets-seal-v1",
+  "status": "input-source-asset-seal-only-dispatch-not-yet-authorized",
+  "freezeFile": "box-heldout-run-freeze-20261021-v1.json",
+  "freezeSha256": "31e6b96b485b1dccbbe10b2c5e222ca0c20f3adbe25ee027a682595a136d8650",
+  "methodSelectionSha256": "3b576871c36d904203ef06e0cf26af5847a71a92c2df3647725d532238258c5e",
+  "producerSourceSha256": "661cfe53782105d99423cfba70466121f76fcd4c6f09fb35ec7a888389e5ce0f",
+  "sourceFiles": 82,
+  "opaqueCanonicalPins": [
+    {
+      "file": "photo-inputs.json",
+      "sha256": "ce0d7af70cace50fbee83d3cc21cc83fa4c213759f49758ba53397509660906c",
+      "bytes": 22710,
+      "caseDetailsParsed": false
+    },
+    {
+      "file": "ui-inputs.json",
+      "sha256": "9f31d033fe1b48d2d312c8bfb0274b5f30494978e6c95115508b283d38ce76d2",
+      "bytes": 13133,
+      "caseDetailsParsed": false
+    },
+    {
+      "file": "map-inputs.json",
+      "sha256": "d7c0e31f0b798a1e79d79d56434b4622f1bd09ee48debb2a5047b6d92a03abe8",
+      "bytes": 11553,
+      "caseDetailsParsed": false
+    },
+    {
+      "file": "photoTruth.json",
+      "sha256": "8bd4db0d5818df6902c99c2d6cb1d338e662af29903d9885dcffa17a8f0b344a",
+      "bytes": 128525,
+      "caseDetailsParsed": false
+    },
+    {
+      "file": "uiTruth.json",
+      "sha256": "c749e524854ab34e37abe36d83d91078a1ee31297a67af5cc7a26e019f851548",
+      "bytes": 8004,
+      "caseDetailsParsed": false
+    },
+    {
+      "file": "mapTruth.json",
+      "sha256": "f57629035545b8d3ac36c24b7f19faf8ddf25cf1a1f86fd89eac226b92515f42",
+      "bytes": 17355,
+      "caseDetailsParsed": false
+    },
+    {
+      "file": "combined-inputs.json",
+      "sha256": "1ee7bb1012641563d6341bb945df099588faee6519fc3aff55ba89bee6344d76",
+      "bytes": 47390,
+      "caseDetailsParsed": false
+    }
+  ],
+  "nativeAssets": [
+    {
+      "file": "mobile_sam_image_encoder.onnx",
+      "bytes": 28157093,
+      "sha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749",
+      "rootRehashed": true
+    },
+    {
+      "file": "sam_mask_decoder_multi.onnx",
+      "bytes": 16496559,
+      "sha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe",
+      "rootRehashed": true
+    }
+  ],
+  "curatorReportedCopies": {
+    "photo": 40,
+    "ui": 20,
+    "map": 20,
+    "officialPhotoMasks": 30,
+    "imageBytesVerified": 40353482,
+    "actualLibraryCorpusAndImageLoaderPassCases": 80
+  },
+  "canonicalization": "Derived photo/ and ui/ image paths; map/ paths unchanged; exact source raster and mask bytes; original inputs and truths preserved.",
+  "rootReview": {
+    "openedNewCohortImagePixels": false,
+    "parsedInputCaseDetails": false,
+    "parsedPerCaseTruth": false,
+    "hashedPinnedJsonAsOpaqueBytes": true,
+    "providerCalls": 0
+  },
+  "prerequisitesStillRequired": [
+    "Terminal current-runtime two-hour monotonic resource proof with independent live-process witness",
+    "External dispatch authorization binding current source/archive/CI, source-oracle integrity and these assets",
+    "No per-case truth opened outside independent curator role until both candidate and no-image control are terminal"
+  ],
+  "releaseQualified": false
+}

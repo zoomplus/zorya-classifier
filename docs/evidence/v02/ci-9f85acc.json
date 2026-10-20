@@ -1,0 +1,127 @@
+{
+  "schema": "hosted-source-gate-summary-v1",
+  "databaseId": 39495764471,
+  "headSha": "9f85acca611abb5432b410386ab1128f313f04e2",
+  "conclusion": "success",
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39495764471",
+  "rawReceiptSha256": "bc410bdec1a219754343efcc87dd9d8a01ed05b28844185ce341480a0012640e",
+  "jobs": [
+    {
+      "databaseId": 118880286995,
+      "name": "verify (windows-latest, 24)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39495764471/job/118880286995",
+      "steps": [
+        {
+          "name": "Run npm ci --ignore-scripts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run pack:check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run format:check",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "databaseId": 118880287406,
+      "name": "verify (ubuntu-latest, 22)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39495764471/job/118880287406",
+      "steps": [
+        {
+          "name": "Run npm ci --ignore-scripts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run pack:check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run format:check",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "databaseId": 118880287489,
+      "name": "verify (windows-latest, 22)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39495764471/job/118880287489",
+      "steps": [
+        {
+          "name": "Run npm ci --ignore-scripts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run pack:check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run format:check",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "databaseId": 118880287544,
+      "name": "verify (ubuntu-latest, 24)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39495764471/job/118880287544",
+      "steps": [
+        {
+          "name": "Run npm ci --ignore-scripts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run pack:check",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run format:check",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "scope": "Source, formatting, 471 offline tests and installed-archive CI. New box-confirmation input/source freeze remains a dispatch prerequisite, not qualification; final resource and blind-model gates are separate."
+}
