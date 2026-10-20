@@ -8,7 +8,11 @@ import { RunBudget, RunBudgetExhausted } from '../benchmarks/v02/budget.js'
 import { inputManifestSchema, modelRequestManifest } from '../benchmarks/v02/protocol.js'
 import { recordProvider } from '../benchmarks/v02/recording.js'
 import { applyPromptVariant, promptVariants } from '../benchmarks/v02/promptvariants.js'
-import { createLunaDecisionProvider } from '../benchmarks/v02/runner.js'
+import {
+  createLunaDecisionProvider,
+  createTextProviderForVariant,
+} from '../benchmarks/v02/runner.js'
+import { parseV02RunnerArgs } from '../benchmarks/v02/run.js'
 
 await test('Luna native control uses the typed Decisions endpoint and preserves returned probabilities', async () => {
   let calls = 0
@@ -54,6 +58,89 @@ await test('Luna native control uses the typed Decisions endpoint and preserves 
     { present: 0.8, absent: 0.2 },
   )
   assert.equal(result.metadata.costUsd, 0.0001)
+})
+
+await test('none reasoning probe freezes its exact text transport and limits dispatch to one call', async () => {
+  const options = parseV02RunnerArgs([
+    '--allow-paid',
+    '--max-physical-calls',
+    '1',
+    '--max-cost-usd',
+    '0.10',
+    '--transport-probe',
+    '--transport-variant',
+    'none-json-schema',
+  ])
+  assert.equal(options.transportProbe, true)
+  assert.equal(options.maxPhysicalCalls, 1)
+  assert.equal(options.maxCostUsd, 0.1)
+  assert.throws(() =>
+    parseV02RunnerArgs([
+      '--allow-paid',
+      '--max-physical-calls',
+      '2',
+      '--max-cost-usd',
+      '0.10',
+      '--transport-probe',
+      '--transport-variant',
+      'none-json-schema',
+    ]),
+  )
+
+  let calls = 0
+  const provider = createTextProviderForVariant(
+    'fixture-key',
+    1024,
+    async (url, init) => {
+      calls++
+      assert.equal(url, 'https://openrouter.ai/api/v1/chat/completions')
+      const body = JSON.parse(String(init?.body)) as Record<string, unknown>
+      assert.equal(body.model, 'deepseek/deepseek-v4.1-flash')
+      assert.equal(body.max_tokens, 1024)
+      assert.deepEqual(body.reasoning, { effort: 'none' })
+      assert.deepEqual(body.provider, {
+        only: ['together'],
+        allow_fallbacks: false,
+        require_parameters: true,
+      })
+      const format = body.response_format as Record<string, unknown>
+      assert.equal(format.type, 'json_schema')
+      assert.equal(body.stream, false)
+      return new Response(
+        JSON.stringify({
+          id: 'fixture-id',
+          model: 'deepseek/deepseek-v4.1-flash',
+          provider: 'Together',
+          choices: [
+            {
+              index: 0,
+              finish_reason: 'stop',
+              message: {
+                content: '{"answers":{"selection":{"ranking":["present","absent"]}}}',
+              },
+            },
+          ],
+          usage: { cost: 0.0001 },
+        }),
+      )
+    },
+    'none-json-schema',
+  )
+  const result = await provider.decide(
+    {
+      state: ['encoded fixture'],
+      questions: {
+        selection: {
+          type: 'choice',
+          instructions: 'Rank the options.',
+          criteria: { present: 'Present.', absent: 'Absent.' },
+        },
+      },
+    },
+    AbortSignal.timeout(1000),
+  )
+  assert.equal(calls, 1)
+  assert.equal(result.answers.selection?.type, 'ranked-choice')
 })
 
 await test('budget admits no more than its explicit physical calls and unknown receipts reserve cost', () => {

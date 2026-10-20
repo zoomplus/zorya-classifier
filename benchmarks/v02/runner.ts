@@ -17,6 +17,8 @@ import { recordProvider } from './recording.js'
 import type { PhysicalCallRecord, Recorder } from './recording.js'
 import { applyPromptVariant, promptVariants } from './promptvariants.js'
 import type { PromptVariantId } from './promptvariants.js'
+import { textTransportVariants } from './transportvariants.js'
+import type { TransportVariantId } from './transportvariants.js'
 
 const sourceManifestPath = new URL('./input-manifest.json', import.meta.url)
 const apiKeyPath = '/root/work/element/.env.local'
@@ -43,6 +45,7 @@ export interface DiagnosticRunOptions {
   maxPhysicalCalls: number
   maxCostUsd: number
   promptVariant: PromptVariantId
+  transportVariant: TransportVariantId
   caseLimit: 2 | 4
 }
 
@@ -115,17 +118,28 @@ function makeProvider(
   route: typeof routeTable.togetherText,
   maxOutputTokens: 1024 | 4096,
   fetch: typeof globalThis.fetch,
+  transportVariant: TransportVariantId = 'low-json-schema',
 ): DecisionPort {
+  const transport = textTransportVariants[transportVariant]
   return createOpenRouterText({
     apiKey,
     model: route.model,
     provider: route.provider,
     providerName: route.providerName,
-    responseFormat: 'json-schema',
+    responseFormat: transport.responseFormat,
     maxOutputTokens,
-    reasoningEffort: 'low',
+    reasoningEffort: transport.reasoningEffort,
     fetch,
   })
+}
+
+export function createTextProviderForVariant(
+  apiKey: string,
+  maxOutputTokens: 1024 | 4096,
+  fetch: typeof globalThis.fetch,
+  transportVariant: TransportVariantId,
+): DecisionPort {
+  return makeProvider(apiKey, routeTable.togetherText, maxOutputTokens, fetch, transportVariant)
 }
 
 export function createLunaDecisionProvider(
@@ -394,6 +408,8 @@ export async function runDiagnostic(options: DiagnosticRunOptions) {
     selectedCaseIds: selectedCases.map((item) => item.caseId),
     promptVariant: options.promptVariant,
     promptVariantSha256: hashCanonical(selectedVariant),
+    transportVariant: options.transportVariant,
+    transportVariantSha256: hashCanonical(textTransportVariants[options.transportVariant]),
     routeTable,
     limits: {
       maxPhysicalCalls: options.maxPhysicalCalls,
@@ -430,7 +446,7 @@ export async function runDiagnostic(options: DiagnosticRunOptions) {
       await mkdir(candidateDirectory, { recursive: true })
       if (candidate.kind === 'no-image') {
         const p1 = (fetch: typeof globalThis.fetch) =>
-          makeProvider(apiKey, routeTable.togetherText, 1024, fetch)
+          makeProvider(apiKey, routeTable.togetherText, 1024, fetch, options.transportVariant)
         const c = await noImageControl(
           input.target,
           'classify',
@@ -439,7 +455,7 @@ export async function runDiagnostic(options: DiagnosticRunOptions) {
           join(candidateDirectory, 'classify'),
         )
         const p2 = (fetch: typeof globalThis.fetch) =>
-          makeProvider(apiKey, routeTable.togetherText, 4096, fetch)
+          makeProvider(apiKey, routeTable.togetherText, 4096, fetch, options.transportVariant)
         const l = await noImageControl(
           input.target,
           'locate',
@@ -462,7 +478,7 @@ export async function runDiagnostic(options: DiagnosticRunOptions) {
       const classifyProvider = (fetch: typeof globalThis.fetch) =>
         candidate.kind === 'vision'
           ? createLunaDecisionProvider(apiKey, fetch)
-          : makeProvider(apiKey, routeTable.togetherText, 1024, fetch)
+          : makeProvider(apiKey, routeTable.togetherText, 1024, fetch, options.transportVariant)
       const classifyRecorder = newRecorder(
         classifyProvider,
         budget,
@@ -483,7 +499,7 @@ export async function runDiagnostic(options: DiagnosticRunOptions) {
       const locateProvider = (fetch: typeof globalThis.fetch) =>
         candidate.kind === 'vision'
           ? createLunaDecisionProvider(apiKey, fetch)
-          : makeProvider(apiKey, routeTable.togetherText, 4096, fetch)
+          : makeProvider(apiKey, routeTable.togetherText, 4096, fetch, options.transportVariant)
       const locateRecorder = newRecorder(
         locateProvider,
         budget,
@@ -535,6 +551,87 @@ export async function runDiagnostic(options: DiagnosticRunOptions) {
       errorCode: call.errorCode,
       durationMs: call.durationMs,
     })),
+  }
+  await writeImmutable(
+    join(outputDirectory, 'summary.json'),
+    JSON.stringify(summary, null, 2) + '\n',
+  )
+  await writeImmutable(
+    join(outputDirectory, 'run-complete.json'),
+    JSON.stringify({ endedAt: new Date().toISOString(), aggregate: budget.snapshot() }, null, 2) +
+      '\n',
+  )
+  return { ...summary, outputDirectory }
+}
+
+export async function runTransportProbe(options: {
+  imageRoot: string
+  outputRoot: string
+  maxPhysicalCalls: 1
+  maxCostUsd: number
+  promptVariant: PromptVariantId
+  transportVariant: TransportVariantId
+}) {
+  if (options.maxCostUsd > 0.1) throw new RangeError('Transport probe budget cannot exceed $0.10')
+  const manifest = await loadManifest()
+  const input = manifest.cases[0]!
+  const selectedPrompt = promptVariants[options.promptVariant]
+  const selectedTransport = textTransportVariants[options.transportVariant]
+  const runId = `v02-transport-probe-${new Date().toISOString().replaceAll(':', '').replaceAll('.', '')}-${randomUUID().slice(0, 8)}`
+  const outputDirectory = resolve(options.outputRoot, runId)
+  await mkdir(options.outputRoot, { recursive: true })
+  await mkdir(outputDirectory, { recursive: false })
+  const callDirectory = join(outputDirectory, 'ascii-luma-v1', input.caseId, 'classify')
+  await mkdir(callDirectory, { recursive: true })
+  const budget = new RunBudget(options.maxPhysicalCalls, options.maxCostUsd)
+  const apiKey = await openRouterKey()
+  const manifestRecord = {
+    schemaVersion: 1,
+    runId,
+    purpose: 'one-call exposed-development transport probe; not qualification',
+    sourceManifestSha256: hashCanonical(manifest),
+    selectedCaseId: input.caseId,
+    encoder: 'ascii-luma-v1',
+    promptVariant: options.promptVariant,
+    promptVariantSha256: hashCanonical(selectedPrompt),
+    transportVariant: options.transportVariant,
+    transportVariantSha256: hashCanonical(selectedTransport),
+    route: routeTable.togetherText,
+    limits: {
+      maxPhysicalCalls: options.maxPhysicalCalls,
+      maxCostUsd: options.maxCostUsd,
+      maxOutputTokens: 1024,
+    },
+    modelBoundary: { ...modelRequestManifest, sourceCaseIdsAndPathsAreProducerLocalOnly: true },
+  }
+  await writeImmutable(
+    join(outputDirectory, 'run-manifest.json'),
+    JSON.stringify(manifestRecord, null, 2) + '\n',
+  )
+  const recorder = newRecorder(
+    (fetch) => makeProvider(apiKey, routeTable.togetherText, 1024, fetch, options.transportVariant),
+    budget,
+    callDirectory,
+    routeTable.togetherText,
+  )
+  const port = transformedPort(recorder, options.promptVariant)
+  const { bytes, digest } = await loadImage(input, options.imageRoot)
+  const stageResult = await classify(
+    bytes,
+    input.target,
+    port,
+    createTextRepresentation(textEncodersV1['ascii-luma-v1']!),
+  )
+  const summary = {
+    runId,
+    status: budget.snapshot().inFlightCalls === 0 ? 'complete' : 'incomplete',
+    sourceSha256: digest,
+    encoder: 'ascii-luma-v1',
+    route: 'together-text',
+    transportVariant: options.transportVariant,
+    classify: stageResult.stage,
+    aggregate: budget.snapshot(),
+    latency: latencySummary(recorder.calls.map((call) => call.durationMs)),
   }
   await writeImmutable(
     join(outputDirectory, 'summary.json'),
