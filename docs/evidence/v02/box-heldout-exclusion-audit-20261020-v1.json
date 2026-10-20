@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "status": "corrected-metadata-only-source-exclusion-audit",
+  "cohorts": [
+    {
+      "name": "v0.1",
+      "sha256": "a99f47d4e1c064581c6cc9123b58a5c81b196d15227963bf015041544f713aa3",
+      "cases": 60,
+      "sourceLedgerLabel": "original-0.1-photo60"
+    },
+    {
+      "name": "v0.2",
+      "sha256": "6f82165cb5a46acee698f87a9d5f916bf1ce6755713d5d8749bb3f89957f4852",
+      "cases": 60,
+      "sourceLedgerLabel": "v02-photo60"
+    },
+    {
+      "name": "v0.3-exposed-heldout",
+      "sha256": "19507c1c53c7eec76791ae0cd2997db839867afc564d15fc92829b43436d79fe",
+      "cases": 40,
+      "sourceLedgerLabel": "exposed-categorical-heldout-photo40"
+    }
+  ],
+  "pairwiseOverlapCounts": {
+    "ids": [
+      [60, 0, 0],
+      [0, 60, 0],
+      [0, 0, 40]
+    ],
+    "sha256s": [
+      [60, 0, 0],
+      [0, 60, 0],
+      [0, 0, 40]
+    ],
+    "groups": [
+      [60, 0, 0],
+      [0, 60, 0],
+      [0, 0, 40]
+    ]
+  },
+  "unionCounts": {
+    "ids": 160,
+    "sha256s": 160,
+    "groups": 160
+  },
+  "unionSortedNewlineTerminatedSha256": {
+    "ids": "9f9fb4c5a305babc5bfd2dcce31f7fb5778c296fd95db2457adebb0a9b8369cc",
+    "sha256s": "65421632c09f3ba1a2b16a93e39e6d5cc5ad359b35d2719d7d93c6e03ab7d8d5",
+    "groups": "3ef8e89780192dbe395e98caa91eab80fcb776dd6f801c1635b1a17e94e9adfb"
+  },
+  "normalizationCheck": {
+    "rawGroupsEndWithSlashCount": 0,
+    "rawGroupCount": 160,
+    "rstripSlashChangesObservedSet": false
+  },
+  "priorClaims": {
+    "incompleteUnion": {
+      "count": 100,
+      "cause": "omitted the original v0.1 60-photo manifest"
+    },
+    "unreproducibleGroupDigest": "611f581db391b636910048720c8d5b5d18a4b2a20522c5e6c26e8051f056dc7c",
+    "assessment": "The earlier group digest is not produced by either raw or rstrip-normalized ledger values. All observed profile URLs lack a trailing slash; report it as a transcription/arithmetic error, not a canonicalization change."
+  },
+  "rawAuditSha256": "bcb1b9b32f5ea961092117203a30002f0a2dbd00d86adabf790b754005265f84",
+  "independentRootVerification": {
+    "verified": true,
+    "sourceLedgersRehashed": 3,
+    "unionRecomputed": true,
+    "newCohortPixelsRead": false,
+    "newPerCaseTruthRead": false,
+    "methodSelectionSha256": "3b576871c36d904203ef06e0cf26af5847a71a92c2df3647725d532238258c5e"
+  },
+  "admissionRule": {
+    "excludeMatchingPriorImageId": true,
+    "excludeMatchingPriorImageSha256": true,
+    "excludeMatchingPriorAuthorGroup": true,
+    "positiveCasesMustHaveExactSourceJpegAndOfficialMaskCanvas": true,
+    "normalizingPhotoToGroundTruthBoxAllowed": false,
+    "freshCohortStatus": "acquisition-in-progress-not-yet-frozen"
+  }
+}

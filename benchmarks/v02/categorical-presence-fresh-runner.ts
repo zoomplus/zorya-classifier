@@ -25,6 +25,13 @@ import type { PhysicalCallRecord, Recorder } from './recording.js'
 import { createNativeCategoricalPresencePort } from './native-categorical-presence-port.js'
 import type { HeldoutCandidatePlan } from './categorical-heldout-plan.js'
 import { assertVerifiedHeldoutFreeze, buildHeldoutPlans } from './categorical-heldout-plan.js'
+import type { BoxHeldoutCandidatePlan } from './categorical-box-heldout-plan.js'
+import {
+  assertVerifiedBoxHeldoutFreeze,
+  buildBoxHeldoutPlans,
+  boxHeldoutCandidatePolicy,
+} from './categorical-box-heldout-plan.js'
+import { categoricalBoxHeldoutProducerSourceManifest as boxHeldoutSourceManifest } from './categorical-box-heldout-source.js'
 
 type CategoricalTargetPolicy = 'target-plus-neutral-instruction-v1' | 'target-only-v1'
 
@@ -256,8 +263,26 @@ function writeImmutable(path: string, value: unknown): Promise<void> {
 }
 
 export async function categoricalFreshProducerSourceManifest(): Promise<Record<string, string>> {
+  return categoricalProducerSourceManifest(categoricalFreshProducerSourceFiles)
+}
+
+/** Separate closure for the box-confirmation heldout profile; legacy closure stays unchanged. */
+export async function categoricalBoxHeldoutProducerSourceManifest(): Promise<
+  Record<string, string>
+> {
+  return boxHeldoutSourceManifest()
+}
+
+export async function categoricalBoxHeldoutProducerSourceSha256(): Promise<string> {
+  const hashes = await categoricalBoxHeldoutProducerSourceManifest()
+  return hashCanonical(Object.entries(hashes).sort(([a], [b]) => a.localeCompare(b)))
+}
+
+async function categoricalProducerSourceManifest(
+  benchmarkFiles: readonly string[],
+): Promise<Record<string, string>> {
   const bench = await Promise.all(
-    categoricalFreshProducerSourceFiles.map(
+    [...new Set(benchmarkFiles)].map(
       async (path) => [path, sha256(await readFile(new URL(path, import.meta.url)))] as const,
     ),
   )
@@ -638,6 +663,33 @@ export async function runCategoricalPresenceFreshHeldout(
   )
 }
 
+/** Separate heldout recipe bound to the box-confirmation method-selection digest. */
+export async function runCategoricalPresenceBoxHeldout(
+  options: FreshProposalRunnerOptions,
+  freezeInput: unknown,
+  signal: AbortSignal = new AbortController().signal,
+) {
+  assertVerifiedBoxHeldoutFreeze(freezeInput)
+  const plans = buildBoxHeldoutPlans(freezeInput)
+  const source = await categoricalBoxHeldoutProducerSourceManifest()
+  const actualSourceSha256 = hashCanonical(
+    Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
+  )
+  if (actualSourceSha256 !== plans.candidate.producerSourceSha256)
+    throw new TypeError('Box HELDOUT producer source does not match frozen source digest')
+  if (options.expectedCaseCount !== undefined && options.expectedCaseCount !== 80)
+    throw new TypeError('Box HELDOUT candidate requires exactly 80 cases')
+  return runCategoricalFreshProfile(
+    { ...options, expectedCaseCount: 80 },
+    { id: plans.candidate.profileId, targetPolicy: plans.candidate.targetPolicy },
+    signal,
+    actualSourceSha256,
+    'heldout',
+    plans.candidate,
+    true,
+  )
+}
+
 /** Runs the two predeclared target-policy profiles serially, each with its own hard budget. */
 export async function runCategoricalPresenceFreshPair(
   options: FreshProposalRunnerOptions,
@@ -670,13 +722,16 @@ async function runCategoricalFreshProfile(
   signal: AbortSignal,
   expectedSourceSha256?: string,
   phase: 'dev' | 'heldout' = 'dev',
-  heldoutPlan?: HeldoutCandidatePlan,
+  heldoutPlan?: HeldoutCandidatePlan | BoxHeldoutCandidatePlan,
+  boxHeldout = false,
 ) {
   const corpus = await loadFreshCorpus(
     { manifests: options.manifests, imageRoot: options.imageRoot },
     signal,
   )
-  const source = await categoricalFreshProducerSourceManifest()
+  const source = await (boxHeldout
+    ? categoricalBoxHeldoutProducerSourceManifest()
+    : categoricalFreshProducerSourceManifest())
   const producerSourceSha256 = hashCanonical(
     Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
   )
@@ -738,7 +793,12 @@ async function runCategoricalFreshProfile(
     }
   }
   const profileId = profile.id
-  const policy = phase === 'heldout' ? categoricalHeldoutPolicy : categoricalFreshPolicy
+  const policy =
+    phase === 'heldout'
+      ? boxHeldout
+        ? boxHeldoutCandidatePolicy
+        : categoricalHeldoutPolicy
+      : categoricalFreshPolicy
   const frozenProfile = {
     profileId,
     ...(phase === 'heldout' ? { phase: 'heldout' as const } : { phase: 'dev' as const }),
@@ -802,7 +862,8 @@ async function runCategoricalFreshProfile(
     ...(phase === 'heldout' ? { phase: 'heldout' as const } : { phase: 'dev' as const }),
     purpose:
       phase === 'heldout'
-        ? 'full frozen HELDOUT photo, independent UI and independent map producer pass'
+        ? (heldoutPlan?.purpose ??
+          'full frozen HELDOUT photo, independent UI and independent map producer pass')
         : 'full fresh DEV photo, independent UI and independent map producer pass',
     startedAt: new Date().toISOString(),
     variantSha256,
@@ -911,7 +972,9 @@ async function runCategoricalFreshProfile(
   const completed = new Set(completedCaseIds)
   const missingCaseIds = plannedCaseIds.filter((caseId) => !completed.has(caseId))
   const aggregate = budget.snapshot() satisfies BudgetSnapshot
-  const sourceAfter = await categoricalFreshProducerSourceManifest()
+  const sourceAfter = await (boxHeldout
+    ? categoricalBoxHeldoutProducerSourceManifest()
+    : categoricalFreshProducerSourceManifest())
   const sourceAfterSha256 = hashCanonical(
     Object.entries(sourceAfter).sort(([a], [b]) => a.localeCompare(b)),
   )

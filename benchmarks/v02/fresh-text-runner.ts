@@ -21,6 +21,12 @@ import { applyPromptVariant, promptVariants } from './promptvariants.js'
 import { textTransportVariants } from './transportvariants.js'
 import type { HeldoutNoImagePlan } from './categorical-heldout-plan.js'
 import { assertVerifiedHeldoutFreeze, buildHeldoutPlans } from './categorical-heldout-plan.js'
+import type { BoxHeldoutNoImagePlan } from './categorical-box-heldout-plan.js'
+import {
+  assertVerifiedBoxHeldoutFreeze,
+  buildBoxHeldoutPlans,
+} from './categorical-box-heldout-plan.js'
+import { categoricalBoxHeldoutProducerSourceManifest } from './categorical-box-heldout-source.js'
 
 const keyFile = '/root/work/element/.env.local'
 const route = Object.freeze({
@@ -175,6 +181,8 @@ export interface FreshTextRunnerOptions {
   phase?: FreshTextPhase
   /** Supplied only by the separately frozen HELDOUT no-image entry point. */
   heldoutPlan?: HeldoutNoImagePlan
+  /** Distinct box-confirmation HELDOUT control plan; never aliases the legacy plan. */
+  boxHeldoutPlan?: BoxHeldoutNoImagePlan
   /** Offline-only failure injection for immutable result persistence and disposal. */
   testHooks?: {
     writeCaseResult?: (path: string, result: unknown) => Promise<void>
@@ -284,9 +292,11 @@ function sha256(value: Uint8Array | string): string {
   return createHash('sha256').update(value).digest('hex')
 }
 
-async function sourceHashes(): Promise<Record<string, string>> {
+async function sourceHashes(
+  additionalFiles: readonly string[] = [],
+): Promise<Record<string, string>> {
   const bench = await Promise.all(
-    sourceFiles.map(
+    [...new Set([...sourceFiles, ...additionalFiles])].map(
       async (path) => [path, sha256(await readFile(new URL(path, import.meta.url)))] as const,
     ),
   )
@@ -319,6 +329,16 @@ async function sourceHashes(): Promise<Record<string, string>> {
 export async function freshTextProducerSourceSha256(): Promise<string> {
   const hashes = await sourceHashes()
   return hashCanonical(Object.entries(hashes).sort(([a], [b]) => a.localeCompare(b)))
+}
+
+/** Distinct source closure for the box-confirmation heldout no-image control. */
+export async function freshTextBoxHeldoutProducerSourceSha256(): Promise<string> {
+  const hashes = await freshTextBoxHeldoutProducerSourceManifest()
+  return hashCanonical(Object.entries(hashes).sort(([a], [b]) => a.localeCompare(b)))
+}
+
+export async function freshTextBoxHeldoutProducerSourceManifest(): Promise<Record<string, string>> {
+  return categoricalBoxHeldoutProducerSourceManifest()
 }
 
 async function writeImmutable(path: string, value: unknown): Promise<void> {
@@ -591,6 +611,21 @@ export async function runCategoricalHeldoutNoImageControl(
   )
 }
 
+/** Distinct no-image HELDOUT entry point for the box-confirmation selection. */
+export async function runCategoricalBoxHeldoutNoImageControl(
+  options: Omit<FreshTextRunnerOptions, 'phase' | 'heldoutPlan' | 'boxHeldoutPlan'>,
+  freezeInput: unknown,
+  signal: AbortSignal = new AbortController().signal,
+) {
+  assertVerifiedBoxHeldoutFreeze(freezeInput)
+  const plans = buildBoxHeldoutPlans(freezeInput)
+  return runFreshTextProfile(
+    { ...options, phase: 'heldout', boxHeldoutPlan: plans.noImage },
+    'no-image-control',
+    signal,
+  )
+}
+
 export async function runFreshTextProfile(
   options: FreshTextRunnerOptions,
   profileId: FreshTextProfileId,
@@ -598,33 +633,41 @@ export async function runFreshTextProfile(
 ) {
   if (!freshTextProfiles.includes(profileId)) throw new TypeError('Unknown fresh text profile')
   const phase = options.phase ?? 'dev'
+  const activeHeldoutPlan = options.boxHeldoutPlan ?? options.heldoutPlan
   const purpose = validateFreshTextPhaseRequest(
     phase,
     profileId,
     options.manifests,
     options.stages ?? 'classify-and-locate',
-    options.heldoutPlan?.manifest.sha256,
+    activeHeldoutPlan?.manifest.sha256,
   )
-  if (phase === 'heldout' && !options.heldoutPlan)
+  if (phase === 'heldout' && !activeHeldoutPlan)
     throw new TypeError('A strict frozen HELDOUT no-image plan is required')
   if (
     phase === 'heldout' &&
-    options.heldoutPlan?.profileId !== 'deepseek-flash-no-image-photo-heldout-v1'
+    options.heldoutPlan?.profileId !== 'deepseek-flash-no-image-photo-heldout-v1' &&
+    options.boxHeldoutPlan?.profileId !==
+      'deepseek-flash-no-image-photo-box-confirmation-heldout-v1'
   )
     throw new TypeError('HELDOUT no-image control profile identity is invalid')
+  if (phase === 'heldout' && Boolean(options.heldoutPlan) === Boolean(options.boxHeldoutPlan))
+    throw new TypeError('Provide exactly one frozen HELDOUT no-image plan')
   const policy = freshTextPolicyForPhase(phase)
-  const outputProfileId = options.heldoutPlan?.profileId ?? profileId
-  const runPurpose =
-    options.stages === 'classify-only'
+  const outputProfileId = activeHeldoutPlan?.profileId ?? profileId
+  const runPurpose = options.boxHeldoutPlan
+    ? options.boxHeldoutPlan.purpose
+    : options.stages === 'classify-only'
       ? 'classification-only follow-up for pinned fresh DEV text profiles'
       : purpose
-  const source = await sourceHashes()
+  const source = await (options.boxHeldoutPlan
+    ? categoricalBoxHeldoutProducerSourceManifest()
+    : sourceHashes())
   const producerSourceSha256 = hashCanonical(
     Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
   )
   if (
     phase === 'heldout' &&
-    producerSourceSha256 !== options.heldoutPlan?.noImageProducerSourceSha256
+    producerSourceSha256 !== activeHeldoutPlan?.noImageProducerSourceSha256
   )
     throw new TypeError('HELDOUT no-image producer source does not match frozen source digest')
   const corpus = await loadFreshCorpus(
@@ -634,7 +677,7 @@ export async function runFreshTextProfile(
   if (
     phase === 'heldout' &&
     (corpus.manifests.length !== 1 ||
-      corpus.manifests[0]?.sha256 !== options.heldoutPlan?.manifest.sha256 ||
+      corpus.manifests[0]?.sha256 !== activeHeldoutPlan?.manifest.sha256 ||
       corpus.manifests[0]?.cases !== 40)
   )
     throw new TypeError('HELDOUT no-image control requires the frozen 40-photo manifest')
@@ -687,7 +730,7 @@ export async function runFreshTextProfile(
   })
   const runPrefix =
     phase === 'heldout'
-      ? (options.heldoutPlan?.runIdPrefix ?? 'v02-heldout-no-image')
+      ? (activeHeldoutPlan?.runIdPrefix ?? 'v02-heldout-no-image')
       : options.stages === 'classify-only'
         ? `v02-fresh-text-classify-only-${profileId}`
         : `v02-fresh-text-${profileId}`
@@ -714,9 +757,9 @@ export async function runFreshTextProfile(
     sourceBeforeSha256: producerSourceSha256,
     ...(phase === 'heldout'
       ? {
-          targetPolicy: options.heldoutPlan?.targetPolicy,
-          methodSelectionSha256: options.heldoutPlan?.methodSelectionSha256,
-          heldoutProducerSourceSha256: options.heldoutPlan?.producerSourceSha256,
+          targetPolicy: activeHeldoutPlan?.targetPolicy,
+          methodSelectionSha256: activeHeldoutPlan?.methodSelectionSha256,
+          heldoutProducerSourceSha256: activeHeldoutPlan?.producerSourceSha256,
           producerSourceRole: 'producer-only',
         }
       : {}),
@@ -858,7 +901,9 @@ export async function runFreshTextProfile(
   const completedCaseIds = results.map((item) => item.caseId)
   const completeSet = new Set(completedCaseIds)
   const missingCaseIds = plannedCaseIds.filter((id) => !completeSet.has(id))
-  const sourceAfter = await sourceHashes()
+  const sourceAfter = await (options.boxHeldoutPlan
+    ? categoricalBoxHeldoutProducerSourceManifest()
+    : sourceHashes())
   const sourceAfterSha256 = hashCanonical(
     Object.entries(sourceAfter).sort(([a], [b]) => a.localeCompare(b)),
   )
@@ -884,8 +929,8 @@ export async function runFreshTextProfile(
     variantSha256,
     ...(phase === 'heldout'
       ? {
-          targetPolicy: options.heldoutPlan?.targetPolicy,
-          methodSelectionSha256: options.heldoutPlan?.methodSelectionSha256,
+          targetPolicy: activeHeldoutPlan?.targetPolicy,
+          methodSelectionSha256: activeHeldoutPlan?.methodSelectionSha256,
         }
       : {}),
     producerSourceSha256,

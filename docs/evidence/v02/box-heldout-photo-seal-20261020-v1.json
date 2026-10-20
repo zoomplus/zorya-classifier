@@ -1,0 +1,62 @@
+{
+  "schema": "sealed-box-heldout-photo-admission-v1",
+  "status": "sealed-source-cohort-before-combined-freeze",
+  "methodSelectionSha256": "3b576871c36d904203ef06e0cf26af5847a71a92c2df3647725d532238258c5e",
+  "cases": 40,
+  "positives": 30,
+  "verifiedNegatives": 10,
+  "officialMasks": 30,
+  "files": [
+    {
+      "file": "inputs.json",
+      "sha256": "8ba27cd0a5f0aaafeeb612c412e2078e9e5f5b0e1d996fab863182fc56e9b99f",
+      "bytes": 22440,
+      "rootRehashedWithoutParsingCaseDetails": true
+    },
+    {
+      "file": "ground-truth.json",
+      "sha256": "8bd4db0d5818df6902c99c2d6cb1d338e662af29903d9885dcffa17a8f0b344a",
+      "bytes": 128525,
+      "rootRehashedWithoutParsingCaseDetails": true
+    },
+    {
+      "file": "source-ledger.json",
+      "sha256": "9b23ac227ca1a3c729f50f2b8fc59077d0479deadd37c18c8e9cfbf0c2540e9f",
+      "bytes": 123819,
+      "rootRehashedWithoutParsingCaseDetails": true
+    },
+    {
+      "file": "mask-source-ledger.json",
+      "sha256": "5985ebaf5e318d2a7e651226e0a54b4cc687933ba53718827843f3b62744b9e6",
+      "bytes": 20111,
+      "rootRehashedWithoutParsingCaseDetails": true
+    }
+  ],
+  "curatorChecks": {
+    "uniqueAuthorGroups": 40,
+    "excludedPriorPhotosAndGroups": 160,
+    "exactSourceJpegAndMaskCanvasCount": 30,
+    "maximumSourcePixels": 2097152,
+    "neutralInstructionExact": true,
+    "modelCalls": 0,
+    "rejectedAcquisitionCandidates": 119,
+    "rejectionReasons": {
+      "maskCanvasMismatch": 114,
+      "sourceUnavailable": 2,
+      "missingPhotoSpecificLicenseJsonLd": 2,
+      "http403": 1
+    },
+    "acquisitionResponseBytes": 55958611
+  },
+  "rootScope": {
+    "readPixels": false,
+    "parsedPerCaseTruth": false,
+    "independentlyRehashedSealedFiles": true,
+    "inspectedExposedExclusionMetadata": true
+  },
+  "limits": [
+    "Aggregate acquisition receipt, not localization accuracy or release qualification.",
+    "Canonical path-prefix inputs for the combined 80-case corpus require their own hashes before dispatch.",
+    "Per-case truth and pixels remain sealed from producers until method/source freeze and terminal measurements as required."
+  ]
+}
