@@ -24,6 +24,12 @@ import {
   regionPresenceFirstProfile,
   regionPresenceFirstHeldoutProfile,
   regionPresenceFirstNoImageHeldoutProfile,
+  regionPresenceFirstCheckedProfile,
+  regionPresenceFirstCheckedNoImageProfile,
+  regionPresenceFirstCheckedHeldoutProfile,
+  regionPresenceFirstCheckedNoImageHeldoutProfile,
+  checkedRegionSeededRecipe,
+  checkedRegionNoImageRecipe,
   regionSeededProducerSourceManifest,
   regionSeededRecipe,
   processRegionSeededCase,
@@ -33,7 +39,10 @@ import {
 import type { Recorder } from '../benchmarks/v02/recording.js'
 import { recordProvider } from '../benchmarks/v02/recording.js'
 import { RunBudget } from '../benchmarks/v02/budget.js'
-import { parseRegionSeededArgs } from '../benchmarks/v02/run-region-seeded-dev.js'
+import {
+  parseRegionSeededArgs,
+  runRegionSeededCli,
+} from '../benchmarks/v02/run-region-seeded-dev.js'
 
 await test('region-seeded and no-image controls are distinct named fixed recipes', () => {
   assert.equal(regionSeededProfile.id, 'native-luna-region-seeded-sam-dev-v1')
@@ -62,6 +71,31 @@ await test('region-seeded and no-image controls are distinct named fixed recipes
   assert.equal(regionSeededRecipe.timeoutMs, 120_000)
   assert.equal(regionSeededRecipe.retries, 0)
   assert.equal(regionSeededRecipe.fallback, false)
+  assert.equal(
+    regionPresenceFirstCheckedProfile.id,
+    'native-luna-presence-first-checked-region-sam-dev-v3',
+  )
+  assert.equal(
+    regionPresenceFirstCheckedNoImageProfile.id,
+    'native-luna-presence-first-region-no-image-control-dev-v3',
+  )
+  assert.equal(
+    regionPresenceFirstCheckedHeldoutProfile.id,
+    'native-luna-presence-first-checked-region-sam-heldout-v3',
+  )
+  assert.equal(
+    regionPresenceFirstCheckedNoImageHeldoutProfile.id,
+    'native-luna-presence-first-region-no-image-control-heldout-v3',
+  )
+  assert.equal(checkedRegionSeededRecipe.maxBoxCheckCalls, 2)
+  assert.equal(checkedRegionSeededRecipe.maxLogicalCallsPerCase, 6)
+  assert.equal(checkedRegionSeededRecipe.maxPhysicalCallsPerCase, 6)
+  assert.equal(checkedRegionSeededRecipe.timeoutMs, 120_000)
+  assert.equal(checkedRegionSeededRecipe.retries, 0)
+  assert.equal(checkedRegionSeededRecipe.fallback, false)
+  assert.equal(checkedRegionNoImageRecipe.maxBoxCheckCalls, 0)
+  assert.equal(checkedRegionNoImageRecipe.maxLogicalCallsPerCase, 4)
+  assert.equal(checkedRegionNoImageRecipe.maxPhysicalCallsPerCase, 4)
   assert.deepEqual(
     regionSeededDevManifests.map((item) => item.sha256),
     [
@@ -72,11 +106,103 @@ await test('region-seeded and no-image controls are distinct named fixed recipes
   )
 })
 
+await test('checked-region records ordered box-check evidence without adding checks to seed search', async () => {
+  const fixture = await makeProcessCaseFixture({
+    variant: 'region-seeded-sam',
+    checkedRegion: true,
+    runBoxCheck: true,
+  })
+  try {
+    const result = await processRegionSeededCase(fixture.args)
+    assert.equal(result.extraction.seed.status, 'located', JSON.stringify(result.extraction))
+    assert.equal(result.extraction.seed.logicalCalls, 0)
+    assert.equal(result.extraction.status, 'unknown')
+    assert.deepEqual(
+      result.extraction.boxChecks?.map((row) => [row.index, row.status, row.verdict]),
+      [[0, 'ok', 'complete']],
+    )
+    assert.deepEqual(result.extraction.verification, {
+      checks: [
+        {
+          verdict: 'complete',
+          selection: {
+            choice: 'complete',
+            nativeChoice: 'complete',
+            probabilities: { complete: 1, 'needs-expansion': 0, unknown: 0 },
+            tied: ['complete'],
+          },
+          metadata: {
+            model: 'fixture',
+            provider: 'fixture',
+            requestId: null,
+            durationMs: 1,
+            costUsd: 0,
+            attempts: 1,
+          },
+        },
+      ],
+      expansion: 'not-needed',
+    })
+    assert.equal(fixture.extractCalls(), 1)
+    assert.equal(fixture.segmentCalls(), 1)
+    assert.equal(fixture.disposeCalls(), 1)
+  } finally {
+    await fixture.dispose()
+  }
+})
+
+await test('checked-region no-image control emits an empty check list and never configures SAM', async () => {
+  const fixture = await makeProcessCaseFixture({
+    variant: 'no-image-control',
+    checkedRegion: true,
+  })
+  try {
+    const result = await processRegionSeededCase(fixture.args)
+    assert.equal(result.extraction.status, 'not-found')
+    assert.deepEqual(result.extraction.boxChecks, [])
+    assert.equal(fixture.locateCalls(), 1)
+    assert.equal(fixture.extractCalls(), 0)
+    assert.equal(fixture.segmentCalls(), 0)
+    assert.equal(fixture.disposeCalls(), 1)
+  } finally {
+    await fixture.dispose()
+  }
+})
+
+await test('failed box-check attempts retain zero-fetch evidence without a fabricated verification result', async () => {
+  const fixture = await makeProcessCaseFixture({
+    variant: 'region-seeded-sam',
+    checkedRegion: true,
+    runBoxCheck: true,
+    boxCheckError: Object.assign(new Error('fixture local validation'), { code: 'INVALID_INPUT' }),
+  })
+  try {
+    const result = await processRegionSeededCase(fixture.args)
+    assert.equal(result.extraction.status, 'failed')
+    assert.equal(result.extraction.seed.status, 'located')
+    assert.deepEqual(result.extraction.boxChecks, [
+      {
+        index: 0,
+        status: 'failed',
+        requestHash: null,
+        logicalId: null,
+        physicalIds: [],
+        physicalCalls: 0,
+        errorCode: 'INVALID_INPUT',
+      },
+    ])
+    assert.equal(result.extraction.verification, undefined)
+  } finally {
+    await fixture.dispose()
+  }
+})
+
 await test('presence-first gate skips candidate extraction and control region search after absent classification', async () => {
   for (const variant of ['region-seeded-sam', 'no-image-control'] as const) {
     const fixture = await makeProcessCaseFixture({
       variant,
       classify: { choice: 'absent' },
+      checkedRegion: true,
     })
     try {
       const result = await processRegionSeededCase(fixture.args)
@@ -87,6 +213,7 @@ await test('presence-first gate skips candidate extraction and control region se
       assert.equal(result.extraction.physicalCalls, 0)
       assert.equal(result.extraction.logicalCalls, 0)
       assert.equal(result.extraction.seed.status, 'not-reached')
+      assert.deepEqual(result.extraction.boxChecks, [])
       assert.equal(fixture.locateCalls(), 0)
       assert.equal(fixture.extractCalls(), 0)
       assert.equal(fixture.segmentCalls(), 0)
@@ -102,6 +229,7 @@ await test('presence-first gate skips candidate extraction and control region se
 await test('presence-first gate skips region work and artifacts after failed classification', async () => {
   const fixture = await makeProcessCaseFixture({
     variant: 'region-seeded-sam',
+    checkedRegion: true,
     classifyError: Object.assign(new Error('fixture provider failure'), { code: 'PROVIDER' }),
   })
   try {
@@ -113,6 +241,7 @@ await test('presence-first gate skips region work and artifacts after failed cla
     assert.equal(result.extraction.physicalCalls, 0)
     assert.equal(result.extraction.logicalCalls, 0)
     assert.equal(result.extraction.seed.status, 'not-reached')
+    assert.deepEqual(result.extraction.boxChecks, [])
     assert.equal(fixture.locateCalls(), 0)
     assert.equal(fixture.extractCalls(), 0)
     assert.equal(fixture.segmentCalls(), 0)
@@ -303,6 +432,18 @@ await test('CLI defaults to the pinned complete exposed DEV candidate and requir
   ])
   assert.equal(gatedControl.profileId, regionPresenceFirstNoImageProfile.id)
   assert.equal(gatedControl.requireClassifiedPresence, true)
+  const checkedCandidate = parseRegionSeededArgs(['--dry-run', '--checked-region'])
+  assert.equal(checkedCandidate.profileId, regionPresenceFirstCheckedProfile.id)
+  assert.equal(checkedCandidate.requireClassifiedPresence, true)
+  assert.equal(checkedCandidate.checkedRegion, true)
+  const checkedControl = parseRegionSeededArgs([
+    '--dry-run',
+    '--variant',
+    'no-image-control',
+    '--checked-region',
+  ])
+  assert.equal(checkedControl.profileId, regionPresenceFirstCheckedNoImageProfile.id)
+  assert.equal(checkedControl.checkedRegion, true)
   assert.throws(
     () => parseRegionSeededArgs(['--dry-run', '--phase', 'heldout']),
     /HELDOUT requires --freeze/u,
@@ -340,6 +481,17 @@ await test('CLI defaults to the pinned complete exposed DEV candidate and requir
   assert.equal(heldoutControl.profileId, regionPresenceFirstNoImageHeldoutProfile.id)
   assert.equal(heldoutControl.maxPhysicalCalls, 600)
   assert.equal(heldoutControl.maxCostUsd, 10)
+  const checkedHeldoutCandidate = parseRegionSeededArgs([...heldoutArgs, '--checked-region'])
+  assert.equal(checkedHeldoutCandidate.profileId, regionPresenceFirstCheckedHeldoutProfile.id)
+  assert.equal(checkedHeldoutCandidate.checkedRegion, true)
+  const checkedHeldoutControl = parseRegionSeededArgs([
+    ...heldoutArgs,
+    '--variant',
+    'no-image-control',
+    '--checked-region',
+  ])
+  assert.equal(checkedHeldoutControl.profileId, regionPresenceFirstCheckedNoImageHeldoutProfile.id)
+  assert.equal(checkedHeldoutControl.maxPhysicalCalls, 600)
   assert.throws(
     () =>
       parseRegionSeededArgs(['--dry-run', '--phase', 'heldout', '--freeze', '/tmp/freeze.json']),
@@ -347,6 +499,13 @@ await test('CLI defaults to the pinned complete exposed DEV candidate and requir
   )
   assert.throws(() => parseRegionSeededArgs([]), /Choose exactly one/u)
   assert.throws(() => parseRegionSeededArgs(['--dry-run', '--allow-paid']), /Choose exactly one/u)
+})
+
+await test('new producer rejects legacy segmentation dispatch before reading credentials', async () => {
+  await assert.rejects(
+    runRegionSeededCli(['--allow-paid']),
+    /Legacy segmentation profiles require their frozen historical producer/u,
+  )
 })
 
 await test('presence-first HELDOUT rejects an authorization that omits its required policy bit', async () => {
@@ -410,6 +569,9 @@ async function makeProcessCaseFixture(input: {
   variant: 'region-seeded-sam' | 'no-image-control'
   classify?: { choice: 'present' | 'absent' }
   classifyError?: Error
+  checkedRegion?: boolean
+  runBoxCheck?: boolean
+  boxCheckError?: Error
 }) {
   const root = await mkdtemp(join(tmpdir(), 'presence-first-case-'))
   const bytes = await sharp({
@@ -451,7 +613,19 @@ async function makeProcessCaseFixture(input: {
     tied: [input.classify?.choice ?? 'present'],
     metadata,
   }
-  const decision: DecisionPort = { decide: async () => ({ answers: {}, metadata }) }
+  const decision: DecisionPort = {
+    async decide(request) {
+      if (request.questions.box_check && input.boxCheckError) throw input.boxCheckError
+      const answer = request.questions.box_check
+        ? {
+            type: 'choice' as const,
+            choice: 'complete',
+            probabilities: { complete: 1, 'needs-expansion': 0, unknown: 0 },
+          }
+        : undefined
+      return { answers: answer ? { box_check: answer } : {}, metadata }
+    },
+  }
   const recorder: Recorder = {
     port: decision,
     calls: [],
@@ -496,8 +670,76 @@ async function makeProcessCaseFixture(input: {
         },
       }
     },
-    async extract() {
+    async extract(extractInput) {
       extractCalls++
+      if (input.runBoxCheck) {
+        assert.ok(options.segmentation)
+        assert.ok(options.segmentationBoxCheck)
+        const rgba = await sharp(bytes).ensureAlpha().raw().toBuffer()
+        try {
+          const seed = await options.segmentation.segment({
+            image: { data: rgba, width: 2, height: 2, format: 'rgba8' },
+            seedRegion: { left: 0, top: 0, width: 1, height: 1 },
+            prompt: 'seed-region',
+            wholeRegion: { left: 0, top: 0, width: 2, height: 2 },
+            bounds: {
+              left: { start: 0, endExclusive: 2 },
+              right: { start: 0, endExclusive: 2 },
+              top: { start: 0, endExclusive: 2 },
+              bottom: { start: 0, endExclusive: 2 },
+            },
+            roi: { left: 0, top: 0, width: 2, height: 2 },
+            target: 'named target',
+            exclusions: [],
+            completeness: 'visible-object',
+            signal: extractInput.signal ?? new AbortController().signal,
+          })
+          assert.equal(seed.status, 'unknown')
+          const checked = await options.segmentationBoxCheck.check({
+            image: { data: rgba, width: 2, height: 2, format: 'rgba8' },
+            region: { left: 0, top: 0, width: 2, height: 2 },
+            seedRegion: { left: 0, top: 0, width: 1, height: 1 },
+            roi: { left: 0, top: 0, width: 2, height: 2 },
+            target: 'named target',
+            exclusions: [],
+            signal: extractInput.signal ?? new AbortController().signal,
+          })
+          const localization = {
+            image: { width: 2, height: 2, coordinateSpace: 'oriented-source-pixels' as const },
+            stages: [],
+            durationMs: 1,
+            knownCostUsd: 0,
+            unknownCostCount: 0,
+          }
+          return {
+            status: 'unknown' as const,
+            reason: 'segmentation-uncertain' as const,
+            seedLocation: {
+              status: 'located' as const,
+              region: { left: 0, top: 0, width: 1, height: 1 },
+              normalizedRegion: { left: 0, top: 0, width: 0.5, height: 0.5 },
+              selection: {
+                choice: 'C00',
+                nativeChoice: 'C00',
+                probabilities: { C00: 1 },
+                tied: ['C00'],
+              },
+              method: 'three-choice-grid-v1' as const,
+              metadata: localization,
+            },
+            metadata: localization,
+            segmentation: {
+              method: 'fixture',
+              backend: 'fixture',
+              durationMs: 1,
+              input: { width: 2, height: 2 },
+            },
+            verification: { checks: [checked], expansion: 'not-needed' as const },
+          }
+        } finally {
+          rgba.fill(0)
+        }
+      }
       return {
         status: 'not-found',
         reason: 'absent-in-evaluated-region',
@@ -524,6 +766,7 @@ async function makeProcessCaseFixture(input: {
     ...(input.variant === 'region-seeded-sam' ? { segmentation } : {}),
     variant: input.variant,
     requireClassifiedPresence: true,
+    ...(input.checkedRegion ? { checkedRegion: true } : {}),
     recorder,
     signal: new AbortController().signal,
   }

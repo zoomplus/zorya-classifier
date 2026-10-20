@@ -18,6 +18,10 @@ import {
   regionPresenceFirstProfile,
   regionPresenceFirstHeldoutProfile,
   regionPresenceFirstNoImageHeldoutProfile,
+  regionPresenceFirstCheckedProfile,
+  regionPresenceFirstCheckedNoImageProfile,
+  regionPresenceFirstCheckedHeldoutProfile,
+  regionPresenceFirstCheckedNoImageHeldoutProfile,
   runRegionSeededProfile,
 } from './region-seeded-runner.js'
 
@@ -42,6 +46,7 @@ export function parseRegionSeededArgs(args: readonly string[]) {
       variant: { type: 'string', default: 'region-seeded-sam' },
       'profile-id': { type: 'string' },
       'presence-first': { type: 'boolean', default: false },
+      'checked-region': { type: 'boolean', default: false },
       'image-root': { type: 'string', default: '/root/work/zorya-classifier-worktrees/v02/corpus' },
       'photo-inputs': { type: 'string', default: regionSeededDevManifests[0].path },
       'photo-sha256': { type: 'string', default: regionSeededDevManifests[0].sha256 },
@@ -60,22 +65,31 @@ export function parseRegionSeededArgs(args: readonly string[]) {
     throw new TypeError('Choose exactly one of --dry-run or --allow-paid')
   const phase = z.enum(['dev', 'heldout']).parse(values.phase)
   const variant = z.enum(['region-seeded-sam', 'no-image-control']).parse(values.variant)
-  const requireClassifiedPresence = values['presence-first']
-  const expectedProfile = requireClassifiedPresence
+  const checkedRegion = values['checked-region']
+  const requireClassifiedPresence = values['presence-first'] || checkedRegion
+  const expectedProfile = checkedRegion
     ? variant === 'region-seeded-sam'
       ? phase === 'dev'
-        ? regionPresenceFirstProfile.id
-        : regionPresenceFirstHeldoutProfile.id
+        ? regionPresenceFirstCheckedProfile.id
+        : regionPresenceFirstCheckedHeldoutProfile.id
       : phase === 'dev'
-        ? regionPresenceFirstNoImageProfile.id
-        : regionPresenceFirstNoImageHeldoutProfile.id
-    : variant === 'region-seeded-sam'
-      ? phase === 'dev'
-        ? regionSeededProfile.id
-        : regionSeededHeldoutProfile.id
-      : phase === 'dev'
-        ? regionSeededNoImageProfile.id
-        : regionSeededNoImageHeldoutProfile.id
+        ? regionPresenceFirstCheckedNoImageProfile.id
+        : regionPresenceFirstCheckedNoImageHeldoutProfile.id
+    : requireClassifiedPresence
+      ? variant === 'region-seeded-sam'
+        ? phase === 'dev'
+          ? regionPresenceFirstProfile.id
+          : regionPresenceFirstHeldoutProfile.id
+        : phase === 'dev'
+          ? regionPresenceFirstNoImageProfile.id
+          : regionPresenceFirstNoImageHeldoutProfile.id
+      : variant === 'region-seeded-sam'
+        ? phase === 'dev'
+          ? regionSeededProfile.id
+          : regionSeededHeldoutProfile.id
+        : phase === 'dev'
+          ? regionSeededNoImageProfile.id
+          : regionSeededNoImageHeldoutProfile.id
   const profileId =
     values['profile-id'] === undefined
       ? expectedProfile
@@ -103,6 +117,7 @@ export function parseRegionSeededArgs(args: readonly string[]) {
     variant,
     profileId,
     requireClassifiedPresence,
+    checkedRegion,
     expectedCaseCount: phase === 'dev' ? 40 : 80,
     imageRoot: resolve(z.string().min(1).parse(values['image-root'])),
     outputRoot: resolve(z.string().min(1).parse(values.out)),
@@ -194,6 +209,7 @@ async function preflight(options: ReturnType<typeof parseRegionSeededArgs>) {
         phase: options.phase,
         variant: options.variant,
         requireClassifiedPresence: options.requireClassifiedPresence,
+        checkedRegion: options.checkedRegion,
         manifests: corpus.manifests,
         plannedCaseIds: corpus.cases.map((item) => item.caseId),
         imageChecks: images,
@@ -221,6 +237,10 @@ async function preflight(options: ReturnType<typeof parseRegionSeededArgs>) {
 export async function runRegionSeededCli(args: readonly string[]) {
   const options = parseRegionSeededArgs(args)
   if (!options.paid) return preflight(options)
+  if (options.variant === 'region-seeded-sam' && !options.checkedRegion)
+    throw new TypeError(
+      'Legacy segmentation profiles require their frozen historical producer; new paid runs must select checked-region v3',
+    )
   const authorization = options.freezePath
     ? (JSON.parse(await readFile(options.freezePath, 'utf8')) as unknown)
     : undefined
@@ -236,6 +256,7 @@ export async function runRegionSeededCli(args: readonly string[]) {
     phase: options.phase,
     variant: options.variant,
     requireClassifiedPresence: options.requireClassifiedPresence,
+    checkedRegion: options.checkedRegion,
     expectedCaseCount: options.expectedCaseCount,
     maxPhysicalCalls: options.maxPhysicalCalls,
     maxCostUsd: options.maxCostUsd,

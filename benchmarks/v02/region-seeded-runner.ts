@@ -6,10 +6,23 @@ import { fileURLToPath } from 'node:url'
 import { z } from 'zod'
 import type { Classifier, ClassifierOptions } from '../../src/app/create-classifier.js'
 import { createClassifier } from '../../src/app/create-classifier.js'
-import type { DecisionPort, DecisionRequest, DecisionResult } from '../../src/entities/contracts.js'
+import type {
+  ChoiceSelection,
+  DecisionMetadata,
+  DecisionPort,
+  DecisionRequest,
+  DecisionResult,
+} from '../../src/entities/contracts.js'
 import type { ExtractionResult, SegmentationPort } from '../../src/entities/segmentation.js'
+import type {
+  SegmentationBoxCheckPort,
+  SegmentationBoxCheckResult,
+  SegmentationVerification,
+} from '../../src/entities/segmentation-verification.js'
 import { createOpenRouterDecisions } from '../../src/infrastructure/openrouter.js'
 import { createMobileSamSegmenter } from '../../src/infrastructure/segmentation/mobile-sam/index.js'
+import { createSegmentationBoxCheck } from '../../src/features/segmentation/box-check.js'
+import { createSharpSegmentationBoxPresentation } from '../../src/infrastructure/segmentation/box-presentation.js'
 import { RunBudget } from './budget.js'
 import type { BudgetSnapshot } from './budget.js'
 import { freshProducerTask, loadFreshCorpus, loadFreshImage } from './fresh-corpus.js'
@@ -53,6 +66,27 @@ export const regionPresenceFirstNoImageHeldoutProfile = Object.freeze({
   id: 'native-luna-presence-first-region-no-image-control-heldout-v2',
   phase: 'heldout',
 })
+export const regionPresenceFirstCheckedProfile = Object.freeze({
+  id: 'native-luna-presence-first-checked-region-sam-dev-v3',
+  phase: 'dev',
+  targetPolicy: 'target-plus-neutral-instruction-v1',
+  purpose:
+    'full original exposed DEV pass with presence gate and up to two visible-box containment checks',
+})
+export const regionPresenceFirstCheckedNoImageProfile = Object.freeze({
+  id: 'native-luna-presence-first-region-no-image-control-dev-v3',
+  phase: 'dev',
+  purpose: 'paired original exposed DEV no-image control with the same classification gate',
+})
+export const regionPresenceFirstCheckedHeldoutProfile = Object.freeze({
+  id: 'native-luna-presence-first-checked-region-sam-heldout-v3',
+  phase: 'heldout',
+  targetPolicy: 'target-plus-neutral-instruction-v1',
+})
+export const regionPresenceFirstCheckedNoImageHeldoutProfile = Object.freeze({
+  id: 'native-luna-presence-first-region-no-image-control-heldout-v3',
+  phase: 'heldout',
+})
 export const regionSeededHeldoutProfile = Object.freeze({
   id: 'native-luna-region-seeded-sam-heldout-v1',
   phase: 'heldout',
@@ -87,6 +121,22 @@ export const regionSeededRecipe = Object.freeze({
   latencyRankingEligible: false,
 })
 
+export const checkedRegionSeededRecipe = Object.freeze({
+  ...regionSeededRecipe,
+  boxCheckPolicy: 'up-to-two-closed-visible-box-containment-checks-v1',
+  maxBoxCheckCalls: 2,
+  maxLogicalCallsPerCase: 6,
+  maxPhysicalCallsPerCase: 6,
+})
+export const checkedRegionNoImageRecipe = Object.freeze({
+  ...regionSeededRecipe,
+  native: 'none; no-image control does not configure a segmenter',
+  boxCheckPolicy: 'none-no-segmenter-configured',
+  maxBoxCheckCalls: 0,
+  maxLogicalCallsPerCase: 4,
+  maxPhysicalCallsPerCase: 4,
+})
+
 export const regionSeededDevManifests = Object.freeze([
   {
     path: '/root/work/zorya-classifier/benchmarks/v02/corpus/dev/inputs.json',
@@ -109,6 +159,7 @@ const heldoutAuthorizationSchema = z
     phase: z.literal('heldout'),
     variant: z.enum(['region-seeded-sam', 'no-image-control']),
     requireClassifiedPresence: z.literal(true).optional(),
+    checkedRegion: z.literal(true).optional(),
     producerSourceSha256: z.string().regex(/^[a-f0-9]{64}$/u),
     manifests: z
       .array(
@@ -157,6 +208,7 @@ export interface RegionSeededRunnerOptions {
   profileId: string
   variant: 'region-seeded-sam' | 'no-image-control'
   requireClassifiedPresence?: boolean
+  checkedRegion?: boolean
   phase: 'dev' | 'heldout'
   expectedCaseCount: number
   maxPhysicalCalls: number
@@ -185,6 +237,28 @@ export interface SeedRecord {
   errorCode?: string
 }
 
+export interface BoxCheckReceipt {
+  index: number
+  status: 'ok' | 'failed'
+  requestHash: string | null
+  logicalId: number | null
+  physicalIds: number[]
+  physicalCalls: number
+  verdict?: SegmentationBoxCheckResult['verdict']
+  selection?: ChoiceSelection
+  metadata?: DecisionMetadata
+  errorCode?: string
+}
+
+export interface VerificationRecord {
+  checks: Array<{
+    verdict: SegmentationBoxCheckResult['verdict']
+    selection: ChoiceSelection
+    metadata: DecisionMetadata
+  }>
+  expansion: SegmentationVerification['expansion']
+}
+
 export interface RegionExtractionRecord {
   status: 'extracted' | 'region-only' | 'unknown' | 'not-found' | 'failed'
   reason?: string
@@ -194,6 +268,8 @@ export interface RegionExtractionRecord {
   logicalCalls: number
   requestHashes: string[]
   seed: SeedRecord
+  verification?: VerificationRecord
+  boxChecks?: BoxCheckReceipt[]
   mask?: {
     file: 'mask.u8'
     sha256: string
@@ -438,7 +514,10 @@ function seedRecord(
   logicalStart: number,
   started: number,
   errorCode?: string,
+  end?: { physicalEnd: number; logicalEnd: number },
 ): SeedRecord {
+  const physicalEnd = end?.physicalEnd ?? recorder.calls.length
+  const logicalEnd = end?.logicalEnd ?? recorder.logicalCalls.length
   return {
     status,
     ...(seed
@@ -449,10 +528,74 @@ function seedRecord(
         }
       : {}),
     durationMs: Math.max(0, (seed?.at ?? performance.now()) - started),
-    physicalCalls: recorder.calls.length - physicalStart,
-    logicalCalls: recorder.logicalCalls.length - logicalStart,
-    requestHashes: recorder.logicalCalls.slice(logicalStart).map((call) => call.requestSha256),
+    physicalCalls: physicalEnd - physicalStart,
+    logicalCalls: logicalEnd - logicalStart,
+    requestHashes: recorder.logicalCalls
+      .slice(logicalStart, logicalEnd)
+      .map((call) => call.requestSha256),
     ...(errorCode ? { errorCode } : {}),
+  }
+}
+
+function copyVerification(
+  value: SegmentationVerification | undefined,
+): VerificationRecord | undefined {
+  if (!value) return undefined
+  return {
+    checks: value.checks.map((check) => ({
+      verdict: check.verdict,
+      selection: structuredClone(check.selection),
+      metadata: { ...check.metadata },
+    })),
+    expansion: value.expansion,
+  }
+}
+
+function observedBoxCheck(
+  decision: DecisionPort,
+  recorder: Recorder,
+  receipts: BoxCheckReceipt[],
+): SegmentationBoxCheckPort {
+  const delegate = createSegmentationBoxCheck({
+    decision,
+    presentation: createSharpSegmentationBoxPresentation(),
+  })
+  return {
+    async check(input) {
+      const logicalStart = recorder.logicalCalls.length
+      const physicalStart = recorder.calls.length
+      const index = receipts.length
+      const settleReceipt = (result?: SegmentationBoxCheckResult, error?: unknown) => {
+        const logical = recorder.logicalCalls.slice(logicalStart)
+        const physicalIds = logical.flatMap((call) => call.physicalIds)
+        const receipt: BoxCheckReceipt = {
+          index,
+          status: error ? 'failed' : 'ok',
+          requestHash: logical.length === 1 ? logical[0]!.requestSha256 : null,
+          logicalId: logical.length === 1 ? logical[0]!.logicalId : null,
+          physicalIds,
+          physicalCalls: recorder.calls.length - physicalStart,
+          ...(result
+            ? {
+                verdict: result.verdict,
+                selection: structuredClone(result.selection),
+                metadata: { ...result.metadata },
+              }
+            : {}),
+          ...(error ? { errorCode: safeErrorCode(error) } : {}),
+        }
+        receipts.push(receipt)
+      }
+      try {
+        const result = await delegate.check(input)
+        assertRecorderHealthy(recorder)
+        settleReceipt(result)
+        return result
+      } catch (error) {
+        settleReceipt(undefined, error)
+        throw error
+      }
+    },
   }
 }
 
@@ -530,6 +673,7 @@ export async function processRegionSeededCase(args: {
   segmentation?: SegmentationPort
   variant: RegionSeededRunnerOptions['variant']
   requireClassifiedPresence?: boolean
+  checkedRegion?: boolean
   recorder: Recorder
   signal: AbortSignal
 }): Promise<RegionSeededCaseResult> {
@@ -542,6 +686,7 @@ export async function processRegionSeededCase(args: {
     segmentation,
     variant,
     requireClassifiedPresence = false,
+    checkedRegion = false,
     recorder,
     signal,
   } = args
@@ -568,7 +713,10 @@ export async function processRegionSeededCase(args: {
     sourceWidth: number
     sourceHeight: number
     at: number
+    physicalEnd: number
+    logicalEnd: number
   }[] = []
+  const boxChecks: BoxCheckReceipt[] = []
   const observedSegmentation: SegmentationPort | undefined = segmentation
     ? {
         async segment(input) {
@@ -578,6 +726,8 @@ export async function processRegionSeededCase(args: {
               sourceWidth: input.image.width,
               sourceHeight: input.image.height,
               at: performance.now(),
+              physicalEnd: recorder.calls.length,
+              logicalEnd: recorder.logicalCalls.length,
             })
             if (
               input.prompt !== 'seed-region' ||
@@ -592,6 +742,13 @@ export async function processRegionSeededCase(args: {
           }
           return segmentation.segment(input)
         },
+        ...(checkedRegion && segmentation.expand
+          ? {
+              async expand(input, previousMask) {
+                return segmentation.expand!(input, previousMask)
+              },
+            }
+          : {}),
         settle: () => segmentation.settle(),
         async dispose() {},
       }
@@ -602,12 +759,16 @@ export async function processRegionSeededCase(args: {
   const classLogical = recorder.logicalCalls.length
   let classify: RegionSeededCaseResult['classify']
   let extraction: RegionExtractionRecord
+  let extractionVerification: VerificationRecord | undefined
   let ownedPng: Uint8Array | undefined
   let ownedMask: Uint8Array | undefined
   try {
     classifier = classifierFactory({
       decision,
       ...(observedSegmentation ? { segmentation: observedSegmentation } : {}),
+      ...(checkedRegion && observedSegmentation
+        ? { segmentationBoxCheck: observedBoxCheck(decision, recorder, boxChecks) }
+        : {}),
       timeoutMs: regionSeededRecipe.timeoutMs,
       concurrency: 1,
       maxQueue: 0,
@@ -646,11 +807,11 @@ export async function processRegionSeededCase(args: {
     assertRecorderHealthy(recorder)
 
     if (requireClassifiedPresence && classify.status !== 'ok') {
-      extraction = skippedExtraction('classification-failed')
+      extraction = skippedExtraction('classification-failed', checkedRegion)
       return { caseId: item.caseId, imageSha256: item.image.sha256, classify, extraction }
     }
     if (requireClassifiedPresence && classify.value !== 'present') {
-      extraction = skippedExtraction('classification-absent')
+      extraction = skippedExtraction('classification-absent', checkedRegion)
       return { caseId: item.caseId, imageSha256: item.image.sha256, classify, extraction }
     }
 
@@ -668,6 +829,8 @@ export async function processRegionSeededCase(args: {
               mode: 'region',
               signal: localController.signal,
             })
+      if (checkedRegion && 'verification' in result)
+        extractionVerification = copyVerification(result.verification)
       const captured = seedCapture[0]
       const seedResult = variant === 'no-image-control' ? result : undefined
       const selectedSeed =
@@ -678,6 +841,8 @@ export async function processRegionSeededCase(args: {
               sourceWidth: item.image.width,
               sourceHeight: item.image.height,
               at: performance.now(),
+              physicalEnd: recorder.calls.length,
+              logicalEnd: recorder.logicalCalls.length,
             }
           : undefined)
       const seed = seedRecord(
@@ -693,6 +858,10 @@ export async function processRegionSeededCase(args: {
         physicalStart,
         logicalStart,
         extractionStarted,
+        undefined,
+        checkedRegion && selectedSeed
+          ? { physicalEnd: selectedSeed.physicalEnd, logicalEnd: selectedSeed.logicalEnd }
+          : undefined,
       )
       if (selectedSeed && variant === 'region-seeded-sam') {
         seed.prompt = 'seed-region'
@@ -716,6 +885,12 @@ export async function processRegionSeededCase(args: {
             .map((call) => call.requestSha256),
           seed,
           mask,
+          ...(checkedRegion
+            ? {
+                ...(extractionVerification ? { verification: extractionVerification } : {}),
+                boxChecks: structuredClone(boxChecks),
+              }
+            : {}),
         }
       } else if (variant === 'no-image-control' && result.status === 'located') {
         extraction = {
@@ -727,6 +902,7 @@ export async function processRegionSeededCase(args: {
             .slice(logicalStart)
             .map((call) => call.requestSha256),
           seed,
+          ...(checkedRegion ? { boxChecks: structuredClone(boxChecks) } : {}),
         }
       } else {
         const status =
@@ -747,6 +923,12 @@ export async function processRegionSeededCase(args: {
             .slice(logicalStart)
             .map((call) => call.requestSha256),
           seed,
+          ...(checkedRegion
+            ? {
+                ...(extractionVerification ? { verification: extractionVerification } : {}),
+                boxChecks: structuredClone(boxChecks),
+              }
+            : {}),
           ...(result.status === 'unknown' && 'segmentation' in result
             ? {
                 segmentation: {
@@ -782,7 +964,19 @@ export async function processRegionSeededCase(args: {
           logicalStart,
           extractionStarted,
           safeErrorCode(error),
+          checkedRegion && seedCapture[0]
+            ? {
+                physicalEnd: seedCapture[0].physicalEnd,
+                logicalEnd: seedCapture[0].logicalEnd,
+              }
+            : undefined,
         ),
+        ...(checkedRegion
+          ? {
+              ...(extractionVerification ? { verification: extractionVerification } : {}),
+              boxChecks: structuredClone(boxChecks),
+            }
+          : {}),
       }
     }
     assertRecorderHealthy(recorder)
@@ -802,6 +996,7 @@ export async function processRegionSeededCase(args: {
 
 function skippedExtraction(
   reason: 'classification-absent' | 'classification-failed',
+  checkedRegion = false,
 ): RegionExtractionRecord {
   return {
     status: reason === 'classification-absent' ? 'not-found' : 'failed',
@@ -817,28 +1012,45 @@ function skippedExtraction(
       logicalCalls: 0,
       requestHashes: [],
     },
+    ...(checkedRegion ? { boxChecks: [] } : {}),
   }
 }
 
 export async function runRegionSeededProfile(options: RegionSeededRunnerOptions) {
   const requireClassifiedPresence = options.requireClassifiedPresence === true
-  const expectedProfile = requireClassifiedPresence
+  const checkedRegion = options.checkedRegion === true
+  if (checkedRegion && !requireClassifiedPresence)
+    throw new TypeError('Checked-region v3 profiles require the existing presence-first gate')
+  const expectedProfile = checkedRegion
     ? options.variant === 'region-seeded-sam'
       ? options.phase === 'dev'
-        ? regionPresenceFirstProfile.id
-        : regionPresenceFirstHeldoutProfile.id
+        ? regionPresenceFirstCheckedProfile.id
+        : regionPresenceFirstCheckedHeldoutProfile.id
       : options.phase === 'dev'
-        ? regionPresenceFirstNoImageProfile.id
-        : regionPresenceFirstNoImageHeldoutProfile.id
-    : options.variant === 'region-seeded-sam'
-      ? options.phase === 'dev'
-        ? regionSeededProfile.id
-        : regionSeededHeldoutProfile.id
-      : options.phase === 'dev'
-        ? regionSeededNoImageProfile.id
-        : regionSeededNoImageHeldoutProfile.id
+        ? regionPresenceFirstCheckedNoImageProfile.id
+        : regionPresenceFirstCheckedNoImageHeldoutProfile.id
+    : requireClassifiedPresence
+      ? options.variant === 'region-seeded-sam'
+        ? options.phase === 'dev'
+          ? regionPresenceFirstProfile.id
+          : regionPresenceFirstHeldoutProfile.id
+        : options.phase === 'dev'
+          ? regionPresenceFirstNoImageProfile.id
+          : regionPresenceFirstNoImageHeldoutProfile.id
+      : options.variant === 'region-seeded-sam'
+        ? options.phase === 'dev'
+          ? regionSeededProfile.id
+          : regionSeededHeldoutProfile.id
+        : options.phase === 'dev'
+          ? regionSeededNoImageProfile.id
+          : regionSeededNoImageHeldoutProfile.id
   if (!['dev', 'heldout'].includes(options.phase) || options.profileId !== expectedProfile)
     throw new TypeError('Unknown region-seeded recipe identity')
+  const recipe = checkedRegion
+    ? options.variant === 'region-seeded-sam'
+      ? checkedRegionSeededRecipe
+      : checkedRegionNoImageRecipe
+    : regionSeededRecipe
   if (
     !Number.isInteger(options.expectedCaseCount) ||
     options.expectedCaseCount < 1 ||
@@ -864,6 +1076,7 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     (authorization.profileId !== options.profileId ||
       authorization.variant !== options.variant ||
       (authorization.requireClassifiedPresence === true) !== requireClassifiedPresence ||
+      (authorization.checkedRegion === true) !== checkedRegion ||
       authorization.maxPhysicalCalls !== options.maxPhysicalCalls ||
       authorization.maxCostUsd !== options.maxCostUsd ||
       authorization.unknownCostReserveUsd !== options.unknownCostReserveUsd)
@@ -875,6 +1088,10 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     options.unknownCostReserveUsd !== 0.05
   )
     throw new TypeError('Run budget must match the frozen region-seeded phase policy')
+  if (options.variant === 'region-seeded-sam' && !checkedRegion)
+    throw new TypeError(
+      'Legacy segmentation profiles require their frozen historical producer; use checked-region v3 for new runs',
+    )
 
   const runId = `v02-region-seeded-${options.phase}-${new Date().toISOString().replaceAll(':', '').replaceAll('.', '')}-${randomUUID().slice(0, 8)}`
   const outputDirectory = join(options.outputRoot, runId)
@@ -966,8 +1183,11 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
       { id: 'absent', description: 'The target in the question is not visible in this image.' },
     ],
     classificationInstruction: 'Use only the supplied image. Choose exactly one closed label.',
-    extraction:
-      'Original three-choice region search once; full-source MobileSAM seed-region extraction once; no extent or whole-object model confirmation.',
+    extraction: checkedRegion
+      ? options.variant === 'region-seeded-sam'
+        ? 'Original three-choice region search once; full-source MobileSAM seed-region extraction; up to two closed visible-box containment checks, with at most one native enclosing-mask expansion and one recheck; no separate extent search.'
+        : 'Paired no-image control runs only the original three-choice region search; no segmentation or visible-box checks.'
+      : 'Original three-choice region search once; full-source MobileSAM seed-region extraction once; no extent or whole-object model confirmation.',
     noImageControl:
       'Remove all image parts at DecisionPort boundary; assert no image part at actual fetch; no segmentation, OCR, or hidden CV.',
     ...(requireClassifiedPresence
@@ -977,20 +1197,29 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
         }
       : {}),
   }
-  const variantSha256 = hashCanonical({
-    profileId: options.profileId,
-    phase: options.phase,
-    variant: options.variant,
-    ...(requireClassifiedPresence ? { requireClassifiedPresence: true as const } : {}),
-    route,
-    policy: requireClassifiedPresence
+  const profilePolicy = checkedRegion
+    ? {
+        ...recipe,
+        maxPhysicalCalls: options.maxPhysicalCalls,
+        maxCostUsd: options.maxCostUsd,
+        requireClassifiedPresence: true as const,
+      }
+    : requireClassifiedPresence
       ? {
           ...regionSeededRecipe,
           maxPhysicalCalls: options.maxPhysicalCalls,
           maxCostUsd: options.maxCostUsd,
           requireClassifiedPresence: true as const,
         }
-      : regionSeededRecipe,
+      : regionSeededRecipe
+  const variantSha256 = hashCanonical({
+    profileId: options.profileId,
+    phase: options.phase,
+    variant: options.variant,
+    ...(requireClassifiedPresence ? { requireClassifiedPresence: true as const } : {}),
+    ...(checkedRegion ? { checkedRegion: true as const } : {}),
+    route,
+    policy: profilePolicy,
     promptPolicy,
     manifests: corpus.manifests,
     taskHashes,
@@ -1003,17 +1232,22 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     phase: options.phase,
     purpose:
       options.phase === 'dev'
-        ? requireClassifiedPresence
+        ? checkedRegion
           ? options.variant === 'region-seeded-sam'
-            ? regionPresenceFirstProfile.purpose
-            : regionPresenceFirstNoImageProfile.purpose
-          : options.variant === 'region-seeded-sam'
-            ? regionSeededProfile.purpose
-            : regionSeededNoImageProfile.purpose
+            ? regionPresenceFirstCheckedProfile.purpose
+            : regionPresenceFirstCheckedNoImageProfile.purpose
+          : requireClassifiedPresence
+            ? options.variant === 'region-seeded-sam'
+              ? regionPresenceFirstProfile.purpose
+              : regionPresenceFirstNoImageProfile.purpose
+            : options.variant === 'region-seeded-sam'
+              ? regionSeededProfile.purpose
+              : regionSeededNoImageProfile.purpose
         : requireClassifiedPresence
           ? 'frozen heldout photo, independent UI and independent map pass with existing classification gate'
           : 'frozen heldout photo, independent UI and independent map pass',
     targetPolicy: regionSeededProfile.targetPolicy,
+    ...(checkedRegion ? { checkedRegion: true as const } : {}),
     producerSourceSha256: sourceBeforeSha256,
     producerSourceFiles: before,
     manifests: corpus.manifests,
@@ -1024,14 +1258,7 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     imageChecks,
     route,
     variant: options.variant,
-    policy: requireClassifiedPresence
-      ? {
-          ...regionSeededRecipe,
-          maxPhysicalCalls: options.maxPhysicalCalls,
-          maxCostUsd: options.maxCostUsd,
-          requireClassifiedPresence: true,
-        }
-      : regionSeededRecipe,
+    policy: profilePolicy,
     ...(verifiedAssetManifest
       ? { nativeAssets: verifiedAssetManifest }
       : { native: 'none; image parts are removed before recording and asserted absent at fetch' }),
@@ -1077,7 +1304,7 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
         if (index >= corpus.cases.length) return
         const item = corpus.cases[index]!
         const caseDir = join(outputDirectory, item.caseId)
-        const localBudget = new CaseBudget(budget)
+        const localBudget = new CaseBudget(budget, recipe.maxPhysicalCallsPerCase, options.phase)
         const audit = { checkedFetches: 0, imagePartFetches: 0 }
         if (options.variant === 'no-image-control') noImageAudits.set(item.caseId, audit)
         const actualFetch =
@@ -1116,6 +1343,7 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
             ...(segmenter ? { segmentation: segmenter } : {}),
             variant: options.variant,
             ...(requireClassifiedPresence ? { requireClassifiedPresence: true } : {}),
+            ...(checkedRegion ? { checkedRegion: true } : {}),
             recorder,
             signal: controller.signal,
           })
@@ -1123,11 +1351,17 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
           const row = results[index]!
           if (
             row.classify.logicalCalls > 1 ||
-            row.extraction.logicalCalls > 3 ||
+            row.extraction.logicalCalls >
+              (checkedRegion && options.variant === 'region-seeded-sam' ? 5 : 3) ||
             row.classify.physicalCalls > 1 ||
-            row.extraction.physicalCalls > 3 ||
-            row.classify.logicalCalls + row.extraction.logicalCalls > 4 ||
-            row.classify.physicalCalls + row.extraction.physicalCalls > 4
+            row.extraction.physicalCalls >
+              (checkedRegion && options.variant === 'region-seeded-sam' ? 5 : 3) ||
+            row.classify.logicalCalls + row.extraction.logicalCalls >
+              recipe.maxLogicalCallsPerCase ||
+            row.classify.physicalCalls + row.extraction.physicalCalls >
+              recipe.maxPhysicalCallsPerCase ||
+            (row.extraction.boxChecks?.length ?? 0) >
+              (checkedRegion && options.variant === 'region-seeded-sam' ? 2 : 0)
           )
             throw Object.assign(
               new Error('Case exceeded its frozen classification/region-search call bound'),
@@ -1187,6 +1421,7 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     profileId: options.profileId,
     phase: options.phase,
     ...(requireClassifiedPresence ? { requireClassifiedPresence: true as const } : {}),
+    ...(checkedRegion ? { checkedRegion: true as const } : {}),
     status:
       failed ||
       missingCaseIds.length ||
@@ -1254,8 +1489,12 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
 
 class CaseBudget extends RunBudget {
   private readonly mapping = new Map<number, number>()
-  constructor(private readonly shared: RunBudget) {
-    super(4, 5, 0.05, 'dev')
+  constructor(
+    private readonly shared: RunBudget,
+    maxCalls: number,
+    phase: 'dev' | 'heldout',
+  ) {
+    super(maxCalls, phase === 'heldout' ? 10 : 5, 0.05, phase)
   }
   override admit(): number {
     const local = super.admit()
