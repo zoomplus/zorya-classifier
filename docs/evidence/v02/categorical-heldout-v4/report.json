@@ -1,0 +1,254 @@
+{
+  "schema": "categorical-heldout-v4-independent-failure-v1",
+  "status": "failed-quality-qualification",
+  "releaseQualified": false,
+  "measuredAtUtc": "2026-10-20",
+  "producerSourceCommit": "c107ddfc8a129070e4bf7232f2c713b93fe650d4",
+  "runtimeSourceSnapshot": "0c365cb13173e290365a5aa2a1aec122c42b0b4d",
+  "freezeSha256": "97aa1173d0569c02522789a00ffd469e1a49792e564c91b104ba719ff6c176c1",
+  "methodSelectionSha256": "fabb05c2c472c30a8cb20a5f9b6d697b932d94aedc43976359746463ef8708b9",
+  "candidate": {
+    "runId": "v02-categorical-heldout-native-luna-categorical-presence-sam-heldout-target-plus-neutral-v1-2026-10-20T183257519Z-d6cfb60e",
+    "profileId": "native-luna-categorical-presence-sam-heldout-target-plus-neutral-v1",
+    "cases": 80,
+    "positives": 60,
+    "negatives": 20,
+    "runManifestSha256": "8ba9597bea273c93a8844d875ce95dd0d7ba9c74d35aa8949680acaed32b9503",
+    "rawSummarySha256": "1fb307aef68c93231b3d7fb10b415b4e4aa7d85b5a37ca3fa941bd0beeac28e4",
+    "producerSourceSha256": "0a93a965faf8f6ffbae630d03d00d0e68e2fdc69ac31e3d2ba171253e5515ac4",
+    "classification": {
+      "correct": 69,
+      "truePositives": 59,
+      "falsePositives": 10,
+      "falseNegatives": 1,
+      "trueNegatives": 10
+    },
+    "wholeObject": {
+      "matched": 1,
+      "positiveDenominator": 60,
+      "falseLocations": 0,
+      "negativeDenominator": 20,
+      "located": 4,
+      "unknown": 61,
+      "notFound": 8,
+      "failed": 7
+    },
+    "strata": [
+      {
+        "group": "photo",
+        "positiveMatches": 1,
+        "positiveCases": 30,
+        "falseLocations": 0,
+        "negativeCases": 10
+      },
+      {
+        "group": "ui",
+        "positiveMatches": 0,
+        "positiveCases": 15,
+        "falseLocations": 0,
+        "negativeCases": 5
+      },
+      {
+        "group": "map",
+        "positiveMatches": 0,
+        "positiveCases": 15,
+        "falseLocations": 0,
+        "negativeCases": 5
+      }
+    ],
+    "budget": {
+      "admittedPhysicalCalls": 356,
+      "knownCostUsd": 0.1608768999999998,
+      "unknownCostCalls": 7,
+      "inFlightCalls": 0,
+      "accountedExposureUsd": 0.5108768999999999,
+      "maxPhysicalCalls": 600,
+      "maxCostUsd": 10
+    },
+    "http": {
+      "physicalCalls": 356,
+      "status200": 349,
+      "status502": 7,
+      "negativeCase502": 7,
+      "retries": 0,
+      "fallback": false
+    },
+    "sourceUnchanged": true
+  },
+  "noImageControl": {
+    "runId": "v02-deepseek-no-image-heldout-photo-2026-10-20T184450822Z-eb3ceccc",
+    "cases": 40,
+    "positiveMatches": 0,
+    "positiveCases": 30,
+    "classificationCorrect": 10,
+    "runManifestSha256": "da21c46353240df05c35a04b63bc18224f7489985ca0709c9e17d8d8a1c9b553",
+    "rawSummarySha256": "1180d62c4a43e1cec45fadb6b33bb37e5f4b311dc28fc78ec08e7cbdd890915d",
+    "producerSourceSha256": "69c85bacace07e09356186d1a72252402bf10c28e114697f35a121be97887619",
+    "budget": {
+      "admittedPhysicalCalls": 100,
+      "knownCostUsd": 0.05400330000000001,
+      "unknownCostCalls": 0,
+      "inFlightCalls": 0,
+      "accountedExposureUsd": 0.05400330000000001,
+      "maxPhysicalCalls": 300,
+      "maxCostUsd": 5
+    },
+    "http": {
+      "physicalCalls": 100,
+      "status200": 100,
+      "retries": 0,
+      "fallback": false
+    },
+    "actualFetchAudit": {
+      "fetchesChecked": 100,
+      "fetchAttempts": 100,
+      "zeroImagePartsConfirmed": 100,
+      "zeroImageDerivedStateConfirmed": 100,
+      "imagePartViolations": 0,
+      "unverifiableBodies": 0,
+      "complete": true
+    }
+  },
+  "pairedPhotoQualification": {
+    "methodSelectionSha256": "fabb05c2c472c30a8cb20a5f9b6d697b932d94aedc43976359746463ef8708b9",
+    "photoCases": 40,
+    "positivePairs": 30,
+    "allGroupsNegativeCases": 20,
+    "candidateFalseLocationsAllGroups": [],
+    "maximumAllowedFalseLocationsAllGroups": 1,
+    "allGroupsNegativeGatePasses": true,
+    "bootstrap": {
+      "pairs": 30,
+      "iterations": 10000,
+      "seed": "0x5a4f5259",
+      "method": "paired-percentile-nearest-rank",
+      "difference": 0.03333333333333333,
+      "confidence": 0.95,
+      "lower": 0,
+      "upper": 0.1,
+      "passes": false
+    },
+    "denominator": "all 30 positive photo pairs; transport failures and unknowns count as failures"
+  },
+  "positiveFunnel": {
+    "cases": 60,
+    "initialPresenceAbsent": 1,
+    "finalSeedAbsentWithCellContradiction": 7,
+    "finalSeedAbsentWithNoCell": 6,
+    "finalSeedPresentWithNoCell": 9,
+    "reachedNativeProposals": 37,
+    "noMaskSelected": 15,
+    "selectedMaskCompletenessRejected": 18,
+    "locatedBoxFailed": 3,
+    "locatedBoxPassed": 1,
+    "reconciliation": "1+7+6+9+15+18+3+1 = 60; transport/parse/timeouts caused none of these positive outcomes",
+    "use": "diagnostic only; not a new method selection or revised qualification"
+  },
+  "maskCoverage": {
+    "initialEvaluatorReferenceInstances": 0,
+    "actualOfficialReferenceInstances": 32,
+    "actualOfficialAnnotatedCases": 21,
+    "exactSourceCanvasInstances": 2,
+    "differentFullFrameCanvasInstances": 30,
+    "strictJoinStatus": "rejected-different-source-and-annotation-dimensions",
+    "qualifiedMaskAccuracy": false,
+    "explanation": "Canonical photo truth and official mask index are separate. Initial evaluation did not join references. Strict join rejects 30 differently sized full-frame masks. Raw outputs stay unchanged; any normalized-canvas calculation is separate exploratory evidence and cannot change whole-box or paired results."
+  },
+  "costAccounting": {
+    "physicalCalls": 456,
+    "knownCostUsd": 0.2148801999999998,
+    "unknownCostCalls": 7,
+    "unknownCostReserveUsdPerCall": 0.05,
+    "accountedExposureUsd": 0.5648801999999998,
+    "knownCostIsInvoice": false
+  },
+  "latency": {
+    "rankingEligible": false,
+    "method": "nearest rank, ceil(p*n), actual completed operation/physical fetch duration; shared host and native stress are unranked",
+    "candidate": {
+      "physicalFetch": {
+        "observations": 356,
+        "p50Ms": 1748.815476000018,
+        "p95Ms": 10264.485994999995
+      },
+      "classification": {
+        "observations": 80,
+        "p50Ms": 980.1109229999965,
+        "p95Ms": 4537.356227999997
+      },
+      "localization": {
+        "observations": 80,
+        "p50Ms": 6745.572493999964,
+        "p95Ms": 41874.570619999984
+      }
+    },
+    "noImageControl": {
+      "physicalFetch": {
+        "observations": 100,
+        "p50Ms": 517.789005000006,
+        "p95Ms": 1536.4638100000002
+      },
+      "classification": {
+        "observations": 40,
+        "p50Ms": 605.3571630000006,
+        "p95Ms": 1721.7188230000029
+      },
+      "localization": {
+        "observations": 40,
+        "p50Ms": 926.6581420000002,
+        "p95Ms": 2654.099829999999
+      }
+    }
+  },
+  "limitations": [
+    "Source selection was frozen before new pixels/per-case truth were opened; this 80-case corpus is now exposed regression data.",
+    "UI is one controlled Mousepad family; map is one controlled Minetest minimap family, not arbitrary real games.",
+    "Candidate and no-image control use different model families: this compares complete recipes, not a causal image-only ablation.",
+    "Seven physical 502 receipts have unknown usage cost; reservations remain, not zero charges.",
+    "All mandatory release gates are retained. A new development method and a fresh source-group-disjoint blind cohort are required."
+  ],
+  "artifacts": [
+    {
+      "path": "candidate-evaluation.json",
+      "sha256": "f5ac16c65b63115b22fe753a69a1b340a108e521df49b37aa678f8e2c1db4484",
+      "bytes": 79628,
+      "preservation": "byte-exact original evaluator output; initial evaluation has no joined mask references"
+    },
+    {
+      "path": "candidate-provenance.json",
+      "sha256": "17d1d5970d1f4b9e3785281639c043172119f7dd7dc1cd3827492313d0ed5e62",
+      "bytes": 9491,
+      "preservation": "byte-exact original evaluator output; initial evaluation has no joined mask references"
+    },
+    {
+      "path": "control-evaluation.json",
+      "sha256": "8043f1124caf3224e5bd20b46e337bdd3b014a28eb2b842b64488042cc652576",
+      "bytes": 25062,
+      "preservation": "byte-exact original evaluator output; initial evaluation has no joined mask references"
+    },
+    {
+      "path": "control-provenance.json",
+      "sha256": "3642407e848cfabc6f0fbad0fe5d606a52fec14d34482efbe43df8413fe24162",
+      "bytes": 1410,
+      "preservation": "byte-exact original evaluator output; initial evaluation has no joined mask references"
+    },
+    {
+      "path": "paired-qualification.json",
+      "sha256": "3abe7c561901f5ea2eb34f802db5da872dd7264615dcfcc35db4b4952d7078ee",
+      "bytes": 654,
+      "preservation": "byte-exact original evaluator output; initial evaluation has no joined mask references"
+    },
+    {
+      "path": "candidate-physical-receipts.json",
+      "sha256": "d5eec9791bca9db46257d088d64fd96f2e41282b9f359a0880d8c08d069632be",
+      "bytes": 513037,
+      "preservation": "metadata-only JSON derivative of original physicalReceipts array; no request bodies"
+    },
+    {
+      "path": "control-physical-receipts.json",
+      "sha256": "97e7aa487ef57f27a09902b2c82e8da2c8b5fa61d1ac562d61ba4ccdf4c54796",
+      "bytes": 145621,
+      "preservation": "metadata-only JSON derivative of original physicalReceipts array; no request bodies"
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "schema": "categorical-heldout-dispatch-authorization-v1",
+  "recordedAt": "2026-10-20T18:34:19.252000+00:00",
+  "executableSourceRevision": "c107ddfc8a129070e4bf7232f2c713b93fe650d4",
+  "phase": "heldout",
+  "freeze": {
+    "file": "categorical-heldout-run-freeze-20261020-v4.json",
+    "sha256": "97aa1173d0569c02522789a00ffd469e1a49792e564c91b104ba719ff6c176c1"
+  },
+  "producerSource": {
+    "candidateFiles": 67,
+    "candidateSha256": "0a93a965faf8f6ffbae630d03d00d0e68e2fdc69ac31e3d2ba171253e5515ac4",
+    "noImageFiles": 73,
+    "noImageSha256": "69c85bacace07e09356186d1a72252402bf10c28e114697f35a121be97887619"
+  },
+  "offlineAdmission": {
+    "cases": 80,
+    "photo": 40,
+    "ui": 20,
+    "map": 20,
+    "targetPolicyAndTaskPrivacyChecks": "passed",
+    "pixelsOrTruthInspectedByRootOrDispatcher": false,
+    "physicalCalls": 0
+  },
+  "sourceGates": {
+    "localTests": 451,
+    "failures": 0,
+    "skipped": 0,
+    "strictCheck": "passed",
+    "format": "passed",
+    "hostedCiReceipt": "ci-c107ddf.json",
+    "hostedCiRun": 39475196959,
+    "hostedWindowsLinuxNodeJobs": 4,
+    "jobsPassed": 4,
+    "gitleaksHistory": {
+      "version": "8.30.1",
+      "commits": 93,
+      "findings": 0
+    }
+  },
+  "installedArchive": {
+    "sha256": "866ba6262d9bae307f044ab3174785910c670afe1e17a6c2c4963175fe1b5335",
+    "files": 281,
+    "unpackedBytes": 3840895,
+    "consumer": "passed",
+    "providerCalls": 0,
+    "runtimeDistFiles": 106,
+    "runtimeDistSha256": "87f6a18d46107ca08b37170db1e9204514dfc72a1dfc3181f59e8ffe76d85c95",
+    "retainedByPackCheck": false
+  },
+  "nativeAndResourceScope": {
+    "sourceRuntimeFiles": 53,
+    "unchangedSince": "0c365cb13173e290365a5aa2a1aec122c42b0b4d",
+    "nativeWindowsReceipt": "native-proposal-windows-0c365cb.json",
+    "twoHourResourceReceipt": "proposal-resource-soak-261dc23.json",
+    "gameSessionClaim": false
+  },
+  "authorization": {
+    "rootGoIssuedBeforeFirstDispatch": true,
+    "ownerAuthorization": "existing session authorizes public model tests and eventual publication after gates",
+    "soleDispatcher": "A5",
+    "order": ["candidate80", "photo-no-image-control40"],
+    "retries": 0,
+    "fallback": false,
+    "freshTruthAccessForScoringOnlyAfterBothProducersTerminate": true
+  },
+  "observedFirstDispatch": {
+    "dispatcherRunId": "v02-heldout-dispatch-2026-10-20T183257373Z-72857a56",
+    "profile": "candidate",
+    "startedAt": "2026-10-20T18:32:57.373Z",
+    "runId": "v02-categorical-heldout-native-luna-categorical-presence-sam-heldout-target-plus-neutral-v1-2026-10-20T183257519Z-d6cfb60e"
+  },
+  "status": "authorized-measurement-in-progress",
+  "limitations": [
+    "This receipt records dispatch readiness, not an accuracy result or release qualification.",
+    "The earlier v3 zero-HTTP setup failure and source-oracle capture rejections remain preserved.",
+    "Final publication still requires independent quality evaluation and checks for the final release source/archive."
+  ]
+}

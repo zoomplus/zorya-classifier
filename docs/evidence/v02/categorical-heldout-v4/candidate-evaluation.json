@@ -1,0 +1,2812 @@
+{
+  "runId": "v02-categorical-heldout-native-luna-categorical-presence-sam-heldout-target-plus-neutral-v1-2026-10-20T183257519Z-d6cfb60e",
+  "profileId": "native-luna-categorical-presence-sam-heldout-target-plus-neutral-v1",
+  "complete": true,
+  "coverage": {
+    "planned": 80,
+    "reported": 80,
+    "missing": [],
+    "denominatorPolicy": "all planned cases; missing results fail qualification, not invented API calls"
+  },
+  "inputs": [
+    {
+      "sha256": "5d125e853ed93558ab634e406ca90cf931569953279c1630d49dcf239b9baa79",
+      "cases": 40
+    },
+    {
+      "sha256": "1bf7940fd92fdc1f7fa295296dfc5f84c5f4c32ccc41b7a2e80a0059bff918c3",
+      "cases": 20
+    },
+    {
+      "sha256": "2c18d2c1bae481d0a1239802f32d4ac985bc0d33a028eaafb490fd5995de7a3b",
+      "cases": 20
+    }
+  ],
+  "summarySha256": "17d00dc666575b5a945bdc858c46b5f87f11d90583ee9664a406f579b7aa3aff",
+  "runManifestSha256": "8ba9597bea273c93a8844d875ce95dd0d7ba9c74d35aa8949680acaed32b9503",
+  "truthSha256": [
+    "e0b6b8b977ac31e41e74d1f73044e8638bbfeb8c76fae5732a1207112c7b7caa",
+    "047011b2e15c1f43f6d0ab3aff413ffc7cb24fe9c2c08e9ce8be2c12ee3e176c",
+    "9710edd246a9c2253172bfbd6205b9b2ded393dbd54e0d7a73d301c8f69b6f78"
+  ],
+  "classificationCorrect": 69,
+  "localization": {
+    "attempted": 80,
+    "positives": 60,
+    "negatives": 20,
+    "matched": 1,
+    "localizationRate": 0.016666666666666666,
+    "falseLocations": 0,
+    "falseLocationRate": 0,
+    "unknown": 61,
+    "failed": 7,
+    "correct": 8,
+    "rows": [
+      {
+        "caseId": "photo-heldout-v3-present-01",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-02",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-03",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-04",
+        "presence": "present",
+        "status": "located",
+        "correct": true
+      },
+      {
+        "caseId": "photo-heldout-v3-present-05",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-06",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-07",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-08",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-09",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-10",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-11",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-12",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-13",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-14",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-15",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-16",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-17",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-18",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-19",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-20",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-21",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-22",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-23",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-24",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-25",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-26",
+        "presence": "present",
+        "status": "not-found",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-27",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-28",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-29",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-30",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-01",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-02",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-03",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-04",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-05",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-06",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-07",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-08",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-09",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-10",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-01",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-02",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-03",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-04",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-05",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-06",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-07",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-08",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-09",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-10",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-11",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-12",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-13",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-14",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-15",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-16",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-17",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-18",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-19",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "mousepad-ui-v3-20",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-01",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-02",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-03",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-04",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-21",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-06",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-07",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-08",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-09",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-10",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-11",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-12",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-13",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-14",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-15",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-16",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      },
+      {
+        "caseId": "map-oracle-v3-17",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "map-oracle-v3-18",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      },
+      {
+        "caseId": "map-oracle-v3-19",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      },
+      {
+        "caseId": "map-oracle-v3-20",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      }
+    ]
+  },
+  "photoLocalization": {
+    "attempted": 40,
+    "positives": 30,
+    "negatives": 10,
+    "matched": 1,
+    "localizationRate": 0.03333333333333333,
+    "falseLocations": 0,
+    "falseLocationRate": 0,
+    "unknown": 26,
+    "failed": 6,
+    "correct": 4,
+    "rows": [
+      {
+        "caseId": "photo-heldout-v3-present-01",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-02",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-03",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-04",
+        "presence": "present",
+        "status": "located",
+        "correct": true
+      },
+      {
+        "caseId": "photo-heldout-v3-present-05",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-06",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-07",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-08",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-09",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-10",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-11",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-12",
+        "presence": "present",
+        "status": "located",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-13",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-14",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-15",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-16",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-17",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-18",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-19",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-20",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-21",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-22",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-23",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-24",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-25",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-26",
+        "presence": "present",
+        "status": "not-found",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-27",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-28",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-29",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-30",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-01",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-02",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-03",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-04",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-05",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-06",
+        "presence": "absent",
+        "status": "not-found",
+        "correct": true
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-07",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-08",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-09",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-10",
+        "presence": "absent",
+        "status": "failed",
+        "correct": false
+      }
+    ]
+  },
+  "rows": [
+    {
+      "caseId": "photo-heldout-v3-present-01",
+      "imageSha256": "28035a1bbae8f5372c7195daa138471de59e1ba3361ae69088767a042b2a1ccb",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-02",
+      "imageSha256": "598a4aaaf4b724442ab34ebbfe857a946e9c65015fb08b227cddeed203c16ba9",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-03",
+      "imageSha256": "4055c444e25db4c5f0bdb72e3346b5069fb5abfe5530a6647c85b559b6f733b7",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-04",
+      "imageSha256": "49ccbbf3fa0a9f1dccd95355a877aa10dd137e7fd9a1189a3ed8f28ad8a849de",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "photo-heldout-v3-present-05",
+      "imageSha256": "bcdbb7a0a17365a5f20930f718508184b376061ab419aae9bec0e8e7d5706072",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-06",
+      "imageSha256": "b06a76e0cf88c370d356505441f626484b189d348d4da204338f3e436051b88b",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-07",
+      "imageSha256": "46d61246073b01215fdcd2855de007a76c990e950dc89055c0e46365d348c4a1",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-08",
+      "imageSha256": "fecd2e51edfd13401f3670c66caed6289231609f25a4b048076877eeadb3d5e3",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-09",
+      "imageSha256": "9c47cc619e269370c9d8626f6dd1e468a672f245ae29f6d8f8ba76273bb47fdb",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-10",
+      "imageSha256": "0da18ff473b80319ac0e9c0c0f51095915facbaf49114fa25781137cbdb954db",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-11",
+      "imageSha256": "f68cdfc5820f12decb02f62ddfc2c853e5d7b2bfeb072b14842b9842dad0d4e1",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-12",
+      "imageSha256": "d585c7c75ab7dd5348dd1261d7f6cda2affd98fdfb7be42a0644bf889c408cad",
+      "expectedPresence": "present",
+      "sourceStatus": "located",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-13",
+      "imageSha256": "e8a897b9d12878e0729a0574aa1df3b06186cecd5362afb980eed1210d6bff85",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-14",
+      "imageSha256": "538f4a21e7a6c23249474e05ecbf82f1955b2c5a1b698f3d6be23787ca97fc70",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-15",
+      "imageSha256": "b2ef44734531b9602071d47c7dda30ff5e958006e4b51cb0459e8cbbe58a1970",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-16",
+      "imageSha256": "b05801fcf83726d8431b447ab5e9b967a8dc324156af2b0a673b007a9b70b941",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-17",
+      "imageSha256": "1b18d27efca3126ba81be73cd8dc1213cd4997b5e4c25b3500ed2eed24a6bf71",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-18",
+      "imageSha256": "5be9236ed9c39a3e174a395737287efff15dbf4cd2b1aa6eeae98bc159f03a2a",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-19",
+      "imageSha256": "6400ed4682cd486e37ec0eeb9e64dfb6afec8b351317469b63698476166751d5",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-20",
+      "imageSha256": "c8f56f5d841e4bfccd3e490be86207807f6f23d3b8f093060a70da867b43e9e7",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-21",
+      "imageSha256": "f68184cc53b67990345f53572ff5c7d122c6300aca61f4c054f72dca13e3e4ec",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-22",
+      "imageSha256": "db1050ebc1b2685437528933f860161d9a754a72d2ae4a237e608b94f204e097",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-23",
+      "imageSha256": "6ca29b47effaa1aad9a6816c2369ce9f672117b8548c61fdd5678926fe1ae575",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-24",
+      "imageSha256": "e772e44fabb6b99cb50a498d87550b5fa2e4fd73dc6a8a51a2d6c5a38c27864a",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-25",
+      "imageSha256": "b94a550b9cd01eca7b73feae0c49857694cf4ed8f27e877422fceee27cd36da9",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-26",
+      "imageSha256": "b482fcb9598e988aab6432ac5d2a95fd83f5e10f04a748c11d42c50d13452344",
+      "expectedPresence": "present",
+      "sourceStatus": "not-found",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-27",
+      "imageSha256": "d24a581d9f382bcfc79c59b3a88394f62588eb37c13f7bbfb79d17f8c90d7b8b",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-28",
+      "imageSha256": "aaac18f14a7b217cd291666e62e673941ef88708f71c4bffe918dd68f24343b9",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-29",
+      "imageSha256": "5ba08874120a965a62473abd47c8e4851712793c43a6b674161236a29068fa9a",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-30",
+      "imageSha256": "182c1508d1a216179c32bd8ad2b2c362b6eead67acde360d187fa8d242600f4a",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-01",
+      "imageSha256": "d12ff909a40b44b2823b88da96717bd095440181413bfbf4be25cb8ed3cb7ee7",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-02",
+      "imageSha256": "74fdafbfdee220cdf94b0f4e8b00a0c6e7bd802c9a2d8d7327fe674f6da4a286",
+      "expectedPresence": "absent",
+      "sourceStatus": "failed",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-03",
+      "imageSha256": "ab6627282229dce5c89c62298741f121335bd2c2672006e1f995581f32afd213",
+      "expectedPresence": "absent",
+      "sourceStatus": "not-found",
+      "classificationCorrect": false,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-04",
+      "imageSha256": "6a09c641f7901f818c48d6a632c313cbdfc221630a434baf8bd1a680e7033333",
+      "expectedPresence": "absent",
+      "sourceStatus": "failed",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-05",
+      "imageSha256": "e466689c4681dde49891a8615dbf4704f04f32ec700fe93c2f765b587d79ce68",
+      "expectedPresence": "absent",
+      "sourceStatus": "not-found",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-06",
+      "imageSha256": "8aacd38e7bf23c4b62411473e4d2e0d9b9cd23d7efdc1f3445a4ae8866684045",
+      "expectedPresence": "absent",
+      "sourceStatus": "not-found",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-07",
+      "imageSha256": "544f8c7ede24b64859ef77e8eeaedaa027b8ccb2db7e6ffc5b8cce1c5e36f48c",
+      "expectedPresence": "absent",
+      "sourceStatus": "failed",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-08",
+      "imageSha256": "a54046c8d80d2e673b04a1ea54dad63aea97b4d1eb50ec57bb5e548676c31013",
+      "expectedPresence": "absent",
+      "sourceStatus": "failed",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-09",
+      "imageSha256": "9caaabf778547b6946e31b22249b6a3dce758c0e1d9b284ab0f1f2cc88609c99",
+      "expectedPresence": "absent",
+      "sourceStatus": "failed",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-10",
+      "imageSha256": "5c37a019303f1ec6fcbfceae417051a9a10f14bd66d900afd48eb2e21735e27f",
+      "expectedPresence": "absent",
+      "sourceStatus": "failed",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-01",
+      "imageSha256": "cd6778e4abc4e7689aa6c54d040e2bffd16c15d1b68976bc1b2ad2affc3fddb0",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-02",
+      "imageSha256": "94f43a3435d0db6920d5d6a85427757522b977d1aee003df1b3d5a1fb1f5e073",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-03",
+      "imageSha256": "9c6fdb97f60dc3d0fb442d6483b8b6acfb57427a33dcf1361f891e3a6b4a2d20",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-04",
+      "imageSha256": "4e0eb8c3e63fb9a8e2eb6314aaa69f1b8db824520c1c0366bdecc15318aeb35c",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-05",
+      "imageSha256": "ac8713e0beb22491ad509c770c482dbf085d9eaa6408cf240d793796499dbf2c",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-06",
+      "imageSha256": "c206936c408dfbfc94eb2952b88e3e53a5763c1d716848f409045fcb8305e92a",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-07",
+      "imageSha256": "0b6c03405e60534c19ec81bb7bb9d7dfa92452574f3d48ffd0036d6396611d48",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-08",
+      "imageSha256": "ac5b6028856fec3da23e84a6869364d77e9e645e20feaf7b28bb73e1271ec092",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-09",
+      "imageSha256": "36ce6f2b4d1a5e90ef42398eff90c81f6a250c475a38b023dd4bd10c2bbea368",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-10",
+      "imageSha256": "66c5401beaac889d937a769193bddec2fa993d2232b5b549d41fbbc616c2284e",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-11",
+      "imageSha256": "fa70a2153430a627a6f3b935c371e45cac31dc10608a44748e183969f1d91736",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-12",
+      "imageSha256": "75cafa416e51de08ec0481364b36a31a984a1479c385d8c896afb252272d7aa2",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-13",
+      "imageSha256": "5db83752ef76c91d2860bc60768f5a8c45bff81b577f22ebc48a246bd777ef83",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-14",
+      "imageSha256": "29ddd557d01ce46dc4629a02062da9de4f430a1031dd6035e1d0c2bc304e79b4",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-15",
+      "imageSha256": "8c6cb7ade7d6fecbc623be98d80c2e38565cfa85b3d39a802b82de88542d1058",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-16",
+      "imageSha256": "0aab22656826d5f7f775835ed483c43a6bea97237beba1b69d534e5c50edc90c",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-17",
+      "imageSha256": "673f6b19a76a1729edd59ce2069e663239b7fd3d9ed0acbdf6bade57ea81002f",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-18",
+      "imageSha256": "d4a50cdbbedc39d7e372b75052d7aa4e9ff1a1f5ae16585b36a3ab7519241d4f",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-19",
+      "imageSha256": "e29918ca58498b4d45d4b161db855b7793ffea9cd7343fbfd2d3f4bdd5ba6c0e",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "mousepad-ui-v3-20",
+      "imageSha256": "372d0738e9059c504d00a9f8a008bb0da08f42eeed5e6fd2687ad4cbc69e3b85",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-01",
+      "imageSha256": "f65fc474bc1b698184efc2e4152cb740ff94f16a0d21d69df924111bb225e669",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-02",
+      "imageSha256": "27479bc7493301250f70fd8308acd5788c10a03c2f5e426c11f911adbe5107b9",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-03",
+      "imageSha256": "1bf0bef0403de78595f596792a3804b0e338982cdf69847ca4b24444324498cf",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-04",
+      "imageSha256": "5325e8da07ca03867844f24fdeaec920014e81007f4d94a5a540c21be1694b09",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-21",
+      "imageSha256": "ba8afd9a7d0dffcff7c5b41b128a966d9f3e154c9a0fb6a911c0b1c0c78897d0",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-06",
+      "imageSha256": "0f743b6085563939a72a588a13231ea5b359ef77460054b337f00e1d4e1645be",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-07",
+      "imageSha256": "3991b29580482fe330d68cc08843c7fe6008f716afb2aaeea0388345aaf61a07",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-08",
+      "imageSha256": "5f7e66063d4a9c1fd596f5f8f5c6f4a8669f59aee36da0130e87fe6a5813156c",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-09",
+      "imageSha256": "9cbec057acc329b7648cf085f8356c3fa97448355e8bf7e3aaa07dabbb2dc9f2",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-10",
+      "imageSha256": "514f0e9ec79399e9dcdaccf8e15b3bcb47e6a19cf54acc04326689b42d2837eb",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-11",
+      "imageSha256": "555cc1369e8d9da4c7be28bc13a1956fdb1f45876c1f8c573b7e96e6d60cac15",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-12",
+      "imageSha256": "0dbe108d163fcb19dff059925859d5684a5211717bb478975dbb302314a9a575",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-13",
+      "imageSha256": "fdb746670147a6828a2363945d73fb6ca24d69c581db984310ea57d3d1f7da47",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-14",
+      "imageSha256": "c27323b391f3725118e7b2ca388fa14d3e0cb08b85d2af52fbe12ffc79857a52",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-15",
+      "imageSha256": "aa00d69110e39d78512eff996eb9e01f2a6f2a0c12ecc8b6c6b69480a15a5641",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-16",
+      "imageSha256": "46f16883732c45ad940ba87d71f4a3769422b465bbe525552b4057ffd8d04725",
+      "expectedPresence": "absent",
+      "sourceStatus": "not-found",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "map-oracle-v3-17",
+      "imageSha256": "156eefaaef7e45d78a920ac21397cf8a1a8291d2a2681f50be92cf284d463dca",
+      "expectedPresence": "absent",
+      "sourceStatus": "failed",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "map-oracle-v3-18",
+      "imageSha256": "ecc41346e75e6369bc4ea86d29f5df1c5a3f2814f8463425566bb18755b86a51",
+      "expectedPresence": "absent",
+      "sourceStatus": "not-found",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "map-oracle-v3-19",
+      "imageSha256": "fdf0b739ece2601633280421c0a74bc7b4759a63b424409e833bd9ee5ac72e62",
+      "expectedPresence": "absent",
+      "sourceStatus": "not-found",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    },
+    {
+      "caseId": "map-oracle-v3-20",
+      "imageSha256": "915a4c518660b2e37899b2a588e4a2b8891d559f73a605cfe5390c70463caf66",
+      "expectedPresence": "absent",
+      "sourceStatus": "not-found",
+      "classificationCorrect": true,
+      "localizationCorrect": true
+    }
+  ],
+  "phase": "heldout",
+  "proposalExtractions": [
+    {
+      "caseId": "photo-heldout-v3-present-01",
+      "status": "unknown",
+      "durationMs": 17455.624979,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1831.5347380000003,
+        "input": {
+          "width": 768,
+          "height": 768
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-02",
+      "status": "unknown",
+      "durationMs": 11930.684625,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1739.126341000001,
+        "input": {
+          "width": 1024,
+          "height": 768
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-03",
+      "status": "extracted",
+      "durationMs": 34962.80675,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1717.3649780000014,
+        "input": {
+          "width": 1024,
+          "height": 768
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1717.3649780000014,
+        "input": {
+          "width": 1024,
+          "height": 768
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "23b75e62317471f1d4a9ff4917976e68340b20310e1ece90b922ca3cf4131722",
+        "format": "binary-u8",
+        "width": 275,
+        "height": 261,
+        "sourceRegion": {
+          "left": 418,
+          "top": 290,
+          "width": 275,
+          "height": 261
+        },
+        "sourceOffset": {
+          "x": 418,
+          "y": 290
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "9fbfdcdf2cf8411144be26d763b5c8e60856c16902dd7f25a1a76604a6ffa0a3"
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-04",
+      "status": "extracted",
+      "durationMs": 32543.762786,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1727.5017850000004,
+        "input": {
+          "width": 1024,
+          "height": 844
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1727.5017850000004,
+        "input": {
+          "width": 1024,
+          "height": 844
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "d2ef563de32ea7fe3e4bb86a6df246a93b65a584048808c549df5b53e644f9bb",
+        "format": "binary-u8",
+        "width": 382,
+        "height": 711,
+        "sourceRegion": {
+          "left": 64,
+          "top": 5,
+          "width": 382,
+          "height": 711
+        },
+        "sourceOffset": {
+          "x": 64,
+          "y": 5
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "46acb417ab4edc295096a96e6958da6555e9ea281a8780adb23b58009098d0f4"
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-05",
+      "status": "unknown",
+      "durationMs": 37623.458678999996,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1684.2568420000025,
+        "input": {
+          "width": 1024,
+          "height": 683
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-06",
+      "status": "extracted",
+      "durationMs": 51759.527374,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1701.4143970000005,
+        "input": {
+          "width": 1024,
+          "height": 768
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1701.4143970000005,
+        "input": {
+          "width": 1024,
+          "height": 768
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "36d1f2cb4a067095a98db8b3e8569b1f95081b49adde0e8f010caf84f38bc03f",
+        "format": "binary-u8",
+        "width": 292,
+        "height": 297,
+        "sourceRegion": {
+          "left": 448,
+          "top": 80,
+          "width": 292,
+          "height": 297
+        },
+        "sourceOffset": {
+          "x": 448,
+          "y": 80
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "94867d575e5a58df8334fb57efb8332cc0b66acc69482e4005429a8e347390ca"
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-07",
+      "status": "unknown",
+      "durationMs": 29831.235889000003,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1660.5301179999951,
+        "input": {
+          "width": 1024,
+          "height": 748
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-08",
+      "status": "unknown",
+      "durationMs": 13450.246461999996,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "photo-heldout-v3-present-09",
+      "status": "unknown",
+      "durationMs": 42716.671749999994,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1796.4387160000042,
+        "input": {
+          "width": 1024,
+          "height": 1024
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-10",
+      "status": "unknown",
+      "durationMs": 26948.922112,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1726.5761800000037,
+        "input": {
+          "width": 1024,
+          "height": 768
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-11",
+      "status": "unknown",
+      "durationMs": 31425.31893000001,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1737.906604000018,
+        "input": {
+          "width": 1024,
+          "height": 886
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-12",
+      "status": "extracted",
+      "durationMs": 46143.020481000014,
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1759.083810000011,
+        "input": {
+          "width": 1024,
+          "height": 768
+        },
+        "candidateCount": 36
+      },
+      "segmentation": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1759.083810000011,
+        "input": {
+          "width": 1024,
+          "height": 768
+        }
+      },
+      "mask": {
+        "file": "mask.u8",
+        "sha256": "fb70535187b58cf2cee0cc9d0293cc3997753c396729b844c28540455fa95ffc",
+        "format": "binary-u8",
+        "width": 678,
+        "height": 753,
+        "sourceRegion": {
+          "left": 337,
+          "top": 7,
+          "width": 678,
+          "height": 753
+        },
+        "sourceOffset": {
+          "x": 337,
+          "y": 7
+        },
+        "pngFile": "cutout.png",
+        "pngSha256": "e8f00edfe4f6e9a5aded52e467b1f06e3c3e2548d8bae2c4a9ac8d340dbeaf31"
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-13",
+      "status": "unknown",
+      "durationMs": 41874.570619999984,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1652.3204520000145,
+        "input": {
+          "width": 1024,
+          "height": 683
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-14",
+      "status": "unknown",
+      "durationMs": 19403.09733800002,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1704.6678010000032,
+        "input": {
+          "width": 1024,
+          "height": 768
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-15",
+      "status": "unknown",
+      "durationMs": 23205.543300999998,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1679.8870549999992,
+        "input": {
+          "width": 1024,
+          "height": 752
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-16",
+      "status": "unknown",
+      "durationMs": 32827.66799699998,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1651.0106319999904,
+        "input": {
+          "width": 1024,
+          "height": 779
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-17",
+      "status": "unknown",
+      "durationMs": 34262.691844000015,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1720.500315000012,
+        "input": {
+          "width": 1024,
+          "height": 768
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-18",
+      "status": "unknown",
+      "durationMs": 11046.515197,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "photo-heldout-v3-present-19",
+      "status": "unknown",
+      "durationMs": 21529.80845500005,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1693.3631290000048,
+        "input": {
+          "width": 1024,
+          "height": 647
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-20",
+      "status": "unknown",
+      "durationMs": 24546.568510000012,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1639.6790800000308,
+        "input": {
+          "width": 1024,
+          "height": 590
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-21",
+      "status": "unknown",
+      "durationMs": 43625.96154300001,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1673.5437020000536,
+        "input": {
+          "width": 1024,
+          "height": 683
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-22",
+      "status": "unknown",
+      "durationMs": 39194.14526000002,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1655.4149479999905,
+        "input": {
+          "width": 1024,
+          "height": 678
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-23",
+      "status": "unknown",
+      "durationMs": 24974.482707999996,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "photo-heldout-v3-present-24",
+      "status": "unknown",
+      "durationMs": 18684.338577000017,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "photo-heldout-v3-present-25",
+      "status": "unknown",
+      "durationMs": 35808.22956000001,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1717.707247000013,
+        "input": {
+          "width": 764,
+          "height": 1024
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-26",
+      "status": "not-found",
+      "durationMs": 6684.170114999986,
+      "reason": "absent-in-evaluated-region"
+    },
+    {
+      "caseId": "photo-heldout-v3-present-27",
+      "status": "unknown",
+      "durationMs": 38319.09026299999,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1770.4130919999443,
+        "input": {
+          "width": 1024,
+          "height": 1024
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-28",
+      "status": "unknown",
+      "durationMs": 40691.81492699997,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1656.348181999987,
+        "input": {
+          "width": 1024,
+          "height": 683
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-29",
+      "status": "unknown",
+      "durationMs": 21146.09425100003,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1625.330782999983,
+        "input": {
+          "width": 1024,
+          "height": 576
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-present-30",
+      "status": "unknown",
+      "durationMs": 25502.175777999975,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1648.035383999988,
+        "input": {
+          "width": 1024,
+          "height": 683
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-01",
+      "status": "unknown",
+      "durationMs": 27044.343381999992,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1687.0111139999935,
+        "input": {
+          "width": 1024,
+          "height": 683
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-02",
+      "status": "failed",
+      "durationMs": 11269.925022999989,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-03",
+      "status": "not-found",
+      "durationMs": 4863.786932000017,
+      "reason": "absent-in-evaluated-region"
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-04",
+      "status": "failed",
+      "durationMs": 3926.474748000037,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-05",
+      "status": "not-found",
+      "durationMs": 5273.46337100002,
+      "reason": "absent-in-evaluated-region"
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-06",
+      "status": "not-found",
+      "durationMs": 6715.950879000011,
+      "reason": "absent-in-evaluated-region"
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-07",
+      "status": "failed",
+      "durationMs": 7696.271610999946,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-08",
+      "status": "failed",
+      "durationMs": 16555.204429000034,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-09",
+      "status": "failed",
+      "durationMs": 13928.792592999991,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-10",
+      "status": "failed",
+      "durationMs": 9559.358473,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "mousepad-ui-v3-01",
+      "status": "unknown",
+      "durationMs": 2307.0218299999833,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-02",
+      "status": "unknown",
+      "durationMs": 8595.063335000072,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1790.7989619999425,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "mousepad-ui-v3-03",
+      "status": "unknown",
+      "durationMs": 3187.722361000022,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "mousepad-ui-v3-04",
+      "status": "unknown",
+      "durationMs": 2610.374310000101,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-05",
+      "status": "unknown",
+      "durationMs": 4573.933697999921,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-06",
+      "status": "unknown",
+      "durationMs": 6736.351307000034,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1775.274647000013,
+        "input": {
+          "width": 1280,
+          "height": 800
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "mousepad-ui-v3-07",
+      "status": "unknown",
+      "durationMs": 2896.602841999964,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-08",
+      "status": "unknown",
+      "durationMs": 3226.3845000000438,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-09",
+      "status": "unknown",
+      "durationMs": 4352.157566000009,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-10",
+      "status": "unknown",
+      "durationMs": 2641.957744000014,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-11",
+      "status": "unknown",
+      "durationMs": 3360.4555389999878,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-12",
+      "status": "unknown",
+      "durationMs": 2026.3802980000619,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-13",
+      "status": "unknown",
+      "durationMs": 2499.0535190000664,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-14",
+      "status": "unknown",
+      "durationMs": 3224.1943249999313,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "mousepad-ui-v3-15",
+      "status": "unknown",
+      "durationMs": 3181.210085999919,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "mousepad-ui-v3-16",
+      "status": "unknown",
+      "durationMs": 2523.063435000018,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "mousepad-ui-v3-17",
+      "status": "unknown",
+      "durationMs": 2624.4126460000407,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "mousepad-ui-v3-18",
+      "status": "unknown",
+      "durationMs": 2892.647683999967,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-19",
+      "status": "unknown",
+      "durationMs": 2232.8358640000224,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "mousepad-ui-v3-20",
+      "status": "unknown",
+      "durationMs": 2682.8978839999763,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "map-oracle-v3-01",
+      "status": "unknown",
+      "durationMs": 2263.480789999943,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "map-oracle-v3-02",
+      "status": "unknown",
+      "durationMs": 8090.832681,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1511.2535190000199,
+        "input": {
+          "width": 150,
+          "height": 150
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-oracle-v3-03",
+      "status": "unknown",
+      "durationMs": 5247.030405999976,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1489.5648519999813,
+        "input": {
+          "width": 150,
+          "height": 150
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-oracle-v3-04",
+      "status": "unknown",
+      "durationMs": 2593.793563000043,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "map-oracle-v3-21",
+      "status": "unknown",
+      "durationMs": 6185.676326000015,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1487.9958319999278,
+        "input": {
+          "width": 150,
+          "height": 150
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-oracle-v3-06",
+      "status": "unknown",
+      "durationMs": 6705.91719399998,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1555.0917670000345,
+        "input": {
+          "width": 150,
+          "height": 150
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-oracle-v3-07",
+      "status": "unknown",
+      "durationMs": 9171.864106000052,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1503.9797940000426,
+        "input": {
+          "width": 150,
+          "height": 150
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-oracle-v3-08",
+      "status": "unknown",
+      "durationMs": 5856.661108999979,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1480.2490910000633,
+        "input": {
+          "width": 150,
+          "height": 150
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-oracle-v3-09",
+      "status": "unknown",
+      "durationMs": 2385.205764000071,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "map-oracle-v3-10",
+      "status": "unknown",
+      "durationMs": 5350.294159000041,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1511.164289999986,
+        "input": {
+          "width": 150,
+          "height": 150
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-oracle-v3-11",
+      "status": "unknown",
+      "durationMs": 6745.572493999964,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1500.5720050000818,
+        "input": {
+          "width": 150,
+          "height": 150
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-oracle-v3-12",
+      "status": "unknown",
+      "durationMs": 12638.721533999895,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1477.5794919999316,
+        "input": {
+          "width": 150,
+          "height": 150
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-oracle-v3-13",
+      "status": "unknown",
+      "durationMs": 2142.0092739999527,
+      "reason": "candidate-union-empty"
+    },
+    {
+      "caseId": "map-oracle-v3-14",
+      "status": "unknown",
+      "durationMs": 2610.1761049999623,
+      "reason": "contradictory-evidence"
+    },
+    {
+      "caseId": "map-oracle-v3-15",
+      "status": "unknown",
+      "durationMs": 7980.077933000051,
+      "reason": "extent-uncertain",
+      "nativeProposal": {
+        "method": "mobile-sam-nine-point-proposals-v1",
+        "backend": "mobile-sam",
+        "durationMs": 1481.582323999959,
+        "input": {
+          "width": 150,
+          "height": 150
+        },
+        "candidateCount": 36
+      }
+    },
+    {
+      "caseId": "map-oracle-v3-16",
+      "status": "not-found",
+      "durationMs": 635.2301410000073,
+      "reason": "absent-in-evaluated-region"
+    },
+    {
+      "caseId": "map-oracle-v3-17",
+      "status": "failed",
+      "durationMs": 1938.570188999991,
+      "errorCode": "PROVIDER"
+    },
+    {
+      "caseId": "map-oracle-v3-18",
+      "status": "not-found",
+      "durationMs": 392.4418659999501,
+      "reason": "absent-in-evaluated-region"
+    },
+    {
+      "caseId": "map-oracle-v3-19",
+      "status": "not-found",
+      "durationMs": 562.4365109999198,
+      "reason": "absent-in-evaluated-region"
+    },
+    {
+      "caseId": "map-oracle-v3-20",
+      "status": "not-found",
+      "durationMs": 727.4504729999462,
+      "reason": "absent-in-evaluated-region"
+    }
+  ],
+  "proposalMaskMetrics": {
+    "threshold": 0.8,
+    "truthCases": 0,
+    "scoredCases": 0,
+    "unavailableAnnotatedCases": 0,
+    "unannotatedCases": 80,
+    "referenceInstances": 0,
+    "scoredReferenceInstances": 0,
+    "unavailableReferenceInstances": 0,
+    "passingReferenceInstances": 0,
+    "passedCases": 0,
+    "meanBestInstanceIoU": null,
+    "matching": "Place each cropped 0/1 prediction at its absolute sourceOffset; compare pixelwise against every independent source-sized Open Images instance mask. Emit one IoU per reference-mask SHA; case pass is the maximum instance IoU >= 0.8. This is separate from bbox correctness.",
+    "rows": [
+      {
+        "caseId": "photo-heldout-v3-present-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-05",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-06",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-07",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-08",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-09",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-10",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-11",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-12",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-13",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-14",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-15",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-16",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-17",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-18",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-19",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-20",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-21",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-22",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-23",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-24",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-25",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-26",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-27",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-28",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-29",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-present-30",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-05",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-06",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-07",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-08",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-09",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-10",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-05",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-06",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-07",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-08",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-09",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-10",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-11",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-12",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-13",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-14",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-15",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-16",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-17",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-18",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-19",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "mousepad-ui-v3-20",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-21",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-06",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-07",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-08",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-09",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-10",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-11",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-12",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-13",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-14",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-15",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-16",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-17",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-18",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-19",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-oracle-v3-20",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      }
+    ]
+  },
+  "sourceQualified": true,
+  "latencyRankingEligible": false
+}

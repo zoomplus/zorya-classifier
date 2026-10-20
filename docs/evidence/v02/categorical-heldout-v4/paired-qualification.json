@@ -1,0 +1,21 @@
+{
+  "methodSelectionSha256": "fabb05c2c472c30a8cb20a5f9b6d697b932d94aedc43976359746463ef8708b9",
+  "photoCases": 40,
+  "positivePairs": 30,
+  "allGroupsNegativeCases": 20,
+  "candidateFalseLocationsAllGroups": [],
+  "maximumAllowedFalseLocationsAllGroups": 1,
+  "allGroupsNegativeGatePasses": true,
+  "bootstrap": {
+    "pairs": 30,
+    "iterations": 10000,
+    "seed": "0x5a4f5259",
+    "method": "paired-percentile-nearest-rank",
+    "difference": 0.03333333333333333,
+    "confidence": 0.95,
+    "lower": 0,
+    "upper": 0.1,
+    "passes": false
+  },
+  "denominator": "all 30 positive photo pairs; transport failures and unknowns count as failures"
+}

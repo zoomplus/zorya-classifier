@@ -1,0 +1,855 @@
+{
+  "runId": "v02-deepseek-no-image-heldout-photo-2026-10-20T184450822Z-eb3ceccc",
+  "profileId": "deepseek-flash-no-image-photo-heldout-v1",
+  "complete": true,
+  "coverage": {
+    "planned": 40,
+    "reported": 40,
+    "missing": [],
+    "denominatorPolicy": "all planned cases; missing results fail qualification, not invented API calls"
+  },
+  "inputs": [
+    {
+      "sha256": "5d125e853ed93558ab634e406ca90cf931569953279c1630d49dcf239b9baa79",
+      "cases": 40
+    }
+  ],
+  "summarySha256": "137327176930f1d86d1e386d051d60ccec89c32436ac381e575b6f0352134307",
+  "runManifestSha256": "da21c46353240df05c35a04b63bc18224f7489985ca0709c9e17d8d8a1c9b553",
+  "truthSha256": [
+    "e0b6b8b977ac31e41e74d1f73044e8638bbfeb8c76fae5732a1207112c7b7caa"
+  ],
+  "classificationCorrect": 10,
+  "localization": {
+    "attempted": 40,
+    "positives": 30,
+    "negatives": 10,
+    "matched": 0,
+    "localizationRate": 0,
+    "falseLocations": 0,
+    "falseLocationRate": 0,
+    "unknown": 40,
+    "failed": 0,
+    "correct": 0,
+    "rows": [
+      {
+        "caseId": "photo-heldout-v3-present-01",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-02",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-03",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-04",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-05",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-06",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-07",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-08",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-09",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-10",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-11",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-12",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-13",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-14",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-15",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-16",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-17",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-18",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-19",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-20",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-21",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-22",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-23",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-24",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-25",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-26",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-27",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-28",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-29",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-30",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-01",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-02",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-03",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-04",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-05",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-06",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-07",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-08",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-09",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-10",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      }
+    ]
+  },
+  "photoLocalization": {
+    "attempted": 40,
+    "positives": 30,
+    "negatives": 10,
+    "matched": 0,
+    "localizationRate": 0,
+    "falseLocations": 0,
+    "falseLocationRate": 0,
+    "unknown": 40,
+    "failed": 0,
+    "correct": 0,
+    "rows": [
+      {
+        "caseId": "photo-heldout-v3-present-01",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-02",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-03",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-04",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-05",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-06",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-07",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-08",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-09",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-10",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-11",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-12",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-13",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-14",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-15",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-16",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-17",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-18",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-19",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-20",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-21",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-22",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-23",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-24",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-25",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-26",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-27",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-28",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-29",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-present-30",
+        "presence": "present",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-01",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-02",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-03",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-04",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-05",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-06",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-07",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-08",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-09",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      },
+      {
+        "caseId": "photo-heldout-v3-absent-10",
+        "presence": "absent",
+        "status": "unknown",
+        "correct": false
+      }
+    ]
+  },
+  "rows": [
+    {
+      "caseId": "photo-heldout-v3-present-01",
+      "imageSha256": "28035a1bbae8f5372c7195daa138471de59e1ba3361ae69088767a042b2a1ccb",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-02",
+      "imageSha256": "598a4aaaf4b724442ab34ebbfe857a946e9c65015fb08b227cddeed203c16ba9",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-03",
+      "imageSha256": "4055c444e25db4c5f0bdb72e3346b5069fb5abfe5530a6647c85b559b6f733b7",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-04",
+      "imageSha256": "49ccbbf3fa0a9f1dccd95355a877aa10dd137e7fd9a1189a3ed8f28ad8a849de",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-05",
+      "imageSha256": "bcdbb7a0a17365a5f20930f718508184b376061ab419aae9bec0e8e7d5706072",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-06",
+      "imageSha256": "b06a76e0cf88c370d356505441f626484b189d348d4da204338f3e436051b88b",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-07",
+      "imageSha256": "46d61246073b01215fdcd2855de007a76c990e950dc89055c0e46365d348c4a1",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-08",
+      "imageSha256": "fecd2e51edfd13401f3670c66caed6289231609f25a4b048076877eeadb3d5e3",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-09",
+      "imageSha256": "9c47cc619e269370c9d8626f6dd1e468a672f245ae29f6d8f8ba76273bb47fdb",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-10",
+      "imageSha256": "0da18ff473b80319ac0e9c0c0f51095915facbaf49114fa25781137cbdb954db",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-11",
+      "imageSha256": "f68cdfc5820f12decb02f62ddfc2c853e5d7b2bfeb072b14842b9842dad0d4e1",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-12",
+      "imageSha256": "d585c7c75ab7dd5348dd1261d7f6cda2affd98fdfb7be42a0644bf889c408cad",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-13",
+      "imageSha256": "e8a897b9d12878e0729a0574aa1df3b06186cecd5362afb980eed1210d6bff85",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-14",
+      "imageSha256": "538f4a21e7a6c23249474e05ecbf82f1955b2c5a1b698f3d6be23787ca97fc70",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-15",
+      "imageSha256": "b2ef44734531b9602071d47c7dda30ff5e958006e4b51cb0459e8cbbe58a1970",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-16",
+      "imageSha256": "b05801fcf83726d8431b447ab5e9b967a8dc324156af2b0a673b007a9b70b941",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-17",
+      "imageSha256": "1b18d27efca3126ba81be73cd8dc1213cd4997b5e4c25b3500ed2eed24a6bf71",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-18",
+      "imageSha256": "5be9236ed9c39a3e174a395737287efff15dbf4cd2b1aa6eeae98bc159f03a2a",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-19",
+      "imageSha256": "6400ed4682cd486e37ec0eeb9e64dfb6afec8b351317469b63698476166751d5",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-20",
+      "imageSha256": "c8f56f5d841e4bfccd3e490be86207807f6f23d3b8f093060a70da867b43e9e7",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-21",
+      "imageSha256": "f68184cc53b67990345f53572ff5c7d122c6300aca61f4c054f72dca13e3e4ec",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-22",
+      "imageSha256": "db1050ebc1b2685437528933f860161d9a754a72d2ae4a237e608b94f204e097",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-23",
+      "imageSha256": "6ca29b47effaa1aad9a6816c2369ce9f672117b8548c61fdd5678926fe1ae575",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-24",
+      "imageSha256": "e772e44fabb6b99cb50a498d87550b5fa2e4fd73dc6a8a51a2d6c5a38c27864a",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-25",
+      "imageSha256": "b94a550b9cd01eca7b73feae0c49857694cf4ed8f27e877422fceee27cd36da9",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-26",
+      "imageSha256": "b482fcb9598e988aab6432ac5d2a95fd83f5e10f04a748c11d42c50d13452344",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-27",
+      "imageSha256": "d24a581d9f382bcfc79c59b3a88394f62588eb37c13f7bbfb79d17f8c90d7b8b",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-28",
+      "imageSha256": "aaac18f14a7b217cd291666e62e673941ef88708f71c4bffe918dd68f24343b9",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-29",
+      "imageSha256": "5ba08874120a965a62473abd47c8e4851712793c43a6b674161236a29068fa9a",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-present-30",
+      "imageSha256": "182c1508d1a216179c32bd8ad2b2c362b6eead67acde360d187fa8d242600f4a",
+      "expectedPresence": "present",
+      "sourceStatus": "unknown",
+      "classificationCorrect": false,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-01",
+      "imageSha256": "d12ff909a40b44b2823b88da96717bd095440181413bfbf4be25cb8ed3cb7ee7",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-02",
+      "imageSha256": "74fdafbfdee220cdf94b0f4e8b00a0c6e7bd802c9a2d8d7327fe674f6da4a286",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-03",
+      "imageSha256": "ab6627282229dce5c89c62298741f121335bd2c2672006e1f995581f32afd213",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-04",
+      "imageSha256": "6a09c641f7901f818c48d6a632c313cbdfc221630a434baf8bd1a680e7033333",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-05",
+      "imageSha256": "e466689c4681dde49891a8615dbf4704f04f32ec700fe93c2f765b587d79ce68",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-06",
+      "imageSha256": "8aacd38e7bf23c4b62411473e4d2e0d9b9cd23d7efdc1f3445a4ae8866684045",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-07",
+      "imageSha256": "544f8c7ede24b64859ef77e8eeaedaa027b8ccb2db7e6ffc5b8cce1c5e36f48c",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-08",
+      "imageSha256": "a54046c8d80d2e673b04a1ea54dad63aea97b4d1eb50ec57bb5e548676c31013",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-09",
+      "imageSha256": "9caaabf778547b6946e31b22249b6a3dce758c0e1d9b284ab0f1f2cc88609c99",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    },
+    {
+      "caseId": "photo-heldout-v3-absent-10",
+      "imageSha256": "5c37a019303f1ec6fcbfceae417051a9a10f14bd66d900afd48eb2e21735e27f",
+      "expectedPresence": "absent",
+      "sourceStatus": "unknown",
+      "classificationCorrect": true,
+      "localizationCorrect": false
+    }
+  ],
+  "phase": "heldout",
+  "sourceQualified": true
+}

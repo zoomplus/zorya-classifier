@@ -1,0 +1,240 @@
+{
+  "schema": "paired-segmentation-component-summary-v1",
+  "phase": "development-component",
+  "sourceBaseRevision": "c63da6ac24493a1b891fb230528c8d8d76bdd2e9",
+  "sourceManifestSha256": "4e0880890385cf535c2c0e8fc7e9d8bb0dd66fb3243af6d4b2811c72d193c00c",
+  "sourceManifestFiles": 60,
+  "currentRuntimeParity": {
+    "revision": "c107ddfc8a129070e4bf7232f2c713b93fe650d4",
+    "files": 53,
+    "allByteIdentical": true
+  },
+  "sourceReport": "benchmarks/experiments/segmentation-component-comparison-2026-10-20.md",
+  "sourceReportSha256": "144d547c2d25a23e25ca9050ee43c8851ffe9758a530fb395c6bc4f68589ed35",
+  "photoFixtures": [
+    {
+      "id": "photo-dev-present-06",
+      "sha256": "ad0eb4bf4a6c2c1be585846a943aa06ec2440696b7e8874374904eb25dcc594a",
+      "sourceUrl": "https://www.flickr.com/photos/126942156@N08/15072003400",
+      "license": "CC-BY-2.0"
+    },
+    {
+      "id": "photo-dev-present-08",
+      "sha256": "74b944d3b7d88a046d01f2d813c88e8a6415296db938a343a83d86048f4c3a4f",
+      "sourceUrl": "https://www.flickr.com/photos/jdqueen/6310191834",
+      "license": "CC-BY-2.0"
+    },
+    {
+      "id": "photo-dev-present-09",
+      "sha256": "6710905e971316f4b0d0fe1535eb64702807bc4c041bc161ea1ce1208eff5a0f",
+      "sourceUrl": "https://www.flickr.com/photos/vikingdread/3585699111",
+      "license": "CC-BY-2.0"
+    },
+    {
+      "id": "photo-dev-present-13",
+      "sha256": "750f09aeeb5d1113088eedaf47f201f0837ad64720f836a69fec9ed3e4f1e5a7",
+      "sourceUrl": "https://www.flickr.com/photos/favitia/6390569267",
+      "license": "CC-BY-2.0"
+    },
+    {
+      "id": "photo-dev-present-15",
+      "sha256": "a0a80df65932f8cb7cf7367305372c04aa37f1991436e4f1cb7828c9138f708e",
+      "sourceUrl": "https://www.flickr.com/photos/loqueveelojo/2905202023/",
+      "license": "CC-BY-2.0"
+    }
+  ],
+  "comparison": [
+    {
+      "panel": "original fixture seeds",
+      "backend": "grabcut",
+      "rawFile": "grabcut.json",
+      "rawSha256": "62c87a8781763f82302105e8ab1ce9a204848cdda8e7e21915347055e6d1cfc5",
+      "photoCases": 5,
+      "perCaseMaskIoU": {
+        "photo-dev-present-06": 0.553246463971489,
+        "photo-dev-present-08": 0.5932328061787422,
+        "photo-dev-present-09": 0.7501264402696166,
+        "photo-dev-present-13": 0,
+        "photo-dev-present-15": 0.5309935910519655
+      },
+      "meanPerCaseMaskIoU": 0.48551986029436267,
+      "casesAtMaskIoU08": 0,
+      "repeatedPerCaseIoUValuesIdentical": true,
+      "busyResults": {
+        "segmented": 21,
+        "unknown": 0,
+        "failed": 0,
+        "durationP50Ms": 1916.0716459999967,
+        "durationP95Ms": 6447.738258000001
+      },
+      "childStarts": 21,
+      "childCloses": 21,
+      "childrenStillOwnedCount": 0,
+      "lifecycle": {
+        "positive": {
+          "caseId": "synthetic-red-panel-v1",
+          "status": "segmented",
+          "durationMs": 528.537797,
+          "maskPixels": 11248,
+          "maskIoU": 1
+        },
+        "negative": {
+          "result": "not-found",
+          "segmentCalls": 0
+        },
+        "cancellationCode": "ABORTED",
+        "overloadCapacityRejected": 1,
+        "invalidInputCode": "INVALID_INPUT",
+        "assetFaultCode": "UNSUPPORTED",
+        "disposedTwice": true
+      }
+    },
+    {
+      "panel": "original fixture seeds",
+      "backend": "mobile-sam",
+      "rawFile": "mobile-sam.json",
+      "rawSha256": "224206002e42152b178d35a3418177a45eba70be32eaddb3dd83a136a83a2c57",
+      "photoCases": 5,
+      "perCaseMaskIoU": {
+        "photo-dev-present-06": 0.8778299545680144,
+        "photo-dev-present-08": 0.8585428206220708,
+        "photo-dev-present-09": 0.9432335832924522,
+        "photo-dev-present-13": 0.6699974685542723,
+        "photo-dev-present-15": 0.9470228458355819
+      },
+      "meanPerCaseMaskIoU": 0.8593253345744784,
+      "casesAtMaskIoU08": 4,
+      "repeatedPerCaseIoUValuesIdentical": true,
+      "busyResults": {
+        "segmented": 43,
+        "unknown": 0,
+        "failed": 0,
+        "durationP50Ms": 1352.875978,
+        "durationP95Ms": 1453.6594029999997
+      },
+      "childStarts": 43,
+      "childCloses": 43,
+      "childrenStillOwnedCount": 0,
+      "lifecycle": {
+        "positive": {
+          "caseId": "synthetic-red-panel-v1",
+          "status": "segmented",
+          "durationMs": 1280.7719720000002,
+          "maskPixels": 11244,
+          "maskIoU": 0.9996443812233285
+        },
+        "negative": {
+          "result": "not-found",
+          "segmentCalls": 0
+        },
+        "cancellationCode": "ABORTED",
+        "overloadCapacityRejected": 1,
+        "invalidInputCode": "INVALID_INPUT",
+        "assetFaultCode": "UNSUPPORTED",
+        "disposedTwice": true
+      }
+    },
+    {
+      "panel": "corrected oracle-assisted seeds",
+      "backend": "grabcut",
+      "rawFile": "grabcut-corrected.json",
+      "rawSha256": "57c1952428665c6b9c893ec0e680812d10bef5a4752f86223815635e760dd864",
+      "photoCases": 5,
+      "perCaseMaskIoU": {
+        "photo-dev-present-06": 0.553246463971489,
+        "photo-dev-present-08": 0.5932328061787422,
+        "photo-dev-present-09": 0.7501264402696166,
+        "photo-dev-present-13": 0.5452021336651344,
+        "photo-dev-present-15": 0.531004429204172
+      },
+      "meanPerCaseMaskIoU": 0.5945624546578309,
+      "casesAtMaskIoU08": 0,
+      "repeatedPerCaseIoUValuesIdentical": true,
+      "busyResults": {
+        "segmented": 22,
+        "unknown": 0,
+        "failed": 0,
+        "durationP50Ms": 1842.1046859999988,
+        "durationP95Ms": 6317.7178859999985
+      },
+      "childStarts": 22,
+      "childCloses": 22,
+      "childrenStillOwnedCount": 0,
+      "lifecycle": {
+        "positive": {
+          "caseId": "synthetic-red-panel-v1",
+          "status": "segmented",
+          "durationMs": 451.18495900000016,
+          "maskPixels": 11248,
+          "maskIoU": 1
+        },
+        "negative": {
+          "result": "not-found",
+          "segmentCalls": 0
+        },
+        "cancellationCode": "ABORTED",
+        "overloadCapacityRejected": 1,
+        "invalidInputCode": "INVALID_INPUT",
+        "assetFaultCode": "UNSUPPORTED",
+        "disposedTwice": true
+      }
+    },
+    {
+      "panel": "corrected oracle-assisted seeds",
+      "backend": "mobile-sam",
+      "rawFile": "mobile-sam-corrected.json",
+      "rawSha256": "fca473ef5f4cad5b56e61a0eb828450e3e7e532018332e239f8803f8c55978b6",
+      "photoCases": 5,
+      "perCaseMaskIoU": {
+        "photo-dev-present-06": 0.8778299545680144,
+        "photo-dev-present-08": 0.8585428206220708,
+        "photo-dev-present-09": 0.9432335832924522,
+        "photo-dev-present-13": 0.6699974685542723,
+        "photo-dev-present-15": 0.9470228458355819
+      },
+      "meanPerCaseMaskIoU": 0.8593253345744784,
+      "casesAtMaskIoU08": 4,
+      "repeatedPerCaseIoUValuesIdentical": true,
+      "busyResults": {
+        "segmented": 43,
+        "unknown": 0,
+        "failed": 0,
+        "durationP50Ms": 1269.308901999997,
+        "durationP95Ms": 1344.9541689999987
+      },
+      "childStarts": 43,
+      "childCloses": 43,
+      "childrenStillOwnedCount": 0,
+      "lifecycle": {
+        "positive": {
+          "caseId": "synthetic-red-panel-v1",
+          "status": "segmented",
+          "durationMs": 1185.297646,
+          "maskPixels": 11244,
+          "maskIoU": 0.9996443812233285
+        },
+        "negative": {
+          "result": "not-found",
+          "segmentCalls": 0
+        },
+        "cancellationCode": "ABORTED",
+        "overloadCapacityRejected": 1,
+        "invalidInputCode": "INVALID_INPUT",
+        "assetFaultCode": "UNSUPPORTED",
+        "disposedTwice": true
+      }
+    }
+  ],
+  "physicalProviderCalls": 0,
+  "providerCostUsd": 0,
+  "latencyRankingEligible": false,
+  "changedCurrentVisionRecipe": false,
+  "limitations": [
+    "Five public development photos with supplied whole-object geometry; not end-to-end localization or heldout evidence.",
+    "Original Hat seed has no annotated foreground; corrected seeds for all five cases are deterministically derived from the independent reference masks and are oracle-assisted.",
+    "The original Cat seed overlaps its reference but its center is outside it.",
+    "Concurrent CPU activity and older wall-clock phase accounting make timings and operation counts non-ranking; this is not a two-hour duration proof.",
+    "Synthetic wiring case is excluded from five-photo quality metrics but included in busy outcome totals.",
+    "A component preference does not choose a model/backend for library callers or alter the already frozen heldout candidate."
+  ]
+}

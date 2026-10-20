@@ -43,7 +43,7 @@ Each harness run also passed its synthetic positive control, absent-target contr
 
 These short comparison windows use the older harness's wall-clock configuration. They are not independent physical-duration evidence and do not replace the separate monotonic two-hour resource acceptance.
 
-Runs were serialized by backend, but overlapped the separately running public-path MobileSAM soak and other disclosed CPU screening. Operation counts and latencies are therefore non-ranking evidence. Repeated masks were deterministic within each panel. The sample is small and development-only; the results support comparing these components under this supplied geometry, not a general backend guarantee.
+Runs were serialized by backend, but overlapped the separately running public-path MobileSAM soak and other disclosed CPU screening. Operation counts and latencies are therefore non-ranking evidence. Repeated reported mask IoU values were identical within each panel; the aggregate does not retain every mask byte. The sample is small and development-only; the results support comparing these components under this supplied geometry, not a general backend guarantee.
 
 ## Raw artifacts
 

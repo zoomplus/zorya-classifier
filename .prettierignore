@@ -15,6 +15,15 @@ docs/evidence/v02/seed-unbounded/run-manifest.json
 docs/evidence/v02/seed-outline/run-manifest.json
 release/
 
+# Byte-exact failed evaluator outputs and explicitly pinned receipt derivatives.
+docs/evidence/v02/categorical-heldout-v4/candidate-evaluation.json
+docs/evidence/v02/categorical-heldout-v4/candidate-provenance.json
+docs/evidence/v02/categorical-heldout-v4/control-evaluation.json
+docs/evidence/v02/categorical-heldout-v4/control-provenance.json
+docs/evidence/v02/categorical-heldout-v4/paired-qualification.json
+docs/evidence/v02/categorical-heldout-v4/candidate-physical-receipts.json
+docs/evidence/v02/categorical-heldout-v4/control-physical-receipts.json
+
 # Frozen fresh producer/evaluator artifacts retain their recorded byte hashes.
 docs/evidence/v02/fresh-native-numeric/summary.json
 docs/evidence/v02/fresh-native-numeric/run-manifest.json

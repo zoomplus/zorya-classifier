@@ -1,0 +1,31 @@
+{
+  "normalization": "categorical-no-image-heldout40-adapter-v1",
+  "expectedProducerSourceSha256": "69c85bacace07e09356186d1a72252402bf10c28e114697f35a121be97887619",
+  "expectedCandidateSourceSha256": "0a93a965faf8f6ffbae630d03d00d0e68e2fdc69ac31e3d2ba171253e5515ac4",
+  "expectedPromptSha256": "e442e9dc2bb920db4bf91b11e6b1e7f507f78f3a778af19fcdb79e98eb87cf5d",
+  "summarySha256": "1180d62c4a43e1cec45fadb6b33bb37e5f4b311dc28fc78ec08e7cbdd890915d",
+  "runManifestSha256": "da21c46353240df05c35a04b63bc18224f7489985ca0709c9e17d8d8a1c9b553",
+  "freezeSha256": "97aa1173d0569c02522789a00ffd469e1a49792e564c91b104ba719ff6c176c1",
+  "methodSelectionSha256": "fabb05c2c472c30a8cb20a5f9b6d697b932d94aedc43976359746463ef8708b9",
+  "derivedSummarySha256": "137327176930f1d86d1e386d051d60ccec89c32436ac381e575b6f0352134307",
+  "evaluationSha256": "8043f1124caf3224e5bd20b46e337bdd3b014a28eb2b842b64488042cc652576",
+  "producerInputs": [
+    {
+      "sha256": "5d125e853ed93558ab634e406ca90cf931569953279c1630d49dcf239b9baa79",
+      "cases": 40
+    }
+  ],
+  "truthSha256": [
+    "e0b6b8b977ac31e41e74d1f73044e8638bbfeb8c76fae5732a1207112c7b7caa"
+  ],
+  "physicalCalls": 100,
+  "actualFetchAudit": {
+    "fetchesChecked": 100,
+    "fetchAttempts": 100,
+    "zeroImagePartsConfirmed": 100,
+    "zeroImageDerivedStateConfirmed": 100,
+    "imagePartViolations": 0,
+    "unverifiableBodies": 0,
+    "complete": true
+  }
+}
