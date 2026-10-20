@@ -6,6 +6,7 @@ import type { Classifier } from '../../src/app/create-classifier.js'
 import type { DecisionPort } from '../../src/entities/contracts.js'
 import type { BoundaryViewPort } from '../../src/entities/boundary-view.js'
 import type { WholeObjectLocalizationResult } from '../../src/entities/whole-object.js'
+import type { WholeObjectIntervalPolicy } from '../../src/processes/whole-object.js'
 import { createOpenRouterDecisions } from '../../src/infrastructure/openrouter.js'
 import { createSharpBoundaryView } from '../../src/infrastructure/boundary-view.js'
 import { inputManifestSchema, hashCanonical } from './protocol.js'
@@ -43,6 +44,7 @@ const policy = Object.freeze({
 })
 const sourceFiles = [
   './seedoutlinepilot.ts',
+  './intervalpolicy-pilot.ts',
   './seedoutlinepresentation.ts',
   './seedunboundedprompt.ts',
   './protocol.ts',
@@ -66,11 +68,20 @@ export interface SeedOutlinePilotOptions {
   apiKey: string
   rendererSha256: string
   fetch?: typeof globalThis.fetch
-  composeClassifier: (decision: DecisionPort, boundaryView: BoundaryViewPort) => Classifier
+  composeClassifier: (
+    decision: DecisionPort,
+    boundaryView: BoundaryViewPort,
+    intervalPolicy: WholeObjectIntervalPolicy,
+  ) => Classifier
+  intervalPolicy?: WholeObjectIntervalPolicy
+  sharedBudget?: RunBudget
+  variantId?: string
 }
 
 interface Outcome {
   caseId: string
+  intervalPolicy?: WholeObjectIntervalPolicy
+  variantId?: string
   status: 'located' | 'unknown' | 'not-found' | 'failed' | 'not-run-budget'
   sourceSha256: string | null
   imageDimensions: { width: number; height: number } | null
@@ -133,6 +144,9 @@ function resultSummary(result: WholeObjectLocalizationResult): unknown {
 
 /** Native-only outline presentation experiment. Evaluator truth never enters this producer. */
 export async function runSeedOutlinePilot(options: SeedOutlinePilotOptions) {
+  const intervalPolicy = options.intervalPolicy ?? 'fixed-16-v1'
+  const variantId = options.variantId ?? 'original-seed-outline-v1'
+  const variantPolicy = { ...policy, intervalPolicy, variantId }
   const rendererBytes = await readFile(
     new URL('../../src/infrastructure/boundary-view.ts', import.meta.url),
   )
@@ -147,7 +161,7 @@ export async function runSeedOutlinePilot(options: SeedOutlinePilotOptions) {
   )
   const variantSha256 = hashCanonical({
     route,
-    policy,
+    policy: variantPolicy,
     sourceHashes: Object.entries(sourceHashes).sort(([a], [b]) => a.localeCompare(b)),
   })
   const manifest = await readManifest()
@@ -156,18 +170,20 @@ export async function runSeedOutlinePilot(options: SeedOutlinePilotOptions) {
   const outputDirectory = resolve(options.outputRoot, runId)
   await mkdir(options.outputRoot, { recursive: true })
   await mkdir(outputDirectory, { recursive: false })
-  const budget = new RunBudget(
-    policy.maxPhysicalCalls,
-    policy.maxCostUsd,
-    policy.unknownCostReserveUsd,
-  )
+  const budget =
+    options.sharedBudget ??
+    new RunBudget(
+      policy.maxPhysicalCalls,
+      policy.maxCostUsd,
+      policy.unknownCostReserveUsd,
+    )
   await writeImmutable(join(outputDirectory, 'run-manifest.json'), {
     schemaVersion: 1,
     runId,
     purpose:
       'native Luna original-image seed-outline presentation; old exposed development Car/Boat diagnostic only',
     startedAt: new Date().toISOString(),
-    variantId: 'original-seed-outline-v1',
+    variantId,
     variantSha256,
     sourceHashes,
     producerSourceSha256: hashCanonical(
@@ -176,7 +192,7 @@ export async function runSeedOutlinePilot(options: SeedOutlinePilotOptions) {
     sourceManifestSha256: hashCanonical(manifest),
     selectedCaseIds: caseIds,
     route,
-    policy,
+    policy: variantPolicy,
     modelBoundary: { evaluatorTruthRead: false, retries: 0, fallback: false },
   })
   const outcomes: Outcome[] = []
@@ -234,7 +250,11 @@ export async function runSeedOutlinePilot(options: SeedOutlinePilotOptions) {
           options.fetch ?? globalThis.fetch,
         )
         const decision = withSeedUnboundedPrompt(withSeedOutlinePresentation(recorder.port))
-        const classifier = options.composeClassifier(decision, createSharpBoundaryView())
+        const classifier = options.composeClassifier(
+          decision,
+          createSharpBoundaryView(),
+          intervalPolicy,
+        )
         let result: WholeObjectLocalizationResult
         try {
           result = await classifier.locate({
@@ -272,12 +292,14 @@ export async function runSeedOutlinePilot(options: SeedOutlinePilotOptions) {
       }
       if (recorder) physicalCalls.push(...recorder.calls)
     }
+    outcome.intervalPolicy = intervalPolicy
+    outcome.variantId = variantId
     outcomes.push(outcome)
     await writeImmutable(join(directory, 'outcome.json'), outcome)
   }
   const summary = {
     runId,
-    variantId: 'original-seed-outline-v1',
+    variantId,
     variantSha256,
     status: outcomes.every((item) => !['failed', 'not-run-budget'].includes(item.status))
       ? 'complete'

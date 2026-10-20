@@ -22,6 +22,7 @@ const classificationSchema = z
     value: z.enum(['present', 'absent']).optional(),
     durationMs: z.number().finite().nonnegative(),
     calls: z.number().int().nonnegative(),
+    requestHashes: z.array(sha256Schema).max(12).optional(),
     errorCode: z.string().max(100).optional(),
   })
   .strict()
@@ -33,6 +34,7 @@ const localizationSchema = z
     reason: z.string().max(512).optional(),
     durationMs: z.number().finite().nonnegative(),
     calls: z.number().int().nonnegative(),
+    requestHashes: z.array(sha256Schema).max(12).optional(),
     errorCode: z.string().max(100).optional(),
   })
   .strict()

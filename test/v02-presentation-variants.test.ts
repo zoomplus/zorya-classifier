@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { resolve } from 'node:path'
 import { test } from 'node:test'
 import {
   presentationVariantHash,
@@ -44,8 +45,8 @@ await test('paired pilot CLI requires explicit paid-run intent and rejects varia
     '--out',
     './.run/pilot',
   ])
-  assert.equal(parsed.imageRoot.endsWith('/dev-fixture'), true)
-  assert.equal(parsed.outputRoot.endsWith('/.run/pilot'), true)
+  assert.equal(parsed.imageRoot, resolve('./dev-fixture'))
+  assert.equal(parsed.outputRoot, resolve('./.run/pilot'))
   assert.throws(
     () => parsePresentationPilotArgs(['--allow-paid', '--variant', 'numeric-v1']),
     /Unknown option/u,

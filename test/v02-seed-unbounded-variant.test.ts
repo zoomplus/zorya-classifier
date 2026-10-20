@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { resolve } from 'node:path'
 import test from 'node:test'
 import { parseSeedUnboundedPilotArgs } from '../benchmarks/v02/run-seed-unbounded-pilot.js'
 import {
@@ -50,8 +51,8 @@ await test('seed-unbounded CLI requires explicit paid intent and fixes case sele
     '--out',
     './.run',
   ])
-  assert.equal(options.imageRoot.endsWith('/corpus'), true)
-  assert.equal(options.outputRoot.endsWith('/.run'), true)
+  assert.equal(options.imageRoot, resolve('./corpus'))
+  assert.equal(options.outputRoot, resolve('./.run'))
   assert.throws(
     () => parseSeedUnboundedPilotArgs(['--allow-paid', '--case', 'photo-dev-03']),
     /Unknown option/u,

@@ -1,0 +1,27 @@
+{
+  "sourceSha": "7c1051f6e8b1536c8d19750a0777535b7ff92f19",
+  "runId": 39407594486,
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39407594486",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "name": "verify (ubuntu-latest, 22)",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (ubuntu-latest, 24)",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (windows-latest, 24)",
+      "conclusion": "failure"
+    },
+    {
+      "name": "verify (windows-latest, 22)",
+      "conclusion": "failure"
+    }
+  ],
+  "failedLogSha256": "a3c7a3747ad622b1dfe470ec0403b8a124caad54f6fa4b243f3315b83fd46133",
+  "failure": "Four new benchmark CLI tests assumed POSIX slash separators; production path resolution already uses node:path. Both Windows jobs failed these assertions; Linux jobs passed.",
+  "remediation": "Compare resolved full paths using node:path.resolve in the tests. Keep all platform checks and actual production path semantics."
+}

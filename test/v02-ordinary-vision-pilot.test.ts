@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { resolve } from 'node:path'
 import test from 'node:test'
 import type { DecisionPort, DecisionRequest } from '../src/entities/contracts.js'
 import { createOpenRouterVision } from '../src/infrastructure/openrouter-vision.js'
@@ -115,7 +116,7 @@ await test('ordinary vision provider serializes a pinned JSON-schema request wit
 await test('ordinary Luna CLI requires explicit paid intent and only exposes fixed variant options', () => {
   assert.throws(() => parseOrdinaryVisionPilotArgs([]), /explicit --allow-paid/u)
   const parsed = parseOrdinaryVisionPilotArgs(['--allow-paid', '--image-root', './photos'])
-  assert.equal(parsed.imageRoot.endsWith('/photos'), true)
+  assert.equal(parsed.imageRoot, resolve('./photos'))
   assert.throws(
     () => parseOrdinaryVisionPilotArgs(['--allow-paid', '--model', 'other']),
     /Unknown option/u,

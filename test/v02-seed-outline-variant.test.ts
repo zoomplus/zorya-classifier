@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { resolve } from 'node:path'
 import test from 'node:test'
 import { parseSeedOutlinePilotArgs } from '../benchmarks/v02/run-seed-outline-pilot.js'
 
@@ -11,8 +12,8 @@ await test('seed-outline runner is fixed to old exposed Car and Boat inputs with
     '--out',
     './.run',
   ])
-  assert.equal(parsed.imageRoot.endsWith('/corpus'), true)
-  assert.equal(parsed.outputRoot.endsWith('/.run'), true)
+  assert.equal(parsed.imageRoot, resolve('./corpus'))
+  assert.equal(parsed.outputRoot, resolve('./.run'))
   assert.throws(
     () => parseSeedOutlinePilotArgs(['--allow-paid', '--case', 'photo-dev-01']),
     /Unknown option/u,
