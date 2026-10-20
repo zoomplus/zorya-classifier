@@ -68,6 +68,9 @@ async function fixture(
     injectControlMask?: boolean
     injectNegativeSeed?: boolean
     receipt?: boolean
+    prefetchFailure?: boolean
+    prefetchSuccess?: boolean
+    classifiedAbsentSkip?: boolean
   },
 ) {
   const ids = Array.from({ length: 40 }, (_, i) =>
@@ -123,6 +126,7 @@ async function fixture(
     ),
   )
   const results = ids.map((caseId, index) => {
+    const classifiedAbsentSkip = altered?.classifiedAbsentSkip === true && index === 0
     const seed =
       index === 0 || (index === 27 && altered?.injectNegativeSeed)
         ? {
@@ -162,9 +166,24 @@ async function fixture(
         qualityScore: 0.7,
       },
     }
-    const extraction =
-      (index === 0 || (index === 27 && altered?.injectNegativeSeed)) &&
-      variant === 'region-seeded-sam'
+    const extraction = classifiedAbsentSkip
+      ? {
+          status: 'not-found' as const,
+          reason: 'classification-absent',
+          durationMs: 0,
+          physicalCalls: 0,
+          logicalCalls: 0,
+          requestHashes: [],
+          seed: {
+            status: 'not-reached' as const,
+            durationMs: 0,
+            physicalCalls: 0,
+            logicalCalls: 0,
+            requestHashes: [],
+          },
+        }
+      : (index === 0 || (index === 27 && altered?.injectNegativeSeed)) &&
+          variant === 'region-seeded-sam'
         ? {
             status: 'extracted' as const,
             durationMs: 2,
@@ -206,34 +225,63 @@ async function fixture(
       caseId,
       imageSha256: imageHash,
       classify: {
-        status: 'failed' as const,
-        errorCode: 'TIMEOUT',
+        status:
+          altered?.classifiedAbsentSkip && index === 0
+            ? ('ok' as const)
+            : altered?.prefetchSuccess && index === 0
+              ? ('ok' as const)
+              : ('failed' as const),
+        ...(altered?.classifiedAbsentSkip && index === 0
+          ? { value: 'absent' as const }
+          : altered?.prefetchSuccess && index === 0
+            ? { value: 'present' as const }
+            : {}),
+        ...((altered?.prefetchFailure || altered?.prefetchSuccess) && index === 0
+          ? { errorCode: 'INVALID_INPUT' }
+          : { errorCode: 'TIMEOUT' }),
         durationMs: 1,
-        physicalCalls: altered?.receipt && index === 0 ? 1 : 0,
-        logicalCalls: altered?.receipt && index === 0 ? 1 : 0,
-        requestHashes: altered?.receipt && index === 0 ? ['6'.repeat(64)] : [],
+        physicalCalls: (altered?.receipt || altered?.classifiedAbsentSkip) && index === 0 ? 1 : 0,
+        logicalCalls:
+          (altered?.receipt ||
+            altered?.prefetchFailure ||
+            altered?.prefetchSuccess ||
+            altered?.classifiedAbsentSkip) &&
+          index === 0
+            ? 1
+            : altered?.classifiedAbsentSkip && index === 0
+              ? 1
+              : 0,
+        requestHashes:
+          altered?.receipt && index === 0
+            ? ['6'.repeat(64)]
+            : (altered?.prefetchFailure || altered?.prefetchSuccess) && index === 0
+              ? ['8'.repeat(64)]
+              : altered?.classifiedAbsentSkip && index === 0
+                ? ['9'.repeat(64)]
+                : [],
       },
       extraction,
     }
   })
-  const receipts = altered?.receipt
-    ? [
-        {
-          caseId: ids[0]!,
-          physicalId: 1,
-          logicalId: 1,
-          requestSha256: '6'.repeat(64),
-          requestBodySha256: '7'.repeat(64),
-          admittedAt: '2026-10-21T00:00:00.000Z',
-          durationMs: 1,
-          httpStatus: 200,
-          route,
-          receipt: { costUsd: 0.01 },
-          wireReceipt: { usageCostUsd: 0.01 },
-          errorCode: null,
-        },
-      ]
-    : []
+  const receipts =
+    altered?.receipt || altered?.classifiedAbsentSkip
+      ? [
+          {
+            caseId: ids[0]!,
+            physicalId: 1,
+            logicalId: 1,
+            requestSha256: altered?.classifiedAbsentSkip ? '9'.repeat(64) : '6'.repeat(64),
+            requestBodySha256: '7'.repeat(64),
+            admittedAt: '2026-10-21T00:00:00.000Z',
+            durationMs: 1,
+            httpStatus: 200,
+            route,
+            receipt: { costUsd: 0.01 },
+            wireReceipt: { usageCostUsd: 0.01 },
+            errorCode: null,
+          },
+        ]
+      : []
   const summary = {
     runId: 'fixture-run',
     profileId,
@@ -287,7 +335,7 @@ async function fixture(
     variantSha256,
     route,
     variant,
-    policy,
+    policy: altered?.classifiedAbsentSkip ? { ...policy, requireClassifiedPresence: true } : policy,
     budget: { maxPhysicalCalls: 250, maxCostUsd: 5, unknownCostReserveUsd: 0.05 },
   }
   const runFile = await putJson(directory, 'run.json', run)
@@ -378,7 +426,9 @@ async function fixture(
       expectedProducerSourceSha256: producerSourceSha256,
       expectedVariantSha256: variantSha256,
       expectedRoute: route,
-      expectedPolicy: policy,
+      expectedPolicy: altered?.classifiedAbsentSkip
+        ? { ...policy, requireClassifiedPresence: true as const }
+        : policy,
       expectedTargetPolicy: 'target-plus-neutral-instruction-v1' as const,
       summary: summaryFile,
       runManifest: runFile,
@@ -432,6 +482,53 @@ await test('stage failures remain in the full denominator and receipt accounting
     assert.equal(report.mask.passedAtIoU08, 1)
     assert.equal(report.physical.knownCostUsd, 0.01)
     assert.equal(report.seedRegionCoarseProxy.positiveCellIsNotWholeObject, true)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('failed prefetch validation keeps its logical request without inventing a physical receipt', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-prefetch-'))
+  try {
+    const value = await fixture(directory, 'region-seeded-sam', { prefetchFailure: true })
+    const report = await evaluateRegionSeededRun(value.options, signal)
+    assert.equal(report.denominator, 40)
+    assert.equal(report.classification.answered, 0)
+    assert.equal(report.classification.errors, 40)
+    assert.equal(report.physical.receipts, 0)
+    assert.equal(report.physical.count, 0)
+    assert.equal(report.physical.knownCostUsd, 0)
+    assert.equal(report.physical.unknownCostCalls, 0)
+    assert.equal(report.rows[0]!.classifyStatus, 'failed')
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('a successful logical request cannot omit its physical receipt', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-unreceipted-success-'))
+  try {
+    const value = await fixture(directory, 'region-seeded-sam', { prefetchSuccess: true })
+    await assert.rejects(
+      evaluateRegionSeededRun(value.options, signal),
+      /logical request without a physical fetch/u,
+    )
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('v2 classified-absent skip keeps its pinned policy and zero-call seed status', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-v2-skip-'))
+  try {
+    const value = await fixture(directory, 'region-seeded-sam', { classifiedAbsentSkip: true })
+    const report = await evaluateRegionSeededRun(value.options, signal)
+    assert.equal(report.denominator, 40)
+    assert.equal(report.rows[0]!.classifyStatus, 'ok')
+    assert.equal(report.rows[0]!.extractionStatus, 'not-found')
+    assert.equal(report.rows[0]!.seedStatus, 'not-reached')
+    assert.equal(report.rows[0]!.seedRegion, null)
+    assert.equal(report.physical.count, 1)
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

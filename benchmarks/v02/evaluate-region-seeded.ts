@@ -178,6 +178,8 @@ const policySchema = routeSchema.extend({
   retries: z.literal(0),
   fallback: z.literal(false),
   latencyRankingEligible: z.literal(false),
+  /** V2 reuses the recipe but skips all localization work after a non-present class result. */
+  requireClassifiedPresence: z.literal(true).optional(),
 })
 const budget = z
   .object({
@@ -685,6 +687,7 @@ export async function evaluateRegionSeededRun(
     {
       physical: number
       logicalIds: Set<number>
+      logicalRequests: Map<number, string>
       costKnown: number
       costUnknown: number
       hashes: string[]
@@ -705,12 +708,16 @@ export async function evaluateRegionSeededRun(
     const row = receiptCounts.get(call.caseId) ?? {
       physical: 0,
       logicalIds: new Set<number>(),
+      logicalRequests: new Map<number, string>(),
       costKnown: 0,
       costUnknown: 0,
       hashes: [],
     }
     row.physical++
+    if (row.logicalRequests.has(call.logicalId))
+      throw new Error('More than one physical fetch was attributed to a logical request')
     row.logicalIds.add(call.logicalId)
+    row.logicalRequests.set(call.logicalId, call.requestSha256)
     row.hashes.push(call.requestSha256)
     if (cost === null) {
       unknownCostCalls++
@@ -800,6 +807,7 @@ export async function evaluateRegionSeededRun(
     const expectedReceipt = receiptCounts.get(source.caseId) ?? {
       physical: 0,
       logicalIds: new Set<number>(),
+      logicalRequests: new Map<number, string>(),
       costKnown: 0,
       costUnknown: 0,
       hashes: [],
@@ -809,22 +817,41 @@ export async function evaluateRegionSeededRun(
         expectedReceipt.physical ||
       result.classify.physicalCalls > 1 ||
       result.extraction.physicalCalls > 3 ||
+      result.classify.physicalCalls > result.classify.logicalCalls ||
+      result.extraction.physicalCalls > result.extraction.logicalCalls ||
       result.classify.logicalCalls > 1 ||
       result.extraction.logicalCalls > 3 ||
-      result.classify.logicalCalls + result.extraction.logicalCalls !==
-        expectedReceipt.logicalIds.size ||
       result.classify.physicalCalls + result.extraction.physicalCalls > 4 ||
       result.classify.logicalCalls + result.extraction.logicalCalls > 4 ||
       result.classify.requestHashes.length !== result.classify.logicalCalls ||
       result.extraction.requestHashes.length !== result.extraction.logicalCalls
     )
       throw new Error('Per-case call budget does not reconcile')
-    const stagesHashes = [
-      ...result.classify.requestHashes,
-      ...result.extraction.requestHashes,
-    ].toSorted()
-    if (!same(stagesHashes, expectedReceipt.hashes.toSorted()))
-      throw new Error('Stage request hashes do not reconcile to receipts')
+    // Logical IDs are local to the case and allocated in stage order. A request
+    // can fail during local validation before physical admission, so it has a
+    // request hash but no receipt. Receipts must still map one-to-one to the
+    // corresponding logical request, and only failed stages may lack receipts.
+    const stagesHashes = [...result.classify.requestHashes, ...result.extraction.requestHashes]
+    const stageLogicalCount = result.classify.logicalCalls + result.extraction.logicalCalls
+    if (
+      result.classify.logicalCalls !== result.classify.requestHashes.length ||
+      result.extraction.logicalCalls !== result.extraction.requestHashes.length ||
+      expectedReceipt.logicalRequests.size > stageLogicalCount
+    )
+      throw new Error('Stage logical request accounting is inconsistent')
+    for (const [logicalId, requestSha256] of expectedReceipt.logicalRequests) {
+      if (logicalId > stageLogicalCount || stagesHashes[logicalId - 1] !== requestSha256)
+        throw new Error('Physical receipt does not match its numbered logical request')
+    }
+    for (let logicalId = 1; logicalId <= stageLogicalCount; logicalId++) {
+      if (expectedReceipt.logicalRequests.has(logicalId)) continue
+      const unchargedStage =
+        logicalId <= result.classify.logicalCalls ? result.classify : result.extraction
+      if (unchargedStage.status !== 'failed' || !unchargedStage.errorCode)
+        throw new Error(
+          'A logical request without a physical fetch is not a recorded stage failure',
+        )
+    }
     if (
       result.extraction.seed.physicalCalls !== result.extraction.physicalCalls ||
       result.extraction.seed.logicalCalls !== result.extraction.logicalCalls ||
