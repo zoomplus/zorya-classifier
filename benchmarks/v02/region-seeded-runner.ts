@@ -1187,7 +1187,6 @@ export async function runRegionSeededProfile(options: RegionSeededRunnerOptions)
     profileId: options.profileId,
     phase: options.phase,
     ...(requireClassifiedPresence ? { requireClassifiedPresence: true as const } : {}),
-    ...(requireClassifiedPresence ? { requireClassifiedPresence: true } : {}),
     status:
       failed ||
       missingCaseIds.length ||
