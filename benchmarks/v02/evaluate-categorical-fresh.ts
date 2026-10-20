@@ -278,14 +278,17 @@ export function normalizeCategoricalFreshOutput(
       calls.length !== row.classify.physicalCalls + row.locate.physicalCalls ||
       row.classify.logicalCalls !== row.classify.requestHashes.length ||
       row.locate.logicalCalls !== row.locate.requestHashes.length ||
-      row.classify.physicalCalls !== row.classify.logicalCalls ||
-      row.locate.physicalCalls !== row.locate.logicalCalls ||
-      row.classify.physicalCalls > 1 ||
-      row.locate.physicalCalls > 5 ||
+      row.classify.physicalCalls > row.classify.logicalCalls ||
+      row.locate.physicalCalls > row.locate.logicalCalls ||
+      row.classify.logicalCalls > 1 ||
+      row.locate.logicalCalls > 5 ||
       (row.classify.status === 'failed' && !row.classify.errorCode) ||
       (row.locate.status === 'failed' && !row.locate.errorCode) ||
-      hashes.length !== calls.length ||
-      !same([...hashes].sort(), calls.map((call) => call.requestSha256).sort()) ||
+      calls.some((call) => hashes[call.logicalId - 1] !== call.requestSha256) ||
+      calls.filter((call) => call.logicalId <= row.classify.logicalCalls).length !==
+        row.classify.physicalCalls ||
+      calls.filter((call) => call.logicalId > row.classify.logicalCalls).length !==
+        row.locate.physicalCalls ||
       new Set(calls.map((call) => call.logicalId)).size !== calls.length
     )
       throw new Error('Categorical DEV per-case call or source mismatch')

@@ -530,3 +530,28 @@ await test('categorical evaluator validates produced box/mask geometry and sourc
     /escaped its source/u,
   )
 })
+
+await test('prefetch validation failures retain logical evidence without inventing physical calls or charges', async () => {
+  const f = await fixture()
+  const row = f.summary.results[0]!
+  Object.assign(row.locate, {
+    status: 'failed',
+    errorCode: 'INVALID_INPUT',
+    logicalCalls: 1,
+    physicalCalls: 0,
+    requestHashes: [hashCanonical('prefetch-rejected-request')],
+  })
+  Object.assign(row.extract, { status: 'failed', errorCode: 'INVALID_INPUT' })
+  const result = normalizeCategoricalFreshOutput(
+    f.summary,
+    f.manifest,
+    f.corpus.cases,
+    f.corpus.manifests,
+    f.commitments,
+  )
+  assert.equal(result.rawProposalProvenance.physicalCalls, 40)
+  assert.equal(result.results[0]!.locate.calls, 0)
+  assert.equal(result.results[0]!.locate.status, 'failed')
+  assert.equal(result.results[0]!.locate.requestHashes.length, 1)
+  assert.equal(result.rawProposalProvenance.budget.knownCostUsd, 0)
+})
