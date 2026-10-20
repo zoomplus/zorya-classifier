@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "hosted-ci-attempt",
+  "date": "2026-10-20",
+  "sourceCommit": "32aa90d194ccf926c0205551d20991b01aad1b60",
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39401547547",
+  "conclusion": "success",
+  "matrix": [
+    { "os": "ubuntu-latest", "nodeMajor": 22, "conclusion": "success" },
+    { "os": "ubuntu-latest", "nodeMajor": 24, "conclusion": "success" },
+    { "os": "windows-latest", "nodeMajor": 22, "conclusion": "success" },
+    { "os": "windows-latest", "nodeMajor": 24, "conclusion": "success" }
+  ],
+  "checksPerJob": [
+    "npm ci --ignore-scripts",
+    "npm run check",
+    "npm run pack:check",
+    "npm run format:check"
+  ],
+  "limits": [
+    "This qualifies the recorded source snapshot only; the final release commit needs its own CI run.",
+    "Hosted offline fixture checks are separate from the native Windows CPU component run and live model-quality comparison."
+  ]
+}

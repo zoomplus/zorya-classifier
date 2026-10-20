@@ -1,0 +1,228 @@
+{
+  "kind": "native-windows-cpu-component-acceptance",
+  "testedArchiveSourceCommit": "eea17907c01023f7bc51c1c5aedb28a304e88895",
+  "rawReportSha256": "8056a5d7897541f0257b783d21bd4ba2b29d7164c55a3e2f5ce48999ea9741b1",
+  "redactions": ["tempRoot (owned temporary directory, removed after run)"],
+  "schemaVersion": 1,
+  "platform": "win32",
+  "arch": "x64",
+  "node": "v24.19.0",
+  "osRelease": "10.0.26200",
+  "osVersion": "Windows 11 Pro",
+  "npm": "11.17.0",
+  "dependencies": {
+    "zorya-classifier": "0.1.0",
+    "onnxruntime-node": "1.23.2",
+    "sharp": "0.34.5"
+  },
+  "executionProvider": "cpu",
+  "intraOpThreads": 1,
+  "latencyTag": "concurrent-with-linux-soak",
+  "scope": "native-segmentation-component; no classifier or vision locator calls",
+  "freeBytesBeforeInstall": 183388491776,
+  "packageArchiveSha256": "f41de58a35763910f912859a3ad823a4a4e23e40ee60be70adb7c4752eb5d7c3",
+  "runtimeImport": "passed",
+  "declarationProbe": "passed",
+  "cpuSessionProbe": "passed-cpu-only",
+  "modelAssets": {
+    "encoder": {
+      "name": "mobile_sam_image_encoder.onnx",
+      "bytes": 28157093,
+      "sha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749"
+    },
+    "decoder": {
+      "name": "sam_mask_decoder_multi.onnx",
+      "bytes": 16496559,
+      "sha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe"
+    }
+  },
+  "photoCases": [
+    {
+      "caseId": "photo-dev-present-06",
+      "status": "segmented",
+      "durationMs": 1758,
+      "predictedPixels": 23039,
+      "iou": 0.8778299545680144,
+      "metadata": {
+        "method": "mobile-sam-box-prompt",
+        "backend": "mobile-sam",
+        "durationMs": 1755.1697000000004,
+        "input": {
+          "width": 1024,
+          "height": 683
+        }
+      }
+    },
+    {
+      "caseId": "photo-dev-present-08",
+      "status": "segmented",
+      "durationMs": 1779,
+      "predictedPixels": 8838,
+      "iou": 0.8585428206220708,
+      "metadata": {
+        "method": "mobile-sam-box-prompt",
+        "backend": "mobile-sam",
+        "durationMs": 1774.8545999999988,
+        "input": {
+          "width": 1024,
+          "height": 683
+        }
+      }
+    },
+    {
+      "caseId": "photo-dev-present-09",
+      "status": "segmented",
+      "durationMs": 1785,
+      "predictedPixels": 81383,
+      "iou": 0.9432335832924522,
+      "metadata": {
+        "method": "mobile-sam-box-prompt",
+        "backend": "mobile-sam",
+        "durationMs": 1781.490600000001,
+        "input": {
+          "width": 1024,
+          "height": 768
+        }
+      }
+    },
+    {
+      "caseId": "photo-dev-present-13",
+      "status": "segmented",
+      "durationMs": 1695,
+      "predictedPixels": 357965,
+      "iou": 0.6699974685542723,
+      "metadata": {
+        "method": "mobile-sam-box-prompt",
+        "backend": "mobile-sam",
+        "durationMs": 1691.109800000002,
+        "input": {
+          "width": 1024,
+          "height": 681
+        }
+      }
+    },
+    {
+      "caseId": "photo-dev-present-15",
+      "status": "segmented",
+      "durationMs": 1733,
+      "predictedPixels": 53807,
+      "iou": 0.9470228458355819,
+      "metadata": {
+        "method": "mobile-sam-box-prompt",
+        "backend": "mobile-sam",
+        "durationMs": 1729.4650000000001,
+        "input": {
+          "width": 1024,
+          "height": 768
+        }
+      }
+    }
+  ],
+  "fixtureProvenance": [
+    {
+      "id": "photo-dev-present-06",
+      "sourceUrl": "https://www.flickr.com/photos/126942156@N08/15072003400",
+      "license": "CC-BY-2.0",
+      "photoSha256": "ad0eb4bf4a6c2c1be585846a943aa06ec2440696b7e8874374904eb25dcc594a",
+      "maskSha256": "0a82516a43057329a7b2cafa4fcbe1c714d997a87a9e1dbe6d84ffcbf1bbbe26",
+      "order": 0
+    },
+    {
+      "id": "photo-dev-present-08",
+      "sourceUrl": "https://www.flickr.com/photos/jdqueen/6310191834",
+      "license": "CC-BY-2.0",
+      "photoSha256": "74b944d3b7d88a046d01f2d813c88e8a6415296db938a343a83d86048f4c3a4f",
+      "maskSha256": "4e72cfb83de41421ed4a41c02ee4c700ca8bdf57f9c2f903017cf21ad6d4c772",
+      "order": 1
+    },
+    {
+      "id": "photo-dev-present-09",
+      "sourceUrl": "https://www.flickr.com/photos/vikingdread/3585699111",
+      "license": "CC-BY-2.0",
+      "photoSha256": "6710905e971316f4b0d0fe1535eb64702807bc4c041bc161ea1ce1208eff5a0f",
+      "maskSha256": "602668e56dd5ae8c5a0b7f24afe1b3da88d5e28446e96a870d6d0778478b0703",
+      "order": 2
+    },
+    {
+      "id": "photo-dev-present-13",
+      "sourceUrl": "https://www.flickr.com/photos/favitia/6390569267",
+      "license": "CC-BY-2.0",
+      "photoSha256": "750f09aeeb5d1113088eedaf47f201f0837ad64720f836a69fec9ed3e4f1e5a7",
+      "maskSha256": "417bb4bf0272c4322e6dd5905505abd221ff8af286735b125e9c1c1f549dc9b0",
+      "order": 3
+    },
+    {
+      "id": "photo-dev-present-15",
+      "sourceUrl": "https://www.flickr.com/photos/loqueveelojo/2905202023/",
+      "license": "CC-BY-2.0",
+      "photoSha256": "a0a80df65932f8cb7cf7367305372c04aa37f1991436e4f1cb7828c9138f708e",
+      "maskSha256": "256b081bcf95f744d5524eb16ff1c21795bf5c9896ae0e43d3d4198d53f8e1e3",
+      "order": 4
+    }
+  ],
+  "syntheticCase": {
+    "caseId": "synthetic-red-panel-v1",
+    "status": "segmented",
+    "durationMs": 1717,
+    "predictedPixels": 11244,
+    "iou": 0.9996443812233285,
+    "metadata": {
+      "method": "mobile-sam-box-prompt",
+      "backend": "mobile-sam",
+      "durationMs": 1714.7798000000003,
+      "input": {
+        "width": 256,
+        "height": 256
+      }
+    }
+  },
+  "lifecycle": {
+    "cancellationCode": "ABORTED",
+    "queueCapacityRejected": 1,
+    "queueSettled": 4,
+    "queueFulfilled": 3,
+    "disposedIdempotently": true,
+    "afterDisposeCode": "DISPOSED"
+  },
+  "processOwnership": {
+    "starts": 11,
+    "closes": 11,
+    "stillOwnedPids": []
+  },
+  "cleanupErrors": [],
+  "checks": {
+    "runtimeImport": true,
+    "declarationProbe": true,
+    "cpuSessionProbe": true,
+    "syntheticSegmented": true,
+    "syntheticQuality": true,
+    "allExpectedPositivePhotosSegmented": true,
+    "cancellation": true,
+    "capacity": true,
+    "disposal": true,
+    "processOwnership": true,
+    "cleanup": true,
+    "worker": true
+  },
+  "photoQuality": {
+    "threshold": 0.8,
+    "caseCount": 5,
+    "meanIou": 0.8593253345744782,
+    "minimumIou": 0.6699974685542723,
+    "belowThreshold": [
+      {
+        "caseId": "photo-dev-present-13",
+        "iou": 0.6699974685542723
+      }
+    ]
+  },
+  "acceptance": true,
+  "workerStatus": 0,
+  "workerError": null,
+  "limits": [
+    "Oracle whole-object boxes and independent reference masks test segmentation, not end-to-end vision localization.",
+    "Timings were concurrent with a separate Linux native soak and are not eligible for route/backend latency ranking.",
+    "Four of five photo masks meet IoU >= 0.8; photo-dev-present-13 remains below threshold.",
+    "This is an unpublished 0.1.0 development archive, not the final 0.2 release."
+  ]
+}
