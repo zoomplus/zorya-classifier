@@ -725,7 +725,7 @@ async function main(): Promise<void> {
   let phaseFailure: unknown
   const cleanupFailures: unknown[] = []
   const records: CycleRecord[] = []
-  const runStartedAt = new Date().toISOString()
+  let runStartedAt = ''
   try {
     warmupDurationMs = await runMonotonicPhase(
       options.warmupSeconds * 1000,
@@ -739,6 +739,7 @@ async function main(): Promise<void> {
     resources = new ResourceRunner(options.sampleMs)
     resources.start()
     measurementStartedMonotonic = performance.now()
+    runStartedAt = new Date().toISOString()
     const idleBeforeStartedMonotonic = performance.now()
     await delay(options.idleSeconds * 1000, undefined, { signal: controller.signal }).catch(
       () => undefined,
