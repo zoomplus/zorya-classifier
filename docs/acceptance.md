@@ -1,6 +1,21 @@
 # Acceptance: standalone library
 
-This acceptance concerns the extracted MIT Node.js library, not the Zorya desktop application, installer, microphone or game session. Native Luna Decisions is the primary documented route; ordinary vision chat, direct OpenAI-compatible servers and custom DecisionPort implementations remain alternatives. Jev is optional historical compatibility.
+This acceptance concerns the extracted MIT Node.js library, not the Zorya desktop application, installer, microphone or game session. The caller supplies a `DecisionPort` or explicitly configures an adapter; model/provider recipes below are examples, not library defaults. Ordinary vision chat, direct OpenAI-compatible servers and native decisions are all supported. Jev is optional historical compatibility.
+
+## Current gate state
+
+The latest recorded source snapshot, `a6c2683`, passed 376 tests, formatting, source checks and the installed-archive consumer. Hosted CI run `39436223347` passed all four Windows/Linux × Node 22/24 jobs. An earlier `24f849f` archive check failed on a hardcoded path in public evidence; the path was corrected without weakening the archive scanner. These checks verify the source and archive, not model quality or release readiness.
+
+The frozen 55-file runtime and benchmark harness remain byte-identical to snapshot `0c`. The new two-hour resource soak is still in progress. The supported 20-photo vision screen is sealed and independently evaluated in the [screen report](evidence/v02/supported-vision-screen-20261020.md): Qwen had 0/16 positive whole-object matches and 19 response failures; GPT-6 Sol had 6/16 matches, 2/4 negative false locations and 2/7 reference masks passing the separate mask threshold. This remains screening evidence, not a full DEV40 evaluation or winner freeze; no heldout qualification or public model recommendation has been declared.
+
+| Gate                                 | Current status                                                   |
+| ------------------------------------ | ---------------------------------------------------------------- |
+| Source checks and installed consumer | Pass: 376 tests and installed-archive verification at `a6c2683`  |
+| Hosted Windows/Linux × Node 22/24    | Pass: all four jobs in CI `39436223347`                          |
+| Runtime/harness freeze               | Unchanged at frozen snapshot `0c`                                |
+| Two-hour resource soak               | In progress                                                      |
+| Supported 20-photo vision screen     | Complete; independent results are not a full DEV40 qualification |
+| Winner freeze, heldout, publication  | Not reached                                                      |
 
 ## 0.2 development snapshot, 2026-10-20
 

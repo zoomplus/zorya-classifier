@@ -2,6 +2,8 @@
 
 These APIs are implemented on the 0.2 development branch. They are not a claim that npm `latest` already contains them. The [accepted plan](0.2.0-plan.md) and [acceptance status](acceptance.md) distinguish implementation, offline checks, live quality and platform qualification. No text-image encoder has passed release qualification yet.
 
+The library does not select or connect a model. Supply a `DecisionPort` to `createClassifier`, either by implementing the port or explicitly constructing a provider adapter. The Luna examples below are reproducible integration recipes, not defaults or a claim that one model is always more accurate; stronger model capability does not guarantee monotonic accuracy gains. Optional local segmenters and proposal generators are configured separately, and their runtime packages and model assets remain the caller's responsibility.
+
 ## Choose the operation
 
 | Operation                             | Result                                              | Model requests                                                    |
@@ -13,7 +15,7 @@ These APIs are implemented on the 0.2 development branch. They are not a claim t
 
 Default region behavior remains compatible. A whole-object box covers the visible object within the hard ROI; it does not reconstruct hidden parts. A mask is produced only by `extract`. No operation promises exact semantic understanding for every photo or map.
 
-Runnable source examples are [whole-object location](../examples/locate-whole-object.ts) and [PNG extraction](../examples/extract-object.ts). The extraction example uses the explicit CPU backend and preserves an existing output file. It prints geometry and mask dimensions instead of serializing binary mask bytes. Install the optional runtime and obtain the pinned assets before running it; source examples are maintained in the repository rather than bundled into the npm archive.
+Runnable source examples are [whole-object location](../examples/locate-whole-object.ts) and [PNG extraction](../examples/extract-object.ts). The extraction example uses the explicit CPU backend and preserves an existing output file. It prints geometry and mask dimensions instead of serializing binary mask bytes. Install the optional runtime and obtain the pinned assets yourself before running it; the library does not select, download or install segmentation assets. Source examples are maintained in the repository rather than bundled into the npm archive.
 
 ## Locate the complete visible object
 
@@ -64,7 +66,7 @@ try {
 }
 ```
 
-This adapter requires the same explicit pinned assets and optional ONNX Runtime installation described below. The proposal factory currently supports CPU only, at most 2,097,152 oriented source pixels, one active native task and two waiters. It returns at most 36 masks packed as row-major `binary-lsb0` bits, at most 10 MiB in total. A source larger than this fails explicitly rather than being silently resized. Up to four bounded presentation PNGs supplement the source image. All native work, rendering and model requests share the classifier deadline; up to five model requests are possible. The library performs no model/provider fallback or retry.
+This adapter requires the same explicit pinned assets and optional ONNX Runtime installation described below. Asset selection, verification and installation belong to the caller. The proposal factory currently supports CPU only, at most 2,097,152 oriented source pixels, one active native task and two waiters. It returns at most 36 masks packed as row-major `binary-lsb0` bits, at most 10 MiB in total. A source larger than this fails explicitly rather than being silently resized. Up to four bounded presentation PNGs supplement the source image. All native work, rendering and model requests share the classifier deadline; up to five model requests are possible. The library performs no model/provider fallback or retry.
 
 The returned `bounds` are one-pixel intervals around the selected raster mask. This describes the mask's actual bounds, not a guarantee that the model found the true semantic boundary. `boxTolerancePx` and `maxExtentPasses` apply to the interval strategy, not this strategy. A correct box does not prove a good cutout: mask quality is measured separately. Empty, seed-disjoint or unconfirmed selections return a named `unknown`; native/backend errors throw.
 
@@ -78,7 +80,7 @@ Core runtime dependencies remain Sharp and Zod. MobileSAM requires the optional 
 npm install onnxruntime-node@1.23.2
 ```
 
-Obtain the exact licensed assets yourself; [pinned sizes, SHA256 and provenance](evidence/v02/segmentation/README.md) are recorded separately. Imports never download models or start workers. CPU is the default provider; `executionProvider: 'dml'` is an opt-in Windows route and fails when unavailable. No CPU/model fallback is attempted.
+Obtain the exact licensed assets yourself; [pinned sizes, SHA256 and provenance](evidence/v02/segmentation/README.md) are recorded separately. Asset files, optional ONNX Runtime installation and backend availability are caller-owned prerequisites; importing or configuring the package does not fetch model weights. Imports never download models or start workers. CPU is the default provider within this explicitly constructed adapter; `executionProvider: 'dml'` is an opt-in Windows route and fails when unavailable. No CPU/model fallback is attempted.
 
 ```ts
 import { readFile, writeFile } from 'node:fs/promises'

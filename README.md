@@ -2,9 +2,9 @@
 
 [![npm version](https://img.shields.io/npm/v/zorya-classifier)](https://www.npmjs.com/package/zorya-classifier)
 
-Provider-independent text/image classification and coarse-to-fine object localization for Node.js and TypeScript. MIT application code. **Native decision models are the primary integration**, with Luna Decisions as the main example; ordinary vision language models are also supported without a native classification API.
+Provider-independent text/image classification and coarse-to-fine object localization for Node.js and TypeScript. MIT application code. The library never selects or connects a model for you: create a client with an explicit `DecisionPort`, either injected by your application or built with an adapter you configure. The model and provider shown in examples are examples, not defaults. Ordinary vision language models and native decision APIs are both supported.
 
-Use any image-capable instruction-following model through an OpenAI-compatible API, or implement the small `DecisionPort` for another protocol. OpenRouter is an optional adapter, not a mandatory service. Model compatibility and accuracy vary; see the exact [tested models/results](docs/vision-results.md), [acceptance](docs/acceptance.md), and historical [Jev baseline](docs/results.md).
+Use an explicitly configured image-capable model through a supported adapter, or implement the small `DecisionPort` for another protocol. OpenRouter is an optional adapter, not a mandatory service. A more capable model may help on a task, but model strength does not guarantee a monotonic accuracy improvement. Compatibility and quality vary; see the exact [tested models/results](docs/vision-results.md), [acceptance](docs/acceptance.md), and historical [Jev baseline](docs/results.md).
 
 [Русское руководство](docs/README.ru.md) · [API](docs/api.md) · [Architecture](docs/architecture.md) · [Benchmarks](docs/benchmarks.md)
 
@@ -20,11 +20,11 @@ Node.js 22.12+ is required. Source: [zoomplus/zorya-classifier](https://github.c
 npm install zorya-classifier
 ```
 
-The release archive also installs with `npm install ./zorya-classifier-0.1.0.tgz`. Runtime dependencies are Zod and Sharp; model weights, Electron, a database and background services are not included.
+The release archive also installs with `npm install ./zorya-classifier-0.1.0.tgz`. Runtime dependencies are Zod and Sharp; model weights, Electron, a database and background services are not included. Optional local segmentation backends and their model assets are a separate responsibility of the caller; the library does not download or choose them.
 
-## Quickstart: Luna Decisions
+## Example: Luna Decisions
 
-This example uses the typed **Decisions API** with genuine Choice probabilities. Model and provider are explicit; there are no automatic retries or fallbacks. Jev is optional and is not used by this example.
+This example uses the typed **Decisions API** with genuine Choice probabilities. Model and provider are explicit; there are no automatic retries or fallbacks. It illustrates one integration and is not a library default. Jev is optional and is not used by this example.
 
 ```ts
 import { createClassifier } from 'zorya-classifier'
