@@ -1,0 +1,37 @@
+# Frozen heldout evaluation: not qualified
+
+The selected native proposal recipe failed both frozen whole-object qualification gates. It produced two false locations among 20 explicit negatives, above the allowed maximum of one. Its paired photo-positive localization bootstrap had a 95% lower bound of zero, which does not satisfy the requirement that the lower bound be positive. The run remains useful as a sealed negative result; it does not qualify a release or establish a generally useful model.
+
+The recipe was frozen before heldout access in `vision-recipe-freeze-2026-10-20.json` (SHA-256 `2862e67756b50cf8fcf08bc3e87d1faf8aca20d97f39668afbd987b620836f9f`). It selected the complete DEV2 `native-mobile-sam-proposals-v1` recipe, including the public decision adapter, 45-second timeout, one active request with no queue, 8-pixel tolerance, three extent passes, and no retries or fallback. The selection had 1/30 positive whole-object matches and 0/10 false locations on DEV; it was explicitly selected for blind qualification only, not marked release-qualified. No runner-up was selected after heldout outcomes were available.
+
+The heldout candidate completed all 80 planned cases: 40 licensed photos (30 present, 10 absent), 20 controlled AbiWord UI cases (15 present, 5 absent), and 20 controlled OpenTTD map cases (15 present, 5 absent). Across all 80, classification was correct on 70. Whole-object matching uses the frozen IoU ≥0.5 and visible-reference-coverage ≥0.9 criteria. Every planned case, including unknowns, errors, and not-found responses, remains in the denominator.
+
+| Stratum                | Classification | Positive whole-object matches | False locations on explicit negatives | Located / not-found / unknown / failed |
+| ---------------------- | -------------: | ----------------------------: | ------------------------------------: | -------------------------------------: |
+| Photos                 |          32/40 |                          3/30 |                                  2/10 |                         8 / 5 / 20 / 7 |
+| Controlled AbiWord UI  |          18/20 |                          0/15 |                                   0/5 |                         1 / 2 / 17 / 0 |
+| Controlled OpenTTD map |          20/20 |                          0/15 |                                   0/5 |                         0 / 5 / 15 / 0 |
+| **All strata**         |      **70/80** |                      **3/60** |                              **2/20** |                    **9 / 12 / 52 / 7** |
+
+The paired comparison uses the frozen 30 positive heldout photos against the complete 40-case no-image control. The candidate matched 3/30 positive photos and the control matched 0/30. With 10,000 paired bootstrap iterations and fixed seed `0x5a4f5259`, the observed difference was 0.10 and the 95% percentile interval was [0.00, 0.20]. The lower bound is not greater than zero. Among the candidate’s 20 absent cases, two false locations both occurred in the photo stratum; UI and map negatives had none. The frozen maximum of one false location across all 20 negatives is exceeded.
+
+Mask evaluation is separate from box localization. Independent Open Images truth contains 25 instance masks across 16 photo cases. Masks were scoreable for 4 cases and 6 instances; 4/6 instances reached IoU ≥0.8. Twelve annotated cases with 19 reference instances had no prediction mask and remain unavailable, while the other 64 cases have no reference mask. The six-scored-instance subset is too small to represent a general cutout-quality estimate.
+
+The candidate made 359 physical calls. Recorded known cost was `$0.1679382`; seven calls had unknown cost and remain reserved as unknown exposure. Latency is unranked because the run overlapped the native resource soak. The no-image control completed 40/40 with all localization outcomes unknown; it correctly localized no positive photo and produced no false locations. Classification was correct on 11/40. It is used only for the frozen paired photo-positive comparison.
+
+## Frozen artifact pins
+
+| Artifact                                                | SHA-256                                                                                                                                                                                                    |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Freeze                                                  | `2862e67756b50cf8fcf08bc3e87d1faf8aca20d97f39668afbd987b620836f9f`                                                                                                                                         |
+| Candidate dispatch manifest                             | `f7ac73ba87a414d8ced4ab220f809448d537e706399906b6008c3b06883576fb`                                                                                                                                         |
+| Candidate dispatch result seal                          | `18f378696c86d3b9059d0690241a30c57a5a73b370d11027ab8cba680c2036ed`                                                                                                                                         |
+| Candidate raw summary                                   | `0282bb240adbf4807e2b9c4480ce8475402c100b7f9d52d5ae791ad81cfbc1c0`                                                                                                                                         |
+| Candidate raw run manifest                              | `3ec721036a39f3aaa374a1864e43bdc32cca754fd9e3b451ad3bc91c04042d63`                                                                                                                                         |
+| Candidate completion marker                             | `10ed877d57a001bbc3a79e09d15262f6fb998755bbf111e3c17bd7b89528ac0f`                                                                                                                                         |
+| Photo, UI, and map input manifests                      | `b3afaee883990e01a464929727b7b7bb1315d6e0a70e239a10f20e2f82a3e35b`, `ca6b4db64640bf08fffd055c3e7f6e6e85b3cc0c303c1ac8b41690c87a3d4572`, `c259be7b00040e0c852d8a75b67655b07b9deffe5e284aca33718a921a1e2b62` |
+| Photo, UI, and map truth                                | `92615bcc2e0a05d63b08d045613f6c568a7d8d19aa51f48d5515f973117c1fa8`, `7d14e093bee467e183209c65328337e4e14d5438e17b1fcd9fa3f8b0a68e6526`, `3c00f235cff6a5de9e2c8337a0c4f9a9b0c750c92c2c1043251e87ed7989a19f` |
+| No-image control summary and completion marker          | `85f78f492c79f439fcec78064d246fbafa0fb8aad83da2cc0886b55afe6a3a22`, `ad5715e9c8d8d043f5e5033df9c22319fe842706bdd72cb3481df79d06c1e18f`                                                                     |
+| Independent derived summary, evaluation, and provenance | `a5890ec5099017ef9ee35ca5fefbc6c5dff85a817c7b63d4801e8887798c5782`, `c6bb6dd08b011f33ccfb6d9fe88e63484427ecc39781b6dc7cf15647cd993f1e`, `7581fbd3c463f710e0c7d2907b511658478b8294bb335ad9a9206e9c33286b21` |
+
+The raw producer and truth artifacts are retained unchanged in ignored run/corpus storage. The evaluator output reports aggregate metrics and frozen pins; per-case truth, raw screenshots, and prediction masks are not published here.

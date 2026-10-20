@@ -445,6 +445,7 @@ await test('heldout schema pins 80 cases, exact 40/20/20 manifests and heldout b
       phase?: 'heldout'
     }
     runManifest.phase = 'heldout'
+    runManifest.profileId = 'native-mobile-sam-proposals-heldout-v1'
     runManifest.purpose = freshProposalPhasePins.heldout.purpose
     runManifest.manifests = freshProposalPhasePins.heldout.manifests.map((item) => ({ ...item }))
     runManifest.plannedCaseIds = cases.map((item) => item.caseId)
@@ -465,6 +466,7 @@ await test('heldout schema pins 80 cases, exact 40/20/20 manifests and heldout b
       phase?: 'heldout'
     }
     summary.phase = 'heldout'
+    summary.profileId = 'native-mobile-sam-proposals-heldout-v1'
     summary.plannedCaseIds = cases.map((item) => item.caseId)
     summary.completedCaseIds = cases.map((item) => item.caseId)
     summary.missingCaseIds = []
@@ -496,6 +498,10 @@ await test('heldout schema pins 80 cases, exact 40/20/20 manifests and heldout b
       'heldout',
     )
     assert.equal(normalized.phase, 'heldout')
+    assert.equal(
+      normalized.rawProposalProvenance.profileId,
+      'native-mobile-sam-proposals-heldout-v1',
+    )
     assert.equal(normalized.results.length, 80)
     assert.equal(normalized.rawProposalProvenance.phase, 'heldout')
     const missingPhase = structuredClone(summary)
@@ -512,6 +518,21 @@ await test('heldout schema pins 80 cases, exact 40/20/20 manifests and heldout b
           'heldout',
         ),
       /explicit heldout phase/u,
+    )
+    const wrongDevProfile = structuredClone(summary)
+    wrongDevProfile.profileId = 'native-mobile-sam-proposals-v1'
+    assert.throws(
+      () =>
+        normalizeFreshProposalOutput(
+          wrongDevProfile,
+          runManifest,
+          cases,
+          freshProposalPhasePins.heldout.manifests,
+          { summarySha256: '7'.repeat(64), runManifestSha256: '8'.repeat(64) },
+          freshProposalPhasePins.heldout.manifests,
+          'heldout',
+        ),
+      /profile identity does not match/u,
     )
   } finally {
     await rm(fixture.directory, { recursive: true, force: true })
@@ -531,7 +552,7 @@ await test('heldout pairing reports all 40 photos and bootstraps the 30 positive
   const candidate = {
     phase: 'heldout',
     runId: 'held-candidate',
-    profileId: 'native-mobile-sam-proposals-v1',
+    profileId: 'native-mobile-sam-proposals-heldout-v1',
     complete: true,
     coverage: { planned: 80, reported: 80 },
     inputs: heldoutPins,
@@ -691,7 +712,16 @@ await test('adapter writes exclusive derived artifacts and invokes the strict in
     const truthFiles = []
     for (let index = 0; index < fixture.truths.length; index++) {
       const sourceTruth = fixture.truths[index]!
-      const bytes = await readFile(sourceTruth.path)
+      const sourceBytes = await readFile(sourceTruth.path)
+      const truthRows = JSON.parse(sourceBytes.toString('utf8')) as Array<{
+        referenceMasks?: Array<{ path: string }>
+      }>
+      for (const row of truthRows) {
+        for (const mask of row.referenceMasks ?? []) {
+          mask.path = resolve(fixture.directory, mask.path)
+        }
+      }
+      const bytes = Buffer.from(JSON.stringify(truthRows))
       truthFiles.push(
         await writePinned(join(fixture.directory, `adapter-truth-${index}.json`), bytes),
       )

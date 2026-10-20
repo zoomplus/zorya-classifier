@@ -10,7 +10,8 @@ import type { FreshCase } from './fresh-corpus.js'
 import { pairedBootstrap } from './metrics.js'
 import { hashCanonical } from './protocol.js'
 
-const profileId = 'native-mobile-sam-proposals-v1'
+const devProfileId = 'native-mobile-sam-proposals-v1'
+const heldoutProfileId = 'native-mobile-sam-proposals-heldout-v1'
 const expectedProposalAssets = {
   method: 'mobile-sam-nine-point-proposals-v1',
   executionProvider: 'cpu',
@@ -140,7 +141,7 @@ const runManifestSchema = z
   .object({
     schemaVersion: z.literal(1),
     runId: z.string().min(1).max(160),
-    profileId: z.literal(profileId),
+    profileId: z.enum([devProfileId, heldoutProfileId]),
     phase: z.literal('heldout').optional(),
     purpose: z.string().min(1).max(200),
     startedAt: z.string().datetime(),
@@ -407,7 +408,7 @@ const physicalReceiptSchema = z
 const rawSummarySchema = z
   .object({
     runId: z.string().min(1).max(160),
-    profileId: z.literal(profileId),
+    profileId: z.enum([devProfileId, heldoutProfileId]),
     variantSha256: digestSchema,
     status: z.enum(['complete', 'incomplete']),
     phase: z.literal('heldout').optional(),
@@ -513,6 +514,9 @@ export function normalizeFreshProposalOutput(
   const summary = rawSummarySchema.parse(rawSummary)
   const run = runManifestSchema.parse(rawRunManifest)
   const phaseConfig = freshProposalPhasePins[phase]
+  const expectedProfileId = phase === 'heldout' ? heldoutProfileId : devProfileId
+  if (run.profileId !== expectedProfileId || summary.profileId !== expectedProfileId)
+    throw new Error('Fresh proposal profile identity does not match its frozen phase')
   if (phase === 'heldout' && (run.phase !== 'heldout' || summary.phase !== 'heldout'))
     throw new Error('Heldout evaluation requires explicit heldout phase in manifest and summary')
   if ((run.phase && run.phase !== phase) || (summary.phase && summary.phase !== phase))
@@ -786,14 +790,11 @@ async function scoreProposalMasks(
       for (const descriptor of references) {
         if (descriptor.width !== item.image.width || descriptor.height !== item.image.height)
           throw new Error('Reference mask geometry differs from frozen source image')
-        if (isAbsolute(descriptor.path) || /^[A-Za-z]:[\\/]/u.test(descriptor.path))
-          throw new Error('Reference mask path must be relative to the pinned corpus root')
         const referenceBase = resolve(referenceRoot)
-        const truthPath = assertPathWithin(
-          referenceBase,
-          resolve(referenceBase, descriptor.path),
-          'Reference mask path',
-        )
+        const descriptorPath = isAbsolute(descriptor.path)
+          ? resolve(descriptor.path)
+          : resolve(referenceBase, descriptor.path)
+        const truthPath = assertPathWithin(referenceBase, descriptorPath, 'Reference mask path')
         const truthBytes = await readBoundedCorpusFile(truthPath, descriptor.bytes, signal)
         try {
           if (truthBytes.length !== descriptor.bytes || sha256(truthBytes) !== descriptor.sha256)
@@ -986,7 +987,7 @@ export function compareHeldoutPhotoLocalization(
 ) {
   const heldoutPins = freshProposalPhasePins.heldout.manifests
   const photoPin = heldoutPins[0]!
-  if (candidate.phase !== 'heldout' || candidate.profileId !== profileId)
+  if (candidate.phase !== 'heldout' || candidate.profileId !== heldoutProfileId)
     throw new Error('Candidate must be a completed heldout proposal evaluation')
   if (control.profileId !== 'no-image-control')
     throw new Error('Control evaluation must use the frozen no-image-control profile')
