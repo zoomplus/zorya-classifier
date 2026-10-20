@@ -1,0 +1,362 @@
+[
+  {
+    "caseId": "ui-geany-dev-present-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/ui/geany-dev.png",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "new-document"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-dev-present-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/ui/geany-dev.png",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "open-document"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-dev-present-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/ui/geany-dev.png",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "print"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-dev-present-04",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/ui/geany-dev.png",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "save"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-dev-present-05",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/ui/geany-dev.png",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "reload"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-dev-present-06",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/ui/geany-dev.png",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "delete"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-dev-present-07",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/ui/geany-dev.png",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "compile"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-dev-absent-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/ui/geany-dev.png",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "shopping-cart"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-dev-absent-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/ui/geany-dev.png",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "wifi-symbol"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-dev-absent-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/ui/geany-dev.png",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "camera-icon"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-dev-present-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/maps/freeciv-dev.png",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "mountain-tile"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-dev-present-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/maps/freeciv-dev.png",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "mountain-tile"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-dev-present-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/maps/freeciv-dev.png",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "mountain-tile"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-dev-present-04",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/maps/freeciv-dev.png",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "mountain-tile"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-dev-present-05",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/maps/freeciv-dev.png",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "mountain-tile"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-dev-present-06",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/maps/freeciv-dev.png",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "oasis-tile"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-dev-present-07",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/maps/freeciv-dev.png",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "explorer-unit"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-dev-absent-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/maps/freeciv-dev.png",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "city"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-dev-absent-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/maps/freeciv-dev.png",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "road"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "map-freeciv-dev-absent-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/controlled/maps/freeciv-dev.png",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "width": 1280,
+      "height": 900
+    },
+    "locate": {
+      "target": "ship"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  }
+]

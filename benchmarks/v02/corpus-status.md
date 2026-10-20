@@ -1,6 +1,6 @@
 # v0.2 corpus acquisition status
 
-Status: **partial; photo quota acquired, map and real-UI quotas open**. No model calls or provider outputs are included. The previously exposed v1 photo corpus remains excluded by image ID, SHA256 and Flickr author profile for every selected photo.
+Status: **partial; fresh photo quota and controlled real-app/map supplements acquired; natural-source map/UI gate remains open**. No model calls or provider outputs are included. The previously exposed v1 photo corpus remains excluded by image ID, SHA256 and Flickr author profile for every selected photo.
 
 ## Fresh photos
 
@@ -18,13 +18,15 @@ Input manifests are separate from source/license metadata and evaluator truth:
 
 After photo acquisition and mask normalization, the heldout input manifest SHA256 is `f0be4b9b2d5a11bd77f1b890860745c3bf17dd185b5cc1fb73c1af674c9465d5`. It is a commitment to the current blind producer inputs. The heldout truth and any case-level heldout results stay in the ignored local cache pending the candidate freeze; they are not included in this status file.
 
-## Map and interface acquisition
+## Controlled map and interface supplements
 
-No map or UI cases are admitted, so v0.2 corpus completeness remains blocked. We did not fill quotas with screenshots lacking per-image rights or with authored/synthetic renderings mislabeled as real data.
+A separate controlled-real supplement now contains 20 dev and 40 heldout cases: dev 7 positive/3 explicit-negative UI icons and 7/3 map objects; heldout 15/5 UI icons and 15/5 map objects. UI screenshots are actual Geany and AbiWord applications running in isolated Xvfb sessions with task-authored sample files. Maps are actual Freeciv and OpenTTD renders using locally installed game assets and generated maps. Geany/Freeciv are dev-only; AbiWord/OpenTTD heldout-only. All four source families have package copyright evidence and hashes in `corpus/dev-controlled/source-ledger.json`; heldout evidence stays in the ignored cache. Downloaded application packages totaled about 97 MB for the bounded setup, below the 250 MB cap. No model API calls were made.
+
+These are genuine application/game renders, but controlled scenes rather than natural user captures. The labels were prepared by model-assisted visual review, not independent human annotation or candidate output; there are no masks. Only one app and one game source group per split/stratum are represented, Freeciv exposes a small explored area and OpenTTD uses one generated map seed. Keep these counts reported as a controlled supplement and do not treat them as qualifying a natural-source or broad source-group independence gate. Dev inputs, truth and source ledger are tracked as metadata under `corpus/dev-controlled/`; both screenshot bytes and all heldout manifests/truth/ledger remain under ignored `benchmarks/cache/v02/corpus/controlled/`. `validate_controlled_corpus.py` checks hashes, app/game split disjointness, annotations, explicit absence evidence and per-stratum counts without candidate calls.
 
 The [RICO Semantics repository](https://github.com/google-research-datasets/rico_semantics) provides human-drawn boxes and a CC BY-SA 4.0 license for its annotation dataset. Its own README describes those annotations as augmenting the separate [RICO screenshot dataset](https://www.interactionmining.org/archive/rico). The original RICO project's [copyright notice](https://www.interactionmining.org/archive/rico/copyright.txt) explicitly says screenshots may contain copyrighted work and makes the researcher responsible for use. That does not verify a sampled app screenshot's individual reuse rights, so no RICO screenshot was admitted.
 
-The [DayZ minimap project](https://github.com/pharmazone/dayz-minimap) documents real minimap images and human-reviewed marker centers. The public repository page shows no dataset/image license and the labels are center coordinates, not marker boundaries. It therefore cannot establish either image rights or bbox truth and was not admitted. DayZ screenshots additionally contain game imagery. The v0.2 map quota requires separately licensed screenshots plus an independently drawn whole-marker bbox and verified absence cases.
+The [DayZ minimap project](https://github.com/pharmazone/dayz-minimap) documents real minimap images and human-reviewed marker centers. The public repository page shows no dataset/image license and the labels are center coordinates, not marker boundaries. It therefore cannot establish either image rights or bbox truth and was not admitted. DayZ screenshots additionally contain game imagery. The v0.2 natural-source map quota still requires separately licensed screenshots plus independently reviewed whole-object boxes and verified absence cases.
 
 The producer allowlist for any future strata must remain disjoint from the source ledger and evaluator labels. Cases from the same app design, map/session/game, author, image, resized copy or source screen belong to one split. Do not expose heldout truth/results before the candidate freeze.
 

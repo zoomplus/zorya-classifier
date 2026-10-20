@@ -1,0 +1,212 @@
+{
+  "cases": [
+    {
+      "caseId": "ui-geany-dev-present-01",
+      "sourceGroup": "controlled-app:geany-2.0",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "imagePath": "ui/geany-dev.png",
+      "appOrGame": "ui-geany-dev",
+      "targetClass": "new-document",
+      "split": "dev"
+    },
+    {
+      "caseId": "ui-geany-dev-present-02",
+      "sourceGroup": "controlled-app:geany-2.0",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "imagePath": "ui/geany-dev.png",
+      "appOrGame": "ui-geany-dev",
+      "targetClass": "open-document",
+      "split": "dev"
+    },
+    {
+      "caseId": "ui-geany-dev-present-03",
+      "sourceGroup": "controlled-app:geany-2.0",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "imagePath": "ui/geany-dev.png",
+      "appOrGame": "ui-geany-dev",
+      "targetClass": "print",
+      "split": "dev"
+    },
+    {
+      "caseId": "ui-geany-dev-present-04",
+      "sourceGroup": "controlled-app:geany-2.0",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "imagePath": "ui/geany-dev.png",
+      "appOrGame": "ui-geany-dev",
+      "targetClass": "save",
+      "split": "dev"
+    },
+    {
+      "caseId": "ui-geany-dev-present-05",
+      "sourceGroup": "controlled-app:geany-2.0",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "imagePath": "ui/geany-dev.png",
+      "appOrGame": "ui-geany-dev",
+      "targetClass": "reload",
+      "split": "dev"
+    },
+    {
+      "caseId": "ui-geany-dev-present-06",
+      "sourceGroup": "controlled-app:geany-2.0",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "imagePath": "ui/geany-dev.png",
+      "appOrGame": "ui-geany-dev",
+      "targetClass": "delete",
+      "split": "dev"
+    },
+    {
+      "caseId": "ui-geany-dev-present-07",
+      "sourceGroup": "controlled-app:geany-2.0",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "imagePath": "ui/geany-dev.png",
+      "appOrGame": "ui-geany-dev",
+      "targetClass": "compile",
+      "split": "dev"
+    },
+    {
+      "caseId": "ui-geany-dev-absent-01",
+      "sourceGroup": "controlled-app:geany-2.0",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "imagePath": "ui/geany-dev.png",
+      "appOrGame": "ui-geany-dev",
+      "targetClass": "shopping-cart",
+      "split": "dev"
+    },
+    {
+      "caseId": "ui-geany-dev-absent-02",
+      "sourceGroup": "controlled-app:geany-2.0",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "imagePath": "ui/geany-dev.png",
+      "appOrGame": "ui-geany-dev",
+      "targetClass": "wifi-symbol",
+      "split": "dev"
+    },
+    {
+      "caseId": "ui-geany-dev-absent-03",
+      "sourceGroup": "controlled-app:geany-2.0",
+      "sha256": "c45ae9708616a8a41db5f320236d50b212f89f8aecc267369e0c77f2a57b8b83",
+      "imagePath": "ui/geany-dev.png",
+      "appOrGame": "ui-geany-dev",
+      "targetClass": "camera-icon",
+      "split": "dev"
+    },
+    {
+      "caseId": "map-freeciv-dev-present-01",
+      "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "imagePath": "maps/freeciv-dev.png",
+      "appOrGame": "map-freeciv-dev",
+      "targetClass": "mountain-tile",
+      "split": "dev"
+    },
+    {
+      "caseId": "map-freeciv-dev-present-02",
+      "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "imagePath": "maps/freeciv-dev.png",
+      "appOrGame": "map-freeciv-dev",
+      "targetClass": "mountain-tile",
+      "split": "dev"
+    },
+    {
+      "caseId": "map-freeciv-dev-present-03",
+      "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "imagePath": "maps/freeciv-dev.png",
+      "appOrGame": "map-freeciv-dev",
+      "targetClass": "mountain-tile",
+      "split": "dev"
+    },
+    {
+      "caseId": "map-freeciv-dev-present-04",
+      "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "imagePath": "maps/freeciv-dev.png",
+      "appOrGame": "map-freeciv-dev",
+      "targetClass": "mountain-tile",
+      "split": "dev"
+    },
+    {
+      "caseId": "map-freeciv-dev-present-05",
+      "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "imagePath": "maps/freeciv-dev.png",
+      "appOrGame": "map-freeciv-dev",
+      "targetClass": "mountain-tile",
+      "split": "dev"
+    },
+    {
+      "caseId": "map-freeciv-dev-present-06",
+      "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "imagePath": "maps/freeciv-dev.png",
+      "appOrGame": "map-freeciv-dev",
+      "targetClass": "oasis-tile",
+      "split": "dev"
+    },
+    {
+      "caseId": "map-freeciv-dev-present-07",
+      "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "imagePath": "maps/freeciv-dev.png",
+      "appOrGame": "map-freeciv-dev",
+      "targetClass": "explorer-unit",
+      "split": "dev"
+    },
+    {
+      "caseId": "map-freeciv-dev-absent-01",
+      "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "imagePath": "maps/freeciv-dev.png",
+      "appOrGame": "map-freeciv-dev",
+      "targetClass": "city",
+      "split": "dev"
+    },
+    {
+      "caseId": "map-freeciv-dev-absent-02",
+      "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "imagePath": "maps/freeciv-dev.png",
+      "appOrGame": "map-freeciv-dev",
+      "targetClass": "road",
+      "split": "dev"
+    },
+    {
+      "caseId": "map-freeciv-dev-absent-03",
+      "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+      "sha256": "f3f96ed28da436b1f556e18dadbcddfa2c23755a6ce25446da156737c304c025",
+      "imagePath": "maps/freeciv-dev.png",
+      "appOrGame": "map-freeciv-dev",
+      "targetClass": "ship",
+      "split": "dev"
+    }
+  ],
+  "sources": [
+    {
+      "sourceGroup": "controlled-app:geany-2.0",
+      "package": "geany 2.0-1build2",
+      "license": "GPL-2+ (package metadata; embedded components may carry separate terms)",
+      "evidencePath": "/usr/share/doc/geany/copyright",
+      "evidenceSha256": "dfbee55c754bb363b40b263e7bc9fdc811d7d8499a3c800c115e9471eeab16ed",
+      "content": "Authored /tmp/v02-corpus/example.c displayed in real Geany application window."
+    },
+    {
+      "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+      "package": "freeciv-client-gtk3 3.1.0+ds-1build5; freeciv-data 3.1.0+ds-1build5",
+      "license": "GPL-2+ for Files:* in data package; copyright file lists specific exceptions for some fonts/libraries",
+      "evidencePath": "/usr/share/doc/freeciv-data/copyright",
+      "evidenceSha256": "a7595f514302728b9cf82de272a7f647cfa4049b254cacea9e2e30ee06dd5850",
+      "content": "New single-player generated map, player Inca, no network, terrain/fog settings from local run."
+    }
+  ],
+  "harnessComponents": [
+    {
+      "package": "openbox 3.6.1-12build5",
+      "license": "GPL-2+",
+      "evidencePath": "/usr/share/doc/openbox/copyright",
+      "evidenceSha256": "bdc94599bb9ca141a0bad6b2c6733d1e5b6ef2d73e6616b878c63945dfe1ec39",
+      "role": "shared window framing only; never targeted"
+    }
+  ],
+  "review": "Model-assisted visual review; not human annotation. Controlled desktop/game render; not natural user-captured images."
+}

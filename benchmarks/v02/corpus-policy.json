@@ -1,12 +1,18 @@
 {
   "schemaVersion": 1,
-  "status": "partial-photos-acquired-maps-ui-pending",
+  "status": "fresh-photos-acquired-controlled-map-ui-supplements-not-natural-capture-gate",
   "modelCalls": 0,
   "acquired": {
     "photos": {
       "status": "acquired-and-structurally-validated",
-      "dev": { "present": 16, "absent": 4 },
-      "heldout": { "present": 30, "absent": 10 },
+      "dev": {
+        "present": 16,
+        "absent": 4
+      },
+      "heldout": {
+        "present": 30,
+        "absent": 10
+      },
       "positiveCasesWithOfficialSourceMasks": 21,
       "maskInstances": 32,
       "oldCorpusIdsHashesAndAuthorGroupsExcluded": true,
@@ -25,14 +31,32 @@
   "oldCorpusUse": "development-regression-only",
   "quotas": {
     "dev": {
-      "photo": { "present": 16, "absent": 4 },
-      "map": { "present": 7, "absent": 3 },
-      "ui": { "present": 7, "absent": 3 }
+      "photo": {
+        "present": 16,
+        "absent": 4
+      },
+      "map": {
+        "present": 7,
+        "absent": 3
+      },
+      "ui": {
+        "present": 7,
+        "absent": 3
+      }
     },
     "heldout": {
-      "photo": { "present": 30, "absent": 10 },
-      "map": { "present": 15, "absent": 5 },
-      "ui": { "present": 15, "absent": 5 }
+      "photo": {
+        "present": 30,
+        "absent": 10
+      },
+      "map": {
+        "present": 15,
+        "absent": 5
+      },
+      "ui": {
+        "present": 15,
+        "absent": 5
+      }
     }
   },
   "splitRules": [
@@ -50,9 +74,15 @@
       "minimumReferenceCoverage": 0.9,
       "assignment": "same-single-visible-instance"
     },
-    "mask": { "minimumIoU": 0.8, "format": "source-sized-binary-0-or-1" },
+    "mask": {
+      "minimumIoU": 0.8,
+      "format": "source-sized-binary-0-or-1"
+    },
     "failedAndUnknown": "retain-in-all-attempt-and-positive-denominators",
-    "devEligibility": { "maximumFalseLocations": 0, "negativeCases": 10 },
+    "devEligibility": {
+      "maximumFalseLocations": 0,
+      "negativeCases": 10
+    },
     "heldoutEligibility": {
       "maximumFalseLocations": 1,
       "negativeCases": 20,
@@ -60,5 +90,39 @@
       "pairedBootstrapSeed": "0x5a4f5259",
       "minimumLower95PercentDifferenceAgainstTextControl": 0
     }
+  },
+  "controlledSupplements": {
+    "status": "acquired-separately-not-counted-as-natural-source-qualification",
+    "dev": {
+      "map": {
+        "present": 7,
+        "absent": 3
+      },
+      "ui": {
+        "present": 7,
+        "absent": 3
+      }
+    },
+    "heldout": {
+      "map": {
+        "present": 15,
+        "absent": 5
+      },
+      "ui": {
+        "present": 15,
+        "absent": 5
+      }
+    },
+    "strata": [
+      "controlled-real-game-map",
+      "controlled-real-application"
+    ],
+    "annotationMethod": "model-assisted pixel review, no candidate/model outputs",
+    "limitations": [
+      "one game and one app source group per stratum/split",
+      "Freeciv map exposes a small explored area; OpenTTD is one generated seed",
+      "not natural user-captured imagery",
+      "no reference masks"
+    ]
   }
 }

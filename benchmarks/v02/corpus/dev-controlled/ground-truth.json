@@ -1,0 +1,470 @@
+[
+  {
+    "caseId": "ui-geany-dev-present-01",
+    "expectedPresence": "present",
+    "targetClassId": "new-document",
+    "targetBoxes": [
+      {
+        "className": "new-document",
+        "xyxy": [
+          0.24140625,
+          0.17444444444444446,
+          0.25546875,
+          0.19555555555555557
+        ],
+        "pixelXYXY": [
+          309,
+          157,
+          327,
+          176
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-dev-present-02",
+    "expectedPresence": "present",
+    "targetClassId": "open-document",
+    "targetBoxes": [
+      {
+        "className": "open-document",
+        "xyxy": [
+          0.30234375,
+          0.17444444444444446,
+          0.31640625,
+          0.19555555555555557
+        ],
+        "pixelXYXY": [
+          387,
+          157,
+          405,
+          176
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-dev-present-03",
+    "expectedPresence": "present",
+    "targetClassId": "print",
+    "targetBoxes": [
+      {
+        "className": "print",
+        "xyxy": [
+          0.365625,
+          0.17444444444444446,
+          0.37890625,
+          0.19555555555555557
+        ],
+        "pixelXYXY": [
+          468,
+          157,
+          485,
+          176
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-dev-present-04",
+    "expectedPresence": "present",
+    "targetClassId": "save",
+    "targetBoxes": [
+      {
+        "className": "save",
+        "xyxy": [
+          0.3953125,
+          0.17444444444444446,
+          0.41015625,
+          0.19555555555555557
+        ],
+        "pixelXYXY": [
+          506,
+          157,
+          525,
+          176
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-dev-present-05",
+    "expectedPresence": "present",
+    "targetClassId": "reload",
+    "targetBoxes": [
+      {
+        "className": "reload",
+        "xyxy": [
+          0.44140625,
+          0.17444444444444446,
+          0.45546875,
+          0.19555555555555557
+        ],
+        "pixelXYXY": [
+          565,
+          157,
+          583,
+          176
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-dev-present-06",
+    "expectedPresence": "present",
+    "targetClassId": "delete",
+    "targetBoxes": [
+      {
+        "className": "delete",
+        "xyxy": [
+          0.47578125,
+          0.17444444444444446,
+          0.4890625,
+          0.19555555555555557
+        ],
+        "pixelXYXY": [
+          609,
+          157,
+          626,
+          176
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-dev-present-07",
+    "expectedPresence": "present",
+    "targetClassId": "compile",
+    "targetBoxes": [
+      {
+        "className": "compile",
+        "xyxy": [
+          0.628125,
+          0.17444444444444446,
+          0.64765625,
+          0.19777777777777777
+        ],
+        "pixelXYXY": [
+          804,
+          157,
+          829,
+          178
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-dev-absent-01",
+    "expectedPresence": "absent",
+    "targetClassId": "shopping-cart",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "source": "controlled-scene-complete-image-review",
+      "reviewer": "model-assisted visual review",
+      "confidence": 0,
+      "evidence": "Entire 1280x900 capture reviewed; generated scene contains no shopping-cart instance."
+    },
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-dev-absent-02",
+    "expectedPresence": "absent",
+    "targetClassId": "wifi-symbol",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "source": "controlled-scene-complete-image-review",
+      "reviewer": "model-assisted visual review",
+      "confidence": 0,
+      "evidence": "Entire 1280x900 capture reviewed; generated scene contains no wifi-symbol instance."
+    },
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-dev-absent-03",
+    "expectedPresence": "absent",
+    "targetClassId": "camera-icon",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "source": "controlled-scene-complete-image-review",
+      "reviewer": "model-assisted visual review",
+      "confidence": 0,
+      "evidence": "Entire 1280x900 capture reviewed; generated scene contains no camera-icon instance."
+    },
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "map-freeciv-dev-present-01",
+    "expectedPresence": "present",
+    "targetClassId": "mountain-tile",
+    "targetBoxes": [
+      {
+        "className": "mountain-tile",
+        "xyxy": [
+          0.42890625,
+          0.4122222222222222,
+          0.48984375,
+          0.4688888888888889
+        ],
+        "pixelXYXY": [
+          549,
+          371,
+          627,
+          422
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-dev-present-02",
+    "expectedPresence": "present",
+    "targetClassId": "mountain-tile",
+    "targetBoxes": [
+      {
+        "className": "mountain-tile",
+        "xyxy": [
+          0.52421875,
+          0.3977777777777778,
+          0.5921875,
+          0.4622222222222222
+        ],
+        "pixelXYXY": [
+          671,
+          358,
+          758,
+          416
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-dev-present-03",
+    "expectedPresence": "present",
+    "targetClassId": "mountain-tile",
+    "targetBoxes": [
+      {
+        "className": "mountain-tile",
+        "xyxy": [
+          0.60703125,
+          0.36444444444444446,
+          0.66484375,
+          0.43
+        ],
+        "pixelXYXY": [
+          777,
+          328,
+          851,
+          387
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-dev-present-04",
+    "expectedPresence": "present",
+    "targetClassId": "mountain-tile",
+    "targetBoxes": [
+      {
+        "className": "mountain-tile",
+        "xyxy": [
+          0.65,
+          0.48333333333333334,
+          0.703125,
+          0.5355555555555556
+        ],
+        "pixelXYXY": [
+          832,
+          435,
+          900,
+          482
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-dev-present-05",
+    "expectedPresence": "present",
+    "targetClassId": "mountain-tile",
+    "targetBoxes": [
+      {
+        "className": "mountain-tile",
+        "xyxy": [
+          0.48203125,
+          0.5066666666666667,
+          0.54921875,
+          0.5666666666666667
+        ],
+        "pixelXYXY": [
+          617,
+          456,
+          703,
+          510
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-dev-present-06",
+    "expectedPresence": "present",
+    "targetClassId": "oasis-tile",
+    "targetBoxes": [
+      {
+        "className": "oasis-tile",
+        "xyxy": [
+          0.5859375,
+          0.43444444444444447,
+          0.65078125,
+          0.5044444444444445
+        ],
+        "pixelXYXY": [
+          750,
+          391,
+          833,
+          454
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-dev-present-07",
+    "expectedPresence": "present",
+    "targetClassId": "explorer-unit",
+    "targetBoxes": [
+      {
+        "className": "explorer-unit",
+        "xyxy": [
+          0.546875,
+          0.47333333333333333,
+          0.5859375,
+          0.5344444444444445
+        ],
+        "pixelXYXY": [
+          700,
+          426,
+          750,
+          481
+        ],
+        "source": "model-assisted-independent-visual-annotation"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-dev-absent-01",
+    "expectedPresence": "absent",
+    "targetClassId": "city",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "source": "controlled-scene-complete-image-review",
+      "reviewer": "model-assisted visual review",
+      "confidence": 0,
+      "evidence": "Entire 1280x900 capture reviewed; generated scene contains no city instance."
+    },
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-dev-absent-02",
+    "expectedPresence": "absent",
+    "targetClassId": "road",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "source": "controlled-scene-complete-image-review",
+      "reviewer": "model-assisted visual review",
+      "confidence": 0,
+      "evidence": "Entire 1280x900 capture reviewed; generated scene contains no road instance."
+    },
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+    "sceneStratum": "controlled-real-game-map"
+  },
+  {
+    "caseId": "map-freeciv-dev-absent-03",
+    "expectedPresence": "absent",
+    "targetClassId": "ship",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "source": "controlled-scene-complete-image-review",
+      "reviewer": "model-assisted visual review",
+      "confidence": 0,
+      "evidence": "Entire 1280x900 capture reviewed; generated scene contains no ship instance."
+    },
+    "annotationSource": "Model-assisted visual annotation of an independently controlled real application/game render; boxes based on visible icon/tile/label pixel boundaries, never classifier output.",
+    "sourceGroup": "controlled-game-map:freeciv-3.1-seed-corpustest",
+    "sceneStratum": "controlled-real-game-map"
+  }
+]

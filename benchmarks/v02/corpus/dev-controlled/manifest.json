@@ -1,0 +1,8 @@
+{
+  "split": "dev",
+  "stratum": "controlled-only-supplement",
+  "cases": 20,
+  "inputsSha256": "397438fa372cd5a0d218b5460146dc2d7a8070ff5de5c07cb43d24386e658237",
+  "groundTruthSha256": "45ab20bac4ca6bd9c6d04fbf74f30c6e5411182e79ed0c1f90f07c097f563385",
+  "sourceLedgerSha256": "61a6d27eeda217002c4b6dc6ec62666b5bc4dad53a7cd085eec4b9b01f4a71db"
+}
