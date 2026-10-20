@@ -1,8 +1,18 @@
-# Acceptance: standalone0.1.0 preview
+# Acceptance: standalone library
 
 This acceptance concerns the extracted MIT Node.js library, not the Zorya desktop application, installer, microphone or game session. Native Luna Decisions is the primary documented route; ordinary vision chat, direct OpenAI-compatible servers and custom DecisionPort implementations remain alternatives. Jev is optional historical compatibility.
 
-## Executed checks and release gates
+## 0.2 development snapshot, 2026-10-20
+
+Whole-object location, explicit extraction, optional native adapters and CLI are implemented and integrated. [Snapshot evidence](evidence/v02/integration-8010aad.json) records source commit, actual installed-archive hash and check results. The 254-test snapshot passed source gates and the independent consumer tested the old and new APIs with zero provider HTTP calls. Subsequent diagnostic/corpus integration passed 256 tests; these counts are offline evidence, not model accuracy.
+
+The installed consumer imports core and segmentation entries and compiles declarations without ONNX Runtime. It exercises cutout/mask output with a controlled segmenter and proves caller ownership. The [native CPU smoke](../benchmarks/v02/native-smoke-evidence.md) separately exercised real MobileSAM on five licensed dev photographs with independent instance masks. These are distinct tests.
+
+The full two-hour Linux CPU resource run started at 08:32 UTC on 2026-10-20 against the frozen native sources of `8010aad`. It remains pending until the final report confirms elapsed time, comparable idle medians and zero owned children. New Windows native checks, live whole-object qualification and the experimental encoder's independent development/heldout gates also remain pending. Historical 0.1 results below do not qualify these additions.
+
+All six text-image encoders remain research-only. No winner is promoted merely because JSON parses. Failed protocol/rate-limit/truncated-generation diagnostics remain recorded. The public experimental image selector rejects explicitly until qualification passes. Controlled map/UI renders with model-assisted labels remain an exploratory supplement: their source licensing and split are recorded, but they do not close the independent-ground-truth gate.
+
+## Historical 0.1 executed checks and release gates
 
 | Check                 | Evidence                                                                                                                                                                                                                                                          |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

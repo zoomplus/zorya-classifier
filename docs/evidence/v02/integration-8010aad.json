@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-20",
+  "kind": "source-and-installed-archive-integration",
+  "sourceCommit": "8010aad285476e1700a4222b37612f27d35fd741",
+  "published": false,
+  "host": { "platform": "linux", "arch": "x64", "node": "24.12.0" },
+  "sourceGates": {
+    "stagedSecrets": "pass",
+    "worktreeSecrets": "pass",
+    "typecheck": "pass",
+    "eslint": "pass",
+    "boundaries": "pass",
+    "deadCode": "pass",
+    "tests": { "passed": 254, "failed": 0, "skipped": 0 },
+    "build": "pass",
+    "format": "pass"
+  },
+  "installedArchive": {
+    "status": "pass",
+    "sha256": "5005f93408f88dde0ef49c85a772fd38614f6c6aeb2d536eb9e59046f0d68ab3",
+    "files": 147,
+    "unpackedBytes": 1269159,
+    "runtimeDistFiles": 90,
+    "runtimeDistSha256": "890d12297b43db38289516b4486e546fa81a8db3e8e54988885fcdfbe0ff65b8",
+    "consumerDeclarationFiles": 193,
+    "providerHttpCalls": 0,
+    "checks": [
+      "classification",
+      "legacy-region-localization",
+      "ordinary-chat-fixture-adapter",
+      "native-Decisions-fixture-adapter",
+      "whole-object-localization",
+      "transparent-cutout-and-binary-mask",
+      "caller-owned-segmenter",
+      "core-and-segmentation-import-without-optional-onnx-peer",
+      "installed-byte-secret-scan",
+      "declaration-isolation"
+    ]
+  },
+  "limits": [
+    "This hash describes the tested candidate archive before adding this evidence file; it is not a final release archive hash.",
+    "Provider responses in this installed-consumer check are offline fixtures, not live accuracy evidence.",
+    "No experimental text-image encoder is publicly qualified.",
+    "The full native resource run and new Windows/native qualification remain pending.",
+    "The controlled map/UI supplement uses model-assisted labels and does not close the independent-ground-truth gate."
+  ]
+}
