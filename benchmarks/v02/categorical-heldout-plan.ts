@@ -318,6 +318,6 @@ export function buildHeldoutPlans(freezeInput: unknown): {
 }
 
 export const freshProposalHeldoutPhotoManifestSha256 =
-  '93cf40732075ab63fd26b77806a7b118382e816c6ab691bf3e5ee68a2acbf013'
+  '5d125e853ed93558ab634e406ca90cf931569953279c1630d49dcf239b9baa79'
 export const freshProposalHeldoutUiManifestSha256 =
   '1bf7940fd92fdc1f7fa295296dfc5f84c5f4c32ccc41b7a2e80a0059bff918c3'

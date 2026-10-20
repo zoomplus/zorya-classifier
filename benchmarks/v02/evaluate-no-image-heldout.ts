@@ -38,7 +38,7 @@ const requiredSources = [
   '../../package-lock.json',
 ]
 const photoPin = {
-  sha256: '93cf40732075ab63fd26b77806a7b118382e816c6ab691bf3e5ee68a2acbf013',
+  sha256: '5d125e853ed93558ab634e406ca90cf931569953279c1630d49dcf239b9baa79',
   cases: 40,
 }
 const identity = {

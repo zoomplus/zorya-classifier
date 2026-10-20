@@ -1,0 +1,57 @@
+{
+  "schema": "categorical-heldout-zero-http-admission-failure-v1",
+  "freezeFile": "categorical-heldout-run-freeze-20261020-v3.json",
+  "freezeSha256": "d621530a0bea286d7ae3df83af7d74f7ecb2b94b7873f1cd3397ef085e695a9a",
+  "sealedProducerRevision": "6e398aecdbe8e34ade71ed83a7d64b7ab85a02d3",
+  "physicalProviderCalls": 0,
+  "logicalProviderCalls": 0,
+  "producerCaseOutputs": 0,
+  "noImageControlStarted": false,
+  "status": "prefetch-admission-failed",
+  "diagnosis": {
+    "validator": "validateTargetPolicyTasks",
+    "source": "benchmarks/v02/categorical-presence-fresh-runner.ts",
+    "errorCode": "INVALID_INPUT",
+    "message": "Fresh case has an unapproved locate instruction",
+    "photoInstructionsRejected": 40,
+    "uiInstructionsRejected": 0,
+    "mapInstructionsRejected": 0,
+    "manifestHashesMatchFreeze": true,
+    "caseCountsPass": true,
+    "taskIdentityPrivacyGuardPasses": true,
+    "originalInstruction": "Locate each visible instance of the named physical object class. Return unknown if unsupported; do not infer from absent labels.",
+    "requiredInstruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+  },
+  "preservedDispatchArtifacts": {
+    "start": {
+      "sha256": "959e1a9ca90a532c974c2d53766cfac79d911b0014100f21d17aae3d1845c760",
+      "record": {
+        "schema": "categorical-heldout-dispatch-v1",
+        "dispatcherRunId": "v02-heldout-dispatch-2026-10-20T181953455Z-1a4c23ae",
+        "phase": "heldout",
+        "profile": "candidate",
+        "freezeSha256": "d621530a0bea286d7ae3df83af7d74f7ecb2b94b7873f1cd3397ef085e695a9a",
+        "startedAt": "2026-10-20T18:19:53.455Z",
+        "state": "dispatching"
+      }
+    },
+    "incomplete": {
+      "sha256": "d096dd0d30d48faeb14b7298b5ba0c3e2004609ab7b98e701055377016abbfec",
+      "record": {
+        "schema": "categorical-heldout-dispatch-incomplete-v1",
+        "dispatcherRunId": "v02-heldout-dispatch-2026-10-20T181953455Z-1a4c23ae",
+        "profile": "candidate",
+        "finishedAt": "2026-10-20T18:19:53.488Z",
+        "errorCode": "INVALID_INPUT"
+      }
+    }
+  },
+  "repairPolicy": "Create a separate immutable photo-input derivative replacing only the common instruction with the selected DEV neutral suffix; preserve all targets, IDs, images, references, labels and original receipts. Bind new executable source and input pins before first provider dispatch. No method or scoring gate changes.",
+  "blindness": {
+    "providerSawAnyFreshImage": false,
+    "rootOrDispatcherInspectedFreshPixels": false,
+    "rootOrDispatcherInspectedPerCaseTruth": false,
+    "rootInspectedOnlyUniqueGenericInstructionCounts": true
+  },
+  "accuracyInterpretation": "This setup failure produced no classification/localization outcomes; it cannot qualify or fail accuracy and must not be rewritten as a successful run."
+}

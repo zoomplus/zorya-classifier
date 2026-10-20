@@ -1,0 +1,372 @@
+{
+  "conclusion": "success",
+  "headSha": "d2042e00efe5bfacc0fa2c27999f70e59103b5d9",
+  "jobs": [
+    {
+      "completedAt": "2026-10-20T18:20:49Z",
+      "conclusion": "success",
+      "databaseId": 118804181598,
+      "name": "verify (ubuntu-latest, 24)",
+      "startedAt": "2026-10-20T18:19:35Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-20T18:19:37Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-20T18:19:36Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:19:38Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-10-20T18:19:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:19:42Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 3,
+          "startedAt": "2026-10-20T18:19:38Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:19:46Z",
+          "conclusion": "success",
+          "name": "Run npm ci --ignore-scripts",
+          "number": 4,
+          "startedAt": "2026-10-20T18:19:42Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:20:32Z",
+          "conclusion": "success",
+          "name": "Run npm run check",
+          "number": 5,
+          "startedAt": "2026-10-20T18:19:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:20:42Z",
+          "conclusion": "success",
+          "name": "Run npm run pack:check",
+          "number": 6,
+          "startedAt": "2026-10-20T18:20:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:20:47Z",
+          "conclusion": "success",
+          "name": "Run npm run format:check",
+          "number": 7,
+          "startedAt": "2026-10-20T18:20:42Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:20:47Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 13,
+          "startedAt": "2026-10-20T18:20:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:20:47Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 14,
+          "startedAt": "2026-10-20T18:20:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:20:47Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-10-20T18:20:47Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39473734015/job/118804181598"
+    },
+    {
+      "completedAt": "2026-10-20T18:22:12Z",
+      "conclusion": "success",
+      "databaseId": 118804181660,
+      "name": "verify (windows-latest, 22)",
+      "startedAt": "2026-10-20T18:19:36Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-20T18:19:37Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-20T18:19:36Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:19:43Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-10-20T18:19:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:19:53Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 3,
+          "startedAt": "2026-10-20T18:19:43Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:20:04Z",
+          "conclusion": "success",
+          "name": "Run npm ci --ignore-scripts",
+          "number": 4,
+          "startedAt": "2026-10-20T18:19:53Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:29Z",
+          "conclusion": "success",
+          "name": "Run npm run check",
+          "number": 5,
+          "startedAt": "2026-10-20T18:20:04Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:58Z",
+          "conclusion": "success",
+          "name": "Run npm run pack:check",
+          "number": 6,
+          "startedAt": "2026-10-20T18:21:29Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:22:08Z",
+          "conclusion": "success",
+          "name": "Run npm run format:check",
+          "number": 7,
+          "startedAt": "2026-10-20T18:21:58Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:22:08Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 13,
+          "startedAt": "2026-10-20T18:22:08Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:22:10Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 14,
+          "startedAt": "2026-10-20T18:22:08Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:22:10Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-10-20T18:22:10Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39473734015/job/118804181660"
+    },
+    {
+      "completedAt": "2026-10-20T18:21:12Z",
+      "conclusion": "success",
+      "databaseId": 118804181777,
+      "name": "verify (ubuntu-latest, 22)",
+      "startedAt": "2026-10-20T18:19:35Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-20T18:19:37Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-20T18:19:36Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:19:38Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-10-20T18:19:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:19:43Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 3,
+          "startedAt": "2026-10-20T18:19:38Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:19:49Z",
+          "conclusion": "success",
+          "name": "Run npm ci --ignore-scripts",
+          "number": 4,
+          "startedAt": "2026-10-20T18:19:43Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:20:50Z",
+          "conclusion": "success",
+          "name": "Run npm run check",
+          "number": 5,
+          "startedAt": "2026-10-20T18:19:49Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:03Z",
+          "conclusion": "success",
+          "name": "Run npm run pack:check",
+          "number": 6,
+          "startedAt": "2026-10-20T18:20:50Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:10Z",
+          "conclusion": "success",
+          "name": "Run npm run format:check",
+          "number": 7,
+          "startedAt": "2026-10-20T18:21:03Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:10Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 13,
+          "startedAt": "2026-10-20T18:21:10Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:10Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 14,
+          "startedAt": "2026-10-20T18:21:10Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:10Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-10-20T18:21:10Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39473734015/job/118804181777"
+    },
+    {
+      "completedAt": "2026-10-20T18:22:01Z",
+      "conclusion": "success",
+      "databaseId": 118804182533,
+      "name": "verify (windows-latest, 24)",
+      "startedAt": "2026-10-20T18:19:36Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-20T18:19:37Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-20T18:19:36Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:19:43Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-10-20T18:19:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:19:56Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 3,
+          "startedAt": "2026-10-20T18:19:43Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:20:08Z",
+          "conclusion": "success",
+          "name": "Run npm ci --ignore-scripts",
+          "number": 4,
+          "startedAt": "2026-10-20T18:19:56Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:22Z",
+          "conclusion": "success",
+          "name": "Run npm run check",
+          "number": 5,
+          "startedAt": "2026-10-20T18:20:08Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:50Z",
+          "conclusion": "success",
+          "name": "Run npm run pack:check",
+          "number": 6,
+          "startedAt": "2026-10-20T18:21:22Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:57Z",
+          "conclusion": "success",
+          "name": "Run npm run format:check",
+          "number": 7,
+          "startedAt": "2026-10-20T18:21:50Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:57Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 13,
+          "startedAt": "2026-10-20T18:21:57Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:59Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 14,
+          "startedAt": "2026-10-20T18:21:57Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-20T18:21:59Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-10-20T18:21:59Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39473734015/job/118804182533"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39473734015"
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "categorical-heldout-run-freeze-v1",
+  "phase": "heldout",
+  "targetPolicy": "target-plus-neutral-instruction-v1",
+  "methodSelectionSha256": "fabb05c2c472c30a8cb20a5f9b6d697b932d94aedc43976359746463ef8708b9",
+  "manifests": [
+    {
+      "group": "photo",
+      "sha256": "5d125e853ed93558ab634e406ca90cf931569953279c1630d49dcf239b9baa79",
+      "cases": 40
+    },
+    {
+      "group": "ui",
+      "sha256": "1bf7940fd92fdc1f7fa295296dfc5f84c5f4c32ccc41b7a2e80a0059bff918c3",
+      "cases": 20
+    },
+    {
+      "group": "map",
+      "sha256": "2c18d2c1bae481d0a1239802f32d4ac985bc0d33a028eaafb490fd5995de7a3b",
+      "cases": 20
+    }
+  ],
+  "producerSourceSha256": "0a93a965faf8f6ffbae630d03d00d0e68e2fdc69ac31e3d2ba171253e5515ac4",
+  "noImageProducerSourceSha256": "69c85bacace07e09356186d1a72252402bf10c28e114697f35a121be97887619",
+  "candidateBudget": {
+    "maxPhysicalCalls": 600,
+    "maxCostUsd": 10,
+    "unknownCostReserveUsd": 0.05
+  },
+  "noImageBudget": {
+    "maxPhysicalCalls": 300,
+    "maxCostUsd": 5,
+    "unknownCostReserveUsd": 0.05
+  }
+}
