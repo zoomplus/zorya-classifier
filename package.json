@@ -19,6 +19,10 @@
     "./openai-compatible": {
       "types": "./dist/openai-compatible.d.ts",
       "import": "./dist/openai-compatible.js"
+    },
+    "./segmentation": {
+      "types": "./dist/segmentation.d.ts",
+      "import": "./dist/segmentation.js"
     }
   },
   "bin": {
@@ -33,7 +37,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "node scripts/clean-dist.mjs && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
@@ -87,5 +91,13 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "peerDependencies": {
+    "onnxruntime-node": "1.23.2"
+  },
+  "peerDependenciesMeta": {
+    "onnxruntime-node": {
+      "optional": true
+    }
   }
 }

@@ -4,5 +4,8 @@ export type {
   OpenRouterDecisionsOptions,
 } from './infrastructure/openrouter.js'
 
-export { createOpenRouterVision } from './infrastructure/openrouter-vision.js'
-export type { OpenRouterVisionOptions } from './infrastructure/openrouter-vision.js'
+export { createOpenRouterVision, createOpenRouterText } from './infrastructure/openrouter-vision.js'
+export type {
+  OpenRouterVisionOptions,
+  OpenRouterTextOptions,
+} from './infrastructure/openrouter-vision.js'

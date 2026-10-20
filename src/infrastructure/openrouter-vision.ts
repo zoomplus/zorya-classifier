@@ -18,3 +18,12 @@ export function createOpenRouterVision(input: OpenRouterVisionOptions): Decision
   const options = validated(schema, input, 'INVALID_INPUT')
   return createVisionChat({ ...options, endpoint: 'https://openrouter.ai/api/v1/chat/completions' })
 }
+export type OpenRouterTextOptions = OpenRouterVisionOptions
+/** Same strict chat protocol; rejects image parts before transport. */
+export function createOpenRouterText(input: OpenRouterTextOptions): DecisionPort {
+  const options = validated(schema, input, 'INVALID_INPUT')
+  return createVisionChat(
+    { ...options, endpoint: 'https://openrouter.ai/api/v1/chat/completions' },
+    'text',
+  )
+}

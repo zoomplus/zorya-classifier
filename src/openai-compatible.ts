@@ -9,3 +9,8 @@ const schema = visionOptionsSchema.omit({ provider: true, providerName: true }).
 export function createOpenAICompatibleVision(input: OpenAICompatibleVisionOptions): DecisionPort {
   return createVisionChat(validated(schema, input, 'INVALID_INPUT'))
 }
+export type OpenAICompatibleTextOptions = OpenAICompatibleVisionOptions
+/** Explicit endpoint for a text-only model. Image parts are rejected, never stripped. */
+export function createOpenAICompatibleText(input: OpenAICompatibleTextOptions): DecisionPort {
+  return createVisionChat(validated(schema, input, 'INVALID_INPUT'), 'text')
+}

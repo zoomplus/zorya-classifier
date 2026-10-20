@@ -17,7 +17,8 @@
     "paths": {
       "zorya-classifier": ["./src/index.ts"],
       "zorya-classifier/openrouter": ["./src/openrouter.ts"],
-      "zorya-classifier/openai-compatible": ["./src/openai-compatible.ts"]
+      "zorya-classifier/openai-compatible": ["./src/openai-compatible.ts"],
+      "zorya-classifier/segmentation": ["./src/segmentation.ts"]
     }
   },
   "include": ["src/**/*.ts", "test/**/*.ts", "examples/**/*.ts", "benchmarks/**/*.ts"]
