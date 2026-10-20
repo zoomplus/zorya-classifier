@@ -117,7 +117,7 @@ const extractSchema = z
   })
   .strict()
   .refine((value) => (value.status === 'extracted') === (value.mask !== undefined))
-const resultRowSchema = z
+export const visionScreenResultRowSchema = z
   .object({
     caseId: z.string().min(1).max(128),
     imageSha256: digestSchema,
@@ -179,7 +179,7 @@ const summarySchema = z
     plannedCaseIds: z.array(z.string().min(1)).length(20),
     completedCaseIds: z.array(z.string().min(1)).max(20),
     missingCaseIds: z.array(z.string().min(1)).max(20),
-    results: z.array(resultRowSchema).max(20),
+    results: z.array(visionScreenResultRowSchema).max(20),
     aggregate: budgetSchema,
     screenAggregate: budgetSchema,
     latencyEnvironment: z.literal('screen-unranked-before-resource-soak'),
@@ -195,6 +195,10 @@ export function parseVisionScreenSummary(value: unknown) {
 
 export function parseVisionScreenMaskDescriptor(value: unknown) {
   return maskSchema.parse(value)
+}
+
+export function parseVisionScreenResultRow(value: unknown) {
+  return visionScreenResultRowSchema.parse(value)
 }
 
 const pairCompletionSchema = z
@@ -368,7 +372,7 @@ export function assertVisionScreenLedger(
       'Pair completion ledger does not reconcile with route receipts and prior budget',
     )
 }
-const maskTruthSchema = z
+export const visionScreenMaskTruthSchema = z
   .array(
     z
       .object({
@@ -470,7 +474,10 @@ async function writeExclusive(path: string, value: unknown): Promise<string> {
   return sha256(bytes)
 }
 
-export function normalizeVisionScreenRow(row: z.infer<typeof resultRowSchema>, profile: string) {
+export function normalizeVisionScreenRow(
+  row: z.infer<typeof visionScreenResultRowSchema>,
+  profile: string,
+) {
   return {
     caseId: row.caseId,
     imageSha256: row.imageSha256,
@@ -496,9 +503,9 @@ export function normalizeVisionScreenRow(row: z.infer<typeof resultRowSchema>, p
 }
 
 async function scoreMasks(
-  rows: readonly z.infer<typeof resultRowSchema>[],
+  rows: readonly z.infer<typeof visionScreenResultRowSchema>[],
   cases: readonly { caseId: string; image: { width: number; height: number } }[],
-  truthRows: z.infer<typeof maskTruthSchema>,
+  truthRows: z.infer<typeof visionScreenMaskTruthSchema>,
   profileDirectory: string,
   imageRoot: string,
   signal: AbortSignal,
@@ -654,6 +661,24 @@ async function scoreMasks(
       : null,
     rows: scoreRows,
   }
+}
+
+export async function scoreVisionScreenMasks(
+  rows: readonly unknown[],
+  cases: readonly { caseId: string; image: { width: number; height: number } }[],
+  truthRows: unknown,
+  profileDirectory: string,
+  imageRoot: string,
+  signal: AbortSignal,
+) {
+  return scoreMasks(
+    rows.map((row) => visionScreenResultRowSchema.parse(row)),
+    cases,
+    visionScreenMaskTruthSchema.parse(truthRows),
+    profileDirectory,
+    imageRoot,
+    signal,
+  )
 }
 
 /** Score a completed route; an incomplete pair is reported without scoring the unavailable route. */
@@ -853,7 +878,7 @@ export async function evaluateVisionRouteScreen(input: VisionScreenOptions, sign
     )
       throw new Error('SCREEN input manifest rows differ from the pinned photo inputs')
   }
-  const truthRows = maskTruthSchema.parse(truth.value)
+  const truthRows = visionScreenMaskTruthSchema.parse(truth.value)
   sameSet(
     ids,
     truthRows.map((item) => item.caseId).filter((id) => ids.includes(id)),
@@ -929,7 +954,7 @@ export async function evaluateVisionRouteScreen(input: VisionScreenOptions, sign
         throw new Error('Located region escaped source raster')
       const rawResultPath = resolve(profileDirectory, row.caseId, 'result.json')
       const rawResultFile = await readJson(rawResultPath, 1024 * 1024, signal)
-      const rawResult = resultRowSchema.parse(rawResultFile.value)
+      const rawResult = visionScreenResultRowSchema.parse(rawResultFile.value)
       if (JSON.stringify(rawResult) !== JSON.stringify(row))
         throw new Error('Per-case durable result differs from the frozen route summary')
       rawResultFile.bytes.fill(0)
