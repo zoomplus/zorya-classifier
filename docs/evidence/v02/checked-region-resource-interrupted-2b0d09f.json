@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "benchmark": "public-mobile-sam-region-checked-segmentation-resource-v1",
+  "attempt": "2b0d09f-threads2-20261020T2319Z",
+  "status": "interrupted-not-qualified",
+  "qualified": false,
+  "workflow": "region-checked-segmentation",
+  "reason": "A public-adapter integration review found that the checked box-verification composition sent a raw full-source PNG to image transports that require each side to be 280..1568 pixels. The synthetic fixture used a closed local DecisionPort and did not exercise that transport validation. The run was interrupted before measurement while the checked-flow image preparation fix is developed.",
+  "execution": {
+    "sourceCommit": "2b0d09f6b585ac1fa49a68be039ee92fdbfc4eef",
+    "sourceManifestSha256": "4f23d626078e1dd6fa997d0716022f8c0437b8e39f19279d41951de88745f4e1",
+    "sourceFileCount": 59,
+    "sourceManifestUnchangedAtExit": true,
+    "archiveReferenceSha256": "4156a92fcc27db53d39bfab710719af9a7f36d7deeb76b1731fb705b3b4335d8",
+    "archiveInstalledByHarness": false,
+    "platform": "Linux x64, Node v24.12.0",
+    "threads": 2,
+    "forcedGc": false,
+    "providerHttpCalls": 0
+  },
+  "attemptedConfiguration": {
+    "warmupSeconds": 600,
+    "idleBeforeSeconds": 30,
+    "busySeconds": 6540,
+    "idleAfterSeconds": 30,
+    "sampleIntervalMs": 5000,
+    "warmupObservedMs": 447436.587329,
+    "measurementStarted": false,
+    "durationAccepted": false
+  },
+  "process": {
+    "pid": 1583181,
+    "startTicks": 20003346,
+    "clockTicksPerSecond": 100,
+    "startedAtUtc": "2026-10-20T23:19:42Z",
+    "interruptedAtUtc": "2026-10-20T23:27:55Z",
+    "signal": "SIGINT",
+    "termination": "clean",
+    "denseWitnessLastLiveAgeSeconds": 457.32,
+    "denseWitnessTerminalStatus": "process-exited"
+  },
+  "partialResults": {
+    "warmupCycles": 207,
+    "busyCycles": 0,
+    "observedProcessMs": 457602.335809,
+    "syntheticExpansionRequests": 102,
+    "syntheticBoxChecks": 308,
+    "carComponentExpansion": {
+      "sourceImageSha256": "71b99532e14abb6098a704e9bd9c2c50eebba72588a49e60c8a4b89af4eea4c5",
+      "previousMaskSha256": "47cd72ed0235395646e3ddf0d3797f2e032bac5e53c0768fc53bc1de640370d4",
+      "previousMaskPixels": 12144,
+      "expandedMaskPixels": 430942,
+      "expandedMaskBox": {
+        "left": 58,
+        "top": 0,
+        "width": 931,
+        "height": 642
+      },
+      "strictlyEnclosed": true,
+      "backend": "mobile-sam",
+      "method": "mobile-sam-enclosing-mask-v1"
+    },
+    "noResourceMeasurement": true,
+    "syntheticWarmupStatuses": {
+      "located": 103,
+      "extracted": 103,
+      "abortedBeforeMeasurement": 1
+    }
+  },
+  "rawArtifacts": {
+    "report": {
+      "path": ".run/v02/region-checked-soak-2b0d09f-threads2-20261020T2319Z/report.json",
+      "sha256": "0b37bf24b9fd19480846108437577f695f5dc002566ff93aa5efca8692e2fd1a"
+    },
+    "kernelWitness": {
+      "path": ".run/v02/region-checked-soak-2b0d09f-threads2-20261020T2319Z/proc-dense-witness.tsv",
+      "sha256": "b15c59c71fecd2e331b2cc3c425f883e9fe5e16aba29a2233907dc9a05e0b508"
+    },
+    "interruptionRecord": {
+      "path": ".run/v02/region-checked-soak-2b0d09f-threads2-20261020T2319Z/interruption.json",
+      "sha256": "d3c55902a618db6b1436705d1d8166864e21e0319fefa26a9c176831378bf5d6"
+    },
+    "hostBefore": {
+      "path": ".run/v02/region-checked-soak-2b0d09f-threads2-20261020T2319Z/host-before.json",
+      "sha256": "d3d6c09b01a9e4219f198e75cb001c0aa407f82d2ef50bec8f0d9ae7d147e767"
+    },
+    "hostAfter": {
+      "path": ".run/v02/region-checked-soak-2b0d09f-threads2-20261020T2319Z/host-after-interrupted.json",
+      "sha256": "50aca7cfca9af2f19b6c31db99c6604bf63a80b9651d3e4759c7e9e6209289c6"
+    },
+    "preRunSmoke": {
+      "path": ".run/v02/region-checked-soak-prep/smoke-v4.json",
+      "sha256": "2dbadec815e3b69b6f6720b28dcee638dd31259b4824745b8be9a6d2b9a0df10",
+      "note": "Synthetic DecisionPort integration smoke; not evidence that image transport validation succeeds."
+    }
+  },
+  "limitations": [
+    "The attempt stopped during warmup, before either idle window or resource sampling.",
+    "The partial report and smoke are preserved as interrupted diagnostics only and do not qualify memory retention, native lifecycle over the measurement interval, or latency.",
+    "The older region-segmentation baseline is a separate workflow and remains unchanged."
+  ]
+}
