@@ -6,6 +6,7 @@ import {
   collectMobileSamSegmentationCandidates,
   mobileSamSegmentationPrompt,
   selectBestMaskCandidate,
+  selectMobileSamSegmentationMask,
 } from '../src/infrastructure/segmentation/mobile-sam/worker-inference.js'
 import { initializeGrabCutMask } from '../src/infrastructure/segmentation/grabcut/worker-inference.js'
 
@@ -128,6 +129,30 @@ await test('seed-prompt masks remain full-source, clip to ROI/alpha, and require
     prompt: 'whole-region',
   })
   assert.equal(boxCandidates[0]?.mask[2 * width + 4], 1)
+})
+
+await test('seed prompt returns an empty full-source mask while whole-region keeps its failure', () => {
+  const empty = selectMobileSamSegmentationMask({
+    candidates: [],
+    width: 7,
+    height: 5,
+    prompt: 'seed-region',
+  })
+  assert.equal(empty.length, 35)
+  assert.equal(
+    empty.some((value) => value !== 0),
+    false,
+  )
+  assert.throws(
+    () =>
+      selectMobileSamSegmentationMask({
+        candidates: [],
+        width: 7,
+        height: 5,
+        prompt: 'whole-region',
+      }),
+    /no seed-grounded mask/u,
+  )
 })
 
 await test('GrabCut seed prompt initializes probable background only in hard ROI', () => {

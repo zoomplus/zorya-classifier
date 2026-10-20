@@ -175,6 +175,18 @@ export function collectMobileSamSegmentationCandidates(input: {
   return candidates
 }
 
+export function selectMobileSamSegmentationMask(input: {
+  candidates: readonly MaskCandidate[]
+  width: number
+  height: number
+  prompt: 'whole-region' | 'seed-region'
+}): Uint8Array {
+  const best = selectBestMaskCandidate(input.candidates)
+  if (best) return best.mask
+  if (input.prompt === 'seed-region') return new Uint8Array(input.width * input.height)
+  throw new Error('MobileSAM produced no seed-grounded mask')
+}
+
 export async function runMobileSamTask(
   request: Extract<NativeSegmentationRequest, { kind: 'mobile-sam' }>,
 ): Promise<NativeSegmentationReply> {
@@ -287,15 +299,18 @@ export async function runMobileSamTask(
         seedRegion: request.seedRegion,
         prompt: request.prompt,
       })
-      if (!candidates.length) throw new Error('MobileSAM produced no seed-grounded mask')
-      const best = selectBestMaskCandidate(candidates)
-      if (!best) throw new Error('MobileSAM produced no mask candidate')
+      const mask = selectMobileSamSegmentationMask({
+        candidates,
+        width: request.width,
+        height: request.height,
+        prompt: request.prompt,
+      })
       result = {
         id: request.id,
         status: 'segmented',
         width: request.width,
         height: request.height,
-        mask: Buffer.from(best.mask).toString('base64'),
+        mask: Buffer.from(mask).toString('base64'),
         method:
           request.prompt === 'seed-region' ? 'mobile-sam-seed-point-v1' : 'mobile-sam-box-prompt',
       }
