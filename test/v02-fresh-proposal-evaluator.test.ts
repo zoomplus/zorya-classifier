@@ -161,6 +161,7 @@ async function setup() {
     durationMs: 1,
     httpStatus: 200,
     route,
+    errorCode: null,
     receipt: {
       model: route.model,
       provider: route.provider,
@@ -300,9 +301,12 @@ async function setup() {
           JSON.stringify(
             truthGroups[index]!.map((item) => ({
               caseId: item.caseId,
-              expectedPresence: 'present',
-              targetBoxes: [{ xyxy: [0.1, 0.1, 0.4, 0.4] }],
-              negativeEvidence: null,
+              expectedPresence: item.caseId === cases[0]!.caseId ? 'absent' : 'present',
+              targetBoxes: item.caseId === cases[0]!.caseId ? [] : [{ xyxy: [0.1, 0.1, 0.4, 0.4] }],
+              negativeEvidence:
+                item.caseId === cases[0]!.caseId
+                  ? 'Fixture inventory independently verifies the target is absent.'
+                  : null,
               ...(item.caseId === cases[2]!.caseId
                 ? {
                     referenceMasks: [

@@ -401,7 +401,7 @@ const physicalReceiptSchema = z
     route: routeSchema,
     receipt: receiptSchema.nullable(),
     wireReceipt: wireReceiptSchema.nullable(),
-    errorCode: z.string().max(100).optional(),
+    errorCode: z.string().max(100).nullable().optional(),
   })
   .strict()
 const rawSummarySchema = z
