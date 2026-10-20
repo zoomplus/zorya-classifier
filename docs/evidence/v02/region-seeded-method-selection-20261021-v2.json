@@ -1,0 +1,66 @@
+{
+  "schema": "region-seeded-development-method-selection-v2",
+  "createdAt": "2026-10-20T22:28:00.045Z",
+  "developmentEvidence": {
+    "file": "region-seeded-dev-v2/evaluation.json",
+    "sha256": "fff5845b630698bda8897c24456567863855815021f6278f809fa0b6e1e2a82b"
+  },
+  "selectedCandidate": "native-luna-presence-first-region-seeded-sam-dev-v2",
+  "pairedControl": "native-luna-presence-first-region-no-image-control-dev-v2",
+  "producerWorktreeCommit": "3f241154cc09380c46516535006f6cf9582415c9",
+  "integrationSourceCommit": "185bde8432b61cd0184ab4b1c8a4c6c187680515",
+  "producerSourceSha256": "99beadec729003691c6861166b4738db2cc1ee92699040c98254468b24c998e9",
+  "recipe": {
+    "model": "openai/gpt-6-luna-decisions",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "apiEndpoint": "/api/alpha/decisions",
+    "allowFallbacks": false,
+    "native": "MobileSAM CPU segmentation, seed-region prompt on full oriented source image",
+    "timeoutMs": 120000,
+    "maxInFlightCases": 2,
+    "nativeMaxActive": 1,
+    "nativeMaxWaiting": 2,
+    "nativeThreads": 2,
+    "regionSearchPasses": 3,
+    "extentCalls": 0,
+    "sameInstanceCalls": 0,
+    "maxLogicalCallsPerCase": 4,
+    "maxPhysicalCallsPerCase": 4,
+    "maxPhysicalCalls": 250,
+    "maxCostUsd": 5,
+    "unknownCostReserveUsd": 0.05,
+    "retries": 0,
+    "fallback": false,
+    "latencyRankingEligible": false,
+    "requireClassifiedPresence": true
+  },
+  "selectionBasis": "The complete predeclared DEV gate passed. The original region locator is unchanged. The caller reuses the existing classification and segments only after present, using full-source MobileSAM. The same-seed v1 component comparison favored MobileSAM over GrabCut; it is component evidence, not an end-to-end v2 backend comparison.",
+  "eligibility": {
+    "developmentAdmission": "passed",
+    "nativeWindows": "passed on identical108runtimefiles",
+    "installedConsumer": "passed on identical108runtimefiles",
+    "finalHostedCi": "pending Windows path-assertion repair rerun",
+    "flowSpecificTwoHourResources": "active; not yet passed"
+  },
+  "metrics": {
+    "positiveCases": 30,
+    "verifiedNegatives": 10,
+    "coarsePositiveSeedBoxIntersections": 18,
+    "falseSeedLocations": 0,
+    "maskDerivedBoxMatches": 5,
+    "falseExtractions": 0,
+    "exactCanvasMaskReferences": 7,
+    "exactCanvasMasksAtIoU08": 1,
+    "photoSeedProxyPairedInterval": [0.375, 0.875]
+  },
+  "frozenBeforeHeldout": {
+    "newPixelsOpenedByProducer": false,
+    "newPerCaseTruthOpenedByProducer": false,
+    "newHeldoutDispatched": false,
+    "selectRunnerUpFromRevealedHeldout": false
+  },
+  "libraryConnectsModels": false,
+  "latencyRankingEligible": false,
+  "releaseQualified": false
+}
