@@ -2,7 +2,7 @@
 
 The HELDOUT producer inputs were made loadable without changing the 80 source cases, target identities, image bytes, or oracle records. The conversion reads only source case IDs, image paths/hashes/dimensions, authored prompt fields, and the AbiWord capture generator's ordered planned action names. The case generator supplies planned action names and its original 15/5 ordering; this is authoring metadata, rather than observed model outcomes. No ground-truth files, measured boxes/masks, or image pixels are inspected. The frozen source inputs remain preserved at their original hashes.
 
-The canonical arrays contain 40 photos, 20 AbiWord UI captures, and 20 OpenTTD map captures (80 unique case IDs). `loadFreshCorpus` validated all three pinned arrays with relative image paths. The original image root is `/root/work/zorya-classifier-worktrees/v02/corpus`; its 80 source images were separately hash-checked against the source manifests without decoding them.
+The canonical arrays contain 40 photos, 20 AbiWord UI captures, and 20 OpenTTD map captures (80 unique case IDs). `loadFreshCorpus` validated all three pinned arrays with relative image paths. The 80 source images were separately hash-checked against the source manifests without decoding them.
 
 | Input                     | Source SHA-256                                                     | Canonical SHA-256                                                  | Cases |
 | ------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ | ----: |
