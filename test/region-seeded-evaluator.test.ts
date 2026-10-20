@@ -89,6 +89,10 @@ async function fixture(
         maxLogicalCallsPerCase: variant === 'region-seeded-sam' ? (6 as const) : (4 as const),
         maxPhysicalCallsPerCase: variant === 'region-seeded-sam' ? (6 as const) : (4 as const),
         maxBoxCheckCalls: variant === 'region-seeded-sam' ? (2 as const) : (0 as const),
+        boxCheckPolicy:
+          variant === 'region-seeded-sam'
+            ? ('up-to-two-closed-visible-box-containment-checks-v1' as const)
+            : ('none-no-segmenter-configured' as const),
         requireClassifiedPresence: true as const,
       }
     : altered?.classifiedAbsentSkip ||
@@ -372,6 +376,7 @@ async function fixture(
         },
         boxChecks: [
           {
+            index: 0,
             status: 'ok' as const,
             requestHash: '7'.repeat(64),
             logicalId: 2,
@@ -707,85 +712,207 @@ await test('v3 checked-region attempts must reconcile to the actual physical rec
   }
 })
 
-await test('v3 checked-region cannot accept a second needs-expansion verdict', async () => {
-  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-checked-v3-expansion-'))
+await test('v3 checked-region retains a render failure before any request was dispatched', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-checked-v3-undispatched-'))
   try {
     const value = await fixture(directory, 'region-seeded-sam', { checkedRegion: true })
     const firstRow = value.summary.results[0]!
     const extraction = firstRow.extraction as unknown as {
       status: string
+      reason?: string
+      errorCode?: string
       mask?: unknown
+      segmentation?: unknown
+      verification?: unknown
       physicalCalls: number
       logicalCalls: number
       requestHashes: string[]
       boxChecks: Array<Record<string, unknown>>
+    }
+    extraction.status = 'failed'
+    extraction.reason = 'provider-failure'
+    extraction.errorCode = 'PROVIDER'
+    delete extraction.mask
+    delete extraction.segmentation
+    delete extraction.verification
+    extraction.physicalCalls = 0
+    extraction.logicalCalls = 0
+    extraction.requestHashes = []
+    extraction.boxChecks = [
+      {
+        index: 0,
+        status: 'failed',
+        requestHash: null,
+        logicalId: null,
+        physicalIds: [],
+        physicalCalls: 0,
+        errorCode: 'PROVIDER',
+      },
+    ]
+    value.summary.physicalReceipts = value.summary.physicalReceipts.filter(
+      (receipt) => receipt.caseId !== firstRow.caseId || receipt.logicalId !== 2,
+    )
+    value.summary.aggregate.admittedPhysicalCalls = 1
+    value.summary.aggregate.knownCostUsd = 0.01
+    value.summary.aggregate.accountedExposureUsd = 0.01
+    const refreshedPins = await value.refreshSummaryAndSeal()
+    value.options.summary = refreshedPins.summary
+    value.options.completionSeal = refreshedPins.completionSeal
+    const report = await evaluateRegionSeededRun(value.options, signal)
+    assert.equal(report.rows[0]!.extractionStatus, 'failed')
+    assert.deepEqual(report.rows[0]!.boxCheckAttempts, [
+      { status: 'failed', errorCode: 'PROVIDER' },
+    ])
+    assert.equal(report.physical.count, 1)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('v3 checked-region rejects an extracted cutout after a non-complete box verdict', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-checked-v3-cutout-verdict-'))
+  try {
+    const value = await fixture(directory, 'region-seeded-sam', { checkedRegion: true })
+    const firstRow = value.summary.results[0]!
+    const extraction = firstRow.extraction as unknown as {
+      boxChecks: Array<Record<string, unknown>>
       verification: { checks: Array<Record<string, unknown>>; expansion: string }
     }
-    const verdictResult = {
-      verdict: 'needs-expansion',
+    const unresolved = {
+      verdict: 'unknown',
       selection: {
-        choice: 'needs-expansion',
-        nativeChoice: 'needs-expansion',
-        probabilities: { complete: 0, 'needs-expansion': 1, unknown: 0 },
-        tied: ['needs-expansion'],
+        choice: 'unknown',
+        nativeChoice: 'unknown',
+        probabilities: { complete: 0, 'needs-expansion': 0, unknown: 1 },
+        tied: ['unknown'],
       },
       metadata: {
         model: 'fixture-model',
         provider: 'fixture',
-        requestId: 'fixture-box-check-expand',
+        requestId: 'fixture-box-check-unknown',
         durationMs: 1,
         costUsd: 0.01,
         attempts: 1,
       },
     }
-    extraction.status = 'unknown'
-    delete extraction.mask
-    extraction.physicalCalls = 2
-    extraction.logicalCalls = 2
-    extraction.requestHashes = ['7'.repeat(64), '8'.repeat(64)]
     extraction.boxChecks[0] = {
+      index: 0,
       status: 'ok',
       requestHash: '7'.repeat(64),
       logicalId: 2,
       physicalIds: [2],
       physicalCalls: 1,
-      ...verdictResult,
+      ...unresolved,
     }
-    extraction.boxChecks.push({
-      status: 'ok',
-      requestHash: '8'.repeat(64),
-      logicalId: 3,
-      physicalIds: [3],
-      physicalCalls: 1,
-      ...verdictResult,
-    })
-    extraction.verification = { checks: [verdictResult, verdictResult], expansion: 'expanded' }
-    value.summary.physicalReceipts.push({
-      caseId: firstRow.caseId,
-      physicalId: 3,
-      logicalId: 3,
-      requestSha256: '8'.repeat(64),
-      requestBodySha256: 'a'.repeat(64),
-      admittedAt: '2026-10-21T00:00:02.000Z',
-      durationMs: 1,
-      httpStatus: 200,
-      route,
-      receipt: { costUsd: 0.01 },
-      wireReceipt: { usageCostUsd: 0.01 },
-      errorCode: null,
-    })
-    value.summary.aggregate.admittedPhysicalCalls = 3
-    value.summary.aggregate.knownCostUsd = 0.03
-    value.summary.aggregate.accountedExposureUsd = 0.03
+    extraction.verification = { checks: [unresolved], expansion: 'not-needed' }
     const refreshedPins = await value.refreshSummaryAndSeal()
     value.options.summary = refreshedPins.summary
     value.options.completionSeal = refreshedPins.completionSeal
     await assert.rejects(
       evaluateRegionSeededRun(value.options, signal),
-      /Expanded-mask verdict sequence is inconsistent/u,
+      /A cutout was published without a final complete box verdict/u,
     )
   } finally {
     await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('v3 checked-region preserves unresolved second verdicts after a valid expansion', async () => {
+  for (const finalVerdict of ['needs-expansion', 'unknown'] as const) {
+    const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-checked-v3-expansion-'))
+    try {
+      const value = await fixture(directory, 'region-seeded-sam', { checkedRegion: true })
+      const firstRow = value.summary.results[0]!
+      const extraction = firstRow.extraction as unknown as {
+        status: string
+        mask?: unknown
+        physicalCalls: number
+        logicalCalls: number
+        requestHashes: string[]
+        boxChecks: Array<Record<string, unknown>>
+        verification: { checks: Array<Record<string, unknown>>; expansion: string }
+      }
+      const verdictResult = (verdict: 'needs-expansion' | 'unknown') => ({
+        verdict,
+        selection: {
+          choice: verdict,
+          nativeChoice: verdict,
+          probabilities: {
+            complete: 0,
+            'needs-expansion': verdict === 'needs-expansion' ? 1 : 0,
+            unknown: verdict === 'unknown' ? 1 : 0,
+          },
+          tied: [verdict],
+        },
+        metadata: {
+          model: 'fixture-model',
+          provider: 'fixture',
+          requestId: `fixture-box-check-${verdict}`,
+          durationMs: 1,
+          costUsd: 0.01,
+          attempts: 1,
+        },
+      })
+      const firstVerdict = verdictResult('needs-expansion')
+      const secondVerdict = verdictResult(finalVerdict)
+      extraction.status = 'unknown'
+      delete extraction.mask
+      extraction.physicalCalls = 2
+      extraction.logicalCalls = 2
+      extraction.requestHashes = ['7'.repeat(64), '8'.repeat(64)]
+      extraction.boxChecks[0] = {
+        index: 0,
+        status: 'ok',
+        requestHash: '7'.repeat(64),
+        logicalId: 2,
+        physicalIds: [2],
+        physicalCalls: 1,
+        ...firstVerdict,
+      }
+      extraction.boxChecks.push({
+        index: 1,
+        status: 'ok',
+        requestHash: '8'.repeat(64),
+        logicalId: 3,
+        physicalIds: [3],
+        physicalCalls: 1,
+        ...secondVerdict,
+      })
+      extraction.verification = {
+        checks: [firstVerdict, secondVerdict],
+        expansion: 'expanded',
+      }
+      value.summary.physicalReceipts.push({
+        caseId: firstRow.caseId,
+        physicalId: 3,
+        logicalId: 3,
+        requestSha256: '8'.repeat(64),
+        requestBodySha256: 'a'.repeat(64),
+        admittedAt: '2026-10-21T00:00:02.000Z',
+        durationMs: 1,
+        httpStatus: 200,
+        route,
+        receipt: { costUsd: 0.01 },
+        wireReceipt: { usageCostUsd: 0.01 },
+        errorCode: null,
+      })
+      value.summary.aggregate.admittedPhysicalCalls = 3
+      value.summary.aggregate.knownCostUsd = 0.03
+      value.summary.aggregate.accountedExposureUsd = 0.03
+      const refreshedPins = await value.refreshSummaryAndSeal()
+      value.options.summary = refreshedPins.summary
+      value.options.completionSeal = refreshedPins.completionSeal
+      const report = await evaluateRegionSeededRun(value.options, signal)
+      assert.equal(report.rows[0]!.extractionStatus, 'unknown')
+      assert.equal(report.rows[0]!.boxCheckAttempts?.length, 2)
+      assert.equal(report.boxVerification?.expansionOutcomes.expanded, 1)
+      assert.equal(
+        report.boxVerification?.verdicts[finalVerdict],
+        finalVerdict === 'unknown' ? 1 : 2,
+      )
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
   }
 })
 

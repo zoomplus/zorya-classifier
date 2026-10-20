@@ -121,30 +121,50 @@ const maskDescriptor = z
     segmentation,
   })
   .strict()
-const boxCheckAttempt = z.discriminatedUnion('status', [
-  z
-    .object({
-      status: z.literal('ok'),
-      requestHash: sha,
-      logicalId: z.number().int().positive(),
-      physicalIds: z.array(z.number().int().positive()).max(1),
-      physicalCalls: z.literal(1),
-      verdict: z.enum(['complete', 'needs-expansion', 'unknown']),
-      selection: z.record(z.unknown()),
-      metadata: z.record(z.unknown()),
-    })
-    .strict(),
-  z
-    .object({
-      status: z.literal('failed'),
-      requestHash: sha,
-      logicalId: z.number().int().positive(),
-      physicalIds: z.array(z.number().int().positive()).max(1),
-      physicalCalls: z.union([z.literal(0), z.literal(1)]),
-      errorCode: z.string().min(1).max(100),
-    })
-    .strict(),
-])
+const boxCheckAttempt = z
+  .discriminatedUnion('status', [
+    z
+      .object({
+        index: z.number().int().min(0).max(1),
+        status: z.literal('ok'),
+        requestHash: sha,
+        logicalId: z.number().int().positive(),
+        physicalIds: z.array(z.number().int().positive()).max(1),
+        physicalCalls: z.literal(1),
+        verdict: z.enum(['complete', 'needs-expansion', 'unknown']),
+        selection: z.record(z.unknown()),
+        metadata: z.record(z.unknown()),
+      })
+      .strict(),
+    z
+      .object({
+        index: z.number().int().min(0).max(1),
+        status: z.literal('failed'),
+        requestHash: sha.nullable(),
+        logicalId: z.number().int().positive().nullable(),
+        physicalIds: z.array(z.number().int().positive()).max(1),
+        physicalCalls: z.union([z.literal(0), z.literal(1)]),
+        errorCode: z.string().min(1).max(100),
+      })
+      .strict(),
+  ])
+  .superRefine((attempt, context) => {
+    if (attempt.status === 'ok' && attempt.physicalIds.length !== 1)
+      context.addIssue({
+        code: 'custom',
+        message: 'Successful box check lacks one physical receipt',
+      })
+    if (
+      attempt.status === 'failed' &&
+      ((attempt.requestHash === null) !== (attempt.logicalId === null) ||
+        attempt.physicalIds.length !== attempt.physicalCalls ||
+        (attempt.physicalCalls === 1 && attempt.logicalId === null))
+    )
+      context.addIssue({
+        code: 'custom',
+        message: 'Failed box-check request attribution is invalid',
+      })
+  })
 const verification = z
   .object({
     checks: z.array(z.record(z.unknown())).min(1).max(2),
@@ -221,6 +241,9 @@ const policySchema = routeSchema.extend({
   maxLogicalCallsPerCase: z.union([z.literal(4), z.literal(6)]),
   maxPhysicalCallsPerCase: z.union([z.literal(4), z.literal(6)]),
   maxBoxCheckCalls: z.union([z.literal(0), z.literal(2)]).optional(),
+  boxCheckPolicy: z
+    .enum(['up-to-two-closed-visible-box-containment-checks-v1', 'none-no-segmenter-configured'])
+    .optional(),
   maxPhysicalCalls: z.number().int().positive().max(600),
   maxCostUsd: z.number().positive().max(10),
   unknownCostReserveUsd: z.number().positive(),
@@ -452,6 +475,7 @@ function enforceCheckedRegionPolicy(
   if (profileKind === null) {
     if (
       policyValue.maxBoxCheckCalls !== undefined ||
+      policyValue.boxCheckPolicy !== undefined ||
       policyValue.maxLogicalCallsPerCase !== 4 ||
       policyValue.maxPhysicalCallsPerCase !== 4
     )
@@ -461,10 +485,15 @@ function enforceCheckedRegionPolicy(
   const expectedKind = variant === 'region-seeded-sam' ? 'candidate' : 'control'
   const cap = profileKind === 'candidate' ? 6 : 4
   const boxCheckCap = profileKind === 'candidate' ? 2 : 0
+  const boxCheckPolicy =
+    profileKind === 'candidate'
+      ? 'up-to-two-closed-visible-box-containment-checks-v1'
+      : 'none-no-segmenter-configured'
   if (
     profileKind !== expectedKind ||
     policyValue.requireClassifiedPresence !== true ||
     policyValue.maxBoxCheckCalls !== boxCheckCap ||
+    policyValue.boxCheckPolicy !== boxCheckPolicy ||
     policyValue.maxLogicalCallsPerCase !== cap ||
     policyValue.maxPhysicalCallsPerCase !== cap
   )
@@ -497,12 +526,14 @@ function validateCheckedRegionCase(
   }
   if (attempts.length > 2) throw new Error('Checked-region v3 exceeded two box checks')
   const extraction = row.extraction
+  const dispatchedAttempts = attempts.filter((attempt) => attempt.logicalId !== null)
   if (
-    extraction.logicalCalls !== extraction.seed.logicalCalls + attempts.length ||
+    extraction.logicalCalls !== extraction.seed.logicalCalls + dispatchedAttempts.length ||
     extraction.physicalCalls !==
       extraction.seed.physicalCalls +
         attempts.reduce((sum, attempt) => sum + attempt.physicalCalls, 0) ||
-    extraction.requestHashes.length !== extraction.seed.requestHashes.length + attempts.length ||
+    extraction.requestHashes.length !==
+      extraction.seed.requestHashes.length + dispatchedAttempts.length ||
     !same(
       extraction.requestHashes.slice(0, extraction.seed.requestHashes.length),
       extraction.seed.requestHashes,
@@ -512,8 +543,21 @@ function validateCheckedRegionCase(
   const successfulResults: ReturnType<typeof validateSegmentationBoxCheckResult>[] = []
   const attemptResults: Array<{ status: 'ok' | 'failed'; verdict?: string; errorCode?: string }> =
     []
+  let dispatchedIndex = 0
   for (const [index, attempt] of attempts.entries()) {
-    const logicalIndex = extraction.seed.logicalCalls + index
+    if (attempt.index !== index) throw new Error('Box-check indices are not sequential')
+    if (attempt.logicalId === null) {
+      if (attempt.status !== 'failed' || index !== attempts.length - 1)
+        throw new Error('An undispatched box-check failure must be the final attempt')
+      if (attempt.physicalCalls !== 0 || attempt.physicalIds.length !== 0)
+        throw new Error('An undispatched box-check failure has physical work')
+      attemptResults.push({ status: 'failed', errorCode: attempt.errorCode })
+      continue
+    }
+    if (attempt.requestHash === null)
+      throw new Error('A dispatched box check is missing its request hash')
+    const logicalIndex = extraction.seed.logicalCalls + dispatchedIndex
+    dispatchedIndex++
     if (
       extraction.requestHashes[logicalIndex] !== attempt.requestHash ||
       attempt.logicalId !== row.classify.logicalCalls + logicalIndex + 1
@@ -569,6 +613,8 @@ function validateCheckedRegionCase(
     (!savedVerification || savedVerification.checks.at(-1)?.verdict !== 'complete')
   )
     throw new Error('A cutout was published without a final complete box verdict')
+  if (extraction.status === 'unknown' && savedVerification?.checks.at(-1)?.verdict === 'complete')
+    throw new Error('A complete final box verdict was recorded as segmentation-uncertain')
   if (extraction.status === 'extracted' && attempts.at(-1)?.status !== 'ok')
     throw new Error('A cutout follows an unsuccessful last box-check attempt')
   return {
@@ -592,8 +638,7 @@ function validateExpansionSequence(
   if (expansion === 'expanded') {
     if (attempts.length !== 2 || verdicts.length > 2)
       throw new Error('Expanded mask must be checked at most once more')
-    if (verdicts.length === 2 && attempts[1]?.status === 'ok' && verdicts[1] !== 'needs-expansion')
-      return
+    if (verdicts.length === 2 && attempts[1]?.status === 'ok') return
     if (verdicts.length === 1 && attempts[1]?.status === 'failed') return
     throw new Error('Expanded-mask verdict sequence is inconsistent')
   }
