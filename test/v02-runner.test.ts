@@ -8,6 +8,53 @@ import { RunBudget, RunBudgetExhausted } from '../benchmarks/v02/budget.js'
 import { inputManifestSchema, modelRequestManifest } from '../benchmarks/v02/protocol.js'
 import { recordProvider } from '../benchmarks/v02/recording.js'
 import { applyPromptVariant, promptVariants } from '../benchmarks/v02/promptvariants.js'
+import { createLunaDecisionProvider } from '../benchmarks/v02/runner.js'
+
+await test('Luna native control uses the typed Decisions endpoint and preserves returned probabilities', async () => {
+  let calls = 0
+  const decision = createLunaDecisionProvider('fixture-key', async (url, init) => {
+    calls++
+    assert.equal(url, 'https://openrouter.ai/api/alpha/decisions')
+    const body = JSON.parse(String(init?.body)) as Record<string, unknown>
+    assert.equal(body.model, 'openai/gpt-6-luna-decisions')
+    assert.deepEqual(body.provider, { only: ['openai'], allow_fallbacks: false })
+    assert.equal(Object.hasOwn(body, 'messages'), false)
+    return new Response(
+      JSON.stringify({
+        id: 'fixture-id',
+        model: 'openai/gpt-6-luna-decisions-20261006',
+        provider: 'OpenAI',
+        answers: {
+          selection: {
+            type: 'choice',
+            choice: 'present',
+            probabilities: { present: 0.8, absent: 0.2 },
+          },
+        },
+        usage: { cost: 0.0001 },
+      }),
+    )
+  })
+  const result = await decision.decide(
+    {
+      state: ['Classify the image.'],
+      questions: {
+        selection: {
+          type: 'choice',
+          instructions: 'Choose the best answer.',
+          criteria: { present: 'A target is visible.', absent: 'No target is visible.' },
+        },
+      },
+    },
+    AbortSignal.timeout(1000),
+  )
+  assert.equal(calls, 1)
+  assert.deepEqual(
+    result.answers.selection?.type === 'choice' && result.answers.selection.probabilities,
+    { present: 0.8, absent: 0.2 },
+  )
+  assert.equal(result.metadata.costUsd, 0.0001)
+})
 
 await test('budget admits no more than its explicit physical calls and unknown receipts reserve cost', () => {
   const budget = new RunBudget(2, 0.04, 0.03)
@@ -80,6 +127,7 @@ await test('recorder writes sanitized append-only dispatch and receipt records',
         model: 'pinned/model',
         provider: 'provider',
         providerName: 'Pinned',
+        apiEndpoint: '/chat',
         allowFallbacks: false,
       },
       async () => new Response('ok', { status: 200 }),
@@ -132,6 +180,7 @@ await test('physical ledger counts fetches, retains HTTP errors, and excludes pr
       model: 'pinned/model',
       provider: 'provider',
       providerName: 'Pinned',
+      apiEndpoint: '/chat',
       allowFallbacks: false as const,
     }
     const preflight = recordProvider(
@@ -173,6 +222,82 @@ await test('physical ledger counts fetches, retains HTTP errors, and excludes pr
     assert.doesNotMatch(http + receipt, /bounded provider error/u)
     assert.equal(budget.snapshot().admittedPhysicalCalls, 1)
     assert.equal(budget.snapshot().unknownCostCalls, 1)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('wire diagnostics classify retry scope and truncated output without retaining message text', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v02-wire-diagnostics-'))
+  const request: DecisionRequest = {
+    state: ['fixture'],
+    questions: { pick: { type: 'choice', instructions: 'Choose', criteria: { a: 'A', b: 'B' } } },
+  }
+  const route = {
+    model: 'pinned/model',
+    provider: 'provider',
+    providerName: 'Pinned',
+    apiEndpoint: 'https://provider.test/chat',
+    allowFallbacks: false as const,
+  }
+  try {
+    const rateLimit = recordProvider(
+      (fetch) => ({
+        async decide() {
+          await fetch(route.apiEndpoint, { method: 'POST', body: '{}' })
+          throw new Error('expected rate limit')
+        },
+      }),
+      new RunBudget(1, 0.1),
+      join(directory, 'rate-limit'),
+      route,
+      async () =>
+        new Response(JSON.stringify({ error: { message: 'Rate limit exceeded for API key' } }), {
+          status: 429,
+          headers: { 'retry-after': '2' },
+        }),
+    )
+    await assert.rejects(rateLimit.port.decide(request, new AbortController().signal))
+    const rateReceipt = await readFile(
+      join(directory, 'rate-limit', 'physical-receipt-1.json'),
+      'utf8',
+    )
+    assert.match(rateReceipt, /"errorCategory": "rate-limited"/u)
+    assert.match(rateReceipt, /"rateLimitScope": "key"/u)
+    assert.match(rateReceipt, /"retryAfterSeconds": 2/u)
+    assert.doesNotMatch(rateReceipt, /Rate limit exceeded for API key/u)
+
+    const malformed = recordProvider(
+      (fetch) => ({
+        async decide() {
+          await fetch(route.apiEndpoint, { method: 'POST', body: '{}' })
+          throw new Error('invalid provider response')
+        },
+      }),
+      new RunBudget(1, 0.1),
+      join(directory, 'malformed'),
+      route,
+      async () =>
+        new Response(
+          JSON.stringify({
+            choices: [
+              {
+                finish_reason: 'length',
+                message: { content: 'private model output that is not JSON' },
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+    )
+    await assert.rejects(malformed.port.decide(request, new AbortController().signal))
+    const malformedReceipt = await readFile(
+      join(directory, 'malformed', 'physical-receipt-1.json'),
+      'utf8',
+    )
+    assert.match(malformedReceipt, /"responseDisposition": "chat-truncated-output"/u)
+    assert.match(malformedReceipt, /"finishReason": "length"/u)
+    assert.doesNotMatch(malformedReceipt, /private model output/u)
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

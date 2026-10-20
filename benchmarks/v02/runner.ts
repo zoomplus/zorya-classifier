@@ -6,10 +6,8 @@ import sharp from 'sharp'
 import type { DecisionPort, DecisionRequest } from '../../src/entities/contracts.js'
 import type { WholeObjectLocalizationResult } from '../../src/entities/whole-object.js'
 import { createClassifier, createResearchClassifier } from '../../src/app/create-classifier.js'
-import {
-  createOpenRouterText,
-  createOpenRouterVision,
-} from '../../src/infrastructure/openrouter-vision.js'
+import { createOpenRouterText } from '../../src/infrastructure/openrouter-vision.js'
+import { createOpenRouterDecisions } from '../../src/infrastructure/openrouter.js'
 import { createTextRepresentation } from '../../src/infrastructure/text-representation.js'
 import { textEncodersV1 } from '../experiments/text-encoders-v1.js'
 import { RunBudget } from './budget.js'
@@ -27,12 +25,14 @@ const routeTable = {
     model: 'deepseek/deepseek-v4.1-flash',
     provider: 'together',
     providerName: 'Together',
+    apiEndpoint: '/api/v1/chat/completions',
     allowFallbacks: false as const,
   },
   lunaVision: {
     model: 'openai/gpt-6-luna-decisions',
     provider: 'openai',
     providerName: 'OpenAI',
+    apiEndpoint: '/api/alpha/decisions',
     allowFallbacks: false as const,
   },
 }
@@ -128,19 +128,15 @@ function makeProvider(
   })
 }
 
-function makeVisionProvider(
+export function createLunaDecisionProvider(
   apiKey: string,
-  maxOutputTokens: 1024 | 4096,
   fetch: typeof globalThis.fetch,
 ): DecisionPort {
-  return createOpenRouterVision({
+  return createOpenRouterDecisions({
     apiKey,
     model: routeTable.lunaVision.model,
     provider: routeTable.lunaVision.provider,
     providerName: routeTable.lunaVision.providerName,
-    responseFormat: 'json-schema',
-    maxOutputTokens,
-    reasoningEffort: 'low',
     fetch,
   })
 }
@@ -465,7 +461,7 @@ export async function runDiagnostic(options: DiagnosticRunOptions) {
       const route = candidate.kind === 'vision' ? routeTable.lunaVision : routeTable.togetherText
       const classifyProvider = (fetch: typeof globalThis.fetch) =>
         candidate.kind === 'vision'
-          ? makeVisionProvider(apiKey, 1024, fetch)
+          ? createLunaDecisionProvider(apiKey, fetch)
           : makeProvider(apiKey, routeTable.togetherText, 1024, fetch)
       const classifyRecorder = newRecorder(
         classifyProvider,
@@ -486,7 +482,7 @@ export async function runDiagnostic(options: DiagnosticRunOptions) {
 
       const locateProvider = (fetch: typeof globalThis.fetch) =>
         candidate.kind === 'vision'
-          ? makeVisionProvider(apiKey, 4096, fetch)
+          ? createLunaDecisionProvider(apiKey, fetch)
           : makeProvider(apiKey, routeTable.togetherText, 4096, fetch)
       const locateRecorder = newRecorder(
         locateProvider,
