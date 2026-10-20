@@ -99,3 +99,5 @@ Each run creates a new, immutable directory under `.run/v02/` by default. The ru
 ## Controlled corpus supplements
 
 The original fresh-photo acquisition remains in `corpus/dev/` and the ignored local cache. Controlled real-application and generated-game-map supplements are documented in [`corpus/dev-controlled/README.md`](corpus/dev-controlled/README.md). Run `python3 benchmarks/v02/validate_controlled_corpus.py` to check their local metadata and image hashes. These are clearly marked controlled scenes with model-assisted labels and do not claim natural user-capture qualification.
+
+The new `evaluate-categorical-heldout.ts` admits only the frozen 80-case native categorical recipe. `evaluate-no-image-heldout.ts` independently admits its separately sourced 40-photo control and reconciles the producer actual-fetch image audit with every physical receipt. The paired comparison preserves all failures, uses the existing 10,000-resample fixed-seed photo bootstrap, and retains the combined negative-case gate. These helpers do not relabel or loosen historical DEV/heldout schemas. Synthetic evaluator tests do not supply live accuracy evidence.

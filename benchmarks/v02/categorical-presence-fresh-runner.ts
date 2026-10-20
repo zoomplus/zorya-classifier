@@ -23,6 +23,10 @@ import { hashCanonical } from './protocol.js'
 import { recordProvider } from './recording.js'
 import type { PhysicalCallRecord, Recorder } from './recording.js'
 import { createNativeCategoricalPresencePort } from './native-categorical-presence-port.js'
+import type { HeldoutCandidatePlan } from './categorical-heldout-plan.js'
+import { assertVerifiedHeldoutFreeze, buildHeldoutPlans } from './categorical-heldout-plan.js'
+
+type CategoricalTargetPolicy = 'target-plus-neutral-instruction-v1' | 'target-only-v1'
 
 const keyFile = '/root/work/element/.env.local'
 
@@ -45,6 +49,7 @@ export const categoricalFreshPolicy = Object.freeze({
   maxInFlightCases: 2,
   nativeMaxActive: 1,
   nativeMaxWaiting: 2,
+  nativeThreads: 2,
   boxTolerancePx: 8,
   maxExtentPasses: 3,
   maxPhysicalCallsPerCase: CATEGORICAL_FRESH_MAX_PHYSICAL_PER_CASE,
@@ -55,6 +60,27 @@ export const categoricalFreshPolicy = Object.freeze({
   maxCostUsd: 5,
   unknownCostReserveUsd: 0.05,
   latencyEnvironment: 'concurrent-development-runner-unranked',
+  latencyRankingEligible: false,
+})
+
+export const categoricalHeldoutPolicy = Object.freeze({
+  timeoutMs: categoricalFreshPolicy.timeoutMs,
+  maxInFlight: categoricalFreshPolicy.maxInFlight,
+  maxInFlightCases: categoricalFreshPolicy.maxInFlightCases,
+  nativeMaxActive: categoricalFreshPolicy.nativeMaxActive,
+  nativeMaxWaiting: categoricalFreshPolicy.nativeMaxWaiting,
+  nativeThreads: categoricalFreshPolicy.nativeThreads,
+  boxTolerancePx: categoricalFreshPolicy.boxTolerancePx,
+  maxExtentPasses: categoricalFreshPolicy.maxExtentPasses,
+  maxPhysicalCallsPerCase: categoricalFreshPolicy.maxPhysicalCallsPerCase,
+  expectedCaseCount: 80,
+  worstCasePhysicalCalls: 480,
+  retries: 0,
+  fallback: false,
+  maxPhysicalCalls: 600,
+  maxCostUsd: 10,
+  unknownCostReserveUsd: 0.05,
+  latencyEnvironment: 'heldout-development-soak-unranked',
   latencyRankingEligible: false,
 })
 
@@ -71,6 +97,16 @@ export const categoricalFreshProfiles = Object.freeze({
     targetPolicy: 'target-only-v1',
   }),
 })
+
+function heldoutProfile(plan: HeldoutCandidatePlan): {
+  id: string
+  targetPolicy: CategoricalTargetPolicy
+} {
+  return {
+    id: plan.profileId,
+    targetPolicy: plan.targetPolicy,
+  }
+}
 
 export const mobileSamProposalAssets = Object.freeze({
   method: 'mobile-sam-nine-point-proposals-v1',
@@ -101,6 +137,9 @@ const sourceFiles = [
   './categorical-presence-port.ts',
   './native-categorical-presence-port.ts',
   './categorical-presence-fresh-pair.md',
+  './categorical-heldout-plan.ts',
+  './fresh-text-runner.ts',
+  './run-categorical-heldout.ts',
   '../../package.json',
   '../../package-lock.json',
 ] as const
@@ -239,6 +278,11 @@ async function sourceHashes(): Promise<Record<string, string>> {
   return Object.fromEntries([...bench, ...src])
 }
 
+export async function categoricalFreshProducerSourceSha256(): Promise<string> {
+  const hashes = await sourceHashes()
+  return hashCanonical(Object.entries(hashes).sort(([a], [b]) => a.localeCompare(b)))
+}
+
 function taskFor(item: FreshCase) {
   const task = freshProducerTask(item)
   const serialized = JSON.stringify(task)
@@ -265,7 +309,7 @@ export function validateTargetPolicyTasks(items: readonly FreshCase[]): void {
 
 export function targetForProfile(
   item: FreshCase,
-  profile: (typeof categoricalFreshProfiles)[keyof typeof categoricalFreshProfiles],
+  profile: { id: string; targetPolicy: CategoricalTargetPolicy },
 ): string {
   const task = taskFor(item)
   validateTargetPolicyTasks([item])
@@ -282,12 +326,20 @@ export function assertCategoricalFreshCallBound(maxPhysicalCalls: number): void 
     throw new RangeError('Full DEV profile budget must cover 40 six-call cases and stay under cap')
 }
 
+export function assertCategoricalHeldoutCallBound(maxPhysicalCalls: number): void {
+  if (maxPhysicalCalls < 80 * CATEGORICAL_FRESH_MAX_PHYSICAL_PER_CASE || maxPhysicalCalls > 600)
+    throw new RangeError('HELDOUT profile budget must cover 80 six-call cases and stay under cap')
+}
+
 /** Reserves against the shared run ledger while enforcing a per-case six-fetch ceiling. */
 export class CategoricalFreshCaseBudget extends RunBudget {
   private readonly globalToLocal = new Map<number, number>()
 
-  constructor(private readonly runBudget: RunBudget) {
-    super(CATEGORICAL_FRESH_MAX_PHYSICAL_PER_CASE, 5, 0.05, 'dev')
+  constructor(
+    private readonly runBudget: RunBudget,
+    phase: 'dev' | 'heldout' = 'dev',
+  ) {
+    super(CATEGORICAL_FRESH_MAX_PHYSICAL_PER_CASE, phase === 'heldout' ? 10 : 5, 0.05, phase)
   }
 
   override admit(): number {
@@ -543,6 +595,33 @@ export async function runCategoricalPresenceFreshDev(
   return runCategoricalFreshProfile(options, profile, signal)
 }
 
+/** The distinct HELDOUT path requires a frozen config before it can read producer inputs. */
+export async function runCategoricalPresenceFreshHeldout(
+  options: FreshProposalRunnerOptions,
+  freezeInput: unknown,
+  signal: AbortSignal = new AbortController().signal,
+) {
+  assertVerifiedHeldoutFreeze(freezeInput)
+  const plans = buildHeldoutPlans(freezeInput)
+  const source = await sourceHashes()
+  const actualSourceSha256 = hashCanonical(
+    Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
+  )
+  if (actualSourceSha256 !== plans.candidate.producerSourceSha256)
+    throw new TypeError('HELDOUT producer source does not match frozen source digest')
+  if (options.expectedCaseCount !== undefined && options.expectedCaseCount !== 80)
+    throw new TypeError('HELDOUT candidate requires exactly 80 cases')
+  const profile = heldoutProfile(plans.candidate)
+  return runCategoricalFreshProfile(
+    { ...options, expectedCaseCount: 80 },
+    profile,
+    signal,
+    actualSourceSha256,
+    'heldout',
+    plans.candidate,
+  )
+}
+
 /** Runs the two predeclared target-policy profiles serially, each with its own hard budget. */
 export async function runCategoricalPresenceFreshPair(
   options: FreshProposalRunnerOptions,
@@ -571,9 +650,11 @@ export async function runCategoricalPresenceFreshPair(
 
 async function runCategoricalFreshProfile(
   options: FreshProposalRunnerOptions,
-  profile: (typeof categoricalFreshProfiles)[keyof typeof categoricalFreshProfiles],
+  profile: { id: string; targetPolicy: CategoricalTargetPolicy },
   signal: AbortSignal,
   expectedSourceSha256?: string,
+  phase: 'dev' | 'heldout' = 'dev',
+  heldoutPlan?: HeldoutCandidatePlan,
 ) {
   const corpus = await loadFreshCorpus(
     { manifests: options.manifests, imageRoot: options.imageRoot },
@@ -584,7 +665,7 @@ async function runCategoricalFreshProfile(
     Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
   )
   if (expectedSourceSha256 && producerSourceSha256 !== expectedSourceSha256)
-    throw new TypeError('Paired profile source freeze changed before this run')
+    throw new TypeError('Profile producer source does not match its frozen source digest')
   const caseManifest = corpus.cases.map((item) => ({
     caseId: item.caseId,
     imageSha256: item.image.sha256,
@@ -594,12 +675,27 @@ async function runCategoricalFreshProfile(
     caseId: item.caseId,
     task: taskFor(item),
   }))
-  const expectedCaseCount = options.expectedCaseCount ?? 40
+  const expectedCaseCount = options.expectedCaseCount ?? (phase === 'heldout' ? 80 : 40)
   if (!Number.isInteger(expectedCaseCount) || expectedCaseCount < 1 || expectedCaseCount > 120)
     throw new TypeError('Expected fresh corpus case count must be between 1 and 120')
   if (corpus.cases.length !== expectedCaseCount)
     throw new TypeError(`Fresh DEV manifest set must contain exactly ${expectedCaseCount} cases`)
-  if (
+  if (phase === 'heldout') {
+    if (
+      !heldoutPlan ||
+      expectedCaseCount !== 80 ||
+      corpus.manifests.length !== 3 ||
+      corpus.manifests.some(
+        (manifest, index) =>
+          manifest.sha256 !== heldoutPlan.manifests[index]?.sha256 ||
+          manifest.cases !== heldoutPlan.manifests[index]?.cases,
+      ) ||
+      corpus.manifests[0]?.cases !== 40 ||
+      corpus.manifests[1]?.cases !== 20 ||
+      corpus.manifests[2]?.cases !== 20
+    )
+      throw new TypeError('HELDOUT profile requires its frozen 40-photo/20-UI/20-map set')
+  } else if (
     expectedCaseCount === 40 &&
     (corpus.manifests.length !== 3 ||
       corpus.manifests.some(
@@ -626,14 +722,23 @@ async function runCategoricalFreshProfile(
     }
   }
   const profileId = profile.id
-  const policy = categoricalFreshPolicy
+  const policy = phase === 'heldout' ? categoricalHeldoutPolicy : categoricalFreshPolicy
   const frozenProfile = {
     profileId,
-    phase: 'dev' as const,
+    ...(phase === 'heldout' ? { phase: 'heldout' as const } : { phase: 'dev' as const }),
     targetPolicy: profile.targetPolicy,
+    ...(heldoutPlan
+      ? {
+          heldoutFreeze: {
+            methodSelectionSha256: heldoutPlan.methodSelectionSha256,
+            producerSourceSha256: heldoutPlan.producerSourceSha256,
+            inputManifests: heldoutPlan.manifests,
+          },
+        }
+      : {}),
     instructionValidation: {
       accepted: ['absent', categoricalTargetInstruction],
-      omittedOnlyForTargetOnlyProfile: true,
+      omittedOnlyForTargetOnlyProfile: profile.targetPolicy === 'target-only-v1',
     },
     route: freshProposalRoute,
     assets: mobileSamProposalAssets,
@@ -663,7 +768,7 @@ async function runCategoricalFreshProfile(
     cases: caseManifest,
     sourceHashes: Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
   })
-  const runId = `v02-fresh-${profileId}-${new Date().toISOString().replaceAll(':', '').replaceAll('.', '')}-${randomUUID().slice(0, 8)}`
+  const runId = `${phase === 'heldout' ? 'v02-categorical-heldout' : 'v02-fresh'}-${profileId}-${new Date().toISOString().replaceAll(':', '').replaceAll('.', '')}-${randomUUID().slice(0, 8)}`
   const outputDirectory = resolve(options.outputRoot, runId)
   await mkdir(options.outputRoot, { recursive: true })
   await mkdir(outputDirectory, { recursive: false })
@@ -671,18 +776,24 @@ async function runCategoricalFreshProfile(
     policy.maxPhysicalCalls,
     policy.maxCostUsd,
     policy.unknownCostReserveUsd,
-    'dev',
+    phase,
   )
   const plannedCaseIds = caseManifest.map((item) => item.caseId)
   await writeImmutable(join(outputDirectory, 'run-manifest.json'), {
     schemaVersion: 1,
     runId,
     profileId,
-    phase: 'dev' as const,
-    purpose: 'full fresh DEV photo, independent UI and independent map producer pass',
+    ...(phase === 'heldout' ? { phase: 'heldout' as const } : { phase: 'dev' as const }),
+    purpose:
+      phase === 'heldout'
+        ? 'full frozen HELDOUT photo, independent UI and independent map producer pass'
+        : 'full fresh DEV photo, independent UI and independent map producer pass',
     startedAt: new Date().toISOString(),
     variantSha256,
     producerSourceSha256: hashCanonical(
+      Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
+    ),
+    sourceBeforeSha256: hashCanonical(
       Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
     ),
     sourceHashes: source,
@@ -693,6 +804,12 @@ async function runCategoricalFreshProfile(
     mobileSam: mobileSamProposalAssets,
     policy,
     targetPolicy: profile.targetPolicy,
+    ...(heldoutPlan
+      ? {
+          methodSelectionSha256: heldoutPlan.methodSelectionSha256,
+          heldoutInputManifests: heldoutPlan.manifests,
+        }
+      : {}),
     classification: frozenProfile.classification,
     taskManifest,
     modelBoundary: {
@@ -703,7 +820,8 @@ async function runCategoricalFreshProfile(
     },
   })
 
-  assertCategoricalFreshCallBound(policy.maxPhysicalCalls)
+  if (phase === 'heldout') assertCategoricalHeldoutCallBound(policy.maxPhysicalCalls)
+  else assertCategoricalFreshCallBound(policy.maxPhysicalCalls)
   const fetcher = options.fetch ?? globalThis.fetch
   let proposalPort: ObjectProposalPort | undefined
   let initializationError: string | undefined
@@ -740,6 +858,7 @@ async function runCategoricalFreshProfile(
           recorders,
           initializationError,
           signal: runController.signal,
+          phase,
         })
       } catch (error) {
         firstWorkerFailure ??= error
@@ -785,11 +904,19 @@ async function runCategoricalFreshProfile(
     const evidence = {
       runId,
       profileId,
-      phase: 'dev' as const,
+      ...(phase === 'heldout' ? { phase: 'heldout' as const } : { phase: 'dev' as const }),
       status: 'incomplete' as const,
       producerSourceSha256,
+      sourceBeforeSha256: producerSourceSha256,
       sourceAfterSha256,
       sourceUnchanged,
+      ...(heldoutPlan
+        ? {
+            purpose: heldoutPlan.purpose,
+            targetPolicy: heldoutPlan.targetPolicy,
+            methodSelectionSha256: heldoutPlan.methodSelectionSha256,
+          }
+        : {}),
       plannedCaseIds,
       completedCaseIds,
       missingCaseIds,
@@ -811,10 +938,18 @@ async function runCategoricalFreshProfile(
   const summary = {
     runId,
     profileId,
-    phase: 'dev' as const,
+    ...(phase === 'heldout' ? { phase: 'heldout' as const } : { phase: 'dev' as const }),
     targetPolicy: profile.targetPolicy,
+    ...(heldoutPlan
+      ? {
+          purpose: heldoutPlan.purpose,
+          methodSelectionSha256: heldoutPlan.methodSelectionSha256,
+          heldoutInputManifests: heldoutPlan.manifests,
+        }
+      : {}),
     variantSha256,
     producerSourceSha256,
+    sourceBeforeSha256: producerSourceSha256,
     sourceAfterSha256,
     sourceUnchanged,
     status:
@@ -849,6 +984,7 @@ async function runCategoricalFreshProfile(
     completedAt: new Date().toISOString(),
     summarySha256: sha256(JSON.stringify(summary)),
     producerSourceSha256,
+    sourceBeforeSha256: producerSourceSha256,
     sourceAfterSha256,
     sourceUnchanged,
   })
@@ -857,8 +993,9 @@ async function runCategoricalFreshProfile(
 
 interface ProcessFreshCaseOptions {
   item: FreshCase
-  profile: (typeof categoricalFreshProfiles)[keyof typeof categoricalFreshProfiles]
-  policy: typeof categoricalFreshPolicy
+  profile: { id: string; targetPolicy: CategoricalTargetPolicy }
+  policy: typeof categoricalFreshPolicy | typeof categoricalHeldoutPolicy
+  phase: 'dev' | 'heldout'
   options: FreshProposalRunnerOptions
   corpusRoot: string
   imageCheck: { ok: true } | { ok: false; errorCode: string } | undefined
@@ -886,6 +1023,7 @@ async function processFreshCase(options: ProcessFreshCaseOptions): Promise<Fresh
     recorders,
     initializationError,
     signal,
+    phase,
   } = options
   await (runner.testHooks?.makeCaseDirectory ?? ((path) => mkdir(path, { recursive: false })))(
     caseDirectory,
@@ -943,7 +1081,7 @@ async function processFreshCase(options: ProcessFreshCaseOptions): Promise<Fresh
     }
     const task = taskFor(item)
     image = await loadFreshImage(item, corpusRoot, signal)
-    const caseBudget = new CategoricalFreshCaseBudget(budget)
+    const caseBudget = new CategoricalFreshCaseBudget(budget, phase)
     recorder = recordProvider(
       (trackedFetch) => createProvider(runner, trackedFetch),
       caseBudget,

@@ -8,6 +8,7 @@ import type { WholeObjectLocalizationResult } from '../../src/entities/whole-obj
 import { createClassifier, createResearchClassifier } from '../../src/app/create-classifier.js'
 import { createOpenRouterText } from '../../src/infrastructure/openrouter-vision.js'
 import { createTextRepresentation } from '../../src/infrastructure/text-representation.js'
+import { ClassifierError } from '../../src/entities/errors.js'
 import { textEncodersV1 } from '../experiments/text-encoders-v1.js'
 import type { TextRepresentationEncoder } from '../../src/infrastructure/text-representation.js'
 import { RunBudget } from './budget.js'
@@ -18,6 +19,8 @@ import { recordProvider } from './recording.js'
 import type { PhysicalCallRecord, Recorder } from './recording.js'
 import { applyPromptVariant, promptVariants } from './promptvariants.js'
 import { textTransportVariants } from './transportvariants.js'
+import type { HeldoutNoImagePlan } from './categorical-heldout-plan.js'
+import { assertVerifiedHeldoutFreeze, buildHeldoutPlans } from './categorical-heldout-plan.js'
 
 const keyFile = '/root/work/element/.env.local'
 const route = Object.freeze({
@@ -30,6 +33,8 @@ const route = Object.freeze({
 })
 const prompt = promptVariants['grammar-plus-examples']
 const transport = textTransportVariants['none-json-schema']
+const neutralLocateInstruction =
+  'Locate the visible physical instance of the named object; return unknown when unsupported.'
 
 export const freshTextPolicy = Object.freeze({
   timeoutMs: 45000,
@@ -61,6 +66,11 @@ export function freshTextPolicyForPhase(phase: FreshTextPhase) {
     timeoutMs: 120000,
     maxPhysicalCalls: 300,
     maxCostUsd: 5,
+    unknownCostReserveUsd: 0.05,
+    maxInFlight: 1,
+    maxInFlightCases: 1,
+    maxPhysicalCallsPerCase: 6,
+    worstCasePhysicalCalls: 240,
     latencyEnvironment: 'heldout-no-image-control-unranked',
     latencyRankingEligible: false,
   })
@@ -71,6 +81,7 @@ export function validateFreshTextPhaseRequest(
   profileId: FreshTextProfileId,
   manifests: readonly { path: string; sha256: string }[],
   stages: 'classify-and-locate' | 'classify-only' = 'classify-and-locate',
+  expectedHeldoutPhotoSha256 = heldoutPhotoInputSha256,
 ): string {
   if (phase === 'dev') return 'single-profile complete pinned fresh DEV text/no-image comparison'
   if (phase !== 'heldout') throw new TypeError('Unknown fresh text phase')
@@ -80,7 +91,7 @@ export function validateFreshTextPhaseRequest(
     throw new Error('Heldout text control requires classify-and-locate stages')
   if (
     manifests.length !== 1 ||
-    manifests[0]?.sha256 !== heldoutPhotoInputSha256 ||
+    manifests[0]?.sha256 !== expectedHeldoutPhotoSha256 ||
     manifests[0]?.path.trim().length === 0
   )
     throw new Error('Heldout text control requires the frozen 40-photo input manifest')
@@ -90,6 +101,49 @@ export function validateFreshTextPhaseRequest(
 export function assertFreshTextPhaseCaseCount(phase: FreshTextPhase, caseIds: readonly string[]) {
   if (phase === 'heldout' && (caseIds.length !== 40 || new Set(caseIds).size !== 40))
     throw new Error('Heldout text control must contain exactly 40 unique photo cases')
+}
+
+export class FreshTextCaseBudget extends RunBudget {
+  private readonly globalToLocal = new Map<number, number>()
+
+  constructor(
+    private readonly runBudget: RunBudget,
+    phase: FreshTextPhase,
+  ) {
+    super(6, 5, 0.05, phase)
+  }
+
+  override admit(): number {
+    const localId = super.admit()
+    try {
+      const globalId = this.runBudget.admit()
+      this.globalToLocal.set(globalId, localId)
+      return globalId
+    } catch (error) {
+      super.cancelBeforeFetch(localId)
+      throw error
+    }
+  }
+
+  override settle(globalId: number, costUsd: number | null): void {
+    const localId = this.globalToLocal.get(globalId)
+    if (localId === undefined) throw new Error('Unknown text per-case physical call')
+    this.globalToLocal.delete(globalId)
+    this.runBudget.settle(globalId, costUsd)
+    super.settle(localId, costUsd)
+  }
+
+  override cancelBeforeFetch(globalId: number): void {
+    const localId = this.globalToLocal.get(globalId)
+    if (localId === undefined) throw new Error('Unknown text per-case reservation')
+    this.globalToLocal.delete(globalId)
+    try {
+      this.runBudget.cancelBeforeFetch(globalId)
+    } catch {
+      this.runBudget.settle(globalId, null)
+    }
+    super.cancelBeforeFetch(localId)
+  }
 }
 
 const encoderIds = [
@@ -119,6 +173,13 @@ export interface FreshTextRunnerOptions {
   stages?: 'classify-and-locate' | 'classify-only'
   /** Heldout is only for the frozen photo-only no-image control, after winner freeze. */
   phase?: FreshTextPhase
+  /** Supplied only by the separately frozen HELDOUT no-image entry point. */
+  heldoutPlan?: HeldoutNoImagePlan
+  /** Offline-only failure injection for immutable result persistence and disposal. */
+  testHooks?: {
+    writeCaseResult?: (path: string, result: unknown) => Promise<void>
+    afterClassifierDispose?: () => Promise<void>
+  }
 }
 
 type StageStatus = 'ok' | 'failed' | 'located' | 'unknown' | 'not-found'
@@ -135,9 +196,65 @@ interface StageResult {
 interface ResultRow {
   caseId: string
   imageSha256: string
-  profileId: FreshTextProfileId
+  profileId: string
   classify: StageResult
   locate?: StageResult
+}
+
+export interface NoImageFetchAudit {
+  fetchAttempts: number
+  fetchesChecked: number
+  zeroImagePartsConfirmed: number
+  zeroImageDerivedStateConfirmed: number
+  imagePartViolations: number
+  unverifiableBodies: number
+}
+
+function containsImagePayload(value: unknown): boolean {
+  if (typeof value === 'string')
+    return (
+      /^(?:data:image\/|data:application\/octet-stream;base64,)/iu.test(value) ||
+      (value.length > 32 * 1024 && /^[A-Za-z0-9+/=\s]+$/u.test(value))
+    )
+  if (Array.isArray(value)) return value.some(containsImagePayload)
+  if (!value || typeof value !== 'object') return false
+  return Object.entries(value).some(
+    ([key, nested]) =>
+      /image|input_image/iu.test(key) ||
+      (key === 'type' &&
+        typeof nested === 'string' &&
+        /^(?:image|image_url|input_image)$/iu.test(nested)) ||
+      containsImagePayload(nested),
+  )
+}
+
+export function auditNoImageFetch(
+  fetcher: typeof globalThis.fetch,
+  audit: NoImageFetchAudit,
+): typeof globalThis.fetch {
+  return async (input, init) => {
+    audit.fetchAttempts += 1
+    const body = init?.body
+    if (typeof body !== 'string') {
+      audit.unverifiableBodies += 1
+      throw new ClassifierError('INVALID_RESPONSE', 'No-image request body was not auditable')
+    }
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(body)
+    } catch {
+      audit.unverifiableBodies += 1
+      throw new ClassifierError('INVALID_RESPONSE', 'No-image request body was not valid JSON')
+    }
+    audit.fetchesChecked += 1
+    if (containsImagePayload(parsed)) {
+      audit.imagePartViolations += 1
+      throw new ClassifierError('INVALID_RESPONSE', 'No-image request contained image payload')
+    }
+    audit.zeroImagePartsConfirmed += 1
+    audit.zeroImageDerivedStateConfirmed += 1
+    return fetcher(input, init)
+  }
 }
 
 const sourceFiles = [
@@ -149,6 +266,9 @@ const sourceFiles = [
   './protocol.ts',
   './promptvariants.ts',
   './transportvariants.ts',
+  './categorical-heldout-plan.ts',
+  './categorical-presence-fresh-runner.ts',
+  './run-categorical-heldout.ts',
   '../experiments/text-encoders-v1.ts',
   '../experiments/ascii-luma-v1.ts',
   '../experiments/palette-grid-v1.ts',
@@ -156,6 +276,8 @@ const sourceFiles = [
   '../experiments/pixel-rle-v1.ts',
   '../experiments/ascii-contours-v1.ts',
   '../experiments/ascii-svg-layered-v1.ts',
+  '../../package.json',
+  '../../package-lock.json',
 ] as const
 
 function sha256(value: Uint8Array | string): string {
@@ -192,6 +314,11 @@ async function sourceHashes(): Promise<Record<string, string>> {
     ),
   )
   return Object.fromEntries([...bench, ...src])
+}
+
+export async function freshTextProducerSourceSha256(): Promise<string> {
+  const hashes = await sourceHashes()
+  return hashCanonical(Object.entries(hashes).sort(([a], [b]) => a.localeCompare(b)))
 }
 
 async function writeImmutable(path: string, value: unknown): Promise<void> {
@@ -290,8 +417,12 @@ async function persistCase(
   outputDirectory: string,
   fetcher: typeof globalThis.fetch,
   policy: ReturnType<typeof freshTextPolicyForPhase>,
+  outputProfileId: string = profileId,
+  noImageAudit?: NoImageFetchAudit,
+  recordersByCase?: Map<string, Array<{ stage: 'classify' | 'locate'; recorder: Recorder }>>,
 ): Promise<{ result: ResultRow; calls: PhysicalCallRecord[] }> {
   const task = freshProducerTask(item)
+  const caseBudget = new FreshTextCaseBudget(budget, options.phase ?? 'dev')
   const caseDirectory = join(outputDirectory, item.caseId)
   await mkdir(caseDirectory, { recursive: false })
   let classify: StageResult
@@ -300,13 +431,19 @@ async function persistCase(
   {
     const noImage = profileId === 'no-image-control'
     const encoder = noImage ? undefined : textEncodersV1[profileId]
+    const auditedFetcher = noImageAudit ? auditNoImageFetch(fetcher, noImageAudit) : fetcher
     const classifyRecorder = recordProvider(
       (fetchImpl) => providerFor(options, fetchImpl, policy.classifyMaxOutputTokens),
-      budget,
+      caseBudget,
       join(caseDirectory, 'classify'),
       route,
-      fetcher,
+      auditedFetcher,
     )
+    if (recordersByCase) {
+      const recorders = recordersByCase.get(item.caseId) ?? []
+      recorders.push({ stage: 'classify', recorder: classifyRecorder })
+      recordersByCase.set(item.caseId, recorders)
+    }
     const classifyClassifier = composeTextClassifier(
       classifyRecorder.port,
       encoder,
@@ -349,17 +486,23 @@ async function persistCase(
       }
     } finally {
       await classifyClassifier.dispose()
+      await options.testHooks?.afterClassifierDispose?.()
     }
 
     calls.push(...classifyRecorder.calls)
     if (options.stages !== 'classify-only') {
       const locateRecorder = recordProvider(
         (fetchImpl) => providerFor(options, fetchImpl, policy.locateMaxOutputTokens),
-        budget,
+        caseBudget,
         join(caseDirectory, 'locate'),
         route,
-        fetcher,
+        auditedFetcher,
       )
+      if (recordersByCase) {
+        const recorders = recordersByCase.get(item.caseId) ?? []
+        recorders.push({ stage: 'locate', recorder: locateRecorder })
+        recordersByCase.set(item.caseId, recorders)
+      }
       const locateClassifier = composeTextClassifier(locateRecorder.port, encoder, noImage, policy)
       const locateStarted = performance.now()
       const locateLogicalStart = locateRecorder.logicalCalls.length
@@ -397,6 +540,7 @@ async function persistCase(
         }
       } finally {
         await locateClassifier.dispose()
+        await options.testHooks?.afterClassifierDispose?.()
       }
       calls.push(...locateRecorder.calls)
     }
@@ -404,11 +548,13 @@ async function persistCase(
   const row: ResultRow = {
     caseId: item.caseId,
     imageSha256: item.image.sha256,
-    profileId,
+    profileId: outputProfileId,
     classify,
     ...(locate ? { locate } : {}),
   }
-  await writeImmutable(join(caseDirectory, 'result.json'), row)
+  const resultPath = join(caseDirectory, 'result.json')
+  if (options.testHooks?.writeCaseResult) await options.testHooks.writeCaseResult(resultPath, row)
+  else await writeImmutable(resultPath, row)
   bytes.fill(0)
   return { result: row, calls }
 }
@@ -417,6 +563,21 @@ export async function readFreshTextOpenRouterKey(): Promise<string> {
   const key = parseEnv(await readFile(keyFile, 'utf8')).OPENROUTER_API_KEY
   if (!key) throw new Error('Configured OpenRouter credential is absent')
   return key
+}
+
+/** Separate explicit HELDOUT entry point. It accepts only the strict frozen plan. */
+export async function runCategoricalHeldoutNoImageControl(
+  options: Omit<FreshTextRunnerOptions, 'phase' | 'heldoutPlan'>,
+  freezeInput: unknown,
+  signal: AbortSignal = new AbortController().signal,
+) {
+  assertVerifiedHeldoutFreeze(freezeInput)
+  const plans = buildHeldoutPlans(freezeInput)
+  return runFreshTextProfile(
+    { ...options, phase: 'heldout', heldoutPlan: plans.noImage },
+    'no-image-control',
+    signal,
+  )
 }
 
 export async function runFreshTextProfile(
@@ -431,32 +592,79 @@ export async function runFreshTextProfile(
     profileId,
     options.manifests,
     options.stages ?? 'classify-and-locate',
+    options.heldoutPlan?.manifest.sha256,
   )
+  if (phase === 'heldout' && !options.heldoutPlan)
+    throw new TypeError('A strict frozen HELDOUT no-image plan is required')
+  if (
+    phase === 'heldout' &&
+    options.heldoutPlan?.profileId !== 'deepseek-flash-no-image-photo-heldout-v1'
+  )
+    throw new TypeError('HELDOUT no-image control profile identity is invalid')
   const policy = freshTextPolicyForPhase(phase)
+  const outputProfileId = options.heldoutPlan?.profileId ?? profileId
   const runPurpose =
     options.stages === 'classify-only'
       ? 'classification-only follow-up for pinned fresh DEV text profiles'
       : purpose
+  const source = await sourceHashes()
+  const producerSourceSha256 = hashCanonical(
+    Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
+  )
+  if (
+    phase === 'heldout' &&
+    producerSourceSha256 !== options.heldoutPlan?.noImageProducerSourceSha256
+  )
+    throw new TypeError('HELDOUT no-image producer source does not match frozen source digest')
   const corpus = await loadFreshCorpus(
     { manifests: options.manifests, imageRoot: options.imageRoot },
     signal,
   )
+  if (
+    phase === 'heldout' &&
+    (corpus.manifests.length !== 1 ||
+      corpus.manifests[0]?.sha256 !== options.heldoutPlan?.manifest.sha256 ||
+      corpus.manifests[0]?.cases !== 40)
+  )
+    throw new TypeError('HELDOUT no-image control requires the frozen 40-photo manifest')
   assertFreshTextPhaseCaseCount(
     phase,
     corpus.cases.map((item) => item.caseId),
   )
+  if (
+    phase === 'heldout' &&
+    corpus.cases.some(
+      (item) =>
+        item.locate.instruction !== undefined &&
+        item.locate.instruction !== neutralLocateInstruction,
+    )
+  )
+    throw new TypeError('HELDOUT no-image case contains an unapproved locate instruction')
   for (const item of corpus.cases) (await loadFreshImage(item, corpus.imageRoot, signal)).fill(0)
-  const source = await sourceHashes()
   const manifestCases = corpus.cases.map((item) => ({
     caseId: item.caseId,
     imageSha256: item.image.sha256,
     imageDimensions: { width: item.image.width, height: item.image.height },
   }))
   const variantSha256 = hashCanonical({
-    profileId,
+    outputProfileId,
     encoderSha256:
       profileId === 'no-image-control' ? null : hashCanonical(textEncodersV1[profileId]),
     route,
+    routePolicy:
+      phase === 'heldout'
+        ? {
+            responseFormat: transport.responseFormat,
+            reasoningEffort: transport.reasoningEffort,
+            promptVariant: 'grammar-plus-examples',
+            transportVariant: 'none-json-schema',
+            imagePartsRemoved: true,
+            textEncoder: null,
+            objectProposals: null,
+            segmentation: false,
+            ocr: false,
+          }
+        : undefined,
     prompt,
     transport,
     phase,
@@ -467,9 +675,11 @@ export async function runFreshTextProfile(
     sourceHashes: Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
   })
   const runPrefix =
-    options.stages === 'classify-only'
-      ? `v02-fresh-text-classify-only-${profileId}`
-      : `v02-fresh-text-${profileId}`
+    phase === 'heldout'
+      ? (options.heldoutPlan?.runIdPrefix ?? 'v02-heldout-no-image')
+      : options.stages === 'classify-only'
+        ? `v02-fresh-text-classify-only-${profileId}`
+        : `v02-fresh-text-${profileId}`
   const runId = `${runPrefix}-${new Date().toISOString().replaceAll(':', '').replaceAll('.', '')}-${randomUUID().slice(0, 8)}`
   const outputDirectory = resolve(options.outputRoot, runId)
   await mkdir(options.outputRoot, { recursive: true })
@@ -485,17 +695,39 @@ export async function runFreshTextProfile(
     phase,
     purpose: runPurpose,
     startedAt: new Date().toISOString(),
-    profileId,
+    profileId: outputProfileId,
     stages: options.stages ?? 'classify-and-locate',
     variantSha256,
     sourceHashes: source,
-    producerSourceSha256: hashCanonical(
-      Object.entries(source).sort(([a], [b]) => a.localeCompare(b)),
-    ),
+    producerSourceSha256,
+    sourceBeforeSha256: producerSourceSha256,
+    ...(phase === 'heldout'
+      ? {
+          targetPolicy: options.heldoutPlan?.targetPolicy,
+          methodSelectionSha256: options.heldoutPlan?.methodSelectionSha256,
+          heldoutProducerSourceSha256: options.heldoutPlan?.producerSourceSha256,
+          producerSourceRole: 'producer-only',
+        }
+      : {}),
     manifests: corpus.manifests,
     plannedCaseIds: manifestCases.map((item) => item.caseId),
     plannedCases: manifestCases,
     route,
+    ...(phase === 'heldout'
+      ? {
+          routePolicy: {
+            responseFormat: transport.responseFormat,
+            reasoningEffort: transport.reasoningEffort,
+            promptVariant: 'grammar-plus-examples',
+            transportVariant: 'none-json-schema',
+            imagePartsRemoved: true,
+            textEncoder: null,
+            objectProposals: null,
+            segmentation: false,
+            ocr: false,
+          },
+        }
+      : {}),
     prompt,
     promptSha256: hashCanonical(prompt),
     transport,
@@ -510,12 +742,40 @@ export async function runFreshTextProfile(
       segmentation: false,
       ocr: false,
     },
+    ...(phase === 'heldout' && profileId === 'no-image-control'
+      ? {
+          imagePartAudit: {
+            method: 'inspect-every-serialized-provider-request-before-fetch-v1',
+            expectedImageParts: 0,
+            expectedEncodedImageState: false,
+            rawBodiesPersisted: false,
+          },
+        }
+      : {}),
   })
   const results: ResultRow[] = []
-  const allCalls: PhysicalCallRecord[] = []
+  const recordersByCase = new Map<
+    string,
+    Array<{ stage: 'classify' | 'locate'; recorder: Recorder }>
+  >()
+  let fatalCaseFailure:
+    | { caseId: string; errorCode: string; artifactErrorCode?: string }
+    | undefined
+  const noImageAudit: NoImageFetchAudit | undefined =
+    phase === 'heldout' && profileId === 'no-image-control'
+      ? {
+          fetchAttempts: 0,
+          fetchesChecked: 0,
+          zeroImagePartsConfirmed: 0,
+          zeroImageDerivedStateConfirmed: 0,
+          imagePartViolations: 0,
+          unverifiableBodies: 0,
+        }
+      : undefined
   for (const item of corpus.cases) {
-    const bytes = await loadFreshImage(item, corpus.imageRoot, signal)
+    let bytes: Uint8Array | undefined
     try {
+      bytes = await loadFreshImage(item, corpus.imageRoot, signal)
       const outcome = await persistCase(
         options,
         profileId,
@@ -525,72 +785,169 @@ export async function runFreshTextProfile(
         outputDirectory,
         options.fetch ?? globalThis.fetch,
         policy,
+        outputProfileId,
+        noImageAudit,
+        recordersByCase,
       )
       results.push(outcome.result)
-      allCalls.push(...outcome.calls)
     } catch (error) {
-      bytes.fill(0)
+      bytes?.fill(0)
+      const errorCode = safeErrorCode(error)
+      const caseRecorders = recordersByCase.get(item.caseId) ?? []
+      const classifyRecorder = caseRecorders.find((entry) => entry.stage === 'classify')?.recorder
+      const locateRecorder = caseRecorders.find((entry) => entry.stage === 'locate')?.recorder
+      const classifyCalls = classifyRecorder?.calls.length ?? 0
+      const locateCalls = locateRecorder?.calls.length ?? 0
       const failed: ResultRow = {
         caseId: item.caseId,
         imageSha256: item.image.sha256,
-        profileId,
+        profileId: outputProfileId,
         classify: {
           status: 'failed',
-          errorCode: safeErrorCode(error),
+          errorCode,
           durationMs: 0,
-          calls: 0,
-          requestHashes: [],
+          calls: classifyCalls,
+          requestHashes:
+            classifyRecorder?.logicalCalls.map((logical) => logical.requestSha256) ?? [],
         },
         ...(options.stages === 'classify-only'
           ? {}
           : {
               locate: {
                 status: 'failed' as const,
-                errorCode: safeErrorCode(error),
+                errorCode,
                 durationMs: 0,
-                calls: 0,
-                requestHashes: [],
+                calls: locateCalls,
+                requestHashes:
+                  locateRecorder?.logicalCalls.map((logical) => logical.requestSha256) ?? [],
               },
             }),
       }
       results.push(failed)
-      await writeImmutable(join(outputDirectory, item.caseId, 'result.json'), failed)
+      let artifactErrorCode: string | undefined
+      try {
+        await mkdir(join(outputDirectory, item.caseId), { recursive: true })
+        await writeImmutable(join(outputDirectory, item.caseId, 'result.json'), failed)
+      } catch (artifactError) {
+        // Existing success artifacts and any failed immutable writes are preserved verbatim.
+        artifactErrorCode = safeErrorCode(artifactError)
+      }
+      fatalCaseFailure = {
+        caseId: item.caseId,
+        errorCode,
+        ...(artifactErrorCode ? { artifactErrorCode } : {}),
+      }
+      break
     }
   }
   const plannedCaseIds = manifestCases.map((item) => item.caseId)
   const completedCaseIds = results.map((item) => item.caseId)
   const completeSet = new Set(completedCaseIds)
   const missingCaseIds = plannedCaseIds.filter((id) => !completeSet.has(id))
+  const sourceAfter = await sourceHashes()
+  const sourceAfterSha256 = hashCanonical(
+    Object.entries(sourceAfter).sort(([a], [b]) => a.localeCompare(b)),
+  )
+  const sourceUnchanged = sourceAfterSha256 === producerSourceSha256
+  const receiptCases = [...recordersByCase.entries()].flatMap(([caseId, recorders]) =>
+    recorders.flatMap(({ stage, recorder }) =>
+      recorder.calls.map((call) => ({ caseId, stage, call })),
+    ),
+  )
+  const noImageAuditComplete =
+    !noImageAudit ||
+    (noImageAudit.fetchAttempts === noImageAudit.zeroImagePartsConfirmed &&
+      noImageAudit.fetchesChecked === noImageAudit.zeroImagePartsConfirmed &&
+      noImageAudit.fetchAttempts === noImageAudit.zeroImageDerivedStateConfirmed &&
+      noImageAudit.imagePartViolations === 0 &&
+      noImageAudit.unverifiableBodies === 0 &&
+      noImageAudit.fetchAttempts === receiptCases.filter((entry) => entry.call.dispatched).length)
   const summary = {
     runId,
-    profileId,
+    profileId: outputProfileId,
     phase,
     purpose: runPurpose,
     variantSha256,
-    status: missingCaseIds.length === 0 ? 'complete' : 'incomplete',
+    ...(phase === 'heldout'
+      ? {
+          targetPolicy: options.heldoutPlan?.targetPolicy,
+          methodSelectionSha256: options.heldoutPlan?.methodSelectionSha256,
+        }
+      : {}),
+    producerSourceSha256,
+    sourceBeforeSha256: producerSourceSha256,
+    sourceAfterSha256,
+    sourceUnchanged,
+    status:
+      missingCaseIds.length === 0 &&
+      sourceUnchanged &&
+      noImageAuditComplete &&
+      fatalCaseFailure === undefined
+        ? 'complete'
+        : 'incomplete',
     plannedCaseIds,
     completedCaseIds,
     missingCaseIds,
+    failure: fatalCaseFailure ?? null,
     results,
     aggregate: budget.snapshot(),
     policy,
     latencyEnvironment: policy.latencyEnvironment,
     latencyRankingEligible: policy.latencyRankingEligible,
-    physicalReceipts: allCalls.map((call) => ({
+    physicalReceipts: receiptCases.map(({ caseId, stage, call }) => ({
+      caseId,
+      stage,
       physicalId: call.physicalId,
+      logicalId: call.logicalId,
       requestSha256: call.requestSha256,
+      requestBodySha256: call.requestBodySha256,
+      admittedAt: call.admittedAt,
+      httpStatus: call.httpStatus,
       route: call.route,
       receipt: call.receipt,
       wireReceipt: call.wireReceipt,
       errorCode: call.errorCode ?? null,
       durationMs: call.durationMs,
     })),
+    ...(phase === 'heldout' && noImageAudit
+      ? {
+          imagePartAudit: {
+            fetchesChecked: noImageAudit.fetchesChecked,
+            fetchAttempts: noImageAudit.fetchAttempts,
+            zeroImagePartsConfirmed: noImageAudit.zeroImagePartsConfirmed,
+            zeroImageDerivedStateConfirmed: noImageAudit.zeroImageDerivedStateConfirmed,
+            imagePartViolations: noImageAudit.imagePartViolations,
+            unverifiableBodies: noImageAudit.unverifiableBodies,
+            complete: noImageAuditComplete,
+          },
+        }
+      : {}),
   }
   await writeImmutable(join(outputDirectory, 'summary.json'), summary)
-  await writeImmutable(join(outputDirectory, 'run-complete.json'), {
-    runId,
-    completedAt: new Date().toISOString(),
-    summarySha256: sha256(JSON.stringify(summary)),
-  })
+  if (summary.status === 'complete') {
+    await writeImmutable(join(outputDirectory, 'run-complete.json'), {
+      runId,
+      completedAt: new Date().toISOString(),
+      summarySha256: sha256(JSON.stringify(summary)),
+      producerSourceSha256,
+      sourceBeforeSha256: producerSourceSha256,
+      sourceAfterSha256,
+      sourceUnchanged,
+    })
+  } else {
+    await writeImmutable(join(outputDirectory, 'incomplete-evidence.json'), {
+      runId,
+      phase,
+      status: 'incomplete',
+      failure: fatalCaseFailure ?? null,
+      summarySha256: sha256(JSON.stringify(summary)),
+      plannedCaseIds,
+      completedCaseIds,
+      missingCaseIds,
+      aggregate: summary.aggregate,
+      physicalReceiptCount: receiptCases.length,
+      imagePartAudit: summary.imagePartAudit ?? null,
+    })
+  }
   return { ...summary, outputDirectory }
 }

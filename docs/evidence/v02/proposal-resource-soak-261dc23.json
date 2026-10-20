@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "kind": "public-numeric-receipt",
+  "runId": "proposal-resource-soak-monotonic-261dc23",
+  "scope": "Linux CPU resource and native-process lifecycle acceptance for the public locate/extract path; synthetic 256x256 fixture with injected deterministic decision",
+  "execution": {
+    "mode": "working-tree",
+    "sourceRevision": "261dc235f609934b7aa125ace52984d9dd786d83",
+    "sourceFileCount": 55,
+    "sourceManifestSha256": "0fb0dae63ffd384c5c32dbc9eac98e51e7c7a67a97b75cebf87eae32b09fdc66",
+    "sourceManifestUnchanged": true,
+    "runtimeArchiveReferenceSha256": "095552d0613c2b2e25b9c412fc29658f96458d5091e34060644e802e320bd872",
+    "archiveInstalledByThisRun": false
+  },
+  "separateInstalledRuntimeParity": {
+    "verifiedArchiveSha256": "095552d0613c2b2e25b9c412fc29658f96458d5091e34060644e802e320bd872",
+    "runtimeDistFileCount": 106,
+    "runtimeDistManifestSha256": "87f6a18d46107ca08b37170db1e9204514dfc72a1dfc3181f59e8ffe76d85c95",
+    "installedFileCountIncludingPackageJson": 107,
+    "installedManifestSha256": "c886564a772d173fc8b1b9802dc6b42a9dc6261ad09fd7cef5942a8e00a14385",
+    "evidence": "native-proposal-windows-0c365cb.json; separate installed-archive Windows acceptance"
+  },
+  "host": {
+    "platform": "Linux WSL2",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "architecture": "x64",
+    "cpu": "AMD Ryzen 7 7800X3D, 16 logical CPUs",
+    "physicalMemoryBytes": 33185517568,
+    "availableMemoryBeforeBytes": 26707755008,
+    "availableMemoryAfterBytes": 27247034368,
+    "swapTotalBytes": 8589934592,
+    "swapFreeBeforeBytes": 8572784640,
+    "swapFreeAfterBytes": 8533704704,
+    "cgroupMemoryAndSwapLimits": "unavailable",
+    "diskAvailableBeforeBytes": 797428555776,
+    "diskAvailableAfterBytes": 795662667776,
+    "hostSnapshotSha256": {
+      "before": "5a118971a69c67bfdc6b4f6dbfa7b49782c67616cb4ae90a9015bf5c67608013",
+      "after": "23b6ad6ca965b9dd5269bd9e1868ba22654c11d586afbfeee2dcaa1b00139f8c"
+    }
+  },
+  "timing": {
+    "clock": "performance.now monotonic; ISO timestamps are metadata",
+    "processStartedAt": "2026-10-20T15:19:32.841Z",
+    "warmupStartedAt": "2026-10-20T15:19:43.354Z",
+    "measurementStartedAt": "2026-10-20T15:30:39.133Z",
+    "busyStartedAt": "2026-10-20T15:31:09.134Z",
+    "idleAfterStartedAt": "2026-10-20T17:29:56.677Z",
+    "endedAt": "2026-10-20T17:30:29.660Z",
+    "requested": {
+      "warmupMs": 600000,
+      "idleBeforeMs": 30000,
+      "busyMs": 6540000,
+      "idleAfterMs": 30000,
+      "sampleIntervalMs": 5000,
+      "forcedGc": false
+    },
+    "observed": {
+      "processMs": 7212628.618,
+      "warmupMs": 600070.879,
+      "measurementMs": 6602023.775,
+      "idleBeforeMs": 30001.239,
+      "busyMs": 6541990.617,
+      "idleAfterMs": 30001.263
+    },
+    "accepted": true
+  },
+  "workload": {
+    "sourceFixtureSha256": "5aa35d9962a0da1fb7a4e456dc2fc5e0728486626290274a28b9550214c674dc",
+    "providerHttpCalls": 0,
+    "operations": 2158,
+    "locates": 1079,
+    "extracts": 1079,
+    "located": 1079,
+    "extracted": 1079,
+    "unknown": 0,
+    "failed": 0,
+    "timeouts": 0,
+    "seedMisses": 0,
+    "coldPerCallDurationMs": {
+      "p50": 2993.656,
+      "p95": 3344.59,
+      "ranking": "not valid; shared-host diagnostic activity overlapped this session"
+    },
+    "warmupOperationsSeparatelyRecorded": 207
+  },
+  "sampling": {
+    "parentSampleCount": 1324,
+    "nominalIntervalMs": 5000,
+    "observedGapMs": {
+      "median": 5000.363,
+      "p95": 5001.467,
+      "maximum": 5032.394
+    }
+  },
+  "nativeLifecycle": {
+    "childStarts": 2158,
+    "childCloses": 2158,
+    "childrenStillOwned": [],
+    "abortAndJoin": "passed",
+    "queueCapacity": 1,
+    "queueFulfilled": 3,
+    "dispose": "passed",
+    "parentLossChildExited": true,
+    "localDecisionReject": "PROVIDER",
+    "timeout": "TIMEOUT",
+    "noProviderHttp": true,
+    "measurementWindowOnly": true
+  },
+  "memory": {
+    "units": "bytes",
+    "parentPeak": {
+      "rss": 472461312,
+      "heapTotal": 122073088,
+      "heapUsed": 30624760,
+      "external": 76743076,
+      "arrayBuffers": 60492664
+    },
+    "idleWindowMedians": {
+      "before": {
+        "rss": 348393472,
+        "heapUsed": 13900424,
+        "external": 48993340,
+        "arrayBuffers": 1075720
+      },
+      "after": {
+        "rss": 469778432,
+        "heapUsed": 17742692,
+        "external": 62038477,
+        "arrayBuffers": 1084936
+      }
+    },
+    "gateMath": {
+      "rss": {
+        "formula": "max(20% of idle-before median, 128 MiB)",
+        "thresholdBytes": 134217728,
+        "observedIncreaseBytes": 121384960,
+        "observedIncreaseMiB": 115.76,
+        "thresholdMiB": 128,
+        "passed": true,
+        "reviewNote": "Below 128 MiB; still flagged for review because the median RSS increased."
+      },
+      "heapUsed": {
+        "formula": "max(10% of idle-before median, 16 MiB)",
+        "thresholdBytes": 16777216,
+        "observedIncreaseBytes": 3842268,
+        "passed": true
+      },
+      "external": {
+        "formula": "max(10% of idle-before median, 16 MiB)",
+        "thresholdBytes": 16777216,
+        "observedIncreaseBytes": 13045137,
+        "passed": true
+      },
+      "arrayBuffers": {
+        "formula": "max(10% of idle-before median, 16 MiB)",
+        "thresholdBytes": 16777216,
+        "observedIncreaseBytes": 9216,
+        "passed": true
+      }
+    }
+  },
+  "concurrency": {
+    "note": "Shared development host. Source checks, builds, provider development requests, native diagnostics and controlled application captures overlapped the broader run. Treat throughput and cold latency as unranked. This receipt contains no fresh heldout inputs or labels."
+  },
+  "rawArtifactsExcludedFromCommit": [
+    {
+      "file": ".run/v02/proposal-resource-soak-monotonic-261dc23.json",
+      "sha256": "0b25adcde61cc90f5faa696aa7d7ee83d840abfa159044c98c8813fa1d505d30"
+    },
+    {
+      "file": ".run/v02/proposal-resource-soak-monotonic-261dc23-proc-dense.tsv",
+      "sha256": "5ed02be50937f7810f1f4daea8b490b67a027654b3e35273f80f4d0615fb579e"
+    },
+    {
+      "file": ".run/v02/proposal-resource-soak-monotonic-261dc23-proc-watch.tsv",
+      "sha256": "92fa31bf455ecf17e051064417be7cc513d615daadb6f7eb3cd5e7c87b8a1b88"
+    },
+    {
+      "file": ".run/v02/proposal-resource-soak-monotonic-261dc23.log",
+      "sha256": "2fc9376e2bfecb663ee0ac748e4d1de9d8ab38b3afab01b8c9f1482b8ba842c1"
+    },
+    {
+      "file": ".run/v02/host-limits-before-261dc23.json",
+      "sha256": "5a118971a69c67bfdc6b4f6dbfa7b49782c67616cb4ae90a9015bf5c67608013"
+    },
+    {
+      "file": ".run/v02/host-limits-after-261dc23.json",
+      "sha256": "23b6ad6ca965b9dd5269bd9e1868ba22654c11d586afbfeee2dcaa1b00139f8c"
+    },
+    {
+      "file": ".run/v02/source-manifest-261dc23.json",
+      "sha256": "0fb0dae63ffd384c5c32dbc9eac98e51e7c7a67a97b75cebf87eae32b09fdc66"
+    }
+  ],
+  "limitations": [
+    "The load used a deterministic synthetic image and injected decision fixture; it does not establish image-localization or segmentation accuracy.",
+    "This was a working-tree resource run. The separately verified 106-file distribution archive and 107-file installed manifest are cited above and in the Windows acceptance evidence, not represented as the execution source for this run.",
+    "Resource behavior is scoped to the recorded Linux WSL2 environment and model assets."
+  ]
+}

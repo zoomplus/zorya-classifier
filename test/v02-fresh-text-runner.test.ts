@@ -6,8 +6,11 @@ import { join } from 'node:path'
 import sharp from 'sharp'
 import test from 'node:test'
 import type { DecisionPort, DecisionRequest, DecisionResult } from '../src/entities/contracts.js'
+import { RunBudget } from '../benchmarks/v02/budget.js'
 import {
+  auditNoImageFetch,
   assertFreshTextPhaseCaseCount,
+  FreshTextCaseBudget,
   freshTextPolicy,
   freshTextPolicyForPhase,
   freshTextProfiles,
@@ -20,6 +23,87 @@ import { parseFreshTextArgs } from '../benchmarks/v02/fresh-text-dev.js'
 function digest(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex')
 }
+
+await test('no-image wire audit checks each serialized fetch before admission', async () => {
+  const audit = {
+    fetchAttempts: 0,
+    fetchesChecked: 0,
+    zeroImagePartsConfirmed: 0,
+    zeroImageDerivedStateConfirmed: 0,
+    imagePartViolations: 0,
+    unverifiableBodies: 0,
+  }
+  let underlyingFetches = 0
+  const audited = auditNoImageFetch(async () => {
+    underlyingFetches += 1
+    return new Response('{}', { status: 200 })
+  }, audit)
+  await audited('https://provider.invalid', {
+    method: 'POST',
+    body: JSON.stringify({
+      messages: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }],
+    }),
+  })
+  assert.equal(underlyingFetches, 1)
+  assert.deepEqual(audit, {
+    fetchAttempts: 1,
+    fetchesChecked: 1,
+    zeroImagePartsConfirmed: 1,
+    zeroImageDerivedStateConfirmed: 1,
+    imagePartViolations: 0,
+    unverifiableBodies: 0,
+  })
+})
+
+await test('no-image wire audit blocks image fields and never forwards their payload', async () => {
+  const audit = {
+    fetchAttempts: 0,
+    fetchesChecked: 0,
+    zeroImagePartsConfirmed: 0,
+    zeroImageDerivedStateConfirmed: 0,
+    imagePartViolations: 0,
+    unverifiableBodies: 0,
+  }
+  let underlyingFetches = 0
+  const audited = auditNoImageFetch(async () => {
+    underlyingFetches += 1
+    return new Response('{}', { status: 200 })
+  }, audit)
+  await assert.rejects(
+    audited('https://provider.invalid', {
+      method: 'POST',
+      body: JSON.stringify({
+        messages: [{ content: [{ type: 'image_url', image_url: 'data:image/png;base64,secret' }] }],
+      }),
+    }),
+    /contained image payload/u,
+  )
+  assert.equal(underlyingFetches, 0)
+  assert.deepEqual(audit, {
+    fetchAttempts: 1,
+    fetchesChecked: 1,
+    zeroImagePartsConfirmed: 0,
+    zeroImageDerivedStateConfirmed: 0,
+    imagePartViolations: 1,
+    unverifiableBodies: 0,
+  })
+})
+
+await test('text per-case wrapper enforces six physical calls against the shared HELDOUT ledger', () => {
+  const runBudget = new RunBudget(300, 5, 0.05, 'heldout')
+  const firstCase = new FreshTextCaseBudget(runBudget, 'heldout')
+  for (let index = 0; index < 6; index += 1) {
+    const id = firstCase.admit()
+    firstCase.settle(id, 0)
+  }
+  assert.throws(() => firstCase.admit(), /budget has no remaining/u)
+  const secondCase = new FreshTextCaseBudget(runBudget, 'heldout')
+  const nextId = secondCase.admit()
+  secondCase.settle(nextId, null)
+  assert.equal(runBudget.snapshot().admittedPhysicalCalls, 7)
+  assert.equal(runBudget.snapshot().unknownCostCalls, 1)
+  assert.equal(runBudget.snapshot().inFlightCalls, 0)
+})
 
 await test('fresh text CLI pins a single profile and refuses implicit paid dispatch', () => {
   assert.throws(() => parseFreshTextArgs([]), /explicit --allow-paid/u)
@@ -221,6 +305,129 @@ await test('all six text encoders and no-image control preserve fresh tasks and 
     assert.ok(JSON.stringify(noImageRequests).includes('toolbar icon'))
   } finally {
     await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('fresh text persistence and disposal failures retain paid receipts and stop later cases', async () => {
+  for (const failurePoint of ['dispose', 'persist'] as const) {
+    const root = await mkdtemp(join(tmpdir(), `zorya-fresh-text-${failurePoint}-`))
+    try {
+      const image = await sharp({
+        create: { width: 64, height: 48, channels: 3, background: '#718293' },
+      })
+        .png()
+        .toBuffer()
+      const input = ['first-case', 'must-not-run'].map((caseId) => ({
+        caseId,
+        image: { path: 'image.png', sha256: digest(image), width: 64, height: 48 },
+        locate: { target: 'the full red marker' },
+        classify: { question: 'Is the red marker present?', options: ['present', 'absent'] },
+      }))
+      await writeFile(join(root, 'image.png'), image, { flag: 'wx' })
+      const manifestBytes = Buffer.from(JSON.stringify(input))
+      const manifestPath = join(root, 'inputs.json')
+      await writeFile(manifestPath, manifestBytes, { flag: 'wx' })
+      let fetchCalls = 0
+      const fetch: typeof globalThis.fetch = async () => {
+        fetchCalls += 1
+        return new Response(
+          JSON.stringify({
+            id: 'missing-cost-response',
+            model: 'fixture-model',
+            provider: 'fixture-provider',
+            choices: [{ index: 0, finish_reason: 'stop', message: { content: '{}' } }],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        )
+      }
+      const result = await runFreshTextProfile(
+        {
+          manifests: [{ path: manifestPath, sha256: digest(manifestBytes) }],
+          imageRoot: root,
+          outputRoot: join(root, 'runs'),
+          apiKey: 'fixture-key',
+          fetch,
+          stages: 'classify-only',
+          createDecision: (fetcher) => ({
+            async decide(request) {
+              await fetcher('https://provider.invalid/decisions', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ questions: request.questions }),
+              })
+              const answers = Object.fromEntries(
+                Object.entries(request.questions).map(([id, question]) => {
+                  const choiceId =
+                    question.type === 'choice' ? Object.keys(question.criteria)[0]! : ''
+                  const probabilities =
+                    question.type === 'choice'
+                      ? Object.fromEntries(
+                          Object.keys(question.criteria).map((candidateId) => [
+                            candidateId,
+                            candidateId === choiceId ? 1 : 0,
+                          ]),
+                        )
+                      : {}
+                  return [id, { type: 'choice' as const, choice: choiceId, probabilities }]
+                }),
+              )
+              return {
+                answers,
+                metadata: {
+                  model: 'fixture-model',
+                  provider: 'fixture-provider',
+                  requestId: null,
+                  durationMs: 1,
+                  costUsd: null,
+                  attempts: 1,
+                },
+              }
+            },
+          }),
+          testHooks: {
+            ...(failurePoint === 'dispose'
+              ? {
+                  afterClassifierDispose: async () => {
+                    throw new Error('fixture dispose failure')
+                  },
+                }
+              : {}),
+            ...(failurePoint === 'persist'
+              ? {
+                  writeCaseResult: async (path: string, row: unknown) => {
+                    await writeFile(path, JSON.stringify(row), { flag: 'wx' })
+                    throw new Error('fixture persistence failure')
+                  },
+                }
+              : {}),
+          },
+        },
+        'no-image-control',
+      )
+      assert.equal(fetchCalls, 1)
+      assert.equal(result.status, 'incomplete')
+      assert.deepEqual(result.completedCaseIds, ['first-case'])
+      assert.deepEqual(result.missingCaseIds, ['must-not-run'])
+      assert.equal(result.aggregate.admittedPhysicalCalls, 1)
+      assert.equal(result.aggregate.unknownCostCalls, 1)
+      assert.equal(result.aggregate.inFlightCalls, 0)
+      assert.equal(result.physicalReceipts.length, 1)
+      assert.equal(result.physicalReceipts[0]?.caseId, 'first-case')
+      assert.equal(result.physicalReceipts[0]?.logicalId, 1)
+      assert.equal(result.physicalReceipts[0]?.httpStatus, 200)
+      assert.equal(result.physicalReceipts[0]?.wireReceipt?.usageCostUsd, null)
+      assert.ok(result.physicalReceipts[0]?.requestBodySha256)
+      assert.ok(result.physicalReceipts[0]?.admittedAt)
+      assert.ok(await readFile(join(result.outputDirectory, 'incomplete-evidence.json'), 'utf8'))
+      if (failurePoint === 'persist') {
+        const persisted = JSON.parse(
+          await readFile(join(result.outputDirectory, 'first-case', 'result.json'), 'utf8'),
+        ) as { classify: { status: string } }
+        assert.equal(persisted.classify.status, 'ok', JSON.stringify(result.results[0]))
+      }
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
   }
 })
 

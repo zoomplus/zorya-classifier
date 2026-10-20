@@ -4,9 +4,9 @@ This acceptance concerns the extracted MIT Node.js library, not the Zorya deskto
 
 ## Current gate state
 
-The integrated source passed [425 Linux offline tests, formatting, source checks and the installed-archive consumer at `4331b1b`](evidence/v02/integration-4331b1b.json). Its additions are benchmark-only caller composition and independent routing/lifecycle tests; the runtime bytes are unchanged. [43b7426 passed all four Windows/Linux × Node 22/24 jobs](evidence/v02/ci-43b7426.json), including source, installed-archive and formatting steps. The later [4331b1b run](evidence/v02/ci-4331b1b.json) passed Linux but failed one new Windows CLI test that assumed POSIX separators. That assertion now uses `node:path.join`; its replacement and final release CI remain required. Earlier failed path checks remain preserved.
+The integrated source passed [425 Linux offline tests, formatting, source checks and the installed-archive consumer at `4331b1b`](evidence/v02/integration-4331b1b.json). Its additions are benchmark-only caller composition and independent routing/lifecycle tests; the runtime bytes are unchanged. [43b7426 passed all four Windows/Linux × Node 22/24 jobs](evidence/v02/ci-43b7426.json), including source, installed-archive and formatting steps. The later [4331b1b run](evidence/v02/ci-4331b1b.json) passed Linux but failed one new Windows CLI test that assumed POSIX separators. That assertion now uses `node:path.join`; [the repaired `d684259` run passed all four jobs](evidence/v02/ci-d684259.json), including the installed-archive consumer and formatting. Final release CI remains required. Earlier failed path checks remain preserved.
 
-All 53 runtime source files remain byte-identical to `0c365cb`, as do the 106 compiled runtime files. The first proposal resource run completed its configured wall-clock phases, but its observed process lifetime and summed monotonic operation durations did not prove the required physical duration. It is retained as historical evidence. Replacement harness `261dc23` uses monotonic phase deadlines, enforces the full duration minima, and has a separate kernel-uptime observer. Its fresh two-hour run is in progress.
+All 53 runtime source files remain byte-identical to `0c365cb`, as do the 106 compiled runtime files. The first proposal resource run completed its configured wall-clock phases, but its observed process lifetime and summed monotonic operation durations did not prove the required physical duration. It is retained as historical evidence. Replacement harness `261dc23` uses monotonic phase deadlines, enforces the full duration minima, and has a separate kernel-uptime observer. Its [fresh two-hour run passed](evidence/v02/proposal-resource-soak-261dc23.md): 7,212.6 monotonic seconds, an independent live process-age witness at 7,200.68 seconds, and 2,158 native starts/closes in the measurement window with none left. Idle heap, external and array-buffer growth pass the fixed limits; RSS grew 115.76 MiB, below the 128 MiB threshold. Root independently checked parity of all 55 pinned files. This fixture run establishes resource/lifecycle behavior; its shared-host timing does not qualify model quality or production latency.
 
 The [first frozen blind candidate](evidence/v02/heldout-evaluation-20261020.md) failed: 3/60 positive whole-object boxes matched, there were 2/20 false locations against a limit of one, and the paired photo bootstrap interval was [0, 0.20], whose lower bound must be positive. Four of six scored mask instances reached IoU 0.8; nineteen reference instances were unavailable. Mask and box metrics remain separate. The no-image control completed all 40 photos with no successful location. No alternative is selected from these revealed heldout results.
 
@@ -16,16 +16,16 @@ The distinct native categorical batch comparison completed both original DEV40 p
 
 A separate [reconstructed C03 diagnostic](evidence/v02/reconstructed-c03-box.json) finds box IoU 0.874 and reference-box coverage 0.986 against the original Dog annotation. The original producer rejected completeness and returned `unknown`; its mask was not saved. This replay does not repair that result, prove the original mask bytes, or measure mask IoU. A matching box alone cannot show that the mask-completeness verdict was wrong.
 
-| Gate                                 | Current status                                                                      |
-| ------------------------------------ | ----------------------------------------------------------------------------------- |
-| Source checks and installed consumer | Pass: 425 Linux tests at `4331b1b`; runtime bytes unchanged                         |
-| Hosted Windows/Linux × Node 22/24    | Pass for `43b7426`; later Windows CLI test repaired, replacement CI pending         |
-| Windows native execution             | Passed on the identical runtime bytes; controlled input only                        |
-| Two-hour resource soak               | Replacement monotonic run in progress; earlier wall-clock run is not sufficient     |
-| First frozen blind vision candidate  | Failed both false-location and paired-bootstrap gates                               |
-| Next development candidate           | Native categorical batch with neutral instruction selected; fresh blind run pending |
-| Text-only encoders                   | None qualified; public experimental image selector returns `UNSUPPORTED`            |
-| Publication                          | Pending all mandatory gates                                                         |
+| Gate                                 | Current status                                                                        |
+| ------------------------------------ | ------------------------------------------------------------------------------------- |
+| Source checks and installed consumer | Pass: 425 Linux tests at `4331b1b`; runtime bytes unchanged                           |
+| Hosted Windows/Linux × Node 22/24    | Pass for `d684259` on all four jobs; final release CI still required                  |
+| Windows native execution             | Passed on the identical runtime bytes; controlled input only                          |
+| Two-hour resource soak               | Pass: monotonic duration, memory limits and zero owned children; earlier run retained |
+| First frozen blind vision candidate  | Failed both false-location and paired-bootstrap gates                                 |
+| Next development candidate           | Native categorical batch with neutral instruction selected; fresh blind run pending   |
+| Text-only encoders                   | None qualified; public experimental image selector returns `UNSUPPORTED`              |
+| Publication                          | Pending all mandatory gates                                                           |
 
 ## 0.2 development snapshot, 2026-10-20
 
