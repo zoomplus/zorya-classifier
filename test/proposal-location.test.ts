@@ -78,6 +78,11 @@ function setPackedPixel(mask: Uint8Array, x: number, y: number): void {
   mask[index >>> 3] = (mask[index >>> 3] ?? 0) | (1 << (index & 7))
 }
 
+function clearPackedPixel(mask: Uint8Array, x: number, y: number): void {
+  const index = y * 8 + x
+  mask[index >>> 3] = (mask[index >>> 3] ?? 0) & ~(1 << (index & 7))
+}
+
 function baseBatch(overrides: Partial<ObjectProposalBatch> = {}): ObjectProposalBatch {
   return {
     proposals: [
@@ -109,6 +114,7 @@ function harness(
     height?: number
     roi?: { left: number; top: number; width: number; height: number }
     abortDuringPresentation?: boolean
+    abortDuringFocusedPresentation?: boolean
     transparentSource?: boolean
   } = {},
 ) {
@@ -117,6 +123,10 @@ function harness(
   const controller = new AbortController()
   const signal = controller.signal
   const requests: DecisionRequest[] = []
+  const presentationCalls: Array<{
+    ids: string[]
+    regions: Array<{ left: number; top: number; width: number; height: number } | null>
+  }> = []
   const seenSignals: AbortSignal[] = []
   let proposalInput: ObjectProposalInput | undefined
   let presentedImage: RgbaRaster | undefined
@@ -202,13 +212,19 @@ function harness(
   const presentation: ObjectProposalPresentationPort = {
     async render(input) {
       seenSignals.push(input.signal)
+      presentationCalls.push({
+        ids: input.proposals.map((proposal) => proposal.id),
+        regions: input.proposals.map((proposal) => proposal.region),
+      })
       presentedImage = input.image
-      assert.equal(input.proposals.length, 1)
-      assert.equal(input.proposals[0]?.id, 'C00')
+      assert.ok(input.proposals.length >= 1)
       presentedRegion = input.proposals[0]?.region
       input.image.data.fill(88)
       input.proposals[0]!.mask.data.fill(0)
-      if (options.abortDuringPresentation)
+      if (
+        options.abortDuringPresentation ||
+        (options.abortDuringFocusedPresentation && presentationCalls.length === 2)
+      )
         controller.abort(new ClassifierError('ABORTED', 'fixture abort'))
       return [0, 1, 2, 3].map(() => new Uint8Array(pngHeader))
     },
@@ -224,6 +240,7 @@ function harness(
     signal,
     abort: () => controller.abort(new ClassifierError('ABORTED', 'fixture abort')),
     requests,
+    presentationCalls,
     seenSignals,
     get proposalInput() {
       return proposalInput
@@ -270,11 +287,17 @@ await test('proposal localization returns exact packed-mask bounds and sends onl
   assert.equal(h.proposalInput?.signal, h.signal)
   assert.equal(h.proposalInput?.image.data[0], 99)
   assert.equal(h.presentedImage?.data[0], 88)
+  assert.deepEqual(h.presentationCalls, [
+    { ids: ['C00'], regions: [{ left: 2, top: 2, width: 4, height: 4 }] },
+    { ids: ['C00'], regions: [{ left: 2, top: 2, width: 4, height: 4 }] },
+  ])
   assert.ok(h.seenSignals.every((signal) => signal === h.signal))
   const providerText = JSON.stringify(h.requests)
   for (const secret of ['private-backend-name', 'private-source-path', 'private-native-score'])
     assert.equal(providerText.includes(secret), false)
   assert.ok(providerText.includes('C00'))
+  assert.ok(providerText.includes('derived bounding rectangle'))
+  assert.ok(providerText.includes('not pixel-mask completeness'))
   assert.ok(providerText.includes('The blue outline marks the SEED'))
   assert.ok(providerText.includes('presence'))
 })
@@ -288,6 +311,7 @@ await test('proposal choice none and whole-target score at or below 0.5 stay unk
       assert.equal(result.location.reason, 'extent-uncertain')
     assert.equal(result.mask, undefined)
     assert.equal(h.requests.length, 4) // three seed passes and one proposal Choice
+    assert.equal(h.presentationCalls.length, 1)
   })
   await t.test('low confidence', async () => {
     const h = harness({ wholeScore: 0.5 })
@@ -297,7 +321,53 @@ await test('proposal choice none and whole-target score at or below 0.5 stay unk
       assert.equal(result.location.reason, 'extent-uncertain')
     assert.equal(result.mask, undefined)
     assert.equal(h.requests.at(-1)?.questions['presence']?.type, 'noul')
+    assert.equal(h.presentationCalls.length, 2)
   })
+})
+
+await test('box completeness accepts a sparse mask with the correct derived rectangle and focuses the final view', async () => {
+  const sparse = rectMask(2, 2, 4, 4)
+  for (let y = 2; y < 6; y += 1)
+    for (let x = 2; x < 6; x += 1)
+      if (x !== 2 && x !== 5 && y !== 2 && y !== 5) clearPackedPixel(sparse, x, y)
+  const other = rectMask(2, 2, 1, 1)
+  const batch = baseBatch({
+    proposals: [
+      { id: 'C00', mask: { data: other, width: 8, height: 8, format: 'binary-lsb0' } },
+      { id: 'C01', mask: { data: sparse, width: 8, height: 8, format: 'binary-lsb0' } },
+    ],
+  })
+  const h = harness({ batch, selection: 'C01', wholeScore: 0.9 })
+  const result = await locateFromProposals(h.input, h.dependencies, h.signal)
+  assert.equal(result.location.status, 'located')
+  if (result.location.status !== 'located') return
+  assert.deepEqual(result.location.region, { left: 2, top: 2, width: 4, height: 4 })
+  assert.ok(result.mask)
+  assert.equal(
+    result.mask.data.reduce((sum, value) => sum + value, 0),
+    12,
+  )
+  assert.deepEqual(h.presentationCalls, [
+    {
+      ids: ['C00', 'C01'],
+      regions: [
+        { left: 2, top: 2, width: 1, height: 1 },
+        { left: 2, top: 2, width: 4, height: 4 },
+      ],
+    },
+    { ids: ['C01'], regions: [{ left: 2, top: 2, width: 4, height: 4 }] },
+  ])
+  const selectionRequest = h.requests.at(-2)
+  assert.ok(selectionRequest)
+  const criteria = selectionRequest.questions['selection']
+  assert.ok(criteria && criteria.type === 'choice')
+  assert.match(criteria.criteria['C01'] ?? '', /left=2, top=2, width=4, height=4/)
+  assert.match(criteria.instructions, /not pixel-mask completeness/)
+  const finalRequest = h.requests.at(-1)
+  assert.ok(finalRequest)
+  assert.match(JSON.stringify(finalRequest.state), /single displayed candidate is C01/)
+  assert.doesNotMatch(JSON.stringify(finalRequest.state), /C00/)
+  assert.match(finalRequest.questions['presence']?.instructions ?? '', /box-completeness decision/)
 })
 
 await test('a mask with pixels outside hard ROI is rejected before model proposal selection', async () => {
@@ -426,6 +496,17 @@ await test('cancellation after presentation stops before model dispatch', async 
   )
   assert.equal(h.requests.length, 3)
   assert.equal(h.settled, 0)
+})
+
+await test('cancellation during the focused final presentation prevents completeness dispatch', async () => {
+  const h = harness({ abortDuringFocusedPresentation: true })
+  await assert.rejects(
+    locateFromProposals(h.input, h.dependencies, h.signal),
+    (error: unknown) => error instanceof ClassifierError && error.code === 'ABORTED',
+  )
+  assert.equal(h.requests.length, 4) // Seed stages and candidate Choice only.
+  assert.equal(h.presentationCalls.length, 2)
+  assert.deepEqual(h.presentationCalls[1]?.ids, ['C00'])
 })
 
 await test('malformed source mask IDs and padding bits fail before model proposal selection', async (t) => {

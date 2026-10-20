@@ -56,7 +56,15 @@ export function createSharpObjectProposalPresentation(): ObjectProposalPresentat
 
       // Own every buffer synchronously, before the first Sharp await.
       const source = image.data
-      const snapshots = proposals.map((proposal, index) => snapshotProposal(proposal, index, image))
+      let previousAlias = -1
+      for (const proposal of proposals) {
+        const match = typeof proposal.id === 'string' ? /^C(\d{2})$/.exec(proposal.id) : null
+        const alias = match ? Number(match[1]) : -1
+        if (alias < 0 || alias >= objectProposalLimits.candidates || alias <= previousAlias)
+          throw invalid('Proposal aliases must be unique and retain source order')
+        previousAlias = alias
+      }
+      const snapshots = proposals.map((proposal) => snapshotProposal(proposal, image))
       if (
         snapshots.reduce((sum, item) => sum + item.data.byteLength, 0) >
         objectProposalLimits.packedBytes
@@ -115,10 +123,13 @@ export function createSharpObjectProposalPresentation(): ObjectProposalPresentat
           assertActive(signal)
           const tileX = (position % columns) * tileWidth
           const tileY = Math.floor(position / columns) * tileHeight
+          const rectangle = proposal.bounds
+            ? `RECT [${proposal.bounds.left}, ${proposal.bounds.top}, ${proposal.bounds.width}, ${proposal.bounds.height}]`
+            : 'RECT empty'
           const title = svg(
             tileWidth,
-            24,
-            `<rect width="300" height="24" fill="#f2f4f7"/><text x="8" y="17" font-family="sans-serif" font-size="14" fill="#111">${proposal.id}</text>`,
+            40,
+            `<rect width="300" height="40" fill="#f2f4f7"/><text x="8" y="16" font-family="sans-serif" font-size="14" fill="#111">${proposal.id}</text><text x="8" y="33" font-family="sans-serif" font-size="12" fill="#111">${rectangle}</text>`,
           )
           layers.push({ input: title, left: tileX, top: tileY })
 
@@ -131,7 +142,7 @@ export function createSharpObjectProposalPresentation(): ObjectProposalPresentat
           const bounds = proposal.bounds
 
           if (bounds !== null) {
-            const maskOverlay = makeOverlay(source, raster, image.width, image.height)
+            const maskOverlay = makeOverlay(source, raster, image.width, image.height, bounds)
             const overlayPreview = await encode(
               sharp(maskOverlay, {
                 raw: { width: image.width, height: image.height, channels: 4 },
@@ -148,12 +159,12 @@ export function createSharpObjectProposalPresentation(): ObjectProposalPresentat
             layers.push({
               input: sourcePreview,
               left: tileX + previewLeft,
-              top: tileY + previewTop,
+              top: tileY + previewTop + 12,
             })
             layers.push({
               input: overlayPreview,
               left: tileX + previewLeft,
-              top: tileY + previewTop,
+              top: tileY + previewTop + 12,
             })
 
             const cutout = makeCutout(source, raster, image.width, image.height, bounds)
@@ -172,13 +183,13 @@ export function createSharpObjectProposalPresentation(): ObjectProposalPresentat
             layers.push({
               input: cutoutPng,
               left: tileX + previewLeft + previewWidth + 8,
-              top: tileY + previewTop,
+              top: tileY + previewTop + 12,
             })
           } else {
             layers.push({
               input: sourcePreview,
               left: tileX + previewLeft,
-              top: tileY + previewTop,
+              top: tileY + previewTop + 12,
             })
             layers.push({
               input: svg(
@@ -246,16 +257,12 @@ function assertRect(rect: PixelRect, width: number, height: number, name: string
     throw invalid(`${name} is outside the source image`)
 }
 
-function snapshotProposal(
-  proposal: PresentedObjectProposal,
-  index: number,
-  image: RgbaRaster,
-): ProposalSnapshot {
-  const id = `C${index.toString(10).padStart(2, '0')}`
+function snapshotProposal(proposal: PresentedObjectProposal, image: RgbaRaster): ProposalSnapshot {
+  const id = proposal.id
   const mask: PackedBinaryMask = proposal.mask
   const expectedBytes = Math.ceil((image.width * image.height) / 8)
   if (
-    proposal.id !== id ||
+    !/^C(?:0[0-9]|[12][0-9]|3[0-5])$/.test(id) ||
     !mask ||
     mask.format !== 'binary-lsb0' ||
     mask.width !== image.width ||
@@ -287,7 +294,7 @@ function snapshotProposal(
   return {
     id,
     data,
-    region: proposal.region ? { ...proposal.region } : null,
+    region: bounds ? { ...bounds } : null,
     bounds: bounds ? { ...bounds } : null,
   }
 }
@@ -316,6 +323,7 @@ function makeOverlay(
   mask: Uint8Array,
   width: number,
   height: number,
+  bounds: PixelRect | null,
 ): Uint8Array {
   const output = new Uint8Array(source.length)
   for (let y = 0; y < height; y++) {
@@ -348,7 +356,27 @@ function makeOverlay(
       }
     }
   }
+  if (bounds !== null) {
+    const right = bounds.left + bounds.width - 1
+    const bottom = bounds.top + bounds.height - 1
+    for (let x = bounds.left; x <= right; x++) {
+      paintRectanglePixel(output, width, x, bounds.top)
+      paintRectanglePixel(output, width, x, bottom)
+    }
+    for (let y = bounds.top; y <= bottom; y++) {
+      paintRectanglePixel(output, width, bounds.left, y)
+      paintRectanglePixel(output, width, right, y)
+    }
+  }
   return output
+}
+
+function paintRectanglePixel(output: Uint8Array, width: number, x: number, y: number): void {
+  const offset = (y * width + x) * 4
+  output[offset] = 255
+  output[offset + 1] = 220
+  output[offset + 2] = 0
+  output[offset + 3] = 255
 }
 
 function makeCutout(

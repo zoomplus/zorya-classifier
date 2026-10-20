@@ -65,7 +65,7 @@ async function hasNear(
 
 const rect: PixelRect = { left: 2, top: 2, width: 3, height: 3 }
 
-await test('renders a seed witness plus all 36 stable aliases across three generic sheets', async () => {
+await test('renders a seed witness plus all 36 stable aliases and exact foreground rectangles', async () => {
   const source = image()
   const proposals = proposalSet(source.width, source.height)
   const output = await presenter.render({
@@ -89,14 +89,14 @@ await test('renders a seed witness plus all 36 stable aliases across three gener
       [1200, 720, 4],
     )
   }
-  // C00's one-pixel support is visible in the first left preview at the scaled source coordinate.
-  const cyan = (p: number[]) => p[1]! > 150 && p[2]! > 150 && p[0]! < 120
+  // C00's one-pixel support/bounds are visible in the first left preview at the scaled coordinate.
+  const rectangleYellow = (p: number[]) => p[0]! > 170 && p[1]! > 150 && p[2]! < 80
   assert.ok(
     await hasNear(
       output[1]!,
       4 + Math.round((0.5 * 142) / 12),
-      57 + Math.round((0.5 * 142) / 12),
-      cyan,
+      69 + Math.round((0.5 * 142) / 12),
+      rectangleYellow,
     ),
   )
   // C35 occupies the final tile of the third sheet; its alias cannot reorder or omit the proposal.
@@ -104,8 +104,8 @@ await test('renders a seed witness plus all 36 stable aliases across three gener
     await hasNear(
       output[3]!,
       3 * 300 + 4 + Math.round((11.5 * 142) / 12),
-      2 * 240 + 57 + Math.round((2.5 * 142) / 12),
-      cyan,
+      2 * 240 + 69 + Math.round((2.5 * 142) / 12),
+      rectangleYellow,
     ),
   )
   // Empty C01 is accepted and has no mask-derived region; the optional native score is not exposed.
@@ -128,6 +128,26 @@ await test('accepts a partial proposal batch and does not invent aliases for unu
   assert.equal(output.length, 2)
   const sheet = await raw(output[1]!)
   assert.deepEqual([sheet.info.width, sheet.info.height, sheet.info.channels], [1200, 720, 4])
+})
+
+await test('renders an ordered singleton subset with its original alias and derived rectangle', async () => {
+  const source = image()
+  const proposal = proposalSet(source.width, source.height)[17]!
+  const output = await presenter.render({
+    image: source,
+    seedRegion: rect,
+    proposals: [proposal],
+    signal: new AbortController().signal,
+  })
+  assert.equal(output.length, 2)
+  const sheet = await raw(output[1]!)
+  assert.deepEqual([sheet.info.width, sheet.info.height], [1200, 720])
+  // The exact alias is rendered in the title rather than renumbered to C00.
+  const titleArea = await sharp(output[1]!)
+    .extract({ left: 0, top: 0, width: 300, height: 40 })
+    .png()
+    .toBuffer()
+  assert.ok(titleArea.byteLength > 0)
 })
 
 await test('snapshots caller-owned source and packed masks before asynchronous encoding', async () => {
@@ -214,6 +234,29 @@ await test('rejects invalid aliases, inconsistent pixel bounds, malformed tails,
       image: { ...source, data: source.data.subarray(0, source.data.length - 1) },
     }),
     /canonical RGBA/,
+  )
+})
+
+await test('rejects duplicate and out-of-order aliases in a presentation subset', async () => {
+  const source = image()
+  const proposals = proposalSet(source.width, source.height)
+  await assert.rejects(
+    presenter.render({
+      image: source,
+      seedRegion: rect,
+      proposals: [proposals[3]!, proposals[3]!],
+      signal: new AbortController().signal,
+    }),
+    /unique and retain source order/,
+  )
+  await assert.rejects(
+    presenter.render({
+      image: source,
+      seedRegion: rect,
+      proposals: [proposals[17]!, proposals[4]!],
+      signal: new AbortController().signal,
+    }),
+    /unique and retain source order/,
   )
 })
 

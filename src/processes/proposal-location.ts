@@ -16,6 +16,7 @@ import type { CutoutRasterPort } from '../entities/cutout-raster.js'
 import type {
   ObjectProposalPort,
   ObjectProposalPresentationPort,
+  PackedBinaryMask,
 } from '../entities/object-proposals.js'
 import { objectProposalLimits } from '../entities/object-proposals.js'
 import type { RgbaRaster } from '../entities/representation.js'
@@ -78,7 +79,7 @@ const proposalQuestion = {
   type: 'choice' as const,
   rankingSize: 1 as const,
   instructions:
-    'Choose the supplied mask that covers the entire visible physical instance represented by SEED in ORIGINAL. SEED is only an interior witness; its crop edges do not limit the target extent. Reject fragments, background, and other instances. Use ORIGINAL for identity and context. Choose none if no supplied mask covers the full visible instance. Select only a supplied alias; do not invent coordinates.',
+    'Choose the supplied candidate whose displayed derived bounding rectangle covers the entire visible physical instance represented by SEED in ORIGINAL. SEED is only an interior witness; its crop edges do not limit the target extent. Use ORIGINAL for identity and context. The colored mask may omit pixels inside that rectangle: judge the rectangle for whole-object localization, not pixel-mask completeness. Reject fragments, background, and other instances. Choose none if no supplied rectangle covers the full visible instance. Select only a supplied alias; do not invent coordinates.',
 }
 
 interface ProposalLocateDependencies {
@@ -216,14 +217,22 @@ function validateProposalBatch(
   }
 }
 
-function makeQuestion(ids: readonly string[]): DecisionRequest['questions']['selection'] {
+function makeQuestion(
+  proposals: readonly { id: string; region: PixelRect | null }[],
+): DecisionRequest['questions']['selection'] {
+  const criteria = Object.fromEntries(
+    proposals.map(({ id, region }) => [
+      id,
+      region
+        ? `Derived foreground rectangle [left=${region.left}, top=${region.top}, width=${region.width}, height=${region.height}]. Does this rectangle cover the full visible seeded instance? Judge the rectangle, not whether the mask fills it.`
+        : 'This candidate has no visible foreground rectangle and cannot cover the full visible seeded instance.',
+    ]),
+  )
   return {
     ...proposalQuestion,
     criteria: {
-      ...Object.fromEntries(
-        ids.map((id) => [id, `Candidate ${id} covers the entire visible target instance.`]),
-      ),
-      none: 'No supplied candidate covers the entire visible target instance.',
+      ...criteria,
+      none: 'No supplied rectangle covers the entire visible target instance.',
     },
   }
 }
@@ -243,9 +252,65 @@ function makeState(
     JSON.stringify({ seedRegion: seed, hardRoi: roi }),
     'ORIGINAL',
     ...original,
-    'CANDIDATE MASK CONTACT SHEETS',
-    ...sheets.flatMap((sheet, index) => [`CANDIDATE SHEET ${index + 1}`, ...sheet]),
+    'CANDIDATE MASKS AND DERIVED RECTANGLES',
+    ...sheets.flatMap((sheet, index) => [`CANDIDATE PRESENTATION ${index + 1}`, ...sheet]),
   ]
+}
+
+async function presentationStates(
+  dependencies: ProposalLocateDependencies,
+  source: RgbaRaster,
+  seed: PixelRect,
+  proposals: readonly { id: string; mask: PackedBinaryMask; region: PixelRect | null }[],
+  signal: AbortSignal,
+): Promise<DecisionState[]> {
+  const renderedOutput = await dependencies.presentation.render({
+    image: { ...source, data: new Uint8Array(source.data) },
+    seedRegion: { ...seed },
+    proposals: proposals.map(({ id, mask, region }) => ({
+      id,
+      mask: { ...mask, data: new Uint8Array(mask.data) },
+      region: region === null ? null : { ...region },
+    })),
+    signal,
+  })
+  assertActive(signal)
+  if (
+    !Array.isArray(renderedOutput) ||
+    renderedOutput.length < 1 ||
+    renderedOutput.length > objectProposalLimits.presentationImages
+  )
+    throw new ClassifierError('INVALID_RESPONSE', 'Proposal presentation image count is invalid')
+  let presentationBytes = 0
+  const presented: Uint8Array[] = []
+  for (const bytes of renderedOutput) {
+    if (
+      !(bytes instanceof Uint8Array) ||
+      bytes.byteLength < 8 ||
+      bytes.byteLength > limits.imageBytes ||
+      bytes[0] !== 0x89 ||
+      bytes[1] !== 0x50 ||
+      bytes[2] !== 0x4e ||
+      bytes[3] !== 0x47 ||
+      bytes[4] !== 0x0d ||
+      bytes[5] !== 0x0a ||
+      bytes[6] !== 0x1a ||
+      bytes[7] !== 0x0a
+    )
+      throw new ClassifierError('INVALID_RESPONSE', 'Proposal presentation must return PNG images')
+    presentationBytes += bytes.byteLength
+    if (presentationBytes > objectProposalLimits.presentationBytes)
+      throw new ClassifierError('RESOURCE_LIMIT', 'Proposal presentation exceeds its byte budget')
+    presented.push(new Uint8Array(bytes))
+  }
+  const states: DecisionState[] = []
+  for (const bytes of presented) {
+    const rendered = validateSource(await dependencies.raster.normalize(bytes, signal))
+    assertActive(signal)
+    states.push(copyDecisionState(await dependencies.raster.imageState(rendered, signal)))
+    assertActive(signal)
+  }
+  return states
 }
 
 function localizationMetadata(
@@ -384,64 +449,16 @@ export async function locateFromProposals(
       touchesRoi: mapped.touchesRoi,
     }
   })
-  const renderedOutput = await dependencies.presentation.render({
-    image: { ...source, data: new Uint8Array(source.data) },
-    seedRegion: { ...seed },
-    proposals: derived.map(({ id, mask, region }) => ({
-      id,
-      mask: { ...mask, data: new Uint8Array(mask.data) },
-      region: region === null ? null : { ...region },
-    })),
-    signal,
-  })
+  const proposalViews = derived.map(({ id, mask, region }) => ({ id, mask, region }))
+  const sheetStates = await presentationStates(dependencies, source, seed, proposalViews, signal)
+  const originalState = copyDecisionState(await dependencies.raster.imageState(normalized, signal))
   assertActive(signal)
-  if (
-    !Array.isArray(renderedOutput) ||
-    renderedOutput.length < 1 ||
-    renderedOutput.length > objectProposalLimits.presentationImages
-  )
-    throw new ClassifierError('INVALID_RESPONSE', 'Proposal presentation image count is invalid')
-  let presentationBytes = 0
-  for (const bytes of renderedOutput) {
-    if (
-      !(bytes instanceof Uint8Array) ||
-      bytes.byteLength < 8 ||
-      bytes.byteLength > limits.imageBytes ||
-      bytes[0] !== 0x89 ||
-      bytes[1] !== 0x50 ||
-      bytes[2] !== 0x4e ||
-      bytes[3] !== 0x47 ||
-      bytes[4] !== 0x0d ||
-      bytes[5] !== 0x0a ||
-      bytes[6] !== 0x1a ||
-      bytes[7] !== 0x0a
-    )
-      throw new ClassifierError('INVALID_RESPONSE', 'Proposal presentation must return PNG images')
-    presentationBytes += bytes.byteLength
-    if (presentationBytes > objectProposalLimits.presentationBytes)
-      throw new ClassifierError('RESOURCE_LIMIT', 'Proposal presentation exceeds its byte budget')
-  }
-  const presented = renderedOutput.map((bytes) => new Uint8Array(bytes))
-  const sheetStates: DecisionState[] = []
-  for (const bytes of presented) {
-    const rendered = validateSource(await dependencies.raster.normalize(bytes, signal))
-    assertActive(signal)
-    sheetStates.push(copyDecisionState(await dependencies.raster.imageState(rendered, signal)))
-    assertActive(signal)
-  }
 
   const ids = batch.proposals.map((proposal) => proposal.id)
-  const state = makeState(
-    args.target,
-    args.exclusions,
-    seed,
-    roi,
-    copyDecisionState(await dependencies.raster.imageState(normalized, signal)),
-    sheetStates,
-  )
+  const state = makeState(args.target, args.exclusions, seed, roi, originalState, sheetStates)
   const choiceRequest: DecisionRequest = {
     state,
-    questions: { selection: makeQuestion(ids) },
+    questions: { selection: makeQuestion(proposalViews) },
   }
   assertActive(signal)
   const choiceResult = validateDecision(
@@ -458,15 +475,31 @@ export async function locateFromProposals(
     return { location: unknown('extent-inconsistent', metadata()) }
   const selectedPixels = unpackBinaryMask(selected.mask)
 
+  const selectedPresentation = await presentationStates(
+    dependencies,
+    source,
+    seed,
+    [{ id: selected.id, mask: selected.mask, region: selected.region }],
+    signal,
+  )
+  const focusedState = makeState(
+    args.target,
+    args.exclusions,
+    seed,
+    roi,
+    originalState,
+    selectedPresentation,
+  )
+
   const wholeRequest: DecisionRequest = {
     state: [
-      ...state,
-      `Confirm whether candidate ${choice} covers the entire visible physical target instance, including all visible parts outside SEED. A fragment is not complete.`,
+      ...focusedState,
+      `The single displayed candidate is ${choice}. Its colored pixels show the mask; the outlined rectangle and numeric bounds show the rectangle derived exactly from those foreground pixels. Confirm only whether that rectangle spans the full visible extent of the same physical target instance in ORIGINAL, including parts outside SEED. Pixel-mask holes inside that rectangle are irrelevant to this box-only check. A fragmentary rectangle, another object, or uncertainty is not complete.`,
     ],
     questions: {
       presence: {
         type: 'noul',
-        instructions: `Does candidate ${choice} cover the entire visible extent of the exact physical instance represented by SEED in ORIGINAL? Score 1 only if it includes all visible target parts in the hard ROI; score 0 for a fragment, another object, or an uncertain match.`,
+        instructions: `Does the derived bounding rectangle shown for candidate ${choice} span the entire visible extent of the exact physical instance represented by SEED in ORIGINAL? This is a box-completeness decision, not a pixel-mask completeness decision. Score 1 only if that rectangle includes all visible target parts in the hard ROI; score 0 for a fragment, another object, or uncertainty.`,
       },
     },
   }
