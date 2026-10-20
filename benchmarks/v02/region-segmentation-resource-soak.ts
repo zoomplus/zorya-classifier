@@ -35,6 +35,8 @@ interface CliOptions {
   sourceManifestPath: string
   sourceManifestSha256: string
   archiveReferenceSha256: string
+  carImagePath?: string
+  carMaskPath?: string
   threads: number
   outputPath?: string
   warmupSeconds: number
@@ -49,6 +51,10 @@ interface CycleRecord {
   operation: 'locate' | 'extract'
   status: string
   durationMs: number
+  boxCheckPlan?: 'complete' | 'needs-expansion-then-complete'
+  boxCheckCalls?: number
+  segmentCalls?: number
+  expandCalls?: number
   seedRegion?: PixelRect
   seedIntersectsTarget?: boolean
   seedCenterInsideTarget?: boolean
@@ -91,11 +97,15 @@ function parseOptions(argv: readonly string[]): CliOptions {
   const sourceManifestPath = values.get('source-manifest')
   const sourceManifestSha256 = values.get('source-manifest-sha256')
   const archiveReferenceSha256 = values.get('archive-sha')
+  const carImagePath = values.get('car-image')
+  const carMaskPath = values.get('car-mask')
   if (!encoderPath || !decoderPath) throw new Error('--encoder and --decoder are required')
   if (!sourceManifestPath || !sourceManifestSha256 || !/^[a-f0-9]{64}$/.test(sourceManifestSha256))
     throw new Error('--source-manifest and its pinned --source-manifest-sha256 are required')
   if (!archiveReferenceSha256 || !/^[a-f0-9]{64}$/.test(archiveReferenceSha256))
     throw new Error('--archive-sha must be a reference SHA256 (the harness does not install it)')
+  if ((carImagePath === undefined) !== (carMaskPath === undefined))
+    throw new Error('--car-image and --car-mask must be supplied together')
   const integerOption = (key: string, fallback: number, minimum: number) => {
     const value = Number(values.get(key) ?? fallback)
     if (!Number.isSafeInteger(value) || value < minimum)
@@ -123,6 +133,8 @@ function parseOptions(argv: readonly string[]): CliOptions {
     sourceManifestPath: resolve(sourceManifestPath),
     sourceManifestSha256,
     archiveReferenceSha256,
+    ...(carImagePath ? { carImagePath: resolve(carImagePath) } : {}),
+    ...(carMaskPath ? { carMaskPath: resolve(carMaskPath) } : {}),
     threads,
     ...(outputPath ? { outputPath: resolve(outputPath) } : {}),
     warmupSeconds,
@@ -319,6 +331,8 @@ async function candidateScores(request: DecisionRequest, labels: readonly string
 function closedDecision(options: { rejectNext?: boolean; delayMs?: number } = {}) {
   let rejectNext = options.rejectNext ?? false
   let calls = 0
+  let boxCheckPlan: 'complete' | 'needs-expansion-then-complete' = 'complete'
+  let boxCheckCalls = 0
   const decision: DecisionPort = {
     async decide(request: DecisionRequest, signal: AbortSignal): Promise<DecisionResult> {
       calls++
@@ -328,6 +342,39 @@ function closedDecision(options: { rejectNext?: boolean; delayMs?: number } = {}
         throw new ClassifierError('PROVIDER', 'Benchmark fixture rejection')
       }
       if (signal.aborted) throw new ClassifierError('ABORTED', 'Benchmark decision cancelled')
+      const boxCheck = request.questions.box_check
+      if (boxCheck?.type === 'choice') {
+        const boxVerdicts = Object.keys(boxCheck.criteria)
+        if (
+          boxVerdicts.length !== 3 ||
+          !['complete', 'needs-expansion', 'unknown'].every((label) => boxVerdicts.includes(label))
+        )
+          throw new Error('Checked-flow fixture received an unexpected box-check contract')
+        const verdict =
+          boxCheckPlan === 'needs-expansion-then-complete' && boxCheckCalls === 0
+            ? 'needs-expansion'
+            : 'complete'
+        boxCheckCalls++
+        return {
+          answers: {
+            box_check: {
+              type: 'choice',
+              choice: verdict,
+              probabilities: Object.fromEntries(
+                boxVerdicts.map((label) => [label, label === verdict ? 1 : 0]),
+              ),
+            },
+          },
+          metadata: {
+            model: 'closed-synthetic-fixture',
+            provider: 'local',
+            requestId: `region-fixture-box-${calls}`,
+            durationMs: 0,
+            costUsd: 0,
+            attempts: 1,
+          },
+        }
+      }
       const question = request.questions.selection
       if (!question || question.type !== 'choice')
         throw new Error('Region fixture expected a closed selection question')
@@ -365,12 +412,47 @@ function closedDecision(options: { rejectNext?: boolean; delayMs?: number } = {}
       }
     },
   }
-  return { decision, calls: () => calls }
+  return {
+    decision,
+    calls: () => calls,
+    boxCheckCalls: () => boxCheckCalls,
+    setBoxCheckPlan(plan: 'complete' | 'needs-expansion-then-complete') {
+      boxCheckPlan = plan
+      boxCheckCalls = 0
+    },
+  }
+}
+
+interface SegmenterCounters {
+  segment: number
+  expand: number
+}
+
+function countSegmenterCalls(
+  segmenter: SegmentationPort,
+  counters: SegmenterCounters,
+): SegmentationPort {
+  return {
+    segment(input) {
+      counters.segment++
+      return segmenter.segment(input)
+    },
+    ...(segmenter.expand
+      ? {
+          expand(input, previousMask) {
+            counters.expand++
+            return segmenter.expand!(input, previousMask)
+          },
+        }
+      : {}),
+    settle: () => segmenter.settle(),
+    dispose: () => segmenter.dispose(),
+  }
 }
 
 function classifierOptions(
-  decision: DecisionPort,
   segmentation: SegmentationPort,
+  decision: DecisionPort,
   timeoutMs = 45_000,
 ): ClassifierOptions & { segmentation: SegmentationPort } {
   return { decision, segmentation, timeoutMs, concurrency: 1, maxQueue: 2 }
@@ -406,6 +488,123 @@ function directSegmentInput(signal: AbortSignal): SegmentationInput {
   }
 }
 
+function maskSummary(data: Uint8Array, width: number, height: number) {
+  let count = 0
+  let left = width
+  let top = height
+  let right = -1
+  let bottom = -1
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (data[y * width + x] === 0) continue
+      count++
+      left = Math.min(left, x)
+      top = Math.min(top, y)
+      right = Math.max(right, x)
+      bottom = Math.max(bottom, y)
+    }
+  }
+  return {
+    pixels: count,
+    box: count === 0 ? undefined : { left, top, width: right - left + 1, height: bottom - top + 1 },
+  }
+}
+
+async function carExpansionComponentSmoke(options: CliOptions): Promise<unknown> {
+  if (!options.carImagePath || !options.carMaskPath) return { skipped: 'fixture paths omitted' }
+  const imageBytes = await readFile(options.carImagePath)
+  const imageSha256 = createHash('sha256').update(imageBytes).digest('hex')
+  const expectedImageSha256 = '71b99532e14abb6098a704e9bd9c2c50eebba72588a49e60c8a4b89af4eea4c5'
+  if (imageSha256 !== expectedImageSha256)
+    throw new Error('Car component fixture image SHA256 differs from the pinned exposed DEV image')
+  const decoded = await sharp(imageBytes, { limitInputPixels: 2_000_000 })
+    .rotate()
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+  if (decoded.info.width !== 1024 || decoded.info.height !== 683 || decoded.info.channels !== 4)
+    throw new Error(
+      'Car component image dimensions or channel count do not match the pinned fixture',
+    )
+  const rgba = Uint8Array.from(decoded.data)
+  const maskData = await readFile(options.carMaskPath)
+  const maskSha256 = createHash('sha256').update(maskData).digest('hex')
+  const expectedMaskSha256 = '47cd72ed0235395646e3ddf0d3797f2e032bac5e53c0768fc53bc1de640370d4'
+  if (
+    maskSha256 !== expectedMaskSha256 ||
+    maskData.byteLength !== decoded.info.width * decoded.info.height
+  )
+    throw new Error('Car component previous-mask bytes differ from the pinned exposed DEV mask')
+  const previous = Uint8Array.from(maskData)
+  imageBytes.fill(0)
+  maskData.fill(0)
+  const previousSummary = maskSummary(previous, decoded.info.width, decoded.info.height)
+  if (previousSummary.pixels !== 12_144 || !previousSummary.box)
+    throw new Error('Car previous-mask foreground does not match the pinned component fixture')
+  const input: SegmentationInput = {
+    image: { data: rgba, width: decoded.info.width, height: decoded.info.height, format: 'rgba8' },
+    seedRegion: { left: 704, top: 369, width: 64, height: 57 },
+    prompt: 'seed-region',
+    wholeRegion: { left: 0, top: 0, width: decoded.info.width, height: decoded.info.height },
+    bounds: {
+      left: { start: 0, endExclusive: decoded.info.width },
+      right: { start: 0, endExclusive: decoded.info.width },
+      top: { start: 0, endExclusive: decoded.info.height },
+      bottom: { start: 0, endExclusive: decoded.info.height },
+    },
+    roi: { left: 0, top: 0, width: decoded.info.width, height: decoded.info.height },
+    target: 'the selected car headlight',
+    exclusions: [],
+    completeness: 'visible-object',
+    signal: new AbortController().signal,
+  }
+  const segmenter = await createMobileSamSegmenter({
+    encoderPath: options.encoderPath,
+    decoderPath: options.decoderPath,
+    executionProvider: 'cpu',
+    threads: options.threads,
+  })
+  try {
+    const expanded = await segmenter.expand!(input, {
+      data: previous,
+      width: decoded.info.width,
+      height: decoded.info.height,
+      format: 'binary-u8',
+    })
+    if (expanded.status !== 'segmented')
+      return {
+        imageSha256,
+        previousMaskSha256: maskSha256,
+        previous: previousSummary,
+        expansionStatus: expanded.status,
+        reason: expanded.status === 'unknown' ? expanded.reason : undefined,
+      }
+    const next = maskSummary(expanded.mask.data, expanded.mask.width, expanded.mask.height)
+    const strictEnclosing =
+      next.pixels > previousSummary.pixels &&
+      [...previous].every((value, index) => value === 0 || expanded.mask.data[index] === 1)
+    if (!strictEnclosing)
+      throw new Error(
+        'Native component expansion did not return a strict superset of the supplied mask',
+      )
+    const report = {
+      imageSha256,
+      previousMaskSha256: maskSha256,
+      previous: previousSummary,
+      expanded: next,
+      strictEnclosing,
+      backend: expanded.metadata.backend,
+      method: expanded.metadata.method,
+    }
+    expanded.mask.data.fill(0)
+    return report
+  } finally {
+    rgba.fill(0)
+    previous.fill(0)
+    await segmenter.dispose()
+  }
+}
+
 function intersects(left: PixelRect, right: PixelRect): boolean {
   return intersectionArea(left, right) > 0
 }
@@ -423,9 +622,16 @@ async function oneCycle(
   classifier: Classifier,
   image: Uint8Array,
   operation: 'locate' | 'extract',
+  decision: ReturnType<typeof closedDecision>,
+  counters: SegmenterCounters,
+  boxCheckPlan: 'complete' | 'needs-expansion-then-complete' = 'complete',
   signal = new AbortController().signal,
 ): Promise<CycleRecord> {
   const started = performance.now()
+  const segmentsBefore = counters.segment
+  const expansionsBefore = counters.expand
+  decision.setBoxCheckPlan(boxCheckPlan)
+  const checksBefore = decision.boxCheckCalls()
   try {
     const input = classifierInput(image, signal)
     const result =
@@ -439,6 +645,10 @@ async function oneCycle(
       operation,
       status: result.status,
       durationMs: Math.max(0, performance.now() - started),
+      boxCheckPlan,
+      boxCheckCalls: decision.boxCheckCalls() - checksBefore,
+      segmentCalls: counters.segment - segmentsBefore,
+      expandCalls: counters.expand - expansionsBefore,
       ...(seedRegion
         ? {
             seedRegion,
@@ -462,6 +672,10 @@ async function oneCycle(
       operation,
       status: 'failed',
       durationMs: Math.max(0, performance.now() - started),
+      boxCheckPlan,
+      boxCheckCalls: decision.boxCheckCalls() - checksBefore,
+      segmentCalls: counters.segment - segmentsBefore,
+      expandCalls: counters.expand - expansionsBefore,
       errorCode: error instanceof ClassifierError ? error.code : 'UNEXPECTED',
     }
   }
@@ -646,6 +860,7 @@ async function lifecycleSmoke(
   const abortAndJoin = await abortJoinSmoke(options)
   const queueAndDispose = await queueAndDisposeSmoke(options)
   const parentLoss = await parentLossSmoke(options)
+  const carExpansion = await carExpansionComponentSmoke(options)
 
   const rejectDecision = closedDecision({ rejectNext: true })
   const rejectSegmenter = await createMobileSamSegmenter({
@@ -654,10 +869,20 @@ async function lifecycleSmoke(
     executionProvider: 'cpu',
     threads: options.threads,
   })
+  const rejectCounters: SegmenterCounters = { segment: 0, expand: 0 }
   const rejectClassifier = createClassifier(
-    classifierOptions(rejectDecision.decision, rejectSegmenter),
+    classifierOptions(
+      countSegmenterCalls(rejectSegmenter, rejectCounters),
+      rejectDecision.decision,
+    ),
   )
-  const rejection = await oneCycle(rejectClassifier, image, 'locate')
+  const rejection = await oneCycle(
+    rejectClassifier,
+    image,
+    'locate',
+    rejectDecision,
+    rejectCounters,
+  )
   await disposeInOrder([() => rejectClassifier.dispose(), () => rejectSegmenter.dispose()])
 
   const timeoutDecision = closedDecision({ delayMs: 100 })
@@ -667,10 +892,21 @@ async function lifecycleSmoke(
     executionProvider: 'cpu',
     threads: options.threads,
   })
+  const timeoutCounters: SegmenterCounters = { segment: 0, expand: 0 }
   const timeoutClassifier = createClassifier(
-    classifierOptions(timeoutDecision.decision, timeoutSegmenter, 20),
+    classifierOptions(
+      countSegmenterCalls(timeoutSegmenter, timeoutCounters),
+      timeoutDecision.decision,
+      20,
+    ),
   )
-  const timeout = await oneCycle(timeoutClassifier, image, 'locate')
+  const timeout = await oneCycle(
+    timeoutClassifier,
+    image,
+    'locate',
+    timeoutDecision,
+    timeoutCounters,
+  )
   await disposeInOrder([() => timeoutClassifier.dispose(), () => timeoutSegmenter.dispose()])
   if (rejection.errorCode !== 'PROVIDER')
     throw new Error(`Local decision rejection returned ${rejection.errorCode ?? rejection.status}`)
@@ -680,6 +916,7 @@ async function lifecycleSmoke(
     abortAndJoin,
     queueAndDispose,
     parentLoss,
+    carExpansion,
     localDecisionReject: rejection.errorCode ?? rejection.status,
     timeoutCode: timeout.errorCode ?? timeout.status,
     timeoutDecisionCalls: timeoutDecision.calls(),
@@ -699,7 +936,7 @@ async function writeJson(path: string, value: unknown): Promise<void> {
 async function main(): Promise<void> {
   if (process.argv.includes('--help')) {
     console.log(
-      'Usage: node --import tsx benchmarks/v02/region-segmentation-resource-soak.ts --encoder=/path --decoder=/path --source-manifest=/path --source-manifest-sha256=<64hex> --archive-sha=<reference-64hex> [--threads=1..4] [--smoke] [--warmup-seconds=600] [--duration-seconds=6540] [--idle-seconds=30] [--sample-ms=5000] [--out=new-report.json]',
+      'Usage: node --import tsx benchmarks/v02/region-segmentation-resource-soak.ts --encoder=/path --decoder=/path --source-manifest=/path --source-manifest-sha256=<64hex> --archive-sha=<reference-64hex> [--threads=1..4] [--car-image=/path --car-mask=/path] [--smoke] [--warmup-seconds=600] [--duration-seconds=6540] [--idle-seconds=30] [--sample-ms=5000] [--out=new-report.json]',
     )
     return
   }
@@ -727,11 +964,21 @@ async function main(): Promise<void> {
     threads: options.threads,
   })
   const decision = closedDecision()
-  const classifier = createClassifier(classifierOptions(decision.decision, segmenter))
+  const counters: SegmenterCounters = { segment: 0, expand: 0 }
+  const classifier = createClassifier(
+    classifierOptions(countSegmenterCalls(segmenter, counters), decision.decision),
+  )
   if (options.smoke) {
     const records = [
-      await oneCycle(classifier, image, 'locate'),
-      await oneCycle(classifier, image, 'extract'),
+      await oneCycle(classifier, image, 'locate', decision, counters, 'complete'),
+      await oneCycle(
+        classifier,
+        image,
+        'extract',
+        decision,
+        counters,
+        'needs-expansion-then-complete',
+      ),
     ]
     await disposeInOrder([() => classifier.dispose(), () => segmenter.dispose()])
     const sourceAfter = await verifySourceManifest(
@@ -751,11 +998,22 @@ async function main(): Promise<void> {
           record.status === 'extracted' &&
           record.seedCenterInsideTarget,
       ),
+      exercisedOneRealExpansionRequest: records.some(
+        (record) =>
+          record.boxCheckPlan === 'needs-expansion-then-complete' && record.expandCalls === 1,
+      ),
+      completedSecondContainmentCheck: records.some(
+        (record) =>
+          record.boxCheckPlan === 'needs-expansion-then-complete' &&
+          record.expandCalls === 1 &&
+          record.boxCheckCalls === 2 &&
+          record.status === 'extracted',
+      ),
     }
     const smokeReport = {
       schemaVersion: 1,
-      benchmark: 'public-mobile-sam-region-segmentation-smoke-v1',
-      workflow: 'region-segmentation',
+      benchmark: 'public-mobile-sam-region-checked-segmentation-smoke-v1',
+      workflow: 'region-checked-segmentation',
       executionSource: 'working-tree',
       sourceManifest: { before: sourceBefore, after: sourceAfter },
       archiveReferenceSha256: options.archiveReferenceSha256,
@@ -771,13 +1029,20 @@ async function main(): Promise<void> {
         targetRegion,
         sourceSha256: sourceImageSha256,
         decisionCalls: decision.calls(),
+        boxCheckCalls: decision.boxCheckCalls(),
+        nativeCalls: counters,
         providerHttpCalls: 0,
       },
     }
     if (options.outputPath) await writeJson(options.outputPath, smokeReport)
     else process.stdout.write(`${JSON.stringify(smokeReport, null, 2)}\n`)
-    if (!acceptance.locatedWithForegroundSeed || !acceptance.extractedWithForegroundSeed)
-      throw new Error('Smoke did not locate and extract with an actual foreground-interior seed')
+    if (
+      !acceptance.locatedWithForegroundSeed ||
+      !acceptance.extractedWithForegroundSeed ||
+      !acceptance.exercisedOneRealExpansionRequest ||
+      !acceptance.completedSecondContainmentCheck
+    )
+      throw new Error('Smoke did not locate, extract, and request expansion from an interior seed')
     return
   }
 
@@ -806,8 +1071,12 @@ async function main(): Promise<void> {
     warmupDurationMs = await runMonotonicPhase(
       options.warmupSeconds * 1000,
       async () => {
-        const operation = warmup.length % 2 === 0 ? 'locate' : 'extract'
-        warmup.push(await oneCycle(classifier, image, operation, controller.signal))
+        const index = warmup.length
+        const operation = index % 2 === 0 ? 'locate' : 'extract'
+        const plan = index % 4 < 2 ? 'complete' : 'needs-expansion-then-complete'
+        warmup.push(
+          await oneCycle(classifier, image, operation, decision, counters, plan, controller.signal),
+        )
       },
       { shouldStop: () => controller.signal.aborted },
     )
@@ -828,12 +1097,16 @@ async function main(): Promise<void> {
     busyDurationMs = await runMonotonicPhase(
       options.durationSeconds * 1000,
       async () => {
-        const operation = records.length % 2 === 0 ? 'locate' : 'extract'
-        records.push(await oneCycle(classifier, image, operation, controller.signal))
+        const index = records.length
+        const operation = index % 2 === 0 ? 'locate' : 'extract'
+        const plan = index % 4 < 2 ? 'complete' : 'needs-expansion-then-complete'
+        records.push(
+          await oneCycle(classifier, image, operation, decision, counters, plan, controller.signal),
+        )
         const busyElapsedMs = performance.now() - busyStartedMonotonic
         if (busyElapsedMs >= nextProgressAt) {
           console.error(
-            `region-segmentation soak: ${Math.floor(busyElapsedMs / 60_000)} busy minutes, ${records.length} operations`,
+            `region-checked-segmentation soak: ${Math.floor(busyElapsedMs / 60_000)} busy minutes, ${records.length} operations`,
           )
           nextProgressAt += 5 * 60 * 1000
         }
@@ -918,8 +1191,8 @@ async function main(): Promise<void> {
   const allDurationChecksPassed = Object.values(durationValidation).every(Boolean)
   const report: Record<string, unknown> = {
     schemaVersion: 1,
-    benchmark: 'public-mobile-sam-region-segmentation-resource-v1',
-    workflow: 'region-segmentation',
+    benchmark: 'public-mobile-sam-region-checked-segmentation-resource-v1',
+    workflow: 'region-checked-segmentation',
     executionSource: 'working-tree',
     sourceProof: {
       before: sourceBefore,
@@ -983,6 +1256,12 @@ async function main(): Promise<void> {
       extracted: records.filter((record) => record.status === 'extracted').length,
       extractedWithForegroundSeed: records.filter(
         (record) => record.status === 'extracted' && record.seedCenterInsideTarget === true,
+      ).length,
+      boxChecks: records.reduce((sum, record) => sum + (record.boxCheckCalls ?? 0), 0),
+      expansionRequests: records.filter((record) => (record.expandCalls ?? 0) > 0).length,
+      completedAfterExpansion: records.filter(
+        (record) =>
+          record.status === 'extracted' && record.expandCalls === 1 && record.boxCheckCalls === 2,
       ).length,
       seedCenterInsideTarget: records.filter((record) => record.seedCenterInsideTarget === true)
         .length,
