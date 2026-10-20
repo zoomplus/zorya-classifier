@@ -7,8 +7,10 @@ import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 import sharp from 'sharp'
 import {
+  compareHeldoutPhotoLocalization,
   evaluateFreshProposalRun,
   freshProposalInputPins,
+  freshProposalPhasePins,
   normalizeFreshProposalOutput,
 } from '../benchmarks/v02/evaluate-proposals.js'
 import { freshProducerTask, loadFreshCorpus } from '../benchmarks/v02/fresh-corpus.js'
@@ -63,8 +65,17 @@ async function setup() {
   })
     .png()
     .toBuffer()
+  const otherReferencePixels = Buffer.alloc(cases[2]!.image.width * cases[2]!.image.height)
+  otherReferencePixels[otherReferencePixels.length - 1] = 255
+  const otherReferencePng = await sharp(otherReferencePixels, {
+    raw: { width: cases[2]!.image.width, height: cases[2]!.image.height, channels: 1 },
+  })
+    .png()
+    .toBuffer()
   const referencePath = join(directory, 'reference-mask.png')
+  const otherReferencePath = join(directory, 'reference-mask-other.png')
   await writeFile(referencePath, referencePng, { flag: 'wx' })
+  await writeFile(otherReferencePath, otherReferencePng, { flag: 'wx' })
   const sourceHashes = Object.fromEntries(
     [
       './fresh-proposal-runner.ts',
@@ -295,13 +306,16 @@ async function setup() {
               ...(item.caseId === cases[2]!.caseId
                 ? {
                     referenceMasks: [
-                      {
-                        path: referencePath,
-                        sha256: createHash('sha256').update(referencePng).digest('hex'),
-                        bytes: referencePng.length,
+                      ...[
+                        { path: 'reference-mask.png', bytes: referencePng },
+                        { path: 'reference-mask-other.png', bytes: otherReferencePng },
+                      ].map(({ path, bytes }) => ({
+                        path,
+                        sha256: createHash('sha256').update(bytes).digest('hex'),
+                        bytes: bytes.length,
                         width: cases[2]!.image.width,
                         height: cases[2]!.image.height,
-                      },
+                      })),
                     ],
                   }
                 : {}),
@@ -336,6 +350,145 @@ await test('normalizes raw physical call counts and preserves unknown/failed sta
   } finally {
     await rm(fixture.directory, { recursive: true, force: true })
   }
+})
+
+await test('heldout schema pins 80 cases, exact 40/20/20 manifests and heldout budgets', async () => {
+  const fixture = await setup()
+  try {
+    assert.equal(freshProposalPhasePins.heldout.totalCases, 80)
+    assert.deepEqual(
+      freshProposalPhasePins.heldout.manifests.map((item) => item.cases),
+      [40, 20, 20],
+    )
+    assert.deepEqual(freshProposalPhasePins.heldout.budget, {
+      maxPhysicalCalls: 600,
+      maxCostUsd: 10,
+      latencyRankingEligible: false,
+    })
+    const cases = Array.from({ length: 80 }, (_, index) => {
+      const item = structuredClone(fixture.cases[index % fixture.cases.length]!)
+      item.caseId = `synthetic-heldout-${String(index).padStart(2, '0')}`
+      return item
+    })
+    const runManifest = structuredClone(fixture.runManifest) as typeof fixture.runManifest & {
+      phase?: 'heldout'
+    }
+    runManifest.phase = 'heldout'
+    runManifest.purpose = freshProposalPhasePins.heldout.purpose
+    runManifest.manifests = freshProposalPhasePins.heldout.manifests.map((item) => ({ ...item }))
+    runManifest.plannedCaseIds = cases.map((item) => item.caseId)
+    runManifest.plannedCases = cases.map((item) => ({
+      caseId: item.caseId,
+      imageSha256: item.image.sha256,
+      imageDimensions: { width: item.image.width, height: item.image.height },
+    }))
+    runManifest.taskManifest = cases.map((item) => ({
+      caseId: item.caseId,
+      task: freshProducerTask(item),
+    }))
+    runManifest.policy.maxPhysicalCalls = 600
+    runManifest.policy.maxCostUsd = 10
+    runManifest.policy.latencyRankingEligible = false
+
+    const summary = structuredClone(fixture.summary) as typeof fixture.summary & {
+      phase?: 'heldout'
+    }
+    summary.phase = 'heldout'
+    summary.plannedCaseIds = cases.map((item) => item.caseId)
+    summary.completedCaseIds = cases.map((item) => item.caseId)
+    summary.missingCaseIds = []
+    summary.results = cases.map((item, index) => {
+      const row = structuredClone(fixture.summary.results[index % fixture.summary.results.length]!)
+      row.caseId = item.caseId
+      row.imageSha256 = item.image.sha256
+      if (index >= fixture.summary.results.length) {
+        row.classify.physicalCalls = 0
+        row.classify.logicalCalls = 0
+        row.classify.requestHashes = []
+        row.locate.physicalCalls = 0
+        row.locate.logicalCalls = 0
+        row.locate.requestHashes = []
+      }
+      return row
+    })
+    summary.aggregate.maxPhysicalCalls = 600
+    summary.aggregate.maxCostUsd = 10
+    summary.latencyRankingEligible = false
+
+    const normalized = normalizeFreshProposalOutput(
+      summary,
+      runManifest,
+      cases,
+      freshProposalPhasePins.heldout.manifests,
+      { summarySha256: '7'.repeat(64), runManifestSha256: '8'.repeat(64) },
+      freshProposalPhasePins.heldout.manifests,
+      'heldout',
+    )
+    assert.equal(normalized.phase, 'heldout')
+    assert.equal(normalized.results.length, 80)
+    assert.equal(normalized.rawProposalProvenance.phase, 'heldout')
+    const missingPhase = structuredClone(summary)
+    delete missingPhase.phase
+    assert.throws(
+      () =>
+        normalizeFreshProposalOutput(
+          missingPhase,
+          runManifest,
+          cases,
+          freshProposalPhasePins.heldout.manifests,
+          { summarySha256: '7'.repeat(64), runManifestSha256: '8'.repeat(64) },
+          freshProposalPhasePins.heldout.manifests,
+          'heldout',
+        ),
+      /explicit heldout phase/u,
+    )
+  } finally {
+    await rm(fixture.directory, { recursive: true, force: true })
+  }
+})
+
+await test('heldout pairing reports all 40 photos and bootstraps the 30 positive pairs', () => {
+  const heldoutPins = freshProposalPhasePins.heldout.manifests
+  const photoRows = Array.from({ length: 40 }, (_, index) => ({
+    caseId: `photo-heldout-${String(index).padStart(2, '0')}`,
+    expectedPresence: index < 30 ? ('present' as const) : ('absent' as const),
+    sourceStatus: index === 30 ? 'located' : 'not-found',
+    classificationCorrect: true,
+    localizationCorrect: index % 2 === 0,
+  }))
+  const candidate = {
+    phase: 'heldout',
+    runId: 'held-candidate',
+    profileId: 'native-mobile-sam-proposals-v1',
+    complete: true,
+    coverage: { planned: 80, reported: 80 },
+    inputs: heldoutPins,
+    truthSha256: ['a'.repeat(64), 'b'.repeat(64), 'c'.repeat(64)],
+    rows: [
+      ...photoRows,
+      ...Array.from({ length: 40 }, (_, index) => ({
+        ...photoRows[index % photoRows.length]!,
+        caseId: `other-heldout-${String(index).padStart(2, '0')}`,
+      })),
+    ],
+  } as Parameters<typeof compareHeldoutPhotoLocalization>[0]
+  const control = {
+    runId: 'no-image-control',
+    profileId: 'no-image-control',
+    complete: true,
+    coverage: { planned: 40, reported: 40 },
+    inputs: [heldoutPins[0]!],
+    truthSha256: ['a'.repeat(64)],
+    rows: photoRows.map((item) => ({ ...item, localizationCorrect: !item.localizationCorrect })),
+  } as Parameters<typeof compareHeldoutPhotoLocalization>[1]
+  const paired = compareHeldoutPhotoLocalization(candidate, control)
+  assert.equal(paired.photoCases, 40)
+  assert.equal(paired.positivePairs, 30)
+  assert.equal(paired.negativeCases, 10)
+  assert.equal(paired.allGroupsNegativeCases, 20)
+  assert.equal(paired.candidateFalseLocations.length, 1)
+  assert.equal(paired.bootstrap.iterations, 10_000)
+  assert.equal(paired.bootstrap.seed, '0x5a4f5259')
 })
 
 await test('incomplete raw output retains missing cases and rejects inconsistent coverage', async () => {
@@ -469,8 +622,11 @@ await test('adapter writes exclusive derived artifacts and invokes the strict in
     assert.equal(result.provenance.runManifestSha256, runManifest.sha256)
     assert.equal(result.provenance.physicalCalls, 1)
     assert.equal(result.proposalMaskMetrics.scoredCases, 1)
+    assert.equal(result.proposalMaskMetrics.referenceInstances, 2)
+    assert.equal(result.proposalMaskMetrics.scoredReferenceInstances, 2)
     assert.equal(result.proposalMaskMetrics.passedCases, 1)
     assert.equal(result.proposalMaskMetrics.meanBestInstanceIoU, 1)
+    assert.equal(result.proposalMaskMetrics.rows[2]!.instanceIoUs!.length, 2)
     const derived = JSON.parse(
       await readFile(join(fixture.directory, 'normalized-summary.json'), 'utf8'),
     ) as {

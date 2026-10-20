@@ -1,12 +1,13 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { unlink, writeFile } from 'node:fs/promises'
-import { dirname, isAbsolute, resolve } from 'node:path'
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
 import sharp from 'sharp'
 import { z } from 'zod'
 import { assertActive } from '../../src/entities/errors.js'
 import { evaluateFreshRun } from './evaluate-fresh.js'
 import { freshProducerTask, loadFreshCorpus, readBoundedCorpusFile } from './fresh-corpus.js'
 import type { FreshCase } from './fresh-corpus.js'
+import { pairedBootstrap } from './metrics.js'
 import { hashCanonical } from './protocol.js'
 
 const profileId = 'native-mobile-sam-proposals-v1'
@@ -31,6 +32,26 @@ export const freshProposalInputPins = Object.freeze([
   { sha256: '6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc', cases: 10 },
   { sha256: 'b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15', cases: 10 },
 ])
+
+export const freshProposalPhasePins = Object.freeze({
+  dev: {
+    totalCases: 40,
+    purpose: 'full fresh DEV photo, independent UI and independent map producer pass',
+    manifests: freshProposalInputPins,
+    budget: { maxPhysicalCalls: 300, maxCostUsd: 5, latencyRankingEligible: false },
+  },
+  heldout: {
+    totalCases: 80,
+    purpose: 'full frozen HELDOUT photo, independent UI and independent map producer pass',
+    manifests: Object.freeze([
+      { sha256: 'f0be4b9b2d5a11bd77f1b890860745c3bf17dd185b5cc1fb73c1af674c9465d5', cases: 40 },
+      { sha256: '598da2b326e8d4cbedf1ca0517ce6ecccc8d141125ee53a88ef397aa9a5ea0a2', cases: 20 },
+      { sha256: 'afb2e521962573709ab25ddf53beab4f17d2e33c74192c4fd9218cc34e03efb3', cases: 20 },
+    ]),
+    budget: { maxPhysicalCalls: 600, maxCostUsd: 10, latencyRankingEligible: false },
+  },
+})
+type ProposalPhase = keyof typeof freshProposalPhasePins
 
 const boxSchema = z
   .object({
@@ -101,7 +122,7 @@ const caseManifestSchema = z
   .strict()
 const taskManifestSchema = z
   .array(z.object({ caseId: z.string().min(1), task: producerTaskSchema }).strict())
-  .length(40)
+  .max(120)
 const sourceHashesSchema = z.record(z.string().min(1), digestSchema).refine((value) => {
   const required = [
     './fresh-proposal-runner.ts',
@@ -120,7 +141,8 @@ const runManifestSchema = z
     schemaVersion: z.literal(1),
     runId: z.string().min(1).max(160),
     profileId: z.literal(profileId),
-    purpose: z.literal('full fresh DEV photo, independent UI and independent map producer pass'),
+    phase: z.literal('heldout').optional(),
+    purpose: z.string().min(1).max(200),
     startedAt: z.string().datetime(),
     variantSha256: digestSchema,
     producerSourceSha256: digestSchema,
@@ -128,8 +150,8 @@ const runManifestSchema = z
     manifests: z
       .array(z.object({ sha256: digestSchema, cases: z.number().int().positive() }).strict())
       .length(3),
-    plannedCaseIds: z.array(z.string().min(1).max(128)).length(40),
-    plannedCases: z.array(caseManifestSchema).length(40),
+    plannedCaseIds: z.array(z.string().min(1).max(128)).max(120),
+    plannedCases: z.array(caseManifestSchema).max(120),
     route: routeSchema,
     mobileSam: proposalAssetSchema,
     policy: policySchema,
@@ -161,6 +183,10 @@ const runManifestSchema = z
       context.addIssue({ code: 'custom', message: 'Run manifest source-hash digest mismatch' })
     if (!sameJson(value.mobileSam, expectedProposalAssets))
       context.addIssue({ code: 'custom', message: 'Run manifest MobileSAM asset pin mismatch' })
+    if (value.phase === undefined && value.purpose !== freshProposalPhasePins.dev.purpose)
+      context.addIssue({ code: 'custom', message: 'DEV run manifest phase/purpose mismatch' })
+    if (value.phase === 'heldout' && value.purpose !== freshProposalPhasePins.heldout.purpose)
+      context.addIssue({ code: 'custom', message: 'Heldout run manifest phase/purpose mismatch' })
   })
 
 const stageCommon = {
@@ -384,16 +410,17 @@ const rawSummarySchema = z
     profileId: z.literal(profileId),
     variantSha256: digestSchema,
     status: z.enum(['complete', 'incomplete']),
-    plannedCaseIds: z.array(z.string().min(1).max(128)).length(40),
-    completedCaseIds: z.array(z.string().min(1).max(128)).max(40),
-    missingCaseIds: z.array(z.string().min(1).max(128)).max(40),
-    results: z.array(resultSchema).max(40),
+    phase: z.literal('heldout').optional(),
+    plannedCaseIds: z.array(z.string().min(1).max(128)).max(120),
+    completedCaseIds: z.array(z.string().min(1).max(128)).max(120),
+    missingCaseIds: z.array(z.string().min(1).max(128)).max(120),
+    results: z.array(resultSchema).max(120),
     aggregate: budgetSchema,
     latencyEnvironment: z.string().min(1).max(200),
     latencyRankingEligible: z.boolean(),
     initializationError: z.string().max(100).nullable(),
     shutdownError: z.string().max(100).nullable(),
-    physicalReceipts: z.array(physicalReceiptSchema).max(300),
+    physicalReceipts: z.array(physicalReceiptSchema).max(600),
   })
   .strict()
 
@@ -410,6 +437,7 @@ const referenceMaskSchema = z
     height: z.number().int().positive().max(2048),
   })
   .passthrough()
+  .refine((mask) => mask.width * mask.height <= 2_097_152)
 const maskTruthRowSchema = z
   .object({
     caseId: z.string().min(1),
@@ -419,6 +447,7 @@ const maskTruthRowSchema = z
 
 const optionsSchema = z
   .object({
+    phase: z.enum(['dev', 'heldout']).optional(),
     rawSummary: pinnedFileSchema,
     runManifest: pinnedFileSchema,
     corpus: z
@@ -462,6 +491,15 @@ function sameJson(left: unknown, right: unknown): boolean {
   return hashCanonical(left) === hashCanonical(right)
 }
 
+function assertPathWithin(root: string, path: string, label: string): string {
+  const base = resolve(root)
+  const resolvedPath = resolve(path)
+  const value = relative(base, resolvedPath)
+  if (!value || value === '..' || value.startsWith(`..${sep}`) || isAbsolute(value))
+    throw new Error(`${label} escaped its configured root`)
+  return resolvedPath
+}
+
 /** Normalize a validated raw runner artifact; exported for fixture-level tests only. */
 export function normalizeFreshProposalOutput(
   rawSummary: unknown,
@@ -470,17 +508,43 @@ export function normalizeFreshProposalOutput(
   manifests: readonly { sha256: string; cases: number }[],
   rawHashes: { summarySha256: string; runManifestSha256: string },
   acceptedManifestPins: readonly { sha256: string; cases: number }[] = freshProposalInputPins,
+  phase: ProposalPhase = 'dev',
 ) {
   const summary = rawSummarySchema.parse(rawSummary)
   const run = runManifestSchema.parse(rawRunManifest)
+  const phaseConfig = freshProposalPhasePins[phase]
+  if (phase === 'heldout' && (run.phase !== 'heldout' || summary.phase !== 'heldout'))
+    throw new Error('Heldout evaluation requires explicit heldout phase in manifest and summary')
+  if ((run.phase && run.phase !== phase) || (summary.phase && summary.phase !== phase))
+    throw new Error('Fresh proposal phase identity mismatch')
+  if (run.purpose !== phaseConfig.purpose) throw new Error('Fresh proposal phase purpose mismatch')
+  if (
+    cases.length !== phaseConfig.totalCases ||
+    summary.plannedCaseIds.length !== phaseConfig.totalCases
+  )
+    throw new Error('Fresh proposal phase case count mismatch')
   if (acceptedManifestPins.length !== 3 || manifests.length !== 3)
     throw new Error('Fresh proposal requires exactly three pinned source manifests')
-  if (!sameJson(manifests, acceptedManifestPins) || !sameJson(run.manifests, acceptedManifestPins))
+  if (
+    !sameJson(acceptedManifestPins, phaseConfig.manifests) ||
+    !sameJson(manifests, phaseConfig.manifests) ||
+    !sameJson(run.manifests, phaseConfig.manifests)
+  )
     throw new Error('Fresh proposal source manifest pins mismatch')
   if (summary.runId !== run.runId || summary.profileId !== run.profileId)
     throw new Error('Fresh proposal summary/run profile identity mismatch')
   if (summary.variantSha256 !== run.variantSha256)
     throw new Error('Fresh proposal variant digest mismatch')
+  if (
+    phase === 'heldout' &&
+    (run.policy.maxPhysicalCalls !== phaseConfig.budget.maxPhysicalCalls ||
+      run.policy.maxCostUsd !== phaseConfig.budget.maxCostUsd ||
+      run.policy.latencyRankingEligible ||
+      summary.aggregate.maxPhysicalCalls !== phaseConfig.budget.maxPhysicalCalls ||
+      summary.aggregate.maxCostUsd !== phaseConfig.budget.maxCostUsd ||
+      summary.latencyRankingEligible)
+  )
+    throw new Error('Heldout budget or latency-ranking policy mismatch')
   if (
     !/^[a-f0-9]{64}$/u.test(rawHashes.summarySha256) ||
     !/^[a-f0-9]{64}$/u.test(rawHashes.runManifestSha256)
@@ -548,6 +612,7 @@ export function normalizeFreshProposalOutput(
 
   const normalized = {
     runId: run.runId,
+    phase,
     status: summary.status,
     completedCaseIds: summary.completedCaseIds,
     missingCaseIds: summary.missingCaseIds,
@@ -588,6 +653,7 @@ export function normalizeFreshProposalOutput(
       rawSummarySha256: rawHashes.summarySha256,
       rawRunManifestSha256: rawHashes.runManifestSha256,
       profileId: run.profileId,
+      phase,
       variantSha256: run.variantSha256,
       producerSourceSha256: run.producerSourceSha256,
       sourceHashes: run.sourceHashes,
@@ -613,10 +679,10 @@ async function scoreProposalMasks(
   corpus: readonly FreshCase[],
   truthFiles: readonly z.infer<typeof pinnedFileSchema>[],
   runDirectory: string,
+  referenceRoot: string,
   signal: AbortSignal,
 ) {
   const truthById = new Map<string, z.infer<typeof maskTruthRowSchema>>()
-  const repoRoot = resolve(dirname(truthFiles[0]!.path), '../../../..')
   for (const file of truthFiles) {
     const { value } = await readPinnedJson(file, signal)
     for (const row of z.array(maskTruthRowSchema).parse(value)) {
@@ -629,6 +695,7 @@ async function scoreProposalMasks(
     caseId: string
     status: 'scored' | 'missing-prediction' | 'not-extracted' | 'no-reference-mask'
     referenceInstances: number
+    instanceIoUs?: Array<{ referenceMaskSha256: string; iou: number; meetsThreshold: boolean }>
     bestInstanceIoU?: number
     meetsThreshold?: boolean
   }>
@@ -660,21 +727,27 @@ async function scoreProposalMasks(
     const mask = result.extract.mask
     const safeCaseId = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u.test(item.caseId)
     if (!safeCaseId) throw new Error('Unsafe proposal case ID in artifact path')
-    const artifactPath = resolve(runDirectory, item.caseId, mask.file)
-    if (!artifactPath.startsWith(`${resolve(runDirectory)}/`))
-      throw new Error('Proposal mask artifact escaped the raw run directory')
-    const predicted = await readBoundedCorpusFile(artifactPath, 2_000_000, signal)
+    const artifactPath = assertPathWithin(
+      runDirectory,
+      resolve(runDirectory, item.caseId, mask.file),
+      'Proposal mask artifact',
+    )
+    const predicted = await readBoundedCorpusFile(artifactPath, 2_097_152, signal)
     try {
       if (predicted.length !== mask.width * mask.height || sha256(predicted) !== mask.sha256)
         throw new Error('Proposal mask byte length or digest mismatch')
       if (predicted.some((value) => value !== 0 && value !== 1))
         throw new Error('Proposal mask is not binary 0/1')
-      const pngPath = resolve(runDirectory, item.caseId, mask.pngFile)
+      const pngPath = assertPathWithin(
+        runDirectory,
+        resolve(runDirectory, item.caseId, mask.pngFile),
+        'Proposal cutout artifact',
+      )
       const cutout = await readBoundedCorpusFile(pngPath, 8 * 1024 * 1024, signal)
       try {
         if (sha256(cutout) !== mask.pngSha256)
           throw new Error('Proposal cutout PNG digest mismatch')
-        const pngInfo = await sharp(cutout, { limitInputPixels: 2_000_000 }).metadata()
+        const pngInfo = await sharp(cutout, { limitInputPixels: 2_097_152 }).metadata()
         if (
           pngInfo.format !== 'png' ||
           pngInfo.width !== mask.width ||
@@ -686,19 +759,27 @@ async function scoreProposalMasks(
       }
 
       let best = 0
+      const instanceIoUs: Array<{
+        referenceMaskSha256: string
+        iou: number
+        meetsThreshold: boolean
+      }> = []
       for (const descriptor of references) {
         if (descriptor.width !== item.image.width || descriptor.height !== item.image.height)
           throw new Error('Reference mask geometry differs from frozen source image')
-        const truthPath = isAbsolute(descriptor.path)
-          ? resolve(descriptor.path)
-          : resolve(repoRoot, descriptor.path)
-        if (!isAbsolute(descriptor.path) && !truthPath.startsWith(`${repoRoot}/`))
-          throw new Error('Reference mask path escaped repository')
+        if (isAbsolute(descriptor.path) || /^[A-Za-z]:[\\/]/u.test(descriptor.path))
+          throw new Error('Reference mask path must be relative to the pinned corpus root')
+        const referenceBase = resolve(referenceRoot)
+        const truthPath = assertPathWithin(
+          referenceBase,
+          resolve(referenceBase, descriptor.path),
+          'Reference mask path',
+        )
         const truthBytes = await readBoundedCorpusFile(truthPath, descriptor.bytes, signal)
         try {
           if (truthBytes.length !== descriptor.bytes || sha256(truthBytes) !== descriptor.sha256)
             throw new Error('Reference mask byte length or digest mismatch')
-          const decoded = await sharp(truthBytes, { limitInputPixels: 2_000_000 })
+          const decoded = await sharp(truthBytes, { limitInputPixels: 2_097_152 })
             .greyscale()
             .raw()
             .toBuffer({ resolveWithObject: true })
@@ -730,6 +811,11 @@ async function scoreProposalMasks(
           }
           const iou = union === 0 ? 0 : intersection / union
           if (iou > best) best = iou
+          instanceIoUs.push({
+            referenceMaskSha256: descriptor.sha256,
+            iou,
+            meetsThreshold: iou >= 0.8,
+          })
         } finally {
           truthBytes.fill(0)
         }
@@ -738,6 +824,7 @@ async function scoreProposalMasks(
         caseId: item.caseId,
         status: 'scored',
         referenceInstances: references.length,
+        instanceIoUs,
         bestInstanceIoU: best,
         meetsThreshold: best >= 0.8,
       })
@@ -750,13 +837,26 @@ async function scoreProposalMasks(
     threshold: 0.8,
     truthCases: rows.filter((row) => row.referenceInstances > 0).length,
     scoredCases: scored.length,
-    unavailableCases: rows.length - scored.length,
+    unavailableAnnotatedCases: rows.filter(
+      (row) => row.referenceInstances > 0 && row.status !== 'scored',
+    ).length,
+    unannotatedCases: rows.filter((row) => row.status === 'no-reference-mask').length,
+    referenceInstances: rows.reduce((sum, row) => sum + row.referenceInstances, 0),
+    scoredReferenceInstances: scored.reduce((sum, row) => sum + (row.instanceIoUs?.length ?? 0), 0),
+    unavailableReferenceInstances:
+      rows.reduce((sum, row) => sum + row.referenceInstances, 0) -
+      scored.reduce((sum, row) => sum + (row.instanceIoUs?.length ?? 0), 0),
+    passingReferenceInstances: scored.reduce(
+      (sum, row) =>
+        sum + (row.instanceIoUs?.filter((instance) => instance.meetsThreshold).length ?? 0),
+      0,
+    ),
     passedCases: scored.filter((row) => row.meetsThreshold).length,
     meanBestInstanceIoU: scored.length
       ? scored.reduce((sum, row) => sum + row.bestInstanceIoU!, 0) / scored.length
       : null,
     matching:
-      'maximum IoU over independently supplied Open Images instance masks; not bbox correctness',
+      'Place each cropped 0/1 prediction at its absolute sourceOffset; compare pixelwise against every independent source-sized Open Images instance mask. Emit one IoU per reference-mask SHA; case pass is the maximum instance IoU >= 0.8. This is separate from bbox correctness.',
     rows,
   }
 }
@@ -768,6 +868,10 @@ export async function evaluateFreshProposalRun(
 ) {
   assertActive(signal)
   const options = optionsSchema.parse(input)
+  const phase: ProposalPhase = options.phase ?? 'dev'
+  if (phase === 'heldout' && options.phase !== 'heldout')
+    throw new Error('Heldout evaluation requires an explicit phase')
+  const phaseConfig = freshProposalPhasePins[phase]
   const paths = [
     options.rawSummary.path,
     options.runManifest.path,
@@ -784,14 +888,18 @@ export async function evaluateFreshProposalRun(
     readPinnedJson(options.runManifest, signal),
   ])
   const corpus = await loadFreshCorpus(options.corpus, signal)
-  if (!sameJson(corpus.manifests, freshProposalInputPins))
-    throw new Error('Fresh proposal evaluator was given non-active DEV source pins')
+  if (!sameJson(corpus.manifests, phaseConfig.manifests))
+    throw new Error(`Fresh proposal evaluator was given non-active ${phase} source pins`)
+  if (corpus.cases.length !== phaseConfig.totalCases)
+    throw new Error(`Fresh proposal evaluator requires ${phaseConfig.totalCases} cases`)
   const derived = normalizeFreshProposalOutput(
     rawSummary.value,
     rawRunManifest.value,
     corpus.cases,
     corpus.manifests,
     { summarySha256: rawSummary.sha256, runManifestSha256: rawRunManifest.sha256 },
+    phaseConfig.manifests,
+    phase,
   )
   const rawSummaryValue = rawSummarySchema.parse(rawSummary.value)
   const proposalMaskMetrics = await scoreProposalMasks(
@@ -799,6 +907,7 @@ export async function evaluateFreshProposalRun(
     corpus.cases,
     options.truths,
     dirname(resolve(options.rawSummary.path)),
+    options.corpus.imageRoot,
     signal,
   )
   const derivedBytes = `${JSON.stringify(derived, null, 2)}\n`
@@ -823,6 +932,7 @@ export async function evaluateFreshProposalRun(
   }
   const finalEvaluation = {
     ...evaluated,
+    phase,
     proposalExtractions: derived.proposalExtractions,
     proposalMaskMetrics,
   }
@@ -834,6 +944,7 @@ export async function evaluateFreshProposalRun(
     normalization: 'fresh-proposal-summary-adapter-v1',
     runId: evaluated.runId,
     profileId: evaluated.profileId,
+    phase,
     rawSummarySha256: rawSummary.sha256,
     runManifestSha256: rawRunManifest.sha256,
     derivedSummarySha256: derivedSha256,
@@ -847,4 +958,81 @@ export async function evaluateFreshProposalRun(
   }
   await writeExclusive(options.provenanceOutput, `${JSON.stringify(provenance, null, 2)}\n`)
   return { ...finalEvaluation, provenance }
+}
+
+/** Paired heldout photo localization against the frozen no-image text baseline. */
+export function compareHeldoutPhotoLocalization(
+  candidate: Awaited<ReturnType<typeof evaluateFreshProposalRun>>,
+  control: Awaited<ReturnType<typeof evaluateFreshRun>>,
+) {
+  const heldoutPins = freshProposalPhasePins.heldout.manifests
+  const photoPin = heldoutPins[0]!
+  if (candidate.phase !== 'heldout' || candidate.profileId !== profileId)
+    throw new Error('Candidate must be a completed heldout proposal evaluation')
+  if (control.profileId !== 'no-image-control')
+    throw new Error('Control evaluation must use the frozen no-image-control profile')
+  if (
+    !candidate.complete ||
+    candidate.coverage.planned !== 80 ||
+    candidate.coverage.reported !== 80 ||
+    !control.complete ||
+    control.coverage.planned !== 40 ||
+    control.coverage.reported !== 40
+  )
+    throw new Error('Heldout pairing requires complete 80-case candidate and 40-case control runs')
+  if (
+    !sameJson(candidate.inputs, heldoutPins) ||
+    !sameJson(control.inputs, [photoPin]) ||
+    candidate.truthSha256.length !== 3 ||
+    control.truthSha256.length !== 1 ||
+    candidate.truthSha256[0] !== control.truthSha256[0]
+  )
+    throw new Error('Candidate and no-image control do not share the frozen heldout photo truth')
+  const candidatePhotos = candidate.rows.slice(0, 40)
+  const controlPhotos = control.rows
+  if (candidatePhotos.length !== 40 || controlPhotos.length !== 40)
+    throw new Error('Heldout photo group does not contain exactly 40 paired cases')
+  sameIds(
+    candidatePhotos.map((item) => item.caseId),
+    controlPhotos.map((item) => item.caseId),
+    'heldout photo pair',
+  )
+  const controlsById = new Map(controlPhotos.map((item) => [item.caseId, item]))
+  for (const item of candidatePhotos) {
+    if (item.expectedPresence !== controlsById.get(item.caseId)!.expectedPresence)
+      throw new Error('Candidate/control photo truth presence mismatch')
+  }
+  const positiveCandidate = candidatePhotos.filter((item) => item.expectedPresence === 'present')
+  if (positiveCandidate.length !== 30 || candidatePhotos.length - positiveCandidate.length !== 10)
+    throw new Error('Heldout photo positive/negative strata differ from frozen 30/10 counts')
+  const bootstrap = pairedBootstrap(
+    positiveCandidate.map((item) => ({
+      caseId: item.caseId,
+      candidate: item.localizationCorrect,
+      control: controlsById.get(item.caseId)!.localizationCorrect,
+    })),
+  )
+  const candidateFalseLocations = candidatePhotos
+    .filter((item) => item.expectedPresence === 'absent' && item.sourceStatus === 'located')
+    .map((item) => item.caseId)
+  const controlFalseLocations = controlPhotos
+    .filter((item) => item.expectedPresence === 'absent' && item.sourceStatus === 'located')
+    .map((item) => item.caseId)
+  const allCandidateNegatives = candidate.rows.filter((item) => item.expectedPresence === 'absent')
+  if (allCandidateNegatives.length !== 20)
+    throw new Error('Heldout combined photo/UI/map negative count differs from the frozen 20')
+  const candidateFalseLocationsAllGroups = allCandidateNegatives
+    .filter((item) => item.sourceStatus === 'located')
+    .map((item) => item.caseId)
+  return {
+    photoCases: 40,
+    positivePairs: bootstrap.pairs,
+    negativeCases: 10,
+    candidateFalseLocations,
+    controlFalseLocations,
+    allGroupsNegativeCases: allCandidateNegatives.length,
+    candidateFalseLocationsAllGroups,
+    bootstrap,
+    denominator: 'positive heldout photo cases only; negative photo behavior reported separately',
+  }
 }
