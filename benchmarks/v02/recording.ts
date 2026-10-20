@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import type { DecisionPort, DecisionRequest, DecisionResult } from '../../src/entities/contracts.js'
 import { ClassifierError } from '../../src/entities/errors.js'
 import type { RunBudget } from './budget.js'
-import { hashCanonical, sanitizeDecisionRequest } from './protocol.js'
+import { createDecisionTrace, hashCanonical, sanitizeDecisionRequest } from './protocol.js'
 
 type WireErrorCategory =
   | 'unsupported-parameter'
@@ -619,9 +619,18 @@ export function recordProvider(
         { flag: 'wx' },
       )
       try {
-        const result = await currentLogical.run(logical, () =>
+        const rawResult = await currentLogical.run(logical, () =>
           provider.decide(structuredClone(request), signal),
         )
+        const traced = createDecisionTrace(request, rawResult)
+        await writeFile(
+          join(directory, `decision-trace-${logical.logicalId}.json`),
+          JSON.stringify(traced.trace, null, 2) + '\n',
+          { flag: 'wx' },
+        )
+        if (!traced.result)
+          throw new ClassifierError('INVALID_RESPONSE', 'Decision result failed validation')
+        const result = traced.result
         for (const physicalId of logical.physicalIds) {
           const physical = calls.find((item) => item.physicalId === physicalId)
           if (!physical) throw new Error('Missing physical fetch ledger entry')

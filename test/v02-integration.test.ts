@@ -11,6 +11,8 @@ import { writeExtractionFiles } from '../src/app/extraction-files.js'
 import { mkdtemp, readFile, writeFile, rm, readdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { createSharpBoundaryView } from '../src/infrastructure/boundary-view.js'
+import type { BoundaryViewPort } from '../src/entities/boundary-view.js'
 
 const representation = { type: 'experimental-text', profile: 'text-image-v1' } as const
 const classes = [
@@ -73,6 +75,11 @@ await test('text image workflow emits zero images through classification, seed a
   const classifier = createResearchClassifier(
     { decision },
     createTextRepresentation(pixelRleV1Encoder),
+    {
+      async render() {
+        throw new Error('Text-only operations must not invoke a boundary image renderer')
+      },
+    },
   )
   try {
     const classified = await classifier.classify({ input: { image }, classes, representation })
@@ -95,6 +102,64 @@ await test('text image workflow emits zero images through classification, seed a
     assert.equal(calls, 9)
   } finally {
     await classifier.dispose()
+  }
+})
+
+await test('research boundary presentation composes through locate and extract without changing the default', async () => {
+  const image = await sharp({
+    create: { width: 512, height: 384, channels: 3, background: '#ffffff' },
+  })
+    .png()
+    .toBuffer()
+  let boundaryRequests = 0
+  const decision: DecisionPort = {
+    async decide(request) {
+      const hasBoundaryView = request.state.some(
+        (part) => typeof part === 'string' && part.startsWith('{"boundaryView":'),
+      )
+      if (hasBoundaryView) {
+        boundaryRequests++
+        const images = request.state.filter((part) => typeof part !== 'string')
+        assert.ok(images.length >= 4 && images.length <= 6)
+      }
+      return fixtureAnswer(request)
+    },
+  }
+  const segmenter = fixtureSegmenter()
+  const renderer = createSharpBoundaryView()
+  let renders = 0
+  const boundaryView: BoundaryViewPort = {
+    async render(input) {
+      renders++
+      return renderer.render(input)
+    },
+  }
+  const baseline = createClassifier({ decision })
+  const research = createResearchClassifier(
+    { decision, segmentation: segmenter.port },
+    undefined,
+    boundaryView,
+  )
+  try {
+    assert.equal(
+      (await baseline.locate({ image, target: 'fixture object', mode: 'whole-object' })).status,
+      'located',
+    )
+    assert.equal(boundaryRequests, 0)
+    assert.equal(renders, 0)
+    assert.equal(
+      (await research.locate({ image, target: 'fixture object', mode: 'whole-object' })).status,
+      'located',
+    )
+    const afterLocate = boundaryRequests
+    assert.ok(afterLocate > 0)
+    assert.equal((await research.extract({ image, target: 'fixture object' })).status, 'extracted')
+    assert.ok(boundaryRequests > afterLocate)
+    assert.ok(renders >= 4)
+  } finally {
+    await baseline.dispose()
+    await research.dispose()
+    await segmenter.port.dispose()
   }
 })
 

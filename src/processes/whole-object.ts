@@ -14,6 +14,7 @@ import type {
 import { parse } from '../entities/contracts.js'
 import { assertActive, ClassifierError } from '../entities/errors.js'
 import type { ImageRepresentationPort, RepresentationView } from '../entities/representation.js'
+import type { BoundaryViewPort } from '../entities/boundary-view.js'
 import type {
   BoundaryInterval,
   ObjectBounds,
@@ -23,6 +24,7 @@ import type {
 import { wholeObjectSchema } from '../entities/whole-object.js'
 import { validateDecision } from '../features/choice.js'
 import { targetState } from '../features/prompts.js'
+import { prepareBoundaryState } from './boundary-state.js'
 import { locateInput } from './locate.js'
 
 const axisOrder = ['left', 'right', 'top', 'bottom'] as const
@@ -58,7 +60,7 @@ function boundaryInstruction(axis: Axis): string {
     axis === 'left' ? 'left' : axis === 'right' ? 'right' : axis === 'top' ? 'top' : 'bottom'
   return `Select the interval containing the ${edge}most visible pixel coordinate INSIDE HARD_ROI of the SAME physical instance identified by SEED. If the object continues outside HARD_ROI, locate only the visible intersection with that ROI; do not infer hidden parts. Coordinates use the original oriented source pixels. Choose only a supplied interval or unknown; do not infer free coordinates. The interval limits are half-open integer coordinate ranges. Current boundary intervals are candidate ranges, not new ROI limits.`
 }
-function choicesFor(axis: Axis, current: Interval) {
+function choicesFor(axis: Axis, current: Interval, showBoundaryView = false) {
   const intervals = partition(current)
   const labels = intervals.map((_, i) => `${axis}${String(i).padStart(2, '0')}`)
   return {
@@ -67,7 +69,9 @@ function choicesFor(axis: Axis, current: Interval) {
     question: {
       type: 'choice' as const,
       rankingSize: 1 as const,
-      instructions: boundaryInstruction(axis),
+      instructions: showBoundaryView
+        ? `${boundaryInstruction(axis)} A separate boundary view uses X/Y display labels. Use the exact display-label-to-choice mapping in the request state; still select only one supplied closed interval or unknown.`
+        : boundaryInstruction(axis),
       criteria: {
         ...Object.fromEntries(
           intervals.map((range, i) => [
@@ -202,6 +206,7 @@ export async function locateWholeObjectInput(
   raster: RasterPort,
   signal: AbortSignal,
   representation?: ImageRepresentationPort,
+  boundaryView?: BoundaryViewPort,
 ): Promise<WholeObjectLocalizationResult> {
   const started = performance.now()
   const args = parse(wholeObjectSchema, input)
@@ -238,18 +243,35 @@ export async function locateWholeObjectInput(
     let current = boundsFor(roi)
     for (let pass = 0; pass < args.maxExtentPasses; pass++) {
       assertActive(signal)
-      const state = await prepareState(
-        raster,
-        normalized,
-        seed,
-        args.target,
-        args.exclusions,
-        signal,
-        representation,
-      )
       const specs = Object.fromEntries(
-        axisOrder.map((axis) => [axis, choicesFor(axis, current[axis])]),
+        axisOrder.map((axis) => [
+          axis,
+          choicesFor(axis, current[axis], !!boundaryView && !representation),
+        ]),
       ) as Record<Axis, ReturnType<typeof choicesFor>>
+      const state =
+        boundaryView && !representation
+          ? await prepareBoundaryState(
+              raster,
+              normalized,
+              seed,
+              args.target,
+              args.exclusions,
+              signal,
+              boundaryView,
+              roi,
+              current,
+              specs,
+            )
+          : await prepareState(
+              raster,
+              normalized,
+              seed,
+              args.target,
+              args.exclusions,
+              signal,
+              representation,
+            )
       const questions: DecisionRequest['questions'] = Object.fromEntries(
         axisOrder.map((axis) => [axis, specs[axis].question]),
       )
@@ -285,6 +307,21 @@ export async function locateWholeObjectInput(
           { status: 'known', interval: chosen },
           'INVALID_RESPONSE',
         ).interval
+      }
+      if (boundaryView && !representation) {
+        const x1 = next.left.start
+        const x2 = next.right.endExclusive
+        const y1 = next.top.start
+        const y2 = next.bottom.endExclusive
+        if (
+          x1 >= x2 ||
+          y1 >= y2 ||
+          x1 >= seed.left + seed.width ||
+          x2 <= seed.left ||
+          y1 >= seed.top + seed.height ||
+          y2 <= seed.top
+        )
+          return unknown('extent-inconsistent', metadata())
       }
       current = next
       if (axisOrder.every((axis) => intervalWidth(current[axis]) <= args.boxTolerancePx)) break

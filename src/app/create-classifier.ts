@@ -29,6 +29,7 @@ import type { ExtractInput, ExtractionResult, SegmentationPort } from '../entiti
 import { extractSchema } from '../entities/segmentation.js'
 import { extractObject } from '../processes/extract.js'
 import { createSharpCutoutRaster } from '../infrastructure/segmentation/cutout-raster.js'
+import type { BoundaryViewPort } from '../entities/boundary-view.js'
 
 export interface ClassifierOptions {
   decision: DecisionPort
@@ -72,14 +73,16 @@ export function createClassifier(options: ClassifierOptions): Classifier {
 /** Internal benchmark composition. No research codec is exported by the npm entry points. */
 export function createResearchClassifier(
   options: ClassifierOptions,
-  experimental: ImageRepresentationPort,
+  experimental?: ImageRepresentationPort,
+  boundaryView?: BoundaryViewPort,
 ): Classifier {
-  return composeClassifier(options, experimental)
+  return composeClassifier(options, experimental, boundaryView)
 }
 
 function composeClassifier(
   options: ClassifierOptions,
   experimental?: ImageRepresentationPort,
+  boundaryView?: BoundaryViewPort,
 ): Classifier {
   if (!options || typeof options.decision?.decide !== 'function')
     throw new ClassifierError('INVALID_INPUT', 'A DecisionPort is required')
@@ -190,7 +193,14 @@ function composeClassifier(
       try {
         const snapshot = { ...parsed, image: new Uint8Array(parsed.image) }
         return await run(parent, (s) =>
-          locateWholeObjectInput(snapshot, options.decision, raster, s, representation),
+          locateWholeObjectInput(
+            snapshot,
+            options.decision,
+            raster,
+            s,
+            representation,
+            boundaryView,
+          ),
         )
       } finally {
         release()
@@ -270,6 +280,7 @@ function composeClassifier(
                   raster,
                   requestSignal,
                   representation,
+                  boundaryView,
                 ),
             },
           ),

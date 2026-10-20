@@ -5,7 +5,11 @@ import { join } from 'node:path'
 import test from 'node:test'
 import type { DecisionRequest, DecisionResult } from '../src/entities/contracts.js'
 import { RunBudget, RunBudgetExhausted } from '../benchmarks/v02/budget.js'
-import { inputManifestSchema, modelRequestManifest } from '../benchmarks/v02/protocol.js'
+import {
+  createDecisionTrace,
+  inputManifestSchema,
+  modelRequestManifest,
+} from '../benchmarks/v02/protocol.js'
 import { recordProvider } from '../benchmarks/v02/recording.js'
 import { applyPromptVariant, promptVariants } from '../benchmarks/v02/promptvariants.js'
 import {
@@ -212,6 +216,482 @@ await test('diagnostic evaluator counts a no-image unknown localization as an un
     assert.equal(candidate?.localization.unknown, 1)
     assert.equal(candidate?.localization.failed, 0)
     assert.equal(candidate?.localization.correct, 0)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('decision trace stores closed grid labels, raw probabilities, and code-resolved source cells only', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v02-decision-trace-grid-'))
+  const request: DecisionRequest = {
+    state: [
+      '{"target":"private-target-description","exclusions":[]}',
+      JSON.stringify({
+        panel: 'FRAME',
+        sourceRegion: { left: 0, top: 0, width: 100, height: 80 },
+        labels: [
+          { id: 'P01', sourceRegion: { left: 0, top: 0, width: 50, height: 40 } },
+          { id: 'P02', sourceRegion: { left: 50, top: 40, width: 50, height: 40 } },
+        ],
+      }),
+      JSON.stringify({
+        representationView: {
+          id: 'FRAME-grid',
+          aliases: [
+            {
+              id: 'FRAME-grid',
+              role: 'grid',
+              sourceRegion: { left: 0, top: 0, width: 100, height: 80 },
+            },
+          ],
+          sourceRegion: { left: 0, top: 0, width: 100, height: 80 },
+          dimensions: { width: 50, height: 40 },
+          scaleX: 0.5,
+          scaleY: 0.5,
+          grid: [
+            {
+              viewId: 'FRAME-grid',
+              cells: [
+                {
+                  id: 'cell-02',
+                  column: 1,
+                  row: 1,
+                  region: { left: 50, top: 40, width: 50, height: 40 },
+                  label: 'P02',
+                },
+              ],
+            },
+          ],
+        },
+      }),
+      {
+        type: 'image_url',
+        image_url: { url: 'data:image/png;base64,private-image-sentinel', detail: 'high' },
+      },
+    ],
+    questions: {
+      selection: {
+        type: 'choice',
+        rankingSize: 1,
+        instructions: 'private-instructions-sentinel',
+        criteria: { P01: 'private-class-description-one', P02: 'private-class-description-two' },
+      },
+      presence: { type: 'noul', instructions: 'private-presence-instructions' },
+    },
+  }
+  const result: DecisionResult = {
+    answers: {
+      selection: { type: 'choice', choice: 'P02', probabilities: { P01: 0.125, P02: 0.875 } },
+      presence: { type: 'noul', noul: 0.7 },
+    },
+    metadata: {
+      model: 'fixture',
+      provider: 'fixture',
+      requestId: null,
+      durationMs: 1,
+      costUsd: 0,
+      attempts: 1,
+    },
+  }
+  try {
+    const recorder = recordProvider(
+      () => ({
+        async decide() {
+          return result
+        },
+      }),
+      new RunBudget(1, 0.1),
+      directory,
+      {
+        model: 'fixture',
+        provider: 'fixture',
+        providerName: 'fixture',
+        apiEndpoint: '/fixture',
+        allowFallbacks: false,
+      },
+    )
+    await recorder.port.decide(request, new AbortController().signal)
+    const traceText = await readFile(join(directory, 'decision-trace-1.json'), 'utf8')
+    const trace = JSON.parse(traceText) as {
+      status: string
+      questions: {
+        questionId: string
+        selected?: string
+        probabilities?: { optionId: string; value: number }[]
+        selectedSourceRegions?: {
+          optionId: string
+          region: { left: number; top: number; width: number; height: number }
+        }[]
+      }[]
+      geometry: {
+        seedRegion: unknown
+        imageTransforms: {
+          viewId: string | null
+          role: string
+          sourceRegion: { left: number; top: number; width: number; height: number } | null
+          output: { width: number; height: number }
+          scaleX: number
+          scaleY: number
+        }[]
+      }
+    }
+    const selection = trace.questions.find((question) => question.questionId === 'selection')
+    assert.equal(trace.status, 'recorded')
+    assert.equal(selection?.selected, 'P02')
+    assert.deepEqual(selection?.probabilities, [
+      { optionId: 'P01', value: 0.125 },
+      { optionId: 'P02', value: 0.875 },
+    ])
+    assert.deepEqual(selection?.selectedSourceRegions, [
+      { optionId: 'P02', region: { left: 50, top: 40, width: 50, height: 40 } },
+    ])
+    assert.equal(trace.geometry.seedRegion, null)
+    assert.deepEqual(trace.geometry.imageTransforms, [
+      {
+        viewId: 'FRAME-grid',
+        role: 'grid',
+        sourceRegion: { left: 0, top: 0, width: 100, height: 80 },
+        source: { width: 100, height: 80 },
+        output: { width: 50, height: 40 },
+        content: { left: 0, top: 0, width: 50, height: 40 },
+        scaleX: 0.5,
+        scaleY: 0.5,
+      },
+    ])
+    assert.doesNotMatch(
+      traceText,
+      /private-target-description|private-instructions-sentinel|private-class-description|private-image-sentinel|data:image|fixture-key/u,
+    )
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('decision trace preserves closed rankings and omits requests beyond the option budget', () => {
+  const rankingRequest: DecisionRequest = {
+    state: [],
+    questions: {
+      selection: {
+        type: 'choice',
+        rankingSize: 4,
+        instructions: 'fixture',
+        criteria: { P01: 'first', P02: 'second', P03: 'third' },
+      },
+    },
+  }
+  const ranked = createDecisionTrace(rankingRequest, {
+    answers: { selection: { type: 'ranked-choice', ranking: ['P02', 'P01', 'P03'] } },
+    metadata: {
+      model: 'fixture',
+      provider: 'fixture',
+      requestId: null,
+      durationMs: 1,
+      costUsd: null,
+      attempts: 1,
+    },
+  })
+  assert.equal(ranked.trace.status, 'recorded')
+  if (ranked.trace.status !== 'recorded') return
+  assert.deepEqual(ranked.trace.questions[0], {
+    questionId: 'selection',
+    answerType: 'ranked-choice',
+    ranking: ['P02', 'P01', 'P03'],
+    selectedSourceRegions: [],
+  })
+
+  const criteria = Object.fromEntries(
+    Array.from({ length: 256 }, (_, index) => [`C${String(index).padStart(3, '0')}`, 'fixture']),
+  )
+  const probabilities = Object.fromEntries(
+    Object.keys(criteria).map((id, index) => [id, index === 0 ? 0.5 : 0.5 / 255]),
+  )
+  const oversized = createDecisionTrace(
+    {
+      state: [],
+      questions: {
+        selection: { type: 'choice', rankingSize: 1, instructions: 'fixture', criteria },
+      },
+    },
+    {
+      answers: { selection: { type: 'choice', choice: 'C000', probabilities } },
+      metadata: {
+        model: 'fixture',
+        provider: 'fixture',
+        requestId: null,
+        durationMs: 1,
+        costUsd: null,
+        attempts: 1,
+      },
+    },
+  )
+  assert.deepEqual(oversized.trace, { status: 'omitted', reason: 'option-limit-exceeded' })
+})
+
+await test('decision trace captures strict source seed, extent interval, and view transform metadata', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v02-decision-trace-extent-'))
+  const seedRegion = { left: 11, top: 13, width: 27, height: 29 }
+  const currentBounds = {
+    left: { start: 0, endExclusive: 100 },
+    right: { start: 0, endExclusive: 100 },
+    top: { start: 0, endExclusive: 80 },
+    bottom: { start: 0, endExclusive: 80 },
+  }
+  const transform = (source: { width: number; height: number }) =>
+    JSON.stringify({
+      sourceImageTransform: {
+        source,
+        output: { width: 280, height: 280 },
+        content: { left: 0, top: 0, width: 280, height: 280 },
+        scaleX: 2,
+        scaleY: 2,
+      },
+    })
+  const request: DecisionRequest = {
+    state: [
+      'ORIGINAL AND SEED GEOMETRY',
+      JSON.stringify({ seedRegion }),
+      JSON.stringify({ pass: 1, seedRegion, currentBounds }),
+      transform({ width: 100, height: 80 }),
+      transform({ width: 27, height: 29 }),
+      'private target/class description must stay out of the trace',
+    ],
+    questions: {
+      left: {
+        type: 'choice',
+        rankingSize: 1,
+        instructions: 'private boundary instruction',
+        criteria: {
+          left00: 'Integer boundary coordinates in [0, 50).',
+          unknown: 'private unknown description',
+        },
+      },
+      right: {
+        type: 'choice',
+        rankingSize: 1,
+        instructions: 'private boundary instruction',
+        criteria: {
+          right00: 'Integer boundary coordinates in [50, 100).',
+          unknown: 'private unknown description',
+        },
+      },
+      top: {
+        type: 'choice',
+        rankingSize: 1,
+        instructions: 'private boundary instruction',
+        criteria: {
+          top00: 'Integer boundary coordinates in [0, 40).',
+          unknown: 'private unknown description',
+        },
+      },
+      bottom: {
+        type: 'choice',
+        rankingSize: 1,
+        instructions: 'private boundary instruction',
+        criteria: {
+          bottom00: 'Integer boundary coordinates in [40, 80).',
+          unknown: 'private unknown description',
+        },
+      },
+      instance: {
+        type: 'choice',
+        rankingSize: 1,
+        instructions: 'private identity instruction',
+        criteria: { same: 'same', different: 'different', ambiguous: 'ambiguous' },
+      },
+    },
+  }
+  const result: DecisionResult = {
+    answers: {
+      left: { type: 'choice', choice: 'left00', probabilities: { left00: 0.8, unknown: 0.2 } },
+      right: { type: 'choice', choice: 'right00', probabilities: { right00: 0.8, unknown: 0.2 } },
+      top: { type: 'choice', choice: 'top00', probabilities: { top00: 0.8, unknown: 0.2 } },
+      bottom: {
+        type: 'choice',
+        choice: 'bottom00',
+        probabilities: { bottom00: 0.8, unknown: 0.2 },
+      },
+      instance: {
+        type: 'choice',
+        choice: 'same',
+        probabilities: { same: 0.8, different: 0.1, ambiguous: 0.1 },
+      },
+    },
+    metadata: {
+      model: 'fixture',
+      provider: 'fixture',
+      requestId: null,
+      durationMs: 1,
+      costUsd: 0,
+      attempts: 1,
+    },
+  }
+  try {
+    const recorder = recordProvider(
+      () => ({
+        async decide() {
+          return result
+        },
+      }),
+      new RunBudget(1, 0.1),
+      directory,
+      {
+        model: 'fixture',
+        provider: 'fixture',
+        providerName: 'fixture',
+        apiEndpoint: '/fixture',
+        allowFallbacks: false,
+      },
+    )
+    await recorder.port.decide(request, new AbortController().signal)
+    const traceText = await readFile(join(directory, 'decision-trace-1.json'), 'utf8')
+    const trace = JSON.parse(traceText) as {
+      geometry: {
+        seedRegion: typeof seedRegion | null
+        currentBounds: typeof currentBounds | null
+        imageTransforms: {
+          sourceRegion: typeof seedRegion | null
+          scaleX: number
+          scaleY: number
+        }[]
+      }
+      questions: {
+        questionId: string
+        intervalOptions?: { optionId: string; start: number; endExclusive: number }[]
+      }[]
+    }
+    assert.deepEqual(trace.geometry.seedRegion, seedRegion)
+    assert.deepEqual(trace.geometry.currentBounds, currentBounds)
+    assert.deepEqual(
+      trace.geometry.imageTransforms.map((item) => item.sourceRegion),
+      [null, null],
+    )
+    assert.deepEqual(
+      trace.geometry.imageTransforms.map((item) => [item.scaleX, item.scaleY]),
+      [
+        [2, 2],
+        [2, 2],
+      ],
+    )
+    assert.deepEqual(
+      trace.questions.find((question) => question.questionId === 'left')?.intervalOptions,
+      [{ optionId: 'left00', start: 0, endExclusive: 50 }],
+    )
+    assert.doesNotMatch(
+      traceText,
+      /private boundary instruction|private unknown description|private target\/class/u,
+    )
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('decision trace omits invalid extra answers and unrecognized no-image questions without leaking state', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v02-decision-trace-omitted-'))
+  const route = {
+    model: 'fixture',
+    provider: 'fixture',
+    providerName: 'fixture',
+    apiEndpoint: '/fixture',
+    allowFallbacks: false as const,
+  }
+  const baseRequest: DecisionRequest = {
+    state: [
+      'OPENROUTER_API_KEY=private-state-sentinel',
+      'private target description',
+      {
+        type: 'image_url',
+        image_url: { url: 'data:image/png;base64,private-image-sentinel', detail: 'high' },
+      },
+    ],
+    questions: {
+      selection: {
+        type: 'choice',
+        instructions: 'private instructions',
+        criteria: { A: 'private description', B: 'private description' },
+      },
+    },
+  }
+  const validAnswer: DecisionResult = {
+    answers: { selection: { type: 'choice', choice: 'A', probabilities: { A: 0.7, B: 0.3 } } },
+    metadata: {
+      model: 'fixture',
+      provider: 'fixture',
+      requestId: null,
+      durationMs: 1,
+      costUsd: null,
+      attempts: 1,
+    },
+  }
+  try {
+    const invalid = recordProvider(
+      () => ({
+        async decide() {
+          return {
+            ...validAnswer,
+            answers: {
+              ...validAnswer.answers,
+              ['OPENROUTER_API_KEY=secret-extra-answer']: { type: 'presence', presence: 'unknown' },
+            },
+          } as unknown as DecisionResult
+        },
+      }),
+      new RunBudget(1, 0.1),
+      join(directory, 'invalid'),
+      route,
+    )
+    await assert.rejects(invalid.port.decide(baseRequest, new AbortController().signal))
+    const invalidTrace = await readFile(join(directory, 'invalid', 'decision-trace-1.json'), 'utf8')
+    assert.deepEqual(JSON.parse(invalidTrace), {
+      status: 'omitted',
+      reason: 'invalid-decision-result',
+    })
+    assert.doesNotMatch(
+      invalidTrace,
+      /OPENROUTER_API_KEY|secret-extra-answer|private-state-sentinel/u,
+    )
+
+    const noImageRequest: DecisionRequest = {
+      state: baseRequest.state,
+      questions: {
+        classification: {
+          type: 'choice',
+          instructions: 'private no-image instructions',
+          criteria: { unknown: 'private no-image description', present: 'secret target detail' },
+        },
+      },
+    }
+    const noImage = recordProvider(
+      () => ({
+        async decide() {
+          return {
+            answers: {
+              classification: {
+                type: 'choice',
+                choice: 'unknown',
+                probabilities: { unknown: 0.8, present: 0.2 },
+              },
+            },
+            metadata: validAnswer.metadata,
+          }
+        },
+      }),
+      new RunBudget(1, 0.1),
+      join(directory, 'no-image'),
+      route,
+    )
+    await noImage.port.decide(noImageRequest, new AbortController().signal)
+    const noImageTrace = await readFile(
+      join(directory, 'no-image', 'decision-trace-1.json'),
+      'utf8',
+    )
+    assert.deepEqual(JSON.parse(noImageTrace), {
+      status: 'omitted',
+      reason: 'unrecognized-question-id',
+    })
+    assert.doesNotMatch(
+      noImageTrace,
+      /OPENROUTER_API_KEY|private-state-sentinel|private-image-sentinel|private no-image|secret target/u,
+    )
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
