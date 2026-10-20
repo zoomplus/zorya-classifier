@@ -4,7 +4,7 @@ This acceptance concerns the extracted MIT Node.js library, not the Zorya deskto
 
 ## Current gate state
 
-The latest integrated source snapshot, `c1aa640`, passed 384 offline tests, formatting, source checks and the installed-archive consumer. Hosted CI for `be275a6` passed all four Windows/Linux × Node 22/24 jobs; the later changes affect only the resource harness and its tests. [CI evidence](evidence/v02/ci-be275a6.json) and the [installed-archive snapshot](evidence/v02/integration-c1aa640.json) identify their exact scope. Final release CI remains required.
+The latest integrated source snapshot, `35e3064`, passed 393 offline tests, formatting, source checks and the installed-archive consumer. Its additions are benchmark-only caller composition and independent routing/lifecycle tests; the runtime bytes are unchanged. Hosted CI for `be275a6` passed all four Windows/Linux × Node 22/24 jobs. [CI evidence](evidence/v02/ci-be275a6.json) and the [installed-archive snapshot](evidence/v02/integration-35e3064.json) identify their exact scope. CI for the later snapshot is running; final release CI remains required.
 
 All 53 runtime source files remain byte-identical to `0c365cb`, as do the 106 compiled runtime files. The first proposal resource run completed its configured wall-clock phases, but its observed process lifetime and summed monotonic operation durations did not prove the required physical duration. It is retained as historical evidence. Replacement harness `261dc23` uses monotonic phase deadlines, enforces the full duration minima, and has a separate kernel-uptime observer. Its fresh two-hour run is in progress.
 
@@ -14,7 +14,7 @@ The next development experiment composes caller-supplied ports: spatial Choice q
 
 | Gate                                 | Current status                                                                  |
 | ------------------------------------ | ------------------------------------------------------------------------------- |
-| Source checks and installed consumer | Pass: 384 tests at `c1aa640`; runtime bytes unchanged                           |
+| Source checks and installed consumer | Pass: 393 tests at `35e3064`; runtime bytes unchanged                           |
 | Hosted Windows/Linux × Node 22/24    | Pass for `be275a6`; final release source still requires CI                      |
 | Windows native execution             | Passed on the identical runtime bytes; controlled input only                    |
 | Two-hour resource soak               | Replacement monotonic run in progress; earlier wall-clock run is not sufficient |

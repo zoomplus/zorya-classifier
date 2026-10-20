@@ -1,6 +1,10 @@
 # Tested models and results
 
-Native decision models other than Jev are the primary integration. **Luna Decisions is the selected route:** it matched the historical photo/text counts on this corpus, while ordinary vision chat models remain configurable alternatives. This is an observed result on a small public corpus, not a statistical non-inferiority or universal-accuracy guarantee.
+## Historical 0.1 classification comparison
+
+The routes in this report are explicit benchmark configurations, not library defaults. The caller selects and connects every model through an injected `DecisionPort` or an adapter they configure. **Luna Decisions was the selected 0.1 classification recipe:** it matched the historical photo/text counts on this corpus, while ordinary vision chat models remain configurable alternatives. This is an observed result on a small public corpus, not a statistical non-inferiority or universal-accuracy guarantee.
+
+These classification results do not qualify the new 0.2 whole-object or extraction workflows. Their [current acceptance state](acceptance.md) records the failed first blind localization run and the remaining checks independently.
 
 The fixed corpus has60 licensed photos (20 development/40 heldout) and30 authored text fixtures (10/20). Ground truth never enters model requests. Errors stay in the accuracy denominator; unstarted cases remain unverified. Public images may overlap model training. Exact [summaries/source pins](evidence/vision-model-summary.json) and individual run reports below retain failures.
 
