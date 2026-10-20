@@ -14,6 +14,7 @@ import type {
   RefinementPort,
   ChoiceSelection,
 } from '../entities/contracts.js'
+import type { ImageRepresentationPort, RepresentationView } from '../entities/representation.js'
 import { parse, pixelRectSchema } from '../entities/contracts.js'
 import { assertActive, ClassifierError } from '../entities/errors.js'
 import {
@@ -33,6 +34,7 @@ interface Context {
   stages: DecisionMetadata[]
   target: string
   exclusions: readonly string[]
+  representation?: ImageRepresentationPort
 }
 function labelsFor(cells: readonly GridCell[], pass: 1 | 2): Map<string, string> {
   return new Map(
@@ -81,6 +83,21 @@ async function gridPass(context: Context, panels: readonly GridPanel[], pass: 1 
     'ORIGINAL',
     ...context.original,
   ]
+  const views: RepresentationView[] = context.representation
+    ? [
+        {
+          id: 'source',
+          role: 'source',
+          image: context.image,
+          sourceRegion: {
+            left: 0,
+            top: 0,
+            width: context.image.width,
+            height: context.image.height,
+          },
+        },
+      ]
+    : []
   for (const panel of panels) {
     state.push(
       JSON.stringify({
@@ -89,7 +106,16 @@ async function gridPass(context: Context, panels: readonly GridPanel[], pass: 1 
         labels: panel.cells.map((cell) => ({ id: labels.get(cell.id), sourceRegion: cell.region })),
       }),
     )
-    if (
+    if (context.representation) {
+      const clean = await context.raster.crop(context.image, panel.region, context.signal)
+      views.push({
+        id: `${panel.id}-grid`,
+        role: 'grid',
+        image: clean,
+        sourceRegion: panel.region,
+        grid: { cells: panel.cells, labels },
+      })
+    } else if (
       pass === 2 ||
       panel.region.left !== 0 ||
       panel.region.top !== 0 ||
@@ -104,14 +130,24 @@ async function gridPass(context: Context, panels: readonly GridPanel[], pass: 1 
         )),
       )
     }
-    const grid = await context.raster.grid(
-      context.image,
-      panel.region,
-      panel.cells,
-      labels,
-      context.signal,
-    )
-    state.push(`${panel.id} GRID`, ...(await context.raster.imageState(grid, context.signal)))
+    if (!context.representation) {
+      const grid = await context.raster.grid(
+        context.image,
+        panel.region,
+        panel.cells,
+        labels,
+        context.signal,
+      )
+      state.push(`${panel.id} GRID`, ...(await context.raster.imageState(grid, context.signal)))
+    }
+  }
+  if (context.representation) {
+    const prepared = await context.representation.prepare({
+      source: context.image,
+      views,
+      signal: context.signal,
+    })
+    state.push(JSON.stringify({ representation: prepared.metadata }), ...prepared.state)
   }
   const answer = await decide(context, { state, questions: gridQuestions(cells, labels) })
   return {
@@ -138,12 +174,44 @@ async function finalPass(
     'ORIGINAL',
     ...context.original,
   ]
+  const views: RepresentationView[] = context.representation
+    ? [
+        {
+          id: 'source',
+          role: 'source',
+          image: context.image,
+          sourceRegion: {
+            left: 0,
+            top: 0,
+            width: context.image.width,
+            height: context.image.height,
+          },
+        },
+      ]
+    : []
   for (const [index, item] of ranked.entries()) {
     const crop = await context.raster.crop(context.image, item.cell.region, context.signal, scale)
-    state.push(
-      `CANDIDATE ${labels[index]}`,
-      ...(await context.raster.imageState(crop, context.signal)),
-    )
+    if (context.representation) {
+      views.push({
+        id: `candidate-${labels[index]}`,
+        role: 'crop',
+        image: crop,
+        sourceRegion: item.cell.region,
+      })
+    } else {
+      state.push(
+        `CANDIDATE ${labels[index]}`,
+        ...(await context.raster.imageState(crop, context.signal)),
+      )
+    }
+  }
+  if (context.representation) {
+    const prepared = await context.representation.prepare({
+      source: context.image,
+      views,
+      signal: context.signal,
+    })
+    state.push(JSON.stringify({ representation: prepared.metadata }), ...prepared.state)
   }
   const answer = await decide(context, { state, questions: candidateQuestions(labels) })
   const result = selection(answer, [...labels, 'none'], 1)
@@ -232,6 +300,7 @@ export async function locateInput(
   raster: RasterPort,
   signal: AbortSignal,
   refiner?: RefinementPort,
+  representation?: ImageRepresentationPort,
 ): Promise<LocalizationResult> {
   const started = performance.now()
   const image = await raster.normalize(input.image, signal)
@@ -247,6 +316,7 @@ export async function locateInput(
     stages: [],
     target: input.target,
     exclusions: input.exclusions ?? [],
+    ...(representation === undefined ? {} : { representation }),
   }
   const result = await search(context, region)
   const refinement =
