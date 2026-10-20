@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "25c19cd943ac4e309df1a3dbb5bf47e214806467",
+  "scope": "source and lifecycle harness integration; not a release or live-quality qualification",
+  "local": {
+    "platform": "linux",
+    "node": "24.12.0",
+    "check": "passed",
+    "tests": 445,
+    "failed": 0,
+    "skipped": 0,
+    "format": "passed",
+    "checkLogSha256": "57f9c7da1b6c11903d6329daa84474ce8e8171e1a7840bd3f3797da6cc989031"
+  },
+  "hostedCi": {
+    "runId": 39468589379,
+    "jobs": 4,
+    "passed": 4,
+    "receipt": "ci-25c19cd.json"
+  },
+  "installedArchive": {
+    "sourceRevision": "5b4ea37e458b23a5a4f50d5d4d75b80379be02be",
+    "sha256": "d8b8907306f87a7422425436ab4def30c2ad4b7195301b72d2e3911d0804b468",
+    "files": 269,
+    "unpackedBytes": 3735311,
+    "consumer": "passed",
+    "declarationFiles": 198,
+    "providerHttpCalls": 0,
+    "archiveRetainedByPackCheck": false,
+    "note": "25c19cd changes only benchmark/test files; the hosted25c19cd matrix also executes its own installed-archive check"
+  },
+  "runtimeParity": {
+    "sourceFiles": 53,
+    "unchangedSince": "0c365cb13173e290365a5aa2a1aec122c42b0b4d",
+    "distFiles": 106,
+    "distManifestSha256": "87f6a18d46107ca08b37170db1e9204514dfc72a1dfc3181f59e8ffe76d85c95"
+  },
+  "producerSource": {
+    "candidateFiles": 67,
+    "candidateSha256": "1de61734a9c7144d17ea2b2ff32047a28edaba0a1a01cc9040207e82535c8b53",
+    "noImageFiles": 73,
+    "noImageSha256": "9c4a1e56369091fd7f745a120aabc81c45a76b6c7a2d44596484e15a79ab2bb8",
+    "sealedWorktreeRevision": "6e398aecdbe8e34ade71ed83a7d64b7ab85a02d3",
+    "rootBytesMatch": true
+  },
+  "resourceEvidence": "proposal-resource-soak-261dc23.json",
+  "limitations": [
+    "Fresh80-case blind qualification and final run freeze remain pending.",
+    "Historical categorical-presence traces can omit categorical option detail; originals are preserved. The sealed producer now includes the existing root trace schema support, without changing requests, model choices or old outcomes.",
+    "Source checks and deterministic fixtures do not establish provider accuracy or production latency."
+  ]
+}

@@ -4,7 +4,7 @@ This acceptance concerns the extracted MIT Node.js library, not the Zorya deskto
 
 ## Current gate state
 
-The integrated source passed [425 Linux offline tests, formatting, source checks and the installed-archive consumer at `4331b1b`](evidence/v02/integration-4331b1b.json). Its additions are benchmark-only caller composition and independent routing/lifecycle tests; the runtime bytes are unchanged. [43b7426 passed all four Windows/Linux × Node 22/24 jobs](evidence/v02/ci-43b7426.json), including source, installed-archive and formatting steps. The later [4331b1b run](evidence/v02/ci-4331b1b.json) passed Linux but failed one new Windows CLI test that assumed POSIX separators. That assertion now uses `node:path.join`; [the repaired `d684259` run passed all four jobs](evidence/v02/ci-d684259.json), including the installed-archive consumer and formatting. Final release CI remains required. Earlier failed path checks remain preserved.
+The integrated source passed [445 Linux offline tests, formatting and source checks at `25c19cd`](evidence/v02/integration-25c19cd.json). [All four Windows/Linux × Node 22/24 jobs passed](evidence/v02/ci-25c19cd.json), including installed-archive and formatting steps. The separately labeled local `5b4ea37` installed consumer also passes on the same runtime bytes. Final release source still needs its own checks. Earlier [Windows path-assertion failure](evidence/v02/ci-4331b1b.json) and the [successful repair](evidence/v02/ci-d684259.json) remain preserved.
 
 All 53 runtime source files remain byte-identical to `0c365cb`, as do the 106 compiled runtime files. The first proposal resource run completed its configured wall-clock phases, but its observed process lifetime and summed monotonic operation durations did not prove the required physical duration. It is retained as historical evidence. Replacement harness `261dc23` uses monotonic phase deadlines, enforces the full duration minima, and has a separate kernel-uptime observer. Its [fresh two-hour run passed](evidence/v02/proposal-resource-soak-261dc23.md): 7,212.6 monotonic seconds, an independent live process-age witness at 7,200.68 seconds, and 2,158 native starts/closes in the measurement window with none left. Idle heap, external and array-buffer growth pass the fixed limits; RSS grew 115.76 MiB, below the 128 MiB threshold. Root independently checked parity of all 55 pinned files. This fixture run establishes resource/lifecycle behavior; its shared-host timing does not qualify model quality or production latency.
 
@@ -18,8 +18,8 @@ A separate [reconstructed C03 diagnostic](evidence/v02/reconstructed-c03-box.jso
 
 | Gate                                 | Current status                                                                        |
 | ------------------------------------ | ------------------------------------------------------------------------------------- |
-| Source checks and installed consumer | Pass: 425 Linux tests at `4331b1b`; runtime bytes unchanged                           |
-| Hosted Windows/Linux × Node 22/24    | Pass for `d684259` on all four jobs; final release CI still required                  |
+| Source checks and installed consumer | Pass: 445 Linux tests at `25c19cd`; runtime bytes unchanged                           |
+| Hosted Windows/Linux × Node 22/24    | Pass for `25c19cd` on all four jobs; final release CI still required                  |
 | Windows native execution             | Passed on the identical runtime bytes; controlled input only                          |
 | Two-hour resource soak               | Pass: monotonic duration, memory limits and zero owned children; earlier run retained |
 | First frozen blind vision candidate  | Failed both false-location and paired-bootstrap gates                                 |
