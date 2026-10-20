@@ -1,0 +1,246 @@
+{
+  "schema": "predicted-box-native-refinement-component-evaluation-v1",
+  "componentManifestSha256": "5e8586e6dc00eb57e1e2a579c09dedc5966a93959e36545161344bc5cb9309cb",
+  "physicalProducerSummarySha256": "001456121e04ebbb00858c59e37e9d7d70f38ce9c83712a24e1ea4798eee9d0d",
+  "actualPredictedBoxesAndSeedsOnly": true,
+  "requestHashesMatchAllEight": true,
+  "allEightReturnedCasesIncluded": true,
+  "providerCallsAdded": 0,
+  "pipelineQualification": false,
+  "maskMetrics": {
+    "threshold": 0.8,
+    "truthCases": 5,
+    "scoredCases": 1,
+    "unavailableAnnotatedCases": 4,
+    "unannotatedCases": 35,
+    "referenceInstances": 7,
+    "scoredReferenceInstances": 2,
+    "unavailableReferenceInstances": 5,
+    "passingReferenceInstances": 0,
+    "passedCases": 0,
+    "meanBestInstanceIoU": 0.00023204548091425919,
+    "matching": "Place each cropped 0/1 prediction at its absolute sourceOffset; compare pixelwise against every independent source-sized Open Images instance mask. Emit one IoU per reference-mask SHA; case pass is the maximum instance IoU >= 0.8. This is separate from bbox correctness.",
+    "rows": [
+      {
+        "caseId": "photo-dev-present-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-05",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-06",
+        "status": "not-extracted",
+        "referenceInstances": 1
+      },
+      {
+        "caseId": "photo-dev-present-07",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-08",
+        "status": "scored",
+        "referenceInstances": 2,
+        "instanceIoUs": [
+          {
+            "referenceMaskSha256": "4e72cfb83de41421ed4a41c02ee4c700ca8bdf57f9c2f903017cf21ad6d4c772",
+            "iou": 0,
+            "meetsThreshold": false
+          },
+          {
+            "referenceMaskSha256": "7ca014cd837aca50d98e8d97420e4d9566f1cf75d9ddb9b4f1ef11d5b226d947",
+            "iou": 0.00023204548091425919,
+            "meetsThreshold": false
+          }
+        ],
+        "bestInstanceIoU": 0.00023204548091425919,
+        "meetsThreshold": false
+      },
+      {
+        "caseId": "photo-dev-present-09",
+        "status": "not-extracted",
+        "referenceInstances": 1
+      },
+      {
+        "caseId": "photo-dev-present-10",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-11",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-12",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-13",
+        "status": "not-extracted",
+        "referenceInstances": 1
+      },
+      {
+        "caseId": "photo-dev-present-14",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-present-15",
+        "status": "not-extracted",
+        "referenceInstances": 2
+      },
+      {
+        "caseId": "photo-dev-present-16",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-absent-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-absent-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-absent-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "photo-dev-absent-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-05",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-06",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-present-07",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "ui-geany-oracle-dev-absent-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-01",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-02",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-03",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-04",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-05",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-06",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-present-07",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-absent-bomber",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-absent-battleship",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      },
+      {
+        "caseId": "map-freeciv-oracle-dev-absent-fighter",
+        "status": "no-reference-mask",
+        "referenceInstances": 0
+      }
+    ]
+  },
+  "limits": [
+    "Native-only intervention reuses actual model-predicted geometry; it is not an end-to-end model rerun.",
+    "Only one annotated case among the eight located results; absent predictions stay unavailable in the seven-reference denominator.",
+    "No original locations/masks or qualification outcomes are overwritten."
+  ],
+  "rawComponentEvaluationSha256": "02d49c18052a314747f0425e2b7c76aed6c617b05721b41291ba543a06498b0c"
+}

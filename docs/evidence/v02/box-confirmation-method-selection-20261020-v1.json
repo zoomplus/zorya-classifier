@@ -1,0 +1,85 @@
+{
+  "schema": "box-confirmation-development-selection-v1",
+  "status": "selected-for-fresh-blind-evaluation-only",
+  "selectedProfileId": "native-luna-box-confirmation-sam-target-plus-neutral-v1",
+  "heldoutProfileId": "native-luna-box-confirmation-sam-target-plus-neutral-heldout-v1",
+  "noImageProfileId": "deepseek-flash-no-image-photo-box-confirmation-heldout-v1",
+  "phase": "dev",
+  "targetPolicy": "target-plus-neutral-instruction-v1",
+  "producerSourceSha256": "95eee1257ee8111cf97f60abc0297239789aee2f3d7db33c2eb80f6857faa277",
+  "predispatchFreezeSha256": "9213e6c637d2e157c85903d5c235cf64b65fcf2f96a398342227441b79beeb9e",
+  "developmentEvaluationSha256": "87042d2701a712c8f7eab97b63ae1ffac444aad5f24c9d92d2908ff8c3958401",
+  "developmentProvenanceSha256": "84fb502810ec0487b84834fde57d403e6f708dc7fca751b9db2fb9e4408e8e2e",
+  "selectionRule": "Original DEV corpus; zero false locations on ten negatives; rank photo whole-object matches then classification. Latency is unranked; no latency tie-break is used. A changed method cannot be selected from exposed heldout results.",
+  "comparison": [
+    {
+      "profileId": "native-luna-categorical-presence-sam-target-plus-neutral-v1",
+      "photoPositiveMatches": 3,
+      "photoPositiveCases": 16,
+      "classificationCorrect": 35,
+      "cases": 40,
+      "falseLocationsOnTenNegatives": 0,
+      "role": "historical original DEV comparator; its failed heldout cannot be repaired or rerun as fresh"
+    },
+    {
+      "profileId": "native-luna-categorical-presence-sam-target-only-v1",
+      "photoPositiveMatches": 0,
+      "photoPositiveCases": 16,
+      "classificationCorrect": 35,
+      "cases": 40,
+      "falseLocationsOnTenNegatives": 0,
+      "role": "historical original DEV comparator"
+    },
+    {
+      "profileId": "native-luna-box-confirmation-sam-target-plus-neutral-v1",
+      "photoPositiveMatches": 4,
+      "photoPositiveCases": 16,
+      "classificationCorrect": 35,
+      "cases": 40,
+      "wholePositiveMatches": 5,
+      "wholePositiveCases": 30,
+      "falseLocationsOnTenNegatives": 0,
+      "role": "new implementation hypothesis, highest observed primary DEV metric"
+    }
+  ],
+  "componentRefinement": {
+    "manifestSha256": "5e8586e6dc00eb57e1e2a579c09dedc5966a93959e36545161344bc5cb9309cb",
+    "cases": 8,
+    "actualPredictedGeometryOnly": true,
+    "newProviderCalls": 0,
+    "passingReferenceInstances": 0,
+    "scoredReferenceInstances": 2,
+    "promoted": false,
+    "reason": "One annotated returned case does not establish refinement benefit. Original selected-mask recipe remains unchanged."
+  },
+  "frozenBeforeFreshHeldoutPixelsAndPerCaseTruthWereOpened": true,
+  "librarySelectsModel": false,
+  "routeRecipe": {
+    "model": "openai/gpt-6-luna-decisions",
+    "provider": "openai",
+    "fallback": false
+  },
+  "heldoutRequired": {
+    "cases": 80,
+    "photo": 40,
+    "ui": 20,
+    "map": 20,
+    "photoPositivePairs": 30,
+    "negativeCasesAllGroups": 20,
+    "maximumFalseLocations": 1,
+    "pairedBootstrapIterations": 10000,
+    "pairedBootstrapSeed": "0x5a4f5259",
+    "strictPositiveLower95PercentBound": true,
+    "allFailuresAndUnknownsCount": true,
+    "newSourceGroupDisjointCohortRequired": true,
+    "actualProducerAndControlClosureFreezeRequired": true,
+    "nativeResourceGateBeforeDispatch": "new 450439c two-thread monotonic two-hour run; currently pending, not a pass"
+  },
+  "releaseQualified": false,
+  "limits": [
+    "Development selection is not statistical superiority, calibration or blind release qualification.",
+    "Mask success retains IoU>=0.8 and is reported separately with all unavailable predictions.",
+    "No additional refiner or model/provider default is introduced.",
+    "All source, archive, platform, resource and final publication gates remain mandatory."
+  ]
+}
