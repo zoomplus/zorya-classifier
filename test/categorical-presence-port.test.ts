@@ -243,6 +243,66 @@ await test('mixed-leg failure cancels and joins its peer before rejection', asyn
   assert.equal(peerSettled, true)
 })
 
+await test('parent abort settles both legs and removes its abort listener', async () => {
+  const parent = new AbortController()
+  let listenerAdds = 0
+  let listenerRemoves = 0
+  const observedSignal = new Proxy(parent.signal, {
+    get(target, property) {
+      if (property === 'addEventListener')
+        return (
+          type: string,
+          listener: EventListenerOrEventListenerObject,
+          options?: boolean | AddEventListenerOptions,
+        ) => {
+          if (type === 'abort') listenerAdds++
+          target.addEventListener(type, listener, options)
+        }
+      if (property === 'removeEventListener')
+        return (
+          type: string,
+          listener: EventListenerOrEventListenerObject,
+          options?: boolean | EventListenerOptions,
+        ) => {
+          if (type === 'abort') listenerRemoves++
+          target.removeEventListener(type, listener, options)
+        }
+      const value = Reflect.get(target, property, target) as unknown
+      return typeof value === 'function' ? value.bind(target) : value
+    },
+  })
+
+  const started = new Set<string>()
+  let resolveBothStarted!: () => void
+  const bothStarted = new Promise<void>((resolve) => {
+    resolveBothStarted = resolve
+  })
+  let settled = 0
+  const waitingPort = (name: string): DecisionPort =>
+    port(async (_request, signal) => {
+      started.add(name)
+      if (started.size === 2) resolveBothStarted()
+      await new Promise<void>((resolve) => {
+        const finish = () => setTimeout(resolve, 2)
+        if (signal.aborted) finish()
+        else signal.addEventListener('abort', finish, { once: true })
+      })
+      settled++
+      throw new ClassifierError('ABORTED', `${name} fixture canceled`)
+    })
+  const decision = createCategoricalPresencePort(waitingPort('spatial'), waitingPort('presence'))
+  const pending = decision.decide(mixed, observedSignal)
+  await bothStarted
+  parent.abort('fixture parent cancellation')
+  await assert.rejects(
+    pending,
+    (error: unknown) => error instanceof ClassifierError && error.code === 'ABORTED',
+  )
+  assert.equal(settled, 2)
+  assert.equal(listenerAdds, 1)
+  assert.equal(listenerRemoves, 1)
+})
+
 await test('route recorder journals the transformed native Choice request and wire body hash', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'categorical-presence-record-'))
   const budget = new RunBudget(1, 1, 0.05)

@@ -95,6 +95,7 @@ async function reconstruct(outputPath: string) {
   let maskData: Uint8Array | undefined
   let pngBytes: Uint8Array | undefined
   let previewBytes: Uint8Array | undefined
+  let failure: { value: unknown } | undefined
   try {
     const image = await raster.normalize(bytes, signal)
     const seedResult = await (
@@ -238,15 +239,26 @@ async function reconstruct(outputPath: string) {
         derivedMask: summary.derivedMask,
       }),
     )
+  } catch (error) {
+    failure = { value: error }
   } finally {
-    await proposalPort?.settle()
-    await proposalPort?.dispose()
+    try {
+      await proposalPort?.settle()
+    } catch (error) {
+      failure ??= { value: error }
+    }
+    try {
+      await proposalPort?.dispose()
+    } catch (error) {
+      failure ??= { value: error }
+    }
     bytes.fill(0)
     rgba?.fill(0)
     maskData?.fill(0)
     pngBytes?.fill(0)
     previewBytes?.fill(0)
   }
+  if (failure) throw failure.value
 }
 
 const replayRequests: DecisionRequest[] = []
