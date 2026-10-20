@@ -1,0 +1,182 @@
+[
+  {
+    "caseId": "ui-geany-oracle-dev-present-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the New document button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Open document button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Save document button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-04",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Revert document button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-05",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Close document button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-06",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Back navigation button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-07",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Forward navigation button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-absent-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Print action button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-absent-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Undo action button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-absent-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Cut action button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  }
+]

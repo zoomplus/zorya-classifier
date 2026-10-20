@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "split": "dev",
+  "stratum": "controlled-real-ui-independent-source-geometry",
+  "sourceGroup": "controlled-app:geany-2.0",
+  "content": {
+    "description": "Geany 2.0 rendered in isolated Xvfb with private XDG profile and task-authored unsaved editor text. Controlled application render, not natural user capture.",
+    "imagePath": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+    "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+    "dimensions": [
+      1280,
+      800
+    ],
+    "captureEvidencePath": ".run/v02-geany-dev-oracle-20261020-02/evidence.json",
+    "captureEvidenceSha256": "dfd48fe730d141d6306ccea112e856981854714e1ecb4fc1d911cbf09173bf12",
+    "captureDriverPath": ".run/v02-geany-dev-oracle-20261020-02/capture.py",
+    "captureDriverSha256": "b064e960fcbafe8daadf0a9d22ace87f0ab75328ac6f36d6cd02f558454e4899"
+  },
+  "sources": [
+    {
+      "sourceGroup": "controlled-app:geany-2.0",
+      "package": "geany 2.0-1build2; geany-common 2.0-1build2",
+      "license": "GPL-2-or-later (Geany source; embedded Scintilla has a separate license and is not redistributed)",
+      "source": "https://github.com/geany/geany",
+      "evidencePath": "/usr/share/doc/geany-common/copyright",
+      "evidenceSha256": "dfbee55c754bb363b40b263e7bc9fdc811d7d8499a3c800c115e9471eeab16ed",
+      "content": "Installed Geany interface, with task-authored ephemeral text."
+    },
+    {
+      "sourceGroup": "controlled-app:geany-2.0",
+      "package": "adwaita-icon-theme 46.0-1",
+      "license": "Per-file terms include LGPL-3, CC-BY-SA-3.0 and CC-BY-SA-4.0; no icon files redistributed",
+      "source": "https://gitlab.gnome.org/GNOME/adwaita-icon-theme",
+      "evidencePath": "/usr/share/doc/adwaita-icon-theme/copyright",
+      "evidenceSha256": "b8058c6a4e62094c4c4a081b9681b3e67e2ffed995d6b8b5fe43a536745f04ba",
+      "content": "System theme icons rendered in the toolbar; screenshot retained only in ignored local cache."
+    },
+    {
+      "sourceGroup": "controlled-app:geany-2.0",
+      "package": "libgtk-3-0t64 3.24.41-4ubuntu1.3",
+      "license": "LGPL-2.1-or-later (runtime, not redistributed)",
+      "evidencePath": "/usr/share/doc/libgtk-3-0t64/copyright",
+      "evidenceSha256": "2be2199cc990913cd94874b6f16fc84f1e3c35aaaa4719ad34b4478f1e69c557",
+      "content": "Application widget renderer; oracle CSS applies only controlled visible outline/fill."
+    },
+    {
+      "sourceGroup": "harness:geany-xvfb-20261020",
+      "package": "openbox 3.6.1-12build5",
+      "license": "GPL-2-or-later",
+      "evidencePath": "/usr/share/doc/openbox/copyright",
+      "evidenceSha256": "bdc94599bb9ca141a0bad6b2c6733d1e5b6ef2d73e6616b878c63945dfe1ec39",
+      "content": "Window frame only, never labeled."
+    },
+    {
+      "sourceGroup": "harness:geany-xvfb-20261020",
+      "package": "fonts-dejavu-core 2.37-8",
+      "license": "DejaVu/Bitstream Vera license (no font files redistributed)",
+      "evidencePath": "/usr/share/doc/fonts-dejavu-core/copyright",
+      "evidenceSha256": "63d3ba759d12804c5b31a9d5940d855c1820d1f5999e6b0872eb1c7ff045fbc9",
+      "content": "System text rendering only."
+    }
+  ],
+  "oracle": {
+    "method": "AT-SPI accessible control name and widget allocation define source geometry. An owned GtkCssProvider paints a 2px magenta outline around each widget allocation; exact screenshot pixels have 100% magenta coverage along top/bottom/left/right edges for all selected positives. Box target is the entire visible toolbar button allocation, not glyph boundary or clickable padding.",
+    "reviewer": "source geometry + pixel corroboration; no model-generated coordinates",
+    "driverSha256": "b064e960fcbafe8daadf0a9d22ace87f0ab75328ac6f36d6cd02f558454e4899",
+    "cssSha256": "ca279d83b04e12caf01f5a9164df881c7bc345be5b320983cf77f539ae945e6e",
+    "shimSourceSha256": "c69d1cd8e4f8593f4d9ba3a2d7bcac550418e883464f3ecc82ec2363cae6d8d2",
+    "shimBinarySha256": "19956437fdcf4be786c4cec3dbe61ce706df175353090d7a651528de94bd6ded",
+    "positiveControls": [
+      {
+        "name": "New",
+        "role": "push button",
+        "bounds": {
+          "x": 194,
+          "y": 136,
+          "width": 44,
+          "height": 36
+        },
+        "edgeCoverage": {
+          "top": 1.0,
+          "bottom": 1.0,
+          "left": 1.0,
+          "right": 1.0
+        }
+      },
+      {
+        "name": "Open",
+        "role": "push button",
+        "bounds": {
+          "x": 277,
+          "y": 136,
+          "width": 44,
+          "height": 36
+        },
+        "edgeCoverage": {
+          "top": 1.0,
+          "bottom": 1.0,
+          "left": 1.0,
+          "right": 1.0
+        }
+      },
+      {
+        "name": "Save",
+        "role": "push button",
+        "bounds": {
+          "x": 360,
+          "y": 136,
+          "width": 44,
+          "height": 37
+        },
+        "edgeCoverage": {
+          "top": 1.0,
+          "bottom": 1.0,
+          "left": 1.0,
+          "right": 1.0
+        }
+      },
+      {
+        "name": "Revert",
+        "role": "push button",
+        "bounds": {
+          "x": 462,
+          "y": 136,
+          "width": 44,
+          "height": 37
+        },
+        "edgeCoverage": {
+          "top": 1.0,
+          "bottom": 1.0,
+          "left": 1.0,
+          "right": 1.0
+        }
+      },
+      {
+        "name": "Close",
+        "role": "push button",
+        "bounds": {
+          "x": 506,
+          "y": 136,
+          "width": 44,
+          "height": 37
+        },
+        "edgeCoverage": {
+          "top": 1.0,
+          "bottom": 1.0,
+          "left": 1.0,
+          "right": 1.0
+        }
+      },
+      {
+        "name": "Back",
+        "role": "push button",
+        "bounds": {
+          "x": 564,
+          "y": 136,
+          "width": 44,
+          "height": 37
+        },
+        "edgeCoverage": {
+          "top": 1.0,
+          "bottom": 1.0,
+          "left": 1.0,
+          "right": 1.0
+        }
+      },
+      {
+        "name": "Forward",
+        "role": "push button",
+        "bounds": {
+          "x": 608,
+          "y": 136,
+          "width": 44,
+          "height": 37
+        },
+        "edgeCoverage": {
+          "top": 1.0,
+          "bottom": 1.0,
+          "left": 1.0,
+          "right": 1.0
+        }
+      }
+    ],
+    "completeVisibleToolbarWidgetNames": [
+      "New",
+      "Menu",
+      "Open",
+      "Menu",
+      "Save",
+      "Save All",
+      "Revert",
+      "Close",
+      "Back",
+      "Forward",
+      "Compile",
+      "Build",
+      "Menu",
+      "Execute",
+      "Color Chooser"
+    ],
+    "absenceTargets": [
+      "Print",
+      "Undo",
+      "Cut"
+    ],
+    "atspiTreeNodeCount": 748
+  },
+  "limits": "Controlled theme, authored state and one app-family source group. Feasibility supplement; not natural UI qualification. Shared window frame/theme and other panels are excluded."
+}

@@ -1,0 +1,287 @@
+[
+  {
+    "caseId": "ui-geany-oracle-dev-absent-01",
+    "expectedPresence": "absent",
+    "targetClassId": "print-toolbar-button",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "method": "complete visible Geany toolbar widget inventory for this screenshot; target action name has no visible toolbar widget; target region is the toolbar, not menus",
+      "targetActionName": "Print",
+      "visibleToolbarWidgetNames": [
+        "New",
+        "Menu",
+        "Open",
+        "Menu",
+        "Save",
+        "Save All",
+        "Revert",
+        "Close",
+        "Back",
+        "Forward",
+        "Compile",
+        "Build",
+        "Menu",
+        "Execute",
+        "Color Chooser"
+      ],
+      "accessibilityTreeNodeCount": 748,
+      "inventorySource": "full AT-SPI tree captured for exact screenshot before candidate access"
+    },
+    "annotationSource": "Explicit absence from complete visible toolbar inventory; not inferred from missing annotations.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-absent-02",
+    "expectedPresence": "absent",
+    "targetClassId": "undo-toolbar-button",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "method": "complete visible Geany toolbar widget inventory for this screenshot; target action name has no visible toolbar widget; target region is the toolbar, not menus",
+      "targetActionName": "Undo",
+      "visibleToolbarWidgetNames": [
+        "New",
+        "Menu",
+        "Open",
+        "Menu",
+        "Save",
+        "Save All",
+        "Revert",
+        "Close",
+        "Back",
+        "Forward",
+        "Compile",
+        "Build",
+        "Menu",
+        "Execute",
+        "Color Chooser"
+      ],
+      "accessibilityTreeNodeCount": 748,
+      "inventorySource": "full AT-SPI tree captured for exact screenshot before candidate access"
+    },
+    "annotationSource": "Explicit absence from complete visible toolbar inventory; not inferred from missing annotations.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-absent-03",
+    "expectedPresence": "absent",
+    "targetClassId": "cut-toolbar-button",
+    "targetBoxes": [],
+    "negativeEvidence": {
+      "method": "complete visible Geany toolbar widget inventory for this screenshot; target action name has no visible toolbar widget; target region is the toolbar, not menus",
+      "targetActionName": "Cut",
+      "visibleToolbarWidgetNames": [
+        "New",
+        "Menu",
+        "Open",
+        "Menu",
+        "Save",
+        "Save All",
+        "Revert",
+        "Close",
+        "Back",
+        "Forward",
+        "Compile",
+        "Build",
+        "Menu",
+        "Execute",
+        "Color Chooser"
+      ],
+      "accessibilityTreeNodeCount": 748,
+      "inventorySource": "full AT-SPI tree captured for exact screenshot before candidate access"
+    },
+    "annotationSource": "Explicit absence from complete visible toolbar inventory; not inferred from missing annotations.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-01",
+    "expectedPresence": "present",
+    "targetClassId": "new",
+    "targetBoxes": [
+      {
+        "className": "new",
+        "xyxy": [
+          0.1515625,
+          0.17,
+          0.1859375,
+          0.215
+        ],
+        "pixelXYXY": [
+          194,
+          136,
+          238,
+          172
+        ],
+        "source": "AT-SPI widget allocation corroborated by controlled CSS edge pixels"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: AT-SPI semantic button name and full allocation; all four CSS-painted allocation edges verified in screenshot pixels. Not model-derived.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-02",
+    "expectedPresence": "present",
+    "targetClassId": "open",
+    "targetBoxes": [
+      {
+        "className": "open",
+        "xyxy": [
+          0.21640625,
+          0.17,
+          0.25078125,
+          0.215
+        ],
+        "pixelXYXY": [
+          277,
+          136,
+          321,
+          172
+        ],
+        "source": "AT-SPI widget allocation corroborated by controlled CSS edge pixels"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: AT-SPI semantic button name and full allocation; all four CSS-painted allocation edges verified in screenshot pixels. Not model-derived.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-03",
+    "expectedPresence": "present",
+    "targetClassId": "save",
+    "targetBoxes": [
+      {
+        "className": "save",
+        "xyxy": [
+          0.28125,
+          0.17,
+          0.315625,
+          0.21625
+        ],
+        "pixelXYXY": [
+          360,
+          136,
+          404,
+          173
+        ],
+        "source": "AT-SPI widget allocation corroborated by controlled CSS edge pixels"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: AT-SPI semantic button name and full allocation; all four CSS-painted allocation edges verified in screenshot pixels. Not model-derived.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-04",
+    "expectedPresence": "present",
+    "targetClassId": "revert",
+    "targetBoxes": [
+      {
+        "className": "revert",
+        "xyxy": [
+          0.3609375,
+          0.17,
+          0.3953125,
+          0.21625
+        ],
+        "pixelXYXY": [
+          462,
+          136,
+          506,
+          173
+        ],
+        "source": "AT-SPI widget allocation corroborated by controlled CSS edge pixels"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: AT-SPI semantic button name and full allocation; all four CSS-painted allocation edges verified in screenshot pixels. Not model-derived.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-05",
+    "expectedPresence": "present",
+    "targetClassId": "close",
+    "targetBoxes": [
+      {
+        "className": "close",
+        "xyxy": [
+          0.3953125,
+          0.17,
+          0.4296875,
+          0.21625
+        ],
+        "pixelXYXY": [
+          506,
+          136,
+          550,
+          173
+        ],
+        "source": "AT-SPI widget allocation corroborated by controlled CSS edge pixels"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: AT-SPI semantic button name and full allocation; all four CSS-painted allocation edges verified in screenshot pixels. Not model-derived.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-06",
+    "expectedPresence": "present",
+    "targetClassId": "navigation-back",
+    "targetBoxes": [
+      {
+        "className": "navigation-back",
+        "xyxy": [
+          0.440625,
+          0.17,
+          0.475,
+          0.21625
+        ],
+        "pixelXYXY": [
+          564,
+          136,
+          608,
+          173
+        ],
+        "source": "AT-SPI widget allocation corroborated by controlled CSS edge pixels"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: AT-SPI semantic button name and full allocation; all four CSS-painted allocation edges verified in screenshot pixels. Not model-derived.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  },
+  {
+    "caseId": "ui-geany-oracle-dev-present-07",
+    "expectedPresence": "present",
+    "targetClassId": "navigation-forward",
+    "targetBoxes": [
+      {
+        "className": "navigation-forward",
+        "xyxy": [
+          0.475,
+          0.17,
+          0.509375,
+          0.21625
+        ],
+        "pixelXYXY": [
+          608,
+          136,
+          652,
+          173
+        ],
+        "source": "AT-SPI widget allocation corroborated by controlled CSS edge pixels"
+      }
+    ],
+    "negativeEvidence": null,
+    "annotationSource": "Independent source-geometry oracle: AT-SPI semantic button name and full allocation; all four CSS-painted allocation edges verified in screenshot pixels. Not model-derived.",
+    "sourceGroup": "controlled-app:geany-2.0",
+    "sceneStratum": "controlled-real-application"
+  }
+]

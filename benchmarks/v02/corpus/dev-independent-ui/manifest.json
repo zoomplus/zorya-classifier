@@ -1,0 +1,8 @@
+{
+  "split": "dev",
+  "stratum": "controlled-real-ui-independent-source-geometry",
+  "cases": 10,
+  "inputsSha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc",
+  "groundTruthSha256": "c7944190e1cadab695f2688351df10a14132986040dafb72794bb1df4571abfe",
+  "sourceLedgerSha256": "10f408e34c80bf262217c9413f5049c128573613a44ff27e1a586eb4a56a0c8b"
+}

@@ -1,0 +1,19 @@
+toolbar toolbutton,
+toolbar toolbutton button,
+toolbar button,
+toolbar toolbutton:hover,
+toolbar toolbutton:active,
+toolbar toolbutton:checked,
+toolbar toolbutton:disabled,
+toolbar button:hover,
+toolbar button:active,
+toolbar button:checked,
+toolbar button:disabled {
+  background-image: none;
+  background-color: #00d020;
+  border: 2px solid #ff00ff;
+  border-radius: 0;
+  margin: 0;
+  box-shadow: none;
+  opacity: 1;
+}

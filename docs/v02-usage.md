@@ -13,6 +13,8 @@ These APIs are implemented on the 0.2 development branch. They are not a claim t
 
 Default region behavior remains compatible. A whole-object box covers the visible object within the hard ROI; it does not reconstruct hidden parts. A mask is produced only by `extract`. No operation promises exact semantic understanding for every photo or map.
 
+Runnable source examples are [whole-object location](../examples/locate-whole-object.ts) and [PNG extraction](../examples/extract-object.ts). The extraction example uses the explicit CPU backend and preserves an existing output file. It prints geometry and mask dimensions instead of serializing binary mask bytes. Install the optional runtime and obtain the pinned assets before running it; source examples are maintained in the repository rather than bundled into the npm archive.
+
 ## Locate the complete visible object
 
 Use an existing client configured with a `DecisionPort`:
