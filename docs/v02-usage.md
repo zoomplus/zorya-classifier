@@ -6,14 +6,14 @@ The library does not select or connect a model. Supply a `DecisionPort` to `crea
 
 ## Choose the operation
 
-| Operation                                               | Result                                                                       | Model requests                       |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------ |
-| `classify`                                              | One supplied class                                                           | One                                  |
-| `locate` (default / `mode: 'region'`)                   | A grid cell that may contain an object fragment                              | Up to three                          |
-| `locate` with `mode: 'whole-object'` and `segmentation` | Visible bounds and center derived from a mask                                | Up to three, plus local segmentation |
-| `extract` with `segmentation`                           | Mask-derived bounds, center, transparent PNG, cropped mask and source offset | Up to three, plus local segmentation |
+| Operation                                               | Result                                                                       | Model requests                                 |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| `classify`                                              | One supplied class                                                           | One                                            |
+| `locate` (default / `mode: 'region'`)                   | A grid cell that may contain an object fragment                              | Up to three                                    |
+| `locate` with `mode: 'whole-object'` and `segmentation` | Visible bounds and center derived from a mask                                | Up to five, plus local segmentation/correction |
+| `extract` with `segmentation`                           | Mask-derived bounds, center, transparent PNG, cropped mask and source offset | Up to five, plus local segmentation/correction |
 
-The primary object workflow is the unchanged region locator followed by an explicitly configured segmenter. Segmentation receives the locator's seed prompt on the full EXIF-oriented source image; it does not receive a seed crop or treat the seed as an object box. Bounds and center come from actual foreground mask pixels. This flow makes no separate extent-search or model mask-confirmation requests. Default `locate` behavior remains compatible.
+The primary object workflow is the unchanged region locator followed by an explicitly configured segmenter. Segmentation receives the locator's seed prompt on the full EXIF-oriented source image; it does not receive a seed crop or treat the seed as an object box. Bounds and center come from actual foreground mask pixels. After the initial mask, a closed decision checks the original image with the actual mask box and original seed anchor: `complete`, `needs-expansion`, or `unknown`. It reuses the caller-supplied `DecisionPort`. An incomplete box permits one actual enclosing-mask correction and one final check; there is no separate extent search or generated model geometry. Default `locate` behavior remains compatible.
 
 ## Primary workflow: region seed to mask-derived result
 
@@ -38,15 +38,38 @@ try {
 }
 ```
 
-`result.region` is the mask-derived half-open rectangle in source coordinates. `result.center` is its pixel center, and `result.offset` maps the cropped mask and PNG back to the source. Empty or seed-ungrounded masks return `unknown/segmentation-uncertain`; a locator rectangle is never substituted. Native and resource errors remain typed failures. `locate({ mode: 'whole-object' })` uses the same mask path when a segmenter is explicitly configured.
+`result.region` is the mask-derived half-open rectangle in source coordinates. `result.center` is its pixel center, and `result.offset` maps the cropped mask and PNG back to the source. Empty or seed-ungrounded masks return `unknown/segmentation-uncertain`; a locator rectangle is never substituted. The same unknown is returned when containment cannot be confirmed, expansion is unavailable, or the corrected mask still fails its check. Successful primary results use `method: 'region-checked-segmentation-v1'`. `verification.checks` retains the one or two closed decisions with raw scores/ranks and actual request metadata; `verification.expansion` reports `not-needed`, `unsupported`, `no-enclosing-mask`, `rejected-mask`, or `expanded`. Verification decision costs are included in `location.metadata`. A confirmed box is separate from pixel-perfect mask quality. Native and resource errors remain typed failures. `locate({ mode: 'whole-object' })` uses the same mask path when a segmenter is explicitly configured.
 
-Both ports remain caller-owned. The classifier cancels and joins its operations but does not dispose an injected segmenter. Dispose both resources when the application owns both. Model/provider selection is also explicit; examples below show one caller-configured route, not a library default or accuracy guarantee.
+The decision port, optional custom `segmentationBoxCheck`, and segmenter remain caller-owned. The classifier cancels and joins its operations but does not dispose an injected segmenter. Dispose both resources when the application owns both. Model/provider selection is also explicit; examples below show one caller-configured route, not a library default or accuracy guarantee.
 
-A Linux CPU wiring smoke with the pinned MobileSAM assets used a synthetic 192×128 image. A colored rectangle produced a 2,800-pixel mask with bounds `[70, 34, 120, 90]`; an all-transparent input produced a full-size empty mask. Three child starts matched three closes. This verifies adapter wiring only, not photo accuracy.
+### Optional caller presence guard
+
+The separately tested v2 benchmark composition first classifies the target as `present` or `absent`, then calls the unchanged `extract` only for `present`. This is caller logic: direct `extract` uses up to three region requests plus one or two containment checks, while the guarded composition adds one classification request. The v2 benchmark predates containment checks and remains historical evidence; the new checked workflow requires a separately named comparison. The benchmark already recorded that classification in v1, so reusing it in v2 did not add a request to the comparison. A classification error remains an error; it must not be converted to absence. Keep both calls under one caller-owned absolute deadline and abort signal.
+
+```ts
+// image, target and signal are owned by this application's operation.
+const presence = await client.classify({
+  input: { image, text: target },
+  classes: [
+    { id: 'present', description: 'The target is visible in this image.' },
+    { id: 'absent', description: 'The target is not visible in this image.' },
+  ],
+  signal,
+})
+if (presence.choice === 'present') {
+  const result = await client.extract({ image, target, signal })
+  // Handle the actual result; do not substitute the seed for a failed mask.
+  console.log(result.status)
+}
+```
+
+This illustrates caller composition rather than a new package default. Exact benchmark tasks, prompts, timeouts, route and preserved failures are pinned in [development evidence](evidence/v02/region-seeded-dev-v2/README.md); changing the caller's model or prompt requires its own quality measurement.
+
+A baseline Linux CPU wiring smoke with the pinned MobileSAM assets used a synthetic 192×128 image. A colored rectangle produced a 2,800-pixel mask with bounds `[70, 34, 120, 90]`; an all-transparent input produced a full-size empty mask. Three child starts matched three closes. This verifies adapter wiring only, not photo accuracy.
 
 ## Legacy interval and proposal strategies
 
-The earlier boundary-interval `whole-object` strategy and `objectProposals` mask-choice strategy remain optional legacy/research paths. They are not required by the primary seed-region segmentation workflow and have separate model-confirmation steps and evidence. The interval strategy asks closed Choices over integer boundaries after the region seed. Each axis has at most sixteen intervals plus `unknown`; up to three passes refine the intervals. It returns interval-derived geometry, not a segmented mask.
+The earlier boundary-interval `whole-object` strategy and `objectProposals` mask-choice strategy remain optional legacy/research paths. They are not required by the primary seed-region segmentation workflow and have their own model-confirmation steps and historical evidence. The interval strategy asks closed Choices over integer boundaries after the region seed. Each axis has at most sixteen intervals plus `unknown`; up to three passes refine the intervals. It returns interval-derived geometry, not a segmented mask.
 
 The optional `objectProposals` adapter computes packed MobileSAM masks from nine seed points, then asks the configured model to select a supplied candidate and confirm its rectangle. Its box checks and mask quality are separate from direct seed-prompt segmentation. Default region and classification operations are unchanged.
 
@@ -111,6 +134,8 @@ The mask is cropped to its visible bounds, row-major, one byte per pixel (`0` or
 The caller owns a segmenter and may share it between clients. `client.dispose()` cancels and joins that client's operations without disposing the segmenter. Each `segment()` promise must remain pending until its own physical work settles, including cancellation. `segmenter.settle()` joins admitted work; `segmenter.dispose()` closes its own resources. Dispose both when the application owns both.
 
 Built-in adapters probe the backend on explicit factory calls and run each admitted inference in a fresh owned child. They currently do not reuse sessions: measured inference includes cold child/model startup. One active task and two waiters bound native work. Cancellation retains the slot through child close, with 250 ms grace before owned-child termination; each task has a 10-second native limit inside the client's absolute deadline. Consult measured evidence for latency-sensitive deployment.
+
+MobileSAM uses the seed region's center as a positive point on the full source and selects the mask with the greatest finite native quality score, using stable ties. It is a geometric point-prompt model; it does not interpret the target's text. Its raw quality score estimates a mask, not target identity or completeness. In the exposed development set it sometimes selected a part, such as a car's headlight, rather than the whole car. `status: 'extracted'` means that the returned mask and artifacts passed structural/source validation; it is not a semantic correctness guarantee. The [independent quality report](evidence/v02/region-seeded-dev-v2/README.md) measures that distinction. A caller-owned `SegmentationPort` can supply a different or text-guided backend without changing region search or connecting a model inside the library.
 
 ## CLI
 

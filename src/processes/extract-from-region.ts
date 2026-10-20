@@ -14,14 +14,21 @@ import type { CutoutRasterPort } from '../entities/cutout-raster.js'
 import { ClassifierError, assertActive } from '../entities/errors.js'
 import type { RgbaRaster } from '../entities/representation.js'
 import type {
+  BinaryMask,
   ExtractInput,
   ExtractionResult,
   SegmentationInput,
+  SegmentationMetadata,
   SegmentationPort,
 } from '../entities/segmentation.js'
+import type {
+  SegmentationBoxCheckPort,
+  SegmentationVerification,
+} from '../entities/segmentation-verification.js'
 import type { ObjectBounds, WholeObjectLocated } from '../entities/whole-object.js'
 import { wholeObjectSchema } from '../entities/whole-object.js'
 import { cropMask, maskedRgba, validateMask } from '../features/segmentation/mask.js'
+import { validateSegmentationBoxCheckResult } from '../features/segmentation/box-check.js'
 import {
   assertRasterImage,
   contains,
@@ -101,10 +108,11 @@ interface ExtractFromRegionDependencies {
   raster: RasterPort
   image: CutoutRasterPort
   segmenter: SegmentationPort
+  boxCheck: SegmentationBoxCheckPort
   locateRegion: LocateRegion
 }
 
-/** Segments the full source from one original grid-selected seed region. */
+/** Original region seed, full-source mask, closed containment check and at most one repair. */
 export async function extractFromRegion(
   input: ExtractInput & { signal: AbortSignal },
   dependencies: ExtractFromRegionDependencies,
@@ -165,9 +173,8 @@ export async function extractFromRegion(
         'Region locator returned invalid source geometry',
       )
 
-    const segmentImage: RgbaRaster = { ...image, data: new Uint8Array(image.data) }
     const segmentInput: SegmentationInput = {
-      image: segmentImage,
+      image,
       seedRegion: { ...seedLocation.region },
       prompt: 'seed-region',
       wholeRegion: { ...roi },
@@ -178,14 +185,7 @@ export async function extractFromRegion(
       completeness: 'visible-object',
       signal,
     }
-    let rawSegmented: unknown
-    try {
-      rawSegmented = await dependencies.segmenter.segment(segmentInput)
-      assertActive(signal)
-    } finally {
-      segmentImage.data.fill(0)
-    }
-    const segmented = validateSegmentationResult(rawSegmented, image.width, image.height)
+    let segmented = await segmentSource(dependencies.segmenter, segmentInput)
     if (segmented.status === 'unknown') {
       const metadata = withMetadataDuration(seedLocation.metadata, started, source)
       return {
@@ -197,16 +197,10 @@ export async function extractFromRegion(
       }
     }
 
+    const ownedMasks = [segmented.mask]
+    const verification: SegmentationVerification = { checks: [], expansion: 'not-needed' }
     try {
-      let box: PixelRect | undefined
-      try {
-        box = validateMask(segmented.mask, image, roi, seedLocation.region)
-      } catch {
-        throw new ClassifierError(
-          'INVALID_RESPONSE',
-          'Segmenter mask failed binary/source validation',
-        )
-      }
+      let box = validateSourceMask(segmented.mask, image, roi, seedLocation.region)
       if (!box) {
         const metadata = withMetadataDuration(seedLocation.metadata, started, source)
         return {
@@ -218,8 +212,35 @@ export async function extractFromRegion(
         }
       }
 
-      for (let index = 0; index < segmented.mask.data.length; index++)
-        if (image.data[index * 4 + 3] === 0) segmented.mask.data[index] = 0
+      clearTransparentForeground(segmented.mask, image)
+      let check = await checkBox(dependencies.boxCheck, segmentInput, box)
+      verification.checks.push(check)
+      if (check.verdict === 'needs-expansion') {
+        if (!dependencies.segmenter.expand) {
+          verification.expansion = 'unsupported'
+          return unresolved(seedLocation, segmented.metadata, verification, started, source)
+        }
+        const expanded = await segmentSource(dependencies.segmenter, segmentInput, segmented.mask)
+        if (expanded.status === 'unknown') {
+          verification.expansion = 'no-enclosing-mask'
+          return unresolved(seedLocation, expanded.metadata, verification, started, source)
+        }
+        ownedMasks.push(expanded.mask)
+        const expandedBox = validateSourceMask(expanded.mask, image, roi, seedLocation.region)
+        clearTransparentForeground(expanded.mask, image)
+        if (!expandedBox || !isEnclosingMask(segmented.mask, box, expanded.mask, expandedBox)) {
+          verification.expansion = 'rejected-mask'
+          return unresolved(seedLocation, expanded.metadata, verification, started, source)
+        }
+        verification.expansion = 'expanded'
+        segmented = expanded
+        box = expandedBox
+        check = await checkBox(dependencies.boxCheck, segmentInput, box)
+        verification.checks.push(check)
+      }
+      if (check.verdict !== 'complete')
+        return unresolved(seedLocation, segmented.metadata, verification, started, source)
+
       const croppedMask = cropMask(segmented.mask, box)
       const rgba = maskedRgba(image, segmented.mask, box)
       let rawPng: unknown
@@ -245,8 +266,9 @@ export async function extractFromRegion(
           'Cutout raster port returned invalid PNG bytes',
         )
 
-      const metadata = withMetadataDuration(seedLocation.metadata, started, source)
+      const metadata = withMetadataDuration(seedLocation.metadata, started, source, verification)
       const location = locatedFromMask(seedLocation, box, image, roi, metadata)
+      location.verification = verification
       return {
         status: 'extracted',
         location,
@@ -256,14 +278,127 @@ export async function extractFromRegion(
         center: { x: box.left + box.width / 2, y: box.top + box.height / 2 },
         offset: { x: box.left, y: box.top },
         segmentation: segmented.metadata,
+        verification,
       }
     } finally {
-      segmented.mask.data.fill(0)
+      for (const mask of ownedMasks) mask.data.fill(0)
     }
   } finally {
     ownedBytes.fill(0)
     source?.bytes.fill(0)
     image?.data.fill(0)
+  }
+}
+
+async function segmentSource(
+  segmenter: SegmentationPort,
+  input: SegmentationInput,
+  previous?: BinaryMask,
+) {
+  const image: RgbaRaster = { ...input.image, data: new Uint8Array(input.image.data) }
+  const previousMask = previous ? { ...previous, data: new Uint8Array(previous.data) } : undefined
+  const owned: SegmentationInput = {
+    ...input,
+    image,
+    seedRegion: { ...input.seedRegion },
+    wholeRegion: { ...input.wholeRegion },
+    roi: { ...input.roi },
+    bounds: {
+      left: { ...input.bounds.left },
+      right: { ...input.bounds.right },
+      top: { ...input.bounds.top },
+      bottom: { ...input.bounds.bottom },
+    },
+    exclusions: [...input.exclusions],
+  }
+  try {
+    assertActive(input.signal)
+    const result: unknown = previousMask
+      ? await segmenter.expand?.(owned, previousMask)
+      : await segmenter.segment(owned)
+    assertActive(input.signal)
+    return validateSegmentationResult(result, image.width, image.height)
+  } finally {
+    image.data.fill(0)
+    previousMask?.data.fill(0)
+  }
+}
+
+async function checkBox(port: SegmentationBoxCheckPort, input: SegmentationInput, box: PixelRect) {
+  const image: RgbaRaster = { ...input.image, data: new Uint8Array(input.image.data) }
+  try {
+    assertActive(input.signal)
+    const result: unknown = await port.check({
+      image,
+      region: { ...box },
+      seedRegion: { ...input.seedRegion },
+      roi: { ...input.roi },
+      target: input.target,
+      exclusions: [...input.exclusions],
+      signal: input.signal,
+    })
+    assertActive(input.signal)
+    return validateSegmentationBoxCheckResult(result)
+  } finally {
+    image.data.fill(0)
+  }
+}
+
+function validateSourceMask(
+  mask: BinaryMask,
+  image: RgbaRaster,
+  roi: PixelRect,
+  seed: PixelRect,
+): PixelRect | undefined {
+  try {
+    return validateMask(mask, image, roi, seed)
+  } catch {
+    throw new ClassifierError('INVALID_RESPONSE', 'Segmenter mask failed binary/source validation')
+  }
+}
+
+function clearTransparentForeground(mask: BinaryMask, image: RgbaRaster): void {
+  for (let index = 0; index < mask.data.length; index++)
+    if (image.data[index * 4 + 3] === 0) mask.data[index] = 0
+}
+
+function isEnclosingMask(
+  previous: BinaryMask,
+  previousBox: PixelRect,
+  expanded: BinaryMask,
+  box: PixelRect,
+): boolean {
+  if (
+    !contains(box, previousBox) ||
+    (box.left === previousBox.left &&
+      box.top === previousBox.top &&
+      box.width === previousBox.width &&
+      box.height === previousBox.height)
+  )
+    return false
+  let added = false
+  for (let i = 0; i < previous.data.length; i++) {
+    if (previous.data[i] === 1 && expanded.data[i] !== 1) return false
+    if (previous.data[i] !== 1 && expanded.data[i] === 1) added = true
+  }
+  return added
+}
+
+function unresolved(
+  seedLocation: LocatedSeed,
+  segmentation: SegmentationMetadata,
+  verification: SegmentationVerification,
+  started: number,
+  source: RasterImage,
+): ExtractionResult {
+  const metadata = withMetadataDuration(seedLocation.metadata, started, source, verification)
+  return {
+    status: 'unknown',
+    reason: 'segmentation-uncertain',
+    seedLocation: { ...seedLocation, metadata },
+    metadata,
+    segmentation,
+    verification,
   }
 }
 
@@ -332,6 +467,7 @@ function withMetadataDuration(
   value: LocalizationMetadata,
   started: number,
   source?: RasterImage,
+  verification?: SegmentationVerification,
 ): LocalizationMetadata {
   const metadata = snapshotLocalizationMetadata(value)
   if (source && (metadata.image.width !== source.width || metadata.image.height !== source.height))
@@ -340,6 +476,11 @@ function withMetadataDuration(
       'Region locator metadata source dimensions mismatch',
     )
   metadata.durationMs = Math.max(0, performance.now() - started)
+  for (const check of verification?.checks ?? []) {
+    metadata.stages.push({ ...check.metadata })
+    if (check.metadata.costUsd === null) metadata.unknownCostCount++
+    else metadata.knownCostUsd += check.metadata.costUsd
+  }
   return metadata
 }
 
@@ -368,7 +509,7 @@ function locatedFromMask(
     },
     bounds: boundsForMask(box),
     completeness: touchesRoi ? 'boundary-limited' : 'visible-object',
-    method: 'region-segmentation-v1',
+    method: 'region-checked-segmentation-v1',
     center: { x: box.left + box.width / 2, y: box.top + box.height / 2 },
     metadata,
   }

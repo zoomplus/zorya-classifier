@@ -2,7 +2,7 @@
 
 The public factory composes the caller-supplied `DecisionPort` and a Sharp-backed `RasterPort`. The library does not select a model, provider or endpoint; applications either inject an existing port or explicitly build one with a supported adapter. Processes orchestrate classify/locate; features contain pure Choice interpretation, grid geometry and prompt construction; entities define validated public contracts; infrastructure owns provider HTTP and image processing. No application runtime, game-state schema or workspace import is required.
 
-The primary 0.2 object path preserves the original region locator. Its selected seed prompts an explicitly configured segmenter on the full oriented source image; actual mask pixels determine bounds, center and the optional cutout. No additional extent search or model mask-confirmation request is made. `locate({ mode: 'whole-object' })` and `extract` use the same mask-derived geometry when a segmenter is configured. Boundary-interval location and `ObjectProposalPort` remain optional legacy strategies with their own request flows.
+The primary 0.2 object path preserves the original region locator. Its selected seed prompts an explicitly configured segmenter on the full oriented source image; actual mask pixels determine bounds, center and the optional cutout. A generic closed containment checker receives the full source with the mask-derived box and original seed anchor. It uses the injected decision port and a presentation port; the process allows at most one actual enclosing-mask correction and a final check. The segmenter can implement optional `expand`; corrected foreground must strictly contain the old visible foreground and grow the real box within the hard ROI. The process rejects unresolved checks without publishing a partial cutout. Its absolute deadline, cancellation and byte ownership cover every stage. No additional extent search or model-generated coordinates are used. `locate({ mode: 'whole-object' })` and `extract` use the same mask-derived geometry when a segmenter is configured. Boundary-interval location and `ObjectProposalPort` remain optional legacy strategies with their own request flows.
 
 Extraction composes the selected locator with a caller-owned `SegmentationPort` and a `CutoutRasterPort`; processes import neither Sharp nor native inference. Explicitly created native adapters own their workers and queues, while the caller supplies and manages their optional runtime packages and local model assets. No weights are selected, installed or downloaded by the library. [Operation and ownership details](v02-usage.md) are explicit; no experimental text-image profile is publicly qualified yet.
 
@@ -13,7 +13,13 @@ flowchart LR
   G --> L[Original region locator: up to three requests]
   L --> S[Caller-owned segmenter on full source with seed prompt]
   S --> M[Validate mask and derive visible bounds / center]
-  M --> X[Optional transparent cutout]
+  M --> B[Closed box check on full source and seed anchor]
+  B -->|complete| X[Optional transparent cutout]
+  B -->|unknown| U[Explicit unresolved result]
+  B -->|needs expansion| E[At most one actual enclosing-mask correction]
+  E --> R[Validate foreground containment and recheck actual box]
+  R -->|complete| X
+  R -->|unresolved / no parent| U
 ```
 
 One deadline covers the whole operation, including queue time. AbortSignal passes through every boundary; guards after awaits reject late results. Physical Sharp/provider work retains its slot until its promise settles. Timers/listeners are cleared in finally. There is no import-time worker, automatic retry, persistent image cache, database or background polling loop.

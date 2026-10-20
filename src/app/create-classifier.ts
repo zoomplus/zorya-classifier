@@ -35,6 +35,9 @@ import type { BoundaryViewPort } from '../entities/boundary-view.js'
 import type { ObjectProposalPort } from '../entities/object-proposals.js'
 import { locateFromProposals } from '../processes/proposal-location.js'
 import { createSharpObjectProposalPresentation } from '../infrastructure/segmentation/proposal-presentation.js'
+import type { SegmentationBoxCheckPort } from '../entities/segmentation-verification.js'
+import { createSegmentationBoxCheck } from '../features/segmentation/box-check.js'
+import { createSharpSegmentationBoxPresentation } from '../infrastructure/segmentation/box-presentation.js'
 
 export interface ClassifierOptions {
   decision: DecisionPort
@@ -45,6 +48,8 @@ export interface ClassifierOptions {
   refinement?: RefinementPort
   /** Caller-owned; classifier disposal never disposes a shared segmenter. */
   segmentation?: SegmentationPort
+  /** Optional caller-owned containment checker; by default reuses the injected decision port. */
+  segmentationBoxCheck?: SegmentationBoxCheckPort
   /** Explicit, caller-owned pixel-mask proposal strategy for whole-object operations. */
   objectProposals?: ObjectProposalPort
 }
@@ -101,10 +106,16 @@ function composeClassifier(
     segmenter !== undefined &&
     (!segmenter ||
       typeof segmenter.segment !== 'function' ||
+      (segmenter.expand !== undefined && typeof segmenter.expand !== 'function') ||
       typeof segmenter.settle !== 'function' ||
       typeof segmenter.dispose !== 'function')
   )
     throw new ClassifierError('INVALID_INPUT', 'segmentation must implement SegmentationPort')
+  if (
+    options.segmentationBoxCheck !== undefined &&
+    (!options.segmentationBoxCheck || typeof options.segmentationBoxCheck.check !== 'function')
+  )
+    throw new ClassifierError('INVALID_INPUT', 'segmentationBoxCheck must implement its check port')
   if (
     objectProposals !== undefined &&
     (!objectProposals ||
@@ -123,6 +134,13 @@ function composeClassifier(
   const inputBudget = new InputBudget(config.maxInputBytes)
   const raster = createSharpRaster()
   const cutoutRaster = createSharpCutoutRaster()
+  const boxCheck = segmenter
+    ? (options.segmentationBoxCheck ??
+      createSegmentationBoxCheck({
+        decision: options.decision,
+        presentation: createSharpSegmentationBoxPresentation(),
+      }))
+    : undefined
   const proposalDependencies = objectProposals
     ? {
         decision: options.decision,
@@ -185,6 +203,7 @@ function composeClassifier(
           status: 'unknown',
           reason: 'segmentation-uncertain',
           metadata: 'metadata' in result ? result.metadata : result.location.metadata,
+          ...(result.verification ? { verification: result.verification } : {}),
         }
       return result
     }
@@ -208,14 +227,17 @@ function composeClassifier(
     signal: AbortSignal,
     representation: ImageRepresentationPort | undefined,
   ): Promise<ExtractionResult> {
-    if (!segmenter)
+    if (!segmenter || !boxCheck)
       throw new ClassifierError('UNSUPPORTED', 'Region extraction requires a SegmentationPort')
+    if (representation)
+      throw new ClassifierError('UNSUPPORTED', 'Checked segmentation requires vision input')
     return extractFromRegion(
       { ...input, signal },
       {
         raster,
         image: cutoutRaster,
         segmenter,
+        boxCheck,
         locateRegion: (source, { signal: operationSignal, ...request }) =>
           locateInput(
             { ...request, image: source.bytes },

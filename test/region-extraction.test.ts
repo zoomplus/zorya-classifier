@@ -5,13 +5,41 @@ import sharp from 'sharp'
 import type { LocalizationResult, RasterImage, RasterPort } from '../src/entities/contracts.js'
 import type { CutoutRasterPort } from '../src/entities/cutout-raster.js'
 import type {
+  BinaryMask,
   SegmentationInput,
   SegmentationPort,
   SegmentationResult,
 } from '../src/entities/segmentation.js'
+import type {
+  SegmentationBoxCheckPort,
+  SegmentationBoxCheckResult,
+  SegmentationBoxVerdict,
+} from '../src/entities/segmentation-verification.js'
 import type { RgbaRaster } from '../src/entities/representation.js'
 import { ClassifierError } from '../src/entities/errors.js'
 import { extractFromRegion } from '../src/processes/extract-from-region.js'
+
+function checkResult(verdict: SegmentationBoxVerdict): SegmentationBoxCheckResult {
+  return {
+    verdict,
+    selection: {
+      choice: verdict,
+      nativeChoice: null,
+      probabilities: null,
+      ranking: [verdict],
+      tied: [],
+    },
+    metadata: {
+      model: 'fixture-box',
+      provider: 'fixture',
+      requestId: null,
+      durationMs: 1,
+      costUsd: 0.001,
+      attempts: 1,
+    },
+  }
+}
+const completeBoxCheck: SegmentationBoxCheckPort = { check: async () => checkResult('complete') }
 
 const width = 8
 const height = 6
@@ -189,6 +217,7 @@ await test('region-seeded extraction segments the entire source and derives exte
   const result = await extractFromRegion(
     { image: bytes, target: 'the visible object', roi, signal: controller.signal },
     {
+      boxCheck: completeBoxCheck,
       raster: rasterPort(bytes),
       image: cutout,
       segmenter: port,
@@ -212,7 +241,7 @@ await test('region-seeded extraction segments the entire source and derives exte
   assert.deepEqual(result.region, { left: 1, top: 1, width: 5, height: 4 })
   assert.deepEqual(result.offset, { x: 1, y: 1 })
   assert.deepEqual(result.center, { x: 3.5, y: 3 })
-  assert.equal(result.location.method, 'region-segmentation-v1')
+  assert.equal(result.location.method, 'region-checked-segmentation-v1')
   assert.deepEqual(result.location.seedRegion, seed)
   assert.deepEqual(result.location.bounds, {
     left: { start: 1, endExclusive: 2 },
@@ -221,7 +250,7 @@ await test('region-seeded extraction segments the entire source and derives exte
     bottom: { start: 4, endExclusive: 5 },
   })
   assert.equal(result.location.completeness, 'boundary-limited')
-  assert.equal(result.location.metadata.stages.length, 3)
+  assert.equal(result.location.metadata.stages.length, 4)
   assert.ok(Number.isFinite(result.location.metadata.durationMs))
   assert.ok(result.location.metadata.durationMs >= 0)
   assert.equal(result.mask.data.length, 20)
@@ -240,6 +269,7 @@ await test('region locator unknown or absent skips segmentation and preserves it
     const output = await extractFromRegion(
       { image: bytes, target: 'object', signal: new AbortController().signal },
       {
+        boxCheck: completeBoxCheck,
         raster: rasterPort(bytes),
         image: cutoutPort(),
         segmenter: segmenter(async () => {
@@ -268,6 +298,7 @@ await test('caller bytes are snapshotted before the first normalization await', 
   const resultPromise = extractFromRegion(
     { image: bytes, target: 'object', signal: new AbortController().signal },
     {
+      boxCheck: completeBoxCheck,
       raster: rasterPort(bytes, {
         normalize: async (owned) => {
           assert.notEqual(owned, bytes)
@@ -301,6 +332,7 @@ await test('segmentation unknown carries the seed result without inventing an ob
   const output = await extractFromRegion(
     { image: bytes, target: 'object', signal: new AbortController().signal },
     {
+      boxCheck: completeBoxCheck,
       raster: rasterPort(bytes),
       image: cutoutPort(),
       segmenter: segmenter(async () => ({
@@ -329,6 +361,7 @@ await test('mask outside hard ROI is invalid and cannot produce a rectangle fall
     extractFromRegion(
       { image: bytes, target: 'object', roi, signal: new AbortController().signal },
       {
+        boxCheck: completeBoxCheck,
         raster: rasterPort(bytes),
         image: cutoutPort(),
         segmenter: segmenter(async () => {
@@ -363,6 +396,7 @@ await test('abort after the segmenter resolves is honored and shared adapter own
     extractFromRegion(
       { image: bytes, target: 'object', signal: controller.signal },
       {
+        boxCheck: completeBoxCheck,
         raster: rasterPort(bytes),
         image: cutoutPort({
           png: async () => {
@@ -402,4 +436,281 @@ await test('abort after the segmenter resolves is honored and shared adapter own
   assert.equal(pngCalls, 0)
   assert.equal(settleCalls, 0)
   assert.equal(disposeCalls, 0)
+})
+
+function segmentedMask(data: Uint8Array): SegmentationResult {
+  return {
+    status: 'segmented',
+    mask: { data, width, height, format: 'binary-u8' },
+    metadata: {
+      method: 'fixture-mask',
+      backend: 'fixture',
+      durationMs: 1,
+      input: { width, height },
+    },
+  }
+}
+
+function partMask(): Uint8Array {
+  const data = new Uint8Array(width * height)
+  data[2 * width + 2] = 1
+  data[2 * width + 3] = 1
+  return data
+}
+
+async function correctionFixture(
+  boxCheck: SegmentationBoxCheckPort,
+  expand?: SegmentationPort['expand'],
+  signal = new AbortController().signal,
+) {
+  const bytes = await sourcePng()
+  let pngCalls = 0
+  const port: SegmentationPort = {
+    ...segmenter(async () => segmentedMask(partMask())),
+    ...(expand ? { expand } : {}),
+  }
+  const result = await extractFromRegion(
+    { image: bytes, target: 'one physical object', exclusions: ['another object'], roi, signal },
+    {
+      raster: rasterPort(bytes),
+      image: cutoutPort({
+        png: async (image, operationSignal) => {
+          pngCalls++
+          return cutoutPort().png(image, operationSignal)
+        },
+      }),
+      segmenter: port,
+      locateRegion: async () => original,
+      boxCheck,
+    },
+  )
+  return { result, pngCalls }
+}
+
+await test('incomplete part triggers exactly one enclosing-mask correction and rechecks real geometry', async () => {
+  const controller = new AbortController()
+  let checks = 0
+  let expansions = 0
+  const seenImages: Uint8Array[] = []
+  const seenPrevious: Uint8Array[] = []
+  const externalMask = maskFixture()
+  const { result, pngCalls } = await correctionFixture(
+    {
+      async check(input) {
+        checks++
+        assert.equal(input.signal, controller.signal)
+        assert.deepEqual(input.image.data, rgbaFixture().data)
+        seenImages.push(input.image.data)
+        assert.deepEqual(input.seedRegion, seed)
+        assert.deepEqual(input.roi, roi)
+        assert.equal(input.target, 'one physical object')
+        assert.deepEqual(input.exclusions, ['another object'])
+        assert.deepEqual(input.region, checks === 1 ? { ...seed, width: 2 } : roi)
+        // A caller implementation cannot mutate the canonical image or later stage geometry.
+        input.image.data.fill(0)
+        input.region.left = 0
+        input.seedRegion.left = 0
+        return checkResult(checks === 1 ? 'needs-expansion' : 'complete')
+      },
+    },
+    async (input, previous) => {
+      expansions++
+      assert.equal(input.signal, controller.signal)
+      assert.equal(input.prompt, 'seed-region')
+      assert.deepEqual(input.image.data, rgbaFixture().data)
+      assert.deepEqual(input.seedRegion, seed)
+      assert.deepEqual(input.wholeRegion, roi)
+      assert.deepEqual(previous.data, partMask())
+      assert.deepEqual(
+        [previous.width, previous.height, previous.format],
+        [width, height, 'binary-u8'],
+      )
+      seenImages.push(input.image.data)
+      seenPrevious.push(previous.data)
+      previous.data.fill(0)
+      return segmentedMask(externalMask)
+    },
+    controller.signal,
+  )
+  assert.equal(result.status, 'extracted')
+  assert.equal(checks, 2)
+  assert.equal(expansions, 1)
+  assert.equal(pngCalls, 1)
+  for (const bytes of [...seenImages, ...seenPrevious]) assert.ok(bytes.every((byte) => byte === 0))
+  assert.deepEqual(externalMask, maskFixture())
+  if (result.status !== 'extracted') throw new Error('Expected verified cutout')
+  assert.deepEqual(result.region, roi)
+  assert.deepEqual(result.center, { x: 3.5, y: 3 })
+  assert.equal(result.verification?.expansion, 'expanded')
+  assert.deepEqual(
+    result.verification?.checks.map((check) => check.verdict),
+    ['needs-expansion', 'complete'],
+  )
+  assert.equal(result.location.metadata.stages.length, 5)
+  assert.equal(result.location.metadata.knownCostUsd, 0.002)
+  assert.equal(result.location.metadata.unknownCostCount, 0)
+  assert.deepEqual(result.location.verification, result.verification)
+})
+
+await test('already complete box skips expansion and preserves the maximum below 0.8', async () => {
+  let expansions = 0
+  const selection = {
+    choice: 'complete',
+    nativeChoice: 'complete',
+    probabilities: { complete: 0.66, 'needs-expansion': 0.31, unknown: 0.03 },
+    tied: ['complete'],
+  }
+  const { result } = await correctionFixture(
+    { check: async () => ({ ...checkResult('complete'), selection }) },
+    async () => {
+      expansions++
+      throw new Error('Complete box must not expand')
+    },
+  )
+  assert.equal(result.status, 'extracted')
+  assert.equal(expansions, 0)
+  if (result.status !== 'extracted') throw new Error('Expected complete result')
+  assert.equal(result.verification?.expansion, 'not-needed')
+  assert.deepEqual(result.verification?.checks[0]?.selection.probabilities, selection.probabilities)
+})
+
+await test('missing expansion, no parent and uncertain checks return unknown without a partial PNG', async () => {
+  for (const scenario of ['unsupported', 'no-enclosing-mask', 'unknown'] as const) {
+    let expansions = 0
+    const { result, pngCalls } = await correctionFixture(
+      { check: async () => checkResult(scenario === 'unknown' ? 'unknown' : 'needs-expansion') },
+      scenario === 'unsupported'
+        ? undefined
+        : async () => {
+            expansions++
+            return {
+              status: 'unknown',
+              reason: 'no-enclosing-mask',
+              metadata: {
+                method: 'fixture-expand',
+                backend: 'fixture',
+                durationMs: 1,
+                input: { width, height },
+              },
+            }
+          },
+    )
+    assert.equal(result.status, 'unknown')
+    assert.equal(pngCalls, 0)
+    assert.equal(expansions, scenario === 'no-enclosing-mask' ? 1 : 0)
+    assert.equal('png' in result, false)
+    assert.equal('region' in result, false)
+    if (result.status !== 'unknown' || !('seedLocation' in result))
+      throw new Error('Expected seed-only unknown')
+    assert.equal(result.reason, 'segmentation-uncertain')
+    assert.deepEqual(result.seedLocation.region, seed)
+    assert.equal(result.verification?.expansion, scenario === 'unknown' ? 'not-needed' : scenario)
+  }
+})
+
+await test('a replacement that removes original foreground or fails to grow the box is rejected', async () => {
+  for (const scenario of ['missing-old-pixel', 'same-mask'] as const) {
+    let checks = 0
+    let data = maskFixture()
+    if (scenario === 'missing-old-pixel') data[2 * width + 3] = 0
+    else data = partMask()
+    const { result, pngCalls } = await correctionFixture(
+      {
+        check: async () => {
+          checks++
+          return checkResult('needs-expansion')
+        },
+      },
+      async () => segmentedMask(data),
+    )
+    assert.equal(result.status, 'unknown')
+    assert.equal(checks, 1)
+    assert.equal(pngCalls, 0)
+    if (result.status !== 'unknown' || !('seedLocation' in result))
+      throw new Error('Expected unknown')
+    assert.equal(result.verification?.expansion, 'rejected-mask')
+  }
+})
+
+await test('a second incomplete or unknown verdict never loops or publishes an unverified cutout', async () => {
+  for (const finalVerdict of ['needs-expansion', 'unknown'] as const) {
+    let checks = 0
+    let expansions = 0
+    const { result, pngCalls } = await correctionFixture(
+      { check: async () => checkResult(++checks === 1 ? 'needs-expansion' : finalVerdict) },
+      async () => {
+        expansions++
+        return segmentedMask(maskFixture())
+      },
+    )
+    assert.equal(result.status, 'unknown')
+    assert.equal(checks, 2)
+    assert.equal(expansions, 1)
+    assert.equal(pngCalls, 0)
+    if (result.status !== 'unknown' || !('seedLocation' in result))
+      throw new Error('Expected unknown')
+    assert.equal(result.verification?.checks[1]?.verdict, finalVerdict)
+    assert.equal(result.verification?.expansion, 'expanded')
+  }
+})
+
+await test('box-check cancellation joins its physical result and clears owned image bytes', async () => {
+  const controller = new AbortController()
+  let image: Uint8Array | undefined
+  let markEntered!: () => void
+  let resume!: () => void
+  const entered = new Promise<void>((resolve) => {
+    markEntered = resolve
+  })
+  const pending = new Promise<void>((resolve) => {
+    resume = resolve
+  })
+  let settled = false
+  const promise = correctionFixture(
+    {
+      async check(input) {
+        image = input.image.data
+        markEntered()
+        await pending
+        return checkResult('complete')
+      },
+    },
+    undefined,
+    controller.signal,
+  ).finally(() => {
+    settled = true
+  })
+  const rejection = assert.rejects(
+    promise,
+    (error: unknown) => error instanceof ClassifierError && error.code === 'ABORTED',
+  )
+  await entered
+  controller.abort()
+  await Promise.resolve()
+  assert.equal(settled, false)
+  assert.ok(image?.some((value) => value !== 0))
+  resume()
+  await rejection
+  assert.ok(image?.every((value) => value === 0))
+})
+
+await test('late enclosing-mask result cannot succeed after cancellation and both input copies are released', async () => {
+  const controller = new AbortController()
+  let image: Uint8Array | undefined
+  let previous: BinaryMask | undefined
+  await assert.rejects(
+    correctionFixture(
+      { check: async () => checkResult('needs-expansion') },
+      async (input, previousMask) => {
+        image = input.image.data
+        previous = previousMask
+        controller.abort()
+        return segmentedMask(maskFixture())
+      },
+      controller.signal,
+    ),
+    (error: unknown) => error instanceof ClassifierError && error.code === 'ABORTED',
+  )
+  assert.ok(image?.every((value) => value === 0))
+  assert.ok(previous?.data.every((value) => value === 0))
 })

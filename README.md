@@ -117,7 +117,7 @@ The locator uses up to three sequential calls: coarse 4×4 regions, fine grids i
 
 ## Extract a mask-derived object
 
-For a visible object box, center, or transparent cutout, use `extract` with an explicitly configured caller-owned segmenter. The existing region locator supplies a seed; the segmenter receives that seed while processing the full oriented source image. The library derives the returned box and center from actual mask pixels. This path uses the locator's normal region requests and adds no boundary-extent or LLM mask-confirmation step. See the [0.2 usage guide](docs/v02-usage.md) and runnable [`extract-object.ts`](examples/extract-object.ts). The classifier and segmenter are separately caller-owned and both must be disposed.
+For a visible object box, center, or transparent cutout, use `extract` with an explicitly configured caller-owned segmenter. The existing region locator supplies a seed; the segmenter receives that seed while processing the full oriented source image. The library derives the returned box and center from actual mask pixels. After segmentation, the caller's decision port checks the original image with the mask-derived box and seed anchor. An incomplete box permits one enclosing-mask correction and one recheck; unresolved results remain unknown. This adds one or two closed checks to the normal region requests, without model-generated coordinates or an extent search. See the [0.2 usage guide](docs/v02-usage.md) and runnable [`extract-object.ts`](examples/extract-object.ts). The classifier and segmenter are separately caller-owned and both must be disposed.
 
 ## Development and limits
 

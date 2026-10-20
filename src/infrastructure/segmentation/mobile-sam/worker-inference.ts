@@ -191,7 +191,7 @@ export function selectMobileSamSegmentationMask(input: {
   throw new Error('MobileSAM produced no seed-grounded mask')
 }
 
-export interface EnclosingMobileSamCandidate {
+interface EnclosingMobileSamCandidate {
   token: number
   score: number
   mask: Uint8Array

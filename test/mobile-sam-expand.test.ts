@@ -236,7 +236,7 @@ await test('expansion chooses the smallest strict outer mask and applies score t
   })
   assert.equal(tieByScore?.token, 1)
 
-  const tieByToken = selectEnclosingMobileSamCandidate({
+  const stableTieResult = selectEnclosingMobileSamCandidate({
     width,
     height,
     rgba: rgba(width, height),
@@ -245,7 +245,7 @@ await test('expansion chooses the smallest strict outer mask and applies score t
     scores: Float32Array.of(0.99, 0.99, 0.8, 0.8),
     roi: { left: 0, top: 0, width, height },
   })
-  assert.equal(tieByToken?.token, 2)
+  assert.equal(stableTieResult?.token, 2)
 })
 
 await test('expansion returns no candidate when masks are unchanged, fragments or contract bounds', () => {

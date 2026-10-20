@@ -144,7 +144,7 @@ let regionExtractionCalls=0
 let segmentationCalls=0
 const whole=createClassifier({decision:{async decide(request){
  regionExtractionCalls++
- assert.deepEqual(Object.keys(request.questions).sort(),['presence','selection'])
+ assert.deepEqual(Object.keys(request.questions).sort(),request.questions['box_check']?['box_check']:['presence','selection'])
  const answers:DecisionResult['answers']={}
  for(const [id,q] of Object.entries(request.questions)){
   if(q.type==='noul'){answers[id]={type:'presence',presence:'present'};continue}
@@ -165,7 +165,7 @@ try{
  const location=await whole.locate({image,target:'Synthetic rectangle',mode:'whole-object'})
  assert.equal(location.status,'located')
  if(location.status==='located'){
-  assert.equal(location.method,'region-segmentation-v1')
+  assert.equal(location.method,'region-checked-segmentation-v1')
   assert.deepEqual(location.region,{left:0,top:0,width:160,height:100})
   assert.deepEqual(location.center,{x:80,y:50})
  }
@@ -176,7 +176,7 @@ try{
   assert.deepEqual(extracted.region,{left:0,top:0,width:160,height:100})
   assert.deepEqual(extracted.center,{x:80,y:50})
  }
- assert.equal(regionExtractionCalls,6)
+ assert.equal(regionExtractionCalls,8)
  assert.equal(segmentationCalls,2)
  console.log(JSON.stringify({wholeObject:'passed',extract:'passed',optionalOnnxAbsent:true,providerHttpCalls:0}))
 }finally{await whole.dispose()}

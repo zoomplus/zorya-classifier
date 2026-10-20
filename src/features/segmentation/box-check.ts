@@ -11,23 +11,15 @@ import type {
   SegmentationBoxCheckInput,
   SegmentationBoxCheckPort,
   SegmentationBoxCheckResult,
-  SegmentationBoxVerdict,
   SegmentationBoxPresentationPort,
 } from '../../entities/segmentation-verification.js'
 import { ClassifierError, assertActive } from '../../entities/errors.js'
 import type { RgbaRaster } from '../../entities/representation.js'
 import { validateDecision, selection } from '../choice.js'
 
-export type {
-  SegmentationBoxCheckInput,
-  SegmentationBoxCheckPort,
-  SegmentationBoxCheckResult,
-  SegmentationBoxVerdict,
-} from '../../entities/segmentation-verification.js'
-
 const verdicts = ['complete', 'needs-expansion', 'unknown'] as const
 const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10] as const
-export const segmentationBoxCheckCriteria = Object.freeze({
+const segmentationBoxCheckCriteria = Object.freeze({
   complete:
     'The complete visible target instance, limited to the caller-provided region of interest, is inside the magenta box.',
   'needs-expansion':
@@ -86,7 +78,7 @@ const selectionSchema = z
       context.addIssue({ code: z.ZodIssueCode.custom, message: 'Ranked selection fields disagree' })
     }
   })
-export const segmentationBoxCheckResultSchema = z
+const segmentationBoxCheckResultSchema = z
   .object({
     verdict: z.enum(verdicts),
     selection: selectionSchema,
@@ -250,7 +242,7 @@ export function validateSegmentationBoxCheckResult(value: unknown): Segmentation
   }
 }
 
-export interface CreateSegmentationBoxCheckOptions {
+interface CreateSegmentationBoxCheckOptions {
   decision: DecisionPort
   presentation: SegmentationBoxPresentationPort
 }
@@ -343,7 +335,7 @@ export function createSegmentationBoxCheck(
         const checked = validateDecision(request, raw)
         const chosen: ChoiceSelection = selection(checked, verdicts, 1, 'box_check')
         return validateSegmentationBoxCheckResult({
-          verdict: chosen.choice as SegmentationBoxVerdict,
+          verdict: chosen.choice,
           selection: chosen,
           metadata: { ...checked.metadata },
         })

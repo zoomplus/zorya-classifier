@@ -4,6 +4,14 @@ This acceptance concerns the extracted MIT Node.js library, not the Zorya deskto
 
 ## Current gate state
 
+The latest owner correction adds a closed post-segmentation containment check and at most one actual enclosing-mask repair. The original three-Choice region search stays compatible; coordinates and cutouts still come only from mask pixels. A default checker reuses the injected decision port, while an optional custom checker remains caller-owned. An unresolved check returns unknown without a partial cutout. The [updated plan](0.2.0-plan.md) records contracts, ownership, bounded calls and execution waves.
+
+A three-call DEV component probe rejected the headlight-only Car box, accepted the Knife box, and accepted the actual enclosing Car box. This demonstrates the correction hypothesis on two exposed images; it does not qualify general accuracy. The production prompt/presentation and integrated runtime require their own tests and evaluation. The old v2 blind freeze was [cancelled before dispatch](evidence/v02/region-seeded-heldout-cancelled-before-dispatch-20261021-v2.json); all 80 unused cases remain sealed.
+
+Checked-flow source, installed-archive, native Windows/Linux and resource gates are pending integration. Existing successful receipts below cover their pinned earlier runtime bytes. They are not relabeled as checks of the new mechanism. No text-only encoder qualified, and no 0.2 npm release is claimed.
+
+## Baseline before checked expansion
+
 The agreed primary flow is the original three-Choice region search followed by one caller-owned segmentation of the full oriented source. The selected cell is a prompt, not a crop limiting the object. Cutout pixels, bounding rectangle and centre come from the mask. The implementation was integrated at `c6b8069`; its 54 runtime source files remain unchanged. At `65c785f`, all 512 offline tests, strict TypeScript/ESLint, boundaries, dead-code checks, build and formatting pass. Caller-owned model/segmenter configuration and default region behavior are retained.
 
 The [native Windows installed-archive check](evidence/v02/native-region-windows-efc9318.json) passed with the new full-source point-prompt flow: the mask extended beyond its seed, PNG alpha and mask/bounds/center/offset agreed, transparent input produced a valid empty mask, and nine owned child starts matched nine closes. Physical cancellation, bounded queuing, caller ownership and cleanup passed with zero HTTP. This is wiring/lifecycle evidence, not photo accuracy. [All four hosted Windows/Linux × Node 22/24 jobs passed for `c5eddd8`](evidence/v02/ci-c5eddd8.json); final release-source CI and archive parity remain mandatory.
