@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "status": "sealed controlled corpus; metadata-only provenance",
+  "freezeSha256": "31e6b96b485b1dccbbe10b2c5e222ca0c20f3adbe25ee027a682595a136d8650",
+  "aggregate": {
+    "cases": 80,
+    "present": 60,
+    "absent": 20,
+    "modelCalls": 0,
+    "privateImageAndTruthBytesIncluded": false
+  },
+  "producerInputs": {
+    "photo": {
+      "cases": 40,
+      "originalSha256": "8ba27cd0a5f0aaafeeb612c412e2078e9e5f5b0e1d996fab863182fc56e9b99f",
+      "canonicalSha256": "ce0d7af70cace50fbee83d3cc21cc83fa4c213759f49758ba53397509660906c"
+    },
+    "ui": {
+      "cases": 20,
+      "originalSha256": "2a0fafceeefa3253b1b99f993d3a7a41b7595aa70b60abbb9b3f1ee654866781",
+      "canonicalSha256": "9f31d033fe1b48d2d312c8bfb0274b5f30494978e6c95115508b283d38ce76d2"
+    },
+    "map": {
+      "cases": 20,
+      "originalSha256": "d7c0e31f0b798a1e79d79d56434b4622f1bd09ee48debb2a5047b6d92a03abe8",
+      "canonicalSha256": "d7c0e31f0b798a1e79d79d56434b4622f1bd09ee48debb2a5047b6d92a03abe8"
+    },
+    "combinedCanonicalSha256": "1ee7bb1012641563d6341bb945df099588faee6519fc3aff55ba89bee6344d76"
+  },
+  "evaluatorTruth": {
+    "photo": {
+      "cases": 40,
+      "sourceSha256": "8bd4db0d5818df6902c99c2d6cb1d338e662af29903d9885dcffa17a8f0b344a",
+      "evaluatorSha256": "8bd4db0d5818df6902c99c2d6cb1d338e662af29903d9885dcffa17a8f0b344a"
+    },
+    "ui": {
+      "cases": 20,
+      "sourceWrapperSha256": "c749e524854ab34e37abe36d83d91078a1ee31297a67af5cc7a26e019f851548",
+      "derivedFile": "ui-evaluator-truth.json",
+      "derivedSha256": "dbfa76930880361a54c87baf6b652d832b1999af2bcf68a6aaaea4595e558df2",
+      "transform": "map boolean presence to present/absent; normalize frozen painted XYXY pixels by matching canonical input raster dimensions; copy authored negative evidence"
+    },
+    "map": {
+      "cases": 20,
+      "sourceSha256": "f57629035545b8d3ac36c24b7f19faf8ddf25cf1a1f86fd89eac226b92515f42",
+      "evaluatorSha256": "f57629035545b8d3ac36c24b7f19faf8ddf25cf1a1f86fd89eac226b92515f42"
+    }
+  },
+  "sourceLedgers": {
+    "photo": "9b23ac227ca1a3c729f50f2b8fc59077d0479deadd37c18c8e9cfbf0c2540e9f",
+    "photoMasks": "5985ebaf5e318d2a7e651226e0a54b4cc687933ba53718827843f3b62744b9e6",
+    "ui": "d8907ac71b1227745c2254da59e3e12a5b932faed36a9d065aaa4904f8dd48f3",
+    "map": "4de33829171cb0807bc7430efd388e7d6771c5d6662c334eaa7b80c2ed8f7a87"
+  },
+  "sourceAndLicenseSummary": {
+    "photo": "Open Images V5 validation; per-photo landing-page CC BY 2.0 evidence; official instance masks CC BY 4.0; 30 positive mask references on exact JPEG/PNG canvas; 40 unique source groups; 160 prior IDs, hashes, and normalized source groups excluded (source-group digest 3ef8e89780192dbe395e98caa91eab80fcb776dd6f801c1635b1a17e94e9adfb).",
+    "ui": "GNOME Calculator 46.3, GPL-2+ package; controlled GTK style and authored keypad state; pinned GtkBuilder, AT-SPI inventory, and pixel-edge oracle; one application family.",
+    "map": "Wesnoth 1.16.11 official maps/data, GPL-2-or-later; 20 source maps; actual map editor/minimap renderer; off/on/off village-layer pixel oracle; one game/renderer family; excluded proof map not included."
+  },
+  "methodNotes": [
+    "Float32 accumulated minimap sampling has regression coverage; source projection is support-only and boxes derive from stable A/B/A visible pixel deltas.",
+    "UI source wrapper remains unchanged; evaluator-normalized rows are separately saved and pinned.",
+    "Combined imageRoot copies preserve source image hashes and use photo/, ui/, map/ prefixes; 30 official masks remain in private data.",
+    "No source images, masks, weights, per-case records, local paths, credentials, or provider outcomes are in this receipt."
+  ],
+  "scriptPins": {
+    "prePortabilityExecutedBytes": [
+      {
+        "file": "acquire_photo40.py",
+        "sha256": "26cfe86d36853dce8f71f2d44f36e62103efd6dd7f79427dba7eebf28d2b66d7"
+      },
+      {
+        "file": "finalize_photo40.py",
+        "sha256": "ec04d15b4b89f2aadf8f901111f9c6d142bc7061e996cf00140d38c71b579cdf"
+      },
+      {
+        "file": "capture_calculator.py",
+        "sha256": "961d6f44ab55b432dccca3adc0cd2a42a0a325a36fc188fc19cf8dac4af0a489"
+      },
+      {
+        "file": "build_calculator_ui20.py",
+        "sha256": "f15d319315afb427599162583eb3e6f7f7c3ba60dd54984ded5dc18651f10504"
+      },
+      {
+        "file": "capture_wesnoth_editor.py",
+        "sha256": "4f05e6b2a8a030428f0cead82d9dc634514d393034687149e59336d3a676b3b6"
+      },
+      {
+        "file": "audit_wesnoth_aba.py",
+        "sha256": "aba2a52205a3357acc9f2e063dc68c4f3f9ffd4542a5adaf36a08df54ce8dbf5"
+      },
+      {
+        "file": "build_wesnoth_map20.py",
+        "sha256": "b31532027ce37a24dc98affabf06b64051dec76f8f6f2c3a27de556d886eb386"
+      },
+      {
+        "file": "oracle.py",
+        "sha256": "35f36de6052ca6ab8b766aed4a87c74d7ca1ddda80ed358abfe11c6484ffbb58"
+      }
+    ],
+    "reusableToolBytes": [
+      {
+        "file": "README.md",
+        "sha256": "ac12c064f70b06d7b9ac30cf4371e57245d0688642d5627868c04aa69f1d1633"
+      },
+      {
+        "file": "acquire_photo40.py",
+        "sha256": "523c30705776b7545a06764ebe8fa6bd3f9dad86c87fae9c721517038aaccc10"
+      },
+      {
+        "file": "finalize_photo40.py",
+        "sha256": "e693e945e417368b4f89fcea0f1d98a0432469ffe55ec35c70c0dc6537e87ab6"
+      },
+      {
+        "file": "assemble_combined_inputs.py",
+        "sha256": "c96597432792cd1f9c1883599d3d70506511cfaff8153acb38076be35b29781f"
+      },
+      {
+        "file": "audit_wesnoth_aba.py",
+        "sha256": "03c8c6779d9c76d3063782d677cda08c7563992f00b311631d2e7f92c89483ef"
+      },
+      {
+        "file": "build_calculator_ui20.py",
+        "sha256": "f15d319315afb427599162583eb3e6f7f7c3ba60dd54984ded5dc18651f10504"
+      },
+      {
+        "file": "capture_calculator.py",
+        "sha256": "961d6f44ab55b432dccca3adc0cd2a42a0a325a36fc188fc19cf8dac4af0a489"
+      },
+      {
+        "file": "capture_wesnoth_editor.py",
+        "sha256": "4f05e6b2a8a030428f0cead82d9dc634514d393034687149e59336d3a676b3b6"
+      },
+      {
+        "file": "build_wesnoth_map20.py",
+        "sha256": "79a0492115b1e1f8f485c3c6a9e492bebbc523d4e7fb025122845f834fa84564"
+      },
+      {
+        "file": "canonicalize_calculator_truth.py",
+        "sha256": "a896c46ba385156ff0fd6b33f8975f27fb34dfa9340ea7daec977b19d277212a"
+      },
+      {
+        "file": "validate_evaluator_truth.cjs",
+        "sha256": "38e75c2b18de7bac4ce881b670e8eac1d457859c3b95eb21f791024bc3ad3fe1"
+      },
+      {
+        "file": "oracle.py",
+        "sha256": "b34c6a0abbdf94c3d0d2d97b6ff5d7366746df828e2f5621669b280bce7d4a06"
+      },
+      {
+        "file": "test_oracle.py",
+        "sha256": "d1fc88102df8822f8c511231d9cde3414e8e379b82c9b6de3655f959e1accc43"
+      },
+      {
+        "file": "validate_evaluator_truth.test.cjs",
+        "sha256": "460fa6271bc51c5869437c8f365a7bd05940b6857a54a45d7761a1c0ad46063c"
+      }
+    ]
+  },
+  "primarySourceUrls": {
+    "openImagesV5": "https://storage.googleapis.com/openimages/web/download_v5.html",
+    "openImagesV5SegmentationCsv": "https://storage.googleapis.com/openimages/v5/validation-annotations-object-segmentation.csv",
+    "photoLicense": "https://creativecommons.org/licenses/by/2.0/",
+    "maskAnnotationLicense": "https://creativecommons.org/licenses/by/4.0/",
+    "calculatorGtkBuilder": "https://raw.githubusercontent.com/GNOME/gnome-calculator/46.3/src/ui/buttons-basic.ui",
+    "wesnothMinimapRenderer": "https://raw.githubusercontent.com/wesnoth/wesnoth/1.16.11/src/minimap.cpp",
+    "wesnothDisplayRenderer": "https://raw.githubusercontent.com/wesnoth/wesnoth/1.16.11/src/display.cpp",
+    "wesnothSampler": "https://raw.githubusercontent.com/wesnoth/wesnoth/1.16.11/src/sdl/utils.cpp",
+    "wesnothDataLicense": "https://github.com/wesnoth/wesnoth/blob/1.16.11/COPYING"
+  }
+}
