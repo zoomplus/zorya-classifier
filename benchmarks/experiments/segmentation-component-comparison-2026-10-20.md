@@ -6,7 +6,7 @@ The first panel preserved the fixture seeds exactly. The Hat seed had no annotat
 
 ## Reproducibility
 
-- Source revision: `c63da6ac24493a1b891fb230528c8d8d76bdd2e9`.
+- Base source revision: `c63da6ac24493a1b891fb230528c8d8d76bdd2e9`. The separately frozen seed-derivation helper was added in `ee9fe39645d809021b83f001e167cfa92756f4d4`; the complete manifest below, rather than the base revision alone, identifies the compared files.
 - Source manifest SHA-256: `4e0880890385cf535c2c0e8fc7e9d8bb0dd66fb3243af6d4b2811c72d193c00c` (60 files including the source, harness, fixture manifest, and seed derivation helper).
 - Original fixture manifest SHA-256: `9d2b4c0fffc06edb5c736c67bfee0b7c2352e1d19764956e5f53a071cea3591b`.
 - Corrected seed manifest SHA-256: `cd3acde186eb6e7f0bad3c428a169188ea6306a176a98832457e91b4fb7bcdf5`.
@@ -32,14 +32,16 @@ Across the five cases, mean per-case IoU was GrabCut 0.486 with the original see
 
 ## Run outcomes and limits
 
-| Panel / backend       | Busy duration | Segmented / unknown / failed | Owned child starts / closes / still owned |
-| --------------------- | ------------: | ---------------------------: | ----------------------------------------: |
-| Original / GrabCut    |          60 s |                   21 / 0 / 0 |                               21 / 21 / 0 |
-| Original / MobileSAM  |          60 s |                   43 / 0 / 0 |                               43 / 43 / 0 |
-| Corrected / GrabCut   |          60 s |                   22 / 0 / 0 |                               22 / 22 / 0 |
-| Corrected / MobileSAM |          60 s |                   43 / 0 / 0 |                               43 / 43 / 0 |
+| Panel / backend       | Configured busy window | Segmented / unknown / failed | Owned child starts / closes / still owned |
+| --------------------- | ---------------------: | ---------------------------: | ----------------------------------------: |
+| Original / GrabCut    |                   60 s |                   21 / 0 / 0 |                               21 / 21 / 0 |
+| Original / MobileSAM  |                   60 s |                   43 / 0 / 0 |                               43 / 43 / 0 |
+| Corrected / GrabCut   |                   60 s |                   22 / 0 / 0 |                               22 / 22 / 0 |
+| Corrected / MobileSAM |                   60 s |                   43 / 0 / 0 |                               43 / 43 / 0 |
 
 Each harness run also passed its synthetic positive control, absent-target control, cancellation, capacity rejection, invalid-input, missing-asset, and repeated-disposal checks. No native children remained owned in any report. The harness aggregate retains per-case successful IoU observations but only overall status totals; consult the raw reports for those complete totals and lifecycle/resource samples.
+
+These short comparison windows use the older harness's wall-clock configuration. They are not independent physical-duration evidence and do not replace the separate monotonic two-hour resource acceptance.
 
 Runs were serialized by backend, but overlapped the separately running public-path MobileSAM soak and other disclosed CPU screening. Operation counts and latencies are therefore non-ranking evidence. Repeated masks were deterministic within each panel. The sample is small and development-only; the results support comparing these components under this supplied geometry, not a general backend guarantee.
 

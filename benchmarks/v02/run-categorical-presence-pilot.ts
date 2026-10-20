@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url'
 import { z } from 'zod'
 import {
   preflightCategoricalPresencePilot,
-  readCategoricalPilotOpenRouterKey,
+  readCategoricalPilotOpenRouterKey as readKey,
   runCategoricalPresenceDevPilot,
   categoricalPilotInput,
 } from './categorical-presence-pilot.js'
@@ -59,7 +59,7 @@ async function runFromCommandLine(args: readonly string[]) {
       physicalProviderCalls: 0,
     }
   }
-  const apiKey = readCategoricalPilotOpenRouterKey(process.env, options.apiKeyEnvironmentName)
+  const apiKey = readKey(process.env, options.apiKeyEnvironmentName)
   const result = await runCategoricalPresenceDevPilot({ ...options, apiKey })
   return {
     runId: result.runId,

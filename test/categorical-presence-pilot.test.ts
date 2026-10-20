@@ -209,7 +209,7 @@ await test('public classify and extract use the pinned composite with separate r
   }
   const recorded = createRecordedCategoricalPresenceDecision(
     {
-      apiKey: 'offline-public-fixture-key',
+      apiKey: 'dummy-offline-fixture-key',
       inputManifestPath: '',
       imageRoot: '',
       outputRoot: '',
