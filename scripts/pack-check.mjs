@@ -61,12 +61,14 @@ function within(root, path) {
 }
 const consumerProbe = `import assert from 'node:assert/strict'
 import { realpathSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { isAbsolute, join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { createClassifier, type DecisionPort, type DecisionResult } from 'zorya-classifier'
 import { createOpenRouterDecisions, type OpenRouterDecisionsOptions, createOpenRouterVision, type OpenRouterVisionOptions } from 'zorya-classifier/openrouter'
 import { createOpenAICompatibleVision, type OpenAICompatibleVisionOptions } from 'zorya-classifier/openai-compatible'
+import { createMobileSamSegmenter, createGrabCutSegmenter } from 'zorya-classifier/segmentation'
 const native: (options: OpenRouterDecisionsOptions) => DecisionPort = createOpenRouterDecisions
 assert.equal(typeof native, 'function')
 const transport: (options: OpenRouterVisionOptions) => DecisionPort = createOpenRouterVision
@@ -74,7 +76,7 @@ const direct: (options: OpenAICompatibleVisionOptions) => DecisionPort = createO
 assert.equal(typeof direct, 'function')
 assert.equal(typeof transport, 'function')
 const packageRoot = realpathSync.native(join(process.cwd(), 'node_modules', 'zorya-classifier'))
-for (const name of ['zorya-classifier', 'zorya-classifier/openrouter', 'zorya-classifier/openai-compatible']) {
+for (const name of ['zorya-classifier', 'zorya-classifier/openrouter', 'zorya-classifier/openai-compatible', 'zorya-classifier/segmentation']) {
   const suffix = relative(packageRoot, realpathSync.native(fileURLToPath(import.meta.resolve(name))))
   assert.ok(suffix !== '..' && !suffix.startsWith('..' + sep) && !isAbsolute(suffix))
 }
@@ -130,6 +132,42 @@ const typed=createClassifier({decision:native({apiKey:'fixture',model:'fixture/d
  return new Response(JSON.stringify({model:'fixture/decisions',provider:'fixture',answers:{selection:{type:'choice',choice:'yes',probabilities:{yes:0.7,no:0.3}}}}))
 }})})
 try {const answer=await typed.classify({input:{image},classes:[{id:'yes',description:'Rectangle'},{id:'no',description:'No rectangle'}]});assert.equal(answer.choice,'yes');assert.deepEqual(answer.probabilities,{yes:0.7,no:0.3});assert.equal(nativeTransportCalls,1);console.log(JSON.stringify({nativeDecisionsAdapter:'passed',nativeTransportCalls,providerHttpCalls:0}))}finally{await typed.dispose()}
+const require = createRequire(import.meta.url)
+assert.throws(() => require.resolve('onnxruntime-node'), {code:'MODULE_NOT_FOUND'})
+assert.equal(typeof createGrabCutSegmenter,'function')
+await assert.rejects(createMobileSamSegmenter({encoderPath:'not-downloaded.onnx',decoderPath:'not-downloaded.onnx'}),{code:'UNSUPPORTED'})
+let segmenterDisposals=0
+const whole=createClassifier({decision:{async decide(request){
+ const answers:DecisionResult['answers']={}
+ for(const [id,q] of Object.entries(request.questions)){
+  if(q.type==='noul'){answers[id]={type:'presence',presence:'present'};continue}
+  if(id==='instance'){answers[id]={type:'ranked-choice',ranking:['same']};continue}
+  const coordinate=id==='right'?99:id==='bottom'?79:0
+  const boundary=Object.entries(q.criteria).find(([,text])=>{
+   const parts=/^Integer boundary coordinates in \\[(\\d+), (\\d+)\\)\\.$/.exec(text)
+   return parts!==null && coordinate>=Number(parts[1]) && coordinate<Number(parts[2])
+  })?.[0]
+  answers[id]={type:'ranked-choice',ranking:boundary?[boundary]:Object.keys(q.criteria).slice(0,q.rankingSize??4)}
+ }
+ return {answers,metadata:{model:'fixture',provider:'fixture',requestId:null,durationMs:0,costUsd:0,attempts:1}}
+}},segmentation:{async segment(input){
+ const mask=new Uint8Array(input.image.width*input.image.height)
+ for(let y=0;y<10;y++)for(let x=0;x<10;x++)mask[y*input.image.width+x]=1
+ return {status:'segmented',mask:{data:mask,width:input.image.width,height:input.image.height,format:'binary-u8'},metadata:{method:'fixture',backend:'fixture',durationMs:0,input:{width:input.image.width,height:input.image.height}}}
+},settle:async()=>{},dispose:async()=>{segmenterDisposals++}}})
+try{
+ const location=await whole.locate({image,target:'Synthetic rectangle',mode:'whole-object'})
+ assert.equal(location.status,'located')
+ if(location.status==='located'){assert.equal(location.kind,'whole-object');assert.ok(location.region.width>=100);assert.ok(location.region.height>=80)}
+ const extracted=await whole.extract({image,target:'Synthetic rectangle'})
+ assert.equal(extracted.status,'extracted')
+ if(extracted.status==='extracted'){
+  assert.equal(extracted.png[0],137);assert.equal(extracted.mask.data.length,100)
+  assert.deepEqual(extracted.region,{left:0,top:0,width:10,height:10})
+ }
+ console.log(JSON.stringify({wholeObject:'passed',extract:'passed',optionalOnnxAbsent:true,providerHttpCalls:0}))
+}finally{await whole.dispose()}
+assert.equal(segmenterDisposals,0)
 `
 
 run(['run', 'build'])
@@ -230,7 +268,12 @@ try {
         'Consumer declaration resolution escaped its install and compiler standard libraries',
       )
   }
-  for (const name of ['index.d.ts', 'openrouter.d.ts', 'openai-compatible.d.ts']) {
+  for (const name of [
+    'index.d.ts',
+    'openrouter.d.ts',
+    'openai-compatible.d.ts',
+    'segmentation.d.ts',
+  ]) {
     const expected = realpathSync.native(
       join(dir, 'node_modules', 'zorya-classifier', 'dist', name),
     )

@@ -7,3 +7,7 @@ export type {
   SegmentationPort,
   ExtractionResult,
 } from './entities/segmentation.js'
+export { createMobileSamSegmenter } from './infrastructure/segmentation/mobile-sam/index.js'
+export type { MobileSamSegmenterOptions } from './infrastructure/segmentation/mobile-sam/index.js'
+export { createGrabCutSegmenter } from './infrastructure/segmentation/grabcut/index.js'
+export type { GrabCutSegmenterOptions } from './infrastructure/segmentation/grabcut/index.js'

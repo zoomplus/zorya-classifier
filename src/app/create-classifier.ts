@@ -25,6 +25,10 @@ import { wholeObjectSchema } from '../entities/whole-object.js'
 import { locateWholeObjectInput } from '../processes/whole-object.js'
 import type { ImageRepresentationPort } from '../entities/representation.js'
 import { preparedTextSchema, representationLimits } from '../entities/representation.js'
+import type { ExtractInput, ExtractionResult, SegmentationPort } from '../entities/segmentation.js'
+import { extractSchema } from '../entities/segmentation.js'
+import { extractObject } from '../processes/extract.js'
+import { createSharpCutoutRaster } from '../infrastructure/segmentation/cutout-raster.js'
 
 export interface ClassifierOptions {
   decision: DecisionPort
@@ -33,12 +37,15 @@ export interface ClassifierOptions {
   maxQueue?: number
   maxInputBytes?: number
   refinement?: RefinementPort
+  /** Caller-owned; classifier disposal never disposes a shared segmenter. */
+  segmentation?: SegmentationPort
 }
 export interface Classifier {
   classify(input: ClassifyInput): Promise<ClassificationResult>
   locate(input: WholeObjectLocateInput): Promise<WholeObjectLocalizationResult>
   locate(input: LocateInput): Promise<LocalizationResult>
   locate(input: AnyLocateInput): Promise<LocalizationResult | WholeObjectLocalizationResult>
+  extract(input: ExtractInput): Promise<ExtractionResult>
   dispose(): Promise<void>
 }
 const configSchema = z.object({
@@ -76,6 +83,15 @@ function composeClassifier(
 ): Classifier {
   if (!options || typeof options.decision?.decide !== 'function')
     throw new ClassifierError('INVALID_INPUT', 'A DecisionPort is required')
+  const segmenter = options.segmentation
+  if (
+    segmenter !== undefined &&
+    (!segmenter ||
+      typeof segmenter.segment !== 'function' ||
+      typeof segmenter.settle !== 'function' ||
+      typeof segmenter.dispose !== 'function')
+  )
+    throw new ClassifierError('INVALID_INPUT', 'segmentation must implement SegmentationPort')
   const config = parse(configSchema, {
     timeoutMs: options.timeoutMs,
     concurrency: options.concurrency,
@@ -85,6 +101,7 @@ function composeClassifier(
   const gate = new OperationGate(config.concurrency, config.maxQueue)
   const inputBudget = new InputBudget(config.maxInputBytes)
   const raster = createSharpRaster()
+  const cutoutRaster = createSharpCutoutRaster()
   const owned = new Map<OperationScope, Promise<unknown>>()
   let disposed = false
   const textRepresentation: ImageRepresentationPort | undefined = experimental
@@ -225,6 +242,42 @@ function composeClassifier(
       }
     },
     locate,
+    async extract(input) {
+      if (disposed) throw new ClassifierError('DISPOSED', 'Classifier has been disposed')
+      gate.assertAvailable()
+      if (!input || typeof input !== 'object')
+        throw new ClassifierError('INVALID_INPUT', 'Expected extract input object')
+      const { signal, ...rest } = input
+      const parent = signalOf(signal)
+      const parsed = parse(extractSchema, rest)
+      if (!segmenter)
+        throw new ClassifierError('UNSUPPORTED', 'extract requires an explicit SegmentationPort')
+      const representation = representationFor(parsed.representation)
+      const release = inputBudget.reserve(parsed.image.byteLength)
+      try {
+        const snapshot = { ...parsed, image: new Uint8Array(parsed.image) }
+        return await run(parent, (s) =>
+          extractObject(
+            { ...snapshot, mode: 'whole-object', signal: s },
+            {
+              raster,
+              image: cutoutRaster,
+              segmenter,
+              locateWhole: (source, { signal: requestSignal, ...request }) =>
+                locateWholeObjectInput(
+                  { ...request, mode: 'whole-object', image: source.bytes },
+                  options.decision,
+                  raster,
+                  requestSignal,
+                  representation,
+                ),
+            },
+          ),
+        )
+      } finally {
+        release()
+      }
+    },
     async dispose() {
       disposed = true
       for (const scope of owned.keys()) scope.abort()

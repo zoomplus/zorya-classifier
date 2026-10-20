@@ -2,14 +2,12 @@ import type { PixelRect } from '../../entities/contracts.js'
 import type { BinaryMask } from '../../entities/segmentation.js'
 import type { RgbaRaster } from '../../entities/representation.js'
 
-export type MaskBox = PixelRect
-
 export function validateMask(
   mask: BinaryMask,
   image: RgbaRaster,
   roi: PixelRect,
   seed: PixelRect,
-): MaskBox | undefined {
+): PixelRect | undefined {
   const pixels = image.width * image.height
   if (
     !Number.isSafeInteger(pixels) ||

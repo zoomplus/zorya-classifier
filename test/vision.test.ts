@@ -118,6 +118,26 @@ for (const extra of [
     })
   })
 }
+await test('truncated generation has a content-free typed reason and is never retried', async () => {
+  let calls = 0
+  const port = createOpenRouterVision({
+    ...options,
+    fetch: async () => {
+      calls++
+      return reply(undefined, {
+        choices: [{ finish_reason: 'length', message: { content: 'private partial content' } }],
+      })
+    },
+  })
+  await assert.rejects(port.decide(request, AbortSignal.timeout(1000)), (error: unknown) => {
+    assert.ok(error instanceof ClassifierError)
+    assert.equal(error.code, 'INVALID_RESPONSE')
+    assert.deepEqual(error.details, { reason: 'incomplete-generation', finishReason: 'length' })
+    assert.equal(JSON.stringify(error).includes('private partial content'), false)
+    return true
+  })
+  assert.equal(calls, 1)
+})
 await test('vision supports strict schema opt-in and preserves unknown cost', async () => {
   const port = createOpenRouterVision({
     ...options,

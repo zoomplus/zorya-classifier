@@ -267,6 +267,11 @@ function parseResult(
   )
     throw invalid('INVALID_RESPONSE', 'Vision provider returned an unexpected route')
   const choice = envelope.choices[0]
+  if (choice?.finish_reason === 'length')
+    throw ownedError('INVALID_RESPONSE', 'Model generation exceeded its output token limit', {
+      reason: 'incomplete-generation',
+      finishReason: 'length',
+    })
   if (
     !choice ||
     choice.finish_reason !== 'stop' ||

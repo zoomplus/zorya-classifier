@@ -34,8 +34,15 @@ async function normalizeImage(bytes: Uint8Array, signal: AbortSignal): Promise<R
       .png()
       .toBuffer({ resolveWithObject: true })
     assertActive(signal)
-    if (normalized.data.byteLength > limits.imageBytes)
-      throw new ClassifierError('RESOURCE_LIMIT', 'Decoded presentation exceeds image byte limit')
+    if (
+      normalized.data.byteLength > limits.imageBytes ||
+      normalized.info.width > 16384 ||
+      normalized.info.height > 16384
+    )
+      throw new ClassifierError(
+        'RESOURCE_LIMIT',
+        'Decoded source exceeds image byte or side limits',
+      )
     return { bytes: normalized.data, width: normalized.info.width, height: normalized.info.height }
   } catch (error) {
     assertActive(signal)
@@ -168,6 +175,8 @@ export async function readCanonicalPixels(
     !Number.isSafeInteger(image.height) ||
     image.width < 1 ||
     image.height < 1 ||
+    image.width > 16384 ||
+    image.height > 16384 ||
     image.width * image.height > limits.imagePixels
   )
     throw new ClassifierError('RESOURCE_LIMIT', 'Raster dimensions exceed pixel limits')

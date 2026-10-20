@@ -2,6 +2,8 @@
 
 The public factory composes a DecisionPort and a Sharp-backed RasterPort. Processes orchestrate classify/locate; features contain pure Choice interpretation, grid geometry and prompt construction; entities define validated public contracts; infrastructure owns provider HTTP and image processing. No application runtime, game-state schema or workspace import is required.
 
+On the 0.2 branch, whole-object orchestration adds closed boundary intervals after the compatible region seed. Extraction composes that locator with a caller-owned `SegmentationPort` and a `CutoutRasterPort`; processes import neither Sharp nor native inference. Native providers own their workers, queues and assets. [Operation and ownership details](v02-usage.md) are explicit; no experimental text-image profile is publicly qualified yet.
+
 ```mermaid
 flowchart LR
   I[Owned input snapshot] --> G[Bounded operation queue]
@@ -22,6 +24,8 @@ Image handling normalizes EXIF orientation, validates bounded decode, crops in s
 Extraction differences from the gaming service: the public result is an area; multiple objects are allowed with one selected; no session/epoch/database/process host remains; the caller owns freshness of supplied bytes; generic image operations have an explicit45s library timeout instead of borrowing the gaming background8s budget. Stable ties use supplied class/grid order. Prompt wording and compact grid labels are documented source changes and require new quality evidence; old game-map results do not qualify this library.
 
 ESLint catches common promise/race/interval errors and architectural checks reject private imports/cycles. These checks cannot prove native memory safety; tests additionally exercise cancellation, queue overload, late completion, input mutation and repeated lifecycle disposal.
+
+Knip checks the dynamically started native-worker entry. Its dependency allowlist contains only `onnxruntime-node`: Knip 5 flags referenced optional peers, while this package intentionally loads it only inside the explicit MobileSAM worker. The installed-archive check proves that core and segmentation entries import and their declarations compile without ONNX; requesting MobileSAM then fails explicitly. Other dependency/export checks remain enabled.
 
 ## Model and provider independence
 

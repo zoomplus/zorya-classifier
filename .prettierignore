@@ -4,4 +4,6 @@ dist
 package-lock.json
 benchmarks/cache
 benchmarks/corpus/
+# Generated v0.2 provenance JSON is frozen by SHA256; regenerate and re-freeze it instead.
+benchmarks/v02/corpus/dev/*.json
 release/

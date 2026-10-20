@@ -8,6 +8,8 @@ Use any image-capable instruction-following model through an OpenAI-compatible A
 
 [Русское руководство](docs/README.ru.md) · [API](docs/api.md) · [Architecture](docs/architecture.md) · [Benchmarks](docs/benchmarks.md)
 
+The 0.2 source branch adds explicit whole-object bounds and optional transparent cutouts. See the [new usage guide](docs/v02-usage.md) for contracts, backend ownership, CLI and current qualification limits; this does not change the published 0.1 results.
+
 ## Install
 
 Node.js 22.12+ is required. Source: [zoomplus/zorya-classifier](https://github.com/zoomplus/zorya-classifier). Package: [zorya-classifier](https://www.npmjs.com/package/zorya-classifier).
@@ -125,6 +127,6 @@ CLI uses explicit `ZORYA_MODEL` and defaults to `ZORYA_MODE=decisions`. OpenRout
 
 Tests are offline. Examples, CLI and explicitly authorized model benchmarks make paid calls. Default operation limits: 45-second absolute timeout, two active operations, sixteen waiters, bounded image/request/response sizes. Honor cancellation and call `dispose` on shutdown. The library has no import-time network request, hidden model switching or automatic retry.
 
-A model must understand the input, follow instructions and produce the checked answer shape. JSON Schema/JSON-object modes are opt-in when the chosen endpoint supports them; prompt-only mode does not require structured-output support. No universal accuracy, calibration or sub-second guarantee is asserted. Optional segmentation/refinement is a caller-owned `RefinementPort`.
+A model must understand the input, follow instructions and produce the checked answer shape. JSON Schema/JSON-object modes are opt-in when the chosen endpoint supports them; prompt-only mode does not require structured-output support. No universal accuracy, calibration or sub-second guarantee is asserted. Legacy region refinement uses `RefinementPort`; the 0.2 explicit `extract` workflow uses a caller-owned `SegmentationPort`.
 
 See [CONTRIBUTING](CONTRIBUTING.md), [SECURITY](SECURITY.md), [NOTICE](NOTICE.md), and [LICENSE](LICENSE).

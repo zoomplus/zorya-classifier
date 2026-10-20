@@ -56,7 +56,7 @@ function boundsFor(region: PixelRect): Record<Axis, Interval> {
 function boundaryInstruction(axis: Axis): string {
   const edge =
     axis === 'left' ? 'left' : axis === 'right' ? 'right' : axis === 'top' ? 'top' : 'bottom'
-  return `Select the interval containing the ${edge}most visible pixel coordinate of the SAME physical instance identified by SEED. Coordinates use the original oriented source pixels. Choose only a supplied interval or unknown; do not infer free coordinates. The interval limits are half-open integer coordinate ranges.`
+  return `Select the interval containing the ${edge}most visible pixel coordinate INSIDE HARD_ROI of the SAME physical instance identified by SEED. If the object continues outside HARD_ROI, locate only the visible intersection with that ROI; do not infer hidden parts. Coordinates use the original oriented source pixels. Choose only a supplied interval or unknown; do not infer free coordinates. The interval limits are half-open integer coordinate ranges. Current boundary intervals are candidate ranges, not new ROI limits.`
 }
 function choicesFor(axis: Axis, current: Interval) {
   const intervals = partition(current)
@@ -257,7 +257,12 @@ export async function locateWholeObjectInput(
       const request = {
         state: [
           ...state,
-          JSON.stringify({ pass: pass + 1, seedRegion: seed, currentBounds: current }),
+          JSON.stringify({
+            pass: pass + 1,
+            hardRoi: roi,
+            seedRegion: seed,
+            currentBounds: current,
+          }),
         ],
         questions,
       }

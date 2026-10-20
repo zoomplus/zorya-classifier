@@ -9,8 +9,10 @@
     "examples/*.ts",
     "benchmarks/**/*.ts",
     "scripts/*.mjs",
-    "eslint.config.mjs"
+    "eslint.config.mjs",
+    "src/infrastructure/segmentation/native-worker.ts"
   ],
+  "ignoreDependencies": ["onnxruntime-node"],
   "project": [
     "src/**/*.ts",
     "test/**/*.ts",

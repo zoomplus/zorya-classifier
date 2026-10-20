@@ -26,6 +26,14 @@ const binaryMaskSchema = z
     format: z.literal('binary-u8'),
   })
   .strict()
+const rgbaSchema = z
+  .object({
+    data: z.instanceof(Uint8Array),
+    width: z.number().int().positive().max(16384),
+    height: z.number().int().positive().max(16384),
+    format: z.literal('rgba8'),
+  })
+  .strict()
 const segmentationMetadataSchema = z
   .object({
     method: z.string().min(1).max(128),
@@ -54,12 +62,12 @@ const segmentationResultSchema = z.discriminatedUnion('status', [
     .strict(),
 ])
 
-export type WholeObjectLocator = (
+type WholeObjectLocator = (
   image: RasterImage,
   request: Omit<WholeObjectLocateInput, 'image' | 'mode'> & { signal: AbortSignal },
 ) => Promise<WholeObjectLocalizationResult>
 
-export interface ExtractDependencies {
+interface ExtractDependencies {
   raster: RasterPort
   image: CutoutRasterPort
   segmenter: SegmentationPort
@@ -237,16 +245,7 @@ function assertRasterImage(image: RasterImage): void {
 }
 
 function validateAndSnapshotRgba(value: unknown, width: number, height: number): RgbaRaster {
-  if (
-    typeof value !== 'object' ||
-    value === null ||
-    !('data' in value) ||
-    !('width' in value) ||
-    !('height' in value) ||
-    !('format' in value)
-  )
-    throw new ClassifierError('INVALID_RESPONSE', 'Cutout raster port returned invalid RGBA pixels')
-  const image = value as RgbaRaster
+  const image = parse(rgbaSchema, value, 'INVALID_RESPONSE')
   if (
     image.format !== 'rgba8' ||
     image.width !== width ||
