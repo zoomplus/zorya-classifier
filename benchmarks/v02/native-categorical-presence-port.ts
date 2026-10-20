@@ -3,38 +3,6 @@ import { ClassifierError } from '../../src/entities/errors.js'
 import { selection, validateDecision } from '../../src/features/choice.js'
 import { categoricalPresenceRequest } from './categorical-presence-port.js'
 
-export const nativeCategoricalChoiceProfile = Object.freeze({
-  id: 'native-luna-choice-all-stages-categorical-presence-sam-v1',
-  route: Object.freeze({
-    model: 'openai/gpt-6-luna-decisions',
-    provider: 'openai',
-    providerName: 'OpenAI',
-    apiEndpoint: '/api/alpha/decisions',
-    allowFallbacks: false,
-    categoricalEncoding: 'closed-choice-present-absent-unknown-v1',
-  }),
-  policy: Object.freeze({
-    timeoutMs: 120_000,
-    maxInFlightCases: 2,
-    boxTolerancePx: 8,
-    maxExtentPasses: 3,
-    retries: 0,
-    fallback: false,
-    maxPhysicalCalls: 100,
-    maxCostUsd: 5,
-    unknownCostReserveUsd: 0.05,
-  }),
-  caseIds: Object.freeze([
-    'photo-dev-present-01',
-    'photo-dev-present-02',
-    'photo-dev-absent-01',
-    'photo-dev-absent-02',
-    'photo-dev-absent-03',
-    'photo-dev-absent-04',
-  ]),
-  inputManifestSha256: '6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a',
-})
-
 /** Caller-owned one-route experiment; Choice stays Choice and NoUL becomes categorical Choice. */
 export function createNativeCategoricalPresencePort(nativePort: DecisionPort): DecisionPort {
   if (!nativePort || typeof nativePort.decide !== 'function')
