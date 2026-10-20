@@ -5,7 +5,25 @@ import type {
 } from '../../src/infrastructure/text-representation.js'
 
 const maxSide = 64
-const header = ['PIXEL_RLE_V1', 'color=RGBA8 order=row-major'] as const
+const header = 'PIXEL_RLE_V1\n'
+const colorHeader = 'color=RGBA8 order=row-major'
+
+export function pixelRleV1MaxEncodedBytes(width: number, height: number): number {
+  if (
+    !Number.isSafeInteger(width) ||
+    !Number.isSafeInteger(height) ||
+    width < 1 ||
+    height < 1 ||
+    width > maxSide ||
+    height > maxSide
+  )
+    throw new ClassifierError('RESOURCE_LIMIT', 'RLE resolution exceeds 64 by 64 pixels')
+  let bytes = Buffer.byteLength(`${header}width=${width} height=${height}\n${colorHeader}\n\n`)
+  for (let y = 0; y < height; y += 1)
+    bytes += Buffer.byteLength(`y${y}: `) + width * 11 + Math.max(0, width - 1)
+  bytes += Math.max(0, height - 1)
+  return bytes
+}
 
 function validateRaster(view: Pick<TextPixelView, 'width' | 'height' | 'data'>): void {
   if (
@@ -49,7 +67,7 @@ export function encodePixelRleV1(view: TextPixelView): string {
     }
     rows.push(`y${y}: ${runs.join(' ')}`)
   }
-  return `${header[0]}\nwidth=${view.width} height=${view.height}\n${header[1]}\n${rows.join('\n')}`
+  return `${header}width=${view.width} height=${view.height}\n${colorHeader}\n\n${rows.join('\n')}`
 }
 
 export function decodePixelRleV1(encoded: string): {
@@ -60,7 +78,12 @@ export function decodePixelRleV1(encoded: string): {
   if (Buffer.byteLength(encoded, 'utf8') > 64 * 1024)
     throw new ClassifierError('RESOURCE_LIMIT', 'RLE input exceeds the request byte cap')
   const lines = encoded.split('\n')
-  if (lines.length < 4 || lines[0] !== header[0] || lines[2] !== header[1])
+  if (
+    lines.length < 5 ||
+    lines[0] !== 'PIXEL_RLE_V1' ||
+    lines[2] !== colorHeader ||
+    lines[3] !== ''
+  )
     throw new ClassifierError('INVALID_INPUT', 'RLE header is invalid')
   const dimensionMatch = /^width=([1-9][0-9]*) height=([1-9][0-9]*)$/.exec(lines[1] ?? '')
   if (!dimensionMatch)
@@ -76,7 +99,7 @@ export function decodePixelRleV1(encoded: string): {
   )
     throw new ClassifierError('RESOURCE_LIMIT', 'RLE dimensions exceed the 64 by 64 pixel cap')
   if (lines.at(-1) === '') lines.pop()
-  if (lines.length !== height + 3)
+  if (lines.length !== height + 4)
     throw new ClassifierError(
       'INVALID_INPUT',
       'RLE must contain exactly one row for every image row',
@@ -84,7 +107,7 @@ export function decodePixelRleV1(encoded: string): {
 
   const rows: { color: number[]; count: number }[][] = []
   for (let index = 0; index < height; index += 1) {
-    const line = lines[index + 3] ?? ''
+    const line = lines[index + 4] ?? ''
     const match =
       /^y(0|[1-9][0-9]*): (#[0-9A-F]{8}\*[1-9][0-9]*(?: #[0-9A-F]{8}\*[1-9][0-9]*)*)$/.exec(line)
     if (!match || Number(match[1]) !== index)
@@ -123,6 +146,7 @@ export function decodePixelRleV1(encoded: string): {
 
 export const pixelRleV1Encoder: TextRepresentationEncoder = {
   profile: 'pixel-rle-v1',
+  maxEncodedBytes: pixelRleV1MaxEncodedBytes,
   async encode(view, signal) {
     assertActive(signal)
     return encodePixelRleV1(view)

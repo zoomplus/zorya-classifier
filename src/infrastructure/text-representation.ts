@@ -1,5 +1,5 @@
 import sharp from 'sharp'
-import type { PixelRect, RasterImage } from '../entities/contracts.js'
+import type { DecisionState, PixelRect, RasterImage } from '../entities/contracts.js'
 import { limits } from '../entities/contracts.js'
 import { ClassifierError, assertActive } from '../entities/errors.js'
 import type {
@@ -23,7 +23,30 @@ export interface TextPixelView {
 
 export interface TextRepresentationEncoder {
   readonly profile: string
+  /** Hard UTF-8 upper bound for one encoded view at these dimensions. */
+  maxEncodedBytes(width: number, height: number): number
   encode(view: TextPixelView, signal: AbortSignal): Promise<string>
+}
+
+interface ViewAlias {
+  id: string
+  role: RepresentationView['role']
+  sourceRegion: PixelRect
+  grid?: RepresentationView['grid']
+}
+
+interface ViewGroup {
+  sourceRegion: PixelRect
+  aliases: ViewAlias[]
+  primary: RepresentationView
+}
+
+interface PlannedView {
+  group: ViewGroup
+  width: number
+  height: number
+  metadataText: string
+  maxEncodedBytes: number
 }
 
 function isContained(outer: PixelRect, inner: PixelRect): boolean {
@@ -39,19 +62,8 @@ function key(region: PixelRect): string {
   return `${region.left},${region.top},${region.width},${region.height}`
 }
 
-function gridKey(view: RepresentationView): string | undefined {
-  if (!view.grid) return undefined
-  return JSON.stringify(
-    view.grid.cells.map((cell) => ({
-      id: cell.id,
-      region: key(cell.region),
-      label: view.grid?.labels.get(cell.id),
-    })),
-  )
-}
-
-function dimensions(region: PixelRect): { width: number; height: number } {
-  const scale = Math.min(1, representationLimits.maxSide / Math.max(region.width, region.height))
+function dimensions(region: PixelRect, maxSide: number): { width: number; height: number } {
+  const scale = Math.min(1, maxSide / Math.max(region.width, region.height))
   return {
     width: Math.max(1, Math.round(region.width * scale)),
     height: Math.max(1, Math.round(region.height * scale)),
@@ -91,6 +103,8 @@ async function cleanPixels(
   source: RasterImage,
   sourcePixels: Uint8Array,
   view: RepresentationView,
+  width: number,
+  height: number,
   signal: AbortSignal,
 ): Promise<TextPixelView> {
   const region = view.sourceRegion
@@ -99,20 +113,18 @@ async function cleanPixels(
       'INVALID_INPUT',
       'Representation view lies outside the oriented source',
     )
-  const size = dimensions(region)
-  assertGridGeometry(view, size.width, size.height)
-  const raw = Buffer.from(sourcePixels)
+  const raw = Buffer.from(sourcePixels.buffer, sourcePixels.byteOffset, sourcePixels.byteLength)
   const pipeline = sharp(raw, {
     raw: { width: source.width, height: source.height, channels: 4 },
     limitInputPixels: limits.imagePixels,
   })
     .extract(region)
-    .resize(size.width, size.height, { kernel: 'nearest' })
+    .resize(width, height, { kernel: 'nearest' })
     .raw()
   try {
     const result = await pipeline.toBuffer({ resolveWithObject: true })
     assertActive(signal)
-    if (result.info.channels !== 4 || result.data.byteLength !== size.width * size.height * 4)
+    if (result.info.channels !== 4 || result.data.byteLength !== width * height * 4)
       throw new ClassifierError(
         'INVALID_RESPONSE',
         'Sharp returned an invalid canonical pixel view',
@@ -121,14 +133,107 @@ async function cleanPixels(
       id: view.id,
       role: view.role,
       sourceRegion: region,
-      width: size.width,
-      height: size.height,
+      width,
+      height,
       data: result.data,
       ...(view.grid ? { grid: view.grid } : {}),
     }
   } finally {
     pipeline.destroy()
   }
+}
+
+function aliasesFor(view: RepresentationView): ViewAlias {
+  return {
+    id: view.id,
+    role: view.role,
+    sourceRegion: view.sourceRegion,
+    ...(view.grid ? { grid: view.grid } : {}),
+  }
+}
+
+function gridMetadata(grid: RepresentationView['grid']):
+  | {
+      cells: {
+        id: string
+        column: number
+        row: number
+        region: PixelRect
+        label: string | null
+      }[]
+    }
+  | undefined {
+  if (!grid) return undefined
+  return {
+    cells: grid.cells.map((cell) => ({
+      id: cell.id,
+      column: cell.column,
+      row: cell.row,
+      region: cell.region,
+      label: grid.labels.get(cell.id) ?? null,
+    })),
+  }
+}
+
+function makePlan(
+  groups: readonly ViewGroup[],
+  maxSide: number,
+  encoder: TextRepresentationEncoder,
+): PlannedView[] | undefined {
+  const plan: PlannedView[] = []
+  let totalBytes = 0
+  for (const group of groups) {
+    const size = dimensions(group.sourceRegion, maxSide)
+    const metadataText = JSON.stringify({
+      representationView: {
+        id: group.aliases[0]?.id ?? group.primary.id,
+        aliases: group.aliases.map((alias) => ({
+          id: alias.id,
+          role: alias.role,
+          sourceRegion: alias.sourceRegion,
+          ...(alias.grid ? { grid: gridMetadata(alias.grid) } : {}),
+        })),
+        sourceRegion: group.sourceRegion,
+        dimensions: size,
+        scaleX: size.width / group.sourceRegion.width,
+        scaleY: size.height / group.sourceRegion.height,
+        grid: group.aliases.flatMap((alias) => {
+          const value = gridMetadata(alias.grid)
+          return value === undefined ? [] : [{ viewId: alias.id, cells: value.cells }]
+        }),
+      },
+    })
+    const bound = encoder.maxEncodedBytes(size.width, size.height)
+    const metadataBytes = Buffer.byteLength(metadataText, 'utf8')
+    if (
+      !Number.isSafeInteger(bound) ||
+      bound < 0 ||
+      bound > representationLimits.partCharacters ||
+      metadataText.length > representationLimits.partCharacters
+    )
+      return undefined
+    totalBytes += metadataBytes + bound
+    plan.push({ group, ...size, metadataText, maxEncodedBytes: bound })
+  }
+  return totalBytes <= representationLimits.totalBytes ? plan : undefined
+}
+
+function buildGroups(views: readonly RepresentationView[]): ViewGroup[] {
+  const groups = new Map<string, ViewGroup>()
+  for (const view of views) {
+    const regionKey = key(view.sourceRegion)
+    const prior = groups.get(regionKey)
+    if (!prior) {
+      groups.set(regionKey, {
+        sourceRegion: view.sourceRegion,
+        primary: view,
+        aliases: [aliasesFor(view)],
+      })
+    } else {
+      prior.aliases.push(aliasesFor(view))
+    }
+  }
+  return [...groups.values()]
 }
 
 /**
@@ -149,30 +254,65 @@ export function createTextRepresentation(
             component: 'representation',
           },
         )
-      const decoded = await readCanonicalPixels(input.source, input.signal)
-      const unique = new Map<string, RepresentationView>()
-      for (const view of input.views) {
-        const regionKey = key(view.sourceRegion)
-        const prior = unique.get(regionKey)
-        if (prior?.grid && view.grid && gridKey(prior) !== gridKey(view))
+      const groups = buildGroups(input.views)
+      for (const group of groups) {
+        if (
+          !isContained(
+            { left: 0, top: 0, width: input.source.width, height: input.source.height },
+            group.sourceRegion,
+          )
+        )
           throw new ClassifierError(
             'INVALID_INPUT',
-            'Duplicate grid regions have inconsistent metadata',
+            'Representation view lies outside the oriented source',
           )
-        if (!prior) unique.set(regionKey, view)
-        else if (!prior.grid && view.grid) unique.set(regionKey, { ...prior, grid: view.grid })
       }
-      const allocated = [...unique.values()].map((view) => ({
-        view,
-        ...dimensions(view.sourceRegion),
-      }))
+      let plan: PlannedView[] | undefined
+      for (let side = representationLimits.maxSide; side >= 1 && plan === undefined; side -= 1)
+        plan = makePlan(groups, side, encoder)
+      if (!plan)
+        throw new ClassifierError(
+          'RESOURCE_LIMIT',
+          'No bounded text representation allocation fits the request',
+          {
+            component: 'representation',
+          },
+        )
+      for (const item of plan)
+        for (const alias of item.group.aliases)
+          if (alias.grid)
+            assertGridGeometry(
+              { ...item.group.primary, sourceRegion: item.group.sourceRegion, grid: alias.grid },
+              item.width,
+              item.height,
+            )
+
+      const decoded = await readCanonicalPixels(input.source, input.signal)
       const pixelViews: TextPixelView[] = []
-      for (const item of allocated)
-        pixelViews.push(await cleanPixels(input.source, decoded.data, item.view, input.signal))
-      const encoded: string[] = []
+      for (const item of plan)
+        pixelViews.push(
+          await cleanPixels(
+            input.source,
+            decoded.data,
+            item.group.primary,
+            item.width,
+            item.height,
+            input.signal,
+          ),
+        )
+      const state: DecisionState = []
       const metadata: RepresentationMetadata = { profile: encoder.profile, bytes: 0, views: [] }
-      for (const view of pixelViews) {
+      for (let index = 0; index < pixelViews.length; index += 1) {
+        const view = pixelViews[index]
+        const allocation = plan[index]
+        if (!view || !allocation)
+          throw new ClassifierError(
+            'INVALID_RESPONSE',
+            'Text representation allocation was incomplete',
+          )
         assertActive(input.signal)
+        state.push(allocation.metadataText)
+        metadata.bytes += Buffer.byteLength(allocation.metadataText, 'utf8')
         let text: string
         try {
           text = await encoder.encode(view, input.signal)
@@ -185,10 +325,10 @@ export function createTextRepresentation(
           throw error
         }
         const bytes = Buffer.byteLength(text, 'utf8')
-        if (text.length > representationLimits.partCharacters)
+        if (text.length > representationLimits.partCharacters || bytes > allocation.maxEncodedBytes)
           throw new ClassifierError(
             'RESOURCE_LIMIT',
-            'Encoded view exceeds the UTF-16 character limit',
+            'Encoder output exceeds its declared per-view bound',
             {
               component: 'representation',
             },
@@ -202,7 +342,7 @@ export function createTextRepresentation(
             },
           )
         metadata.bytes += bytes
-        encoded.push(text)
+        state.push(text)
         metadata.views.push({
           id: view.id,
           sourceRegion: view.sourceRegion,
@@ -213,7 +353,7 @@ export function createTextRepresentation(
           content: { left: 0, top: 0, width: view.width, height: view.height },
         })
       }
-      return { state: encoded, metadata }
+      return { state, metadata }
     },
   }
 }

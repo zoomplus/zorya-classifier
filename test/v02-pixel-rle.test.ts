@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { decodePixelRleV1, encodePixelRleV1 } from '../benchmarks/experiments/pixel-rle-v1.js'
+import { pixelRleV1Encoder } from '../benchmarks/experiments/pixel-rle-v1.js'
 import type { TextPixelView } from '../src/infrastructure/text-representation.js'
 
 function view(width: number, height: number, data: number[]): TextPixelView {
@@ -29,6 +30,34 @@ await test('pixel-rle-v1 roundtrips normalized RGBA8 pixels exactly', () => {
     width: input.width,
     height: input.height,
   })
+})
+
+await test('pixel-rle-v1 decodes the specified blank-line grammar example', () => {
+  const example = [
+    'PIXEL_RLE_V1',
+    'width=8 height=2',
+    'color=RGBA8 order=row-major',
+    '',
+    'y0: #FF0000FF*5 #000000FF*3',
+    'y1: #FFFFFFFF*8',
+  ].join('\n')
+  const decoded = decodePixelRleV1(example)
+  assert.equal(decoded.width, 8)
+  assert.equal(decoded.height, 2)
+  assert.deepEqual([...decoded.data.slice(0, 20)], Array(5).fill([255, 0, 0, 255]).flat())
+  assert.match(encodePixelRleV1(view(1, 1, [1, 2, 3, 4])), /row-major\n\ny0:/)
+  assert.ok(
+    pixelRleV1Encoder.maxEncodedBytes(64, 64) >=
+      Buffer.byteLength(
+        encodePixelRleV1(
+          view(
+            64,
+            64,
+            Array.from({ length: 64 * 64 * 4 }, (_, i) => i % 256),
+          ),
+        ),
+      ),
+  )
 })
 
 await test('pixel-rle-v1 rejects malformed rows, counts, dimensions, and row crossing', () => {

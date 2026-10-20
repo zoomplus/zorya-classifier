@@ -12,6 +12,10 @@ import {
 } from '../src/infrastructure/text-representation.js'
 import type { RasterImage } from '../src/entities/contracts.js'
 import type { RepresentationView } from '../src/entities/representation.js'
+import {
+  pixelRleV1Encoder,
+  pixelRleV1MaxEncodedBytes,
+} from '../benchmarks/experiments/pixel-rle-v1.js'
 
 const signal = new AbortController().signal
 
@@ -47,6 +51,7 @@ await test('normalization applies EXIF orientation and text views use source-spa
   let pixels: Uint8Array | undefined
   const port = createTextRepresentation({
     profile: 'roi',
+    maxEncodedBytes: () => 3,
     async encode(view) {
       pixels = view.data
       return 'roi'
@@ -115,6 +120,7 @@ await test('text preparation deduplicates geometry and allocates bounded pixels 
   const seen: TextPixelView[] = []
   const port = createTextRepresentation({
     profile: 'test',
+    maxEncodedBytes: () => 32,
     async encode(view) {
       seen.push(view)
       return `pixels:${view.width}x${view.height}`
@@ -128,7 +134,7 @@ await test('text preparation deduplicates geometry and allocates bounded pixels 
   assert.equal(result.metadata.views.length, 1)
 })
 
-await test('text request fails byte budget rather than truncating an encoded view', async () => {
+await test('text allocation counts metadata against the aggregate byte budget before encoding', async () => {
   const raster = createSharpRaster()
   const bytes = await sharp({ create: { width: 1, height: 1, channels: 3, background: '#fff' } })
     .png()
@@ -140,16 +146,20 @@ await test('text request fails byte budget rather than truncating an encoded vie
     image: source,
     sourceRegion: { left: 0, top: 0, width: 1, height: 1 },
   }
+  let encoded = false
   const port = createTextRepresentation({
     profile: 'large',
+    maxEncodedBytes: () => 65500,
     async encode() {
-      return 'é'.repeat(33000)
+      encoded = true
+      return 'x'
     },
   })
   await assert.rejects(
     port.prepare({ source, views: [view], signal }),
-    /aggregate UTF-8 byte limit/,
+    /No bounded text representation allocation fits/,
   )
+  assert.equal(encoded, false)
 })
 
 await test('text preparation rejects grid cells that collapse at 64-pixel resolution', async () => {
@@ -178,6 +188,7 @@ await test('text preparation rejects grid cells that collapse at 64-pixel resolu
   let encoded = false
   const port = createTextRepresentation({
     profile: 'unused',
+    maxEncodedBytes: () => 1,
     async encode() {
       encoded = true
       return ''
@@ -188,4 +199,128 @@ await test('text preparation rejects grid cells that collapse at 64-pixel resolu
     /indistinguishable|collapses/,
   )
   assert.equal(encoded, false)
+})
+
+await test('text request rejects output that exceeds the encoder declared bound', async () => {
+  const raster = createSharpRaster()
+  const bytes = await sharp({ create: { width: 1, height: 1, channels: 3, background: '#fff' } })
+    .png()
+    .toBuffer()
+  const source = await raster.normalize(bytes, signal)
+  const view: RepresentationView = {
+    id: 'one',
+    role: 'source',
+    image: source,
+    sourceRegion: { left: 0, top: 0, width: 1, height: 1 },
+  }
+  const port = createTextRepresentation({
+    profile: 'invalid-bound',
+    maxEncodedBytes: () => 1,
+    async encode() {
+      return 'x'.repeat(64001)
+    },
+  })
+  await assert.rejects(
+    port.prepare({ source, views: [view], signal }),
+    /exceeds its declared per-view bound/,
+  )
+})
+
+await test('deduplicated text metadata retains every view role and grid labels', async () => {
+  const raster = createSharpRaster()
+  const bytes = await sharp({ create: { width: 2, height: 2, channels: 3, background: '#fff' } })
+    .png()
+    .toBuffer()
+  const source = await raster.normalize(bytes, signal)
+  const region = { left: 0, top: 0, width: 2, height: 2 }
+  const views: RepresentationView[] = [
+    { id: 'source', role: 'source', image: source, sourceRegion: region },
+    { id: 'crop-alias', role: 'crop', image: source, sourceRegion: region },
+    {
+      id: 'grid-alias',
+      role: 'grid',
+      image: source,
+      sourceRegion: region,
+      grid: {
+        cells: [{ id: 'cell-1', column: 0, row: 0, region, xId: 'x0', yId: 'y0' }],
+        labels: new Map([['cell-1', 'P01']]),
+      },
+    },
+  ]
+  const result = await createTextRepresentation({
+    profile: 'metadata',
+    maxEncodedBytes: () => 8,
+    async encode() {
+      return 'pixels'
+    },
+  }).prepare({ source, views, signal })
+  assert.equal(result.metadata.views.length, 1)
+  const envelope = JSON.parse(String(result.state[0])) as {
+    representationView: {
+      aliases: { id: string; role: string }[]
+      dimensions: { width: number; height: number }
+      scaleX: number
+      grid: { viewId: string; cells: { label: string | null }[] }[]
+    }
+  }
+  const representationView = envelope.representationView
+  assert.deepEqual(
+    representationView.aliases.map(({ id, role }) => [id, role]),
+    [
+      ['source', 'source'],
+      ['crop-alias', 'crop'],
+      ['grid-alias', 'grid'],
+    ],
+  )
+  assert.deepEqual(representationView.dimensions, { width: 2, height: 2 })
+  assert.equal(representationView.scaleX, 1)
+  assert.equal(representationView.grid[0]?.cells[0]?.label, 'P01')
+  assert.equal(result.state[1], 'pixels')
+})
+
+await test('noisy RLE views shrink under worst-case aggregate allocation before any encode call', async () => {
+  const width = 5 * 64
+  const height = 64
+  const noisy = Uint8Array.from(
+    { length: width * height * 4 },
+    (_, index) => (index * 73 + 41) % 256,
+  )
+  const bytes = await sharp(Buffer.from(noisy), {
+    raw: { width, height, channels: 4 },
+  })
+    .png()
+    .toBuffer()
+  const raster = createSharpRaster()
+  const source = await raster.normalize(bytes, signal)
+  const views: RepresentationView[] = Array.from({ length: 5 }, (_, index) => ({
+    id: `view-${index}`,
+    role: index === 0 ? 'source' : 'crop',
+    image: source,
+    sourceRegion: { left: index * 64, top: 0, width: 64, height: 64 },
+  }))
+  const planned: string[] = []
+  let encodingStarted = false
+  const encoder = {
+    profile: pixelRleV1Encoder.profile,
+    maxEncodedBytes(viewWidth: number, viewHeight: number) {
+      assert.equal(encodingStarted, false, 'allocation is frozen before encoding')
+      planned.push(`${viewWidth}x${viewHeight}`)
+      return pixelRleV1MaxEncodedBytes(viewWidth, viewHeight)
+    },
+    async encode(view: TextPixelView, abortSignal: AbortSignal) {
+      encodingStarted = true
+      assert.ok(view.width < 64)
+      return pixelRleV1Encoder.encode(view, abortSignal)
+    },
+  }
+  const result = await createTextRepresentation(encoder).prepare({ source, views, signal })
+  assert.ok(planned.includes('64x64'))
+  assert.equal(result.metadata.views.length, 5)
+  assert.ok(result.metadata.bytes <= 64 * 1024)
+  assert.equal(result.state.length, 10)
+  assert.ok(
+    result.state.every(
+      (part) => typeof part === 'string' && Buffer.byteLength(part, 'utf8') <= 64000,
+    ),
+  )
 })
