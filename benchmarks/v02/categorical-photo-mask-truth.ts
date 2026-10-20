@@ -27,6 +27,7 @@ const indexRowSchema = z
       .max(16 * 1024 * 1024),
   })
   .strict()
+  .refine((row) => row.width * row.height <= 2_097_152)
 const maskIndexSchema = z
   .object({
     sourceUrl: z.literal(
@@ -53,6 +54,23 @@ const photoTruthSchema = z.array(
     .passthrough(),
 )
 
+/** Check whether two integer canvases can share an aspect ratio after independent nearest-integer rounding. */
+export function hasCompatibleIntegerRoundedAspect(
+  sourceWidth: number,
+  sourceHeight: number,
+  referenceWidth: number,
+  referenceHeight: number,
+): boolean {
+  for (const value of [sourceWidth, sourceHeight, referenceWidth, referenceHeight]) {
+    if (!Number.isSafeInteger(value) || value < 1 || value > 2048) return false
+  }
+  const sourceLow = (sourceWidth - 0.5) / (sourceHeight + 0.5)
+  const sourceHigh = (sourceWidth + 0.5) / (sourceHeight - 0.5)
+  const referenceLow = (referenceWidth - 0.5) / (referenceHeight + 0.5)
+  const referenceHigh = (referenceWidth + 0.5) / (referenceHeight - 0.5)
+  return Math.max(sourceLow, referenceLow) <= Math.min(sourceHigh, referenceHigh)
+}
+
 function sha256(value: string): string {
   return createHash('sha256').update(value).digest('hex')
 }
@@ -61,19 +79,24 @@ function sha256(value: string): string {
  * Join the separately pinned official mask index to canonical photo truth and frozen producer
  * image bindings. The original truth/index objects are never mutated or rewritten.
  */
-export function joinCategoricalPhotoMaskTruth(input: {
-  canonicalPhotoTruth: unknown
-  canonicalPhotoTruthSha256: string
-  maskIndex: unknown
-  maskIndexSha256: string
-  producerImageBindings: readonly FreshCase[]
-}) {
+function joinPhotoMaskTruth(
+  input: {
+    canonicalPhotoTruth: unknown
+    canonicalPhotoTruthSha256: string
+    maskIndex: unknown
+    maskIndexSha256: string
+    producerImageBindings: readonly FreshCase[]
+  },
+  canvasPolicy: 'exact-source-canvas' | 'openimages-v5-normalized-canvas-exploratory',
+) {
   const truth = photoTruthSchema.parse(input.canonicalPhotoTruth)
   const index = maskIndexSchema.parse(input.maskIndex)
   digest.parse(input.canonicalPhotoTruthSha256)
   digest.parse(input.maskIndexSha256)
   if (input.producerImageBindings.length !== 40 || truth.length !== 40)
     throw new Error('Photo mask join requires the frozen 40-case photo source')
+  if (input.producerImageBindings.some((item) => item.image.width * item.image.height > 2_097_152))
+    throw new Error('Producer image canvas exceeds the 2,097,152-pixel exploratory limit')
 
   const truthById = new Map<string, (typeof truth)[number]>()
   for (const row of truth) {
@@ -93,7 +116,17 @@ export function joinCategoricalPhotoMaskTruth(input: {
 
   const referencesByCase = new Map<
     string,
-    Array<{ path: string; sha256: string; bytes: number; width: number; height: number }>
+    Array<{
+      path: string
+      sha256: string
+      bytes: number
+      width: number
+      height: number
+      sourceImageSha256?: string
+      sourceWidth?: number
+      sourceHeight?: number
+      coordinatePolicy?: 'openimages-v5-normalized-canvas-exploratory'
+    }>
   >()
   const sourceRows = new Set<number>()
   const paths = new Set<string>()
@@ -110,8 +143,19 @@ export function joinCategoricalPhotoMaskTruth(input: {
     const imageId = /^([a-f0-9]{16})\.jpe?g$/u.exec(basename(binding.image.path))?.[1]
     if (!imageId || imageId !== row.imageId)
       throw new Error('Official mask image ID differs from the frozen producer image binding')
-    if (row.width !== binding.image.width || row.height !== binding.image.height)
-      throw new Error('Official mask dimensions differ from the frozen producer image')
+    if (canvasPolicy === 'exact-source-canvas') {
+      if (row.width !== binding.image.width || row.height !== binding.image.height)
+        throw new Error('Official mask dimensions differ from the frozen producer image')
+    } else if (
+      !hasCompatibleIntegerRoundedAspect(
+        binding.image.width,
+        binding.image.height,
+        row.width,
+        row.height,
+      )
+    ) {
+      throw new Error('Official mask canvas is not aspect-compatible under integer rounding')
+    }
     if (
       row.maskPath.startsWith(`${row.imageId}_`) === false ||
       row.file !== `sealed/masks/${row.caseId}/${row.maskPath}`
@@ -132,6 +176,14 @@ export function joinCategoricalPhotoMaskTruth(input: {
       bytes: row.bytes,
       width: row.width,
       height: row.height,
+      ...(canvasPolicy === 'openimages-v5-normalized-canvas-exploratory'
+        ? {
+            sourceImageSha256: binding.image.sha256,
+            sourceWidth: binding.image.width,
+            sourceHeight: binding.image.height,
+            coordinatePolicy: canvasPolicy,
+          }
+        : {}),
     })
     referencesByCase.set(row.caseId, refs)
   }
@@ -163,6 +215,39 @@ export function joinCategoricalPhotoMaskTruth(input: {
       caseCount: referencesByCase.size,
       maskInstanceCount: index.rows.length,
       annotationLicense: index.annotationLicense,
+      ...(canvasPolicy === 'openimages-v5-normalized-canvas-exploratory'
+        ? {
+            coordinatePolicy: canvasPolicy,
+            alignment: 'normalized-pixel-center-nearest-neighbor-v1',
+            caveats: [
+              'Aspect compatibility permits only overlapping integer-rounding ratio intervals.',
+              'Exact Open Images annotation pixel sampling and source-asset rotation history are not independently verified.',
+              'This exploratory component score does not qualify mask accuracy or change whole-object/classification gates.',
+            ],
+          }
+        : {}),
     },
   }
+}
+
+/** Strict default: annotation and producer source canvases must have identical dimensions. */
+export function joinCategoricalPhotoMaskTruth(input: {
+  canonicalPhotoTruth: unknown
+  canonicalPhotoTruthSha256: string
+  maskIndex: unknown
+  maskIndexSha256: string
+  producerImageBindings: readonly FreshCase[]
+}) {
+  return joinPhotoMaskTruth(input, 'exact-source-canvas')
+}
+
+/** Explicit exploratory Open Images V5 policy for independently normalized full-frame canvases. */
+export function joinCategoricalPhotoMaskTruthNormalizedCanvas(input: {
+  canonicalPhotoTruth: unknown
+  canonicalPhotoTruthSha256: string
+  maskIndex: unknown
+  maskIndexSha256: string
+  producerImageBindings: readonly FreshCase[]
+}) {
+  return joinPhotoMaskTruth(input, 'openimages-v5-normalized-canvas-exploratory')
 }
