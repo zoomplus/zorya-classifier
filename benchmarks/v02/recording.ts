@@ -104,6 +104,13 @@ export interface Recorder {
   persistenceFailures?: RecorderPersistenceFailure[]
 }
 
+const recorderBudgets = new WeakMap<Recorder, RunBudget>()
+
+/** Verify the actual fetch recorder's captured budget, not a caller-provided receipt claim. */
+export function isRecorderBoundToBudget(recorder: Recorder, budget: RunBudget): boolean {
+  return recorderBudgets.get(recorder) === budget
+}
+
 export interface RecorderPersistenceFailure {
   stage:
     | 'physical-admission'
@@ -744,5 +751,7 @@ export function recordProvider(
       }
     },
   }
-  return { port, calls, logicalCalls, fetch: trackedFetch, persistenceFailures }
+  const recorder = { port, calls, logicalCalls, fetch: trackedFetch, persistenceFailures }
+  recorderBudgets.set(recorder, budget)
+  return recorder
 }
