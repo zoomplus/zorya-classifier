@@ -1,7 +1,7 @@
 {
   "name": "zorya-classifier",
   "version": "0.2.0",
-  "description": "Provider-independent text/image classification, whole-object localization and optional transparent cutouts for Node.js",
+  "description": "Provider-independent classification with experimental localization and object extraction for Node.js",
   "type": "module",
   "license": "MIT",
   "engines": {

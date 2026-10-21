@@ -1,3 +1,4 @@
+/** Experimental: whole-object locate with caller segmentation is unqualified for general use. */
 import { readFile } from 'node:fs/promises'
 import { createClassifier, type Classifier } from 'zorya-classifier'
 import { createOpenRouterDecisions } from 'zorya-classifier/openrouter'

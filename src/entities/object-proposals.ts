@@ -39,7 +39,10 @@ export interface ObjectProposalBatch {
   metadata: SegmentationMetadata
 }
 
-/** Caller-owned. propose settles only after physical work closes; no model calls here. */
+/**
+ * Caller-owned. propose settles only after physical work closes; no model calls here.
+ * @experimental Mask proposal strategy with no general quality qualification.
+ */
 export interface ObjectProposalPort {
   propose(input: ObjectProposalInput): Promise<ObjectProposalBatch>
   settle(): Promise<void>

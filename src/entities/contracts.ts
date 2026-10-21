@@ -80,6 +80,7 @@ export const locateSchema = z
     representation: representationSchema.optional(),
   })
   .strict()
+/** @experimental Unqualified coarse region search; a located grid cell is a hypothesis, not reliable whole-object geometry or proof of absence. */
 export type LocateInput = z.input<typeof locateSchema> & { signal?: AbortSignal }
 export type ImagePart = { type: 'image_url'; image_url: { url: string; detail: 'high' } }
 export type DecisionState = (string | ImagePart)[]
@@ -155,6 +156,7 @@ export interface LocalizationMetadata {
   knownCostUsd: number
   unknownCostCount: number
 }
+/** @experimental Outcome of unqualified spatial localization; grid regions are not semantic object boxes or masks. */
 export type LocalizationResult = (
   | {
       status: 'located'
@@ -174,9 +176,11 @@ export type LocalizationResult = (
         | 'layout-limit'
     }
 ) & { metadata: LocalizationMetadata }
+/** @experimental Optional legacy region refinement with no general quality qualification. */
 export type RefinementResult =
   | { status: 'refined'; region: PixelRect; method: string }
   | { status: 'unknown'; reason: string }
+/** @experimental Caller-owned refinement hook; unqualified for general spatial accuracy. */
 export interface RefinementPort {
   refine(input: {
     image: Uint8Array

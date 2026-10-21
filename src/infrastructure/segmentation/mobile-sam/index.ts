@@ -40,6 +40,7 @@ const optionsSchema = z
     threads: z.number().int().min(1).max(8).default(2),
   })
   .strict()
+/** @experimental Options for the unqualified MobileSAM segmentation factory. */
 export type MobileSamSegmenterOptions = z.input<typeof optionsSchema>
 
 const proposalOptionsSchema = z
@@ -51,6 +52,7 @@ const proposalOptionsSchema = z
     sampling: z.enum(['seed-grid', 'seed-center']).default('seed-grid'),
   })
   .strict()
+/** @experimental Options for the unqualified MobileSAM object-proposal factory. */
 export type MobileSamObjectProposalsOptions = z.input<typeof proposalOptionsSchema>
 
 type SerializedTask =
@@ -61,7 +63,10 @@ type SerializedTask =
       rgba: string
     })
 
-/** Explicit pinned MobileSAM inference in a separately owned Node child process. */
+/**
+ * Explicit pinned MobileSAM inference in a separately owned Node child process.
+ * @experimental Native segmentation adapter; unqualified for general mask or object accuracy.
+ */
 export async function createMobileSamSegmenter(
   options: MobileSamSegmenterOptions,
 ): Promise<SegmentationPort> {
@@ -358,7 +363,10 @@ export function createMobileSamPortForPool(
   }
 }
 
-/** Explicit CPU-only proposals: historical 3x3/36 default or opt-in seed-center/four. */
+/**
+ * Explicit CPU-only proposals: historical 3x3/36 default or opt-in seed-center/four.
+ * @experimental Native proposal adapter; unqualified for general spatial or mask accuracy.
+ */
 export async function createMobileSamObjectProposals(
   options: MobileSamObjectProposalsOptions,
 ): Promise<ObjectProposalPort> {
