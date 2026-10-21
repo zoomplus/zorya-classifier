@@ -1,0 +1,165 @@
+{
+  "schema": "v03-h11-sa2va-load-failures-v1",
+  "version": 1,
+  "hypothesis": "h11-sa2va-text-mask",
+  "profiles": ["h11-legacy-cpu-then-to-cuda", "h11b-direct-cuda-v1"],
+  "closedAt": "2026-10-21",
+  "statusInterpretation": {
+    "qualityMeasured": false,
+    "h11LocalizationScore": null,
+    "h11bDevImageResults": false,
+    "qualification": false,
+    "heldoutTruthAccess": false,
+    "providerPhysicalCalls": 0,
+    "productionPromotion": false,
+    "statement": "Failed initialization and load-only smoke are technical blockers only. Do not treat them as model-quality comparisons or localization scores."
+  },
+  "contracts": {
+    "h11Legacy": {
+      "path": "benchmarks/v03/h11-sa2va-contract.json",
+      "sha256": "14281b417d8fc2838cd52ff6bf05cb63aae493bc9968b5a4f20b6b482d58ccdd"
+    },
+    "h11bDirectCuda": {
+      "path": "benchmarks/v03/h11b-sa2va-direct-gpu-contract.json",
+      "sha256": "ee623e58181f5db22d77720760438b0b34342c708a9f5f99037446d4d3846908",
+      "deltaFromH11": {
+        "runtime_profile_id": "h11b-direct-cuda-v1",
+        "loader_device_map": { "": "cuda:0" }
+      },
+      "recipeHypothesisGateUnchanged": true
+    }
+  },
+  "gate": {
+    "positiveDenominator": 9,
+    "positiveSuccessesMinimum": 7,
+    "negativeDenominator": 3,
+    "falseOutputsMaximum": 0,
+    "requiresZeroTechnicalOrIntegrityDefects": true,
+    "assessedOnTheseRuns": false,
+    "note": "Runs failed before masks could be scored; they neither pass nor establish localization quality."
+  },
+  "manifestSha256": "98e8a5e767a6604a02fec0e561fa1b0128cb76783e4a405df4cb96e4b75fd084",
+  "legacyH11DevAttempts": [
+    {
+      "runId": "h11-sa2va-dev12-4f1a2d6b-8295-4aae-b02c-64e6ee54bc13",
+      "label": "legacy-h11-dev12-after-image-root-fix",
+      "contractSha256": "14281b417d8fc2838cd52ff6bf05cb63aae493bc9968b5a4f20b6b482d58ccdd",
+      "runStatus": "completed_with_technical_errors",
+      "rowCount": 12,
+      "imageForwardsExecuted": 0,
+      "workerReadyBeforeRows": false,
+      "failurePhase": "model placement/load on CUDA before READY",
+      "failureClass": "INIT_FAILURE",
+      "failureDetail": "594 MiB allocation request during load/placement; no image forward",
+      "artifacts": {
+        "freeze.json": "8884bfdfe98cc95522285a95d78f5e0b4d8603c16085e649b0b81b8bd8d1273c",
+        "run.json": "3e00d1e83031c7e0aa4a283727d7e53ae539fd6a3673ddc920520c70ed053c27",
+        "rows.jsonl": "dd1104a176cbe71723f65c5803100e11b4c7d5d759867adbc7df36fe2675d844",
+        "evaluation-after-image-root-fix.json": "c0c0bef87e040c2dbe09b2f26b7851d132beca9f337ad3004cdad723f1457a94"
+      },
+      "evaluationSummary": {
+        "positiveDenominator": 9,
+        "negativeDenominator": 3,
+        "technicalOrIntegrityDefects": 12,
+        "allRowOutcomes": "technical_error",
+        "errorCode": "INIT_FAILURE",
+        "cleanPass": false,
+        "positiveSuccesses": null,
+        "falseOutputs": null
+      },
+      "frozenSourceReceipts": {
+        "h11_common_py": "ccc566d11580c0b8789500fad7717386b2aa990ea45f92715d50b14815a8cf50",
+        "h11_runner_py": "a0a8536e22dc5187d3179e5e35533ecf6d5102f65e646fa9731172b836485919",
+        "h11_worker_py": "fb6d3c1043c2314808ea8386ac593a7c4ec059f8965dd56d3efa11d0b2997f3e",
+        "h10_common_py": "c32954eeae39a3de5093a1c2227f239b11915d3d520fc144e633b23113869a20",
+        "h10_runner_py": "70868ac896cdbf16b5ef9846b37e374318c38944c846e6e6f3d328d24d9db5f9"
+      }
+    },
+    {
+      "runId": "h11-sa2va-dev12-parent-probe-84af0ab2-cb28-43eb-a1ac-729ec6e5348e",
+      "label": "legacy-h11-dev12-parent-cuda-probe",
+      "contractSha256": "14281b417d8fc2838cd52ff6bf05cb63aae493bc9968b5a4f20b6b482d58ccdd",
+      "runStatus": "completed_with_technical_errors",
+      "rowCount": 12,
+      "imageForwardsExecuted": 0,
+      "workerReadyBeforeRows": false,
+      "failurePhase": "model placement/load on CUDA before READY",
+      "failureClass": "INIT_FAILURE",
+      "failureDetail": "Same allocation-stage failure class as run A; no image forward",
+      "artifacts": {
+        "freeze.json": "be02254da8c464f534399d201d580c66d193b676aec3d76e84988b03e093b9af",
+        "run.json": "2e73cea5417dfb75312e2964b409cb77089e6426468dbbdb44e1c4f511c2e73a",
+        "rows.jsonl": "1d19876d670e13eafad8f1cd404996ff75204daa60b9c72f7a2e9da2d3abfb3c",
+        "evaluation.json": "c0c0bef87e040c2dbe09b2f26b7851d132beca9f337ad3004cdad723f1457a94"
+      },
+      "evaluationSummary": {
+        "positiveDenominator": 9,
+        "negativeDenominator": 3,
+        "technicalOrIntegrityDefects": 12,
+        "allRowOutcomes": "technical_error",
+        "errorCode": "INIT_FAILURE",
+        "cleanPass": false,
+        "positiveSuccesses": null,
+        "falseOutputs": null
+      },
+      "frozenSourceReceipts": {
+        "h11_common_py": "180678247a1ab958cfc7628d9cfbbdc3f48dd77b3208778e5c47c304f5a37f22",
+        "h11_runner_py": "a0a8536e22dc5187d3179e5e35533ecf6d5102f65e646fa9731172b836485919",
+        "h11_worker_py": "fb6d3c1043c2314808ea8386ac593a7c4ec059f8965dd56d3efa11d0b2997f3e",
+        "h10_common_py": "c32954eeae39a3de5093a1c2227f239b11915d3d520fc144e633b23113869a20",
+        "h10_runner_py": "70868ac896cdbf16b5ef9846b37e374318c38944c846e6e6f3d328d24d9db5f9"
+      },
+      "note": "Both evaluations retained separately; evaluation artifact SHA-256 currently matches run A."
+    }
+  ],
+  "h11bDirectCuda": {
+    "prepareFreeze": {
+      "runId": "h11b-sa2va-dev12-b3fd6f2a-65f0-4fc1-8d27-e7ed4f5b600f",
+      "isRun": false,
+      "strictEvaluatorFreezeAccepted": true,
+      "contractSha256": "ee623e58181f5db22d77720760438b0b34342c708a9f5f99037446d4d3846908",
+      "recipeLoaderDeviceMap": { "": "cuda:0" },
+      "artifacts": {
+        "freeze.json": "2173a0c9a4b2a950b507ae08cef733178ee59a237f2a104ae911c182bdcc9156"
+      },
+      "manifestSha256": "98e8a5e767a6604a02fec0e561fa1b0128cb76783e4a405df4cb96e4b75fd084",
+      "frozenSourceReceipts": {
+        "h11_common_py": "0f30e77db0d01b3c7218f85455136899307ae76ef7e47ee53477b687c8089ac9",
+        "h11_runner_py": "c86eaa9d1b9d48df34f84c6d67aa74416e8e2990df8b99758a816f97204c2eff",
+        "h11_worker_py": "eff201ba0423c6b04af1d2b93711c8c1cb79dd106ff43d78dab959fdb6da8eee",
+        "h10_common_py": "c32954eeae39a3de5093a1c2227f239b11915d3d520fc144e633b23113869a20",
+        "h10_runner_py": "70868ac896cdbf16b5ef9846b37e374318c38944c846e6e6f3d328d24d9db5f9"
+      }
+    },
+    "loadOnlySmoke": {
+      "receiptPath": ".run/v03/h11b/load-smoke/receipt.json",
+      "sha256": "0b0b014749c93a03c08194861efc893c7cd365b0ce849e45a76e416901264212",
+      "phase": "h11b-load-only-protocol-smoke",
+      "image_forward_executed": false,
+      "model_weights_load_verified": false,
+      "cleanup_failed": false,
+      "failurePhase": "Transformers caching_allocator_warmup",
+      "failureDetail": "4.39 GiB allocation request; CUDA reported 14.69 GiB free; PyTorch allocated/reserved 0 bytes at failure"
+    },
+    "devRowsDispatched": false
+  },
+  "hostMemoryDiagnostics": {
+    "interpretation": "Correlated Windows host commit pressure only; not proof of leak or direct cause of CUDA INIT/load failures.",
+    "samples": [
+      {
+        "path": ".run/v03/h11/windows-memory-corrected.jsonl",
+        "sha256": "6f0ee050d458857144addc1e395773fe2f5ce7d63315d99b5d1fc50795329cec",
+        "sampleCount": 40,
+        "peakCommittedLimitPercent": 99.586688,
+        "minimumCommitHeadroomBytes": 318984192
+      },
+      {
+        "path": ".run/v03/h11b/windows-memory-load-smoke.jsonl",
+        "sha256": "0d20938584d79800e3bbd651c82c826f310665f4253d55d1aa8cf6abcb083f8c",
+        "sampleCount": 50,
+        "peakCommittedLimitPercent": 96.919803,
+        "minimumCommitHeadroomBytes": 2377224192
+      }
+    ]
+  }
+}
