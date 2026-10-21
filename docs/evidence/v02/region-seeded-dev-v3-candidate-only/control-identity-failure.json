@@ -1,0 +1,22 @@
+{
+  "schema": "region-seeded-dev-v3-control-identity-failure-v1",
+  "status": "preserved and unscored against original frozen pair",
+  "originalFreezeSha256": "d980af0ee5c3ae38f2e397db8e195686663d2b2862afad53c9e6f62b68b113a2",
+  "frozenControlVariantSha256": "5a64ebc3f0261dd7ece37d8428ccae77c9e0c47019216d3cf2876f5b30983511",
+  "rawControl": {
+    "profileId": "native-luna-presence-first-region-no-image-control-dev-v3",
+    "variant": "no-image-control",
+    "manifestSha256": "a0e756cf750ec9d8b8d46aa42d64d7346492f28723d6c729a30077fac58010d9",
+    "summarySha256": "5ea51a5795f645ad39324281bc5e9e2fec6bef501549dce31f43408451bd9733",
+    "completionSealSha256": "6e7a3786da5548d98d6a69bf5772a86e4741333aa0d20883a1c3eb98f66eec5c",
+    "actualVariantSha256": "b2d85c509ff454ee62299d46a9f7dc7cb3009ca0aaf0ef015344c8a6dc45ed35",
+    "sourceUnchanged": true,
+    "plannedAndCompletedCases": 40
+  },
+  "identityFormula": "hashCanonical({profileId, phase, variant, requireClassifiedPresence:true, checkedRegion:true, route, policy, promptPolicy, manifests, taskHashes, source, nativeAssets:null})",
+  "diagnosis": "The frozen control digest is reproduced only if the candidate run's promptPolicy is substituted in place of the control promptPolicy. The control producer output has the correct no-image extraction policy and is internally consistent: its actual promptPolicy says it runs only the original region search without segmentation or visible-box checks, and reconstructing the identity from that raw manifest yields actualVariantSha256. The original frozen digest therefore does not identify the control recipe that was dispatched.",
+  "pairedEvaluation": "not produced; evaluator rejected the control variant digest mismatch before scoring control outcomes or computing a paired statistic",
+  "preservedFailures": true,
+  "rawArtifactsModified": false,
+  "candidateRerun": false
+}

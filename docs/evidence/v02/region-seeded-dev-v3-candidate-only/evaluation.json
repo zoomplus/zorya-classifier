@@ -1,0 +1,160 @@
+{
+  "schema": "region-seeded-dev-v3-candidate-only-evidence-v1",
+  "status": "candidate evaluated; original candidate/control pair incomplete due control identity mismatch",
+  "qualification": "no paired gate verdict; not release qualification",
+  "freeze": {
+    "sourceCommit": "d4b84b9fa025e5a5238968f99fb685633c837c7d",
+    "producerSourceSha256": "be43090b13951e9a6ffa65daffb9413a6a539d8dae335925dc885733a467fb20",
+    "profileId": "native-luna-presence-first-checked-region-sam-dev-v3",
+    "variantSha256": "f4ed437c17160ab1a694961e9b38b63ad76a290a21dbe82aa79d51e169c19697",
+    "route": "openai/gpt-6-luna-decisions",
+    "phaseBudget": {
+      "maxPhysicalCalls": 250,
+      "maxCostUsd": 5,
+      "unknownCostReserveUsd": 0.05
+    },
+    "policy": {
+      "timeoutMs": 120000,
+      "maxInFlightCases": 2,
+      "nativeMaxActive": 1,
+      "nativeMaxWaiting": 2,
+      "nativeThreads": 2,
+      "maxPhysicalCallsPerCase": 6,
+      "maxLogicalCallsPerCase": 6,
+      "maxBoxCheckCalls": 2,
+      "retries": 0,
+      "fallback": false,
+      "latencyRankingEligible": false,
+      "requireClassifiedPresence": true
+    }
+  },
+  "inputs": [
+    {
+      "cases": 20,
+      "manifestSha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a",
+      "truthSha256": "793e26845deaa2cb56748ef270b8cb02877218d680068573f02e5af92b26af6a"
+    },
+    {
+      "cases": 10,
+      "manifestSha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc",
+      "truthSha256": "c7944190e1cadab695f2688351df10a14132986040dafb72794bb1df4571abfe"
+    },
+    {
+      "cases": 10,
+      "manifestSha256": "b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15",
+      "truthSha256": "874971d3e9344f7c54207064115257e5c802260d2a996a53f96bb6a68b2afad3"
+    }
+  ],
+  "candidateRun": {
+    "runId": "v02-region-seeded-dev-2026-10-20T235301825Z-10b11642",
+    "manifestSha256": "e18ca240cb35d7f3081d5ab8bf19f93b451e638e5e7887975cce4715c243a819",
+    "summarySha256": "fea18ed9b5dce920495bce1d9cb9e190675ec5630c07b0ae07f73623d731be39",
+    "completionSealSha256": "c65fc9001acdbdedd2e823764012b0ad6b6dbfc9ef820f6aceb073f95fa0f25b",
+    "independentEvaluationSha256": "2ac4d19caaf58ab7ce9c666b7b4a166ec3cc7008e48f869c8849a9891eae0a89",
+    "sourceUnchanged": true,
+    "complete": true,
+    "denominator": 40
+  },
+  "aggregate": {
+    "classification": {
+      "answered": 40,
+      "correct": 35,
+      "accuracy": 0.875
+    },
+    "wholeObject": {
+      "denominator": 40,
+      "positives": 30,
+      "negatives": 10,
+      "matchedPositiveBoxes": 6,
+      "falseLocations": 0,
+      "unknown": 13,
+      "failed": 6,
+      "notFound": 5
+    },
+    "seedSearchProxy": {
+      "located": 22,
+      "positiveBoxIntersections": 18,
+      "falseSeedLocations": 0,
+      "falsePositiveBoxIntersections": 0,
+      "interpretation": "coarse search proxy only; not whole-object success"
+    },
+    "boxChecks": {
+      "caseDenominator": 40,
+      "casesWithAttempt": 22,
+      "casesWithoutAttempt": 18,
+      "successfulAttempts": 28,
+      "failedAttempts": 0,
+      "verdicts": {
+        "complete": 16,
+        "needsExpansion": 12,
+        "unknown": 0
+      },
+      "expansionOutcomes": {
+        "notNeeded": 13,
+        "noEnclosingMask": 3,
+        "expanded": 6,
+        "unsupported": 0,
+        "rejectedMask": 0
+      }
+    },
+    "maskReferences": {
+      "instances": 7,
+      "scoredExactCanvas": 4,
+      "iouAtLeast0_8": 1,
+      "unavailable": 3,
+      "casesWithoutReferenceMasks": 35
+    },
+    "physicalCalls": {
+      "count": 162,
+      "knownCostUsd": 0.0645113,
+      "unknownCostCalls": 6,
+      "accountedExposureUsd": 0.3645113,
+      "inFlightAtSeal": 0
+    },
+    "strata": {
+      "photo": {
+        "cases": 20,
+        "positive": 16,
+        "negative": 4,
+        "classificationCorrect": 17,
+        "extractionStatuses": {
+          "extracted": 6,
+          "failed": 6,
+          "unknown": 7,
+          "notFound": 1
+        },
+        "seedLocations": 10,
+        "seedPositiveIntersections": 10,
+        "maskDerivedBoxesMatched": 6
+      },
+      "ui": {
+        "cases": 10,
+        "positive": 7,
+        "negative": 3,
+        "classificationCorrect": 8,
+        "extractionStatuses": {
+          "extracted": 5,
+          "unknown": 4,
+          "notFound": 1
+        },
+        "seedLocations": 5,
+        "seedPositiveIntersections": 1,
+        "maskDerivedBoxesMatched": 0
+      },
+      "map": {
+        "cases": 10,
+        "positive": 7,
+        "negative": 3,
+        "classificationCorrect": 10,
+        "extractionStatuses": {
+          "extracted": 5,
+          "unknown": 2,
+          "notFound": 3
+        },
+        "seedLocations": 7,
+        "seedPositiveIntersections": 7,
+        "maskDerivedBoxesMatched": 0
+      }
+    }
+  }
+}
