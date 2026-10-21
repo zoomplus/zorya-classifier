@@ -214,6 +214,14 @@ function validateRun(availability: H5AvailabilityReport, replay: H8Envelope) {
       unknownCost === replay.budget.unknown_cost_calls,
     'h8-cost-receipts',
   )
+  assert(
+    Math.abs(
+      replay.budget.accounted_exposure_usd -
+        replay.budget.known_cost_usd -
+        unknownCost * arm.reserve,
+    ) < 1e-9,
+    'h8-accounted-exposure',
+  )
   for (const call of replay.physical_calls) {
     assert(
       isDeepStrictEqual(call.route, {
@@ -233,10 +241,18 @@ function validateRun(availability: H5AvailabilityReport, replay: H8Envelope) {
       }),
       'h8-physical-chat-parameters',
     )
+    assert(
+      call.receipt === null || (call.receipt as { attempts?: number }).attempts === 1,
+      'h8-physical-retry',
+    )
   }
   assert(
     replay.rows.reduce((n, row) => n + row.physical_call_count, 0) === replay.physical_call_count,
     'h8-row-physical-total',
+  )
+  assert(
+    replay.rows.every((row) => row.physical_call_count <= 4 && row.logical_calls.length <= 4),
+    'h8-row-call-cap',
   )
   assert(
     replay.rows.reduce((n, row) => n + row.logical_calls.length, 0) === replay.logical_call_count,
@@ -513,6 +529,12 @@ export async function evaluateH8OrdinaryVisionRun(
   const final = nominated.filter(
     (row) => row.selected && row.selectedSameMaskPass && row.selectedMaskArtifactValid,
   )
+  const stratumSuccesses: Record<'photo' | 'ui' | 'map', number> = {
+    photo: final.filter((row) => row.stratum === 'photo').length,
+    ui: final.filter((row) => row.stratum === 'ui').length,
+    map: final.filter((row) => row.stratum === 'map').length,
+  }
+  const falseOutputs = negatives.filter((row) => row.selected)
   return {
     schema: 'v03-h8-ordinary-vision-independent-evaluation-v1',
     production: {
@@ -531,6 +553,15 @@ export async function evaluateH8OrdinaryVisionRun(
       selectedMaskArtifactsVerified: artifactRows.size,
       selectedMaskArtifactsExpected: rows.filter((row) => row.selected).length,
       sourceFilesHashed: checked.size,
+      advancementGate: {
+        pass:
+          stratumSuccesses.photo === 3 &&
+          stratumSuccesses.ui === 3 &&
+          stratumSuccesses.map >= 1 &&
+          falseOutputs.length === 0,
+        successesByStratum: stratumSuccesses,
+        falseOutputCount: falseOutputs.length,
+      },
     },
     positiveSummary: {
       denominator: positives.length,
@@ -577,7 +608,7 @@ export async function evaluateH8OrdinaryVisionRun(
       uncertain: negatives
         .filter((row) => row.presenceChoice === 'uncertain')
         .map((row) => row.caseId),
-      falseOutputs: negatives.filter((row) => row.selected).map((row) => row.caseId),
+      falseOutputs: falseOutputs.map((row) => row.caseId),
       errors: negatives.filter((row) => row.status === 'error' || row.status === 'timeout'),
     },
     rows,
