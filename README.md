@@ -8,7 +8,9 @@ Use an explicitly configured image-capable model through a supported adapter, or
 
 [Русское руководство](docs/README.ru.md) · [API](docs/api.md) · [Architecture](docs/architecture.md) · [Benchmarks](docs/benchmarks.md)
 
-The 0.2 source branch adds region-seeded segmentation, mask-derived bounds and optional transparent cutouts. See the [new usage guide](docs/v02-usage.md) for contracts, backend ownership, CLI and current qualification limits; this does not change the published 0.1 results.
+Version 0.2 adds region-seeded segmentation, mask-derived bounds and optional transparent cutouts, with a closed completeness check and one bounded mask expansion. See the [usage guide](docs/v02-usage.md) for contracts, backend ownership and CLI.
+
+The [frozen 80-case evaluation](docs/evidence/v02/region-seeded-heldout-v3/README.md) passed its predeclared admission criteria, but localization remains limited: 26/60 positive seed hits and 8/60 complete object boxes; no false seeds or cutouts on 20 negatives. Eight of 30 reference masks reached IoU 0.8, three failed and 19 had no predicted mask. These results describe one explicit caller-configured Luna/OpenAI + MobileSAM recipe, not every model or game.
 
 Six experimental encodings for text-only models were also tested on fresh photos and real UI captures. None qualified for image localization; see the [measured comparison](docs/evidence/v02/fresh-text/README.md). They remain research code rather than an advertised replacement for a vision model.
 

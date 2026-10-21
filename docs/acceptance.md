@@ -2,7 +2,17 @@
 
 This acceptance concerns the extracted MIT Node.js library, not the Zorya desktop application, installer, microphone or game session. The caller supplies a `DecisionPort` or explicitly configures an adapter; model/provider recipes below are examples, not library defaults. Ordinary vision chat, direct OpenAI-compatible servers and native decisions are all supported. Jev is optional historical compatibility.
 
-## Current gate state
+## Current 0.2 acceptance
+
+The original-region/full-source-segmentation workflow, closed box check and single enclosing-mask correction are implemented. The caller selects every decision model, provider and segmenter. Classification and the default region API remain compatible. All six text-only encoders failed their separate qualification and remain unsupported.
+
+The [independent frozen heldout evaluation](evidence/v02/region-seeded-heldout-v3/README.md) passed its predeclared criteria on all 80 candidate and 80 image-free control cases. Candidate classification was 65/80. Positive seed hits were 26/60, complete mask-derived boxes 8/60, and false seeds/extractions 0/20 negatives. Of 30 exact-canvas mask references, eight reached IoU 0.8, three did not and 19 had no predicted mask. Both paired positive-photo seed intervals were [0.500, 0.833]; neither measures whole-object quality. The corpus contains official photos and one controlled UI/game family each, not general game coverage. Two HTTP 502 failures and unknown charges remain counted.
+
+The [fresh checked-flow resource run](evidence/v02/checked-region-segmentation-resource-4df544c-receipt.json) passed every strict monotonic-duration guard after the harness-only deadline repair. It recorded 7,212.61 seconds, 3,295 successful operations and 4,942 matching child starts/closes with none left. [Independent root recomputation](evidence/v02/checked-region-segmentation-resource-4df544c-root-review.json) rehashed all 59 pinned sources and confirmed idle-median growth of 51.44 MiB RSS, 8.61 MiB heap and 5.57 MiB array buffers; external memory decreased. All fixed thresholds pass. This is bounded resource evidence, not proof of zero retained memory.
+
+[Native Windows installed-archive checks](evidence/v02/native-checked-region-windows-987ac32.json) cover the same 114 compiled runtime files. The [565-test hosted matrix](evidence/v02/ci-f9d4633.json) passed Windows/Linux × Node 22/24. The later evaluator-only missing-byte-count compatibility fix preserves pinned assets, bounded reads, hashes, canvas/pixel checks and every scoring criterion. Final source gates, exact installed archive, runtime parity, redacted security scans, final-source CI and registry publication are recorded separately in the external release manifest. Historical interrupted and rejected runs below remain preserved.
+
+## Implementation and development history
 
 The latest owner correction adds a closed post-segmentation containment check and at most one actual enclosing-mask repair. The original three-Choice region search stays compatible; coordinates and cutouts still come only from mask pixels. A default checker reuses the injected decision port, while an optional custom checker remains caller-owned. An unresolved check returns unknown without a partial cutout. The [updated plan](0.2.0-plan.md) records contracts, ownership, bounded calls and execution waves.
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 — unreleased
+## 0.2.0 — 2026-10-21
 
 - Keep the original three-Choice region locator. With an explicitly supplied segmenter, use its selected region as a prompt on the full oriented image, then derive the cutout, bounding rectangle and centre from foreground mask pixels. A closed post-mask decision checks visible box containment on the full source with a seed anchor; one enclosing-mask correction and one recheck are allowed. No model-generated coordinates or extent search is added.
 - Return a transparent PNG, cropped binary mask, source offset and bounding-box centre. Empty, ungrounded or unconfirmed masks remain unknown; backend failures remain errors. A cell is never substituted for a mask.
@@ -8,7 +8,7 @@
 - Preserve default region/classification compatibility and explicit optional legacy interval/proposal research strategies. The caller chooses every decision model, provider and segmenter.
 - Prepare full-source containment images for both native and ordinary public transports while retaining original mask coordinates. Add regressions for small images, desktop-sized images, producer/evaluator receipts and independent per-profile freeze identities.
 - Compare six text-only image representations in benchmark tooling. None qualified; the public experimental image selector rejects explicitly rather than silently selecting a losing encoder.
-- Extend source, installed-archive, native Windows/Linux, resource and secret checks. Current qualification and limitations are recorded in [acceptance](docs/acceptance.md); this entry does not assert that the release is already published.
+- Extend source, installed-archive, native Windows/Linux, resource and secret checks. The corrected two-hour checked-flow run and frozen 80-case quality gate passed; [acceptance](docs/acceptance.md) separates seed, whole-box and mask scores, unavailable outputs and final release evidence.
 
 ## 0.1.0 — initial standalone candidate
 

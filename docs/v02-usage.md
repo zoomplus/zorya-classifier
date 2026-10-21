@@ -1,6 +1,6 @@
-# Region-seeded masks and extraction (0.2 source branch)
+# Region-seeded masks and extraction (0.2)
 
-These APIs are implemented on the 0.2 development branch. They are not a claim that npm `latest` already contains them. The [accepted plan](0.2.0-plan.md) and [acceptance status](acceptance.md) distinguish implementation, offline checks, live quality and platform qualification. No text-image encoder has passed release qualification yet.
+The [accepted plan](0.2.0-plan.md) and [acceptance status](acceptance.md) distinguish implementation, offline checks, live quality and platform qualification. The frozen caller recipe passed admission with only 8/60 complete positive object boxes; 19/30 mask references had no prediction. Configure and test the model and segmenter for your own data. No text-image encoder qualified.
 
 The library does not select or connect a model. Supply a `DecisionPort` to `createClassifier`, either by implementing the port or explicitly constructing a provider adapter. The Luna examples below are reproducible integration recipes, not defaults or a claim that one model is always more accurate; stronger model capability does not guarantee monotonic accuracy gains. Optional local segmenters and proposal generators are configured separately, and their runtime packages and model assets remain the caller's responsibility.
 
@@ -44,7 +44,7 @@ The decision port, optional custom `segmentationBoxCheck`, and segmenter remain 
 
 ### Optional caller presence guard
 
-The separately tested v2 benchmark composition first classifies the target as `present` or `absent`, then calls the unchanged `extract` only for `present`. This is caller logic: direct `extract` uses up to three region requests plus one or two containment checks, while the guarded composition adds one classification request. The v2 benchmark predates containment checks and remains historical evidence; the new checked workflow requires a separately named comparison. The benchmark already recorded that classification in v1, so reusing it in v2 did not add a request to the comparison. A classification error remains an error; it must not be converted to absence. Keep both calls under one caller-owned absolute deadline and abort signal.
+The tested v3 caller composition first classifies the target as `present` or `absent`, then calls `extract` only for `present`. This is caller logic: direct `extract` uses up to three region requests plus one or two containment checks; the guard adds one classification request. The [complete heldout comparison](evidence/v02/region-seeded-heldout-v3/README.md) preserves all errors and unknown outputs. Earlier v2 results predate containment checks and remain historical. A classification error remains an error; it must not be converted to absence. Keep both calls under one caller-owned absolute deadline and abort signal.
 
 ```ts
 // image, target and signal are owned by this application's operation.
