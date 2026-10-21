@@ -1089,12 +1089,12 @@ await test('verifyH11AssetReceiptMetadata requires full Sa2VA companion lock set
   assert.ok(errors.some((item) => item.startsWith('asset-receipt-missing-')))
 })
 
-const H11_ASSET_STREAM_CHUNK_BYTES = 8192
+const H11_ASSET_STREAM_CHUNK_BYTES = 1048576
 
 await test('hashH11AssetFileOnDisk streams multi-chunk files without whole-file buffering', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'zorya-h11-asset-hash-'))
   const filePath = join(dir, 'multi-chunk.bin')
-  const payload = Buffer.alloc(H11_ASSET_STREAM_CHUNK_BYTES + 1, 0x5a)
+  const payload = Buffer.alloc(2 * H11_ASSET_STREAM_CHUNK_BYTES + 1, 0x5a)
   await writeFile(filePath, payload)
   try {
     const streamed = await hashH11AssetFileOnDisk(filePath)
@@ -1109,7 +1109,7 @@ await test('hashH11AssetFileOnDisk streams multi-chunk files without whole-file 
 await test('verifyH11AssetFileReceiptOnDisk distinguishes digest, size, missing, and unreadable paths', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'zorya-h11-asset-verify-'))
   const filePath = join(dir, 'receipt.bin')
-  const payload = Buffer.alloc(H11_ASSET_STREAM_CHUNK_BYTES + 1, 0xab)
+  const payload = Buffer.alloc(2 * H11_ASSET_STREAM_CHUNK_BYTES + 1, 0xab)
   const expected = {
     sha256: createHash('sha256').update(payload).digest('hex'),
     bytes: payload.byteLength,

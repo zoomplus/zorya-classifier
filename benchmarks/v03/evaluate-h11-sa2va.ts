@@ -468,7 +468,7 @@ function sha256(bytes: Uint8Array | Buffer): string {
 }
 
 /** Bounded read chunk size for H11 on-disk asset SHA-256 (must stay below Node buffer limits). */
-const H11_ASSET_STREAM_HIGH_WATER_MARK = 8192
+const H11_ASSET_STREAM_HIGH_WATER_MARK = 1048576
 
 export type H11AssetFileDigest = { sha256: string; bytes: number }
 
@@ -1611,7 +1611,7 @@ async function buildPilotEvaluation(
     corpus: corpus.cases,
     rows: pilotRows,
     truth,
-    imageRoot: v03PilotRepositoryRoot,
+    imageRoot,
     outputRoot,
   })
 }
