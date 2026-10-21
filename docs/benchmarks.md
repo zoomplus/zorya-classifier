@@ -12,6 +12,12 @@ Metrics include classification accuracy/macro-F 1/confusion, errors in the denom
 
 Offline fixture tests validate mechanics only. Actual provider outcomes are recorded in [results](results.md), acceptance and the run reports. Keep failed and incomplete runs. Never silently retry errors, alter labels or discard difficult images to improve headline metrics.
 
+## 0.2 checked region and segmentation recipe
+
+The [region-seeded runner](../benchmarks/v02/region-seeded-runner.md) records the original region search separately from full-source segmentation and up to two closed visible-box checks. The caller configures the model, native adapter and presence guard explicitly. Its [v3 development freeze](evidence/v02/region-seeded-development-freeze-20261021-v3.json), [prospective control-R2 correction](evidence/v02/region-seeded-development-control-r2-freeze-20261021.json) and [independent results](evidence/v02/region-seeded-dev-v3-control-r2/README.md) retain the original identity-authoring failure. A separate offline verifier rejects reuse of candidate prompt policies in the control identity before dispatch.
+
+Region-fragment hits, mask-derived box matches and exact-canvas mask IoU are different measurements. The image-free control has no segmenter and cannot produce an object mask. The current comparison uses all 40 cases per profile, including unknowns/errors, and reports native quality separately from semantic model decisions. Its 20 photos, ten controlled UI captures and ten controlled map captures do not establish broad game or UI coverage. The [conditional selection](evidence/v02/region-seeded-method-selection-20261021-v3.json) precedes any new blind pixels or truth; the [acceptance record](acceptance.md) determines current release eligibility.
+
 ## Current native Luna Decisions reproduction
 
 For an independent fresh run of the selected non-Jev route, fetch the corpus, set your own `OPENROUTER_API_KEY`, then explicitly opt in:

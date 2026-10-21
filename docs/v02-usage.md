@@ -63,7 +63,7 @@ if (presence.choice === 'present') {
 }
 ```
 
-This illustrates caller composition rather than a new package default. Exact benchmark tasks, prompts, timeouts, route and preserved failures are pinned in [development evidence](evidence/v02/region-seeded-dev-v2/README.md); changing the caller's model or prompt requires its own quality measurement.
+This illustrates caller composition rather than a new package default. Exact benchmark tasks, prompts, timeouts, route and preserved failures are pinned in the historical [v2 development evidence](evidence/v02/region-seeded-dev-v2/README.md) and current [checked-flow v3 comparison](evidence/v02/region-seeded-dev-v3-control-r2/README.md). The latter records 6/30 positive whole-object box matches and 1/7 passing exact-canvas masks; it does not guarantee accurate cutouts for every object. Changing the caller's model, segmenter or prompt requires its own quality measurement.
 
 A baseline Linux CPU wiring smoke with the pinned MobileSAM assets used a synthetic 192×128 image. A colored rectangle produced a 2,800-pixel mask with bounds `[70, 34, 120, 90]`; an all-transparent input produced a full-size empty mask. Three child starts matched three closes. This verifies adapter wiring only, not photo accuracy.
 

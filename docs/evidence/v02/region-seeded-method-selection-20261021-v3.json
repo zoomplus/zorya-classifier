@@ -1,0 +1,120 @@
+{
+  "schema": "region-seeded-development-method-selection-v3",
+  "createdAt": "2026-10-21T00:07:27.254Z",
+  "developmentEvidence": {
+    "file": "region-seeded-dev-v3-control-r2/evaluation.json",
+    "sha256": "500411d3cb436d7c4bcbe8b59e4e6ae844df023c5290b64f5341e6f2ffd8f39f"
+  },
+  "selectedCandidate": "native-luna-presence-first-checked-region-sam-dev-v3",
+  "pairedControl": "native-luna-presence-first-region-no-image-control-dev-v3",
+  "producerWorktreeCommit": "d4b84b9fa025e5a5238968f99fb685633c837c7d",
+  "integrationSourceCommit": "a50fcd7632b4d3d041983f9ae1cbc1bceb79f0dc",
+  "producerSourceSha256": "be43090b13951e9a6ffa65daffb9413a6a539d8dae335925dc885733a467fb20",
+  "variantSha256": {
+    "candidate": "f4ed437c17160ab1a694961e9b38b63ad76a290a21dbe82aa79d51e169c19697",
+    "control": "b2d85c509ff454ee62299d46a9f7dc7cb3009ca0aaf0ef015344c8a6dc45ed35"
+  },
+  "candidateRecipe": {
+    "model": "openai/gpt-6-luna-decisions",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "apiEndpoint": "/api/alpha/decisions",
+    "allowFallbacks": false,
+    "native": "MobileSAM CPU segmentation, seed-region prompt on full oriented source image",
+    "timeoutMs": 120000,
+    "maxInFlightCases": 2,
+    "nativeMaxActive": 1,
+    "nativeMaxWaiting": 2,
+    "nativeThreads": 2,
+    "regionSearchPasses": 3,
+    "extentCalls": 0,
+    "sameInstanceCalls": 0,
+    "maxLogicalCallsPerCase": 6,
+    "maxPhysicalCallsPerCase": 6,
+    "maxPhysicalCalls": 250,
+    "maxCostUsd": 5,
+    "unknownCostReserveUsd": 0.05,
+    "retries": 0,
+    "fallback": false,
+    "latencyRankingEligible": false,
+    "boxCheckPolicy": "up-to-two-closed-visible-box-containment-checks-v1",
+    "maxBoxCheckCalls": 2,
+    "requireClassifiedPresence": true
+  },
+  "controlRecipe": {
+    "model": "openai/gpt-6-luna-decisions",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "apiEndpoint": "/api/alpha/decisions",
+    "allowFallbacks": false,
+    "native": "none; no-image control does not configure a segmenter",
+    "timeoutMs": 120000,
+    "maxInFlightCases": 2,
+    "nativeMaxActive": 1,
+    "nativeMaxWaiting": 2,
+    "nativeThreads": 2,
+    "regionSearchPasses": 3,
+    "extentCalls": 0,
+    "sameInstanceCalls": 0,
+    "maxLogicalCallsPerCase": 4,
+    "maxPhysicalCallsPerCase": 4,
+    "maxPhysicalCalls": 250,
+    "maxCostUsd": 5,
+    "unknownCostReserveUsd": 0.05,
+    "retries": 0,
+    "fallback": false,
+    "latencyRankingEligible": false,
+    "boxCheckPolicy": "none-no-segmenter-configured",
+    "maxBoxCheckCalls": 0,
+    "requireClassifiedPresence": true
+  },
+  "nativeAssets": {
+    "method": "mobile-sam-seed-region-v1",
+    "executionProvider": "cpu",
+    "encoder": {
+      "bytes": 28157093,
+      "sha256": "580f5fb648ea1062c0aabc26217aed56921985f03f0cbbd852bba81d760cc749"
+    },
+    "decoder": {
+      "bytes": 16496559,
+      "sha256": "8976b90a87ba50a6a72217a5ff994f7d25ce16f2229fcc1ed259e1294c622ffe"
+    }
+  },
+  "selectionBasis": "The single predeclared checked-region candidate passes the DEV negative-case and paired seed-search admission gates. Preserve the original region search, full-source caller-owned segmentation, at most one enclosing-mask correction and one final check. Select this exact composition for fresh blind evaluation; it is not a universal best-model or precise-mask claim.",
+  "eligibility": {
+    "developmentAdmission": "passed",
+    "source": "563 offline tests and strict source/build/format gates at 29357d7",
+    "runtimeCi": "all four jobs passed at 987ac32; later 563-test source CI running",
+    "installedConsumer": "passed on identical 114 compiled runtime files",
+    "nativeWindows": "passed on identical 114 compiled runtime files",
+    "checkedFlowTwoHourResources": "active; no terminal acceptance yet"
+  },
+  "metrics": {
+    "positiveCases": 30,
+    "verifiedNegatives": 10,
+    "coarsePositiveSeedBoxIntersections": 18,
+    "falseSeedLocations": 0,
+    "falseExtractions": 0,
+    "maskDerivedBoxMatches": 6,
+    "exactCanvasMaskReferences": 7,
+    "exactCanvasMasksAtIoU08": 1,
+    "photoCoarseSeedPairedInterval": [0.375, 0.875],
+    "photoExactForegroundSeedPairedInterval": [0.4, 1],
+    "exactForegroundSeedPairs": 5
+  },
+  "preservedControlFailure": {
+    "file": "region-seeded-dev-v3-candidate-only/control-identity-failure.json",
+    "originalRunUsedForSelection": false,
+    "prospectiveControlR2": true,
+    "candidateRerun": false
+  },
+  "frozenBeforeHeldout": {
+    "newPixelsOpenedByProducer": false,
+    "newPerCaseTruthOpenedByProducer": false,
+    "newHeldoutDispatched": false,
+    "selectRunnerUpFromRevealedHeldout": false
+  },
+  "libraryConnectsModels": false,
+  "latencyRankingEligible": false,
+  "releaseQualified": false
+}

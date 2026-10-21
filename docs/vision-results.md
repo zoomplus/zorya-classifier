@@ -2,9 +2,24 @@
 
 ## Current 0.2 region and extraction evidence
 
-The primary 0.2 flow retains the original three-Choice region search and uses that seed to segment the full oriented source. Only actual mask pixels determine its cutout, bounds and center. The caller chooses both ports; no model extent search or confirmation is added. The [first complete DEV40 report](evidence/v02/region-seeded-dev-v1/README.md) failed its negative-case gate. It records 18/30 coarse seed-box intersections, 5/30 mask-derived box matches, one false seed/extraction on ten negatives, and 1/7 exact-canvas masks reaching IoU 0.8. These are different metrics, not interchangeable accuracy rates.
+The primary 0.2 flow retains the original three-Choice region search and uses its seed to segment the full oriented source. Only actual mask pixels determine the cutout, bounds and center. The caller's decision port then sees the full image with the actual box and seed anchor, choosing `complete`, `needs-expansion`, or `unknown`. One actual enclosing-mask correction and one final check are allowed. Unresolved results remain unknown. The caller chooses both ports; no model-generated coordinates or separate extent search are added.
 
-The same-seed native component comparison favored MobileSAM over GrabCut on this exposed set: 5 versus 0 box matches among the 22 positive cases with predicted seeds, and 1 versus 0 passing mask references. This supplies development evidence for an explicitly configured backend, not universal superiority or end-to-end qualification. A separately frozen caller presence guard reuses the already-recorded classification; its full rerun and blind qualification are tracked in [acceptance](acceptance.md). The historical 0.1 classification results below remain unchanged.
+The [checked-flow DEV v3 comparison](evidence/v02/region-seeded-dev-v3-control-r2/README.md) uses explicit Luna Decisions/OpenAI, CPU MobileSAM and a caller-side presence guard. The complete 40-case candidate and 40-case image-free control R2 use the same tasks. The first control's erroneous freeze identity is preserved separately and was not scored.
+
+| Measure                                         | Candidate                               | Image-free control R2               |
+| ----------------------------------------------- | --------------------------------------- | ----------------------------------- |
+| Classification                                  | 35/40                                   | 10/40                               |
+| Coarse positive seed-box intersections          | 18/30                                   | 0/30                                |
+| Whole-object box matches                        | 6/30                                    | Not produced                        |
+| False seeds / extractions on verified negatives | 0/10                                    | 0/10 seeds; no segmentation         |
+| Exact-canvas mask IoU ≥ 0.8                     | 1/7 references; 4 scored, 3 unavailable | Not produced                        |
+| Physical requests / known cost                  | 162 / $0.0645113; six unknown charges   | 40 / $0.0008353; no unknown charges |
+
+The positive-photo seed comparison is +0.625 with a fixed-bootstrap 95% interval [0.375, 0.875]. The exact-foreground comparison is available on only five photo pairs, with interval [0.4, 1.0]. These are seed-search metrics, not whole-object or mask accuracy. All failures and unavailable predictions remain in their stated denominators. The 16 extracted results include only six correct whole-object boxes; a containment decision is not proof of a tight or pixel-perfect mask. Timings under concurrent resource stress are not ranked. The [conditional method selection](evidence/v02/region-seeded-method-selection-20261021-v3.json) freezes this recipe for a new blind evaluation, not release qualification.
+
+The earlier [DEV v1](evidence/v02/region-seeded-dev-v1/README.md) failed its negative-case gate: 18/30 coarse seed-box intersections, 5/30 mask-derived box matches, one false seed/extraction on ten negatives and 1/7 exact-canvas masks reaching IoU 0.8. Its presence-first v2 successor passed development admission before the owner's containment-check revision. These earlier results remain distinct from v3.
+
+The same-seed native component comparison favored MobileSAM over GrabCut on the exposed v1 set: 5 versus 0 box matches among the 22 positive cases with predicted seeds, and 1 versus 0 passing mask references. This supplies development evidence for an explicitly configured backend, not universal superiority or end-to-end qualification. Current blind, native/resource and publication gates are tracked in [acceptance](acceptance.md). The historical 0.1 classification results below remain unchanged.
 
 ## Historical 0.1 classification comparison
 
@@ -46,7 +61,7 @@ Native Luna was evaluated in two disjoint sessions:40 heldout photos+10 developm
 
 [Chat v1](evidence/vision-selection-v1-report.json) · [Chat v2](evidence/vision-selection-v2-report.json) · [Native first session](evidence/decisions-selection-v1-report.json) · [Native completion](evidence/decisions-completion-v1-report.json).
 
-## Localization remains experimental
+## Historical 0.1 localization smokes
 
 The first native locator smoke reached its fine stage but received a provider error. An explicit diagnostic replay of that exact195-option/nine-image fine request returned HTTP502: `OpenAI refused to answer question "selection"`. The [diagnostic receipt](evidence/luna-decisions-fine-probe.json) is preserved. This does not establish a documented universal option/image limit or authorize silently changing geometry; model refusal stays an error. A subsequent fixed flower-image smoke completed all three native stages in4.75s and returned a region; its [report](evidence/luna-decisions-locator-smoke-report.json) includes the reference-box metric. This one success does not erase the failed request or qualify the whole locator corpus. A valid classification result does not guarantee locator compatibility.
 
