@@ -34,7 +34,9 @@ MODEL_REVISION = "173fb6512b3ad6f3c1fe25efa09e723d01d5b6d4"
 
 SAM2_PINNED_REL_PATH = "sam2.py"
 CONTRACT_PATH = Path(__file__).with_name("h11-sa2va-contract.json")
+H11_LEGACY_CONTRACT_SHA256 = "14281b417d8fc2838cd52ff6bf05cb63aae493bc9968b5a4f20b6b482d58ccdd"
 H11B_CONTRACT_SHA256 = "ee623e58181f5db22d77720760438b0b34342c708a9f5f99037446d4d3846908"
+APPROVED_CONTRACT_SHA256 = frozenset({H11_LEGACY_CONTRACT_SHA256, H11B_CONTRACT_SHA256})
 H11B_RUNTIME_PROFILE_ID = "h11b-direct-cuda-v1"
 H11B_AUTHORIZED_LOADER_DEVICE_MAP: dict[str, str] = {"": "cuda:0"}
 
@@ -149,7 +151,13 @@ def read_bounded_file_bytes(source_path: Path) -> bytes:
 
 
 def load_contract(contract_path: Path) -> dict[str, Any]:
-    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    raw = contract_path.read_bytes()
+    digest = sha256_bytes(raw)
+    if digest not in APPROVED_CONTRACT_SHA256:
+        raise H11Error(
+            f"unsupported H11 producer contract bytes: sha256 {digest} is not an approved pin"
+        )
+    contract = json.loads(raw.decode("utf-8"))
     if contract.get("schema") != CONTRACT_SCHEMA:
         raise H11Error("unsupported H11 producer contract schema")
     return contract
@@ -537,7 +545,9 @@ def cuda_runtime_details() -> dict[str, Any]:
     return parsed
 
 
-def _contract_from_pretrained_device_map(contract: Mapping[str, Any]) -> Any:
+def _contract_from_pretrained_loader_section(
+    contract: Mapping[str, Any],
+) -> dict[str, Any] | None:
     model_section = contract.get("model")
     if not isinstance(model_section, dict):
         return None
@@ -547,9 +557,21 @@ def _contract_from_pretrained_device_map(contract: Mapping[str, Any]) -> Any:
     from_pretrained = loader_section.get("from_pretrained")
     if not isinstance(from_pretrained, dict):
         return None
-    if "device_map" not in from_pretrained:
-        return None
-    return from_pretrained.get("device_map")
+    return from_pretrained
+
+
+def _contract_device_map_key_present(contract: Mapping[str, Any]) -> bool:
+    from_pretrained = _contract_from_pretrained_loader_section(contract)
+    if from_pretrained is None:
+        return False
+    return "device_map" in from_pretrained
+
+
+def _contract_from_pretrained_device_map_value(contract: Mapping[str, Any]) -> Any:
+    from_pretrained = _contract_from_pretrained_loader_section(contract)
+    if from_pretrained is None or "device_map" not in from_pretrained:
+        raise H11Error("contract device_map key absent")
+    return from_pretrained["device_map"]
 
 
 def _contract_device_map_is_authorized_h11b(device_map: Any) -> bool:
@@ -569,12 +591,19 @@ def _contract_device_map_is_authorized_h11b(device_map: Any) -> bool:
 
 
 def validate_contract_runtime_profile(contract: Mapping[str, Any]) -> None:
-    profile = contract.get("runtime_profile_id")
-    device_map = _contract_from_pretrained_device_map(contract)
-    if profile is None:
-        if device_map is not None:
-            raise H11Error("contract device_map requires authorized h11b runtime profile")
+    profile_key_present = "runtime_profile_id" in contract
+    device_map_key_present = _contract_device_map_key_present(contract)
+    if not profile_key_present and not device_map_key_present:
         return
+    if not profile_key_present:
+        raise H11Error("contract device_map requires authorized h11b runtime profile")
+    if not device_map_key_present:
+        raise H11Error(
+            "h11b runtime_profile_id requires model.loader.from_pretrained.device_map "
+            f"{H11B_AUTHORIZED_LOADER_DEVICE_MAP!r}"
+        )
+    profile = contract["runtime_profile_id"]
+    device_map = _contract_from_pretrained_device_map_value(contract)
     if profile != H11B_RUNTIME_PROFILE_ID:
         raise H11Error(f"unsupported runtime_profile_id: {profile!r}")
     if not _contract_device_map_is_authorized_h11b(device_map):
@@ -629,7 +658,7 @@ def _tensor_on_cuda0(tensor: Any) -> bool:
     if device_type != "cuda":
         return False
     index = getattr(device, "index", None)
-    return index in (None, 0)
+    return index == 0
 
 
 def verify_h11b_loader_placement(model: Any) -> dict[str, Any]:

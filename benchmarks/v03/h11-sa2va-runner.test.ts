@@ -854,6 +854,104 @@ print("ok")
   assert.equal(sha256File(CONTRACT, python), H11_LEGACY_CONTRACT_SHA)
 })
 
+await test('load_contract whitelists exact legacy and H11b contract bytes only', async () => {
+  const python = resolvePython()
+  const script = `
+import importlib.util, json, sys, tempfile
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location("h11c", ${JSON.stringify(COMMON)})
+mod = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = mod
+spec.loader.exec_module(mod)
+
+legacy_path = Path(${JSON.stringify(CONTRACT)})
+h11b_path = Path(${JSON.stringify(H11B_CONTRACT)})
+
+legacy = mod.load_contract(legacy_path)
+h11b = mod.load_contract(h11b_path)
+assert legacy.get("runtime_profile_id") is None or "runtime_profile_id" not in legacy or legacy["runtime_profile_id"] != mod.H11B_RUNTIME_PROFILE_ID
+assert h11b["runtime_profile_id"] == mod.H11B_RUNTIME_PROFILE_ID
+
+tampered_dir = Path(tempfile.mkdtemp(prefix="h11-contract-bytes-"))
+try:
+    tampered_path = tampered_dir / "contract.json"
+    raw = legacy_path.read_bytes()
+    tampered_path.write_bytes(raw + b" ")
+    try:
+        mod.load_contract(tampered_path)
+    except mod.H11Error as error:
+        assert "unsupported H11 producer contract bytes" in str(error)
+    else:
+        raise AssertionError("expected tampered contract bytes to be rejected")
+finally:
+    import shutil
+    shutil.rmtree(tampered_dir)
+
+print("ok")
+`
+  const result = runPythonScript(python, script)
+  assert.equal(result.code, 0, result.stderr + result.stdout)
+  assert.match(result.stdout, /ok/)
+})
+
+await test('runtime profile validation rejects present-null or empty device_map but accepts legacy absence', async () => {
+  const python = resolvePython()
+  const script = `
+import importlib.util, json, sys
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location("h11c", ${JSON.stringify(COMMON)})
+mod = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = mod
+spec.loader.exec_module(mod)
+
+legacy_contract = json.loads(Path(${JSON.stringify(CONTRACT)}).read_text(encoding="utf-8"))
+mod.validate_contract_runtime_profile(legacy_contract)
+mod.build_recipe(requested_device="cuda:0", contract=legacy_contract)
+
+h11b_contract = json.loads(Path(${JSON.stringify(H11B_CONTRACT)}).read_text(encoding="utf-8"))
+mod.validate_contract_runtime_profile(h11b_contract)
+recipe = mod.build_recipe(requested_device="cuda:0", contract=h11b_contract)
+assert recipe["loader_device_map"] == mod.H11B_AUTHORIZED_LOADER_DEVICE_MAP
+
+def expect_fail(fn):
+    try:
+        fn()
+    except mod.H11Error:
+        return
+    raise AssertionError("expected H11Error")
+
+def contract_with_device_map(base: dict, device_map) -> dict:
+    out = dict(base)
+    model = dict(out.get("model") or {})
+    loader = dict(model.get("loader") or {})
+    fp = dict(loader.get("from_pretrained") or {})
+    fp["device_map"] = device_map
+    loader["from_pretrained"] = fp
+    model["loader"] = loader
+    out["model"] = model
+    return out
+
+present_null_map = contract_with_device_map(legacy_contract, None)
+expect_fail(lambda: mod.validate_contract_runtime_profile(present_null_map))
+expect_fail(lambda: mod.build_recipe(requested_device="cuda:0", contract=present_null_map))
+
+present_empty_map = contract_with_device_map(legacy_contract, {})
+expect_fail(lambda: mod.validate_contract_runtime_profile(present_empty_map))
+
+profile_null = dict(h11b_contract)
+profile_null["runtime_profile_id"] = None
+expect_fail(lambda: mod.validate_contract_runtime_profile(profile_null))
+expect_fail(lambda: mod.build_recipe(requested_device="cuda:0", contract=profile_null))
+
+print("ok")
+`
+  const result = runPythonScript(python, script)
+  assert.equal(result.code, 0, result.stderr + result.stdout)
+  assert.match(result.stdout, /ok/)
+})
+
 await test('load_stack uses device_map without to() for H11b and legacy to() without device_map', async () => {
   const python = resolvePython()
   const script = `
@@ -1003,7 +1101,7 @@ print("ok")
 await test('verify_h11b_loader_placement accepts cuda0 and rejects drift meta cpu and dtype', async () => {
   const python = resolvePython()
   const script = `
-import importlib.util, sys
+import importlib.util, sys, types
 import torch
 from torch import nn
 
@@ -1045,6 +1143,9 @@ assert mod.verify_h11b_loader_placement(int_map)["hf_device_map"] == mod.H11B_AU
 expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cpu"}, nn.Parameter(torch.zeros(2)), torch.zeros(2))))
 expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"layer": "cuda:0", "": "cuda:0"}, nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.bfloat16)), torch.zeros(2, device="cuda:0"))))
 expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, nn.Parameter(torch.zeros(2, device="cpu", dtype=torch.bfloat16)), torch.zeros(2, device="cuda:0"))))
+unindexed_cuda = torch.device("cuda")
+assert unindexed_cuda.index is None
+assert not mod._tensor_on_cuda0(types.SimpleNamespace(device=unindexed_cuda))
 expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, nn.Parameter(torch.zeros(2, device="meta", dtype=torch.bfloat16)), torch.zeros(2, device="cuda:0"))))
 expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.float32)), torch.zeros(2, device="cuda:0"))))
 
