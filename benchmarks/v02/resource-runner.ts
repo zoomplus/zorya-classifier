@@ -1,6 +1,7 @@
 import { channel } from 'node:diagnostics_channel'
 import { performance } from 'node:perf_hooks'
 import { setInterval, clearInterval } from 'node:timers'
+import { setTimeout as delay } from 'node:timers/promises'
 
 interface ChildMemorySample {
   type?: 'start' | 'close' | 'memory'
@@ -99,6 +100,30 @@ export function hasMonotonicDeadlineElapsed(
   nowMs: number,
 ): boolean {
   return nowMs - startedAtMs >= durationMs
+}
+
+/** Wait until a monotonic deadline, retrying if a timer resolves before it. */
+export async function waitMonotonicDuration(
+  durationMs: number,
+  options: {
+    now?: MonotonicClock
+    signal?: AbortSignal
+    wait?: (durationMs: number, signal?: AbortSignal) => Promise<void>
+  } = {},
+): Promise<number> {
+  if (!Number.isFinite(durationMs) || durationMs < 0)
+    throw new RangeError('Monotonic wait duration must be a finite nonnegative number')
+  const now = options.now ?? (() => performance.now())
+  const wait = options.wait ?? ((timeoutMs, signal) => delay(timeoutMs, undefined, { signal }))
+  const startedAt = now()
+  const deadline = startedAt + durationMs
+  options.signal?.throwIfAborted()
+  while (true) {
+    options.signal?.throwIfAborted()
+    const remainingMs = deadline - now()
+    if (remainingMs <= 0) return Math.max(0, now() - startedAt)
+    await wait(Math.ceil(remainingMs), options.signal)
+  }
 }
 
 /** Starts only when called; importing this helper does not create timers or subscriptions. */

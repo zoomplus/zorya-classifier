@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { channel } from 'node:diagnostics_channel'
+import { getEventListeners } from 'node:events'
 import { test } from 'node:test'
 
 import {
@@ -7,6 +8,7 @@ import {
   disposeInOrder,
   runMonotonicPhase,
   validateFullSoakDurations,
+  waitMonotonicDuration,
 } from '../benchmarks/v02/resource-runner.js'
 
 await test('resource runner captures parent and owned-child memory then observes zero owned children', () => {
@@ -71,6 +73,33 @@ await test('soak phases follow monotonic time when wall clock jumps', async () =
   assert.equal(report.observedDurationMs, 25)
   assert.ok(report.parentSamples.every((sample) => sample.timestampMs <= 25))
   assert.ok(report.phaseTransitions.every((phase) => phase.timestampMs <= 25))
+})
+
+await test('minimum monotonic wait retries early timers until the exact deadline', async () => {
+  let monotonicMs = 100
+  const requestedWaits: number[] = []
+  const earlyAdvances = [29_999.5, 1]
+  const elapsedMs = await waitMonotonicDuration(30_000, {
+    now: () => monotonicMs,
+    wait: async (waitMs) => {
+      requestedWaits.push(waitMs)
+      monotonicMs += earlyAdvances.shift() ?? waitMs
+    },
+  })
+
+  assert.deepEqual(requestedWaits, [30_000, 1])
+  assert.equal(elapsedMs, 30_000.5)
+  assert.ok(elapsedMs >= 30_000)
+})
+
+await test('minimum monotonic wait cancels its abortable timer and removes the signal listener', async () => {
+  const controller = new AbortController()
+  const wait = waitMonotonicDuration(60_000, { signal: controller.signal })
+  assert.equal(getEventListeners(controller.signal, 'abort').length, 1)
+
+  controller.abort(new Error('test cancellation'))
+  await assert.rejects(wait, { name: 'AbortError' })
+  assert.equal(getEventListeners(controller.signal, 'abort').length, 0)
 })
 
 await test('qualified resource runs enforce duration and cleanup requirements', async () => {

@@ -27,6 +27,7 @@ import {
   runMonotonicPhase,
   type ResourceReport,
   validateFullSoakDurations,
+  waitMonotonicDuration,
 } from './resource-runner.js'
 
 interface CliOptions {
@@ -1085,11 +1086,9 @@ async function main(): Promise<void> {
     resources.start()
     measurementStartedMonotonic = performance.now()
     measurementStartedAt = new Date().toISOString()
-    const idleBeforeStartedMonotonic = performance.now()
-    await delay(options.idleSeconds * 1000, undefined, { signal: controller.signal }).catch(
-      () => undefined,
-    )
-    idleBeforeDurationMs = performance.now() - idleBeforeStartedMonotonic
+    idleBeforeDurationMs = await waitMonotonicDuration(options.idleSeconds * 1000, {
+      signal: controller.signal,
+    })
     resources.setPhase('busy')
     busyStartedAt = new Date().toISOString()
     busyStartedMonotonic = performance.now()
@@ -1115,11 +1114,9 @@ async function main(): Promise<void> {
     )
     resources.setPhase('idle-after')
     idleAfterStartedAt = new Date().toISOString()
-    const idleAfterStartedMonotonic = performance.now()
-    await delay(options.idleSeconds * 1000, undefined, { signal: controller.signal }).catch(
-      () => undefined,
-    )
-    idleAfterDurationMs = performance.now() - idleAfterStartedMonotonic
+    idleAfterDurationMs = await waitMonotonicDuration(options.idleSeconds * 1000, {
+      signal: controller.signal,
+    })
   } catch (error) {
     phaseFailure = error
   } finally {
