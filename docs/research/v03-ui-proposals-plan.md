@@ -1,6 +1,6 @@
 # H4a UI proposal probe plan
 
-**Status:** frozen implementation and focused tests prepared; no model inference or provider calls yet. The single pinned detector asset has been staged outside the repository and SHA-256 verified. This benchmark-only probe tests candidate availability after H3 finishes. It does not establish UI detection accuracy or library suitability.
+**Status:** the frozen implementation and focused tests were prepared, then one detector-only pass was run after H3's miss gate. No provider calls or SAM refinement were made. The single pinned detector asset is staged outside the repository and SHA-256 verified. This screen does not establish UI detection accuracy or library suitability; see the [box-screen evidence](../../evidence/v03/ui-proposal-box-screen.md).
 
 ## Frozen source and model
 
