@@ -1,6 +1,6 @@
 # H9 prospective plan: target-blind mask facts and closed identity check
 
-**Status: proposal only. No implementation or provider dispatch is authorized by this document.** H8a Luna is the proposed baseline because it achieved the same 7/9 positive same-mask result and the same two false outputs as H8b Sol, at much lower observed cost. H8a stays immutable; H9 is a separately named recipe with separately frozen prompts and budget.
+**Status: accepted for implementation and a bounded development run under the owner's existing authorization, 2026-10-21.** The root reviewed the H8b audit and the primary sources before accepting this plan. Dispatch still requires the controlled-fetch checks and an executable source/prompt/input freeze described below. H8a Luna is the baseline because it achieved the same 7/9 positive same-mask result and the same two false outputs as H8b Sol, at much lower observed cost. H8a stays immutable; H9 is a separately named recipe with separately frozen prompts and budget.
 
 ## Hypothesis
 

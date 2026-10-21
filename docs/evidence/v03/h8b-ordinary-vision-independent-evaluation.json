@@ -23,10 +23,7 @@
       "model": "openai/gpt-6.1-sol",
       "provider": "openai",
       "endpoint": "/api/v1/chat/completions",
-      "modalities": [
-        "text",
-        "image"
-      ],
+      "modalities": ["text", "image"],
       "structuredOutputs": true,
       "inputUsdPerMillion": 2,
       "outputUsdPerMillion": 10
@@ -737,37 +734,23 @@
       "photo": {
         "denominator": 3,
         "successes": 3,
-        "cases": [
-          "pilot-v03-photo-01",
-          "pilot-v03-photo-02",
-          "pilot-v03-photo-03"
-        ]
+        "cases": ["pilot-v03-photo-01", "pilot-v03-photo-02", "pilot-v03-photo-03"]
       },
       "ui": {
         "denominator": 3,
         "successes": 3,
-        "cases": [
-          "pilot-v03-ui-01",
-          "pilot-v03-ui-02",
-          "pilot-v03-ui-03"
-        ]
+        "cases": ["pilot-v03-ui-01", "pilot-v03-ui-02", "pilot-v03-ui-03"]
       },
       "map": {
         "denominator": 3,
         "successes": 1,
-        "cases": [
-          "pilot-v03-map-03"
-        ]
+        "cases": ["pilot-v03-map-03"]
       }
     },
-    "generationLoss": [
-      "pilot-v03-map-02"
-    ],
+    "generationLoss": ["pilot-v03-map-02"],
     "presenceLoss": [],
     "nominationLoss": [],
-    "finalSelectionLoss": [
-      "pilot-v03-map-01"
-    ]
+    "finalSelectionLoss": ["pilot-v03-map-01"]
   },
   "negativeSummary": {
     "denominator": 3,
@@ -776,18 +759,10 @@
       "absent": 1,
       "uncertain": 0
     },
-    "falseAtPresence": [
-      "pilot-v03-photo-04",
-      "pilot-v03-ui-04"
-    ],
-    "correctTargetAbsent": [
-      "pilot-v03-map-04"
-    ],
+    "falseAtPresence": ["pilot-v03-photo-04", "pilot-v03-ui-04"],
+    "correctTargetAbsent": ["pilot-v03-map-04"],
     "uncertain": [],
-    "falseOutputs": [
-      "pilot-v03-photo-04",
-      "pilot-v03-ui-04"
-    ],
+    "falseOutputs": ["pilot-v03-photo-04", "pilot-v03-ui-04"],
     "errors": []
   },
   "rows": [
