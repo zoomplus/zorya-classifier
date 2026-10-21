@@ -5,6 +5,7 @@ import { resolve } from 'node:path'
 import test from 'node:test'
 import {
   evaluateH6ContextIdentity,
+  validateH6FreezeBudget,
   verifyH6DecisionTraceArtifacts,
   type H6CandidateRosterEntry,
   type H6ChoiceSelection,
@@ -25,6 +26,25 @@ const caseIds = [
 ]
 
 const digest = (symbol: string) => symbol.repeat(64)
+
+await test('H6 freeze budget reads the persisted per-call reserve field', () => {
+  assert.doesNotThrow(() =>
+    validateH6FreezeBudget({
+      max_physical_calls: 48,
+      max_cost_usd: 2,
+      unknown_reserve_usd_per_call: 0.1,
+    }),
+  )
+  assert.throws(
+    () =>
+      validateH6FreezeBudget({
+        max_physical_calls: 48,
+        max_cost_usd: 2,
+        unknown_reserve_usd: 0.1,
+      }),
+    /h6-freeze-budget/,
+  )
+})
 
 function truthFixture(): H5AvailabilityReport {
   const perCase = caseIds.map((caseId, index) => {

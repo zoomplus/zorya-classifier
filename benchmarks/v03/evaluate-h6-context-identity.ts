@@ -807,12 +807,7 @@ export async function verifyH6ReplayFreeze(
     'h6-freeze-h4e-run',
   )
   const budget = freeze.budget as Record<string, unknown> | undefined
-  assert(
-    budget?.max_physical_calls === 48 &&
-      budget.max_cost_usd === 2 &&
-      budget.unknown_reserve_usd === 0.1,
-    'h6-freeze-budget',
-  )
+  validateH6FreezeBudget(budget)
   const limits = freeze.limits as Record<string, unknown> | undefined
   assert(
     limits?.calls_per_case === 4 &&
@@ -842,6 +837,16 @@ export async function verifyH6ReplayFreeze(
     'h6-executable-source-closure-hash',
   )
   return { runSha256, freezeSha256, executableSourceSha256 }
+}
+
+/** Validate the persisted H6 freeze budget field names and fixed limits. */
+export function validateH6FreezeBudget(budget: Record<string, unknown> | undefined): void {
+  assert(
+    budget?.max_physical_calls === 48 &&
+      budget.max_cost_usd === 2 &&
+      budget.unknown_reserve_usd_per_call === 0.1,
+    'h6-freeze-budget',
+  )
 }
 
 export async function verifyH6PhysicalReceiptArtifacts(
