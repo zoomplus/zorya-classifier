@@ -46,6 +46,7 @@ export type H7Candidate = {
   source_mask_sha256: string
   crop_xyxy: [number, number, number, number] | null
   resize_geometry: {
+    crop_xyxy: [number, number, number, number]
     source_crop_size: [number, number]
     resized_size: [number, number]
     pad_ltrb: [number, number, number, number]
@@ -223,8 +224,7 @@ async function validateH7Inputs(
       typeof suppliedSourcePath === 'string' && suppliedSourcePath.length > 0,
       `h7-input-source-path-${caseId}`,
     )
-    const manifestRelative = expected.image.path.replace(/^benchmarks\/cache\/v02\/corpus\//, '')
-    const expectedPath = resolve(sourceRoot, manifestRelative)
+    const expectedPath = resolve(sourceRoot, expected.image.path)
     const actualPath = resolve(sourceRoot, suppliedSourcePath)
     const [expectedReal, actualReal] = await Promise.all([
       realpath(expectedPath),
@@ -364,6 +364,7 @@ function validateRow(row: H7Row, truth: H5AvailabilityReport['perCase'][number])
       const padLeft = Math.floor((512 - resizedWidth) / 2)
       const padTop = Math.floor((512 - resizedHeight) / 2)
       const expectedGeometry = {
+        crop_xyxy: expectedCrop,
         source_crop_size: [cropWidth, cropHeight],
         resized_size: [resizedWidth, resizedHeight],
         pad_ltrb: [padLeft, padTop, 512 - resizedWidth - padLeft, 512 - resizedHeight - padTop],

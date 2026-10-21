@@ -1,0 +1,18 @@
+{
+  "schema": "v03-h7-local-semantic-shadow-independent-audit-attempt-v1",
+  "attempt": 2,
+  "runDirectory": "/root/work/zorya-classifier-runs/v03/h7-local-semantic-shadow-68784862-79b2-4354-a592-dd4dd42f3ee8",
+  "freezeSha256": "5d24e2073fcefeebee3650b3fffdc7be9228b76c07a32795083015eb0026c966",
+  "runJsonSha256": "31ccd439108b49b25768c005b63c6f3061af78292861d2f4fd513076c1695d16",
+  "inputJsonSha256": "9d535169410e2679e42d560704f13317ee31407dbec593a73aca15732553ed7a",
+  "status": "evaluator-error-before-scoring",
+  "error": {
+    "code": "h7-resize-geometry-pilot-v03-photo-01-h3b-dino-sam2-C00",
+    "expected": "crop, source crop size, resized size, padding, output size",
+    "producerIncluded": "resize_geometry.crop_xyxy"
+  },
+  "cause": "The evaluator checked the crop at the candidate level and omitted the same crop tuple nested in the producer's resize_geometry object. The remaining computed transform values matched.",
+  "classification": "independent-evaluator-schema-comparison-defect",
+  "producerArtifactsChanged": false,
+  "qualityScoresComputed": false
+}

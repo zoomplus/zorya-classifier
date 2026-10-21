@@ -82,6 +82,7 @@ function fixture() {
         resize_geometry: failed
           ? null
           : {
+              crop_xyxy: [7, 7, 23, 23],
               source_crop_size: [16, 16],
               resized_size: [512, 512],
               pad_ltrb: [0, 0, 0, 0],
@@ -105,6 +106,7 @@ function fixture() {
         resize_geometry: failed
           ? null
           : {
+              crop_xyxy: [7, 7, 23, 23],
               source_crop_size: [16, 16],
               resized_size: [512, 512],
               pad_ltrb: [0, 0, 0, 0],
@@ -128,6 +130,7 @@ function fixture() {
         resize_geometry: failed
           ? null
           : {
+              crop_xyxy: [27, 9, 43, 25],
               source_crop_size: [16, 16],
               resized_size: [512, 512],
               pad_ltrb: [0, 0, 0, 0],
