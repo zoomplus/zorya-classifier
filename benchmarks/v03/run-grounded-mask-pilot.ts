@@ -28,6 +28,8 @@ import {
   type GroundedMaskCandidate,
   type GroundedMaskSelection,
 } from './grounded-mask-selector.js'
+import { createH3cVerifier, type H3cVerificationResult } from './h3c-verifier.js'
+import type { SegmentationBoxCheckResult } from '../../src/entities/segmentation-verification.js'
 
 // This isolated benchmark process loads one case at a time; keep libvips caches bounded.
 sharp.cache({ memory: 32, files: 0, items: 0 })
@@ -137,6 +139,8 @@ export interface GroundedMaskPilotOptions {
   /** Test hook. It does not change the default closed fixed cohort. */
   caseLimit?: number
   now?: () => number
+  /** Benchmark-only verifier choice. H3b remains the default frozen profile. */
+  verificationProfile?: 'h3b' | 'h3c'
 }
 
 interface LoadedCandidate extends GroundedMaskCandidate {
@@ -234,6 +238,7 @@ async function walkFiles(directory: string): Promise<string[]> {
 
 async function producerFreeze(
   root: string,
+  verificationProfile: 'h3b' | 'h3c' = 'h3b',
 ): Promise<{ sha256: string; files: Array<{ path: string; sha256: string }> }> {
   const src = (await walkFiles(join(root, 'src'))).map((path) => relative(root, path))
   const tracked = [
@@ -248,6 +253,7 @@ async function producerFreeze(
     'package-lock.json',
     'tsconfig.json',
   ]
+  if (verificationProfile === 'h3c') tracked.push('benchmarks/v03/h3c-verifier.ts')
   const files: Array<{ path: string; sha256: string }> = []
   for (const path of [...new Set(tracked)].sort()) {
     const fullPath = join(root, path)
@@ -549,6 +555,7 @@ async function runCase(
   outputDirectory: string,
   signal: AbortSignal,
   now: () => number,
+  verificationProfile: 'h3b' | 'h3c' = 'h3b',
 ): Promise<CaseResult> {
   const started = now()
   let selectedMaskData: Uint8Array | undefined
@@ -618,21 +625,31 @@ async function runCase(
     rgbaData = rgba.data
     const point = sourceWitness(selected.candidate.mask)
     const region = selected.candidate.box
-    const boxCheck = createSegmentationBoxCheck({
-      decision: boxCheckDecision(decision),
-      presentation: createSharpSegmentationBoxPresentation(),
-      imageState: createSharpRaster().imageState,
-    })
     const boxStarted = now()
-    const checked = await boxCheck.check({
-      image: { ...rgba, format: 'rgba8' },
-      region,
-      seedRegion: { left: point.x, top: point.y, width: 1, height: 1 },
-      roi: { left: 0, top: 0, width: input.image.width, height: input.image.height },
-      target: input.target,
-      exclusions: [],
-      signal,
-    })
+    const checked: H3cVerificationResult | SegmentationBoxCheckResult =
+      verificationProfile === 'h3c'
+        ? await createH3cVerifier({ decision, imageState: createSharpRaster().imageState }).verify({
+            image: { ...rgba, format: 'rgba8' },
+            mask: selected.candidate.mask,
+            box: region,
+            alias: selected.alias,
+            target: input.target,
+            exclusions: [],
+            signal,
+          })
+        : await createSegmentationBoxCheck({
+            decision: boxCheckDecision(decision),
+            presentation: createSharpSegmentationBoxPresentation(),
+            imageState: createSharpRaster().imageState,
+          }).check({
+            image: { ...rgba, format: 'rgba8' },
+            region,
+            seedRegion: { left: point.x, top: point.y, width: 1, height: 1 },
+            roi: { left: 0, top: 0, width: input.image.width, height: input.image.height },
+            target: input.target,
+            exclusions: [],
+            signal,
+          })
     const boxCheckElapsedMs = Math.max(0, now() - boxStarted)
     assertActive(signal)
     const maskPath = join(outputDirectory, `${input.caseId}-${selected.alias}-mask.png`)
@@ -649,7 +666,11 @@ async function runCase(
     let cutoutPath: string | null = null
     let cutoutSha256: string | null = null
     let cutoutElapsedMs: number | null = null
-    if (checked.verdict === 'complete') {
+    const isH3c = 'witness' in checked
+    const completes = isH3c
+      ? checked.verdict === 'match-complete-pure'
+      : checked.verdict === 'complete'
+    if (completes) {
       const cutoutStarted = now()
       const cutout = maskedRgba(
         { ...rgba, format: 'rgba8' },
@@ -674,7 +695,7 @@ async function runCase(
     assertActive(signal)
     return {
       caseId: input.caseId,
-      status: checked.verdict,
+      status: isH3c ? (completes ? 'complete' : 'unknown') : checked.verdict,
       target: input.target,
       sourceSha256: input.sourceSha256,
       candidateCount: input.candidates.length,
@@ -685,8 +706,10 @@ async function runCase(
         verdict: checked.verdict,
         selection: checked.selection,
         metadata: checked.metadata,
-        maskDerivedBox: checked.verdict === 'complete' ? region : null,
-        sourceWitness: { ...point, origin: 'selected-candidate-mask-foreground' },
+        maskDerivedBox: isH3c ? region : completes ? region : null,
+        sourceWitness: isH3c
+          ? checked.witness
+          : { ...point, origin: 'selected-candidate-mask-foreground' },
       },
       errorCode: null,
       elapsedMs: now() - started,
@@ -744,6 +767,7 @@ async function preflight(
   root: string,
   dataRoot: string,
   runDirectory: string,
+  verificationProfile: 'h3b' | 'h3c',
 ): Promise<{
   runHash: string
   closure: { sha256: string; files: Array<{ path: string; sha256: string }> }
@@ -754,7 +778,7 @@ async function preflight(
   const artifacts = loaded.nativeArtifacts
   return {
     runHash: await hashFile(join(runDirectory, 'run.json')),
-    closure: await producerFreeze(root),
+    closure: await producerFreeze(root, verificationProfile),
     artifacts,
     cases: loaded.cases,
   }
@@ -812,7 +836,12 @@ export async function runGroundedMaskPilot(
   const outputStat = await readdir(outputDirectory)
   if (outputStat.length !== 0)
     throw new ClassifierError('INVALID_INPUT', 'Pilot output directory must be empty')
-  const initial = await preflight(root, dataRoot, runDirectory)
+  const initial = await preflight(
+    root,
+    dataRoot,
+    runDirectory,
+    options.verificationProfile ?? 'h3b',
+  )
   try {
     const cases = initial.cases.slice(0, options.caseLimit ?? expectedIds.length)
     if (
@@ -847,7 +876,11 @@ export async function runGroundedMaskPilot(
         'Explicit dispatch requires the frozen 24-call / $2 budget',
       )
     const freezeRecord = {
-      schema: 'v03-grounded-mask-selection-freeze-v1',
+      schema:
+        options.verificationProfile === 'h3c'
+          ? 'v03-grounded-mask-h3c-freeze-v1'
+          : 'v03-grounded-mask-selection-freeze-v1',
+      ...(options.verificationProfile === 'h3c' ? { verificationProfile: 'h3c' } : {}),
       nativeRun: { path: join(runDirectory, 'run.json'), sha256: initial.runHash },
       producerClosure: initial.closure,
       nativeArtifacts: initial.artifacts,
@@ -886,7 +919,14 @@ export async function runGroundedMaskPilot(
         : AbortSignal.timeout(GROUNDED_MASK_CASE_DEADLINE_MS)
       try {
         const input = await loadCaseBuffers(descriptor, caseSignal)
-        row = await runCase(input, decision, outputDirectory, caseSignal, options.now ?? Date.now)
+        row = await runCase(
+          input,
+          decision,
+          outputDirectory,
+          caseSignal,
+          options.now ?? Date.now,
+          options.verificationProfile ?? 'h3b',
+        )
       } catch (error) {
         row = descriptorRow(
           descriptor,
@@ -926,14 +966,18 @@ export async function runGroundedMaskPilot(
         'RESOURCE_LIMIT',
         'Provider recorder still has unsettled physical calls',
       )
-    const finalClosure = await producerFreeze(root)
+    const finalClosure = await producerFreeze(root, options.verificationProfile ?? 'h3b')
     const runHash = await hashFile(join(runDirectory, 'run.json'))
     const finalArtifacts = await hashArtifacts(initial.artifacts)
     const artifactsMatched = finalArtifacts.every(
       (artifact, index) => artifact.sha256 === initial.artifacts[index]?.sha256,
     )
     const runRecord = {
-      schema: 'v03-grounded-mask-selection-pilot-v1',
+      schema:
+        options.verificationProfile === 'h3c'
+          ? 'v03-grounded-mask-h3c-pilot-v1'
+          : 'v03-grounded-mask-selection-pilot-v1',
+      ...(options.verificationProfile === 'h3c' ? { verificationProfile: 'h3c' } : {}),
       status:
         rows.some((row) => row.status === 'error') ||
         rows.length !== expectedIds.length ||
@@ -1025,6 +1069,9 @@ async function main(): Promise<void> {
   const root = resolve(String(args.root ?? process.cwd()))
   const output = resolve(String(args.output ?? join(root, '..', 'grounded-mask-pilot-dry-run')))
   const dispatch = args.dispatch === true
+  const verificationProfile = args.profile === undefined ? 'h3b' : args.profile
+  if (verificationProfile !== 'h3b' && verificationProfile !== 'h3c')
+    throw new ClassifierError('INVALID_INPUT', 'Profile must be h3b or h3c')
   let decision: DecisionPort | undefined
   let recorder: Recorder | undefined
   const budget = new RunBudget(24, 2, 0.05)
@@ -1061,6 +1108,7 @@ async function main(): Promise<void> {
     ...(decision ? { decision } : {}),
     ...(recorder ? { recorder } : {}),
     budget,
+    verificationProfile,
   })
   process.stdout.write(
     `${JSON.stringify({ runPath: result.runPath, rows: result.rows.length, statuses: result.rows.map((row) => row.status) })}\n`,

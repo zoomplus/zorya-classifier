@@ -1,6 +1,6 @@
 # H3b failure analysis and one H3c test
 
-**State: proposed DEV experiment only. No implementation, prompt dispatch, profile promotion, or accuracy claim.** H3b remains closed and immutable. The independent H3b evaluation is the authority for labels and metrics; visual reconstruction below diagnoses presentation and prompt shape, not ground truth.
+**State: benchmark-only verifier implemented and dry-run preflighted. No provider dispatch, profile promotion, or accuracy claim.** H3b remains closed and immutable. The independent H3b evaluation is the authority for labels and metrics; visual reconstruction below diagnoses presentation and prompt shape, not ground truth.
 
 ## Closed result and request reconstruction
 
