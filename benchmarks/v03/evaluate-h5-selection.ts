@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
-import { readFile, realpath } from 'node:fs/promises'
+import { lstat, readFile, realpath, writeFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
 import { isAbsolute, relative, resolve, sep } from 'node:path'
 import sharp from 'sharp'
 
@@ -8,6 +9,7 @@ const H5A_RUN_ROOT =
 const H3_NATIVE_ROOT = '/root/work/zorya-classifier/.run/v03/grounded-proposals-h3-run-02'
 const H4E_ROOT =
   '/root/work/zorya-classifier-worktrees/v03/segmentation-research/.run/v03/h4e-sam2-context-prompt-v1'
+const IMAGE_ROOT = '/root/work/zorya-classifier-worktrees/v02/corpus'
 const H5A_RUN_SHA256 = '86d0aab4f7fad3ce0fae182b840ddd540275309471b27cb091dc4e85866d56f0'
 const H5A_FREEZE_SHA256 = 'b808985a17b150c1adbc2467bd0df4797a3a6b242db2ba99b174c2fb0f9e6566'
 const CASE_IDS = [
@@ -44,46 +46,71 @@ export type H5AvailabilityReport = {
 
 export type H5CandidateRosterEntry = {
   family: H5Family
-  composerAlias: string
-  sourceFamily: SourceFamily
-  sourceAlias: string
-  candidateMaskSha256: string
-  sourceMaskPath: string
+  composer_alias: string
+  source_family: SourceFamily
+  source_alias: string
+  candidate_mask_sha256: string
+  source_mask_path: string
+  roster_ordinal: number
 }
 export type H5Nomination = {
   family: H5Family
-  topFour: string[]
-  nomineeAliases: string[]
+  top_four: string[]
+  nominee_aliases: string[]
 }
 export type H5ReplayRow = {
   case_id: string
-  status: 'located' | 'unknown' | 'error'
+  status: 'located' | 'unknown' | 'error' | 'timeout'
+  physical_call_count: number
+  logical_calls: unknown[]
   nominations: H5Nomination[]
-  candidateRoster: H5CandidateRosterEntry[]
-  family?: H5Family
-  composerAlias?: string
-  sourceFamily?: SourceFamily
-  sourceAlias?: string
-  candidateMaskSha256?: string
-  selectedMaskPath?: string
-  selectedMaskSha256?: string
-  errorCode?: string | null
+  candidate_roster: H5CandidateRosterEntry[]
+  selected_family?: H5Family | null
+  selected_alias?: string | null
+  source_family?: SourceFamily | null
+  source_alias?: string | null
+  candidate_mask_sha256?: string | null
+  selected_mask_path?: string | null
+  selected_mask_sha256?: string | null
+  error_code?: string | null
 }
 export type H5ReplayEnvelope = {
   schema: 'v03-h5b-paid-replay-run-v1'
   status: string
-  freezeMatched: boolean
   case_ids: string[]
-  h5a: { runSha256: string; freezeSha256: string }
-  budget: {
-    physicalCalls: number
-    knownCostUsd: number
-    unknownCostCalls: number
-    inFlightCalls: number
-    persistenceFailures: number
-    maxPhysicalCalls: number
-    maxCostUsd: number
+  route: {
+    model: string
+    provider: string
+    providerName: string
+    apiEndpoint: string
+    allowFallbacks: false
   }
+  h5a: { run_sha256: string; freeze_sha256: string }
+  source_closure: Array<{ path: string; sha256: string }>
+  budget: {
+    admitted_physical_calls: number
+    known_cost_usd: number
+    unknown_cost_calls: number
+    in_flight_calls: number
+    accounted_exposure_usd: number
+    max_physical_calls: number
+    max_cost_usd: number
+  }
+  physical_call_count: number
+  physical_calls: Array<{
+    route: {
+      model: string
+      provider: string
+      providerName: string
+      apiEndpoint: string
+      allowFallbacks: false
+    }
+    receipt: { costUsd: number | null } | null
+  }>
+  logical_call_count: number
+  logical_calls: unknown[]
+  executable_source: { sha256: string; files: Array<{ path: string; sha256: string }> }
+  executable_source_after: { sha256: string; files: Array<{ path: string; sha256: string }> }
   rows: H5ReplayRow[]
 }
 
@@ -143,29 +170,86 @@ export function evaluateH5Selection(
   assert(availability.gate.referenceCoverageAtLeast === 0.9, 'h5a-coverage-gate-changed')
   assert(availability.gate.sameCandidateAndReference, 'h5a-gate-instance-changed')
   assert(replay.schema === 'v03-h5b-paid-replay-run-v1', 'h5b-schema')
-  assert(replay.h5a.runSha256 === H5A_RUN_SHA256, 'h5b-h5a-run-lock')
-  assert(replay.h5a.freezeSha256 === H5A_FREEZE_SHA256, 'h5b-h5a-freeze-lock')
+  assert(replay.h5a.run_sha256 === H5A_RUN_SHA256, 'h5b-h5a-run-lock')
+  assert(replay.h5a.freeze_sha256 === H5A_FREEZE_SHA256, 'h5b-h5a-freeze-lock')
   assert(JSON.stringify(replay.case_ids) === JSON.stringify(CASE_IDS), 'h5b-case-order')
   assert(replay.rows.length === 12, 'h5b-row-count')
-  assert(replay.budget.physicalCalls <= replay.budget.maxPhysicalCalls, 'h5b-call-budget')
-  assert(replay.budget.maxPhysicalCalls <= 36, 'h5b-call-cap')
-  assert(replay.budget.knownCostUsd <= replay.budget.maxCostUsd, 'h5b-cost-budget')
-  assert(replay.budget.maxCostUsd <= 2, 'h5b-cost-cap')
+  assert(
+    replay.budget.admitted_physical_calls <= replay.budget.max_physical_calls,
+    'h5b-call-budget',
+  )
+  assert(replay.budget.max_physical_calls <= 36, 'h5b-call-cap')
+  assert(replay.budget.known_cost_usd <= replay.budget.max_cost_usd, 'h5b-cost-budget')
+  assert(replay.budget.max_cost_usd <= 2, 'h5b-cost-cap')
+  assert(replay.status === 'complete', 'h5b-run-incomplete')
+  assert(replay.physical_call_count <= 36, 'h5b-physical-call-cap')
+  assert(replay.budget.max_physical_calls === 36, 'h5b-call-budget-changed')
+  assert(replay.budget.max_cost_usd === 2, 'h5b-cost-budget-changed')
+  assert(replay.physical_call_count === replay.physical_calls.length, 'h5b-physical-call-count')
+  assert(
+    replay.budget.admitted_physical_calls === replay.physical_call_count,
+    'h5b-budget-call-count',
+  )
+  assert(replay.logical_call_count === replay.logical_calls.length, 'h5b-logical-call-count')
+  assert(
+    replay.route.model === 'openai/gpt-6-luna-decisions' &&
+      replay.route.provider === 'openai' &&
+      replay.route.providerName === 'OpenAI' &&
+      replay.route.apiEndpoint === '/api/alpha/decisions' &&
+      replay.route.allowFallbacks === false,
+    'h5b-route-changed',
+  )
+  for (const call of replay.physical_calls) {
+    assert(
+      call.route.model === replay.route.model &&
+        call.route.provider === replay.route.provider &&
+        call.route.providerName === replay.route.providerName &&
+        call.route.apiEndpoint === replay.route.apiEndpoint &&
+        call.route.allowFallbacks === false,
+      'h5b-physical-route-mismatch',
+    )
+  }
+  const knownReceiptCosts = replay.physical_calls.reduce(
+    (sum, call) => sum + (call.receipt?.costUsd ?? 0),
+    0,
+  )
+  const unknownReceiptCosts = replay.physical_calls.filter(
+    (call) => call.receipt?.costUsd == null,
+  ).length
+  assert(
+    Math.abs(knownReceiptCosts - replay.budget.known_cost_usd) <= 1e-9,
+    'h5b-receipt-cost-total-mismatch',
+  )
+  assert(
+    unknownReceiptCosts === replay.budget.unknown_cost_calls,
+    'h5b-unknown-cost-count-mismatch',
+  )
+  assert(replay.budget.accounted_exposure_usd <= 2, 'h5b-budget-exposure-cap')
 
   const truthByCase = new Map(availability.perCase.map((row) => [row.caseId, row]))
   assert(availability.perCase.length === 12, 'h5a-case-count')
   const replayByCase = new Map(replay.rows.map((row) => [row.case_id, row]))
   assert(replayByCase.size === 12, 'h5b-duplicate-case')
+  assert(
+    replay.rows.reduce((sum, row) => sum + row.physical_call_count, 0) ===
+      replay.physical_call_count,
+    'h5b-case-physical-call-count',
+  )
+  assert(
+    replay.rows.reduce((sum, row) => sum + row.logical_calls.length, 0) ===
+      replay.logical_call_count,
+    'h5b-case-logical-call-count',
+  )
   const rows: EvaluatedRow[] = CASE_IDS.map((caseId) => {
     const truth = truthByCase.get(caseId)
     const replayRow = replayByCase.get(caseId)
     assert(truth && replayRow, `h5b-case-missing-${caseId}`)
     const receipts = indexedReceipts(truth)
     const rosterByAlias = new Map(
-      replayRow.candidateRoster.map((entry) => [entry.composerAlias, entry]),
+      replayRow.candidate_roster.map((entry) => [entry.composer_alias, entry]),
     )
     assert(
-      rosterByAlias.size === replayRow.candidateRoster.length,
+      rosterByAlias.size === replayRow.candidate_roster.length,
       `h5b-roster-duplicate-${caseId}`,
     )
     const expectedRoster = [
@@ -176,30 +260,34 @@ export function evaluateH5Selection(
         .filter((item) => item.sourceFamily !== 'h3b-dino-sam2')
         .map((item) => ({ family: 'U' as const, item })),
     ]
-    assert(expectedRoster.length === replayRow.candidateRoster.length, `h5b-roster-count-${caseId}`)
+    assert(
+      expectedRoster.length === replayRow.candidate_roster.length,
+      `h5b-roster-count-${caseId}`,
+    )
     assert(expectedRoster.length <= 72, `h5b-total-candidate-cap-${caseId}`)
     const familyOrdinals = { D: 0, U: 0 }
     for (let index = 0; index < expectedRoster.length; index++) {
       const expected = expectedRoster[index]!
-      const entry = replayRow.candidateRoster[index]!
+      const entry = replayRow.candidate_roster[index]!
       const ordinal = familyOrdinals[expected.family]++
       assert(ordinal < 36, `h5b-family-candidate-cap-${caseId}`)
       assert(entry.family === expected.family, `h5b-roster-family-order-${caseId}-${index}`)
       assert(
-        entry.composerAlias === `${expected.family}${String(ordinal).padStart(2, '0')}`,
+        entry.roster_ordinal === index &&
+          entry.composer_alias === `${expected.family}${String(ordinal).padStart(2, '0')}`,
         `h5b-roster-alias-order-${caseId}-${index}`,
       )
       assert(
-        entry.sourceFamily === expected.item.sourceFamily &&
-          entry.sourceAlias === expected.item.sourceAlias &&
-          entry.candidateMaskSha256 === expected.item.maskSha256,
+        entry.source_family === expected.item.sourceFamily &&
+          entry.source_alias === expected.item.sourceAlias &&
+          entry.candidate_mask_sha256 === expected.item.maskSha256,
         `h5b-roster-source-mismatch-${caseId}-${index}`,
       )
     }
-    for (const entry of replayRow.candidateRoster) {
+    for (const entry of replayRow.candidate_roster) {
       assert(entry.family === 'D' || entry.family === 'U', `h5b-roster-family-${caseId}`)
-      assert(entry.composerAlias.length > 0, `h5b-roster-alias-${caseId}`)
-      assert(/^[a-f0-9]{64}$/u.test(entry.candidateMaskSha256), `h5b-roster-hash-${caseId}`)
+      assert(entry.composer_alias.length > 0, `h5b-roster-alias-${caseId}`)
+      assert(/^[a-f0-9]{64}$/u.test(entry.candidate_mask_sha256), `h5b-roster-hash-${caseId}`)
     }
     let nominatedAvailable = false
     for (const nomination of replayRow.nominations) {
@@ -207,17 +295,17 @@ export function evaluateH5Selection(
         nomination.family === 'D' || nomination.family === 'U',
         `h5b-nomination-family-${caseId}`,
       )
-      assert(nomination.topFour.length <= 4, `h5b-nomination-rank-cap-${caseId}`)
+      assert(nomination.top_four.length <= 4, `h5b-nomination-rank-cap-${caseId}`)
       assert(
-        new Set(nomination.topFour).size === nomination.topFour.length,
+        new Set(nomination.top_four).size === nomination.top_four.length,
         `h5b-nomination-rank-duplicate-${caseId}`,
       )
       assert(
-        JSON.stringify(nomination.nomineeAliases) ===
-          JSON.stringify(nomination.topFour.filter((alias) => alias !== 'none')),
+        JSON.stringify(nomination.nominee_aliases) ===
+          JSON.stringify(nomination.top_four.filter((alias) => alias !== 'none')),
         `h5b-nomination-alias-list-mismatch-${caseId}`,
       )
-      for (const alias of nomination.nomineeAliases) {
+      for (const alias of nomination.nominee_aliases) {
         const candidate = rosterByAlias.get(alias)
         assert(
           candidate && candidate.family === nomination.family,
@@ -225,9 +313,9 @@ export function evaluateH5Selection(
         )
         const reference = receipts.find(
           (item) =>
-            item.sourceFamily === candidate.sourceFamily &&
-            item.sourceAlias === candidate.sourceAlias &&
-            item.maskSha256 === candidate.candidateMaskSha256,
+            item.sourceFamily === candidate.source_family &&
+            item.sourceAlias === candidate.source_alias &&
+            item.maskSha256 === candidate.candidate_mask_sha256,
         )
         if (reference?.pass) nominatedAvailable = true
       }
@@ -240,39 +328,45 @@ export function evaluateH5Selection(
       assert(
         replayRow.nominations.some(
           (nomination) =>
-            nomination.family === replayRow.family &&
-            nomination.nomineeAliases.includes(replayRow.composerAlias ?? ''),
+            nomination.family === replayRow.selected_family &&
+            nomination.nominee_aliases.includes(replayRow.selected_alias ?? ''),
         ),
         `h5b-selected-not-nominated-${caseId}`,
       )
-      const candidate = replayRow.candidateRoster.find(
+      const candidate = replayRow.candidate_roster.find(
         (entry) =>
-          entry.family === replayRow.family &&
-          entry.composerAlias === replayRow.composerAlias &&
-          entry.sourceFamily === replayRow.sourceFamily &&
-          entry.sourceAlias === replayRow.sourceAlias &&
-          entry.candidateMaskSha256 === replayRow.candidateMaskSha256,
+          entry.family === replayRow.selected_family &&
+          entry.composer_alias === replayRow.selected_alias &&
+          entry.source_family === replayRow.source_family &&
+          entry.source_alias === replayRow.source_alias &&
+          entry.candidate_mask_sha256 === replayRow.candidate_mask_sha256,
       )
       assert(candidate, `h5b-selected-roster-mismatch-${caseId}`)
       const reference = receipts.find(
         (item) =>
-          item.sourceFamily === candidate.sourceFamily &&
-          item.sourceAlias === candidate.sourceAlias &&
-          item.maskSha256 === candidate.candidateMaskSha256,
+          item.sourceFamily === candidate.source_family &&
+          item.sourceAlias === candidate.source_alias &&
+          item.maskSha256 === candidate.candidate_mask_sha256,
       )
       selectedSameMaskPass = reference?.pass === true
       selectedMaskArtifactValid = verifiedSelectedMaskRows.has(caseId)
       assert(
-        replayRow.selectedMaskPath && replayRow.selectedMaskSha256,
+        replayRow.selected_mask_path && replayRow.selected_mask_sha256,
         `h5b-selected-mask-missing-${caseId}`,
       )
       assert(
-        /^[a-f0-9]{64}$/u.test(replayRow.selectedMaskSha256),
+        /^[a-f0-9]{64}$/u.test(replayRow.selected_mask_sha256),
         `h5b-selected-mask-hash-${caseId}`,
       )
     } else {
       assert(
-        !replayRow.selectedMaskPath && !replayRow.selectedMaskSha256,
+        !replayRow.selected_alias &&
+          !replayRow.selected_family &&
+          !replayRow.source_family &&
+          !replayRow.source_alias &&
+          !replayRow.candidate_mask_sha256 &&
+          !replayRow.selected_mask_path &&
+          !replayRow.selected_mask_sha256,
         `h5b-nonlocated-has-selected-mask-${caseId}`,
       )
     }
@@ -288,7 +382,7 @@ export function evaluateH5Selection(
       selectedMaskArtifactValid,
       selected,
       correctNegativeUnknown,
-      errorCode: replayRow.errorCode ?? null,
+      errorCode: replayRow.error_code ?? null,
     }
   })
 
@@ -298,14 +392,16 @@ export function evaluateH5Selection(
     schema: 'v03-h5b-independent-selection-evaluation-v1',
     production: {
       status: replay.status,
-      freezeMatched: replay.freezeMatched,
-      h5aRunSha256: replay.h5a.runSha256,
-      h5aFreezeSha256: replay.h5a.freezeSha256,
+      h5aRunSha256: replay.h5a.run_sha256,
+      h5aFreezeSha256: replay.h5a.freeze_sha256,
       budget: replay.budget,
+      physicalCallCount: replay.physical_call_count,
+      logicalCallCount: replay.logical_call_count,
       budgetCountersClean:
-        replay.budget.unknownCostCalls === 0 &&
-        replay.budget.inFlightCalls === 0 &&
-        replay.budget.persistenceFailures === 0,
+        replay.budget.unknown_cost_calls === 0 &&
+        replay.budget.in_flight_calls === 0 &&
+        replay.budget.admitted_physical_calls === replay.physical_call_count &&
+        replay.physical_calls.length === replay.physical_call_count,
       closureInterpretation:
         'semantic adapter does not independently verify producer closure receipts',
     },
@@ -385,6 +481,163 @@ export async function assertSameBinaryMask(
   )
 }
 
+export async function verifyH5bSourceClosure(replay: H5ReplayEnvelope) {
+  const roots = await Promise.all(
+    [H5A_RUN_ROOT, H3_NATIVE_ROOT, H4E_ROOT, IMAGE_ROOT].map((path) => realpath(path)),
+  )
+  const seen = new Set<string>()
+  for (const receipt of replay.source_closure) {
+    assert(isAbsolute(receipt.path), 'h5b-closure-path-not-absolute')
+    assert(/^[a-f0-9]{64}$/u.test(receipt.sha256), 'h5b-closure-hash-format')
+    const actualPath = await realpath(receipt.path)
+    assert(
+      roots.some((root) => {
+        const part = relative(root, actualPath)
+        return part === '' || (part !== '..' && !part.startsWith(`..${sep}`) && !isAbsolute(part))
+      }),
+      'h5b-closure-path-outside-frozen-inputs',
+    )
+    const actualHash = await sha256(actualPath)
+    assert(actualHash === receipt.sha256, `h5b-closure-hash-mismatch-${receipt.path}`)
+    const key = `${actualPath}:${receipt.sha256}`
+    assert(!seen.has(key), 'h5b-closure-duplicate')
+    seen.add(key)
+  }
+  for (const [path, expected] of [
+    [resolve(H5A_RUN_ROOT, 'run.json'), H5A_RUN_SHA256],
+    [resolve(H5A_RUN_ROOT, 'freeze.json'), H5A_FREEZE_SHA256],
+    [
+      resolve(H5A_RUN_ROOT, 'postrun-integrity.json'),
+      '43b6502dae3a0303a4700cc9692e1cb59a618fa645a110cfd40474f1a4825f50',
+    ],
+    [
+      resolve(H5A_RUN_ROOT, 'worker-closure.json'),
+      'd899e970aee5e893e1d0bcac97eefe6b15831936c6d6bb20723e95942293a76f',
+    ],
+  ] as const) {
+    assert(seen.has(`${await realpath(path)}:${expected}`), 'h5b-required-h5a-closure-missing')
+  }
+  for (const row of replay.rows) {
+    for (const candidate of row.candidate_roster) {
+      assert(!isAbsolute(candidate.source_mask_path), 'h5b-source-mask-path-absolute')
+      const sourcePath = await realpath(resolve(H5A_RUN_ROOT, candidate.source_mask_path))
+      assert(
+        seen.has(`${sourcePath}:${candidate.candidate_mask_sha256}`),
+        `h5b-roster-source-missing-from-closure-${row.case_id}-${candidate.composer_alias}`,
+      )
+    }
+  }
+  return { verifiedFiles: seen.size, status: 'verified' as const }
+}
+
+export async function verifyH5bReplayFreeze(
+  runRoot: string,
+  repositoryRoot: string,
+  replay: H5ReplayEnvelope,
+) {
+  const root = await realpath(runRoot)
+  const repository = await realpath(repositoryRoot)
+  const freezePath = resolve(root, 'freeze.json')
+  const freezeRaw = await readFile(freezePath)
+  const freezeSha256 = createHash('sha256').update(freezeRaw).digest('hex')
+  const freeze = JSON.parse(freezeRaw.toString('utf8')) as Record<string, unknown>
+  const runRaw = await readFile(resolve(root, 'run.json'))
+  const runSha256 = createHash('sha256').update(runRaw).digest('hex')
+  const onDiskRun = JSON.parse(runRaw.toString('utf8')) as H5ReplayEnvelope
+  assert(JSON.stringify(onDiskRun) === JSON.stringify(replay), 'h5b-run-object-differs-from-disk')
+  assert(freeze.schema === 'v03-h5b-paid-replay-freeze-v1', 'h5b-freeze-schema')
+  assert(freeze.status === 'frozen-before-replay', 'h5b-freeze-status')
+  assert(JSON.stringify(freeze.case_ids) === JSON.stringify(CASE_IDS), 'h5b-freeze-case-order')
+  assert(JSON.stringify(freeze.route) === JSON.stringify(replay.route), 'h5b-freeze-route-mismatch')
+  assert(
+    JSON.stringify(freeze.source_closure) === JSON.stringify(replay.source_closure),
+    'h5b-freeze-source-closure-mismatch',
+  )
+  const frozenH5a = freeze.h5a as Record<string, unknown> | undefined
+  assert(frozenH5a?.run_sha256 === H5A_RUN_SHA256, 'h5b-freeze-h5a-run')
+  assert(frozenH5a.freeze_sha256 === H5A_FREEZE_SHA256, 'h5b-freeze-h5a-freeze')
+  assert(
+    frozenH5a.postrun_integrity_sha256 ===
+      '43b6502dae3a0303a4700cc9692e1cb59a618fa645a110cfd40474f1a4825f50',
+    'h5b-freeze-h5a-integrity',
+  )
+  assert(
+    frozenH5a.worker_closure_sha256 ===
+      'd899e970aee5e893e1d0bcac97eefe6b15831936c6d6bb20723e95942293a76f',
+    'h5b-freeze-h5a-worker-closure',
+  )
+  const budget = freeze.budget as Record<string, unknown> | undefined
+  assert(budget?.max_physical_calls === 36 && budget.max_cost_usd === 2, 'h5b-freeze-budget')
+  assert(budget.unknown_reserve_usd === 0.1, 'h5b-freeze-unknown-reserve')
+  const limits = freeze.limits as Record<string, unknown> | undefined
+  assert(
+    limits?.calls_per_case === 3 &&
+      limits.total_calls === 36 &&
+      limits.image_parts_per_nomination === 7 &&
+      limits.final_image_parts === 9 &&
+      limits.images_per_case_deadline_ms === 240_000,
+    'h5b-freeze-limits',
+  )
+  const executable = freeze.executable_source as
+    | {
+        sha256?: unknown
+        files?: Array<{ path: string; sha256: string }>
+      }
+    | undefined
+  assert(executable?.sha256 === replay.executable_source.sha256, 'h5b-freeze-executable-source')
+  assert(
+    JSON.stringify(executable.files) === JSON.stringify(replay.executable_source.files),
+    'h5b-executable-files-differ',
+  )
+  assert(
+    replay.executable_source_after.sha256 === replay.executable_source.sha256 &&
+      JSON.stringify(replay.executable_source_after.files) ===
+        JSON.stringify(replay.executable_source.files),
+    'h5b-executable-source-changed-during-run',
+  )
+  const sourceFiles = replay.executable_source.files
+  assert(sourceFiles.length > 0, 'h5b-executable-source-empty')
+  const sourcePaths = new Set(sourceFiles.map((entry) => entry.path))
+  for (const required of [
+    'benchmarks/v03/run-h5b-paid-replay.ts',
+    'benchmarks/v03/h5-proposal-composer.ts',
+    'benchmarks/v03/replay-source-closure.ts',
+    'benchmarks/v02/recording.ts',
+    'benchmarks/v02/budget.ts',
+    'benchmarks/v02/protocol.ts',
+    'package.json',
+    'package-lock.json',
+    'tsconfig.json',
+    'tsconfig.build.json',
+  ])
+    assert(sourcePaths.has(required), `h5b-executable-source-file-missing-${required}`)
+  const sourceDigests: string[] = []
+  for (const entry of sourceFiles) {
+    assert(!isAbsolute(entry.path), 'h5b-executable-source-path-absolute')
+    assert(/^[a-f0-9]{64}$/u.test(entry.sha256), 'h5b-executable-source-hash-format')
+    const path = resolve(repository, entry.path)
+    const part = relative(repository, path)
+    assert(
+      part && part !== '..' && !part.startsWith(`..${sep}`),
+      'h5b-executable-source-path-escape',
+    )
+    assert((await realpath(path)) === path, 'h5b-executable-source-symlink')
+    const stat = await lstat(path)
+    assert(stat.isFile() && !stat.isSymbolicLink(), 'h5b-executable-source-not-file')
+    sourceDigests.push(await sha256(path))
+  }
+  assert(
+    sourceDigests.every((digest, index) => digest === sourceFiles[index]?.sha256),
+    'h5b-executable-source-hash-mismatch',
+  )
+  assert(
+    createHash('sha256').update(JSON.stringify(sourceFiles)).digest('hex') ===
+      replay.executable_source.sha256,
+    'h5b-executable-source-closure-hash',
+  )
+  return { runSha256, freezeSha256, executableSourceSha256: replay.executable_source.sha256 }
+}
+
 export async function verifySelectedMaskArtifacts(
   runRoot: string,
   replay: H5ReplayEnvelope,
@@ -395,19 +648,19 @@ export async function verifySelectedMaskArtifacts(
   const verified = new Set<string>()
   for (const row of replay.rows) {
     if (row.status !== 'located') continue
-    const selected = row.candidateRoster.find(
+    const selected = row.candidate_roster.find(
       (item) =>
-        item.family === row.family &&
-        item.composerAlias === row.composerAlias &&
-        item.sourceFamily === row.sourceFamily &&
-        item.sourceAlias === row.sourceAlias &&
-        item.candidateMaskSha256 === row.candidateMaskSha256,
+        item.family === row.selected_family &&
+        item.composer_alias === row.selected_alias &&
+        item.source_family === row.source_family &&
+        item.source_alias === row.source_alias &&
+        item.candidate_mask_sha256 === row.candidate_mask_sha256,
     )
     assert(selected, `h5b-selected-source-missing-${row.case_id}`)
-    assert(!isAbsolute(selected.sourceMaskPath), 'h5b-source-mask-path-absolute')
-    assert(!isAbsolute(row.selectedMaskPath ?? ''), 'h5b-output-mask-path-absolute')
-    const sourcePath = resolve(sourceRoot, selected.sourceMaskPath)
-    const outputPath = resolve(root, row.selectedMaskPath ?? '')
+    assert(!isAbsolute(selected.source_mask_path), 'h5b-source-mask-path-absolute')
+    assert(!isAbsolute(row.selected_mask_path ?? ''), 'h5b-output-mask-path-absolute')
+    const sourcePath = resolve(sourceRoot, selected.source_mask_path)
+    const outputPath = resolve(root, row.selected_mask_path ?? '')
     for (const [base, candidate] of [[root, outputPath]] as const) {
       const part = relative(base, candidate)
       assert(part && part !== '..' && !part.startsWith(`..${sep}`), 'h5b-mask-path-escape')
@@ -435,12 +688,71 @@ export async function verifySelectedMaskArtifacts(
     await assertSameBinaryMask(
       sourcePathActual,
       outputPathActual,
-      selected.candidateMaskSha256,
-      row.selectedMaskSha256 ?? '',
+      selected.candidate_mask_sha256,
+      row.selected_mask_sha256 ?? '',
       availabilityCase.sourceDimensions.width,
       availabilityCase.sourceDimensions.height,
     )
     verified.add(row.case_id)
   }
   return verified
+}
+
+export async function evaluateH5SelectionRun(
+  runRoot: string,
+  repositoryRoot: string,
+  availability: H5AvailabilityReport,
+) {
+  const absoluteRunRoot = resolve(runRoot)
+  const replay = JSON.parse(
+    await readFile(resolve(absoluteRunRoot, 'run.json'), 'utf8'),
+  ) as H5ReplayEnvelope
+  const runIdentity = await verifyH5bReplayFreeze(absoluteRunRoot, repositoryRoot, replay)
+  const sourceClosure = await verifyH5bSourceClosure(replay)
+  const selectedMasks = await verifySelectedMaskArtifacts(absoluteRunRoot, replay, availability)
+  const scored = evaluateH5Selection(availability, replay, selectedMasks)
+  return {
+    ...scored,
+    production: {
+      ...scored.production,
+      ...runIdentity,
+      sourceClosure,
+      selectedMaskArtifactsVerified: selectedMasks.size,
+      selectedMaskArtifactsExpected: replay.rows.filter((row) => row.status === 'located').length,
+      budgetCountersClean:
+        replay.budget.unknown_cost_calls === 0 && replay.budget.in_flight_calls === 0,
+      physicalReceiptsComplete:
+        replay.physical_calls.length === replay.physical_call_count &&
+        replay.physical_call_count === replay.budget.admitted_physical_calls,
+      freezeAndExecutableClosureVerified: true,
+    },
+  }
+}
+
+async function main() {
+  const [runRoot, repositoryRoot, outputPath] = process.argv.slice(2)
+  assert(
+    runRoot && repositoryRoot && outputPath,
+    'usage: evaluate-h5-selection <run-root> <runner-repository-root> <output-json>',
+  )
+  const availabilityPath = resolve(
+    process.cwd(),
+    'docs/evidence/v03/h5a-native-proposal-availability-evaluation.json',
+  )
+  const availability = JSON.parse(await readFile(availabilityPath, 'utf8')) as H5AvailabilityReport
+  const result = await evaluateH5SelectionRun(runRoot, repositoryRoot, availability)
+  await writeFile(resolve(outputPath), `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' })
+  process.stdout.write(
+    `${JSON.stringify({
+      schema: result.schema,
+      production: result.production,
+      positiveSummary: result.positiveSummary,
+      negativeSummary: result.negativeSummary,
+      outputPath: resolve(outputPath),
+    })}\n`,
+  )
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await main()
 }

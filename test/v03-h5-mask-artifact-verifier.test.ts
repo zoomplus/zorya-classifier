@@ -71,3 +71,74 @@ for (const fixture of fixtures) {
     },
   )
 }
+
+await test('selected-mask verifier normalizes grayscale/RGB and rejects color or alpha artifacts', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v03-h5-mask-synthetic-'))
+  const width = 4
+  const height = 2
+  const gray = Uint8Array.from([0, 255, 0, 255, 255, 0, 255, 0])
+  const rgb = Uint8Array.from(Array.from(gray).flatMap((value) => [value, value, value]))
+  const sourcePath = join(directory, 'rgb-mask.png')
+  const outputPath = join(directory, 'gray-mask.png')
+  try {
+    await sharp(rgb, { raw: { width, height, channels: 3 } })
+      .png()
+      .toFile(sourcePath)
+    await sharp(gray, { raw: { width, height, channels: 1 } })
+      .png()
+      .toFile(outputPath)
+    const hash = async (path: string) =>
+      createHash('sha256')
+        .update(await readFile(path))
+        .digest('hex')
+    await assertSameBinaryMask(
+      sourcePath,
+      outputPath,
+      await hash(sourcePath),
+      await hash(outputPath),
+      width,
+      height,
+    )
+
+    const colored = Uint8Array.from(rgb)
+    colored[0] = 255
+    colored[1] = 0
+    colored[2] = 0
+    const coloredPath = join(directory, 'colored-mask.png')
+    await sharp(colored, { raw: { width, height, channels: 3 } })
+      .png()
+      .toFile(coloredPath)
+    await assert.rejects(
+      assertSameBinaryMask(
+        sourcePath,
+        coloredPath,
+        await hash(sourcePath),
+        await hash(coloredPath),
+        width,
+        height,
+      ),
+      /color-channels-disagree/u,
+    )
+
+    const rgba = Uint8Array.from(
+      Array.from(gray).flatMap((value, index) => [value, value, value, index === 0 ? 128 : 255]),
+    )
+    const alphaPath = join(directory, 'transparent-mask.png')
+    await sharp(rgba, { raw: { width, height, channels: 4 } })
+      .png()
+      .toFile(alphaPath)
+    await assert.rejects(
+      assertSameBinaryMask(
+        sourcePath,
+        alphaPath,
+        await hash(sourcePath),
+        await hash(alphaPath),
+        width,
+        height,
+      ),
+      /mask-not-opaque/u,
+    )
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
