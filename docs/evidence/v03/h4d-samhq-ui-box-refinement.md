@@ -16,16 +16,18 @@ The source is a controlled Geany screenshot with styled colored button borders. 
 
 After producer closure, the evaluator matched masks to the exposed positive query boxes. The predeclared gate requires **both** mask-bounds IoU >= 0.50 and target coverage >= 0.90 on the same candidate. It found 0/3 positives passing. For each positive, ordinal 1 was the maximum-IoU candidate; the listed coverage is measured on that same candidate/reference pair:
 
-| Fixed positive query | Maximum-IoU candidate | IoU | Target coverage | Gate |
-| --- | ---: | ---: | ---: | --- |
-| `pilot-v03-ui-01` | 1 | 0.0029884 | 1.0000 | Fail |
-| `pilot-v03-ui-02` | 1 | 0.0029884 | 1.0000 | Fail |
-| `pilot-v03-ui-03` | 1 | 0.0029077 | 1.0000 | Fail |
+| Fixed positive query | Maximum-IoU candidate |       IoU | Target coverage | Gate |
+| -------------------- | --------------------: | --------: | --------------: | ---- |
+| `pilot-v03-ui-01`    |                     1 | 0.0029884 |          1.0000 | Fail |
+| `pilot-v03-ui-02`    |                     1 | 0.0029884 |          1.0000 | Fail |
+| `pilot-v03-ui-03`    |                     1 | 0.0029077 |          1.0000 | Fail |
 
 These maximum scores are oracle diagnostics from the independent evaluator and must not be interpreted as a production ranking or selection policy. UI-04 was the absent-target case; 36 masks were produced, but this availability-only evaluation did not judge semantic false positives. No pixel-mask annotations were available, so this does not measure segmentation quality. The result is limited to one controlled screenshot and three positive query boxes.
 
-The independent evaluation receipt is `docs/research/v03-h4d-samhq-ui-mask-availability-evaluation.json`; its frozen hash and audit artifact will be recorded here when the evaluator finalizes the report.
+The [independent evaluation receipt](../../research/v03-h4d-samhq-ui-mask-availability-evaluation.json) has SHA-256 `cb466d88c88f8d27bd58bacc4903211e06ab399de62f7bca17cdefd386606798`. Its [audit](../../research/v03-h4d-samhq-ui-mask-availability-audit.md) confirms the artifact integrity and geometry measurements.
 
 ## Interpretation
 
 H4d's sequential decoding solved the batched recipe's memory failure, but the masks did not yield useful candidate boxes under the unchanged gate. It underperformed the H4c SAM2 screen on the same frozen proposals. Preserve this as a negative feasibility result for this model/prompt recipe; do not promote it as an accuracy result or tune it against these three labels.
+
+The very large mask extents also require a technical diagnostic before attributing failure to SAM-HQ itself. Compare ordinary and cached-embedding forward paths on the same non-oracle prompt and inspect finite raw logits, processor geometry and the pinned implementation. The present report establishes the behavior of this executed recipe, not that the underlying model intrinsically cannot segment icons. Preserve both runs during diagnosis.

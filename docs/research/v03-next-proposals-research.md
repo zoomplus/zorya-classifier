@@ -24,6 +24,14 @@ The first test would be candidate availability and timing on the fixed DEV12, wi
 
 ## Alternatives not selected yet
 
+### H4e: context around detector box prompts
+
+If HQ boundary decoding also plateaus, test one fixed context expansion of the **input prompt**, not the output box. H4a proposals can sit slightly inside the visible object; a box-conditioned model may treat that smaller extent as its intended foreground. The [SAM paper](https://arxiv.org/abs/2304.02643) establishes prompt-conditioned segmentation. [The three-prompt-mode study](https://arxiv.org/abs/2305.00035) reports sensitivity to box perturbations on medical images; its domain and scores do not establish a UI gain. The concrete hypothesis here is that exposing a wider prompt extent may let a segmenter include a visible border it previously excluded.
+
+Before any implementation, freeze a separate H4e protocol: same 36 H4a proposals/order/source and pinned SAM2-Tiny; expand each input box by 25% of its own width/height on each side, clipped to the actual source. This reuses the already chosen context fraction from the H3b presentation; do not search padding values against truth. One full-source embedding, one sole mask per prompt, unchanged binary threshold, no point prompts or per-target exceptions. Preserve both original and expanded prompts. Derive final boxes only from actual output foreground pixels, with no artificial rectangle growth, union with the old box, or filled margins. Retain every empty/error result and compare independently with H4c under the same gate. This is a prompt-sensitivity experiment, not a claim that a larger prompt is always better; nearby controls may merge and reduce correctness. The frozen original run remains the control and is never overwritten.
+
+This is conditional research only; no H4e model run has occurred. Prefer the already running H3b/H4d experiments before spending more effort on boundary alternatives.
+
 [FastSAM](https://github.com/CASIA-LMC-Lab/FastSAM) documents efficient whole-image proposals and point/box/text selection. Its reported speed is measured on another GPU and corpus, and the repository currently carries AGPL-3.0 terms. It is not being bundled into this MIT package. Any isolated comparison would need explicit dependency/license accounting and would not change the package's license silently.
 
 [Semantic-SAM](https://github.com/UX-Decoder/Semantic-SAM) supports multiple segmentation granularities, which is relevant to the object-versus-part failure. Its released setup adds a separate Detectron2 stack and checkpoints. It is deferred while the much smaller semantic selection change and the existing H3 environment are being measured. Merely adding a larger model is not evidence of improvement.

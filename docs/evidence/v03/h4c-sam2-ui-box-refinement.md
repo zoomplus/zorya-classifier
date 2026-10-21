@@ -17,14 +17,14 @@ The frozen producer receipts are ignored `.run/v03/h4c-sam2-ui-box-refinement-v1
 
 After the producer masks and receipts were frozen, the evaluator independently joined them to the exposed labels. It applied the predeclared H4a box-availability rule to mask-derived bounds: IoU at least `0.50` and target coverage at least `0.90` on the same candidate.
 
-| Fixed query | Candidate availability result |
-| --- | --- |
-| `pilot-v03-ui-01` (positive) | Pass; best-IoU candidate ordinal 13 has IoU and target coverage `0.9029484` |
-| `pilot-v03-ui-02` (positive) | Fail; best-IoU candidate ordinal 14 has IoU and target coverage `0.8814496` |
-| `pilot-v03-ui-03` (positive) | Fail; best-IoU candidate ordinal 19 has IoU and target coverage `0.8800505` |
-| `pilot-v03-ui-04` (absent target) | 36 nonempty proposals; no semantic false-positive decision was measured |
+| Fixed query                       | Candidate availability result                                               |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| `pilot-v03-ui-01` (positive)      | Pass; best-IoU candidate ordinal 13 has IoU and target coverage `0.9029484` |
+| `pilot-v03-ui-02` (positive)      | Fail; best-IoU candidate ordinal 14 has IoU and target coverage `0.8814496` |
+| `pilot-v03-ui-03` (positive)      | Fail; best-IoU candidate ordinal 19 has IoU and target coverage `0.8800505` |
+| `pilot-v03-ui-04` (absent target) | 36 nonempty proposals; no semantic false-positive decision was measured     |
 
-The result is **1/3 positive cases meeting the fixed candidate-box gate**, compared with H4a's **0/3** raw-box availability on the same image. Per case, the highest-IoU mask-derived candidate is also the highest-coverage candidate because each query has one reference box; the pass requires both thresholds on that same candidate. This is only a candidate-availability result: the best mask was selected by the evaluator using exposed truth for measurement, not by a production selector. No pixel-mask reference annotations were available, so this run does not score pixel-level segmentation quality. The absent-target row does not measure a semantic false-positive rate.
+The result is **1/3 positive cases meeting the fixed candidate-box gate**, compared with H4a's **0/3** raw-box availability on the same image. Both thresholds must hold for the same candidate and reference instance; a high coverage value alone is insufficient. This is only a candidate-availability result: the best mask was selected by the evaluator using exposed truth for measurement, not by a production selector. No pixel-mask reference annotations were available, so this run does not score pixel-level segmentation quality. The absent-target row does not measure a semantic false-positive rate. The [independent evaluator report](../../research/v03-h4c-sam2-ui-evaluation.json), SHA-256 `48967c60222a2f61e318ca790a6d09cd2b6e91121c29cb19444882036ef5c1fd`, binds these metrics to the frozen run and freeze hashes.
 
 ## Interpretation and limits
 
