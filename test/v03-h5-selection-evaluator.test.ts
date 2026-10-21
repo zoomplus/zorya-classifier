@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import test from 'node:test'
 import {
   evaluateH5Selection,
+  verifyH5bPhysicalReceiptArtifacts,
   type H5AvailabilityReport,
   type H5ReplayEnvelope,
 } from '../benchmarks/v03/evaluate-h5-selection.js'
@@ -167,4 +171,79 @@ await test('H5 selected output must match a closed candidate roster entry', () =
     () => evaluateH5Selection(availability, replay, new Set(['pilot-v03-photo-01'])),
     /selected-roster-mismatch/u,
   )
+})
+
+await test('H5 physical receipt audit requires provider-call files to match the run ledger', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v03-h5b-provider-receipts-'))
+  const providerDirectory = join(directory, 'provider-calls')
+  await mkdir(providerDirectory)
+  try {
+    const { replay } = fixture()
+    const route = replay.route
+    const physical = {
+      physicalId: 1,
+      reservationId: 1,
+      logicalId: 1,
+      requestSha256: digest('1'),
+      requestBodySha256: digest('2'),
+      admittedAt: '2026-10-21T00:00:00.000Z',
+      durationMs: 123,
+      dispatched: true,
+      httpStatus: 200,
+      wireReceipt: { responseId: 'req-1', usageCostUsd: 0.01 },
+      route,
+      receipt: {
+        model: 'openai/gpt-6-luna-decisions',
+        provider: 'OpenAI',
+        requestId: 'req-1',
+        costUsd: 0.01,
+        durationMs: 124,
+        attempts: 1,
+      },
+    }
+    replay.physical_call_count = 1
+    replay.physical_calls = [physical]
+    replay.logical_call_count = 1
+    replay.logical_calls = [
+      { logicalId: 1, requestSha256: physical.requestSha256, physicalIds: [1] },
+    ]
+    replay.budget.admitted_physical_calls = 1
+    replay.budget.known_cost_usd = 0.01
+    replay.rows[0]!.physical_call_count = 1
+    const writeJson = (name: string, value: unknown) =>
+      writeFile(join(providerDirectory, name), `${JSON.stringify(value, null, 2)}\n`)
+    await Promise.all([
+      writeJson('physical-admission-1.json', {
+        physicalId: physical.physicalId,
+        logicalId: physical.logicalId,
+        admittedAt: physical.admittedAt,
+        dispatched: true,
+        requestSha256: physical.requestSha256,
+        requestBodySha256: physical.requestBodySha256,
+        route,
+        redirects: 'error',
+        retries: 0,
+      }),
+      writeJson('physical-http-1.json', {
+        physicalId: physical.physicalId,
+        logicalId: physical.logicalId,
+        httpStatus: physical.httpStatus,
+        durationMs: physical.durationMs,
+      }),
+      writeJson('physical-receipt-1.json', physical),
+    ])
+    const good = await verifyH5bPhysicalReceiptArtifacts(directory, replay)
+    assert.equal(good.status, 'verified')
+    assert.equal(good.verifiedPhysicalCalls, 1)
+    assert.equal(good.fileHashes.length, 3)
+    assert(good.fileHashes.every((entry) => /^[a-f0-9]{64}$/u.test(entry.sha256)))
+    const badReceipt = { ...physical, receipt: { ...physical.receipt, costUsd: 0.02 } }
+    await writeJson('physical-receipt-1.json', badReceipt)
+    await assert.rejects(
+      verifyH5bPhysicalReceiptArtifacts(directory, replay),
+      /provider-receipt-mismatch-1/u,
+    )
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
 })

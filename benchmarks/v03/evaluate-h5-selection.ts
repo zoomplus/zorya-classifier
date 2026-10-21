@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto'
-import { lstat, readFile, realpath, writeFile } from 'node:fs/promises'
+import { lstat, readFile, readdir, realpath, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { isAbsolute, relative, resolve, sep } from 'node:path'
+import { isDeepStrictEqual } from 'node:util'
 import sharp from 'sharp'
 
 const H5A_RUN_ROOT =
@@ -112,6 +113,22 @@ export type H5ReplayEnvelope = {
   executable_source: { sha256: string; files: Array<{ path: string; sha256: string }> }
   executable_source_after: { sha256: string; files: Array<{ path: string; sha256: string }> }
   rows: H5ReplayRow[]
+}
+
+type PhysicalReceiptRecord = {
+  physicalId: number
+  reservationId: number
+  logicalId: number
+  requestSha256: string
+  requestBodySha256: string
+  admittedAt: string
+  durationMs: number
+  dispatched: boolean
+  httpStatus: number | null
+  wireReceipt: unknown
+  route: H5ReplayEnvelope['route']
+  receipt: unknown
+  errorCode?: string
 }
 
 type CandidateReference = {
@@ -638,6 +655,86 @@ export async function verifyH5bReplayFreeze(
   return { runSha256, freezeSha256, executableSourceSha256: replay.executable_source.sha256 }
 }
 
+export async function verifyH5bPhysicalReceiptArtifacts(runRoot: string, replay: H5ReplayEnvelope) {
+  const providerRoot = resolve(await realpath(runRoot), 'provider-calls')
+  const names = await readdir(providerRoot)
+  const hashRecord = async (name: string) => {
+    const path = resolve(providerRoot, name)
+    const bytes = await readFile(path)
+    return {
+      value: JSON.parse(bytes.toString('utf8')) as Record<string, unknown>,
+      sha256: createHash('sha256').update(bytes).digest('hex'),
+    }
+  }
+  const physicalIds = new Set<number>()
+  const logicalById = new Map<number, Record<string, unknown>>()
+  for (const value of replay.logical_calls) {
+    assert(typeof value === 'object' && value !== null, 'h5b-logical-call-invalid')
+    const logical = value as Record<string, unknown>
+    assert(Number.isInteger(logical.logicalId), 'h5b-logical-id-invalid')
+    const logicalId = logical.logicalId as number
+    assert(!logicalById.has(logicalId), 'h5b-logical-id-duplicate')
+    logicalById.set(logicalId, logical)
+  }
+  const admissions = names.filter((name) => /^physical-admission-\d+\.json$/u.test(name))
+  const httpReceipts = names.filter((name) => /^physical-http-\d+\.json$/u.test(name))
+  const providerReceipts = names.filter((name) => /^physical-receipt-\d+\.json$/u.test(name))
+  assert(admissions.length === replay.physical_call_count, 'h5b-admission-file-count')
+  assert(httpReceipts.length === replay.physical_call_count, 'h5b-http-file-count')
+  assert(providerReceipts.length === replay.physical_call_count, 'h5b-provider-receipt-file-count')
+  const fileHashes: Array<{ path: string; sha256: string }> = []
+  for (const callValue of replay.physical_calls) {
+    assert(typeof callValue === 'object' && callValue !== null, 'h5b-physical-call-invalid')
+    const call = callValue as unknown as PhysicalReceiptRecord
+    assert(Number.isInteger(call.physicalId) && call.physicalId > 0, 'h5b-physical-id-invalid')
+    assert(!physicalIds.has(call.physicalId), 'h5b-physical-id-duplicate')
+    physicalIds.add(call.physicalId)
+    assert(call.reservationId === call.physicalId, 'h5b-reservation-id-mismatch')
+    const admission = await hashRecord(`physical-admission-${call.physicalId}.json`)
+    const http = await hashRecord(`physical-http-${call.physicalId}.json`)
+    const provider = await hashRecord(`physical-receipt-${call.physicalId}.json`)
+    assert(
+      admission.value.physicalId === call.physicalId &&
+        admission.value.logicalId === call.logicalId &&
+        admission.value.dispatched === true &&
+        admission.value.requestSha256 === call.requestSha256 &&
+        admission.value.requestBodySha256 === call.requestBodySha256 &&
+        admission.value.admittedAt === call.admittedAt &&
+        isDeepStrictEqual(admission.value.route, call.route),
+      `h5b-admission-receipt-mismatch-${call.physicalId}`,
+    )
+    assert(
+      http.value.physicalId === call.physicalId &&
+        http.value.logicalId === call.logicalId &&
+        http.value.httpStatus === call.httpStatus &&
+        http.value.durationMs === call.durationMs &&
+        http.value.errorCode === call.errorCode,
+      `h5b-http-receipt-mismatch-${call.physicalId}`,
+    )
+    assert(
+      isDeepStrictEqual(provider.value, call),
+      `h5b-provider-receipt-mismatch-${call.physicalId}`,
+    )
+    const logical = logicalById.get(call.logicalId)
+    assert(logical, `h5b-logical-receipt-missing-${call.logicalId}`)
+    assert(
+      logical.requestSha256 === call.requestSha256 &&
+        Array.isArray(logical.physicalIds) &&
+        logical.physicalIds.includes(call.physicalId),
+      `h5b-logical-physical-link-mismatch-${call.physicalId}`,
+    )
+    fileHashes.push(
+      {
+        path: `provider-calls/physical-admission-${call.physicalId}.json`,
+        sha256: admission.sha256,
+      },
+      { path: `provider-calls/physical-http-${call.physicalId}.json`, sha256: http.sha256 },
+      { path: `provider-calls/physical-receipt-${call.physicalId}.json`, sha256: provider.sha256 },
+    )
+  }
+  return { status: 'verified' as const, verifiedPhysicalCalls: physicalIds.size, fileHashes }
+}
+
 export async function verifySelectedMaskArtifacts(
   runRoot: string,
   replay: H5ReplayEnvelope,
@@ -709,6 +806,7 @@ export async function evaluateH5SelectionRun(
   ) as H5ReplayEnvelope
   const runIdentity = await verifyH5bReplayFreeze(absoluteRunRoot, repositoryRoot, replay)
   const sourceClosure = await verifyH5bSourceClosure(replay)
+  const physicalReceipts = await verifyH5bPhysicalReceiptArtifacts(absoluteRunRoot, replay)
   const selectedMasks = await verifySelectedMaskArtifacts(absoluteRunRoot, replay, availability)
   const scored = evaluateH5Selection(availability, replay, selectedMasks)
   return {
@@ -717,6 +815,7 @@ export async function evaluateH5SelectionRun(
       ...scored.production,
       ...runIdentity,
       sourceClosure,
+      physicalReceipts,
       selectedMaskArtifactsVerified: selectedMasks.size,
       selectedMaskArtifactsExpected: replay.rows.filter((row) => row.status === 'located').length,
       budgetCountersClean:
