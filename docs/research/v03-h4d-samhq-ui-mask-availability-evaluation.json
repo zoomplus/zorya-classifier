@@ -1,0 +1,1772 @@
+{
+  "schema": "v03-h4d-samhq-ui-mask-availability-v1",
+  "runSha256": "704a7075e33b4bcc3806e15bb166cb8d088cdc1fbd2c984660c099634618f2b8",
+  "freezeSha256": "d0fdf93348a809ad8f01eb6cf6152958baad57e4d8670ae9c9590076d6cb96e6",
+  "h4aRunSha256": "d1ff8a0fd97e6197834c673d399fe9f1ecfcd2d93182ab2a4fd3767e702755a1",
+  "h4aFreezeSha256": "30ff2cf2f1894745c8e5e227e35ef1858432c63f55ae454a1e10f86118668753",
+  "model": {
+    "repo": "syscv-community/sam-hq-vit-base",
+    "revision": "f906a2e3f60fda2f12eb717cef18614f66c43124",
+    "license": "Apache-2.0",
+    "assets": [
+      {
+        "bytes": 379266384,
+        "name": "model.safetensors",
+        "path": "/root/work/zorya-classifier-models/v03/sam-hq-vit-base/model.safetensors",
+        "sha256": "b3a4c62fa9ebff888b3a891010392b32233ec3dce12d2ece8e19c746ca71cb64"
+      },
+      {
+        "bytes": 1400,
+        "name": "config.json",
+        "path": "/root/work/zorya-classifier-models/v03/sam-hq-vit-base/config.json",
+        "sha256": "3cbf6aa7445e19224e9f3d47faefcdb8c0efa015107de9527eef85be87879939"
+      },
+      {
+        "bytes": 576,
+        "name": "preprocessor_config.json",
+        "path": "/root/work/zorya-classifier-models/v03/sam-hq-vit-base/preprocessor_config.json",
+        "sha256": "4d68d8d8ff5a3d813f02a1baef859d9ee82217998acd225b793fb6e9bd867bbc"
+      },
+      {
+        "bytes": 11357,
+        "name": "LICENSE",
+        "path": "/root/work/zorya-classifier-models/v03/sam-hq-vit-base/LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    ],
+    "cuda": "12.4",
+    "device": "NVIDIA GeForce RTX 4080",
+    "dtype": "float16",
+    "torch": "2.6.0+cu124",
+    "torchvision": "0.21.0+cu124",
+    "transformers": "4.57.3",
+    "upstream_repo_revision": "e696978d60352dc9a26b12631cd91781502c6546"
+  },
+  "protocol": {
+    "clip_to_box": false,
+    "decoder_batch_size": 1,
+    "decoder_calls": 36,
+    "hq_token_only": true,
+    "image_encoding_calls": 1,
+    "mask_frame": "full original source",
+    "mask_threshold": 0,
+    "multimask_output": false,
+    "order": "frozen H4a candidate order",
+    "prompt": "box XYXY",
+    "prompt_count": 36
+  },
+  "integrityUnchanged": true,
+  "validMaskCount": 36,
+  "emptyMaskCount": 0,
+  "positiveDenominator": 3,
+  "positiveCandidatesPassing": 0,
+  "negativeDenominator": 1,
+  "negativesWithCandidates": 1,
+  "interpretation": "candidate-mask availability ceiling; no semantic selection or false-positive judgment",
+  "rows": [
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "proposalCount": 36,
+      "candidateAvailabilityPass": false,
+      "bestCandidate": 1,
+      "bestCandidateIoU": 0.0029884281015037594,
+      "bestCandidateCoverage": 0.9999999999999991,
+      "sameCandidateGatePass": false,
+      "referenceCount": 1
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "proposalCount": 36,
+      "candidateAvailabilityPass": false,
+      "bestCandidate": 1,
+      "bestCandidateIoU": 0.0029884281015037594,
+      "bestCandidateCoverage": 1,
+      "sameCandidateGatePass": false,
+      "referenceCount": 1
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "proposalCount": 36,
+      "candidateAvailabilityPass": false,
+      "bestCandidate": 1,
+      "bestCandidateIoU": 0.0029076597744360903,
+      "bestCandidateCoverage": 0.9999999999999999,
+      "sameCandidateGatePass": false,
+      "referenceCount": 1
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "proposalCount": 36,
+      "candidateAvailabilityPass": false,
+      "bestCandidate": 0,
+      "bestCandidateIoU": 0,
+      "bestCandidateCoverage": 0,
+      "sameCandidateGatePass": false,
+      "referenceCount": 0
+    }
+  ],
+  "candidates": [
+    {
+      "ordinal": 0,
+      "flatIndex": 2052,
+      "sha256": "f8f5bbea8f20e162b7ae0f7a4be3d6954763d628d84812b463b31a9a9e4363bf",
+      "area": 2752,
+      "maskBox": {
+        "left": 151,
+        "top": 89,
+        "width": 935,
+        "height": 607
+      },
+      "promptBox": {
+        "left": 1058.392578125,
+        "top": 91.02783203125,
+        "width": 11.341796875,
+        "height": 11.920005798339844
+      }
+    },
+    {
+      "ordinal": 1,
+      "flatIndex": 2051,
+      "sha256": "6243fa5b20b63a7c092a6de705a7f80b94f3948a315ea75822609a91657c0071",
+      "area": 3611,
+      "maskBox": {
+        "left": 190,
+        "top": 89,
+        "width": 896,
+        "height": 608
+      },
+      "promptBox": {
+        "left": 1042.369873046875,
+        "top": 90.96139526367188,
+        "width": 11.2255859375,
+        "height": 11.994102478027344
+      }
+    },
+    {
+      "ordinal": 2,
+      "flatIndex": 2054,
+      "sha256": "5d690601e6bfbf400a82087bb769a66803592bec55a07cc68bd7c890d816d58c",
+      "area": 5368,
+      "maskBox": {
+        "left": 190,
+        "top": 89,
+        "width": 897,
+        "height": 609
+      },
+      "promptBox": {
+        "left": 1074.2861328125,
+        "top": 91.08397674560547,
+        "width": 11.470703125,
+        "height": 11.902275085449219
+      }
+    },
+    {
+      "ordinal": 3,
+      "flatIndex": 3012,
+      "sha256": "772d2de0e313f59fe753f293a68701316a16961981ba739b91f68fe0639e4488",
+      "area": 5684,
+      "maskBox": {
+        "left": 138,
+        "top": 89,
+        "width": 945,
+        "height": 690
+      },
+      "promptBox": {
+        "left": 1049.497802734375,
+        "top": 136.8236083984375,
+        "width": 36.0845947265625,
+        "height": 35.511688232421875
+      }
+    },
+    {
+      "ordinal": 4,
+      "flatIndex": 26497,
+      "sha256": "f2bde6e60c04ab84962828207d87861e4b787e4920b173bcf1a28000ae484ca9",
+      "area": 26499,
+      "maskBox": {
+        "left": 122,
+        "top": 87,
+        "width": 1152,
+        "height": 713
+      },
+      "promptBox": {
+        "left": 189.7139892578125,
+        "top": 176.0826873779297,
+        "width": 155.54986572265625,
+        "height": 35.65679931640625
+      }
+    },
+    {
+      "ordinal": 5,
+      "flatIndex": 3891,
+      "sha256": "7cbe60001b9e366b5ca8af231b22e6fc4f5af2bd0d21a466d87bc5d8f3d00cb8",
+      "area": 16320,
+      "maskBox": {
+        "left": 131,
+        "top": 87,
+        "width": 956,
+        "height": 691
+      },
+      "promptBox": {
+        "left": 356.87554931640625,
+        "top": 176.67564392089844,
+        "width": 100.20779418945312,
+        "height": 36.36328125
+      }
+    },
+    {
+      "ordinal": 6,
+      "flatIndex": 2320,
+      "sha256": "6dc7d01662a6d8be460c93707ba7db85c386d60ee4e4b05c0a3996ce568f1ccc",
+      "area": 1705,
+      "maskBox": {
+        "left": 141,
+        "top": 88,
+        "width": 943,
+        "height": 650
+      },
+      "promptBox": {
+        "left": 620.6096801757812,
+        "top": 107.98089599609375,
+        "width": 45.0057373046875,
+        "height": 22.980178833007812
+      }
+    },
+    {
+      "ordinal": 7,
+      "flatIndex": 2316,
+      "sha256": "055d12a9e97811fb5360c30dc4c1db4a42da6fe67e010a7a50693ee430f25539",
+      "area": 1273,
+      "maskBox": {
+        "left": 142,
+        "top": 89,
+        "width": 943,
+        "height": 649
+      },
+      "promptBox": {
+        "left": 572.1459350585938,
+        "top": 107.2315902709961,
+        "width": 47.4005126953125,
+        "height": 23.69091033935547
+      }
+    },
+    {
+      "ordinal": 8,
+      "flatIndex": 2308,
+      "sha256": "aea823634fac8ef5aa0d6efd51861b07ebac35129190d511ba8be73f31a9b27f",
+      "area": 1933,
+      "maskBox": {
+        "left": 141,
+        "top": 89,
+        "width": 943,
+        "height": 689
+      },
+      "promptBox": {
+        "left": 523.1400146484375,
+        "top": 107.26683044433594,
+        "width": 47.66058349609375,
+        "height": 23.671218872070312
+      }
+    },
+    {
+      "ordinal": 9,
+      "flatIndex": 3071,
+      "sha256": "1d4e5824bfcdd24e2aeee9ae8de8c3dd2c20708c80134d5b3b51fb1b15b10bb4",
+      "area": 5667,
+      "maskBox": {
+        "left": 132,
+        "top": 89,
+        "width": 942,
+        "height": 691
+      },
+      "promptBox": {
+        "left": 239.6646728515625,
+        "top": 137.26162719726562,
+        "width": 34.687591552734375,
+        "height": 33.028961181640625
+      }
+    },
+    {
+      "ordinal": 10,
+      "flatIndex": 2946,
+      "sha256": "98f588e36bf942d8c17925381ce6f6ca58e1870053053b1212473388130c57ae",
+      "area": 6678,
+      "maskBox": {
+        "left": 132,
+        "top": 89,
+        "width": 942,
+        "height": 709
+      },
+      "promptBox": {
+        "left": 507.78326416015625,
+        "top": 136.7802276611328,
+        "width": 41.72900390625,
+        "height": 35.45263671875
+      }
+    },
+    {
+      "ordinal": 11,
+      "flatIndex": 2294,
+      "sha256": "d837808d25d83e87ec4f4f8d8841f40ee8b25f7421d80a6f3ba405980fae497d",
+      "area": 7112,
+      "maskBox": {
+        "left": 141,
+        "top": 87,
+        "width": 945,
+        "height": 650
+      },
+      "promptBox": {
+        "left": 379.0162658691406,
+        "top": 107.59532165527344,
+        "width": 82.26507568359375,
+        "height": 23.812179565429688
+      }
+    },
+    {
+      "ordinal": 12,
+      "flatIndex": 3066,
+      "sha256": "ec8654f17e3727b05fd26e618c893116bd3c98754234002497afbe177d23a403",
+      "area": 8509,
+      "maskBox": {
+        "left": 131,
+        "top": 90,
+        "width": 943,
+        "height": 709
+      },
+      "promptBox": {
+        "left": 194.9728546142578,
+        "top": 137.3886260986328,
+        "width": 41.62422180175781,
+        "height": 32.91297912597656
+      }
+    },
+    {
+      "ordinal": 13,
+      "flatIndex": 3120,
+      "sha256": "69508de4d2d56e065bdefa4dd77aa680bfc3375c3c8d5d9c59969f847969073f",
+      "area": 5813,
+      "maskBox": {
+        "left": 138,
+        "top": 89,
+        "width": 936,
+        "height": 691
+      },
+      "promptBox": {
+        "left": 609.9671630859375,
+        "top": 137.06373596191406,
+        "width": 41.15570068359375,
+        "height": 35.022369384765625
+      }
+    },
+    {
+      "ordinal": 14,
+      "flatIndex": 2952,
+      "sha256": "1f770cb47a9eec34e025738d28020a5e89bc720b86a0e1e0924e21653b45a2d2",
+      "area": 8657,
+      "maskBox": {
+        "left": 12,
+        "top": 82,
+        "width": 1268,
+        "height": 717
+      },
+      "promptBox": {
+        "left": 564.4934692382812,
+        "top": 137.00592041015625,
+        "width": 41.53204345703125,
+        "height": 35.109588623046875
+      }
+    },
+    {
+      "ordinal": 15,
+      "flatIndex": 3099,
+      "sha256": "99fd80745f585cffad81fdc32b8dd5609b04ea037b8767e43639943d3482e242",
+      "area": 5584,
+      "maskBox": {
+        "left": 138,
+        "top": 89,
+        "width": 936,
+        "height": 691
+      },
+      "promptBox": {
+        "left": 462.40240478515625,
+        "top": 137.08241271972656,
+        "width": 42.006134033203125,
+        "height": 35.13226318359375
+      }
+    },
+    {
+      "ordinal": 16,
+      "flatIndex": 2976,
+      "sha256": "72e7578f6dac8f90083556ba16496c4c64a998e4ab82d2f8596efc9eea2d4949",
+      "area": 2305,
+      "maskBox": {
+        "left": 140,
+        "top": 90,
+        "width": 943,
+        "height": 689
+      },
+      "promptBox": {
+        "left": 755.5352172851562,
+        "top": 137.2523193359375,
+        "width": 35.1524658203125,
+        "height": 34.70774841308594
+      }
+    },
+    {
+      "ordinal": 17,
+      "flatIndex": 2934,
+      "sha256": "14d24becffdf81ca992ef19c2a2b3136e140ed9a834e111ac56c7e5edab54336",
+      "area": 3189,
+      "maskBox": {
+        "left": 139,
+        "top": 88,
+        "width": 944,
+        "height": 691
+      },
+      "promptBox": {
+        "left": 405.6558837890625,
+        "top": 136.85873413085938,
+        "width": 41.867828369140625,
+        "height": 35.646697998046875
+      }
+    },
+    {
+      "ordinal": 18,
+      "flatIndex": 2302,
+      "sha256": "8afe36bbb07777ec1f0638da379acdd48c095e6210be6d91d123acfa026da091",
+      "area": 3185,
+      "maskBox": {
+        "left": 141,
+        "top": 87,
+        "width": 944,
+        "height": 651
+      },
+      "promptBox": {
+        "left": 462.0257263183594,
+        "top": 107.22415161132812,
+        "width": 60.473724365234375,
+        "height": 23.825057983398438
+      }
+    },
+    {
+      "ordinal": 19,
+      "flatIndex": 3076,
+      "sha256": "fde2b9466ca13b7dbfdadb749dc50be4976fa64fe809145c4f401e8f84ce0dab",
+      "area": 8850,
+      "maskBox": {
+        "left": 131,
+        "top": 88,
+        "width": 1143,
+        "height": 711
+      },
+      "promptBox": {
+        "left": 278.20452880859375,
+        "top": 137.29425048828125,
+        "width": 40.60430908203125,
+        "height": 32.996734619140625
+      }
+    },
+    {
+      "ordinal": 20,
+      "flatIndex": 2921,
+      "sha256": "7c5ea855ef7be3806dc091fb68b2da675dd79f17901bac1f4f4ef827e4357939",
+      "area": 3438,
+      "maskBox": {
+        "left": 139,
+        "top": 88,
+        "width": 944,
+        "height": 691
+      },
+      "promptBox": {
+        "left": 321.9084167480469,
+        "top": 137.00411987304688,
+        "width": 36.936126708984375,
+        "height": 34.92179870605469
+      }
+    },
+    {
+      "ordinal": 21,
+      "flatIndex": 2928,
+      "sha256": "90af620f30d21c76741448818736af8678632b423d6757b020046df1aa7a82b9",
+      "area": 5496,
+      "maskBox": {
+        "left": 131,
+        "top": 88,
+        "width": 1143,
+        "height": 691
+      },
+      "promptBox": {
+        "left": 360.98406982421875,
+        "top": 137.15237426757812,
+        "width": 41.128173828125,
+        "height": 34.9814453125
+      }
+    },
+    {
+      "ordinal": 22,
+      "flatIndex": 2965,
+      "sha256": "74e3b784e9e8ad2c0cc24260da7eaf7f422ce83b06d20b64706e6b7815f68412",
+      "area": 7302,
+      "maskBox": {
+        "left": 132,
+        "top": 89,
+        "width": 942,
+        "height": 709
+      },
+      "promptBox": {
+        "left": 666.371337890625,
+        "top": 137.08309936523438,
+        "width": 42.89739990234375,
+        "height": 35.848175048828125
+      }
+    },
+    {
+      "ordinal": 23,
+      "flatIndex": 2970,
+      "sha256": "2747ed9dfda269d7da5526be6ee8ee57039310cde0617c214aad95cbd2728bbd",
+      "area": 3947,
+      "maskBox": {
+        "left": 139,
+        "top": 90,
+        "width": 935,
+        "height": 689
+      },
+      "promptBox": {
+        "left": 711.735595703125,
+        "top": 137.63201904296875,
+        "width": 41.3172607421875,
+        "height": 34.53828430175781
+      }
+    },
+    {
+      "ordinal": 24,
+      "flatIndex": 2438,
+      "sha256": "7184486be39111203c34272486c5aac17a959e3d744471db27d3847ede8c5267",
+      "area": 3041,
+      "maskBox": {
+        "left": 141,
+        "top": 88,
+        "width": 944,
+        "height": 650
+      },
+      "promptBox": {
+        "left": 270.5402526855469,
+        "top": 107.19557189941406,
+        "width": 59.241424560546875,
+        "height": 24.1182861328125
+      }
+    },
+    {
+      "ordinal": 25,
+      "flatIndex": 26737,
+      "sha256": "bab27587cd06ef553fb3b408f77fe1d2962c7d4eca142115219aca76326dc7b6",
+      "area": 92305,
+      "maskBox": {
+        "left": 12,
+        "top": 15,
+        "width": 1268,
+        "height": 785
+      },
+      "promptBox": {
+        "left": 191.07315063476562,
+        "top": 214.58885192871094,
+        "width": 153.27145385742188,
+        "height": 32.686553955078125
+      }
+    },
+    {
+      "ordinal": 26,
+      "flatIndex": 26182,
+      "sha256": "5310641033d192a83ac7bf0f0c73b3c5d1535e1287a9cdbb8ef02ee802eb93b8",
+      "area": 3086,
+      "maskBox": {
+        "left": 141,
+        "top": 88,
+        "width": 944,
+        "height": 644
+      },
+      "promptBox": {
+        "left": 330.52850341796875,
+        "top": 106.89012145996094,
+        "width": 47.575927734375,
+        "height": 24.415359497070312
+      }
+    },
+    {
+      "ordinal": 27,
+      "flatIndex": 2980,
+      "sha256": "bbd736576e7ccdfca4e709bf737accb7b3b22813906a0994308635439b81bb04",
+      "area": 5128,
+      "maskBox": {
+        "left": 132,
+        "top": 88,
+        "width": 951,
+        "height": 691
+      },
+      "promptBox": {
+        "left": 793.69970703125,
+        "top": 136.7325897216797,
+        "width": 43.0958251953125,
+        "height": 36.01838684082031
+      }
+    },
+    {
+      "ordinal": 28,
+      "flatIndex": 2427,
+      "sha256": "7d2264520725d5f56cff3e8f442031773aa35db0372d062a921491a31bf3cd27",
+      "area": 1666,
+      "maskBox": {
+        "left": 142,
+        "top": 89,
+        "width": 943,
+        "height": 642
+      },
+      "promptBox": {
+        "left": 190.35154724121094,
+        "top": 106.837890625,
+        "width": 38.38932800292969,
+        "height": 24.541259765625
+      }
+    },
+    {
+      "ordinal": 29,
+      "flatIndex": 2432,
+      "sha256": "2b787ec144d913604e6b12709b1df8cc4cd0731dfd89f8cd0eaf82491312ff0b",
+      "area": 2806,
+      "maskBox": {
+        "left": 141,
+        "top": 88,
+        "width": 944,
+        "height": 650
+      },
+      "promptBox": {
+        "left": 229.69224548339844,
+        "top": 106.91088104248047,
+        "width": 40.60676574707031,
+        "height": 24.07738494873047
+      }
+    },
+    {
+      "ordinal": 30,
+      "flatIndex": 3461,
+      "sha256": "090351e69d7977f07a80d806ffdc5f6147088987c16889c37d6ec779e4cd7ddb",
+      "area": 1106,
+      "maskBox": {
+        "left": 141,
+        "top": 89,
+        "width": 943,
+        "height": 650
+      },
+      "promptBox": {
+        "left": 793.8226318359375,
+        "top": 163.84873962402344,
+        "width": 43.064697265625,
+        "height": 10.601959228515625
+      }
+    },
+    {
+      "ordinal": 31,
+      "flatIndex": 3412,
+      "sha256": "db02c0de7a268b563e1ba76f7db830e719654a36babb8a0f13d6f5559985bbd0",
+      "area": 1567,
+      "maskBox": {
+        "left": 141,
+        "top": 89,
+        "width": 943,
+        "height": 689
+      },
+      "promptBox": {
+        "left": 405.93988037109375,
+        "top": 163.85025024414062,
+        "width": 41.802001953125,
+        "height": 10.078720092773438
+      }
+    },
+    {
+      "ordinal": 32,
+      "flatIndex": 32419,
+      "sha256": "c784c3f15ab28ba9fc590c0fae97125743ea481f4272281cba8eb78e270b4449",
+      "area": 63387,
+      "maskBox": {
+        "left": 132,
+        "top": 83,
+        "width": 963,
+        "height": 717
+      },
+      "promptBox": {
+        "left": 395.5047912597656,
+        "top": 239.61288452148438,
+        "width": 566.7552185058594,
+        "height": 283.9584655761719
+      }
+    },
+    {
+      "ordinal": 33,
+      "flatIndex": 3469,
+      "sha256": "7bc2c89f6ea1457f9ef66693e4f46c48ecec218b7a5ce41fbbd506ca3089e65b",
+      "area": 1761,
+      "maskBox": {
+        "left": 143,
+        "top": 89,
+        "width": 942,
+        "height": 641
+      },
+      "promptBox": {
+        "left": 850.6427612304688,
+        "top": 164.93113708496094,
+        "width": 43.9808349609375,
+        "height": 9.648956298828125
+      }
+    },
+    {
+      "ordinal": 34,
+      "flatIndex": 4520,
+      "sha256": "845128e72818cfc966242a3b21bcd4fc5b63b629fd5151005299a0a81e3be3c4",
+      "area": 481,
+      "maskBox": {
+        "left": 142,
+        "top": 90,
+        "width": 941,
+        "height": 648
+      },
+      "promptBox": {
+        "left": 320.9121398925781,
+        "top": 224.36695861816406,
+        "width": 14.990692138671875,
+        "height": 12.987106323242188
+      }
+    },
+    {
+      "ordinal": 35,
+      "flatIndex": 3446,
+      "sha256": "a90f2a830d48dea286d3decf8d43f8884a6b5fab932718febc0e374ae5d606f7",
+      "area": 1243,
+      "maskBox": {
+        "left": 142,
+        "top": 89,
+        "width": 943,
+        "height": 650
+      },
+      "promptBox": {
+        "left": 666.0145263671875,
+        "top": 164.9150390625,
+        "width": 43.43798828125,
+        "height": 9.420455932617188
+      }
+    }
+  ],
+  "candidateScores": [
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 0,
+      "bestIoU": 0.0028684950092063184,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 1,
+      "bestIoU": 0.0029884281015037594,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 2,
+      "bestIoU": 0.00298019488424286,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 3,
+      "bestIoU": 0.0024967410474656853,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 4,
+      "bestIoU": 0.0019820398940314787,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 5,
+      "bestIoU": 0.002464441201581602,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 6,
+      "bestIoU": 0.00265600783098132,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 7,
+      "bestIoU": 0.0026601002929705054,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 8,
+      "bestIoU": 0.002505667765076717,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 9,
+      "bestIoU": 0.0025010677162547895,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 10,
+      "bestIoU": 0.002437570933613624,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 11,
+      "bestIoU": 0.0026503866503866506,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 12,
+      "bestIoU": 0.0024349860227614356,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 13,
+      "bestIoU": 0.002517100201615397,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 14,
+      "bestIoU": 0.0017906717878999863,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 15,
+      "bestIoU": 0.002517100201615397,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 16,
+      "bestIoU": 0.002505667765076717,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 17,
+      "bestIoU": 0.0024957688439745883,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 18,
+      "bestIoU": 0.002649118696138926,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 19,
+      "bestIoU": 0.002003265766181478,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 20,
+      "bestIoU": 0.0024957688439745883,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 21,
+      "bestIoU": 0.0020612474091968604,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 22,
+      "bestIoU": 0.002437570933613624,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 23,
+      "bestIoU": 0.002527106633654913,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 24,
+      "bestIoU": 0.002653194263363755,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 25,
+      "bestIoU": 0.0016355562699672487,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 26,
+      "bestIoU": 0.0026779134645752187,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 27,
+      "bestIoU": 0.0024773983056908637,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 28,
+      "bestIoU": 0.0026891045017723644,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 29,
+      "bestIoU": 0.002653194263363755,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 30,
+      "bestIoU": 0.00265600783098132,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 31,
+      "bestIoU": 0.002505667765076717,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 32,
+      "bestIoU": 0.0023578108276813945,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 33,
+      "bestIoU": 0.0026961588017660834,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 34,
+      "bestIoU": 0.002669867884178901,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "ordinal": 35,
+      "bestIoU": 0.00265600783098132,
+      "bestCoverage": 0.9999999999999991,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 0,
+      "bestIoU": 0.0028684950092063184,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 1,
+      "bestIoU": 0.0029884281015037594,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 2,
+      "bestIoU": 0.00298019488424286,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 3,
+      "bestIoU": 0.0024967410474656853,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 4,
+      "bestIoU": 0.0019820398940314787,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 5,
+      "bestIoU": 0.002464441201581602,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 6,
+      "bestIoU": 0.00265600783098132,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 7,
+      "bestIoU": 0.0026601002929705054,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 8,
+      "bestIoU": 0.002505667765076717,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 9,
+      "bestIoU": 0.0025010677162547895,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 10,
+      "bestIoU": 0.002437570933613624,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 11,
+      "bestIoU": 0.0026503866503866506,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 12,
+      "bestIoU": 0.0024349860227614356,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 13,
+      "bestIoU": 0.002517100201615397,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 14,
+      "bestIoU": 0.0017906717878999863,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 15,
+      "bestIoU": 0.002517100201615397,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 16,
+      "bestIoU": 0.002505667765076717,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 17,
+      "bestIoU": 0.0024957688439745883,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 18,
+      "bestIoU": 0.002649118696138926,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 19,
+      "bestIoU": 0.002003265766181478,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 20,
+      "bestIoU": 0.0024957688439745883,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 21,
+      "bestIoU": 0.0020612474091968604,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 22,
+      "bestIoU": 0.002437570933613624,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 23,
+      "bestIoU": 0.002527106633654913,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 24,
+      "bestIoU": 0.002653194263363755,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 25,
+      "bestIoU": 0.0016355562699672487,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 26,
+      "bestIoU": 0.0026779134645752187,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 27,
+      "bestIoU": 0.0024773983056908637,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 28,
+      "bestIoU": 0.0026891045017723644,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 29,
+      "bestIoU": 0.002653194263363755,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 30,
+      "bestIoU": 0.00265600783098132,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 31,
+      "bestIoU": 0.002505667765076717,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 32,
+      "bestIoU": 0.0023578108276813945,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 33,
+      "bestIoU": 0.0026961588017660834,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 34,
+      "bestIoU": 0.002669867884178901,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "ordinal": 35,
+      "bestIoU": 0.00265600783098132,
+      "bestCoverage": 1,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 0,
+      "bestIoU": 0.002790968117065607,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 1,
+      "bestIoU": 0.0029076597744360903,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 2,
+      "bestIoU": 0.002899649076560621,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 3,
+      "bestIoU": 0.0024292615596963425,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 4,
+      "bestIoU": 0.0019284712482468443,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 5,
+      "bestIoU": 0.0023978346826199373,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 6,
+      "bestIoU": 0.0025842238355493923,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 7,
+      "bestIoU": 0.0025882056904577887,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 8,
+      "bestIoU": 0.002437947014669238,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 9,
+      "bestIoU": 0.0024334712914911463,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 10,
+      "bestIoU": 0.002371690638110553,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 11,
+      "bestIoU": 0.002578754578754579,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 12,
+      "bestIoU": 0.0023691755897138293,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 13,
+      "bestIoU": 0.0024490704664366023,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 14,
+      "bestIoU": 0.0017422752530918786,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 15,
+      "bestIoU": 0.0024490704664366023,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 16,
+      "bestIoU": 0.002437947014669238,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 17,
+      "bestIoU": 0.0024283156319752754,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 18,
+      "bestIoU": 0.0025775208935405764,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 19,
+      "bestIoU": 0.0019491234481765728,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 20,
+      "bestIoU": 0.0024283156319752754,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 21,
+      "bestIoU": 0.0020055380197591074,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 22,
+      "bestIoU": 0.002371690638110553,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 23,
+      "bestIoU": 0.0024588064543669425,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 24,
+      "bestIoU": 0.0025814863102998696,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 25,
+      "bestIoU": 0.0015913520464546204,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 26,
+      "bestIoU": 0.0026055374249921042,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 27,
+      "bestIoU": 0.002410441594726246,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 28,
+      "bestIoU": 0.0026164260017244624,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 29,
+      "bestIoU": 0.0025814863102998696,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 30,
+      "bestIoU": 0.0025842238355493923,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 31,
+      "bestIoU": 0.002437947014669238,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 32,
+      "bestIoU": 0.0022940862107170322,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 33,
+      "bestIoU": 0.0026232896449615946,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 34,
+      "bestIoU": 0.002597709292714606,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "ordinal": 35,
+      "bestIoU": 0.0025842238355493923,
+      "bestCoverage": 0.9999999999999999,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 0,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 1,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 2,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 3,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 4,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 5,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 6,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 7,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 8,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 9,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 10,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 11,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 12,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 13,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 14,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 15,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 16,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 17,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 18,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 19,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 20,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 21,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 22,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 23,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 24,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 25,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 26,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 27,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 28,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 29,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 30,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 31,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 32,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 33,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 34,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "ordinal": 35,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "pass": false
+    }
+  ]
+}
