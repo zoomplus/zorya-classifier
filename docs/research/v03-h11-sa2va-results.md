@@ -12,8 +12,6 @@ From [H11 plan](v03-h11-sa2va-text-mask-plan.md) and [H11b plan](v03-h11b-sa2va-
 | Provider physical calls             | **0**                                          |
 | Qualification / heldout / promotion | **None**                                       |
 
-**Context only (not H11 scores):** independent **H10** on the same fixed cohort observed **0/9** positive successes with masks actually produced; **H8a** observed **7/9** via ordinary vision-chat on fixed H6 evidence.
-
 ## Immutable contracts
 
 | Profile          | File                                                 | SHA-256                                                            |
