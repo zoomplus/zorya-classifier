@@ -1,0 +1,58 @@
+{
+  "schema": "independent-root-resource-review-v1",
+  "workflow": "region-checked-segmentation",
+  "sourceRevision": "4df544c1180e82751a22902f410d9fe8a3c58fb4",
+  "forcedGc": false,
+  "nativeThreads": 2,
+  "reportSha256": "89501d828d44a23bee02648b5ce095a04a94dd6c0f54465acd4bee07766bec72",
+  "sourceManifestSha256": "3edc855221203510545368d7fb8ede9c56010188204928ff6974fe210c1797a6",
+  "sourceFilesRehashed": 59,
+  "kernelWitnessSha256": "d00f8ffe8626527ddefd8b40ba543c2680c6b019f371fdba61b9906dad434ff2",
+  "pid": 1758290,
+  "startTicks": 20860863,
+  "lastLiveKernelAgeSeconds": 7212.11,
+  "monotonicDurationMs": 7212607.320959,
+  "phases": {
+    "before": {
+      "samples": 6,
+      "medians": {
+        "rss": 295481344.0,
+        "heapUsed": 16304808.0,
+        "external": 30678280.0,
+        "arrayBuffers": 1599991.0
+      }
+    },
+    "after": {
+      "samples": 8,
+      "medians": {
+        "rss": 349417472.0,
+        "heapUsed": 25330692.0,
+        "external": 10295319.0,
+        "arrayBuffers": 7445438.0
+      }
+    }
+  },
+  "growthBytes": {
+    "rss": 53936128.0,
+    "heapUsed": 9025884.0,
+    "external": -20382961.0,
+    "arrayBuffers": 5845447.0
+  },
+  "growthThresholdBytes": {
+    "rss": 134217728,
+    "heapUsed": 16777216,
+    "external": 16777216,
+    "arrayBuffers": 16777216
+  },
+  "withinThresholds": {
+    "rss": true,
+    "heapUsed": true,
+    "external": true,
+    "arrayBuffers": true
+  },
+  "ownedStarts": 4942,
+  "ownedCloses": 4942,
+  "remainingOwnedChildren": 0,
+  "qualifiedByThisReview": true,
+  "scope": "Pinned workflow only; configured threshold evidence, not proof of no retained memory."
+}

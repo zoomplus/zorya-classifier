@@ -1,0 +1,47 @@
+{
+  "schema": "region-seeded-heldout-dispatch-authorization-v3",
+  "recordedAt": "2026-10-21T04:06:51.132617+00:00",
+  "dispatchAuthorized": true,
+  "authorizationScope": "Only the unchanged frozen v3 candidate80 then control80, serially; no model/provider fallback or post-outcome tuning.",
+  "freeze": {
+    "file": "region-seeded-heldout-run-freeze-20261021-v3.json",
+    "sha256": "5efcea0a0556dda41cf67fd0178ec7e0208b3a51ca3fdaf03e9b26b13afae73b"
+  },
+  "selectionSha256": "65efa36af59b26b6d78d9a24c614386fc123bf08391dad25f799c8c398ca8173",
+  "producerSourceSha256": "be43090b13951e9a6ffa65daffb9413a6a539d8dae335925dc885733a467fb20",
+  "producerSourceFilesRehashed": 68,
+  "candidateVariantSha256": "cf17516c888a8ef952ad608472bc64e2b1d4c1746d6c5057440036e242b9ceee",
+  "controlVariantSha256": "1ec1668798a587daa585ba37a079acd38d7d97ef9d735f7b2732f2fa18e5bce4",
+  "proofs": {
+    "checked-region-segmentation-resource-4df544c-receipt.json": {
+      "sha256": "79e1097b92ebfa8574aa6917345698c2262d332443b36d5e2e68cced55f7bb47",
+      "status": "passed"
+    },
+    "checked-region-segmentation-resource-4df544c-root-review.json": {
+      "sha256": "4c154cea4c138d7f6372270a2e3bf176de5f3cbbd002d69a3e9b3211ebabaa97",
+      "status": "passed"
+    },
+    "ci-f9d4633.json": {
+      "sha256": "7ccfe2ab2d7fe4096f6f7fb3d86560a32278fe2d91beaeef8584a8112bf7d3a1",
+      "status": "passed"
+    },
+    "native-checked-region-windows-987ac32.json": {
+      "sha256": "c5a64eab76e45a767855c87421fc51bca2880a9a98e7b478cf35a79aae211f3b",
+      "status": "passed"
+    }
+  },
+  "originalRejectedResourceAttempt": {
+    "file": "checked-region-segmentation-resource-987ac32-receipt.json",
+    "status": "not-qualified; preserved, not waived"
+  },
+  "runtimeSourceCommit": "987ac32a50150399ef9e4cd75d8ae0c74ac85a74",
+  "runtimeDistFiles": 114,
+  "runtimeDistSha256": "e91030fe7af4f862aaf250dbc269b142ab14bcb3371dcfcf4da251cf96e95a09",
+  "resourceHarnessOnlyFix": "4df544c1180e82751a22902f410d9fe8a3c58fb4",
+  "offlineTests": 565,
+  "heldoutRequestsBeforeAuthorization": 0,
+  "truthEvaluationAfterBothProducerTerminals": true,
+  "criteriaUnchanged": true,
+  "librarySelectsModels": false,
+  "releaseQualifiedByThisAuthorization": false
+}
