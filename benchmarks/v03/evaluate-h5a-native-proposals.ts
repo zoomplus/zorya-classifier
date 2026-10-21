@@ -272,19 +272,19 @@ async function decodeCandidate(candidate: Candidate): Promise<MaskGeometry> {
   return { bits, box, area, width, height, sha256: digest, bytes: encoded.byteLength }
 }
 
-function scoreCandidate(box: Box, references: Box[]): GateScore {
-  const matches = wholeObjectMatch(box, references).instances
-  const best = matches.reduce(
-    (acc, item) =>
-      item.iou > acc.iou || (item.iou === acc.iou && item.coverage > acc.coverage)
-        ? { iou: item.iou, coverage: item.coverage, matched: item.matched }
-        : acc,
-    { iou: 0, coverage: 0, matched: false },
-  )
+export function scoreCandidate(box: Box, references: Box[]): GateScore {
+  const instances = wholeObjectMatch(box, references).instances
+  const best =
+    instances.find((item) => item.matched) ??
+    instances.reduce(
+      (acc, item) =>
+        item.iou > acc.iou || (item.iou === acc.iou && item.coverage > acc.coverage) ? item : acc,
+      { iou: 0, coverage: 0, matched: false, index: -1 },
+    )
   return {
     iou: best.iou,
     coverage: Math.min(1, best.coverage),
-    pass: best.iou >= GATE_IOU && best.coverage >= GATE_COVERAGE,
+    pass: best.matched,
   }
 }
 
