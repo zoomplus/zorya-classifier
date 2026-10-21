@@ -24,7 +24,7 @@ After producer closure, the evaluator matched masks to the exposed positive quer
 
 These maximum scores are oracle diagnostics from the independent evaluator and must not be interpreted as a production ranking or selection policy. UI-04 was the absent-target case; 36 masks were produced, but this availability-only evaluation did not judge semantic false positives. No pixel-mask annotations were available, so this does not measure segmentation quality. The result is limited to one controlled screenshot and three positive query boxes.
 
-The [independent evaluation receipt](../../research/v03-h4d-samhq-ui-mask-availability-evaluation.json) has SHA-256 `cb466d88c88f8d27bd58bacc4903211e06ab399de62f7bca17cdefd386606798`. Its [audit](../../research/v03-h4d-samhq-ui-mask-availability-audit.md) confirms the artifact integrity and geometry measurements.
+The [independent evaluation receipt](../../research/v03-h4d-samhq-ui-mask-availability-evaluation.json) has SHA-256 `cb466d88c88f8d27bd58bacc4903211e06ab399de62f7bca17cdefd386606798`. Its `candidateScores` array retains all 144 candidate/case rows. Its [audit](../../research/v03-h4d-samhq-ui-mask-availability-audit.md) confirms the artifact integrity and geometry measurements.
 
 ## Interpretation
 
