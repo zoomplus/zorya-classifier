@@ -135,7 +135,7 @@ The locator uses up to three sequential calls: coarse 4×4 regions, fine grids i
 
 ## Extract a mask-derived object (experimental)
 
-Extraction and caller-owned segmentation are experimental and unqualified. For a visible object box, center, or transparent cutout, use `extract` with an explicitly configured caller-owned segmenter. The existing region locator supplies a seed; the segmenter receives that seed while processing the full oriented source image. The library derives the returned box and center from actual mask pixels. After segmentation, the caller's decision port checks the original image with the mask-derived box and seed anchor. An incomplete box permits one enclosing-mask correction and one recheck; unresolved results remain unknown. This adds one or two closed checks to the normal region requests, without model-generated coordinates or an extent search. See the [0.2 usage guide](docs/v02-usage.md) and runnable [`extract-object.ts`](examples/extract-object.ts). The classifier and segmenter are separately caller-owned and both must be disposed.
+Extraction and caller-owned segmentation are experimental and unqualified. For a visible object box, center, or transparent cutout, use `extract` with an explicitly configured caller-owned segmenter. The existing region locator supplies a seed; the segmenter receives that seed while processing the full oriented source image. The library derives the returned box and center from actual mask pixels. After segmentation, the caller's decision port checks the original image with the mask-derived box and seed anchor. An incomplete box permits one enclosing-mask correction and one recheck; unresolved results remain unknown. This adds one or two closed checks to the normal region requests, without model-generated coordinates or an extent search. See the [0.2 usage guide](docs/v02-usage.md) and runnable [`extract-object.ts`](https://github.com/zoomplus/zorya-classifier/blob/main/examples/extract-object.ts). The classifier and segmenter are separately caller-owned and both must be disposed.
 
 ## Development and limits
 
@@ -153,4 +153,4 @@ Tests are offline. Examples, CLI and explicitly authorized model benchmarks make
 
 A model must understand the input, follow instructions and produce the checked answer shape. JSON Schema/JSON-object modes are opt-in when the chosen endpoint supports them; prompt-only mode does not require structured-output support. No universal accuracy, calibration or sub-second guarantee is asserted. Legacy region refinement uses `RefinementPort`; the 0.2 explicit `extract` workflow uses a caller-owned `SegmentationPort`.
 
-See [CONTRIBUTING](CONTRIBUTING.md), [SECURITY](SECURITY.md), [NOTICE](NOTICE.md), and [LICENSE](LICENSE).
+See [CONTRIBUTING](https://github.com/zoomplus/zorya-classifier/blob/main/CONTRIBUTING.md), [SECURITY](https://github.com/zoomplus/zorya-classifier/blob/main/SECURITY.md), [NOTICE](NOTICE.md), and [LICENSE](LICENSE).

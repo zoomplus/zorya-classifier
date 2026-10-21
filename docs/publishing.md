@@ -31,6 +31,6 @@ Keep the final release manifest outside its own archives to avoid self-reference
 
 ## 0.2.1 release-candidate handoff
 
-This branch prepares a local **0.2.1 release candidate** from the published **0.2.0** package baseline. Only experimental status documentation, JSDoc, CLI help, the package description, and a test-only Git fixture isolation fix in `test/secrets.test.ts` changed. There are no model, default, or algorithm/runtime behavior changes relative to 0.2.0. npm or GitHub publication has **not** occurred for 0.2.1.
+This branch prepares a local **0.2.1 release candidate** from the published **0.2.0** package baseline. Only experimental status documentation, JSDoc, CLI help, the package description, and a test-only Git fixture isolation fix in `test/secrets.test.ts` changed. There are no model, default, or algorithm/runtime behavior changes relative to 0.2.0. At local 0.2.1 release-candidate preparation time, npm and GitHub publication for 0.2.1 had not yet been recorded in this handoff; check the repository releases, npm registry entry, and external release receipt for the current publication state.
 
 A failed pre-commit attempt during local release preparation is preserved in the maintainer’s local release-preparation logs. That failure led to the narrow test-only isolation fix so hook-provided `GIT_*` variables cannot redirect fixture repositories or mutate unrelated sentinel indexes during secret scans.
