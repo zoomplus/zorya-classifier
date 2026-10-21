@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import importlib.util
 import math
+import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 
 MODULE_PATH = Path(__file__).parents[1] / "benchmarks" / "v03" / "ui-proposal-probe.py"
@@ -53,11 +55,11 @@ class LetterboxTests(unittest.TestCase):
         for actual, expected in zip(mapped, source, strict=True):
             self.assertAlmostEqual(actual, expected)
 
-    def test_clipping_is_bounded_and_degenerate_clipped_boxes_fail(self) -> None:
+    def test_clipping_is_bounded_and_padding_only_boxes_drop(self) -> None:
         transform = probe.letterbox_transform(1280, 800)
         self.assertEqual(probe.source_box_from_canvas((-10, -8, 35, 40), transform), (0, 0, 35, 40))
-        with self.assertRaises(probe.ProbeError):
-            probe.source_box_from_canvas((-30, -40, -20, -10), transform)
+        self.assertIsNone(probe.source_box_from_canvas((1, 810, 5, 820), transform))
+        self.assertIsNone(probe.source_box_from_canvas((-30, -40, -20, -10), transform))
 
     def test_invalid_canvas_boxes_fail_closed(self) -> None:
         transform = probe.letterbox_transform(1280, 800)
@@ -83,6 +85,52 @@ class CandidateAndReceiptTests(unittest.TestCase):
             path.write_bytes(b"frozen")
             with self.assertRaises(probe.ProbeError):
                 probe.verify_file(path, "0" * 64)
+
+    def test_exclusive_reservation_refuses_existing_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "frozen.json"
+            path.write_text("historical", encoding="utf-8")
+            with self.assertRaises(FileExistsError):
+                probe.reserve_new_file(path)
+            self.assertEqual(path.read_text(encoding="utf-8"), "historical")
+
+    def test_watchdog_termination_joins_worker(self) -> None:
+        process = subprocess.Popen(
+            [sys.executable, "-c", "import time; time.sleep(30)"],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+        probe.terminate_worker(process)
+        self.assertIsNotNone(process.returncode)
+
+    def test_post_run_integrity_records_mutated_model_and_marks_run_unstable(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = root / "manifest.json"
+            model = root / "model.pt"
+            license_file = root / "LICENSE"
+            source = root / "source.png"
+            for path in (manifest, model, license_file, source):
+                path.write_bytes(path.name.encode("utf-8"))
+
+            def receipt(path: Path) -> dict[str, object]:
+                digest, size = probe.sha256_file(path)
+                return {"path": str(path), "sha256": digest, "bytes": size}
+
+            frozen = {
+                "producer": receipt(MODULE_PATH),
+                "manifest": receipt(manifest),
+                "model": receipt(model),
+                "model_license": receipt(license_file),
+            }
+            source_record = {"source": source, "receipt": receipt(source)}
+            args = SimpleNamespace(manifest=manifest, model=model, model_license=license_file)
+            model.write_bytes(b"changed after freeze")
+            integrity = probe.verify_after(args, frozen, [source_record])
+            self.assertFalse(integrity["unchanged"])
+            self.assertEqual(integrity["model"]["sha256"], probe.sha256_file(model)[0])
 
 
 if __name__ == "__main__":
