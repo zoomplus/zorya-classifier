@@ -219,7 +219,7 @@ async function readReferenceMask(
   const bytes = await readFile(path)
   if (createHash('sha256').update(bytes).digest('hex') !== reference.sha256)
     throw new Error(`Reference mask hash mismatch: ${reference.path}`)
-  if (!reference.resampling.startsWith('nearest-neighbor to acquired '))
+  if (!/^nearest-neighbor to (?:the )?acquired /u.test(reference.resampling))
     throw new Error(`Unsupported pinned reference-mask resampling policy: ${reference.path}`)
   const decoded = await sharp(bytes, { failOn: 'error' })
     .greyscale()

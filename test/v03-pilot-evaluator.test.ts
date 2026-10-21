@@ -72,7 +72,8 @@ await test('pilot evaluator counts missing outputs, errors, seed hits, whole box
         sha256: hash(referencePng),
         width: 20,
         height: 20,
-        resampling: 'nearest-neighbor to acquired synthetic raster',
+        // Exercise the actual frozen policy string, including its article, on synthetic pixels.
+        resampling: originalTruth.flatMap((item) => item.referenceMasks)[0]!.resampling,
       },
       {
         path: 'reference-small.png',

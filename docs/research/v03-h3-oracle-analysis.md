@@ -26,7 +26,7 @@ The corrected run closed with all 12 cases complete. Its external `run.json` SHA
 
 Five of nine positive cases had at least one candidate mask whose pixel-derived box met the IoU >= 0.50 and coverage >= 0.90 condition (55.6%). Availability was 3/3 photos, 0/3 UI, and 2/3 maps. All 12 worker rows were complete; there were no zero-candidate cases or truncations. All three negatives had candidates, 20 in total; these are availability counts and not false-positive judgments. One positive has an independent mask reference: its best candidate mask IoU was 0.902. The other eight positives have no independent mask reference in this pilot.
 
-This is a candidate-availability ceiling, not a selected-output score. The strong photo/map availability and zero UI availability suggest that any downstream H2c benefit will be highly stratum-dependent; the UI cases provide no candidate capable of meeting the whole-object gate. Do not infer the final production score from this ceiling.
+This is a candidate-availability ceiling, not a selected-output score. The strong photo/map availability and zero UI availability suggest that any downstream H3b benefit will be highly stratum-dependent; the UI cases provide no candidate capable of meeting the whole-object gate. Do not infer the final production score from this ceiling.
 
 The first closed attempt remains a separate technical failure record: `grounded-proposals-h3-run-01` had all 12 cases recorded as errors before inference, and its `run.json` SHA-256 is `b5bd4e12264a620ebdfb783a70f6d0a4a064c9fdc701d717664ce9464005ea0d`. It was excluded from the corrected-run performance metrics and retained as failure evidence.
 

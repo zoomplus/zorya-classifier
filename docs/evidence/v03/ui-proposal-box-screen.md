@@ -17,12 +17,12 @@ The model emitted 76 boxes after confidence filtering and NMS; 36 were retained 
 
 After the producer outputs and freeze were written, I compared the retained source-coordinate boxes against the existing evaluator-only references in `benchmarks/v03/evaluator-data/pilot-truth.json`. For each positive query, I report the best IoU candidate and its target coverage (intersection divided by reference-box area). A “usable box” for this gate requires both IoU `>=0.50` and coverage `>=0.90`.
 
-| Fixed query | Best candidate IoU | Target coverage | Meets box gate |
-| --- | ---: | ---: | --- |
-| Forward (`pilot-v03-ui-01`) | 0.8854 | 0.8854 | No |
-| Back (`pilot-v03-ui-02`) | 0.8957 | 0.8957 | No |
-| Open document (`pilot-v03-ui-03`) | 0.8458 | 0.8458 | No |
-| Undo absent (`pilot-v03-ui-04`) | — | — | 36 proposals; no semantic acceptance measured |
+| Fixed query                       | Best candidate IoU | Target coverage | Meets box gate                                |
+| --------------------------------- | -----------------: | --------------: | --------------------------------------------- |
+| Forward (`pilot-v03-ui-01`)       |             0.8854 |          0.8854 | No                                            |
+| Back (`pilot-v03-ui-02`)          |             0.8957 |          0.8957 | No                                            |
+| Open document (`pilot-v03-ui-03`) |             0.8458 |          0.8458 | No                                            |
+| Undo absent (`pilot-v03-ui-04`)   |                  — |               — | 36 proposals; no semantic acceptance measured |
 
 The detector closely proposed each positive toolbar button, but every best box was slightly inset and missed the fixed 0.90 coverage cutoff. Therefore the result is **0/3 positives meeting the predeclared box-availability gate**. This is not a mask result, and no threshold was adjusted after seeing it. The absent Undo query demonstrates that proposal presence alone does not establish a false-positive decision rate.
 
