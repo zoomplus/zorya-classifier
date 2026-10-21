@@ -9,7 +9,7 @@ import { evaluateV03Pilot, loadV03PilotTruth } from '../benchmarks/v03/evaluate-
 import type { V03PilotTruth } from '../benchmarks/v03/evaluate-pilot.js'
 import { loadV03PilotCorpus, v03PilotManifests } from '../benchmarks/v03/pilot-manifest.js'
 
-const imageRoot = '/root/work/zorya-classifier-worktrees/v02/corpus'
+const imageRoot = process.cwd()
 const hash = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex')
 
 await test('v0.3 pilot manifest loads 12 opaque DEV cases without evaluator data', async () => {
@@ -58,13 +58,28 @@ await test('pilot evaluator counts missing outputs, errors, seed hits, whole box
       .png()
       .toBuffer()
     await writeFile(join(refs, 'reference.png'), referencePng)
+    const reducedReferenceBits = new Uint8Array(10 * 10)
+    reducedReferenceBits[2 * 10 + 2] = 255
+    const reducedReferencePng = await sharp(Buffer.from(reducedReferenceBits), {
+      raw: { width: 10, height: 10, channels: 1 },
+    })
+      .png()
+      .toBuffer()
+    await writeFile(join(refs, 'reference-small.png'), reducedReferencePng)
     positive.referenceMasks = [
       {
         path: 'reference.png',
         sha256: hash(referencePng),
         width: 20,
         height: 20,
-        resampling: 'synthetic-test',
+        resampling: 'nearest-neighbor to acquired synthetic raster',
+      },
+      {
+        path: 'reference-small.png',
+        sha256: hash(reducedReferencePng),
+        width: 10,
+        height: 10,
+        resampling: 'nearest-neighbor to acquired synthetic raster',
       },
     ]
     const predicted = new Uint8Array([1, 1, 1, 1])
@@ -77,7 +92,12 @@ await test('pilot evaluator counts missing outputs, errors, seed hits, whole box
         extraction: {
           status: 'extracted',
           durationMs: 7,
-          seed: { status: 'located', region: { left: 5, top: 5, width: 1, height: 1 } },
+          seed: {
+            status: 'located',
+            region: { left: 5, top: 5, width: 1, height: 1 },
+            sourceWidth: 20,
+            sourceHeight: 20,
+          },
           mask: {
             file: 'mask.u8',
             sha256: hash(predicted),
@@ -95,7 +115,12 @@ await test('pilot evaluator counts missing outputs, errors, seed hits, whole box
         extraction: {
           status: 'failed',
           reason: 'test',
-          seed: { status: 'located', region: { left: 1, top: 1, width: 2, height: 2 } },
+          seed: {
+            status: 'located',
+            region: { left: 1, top: 1, width: 2, height: 2 },
+            sourceWidth: 20,
+            sourceHeight: 20,
+          },
           cutout: true,
           mask: {
             file: 'mask.u8',
@@ -143,9 +168,153 @@ await test('pilot evaluator counts missing outputs, errors, seed hits, whole box
     assert.equal(report.denominators.failedClassifications, 1)
     assert.equal(report.seedDiagnostic.positiveLocatedSeeds, 1)
     assert.equal(report.seedDiagnostic.positiveSeedHits, 1)
-    assert.equal(report.masks.independentReferenceCount, 1)
-    assert.equal(report.masks.predictionsPresent, 1)
+    assert.equal(report.masks.independentReferenceCount, 2)
+    assert.equal(report.masks.predictionsPresent, 2)
     assert.equal(report.masks.iouAtLeast080, 1)
+  } finally {
+    await rm(temp, { recursive: true, force: true })
+  }
+})
+
+await test('forged boxes and invalid mask canvases cannot count as localization successes', async () => {
+  const corpus = await loadV03PilotCorpus(imageRoot, new AbortController().signal)
+  const originalTruth = await loadV03PilotTruth()
+  const truth = originalTruth.map((item) => ({
+    ...item,
+    sourceWidth: 20,
+    sourceHeight: 20,
+    boxes: item.presence === 'present' ? [{ left: 5, top: 5, width: 2, height: 2 }] : [],
+    referenceMasks: [],
+  }))
+  const testCorpus = corpus.cases.map((item) => ({
+    ...item,
+    image: { ...item.image, width: 20, height: 20 },
+  }))
+  const forged = truth[0]!
+  const wrongCanvas = truth[1]!
+  const seedOnly = truth[2]!
+  const common = { status: 'located', sourceWidth: 20, sourceHeight: 20 }
+  const rows = [
+    {
+      caseId: forged.caseId,
+      imageSha256: forged.imageSha256,
+      classify: { status: 'classified', choice: 'present' },
+      extraction: {
+        status: 'located',
+        seed: { ...common, region: { left: 5, top: 5, width: 2, height: 2 } },
+        mask: {
+          file: 'mask.u8',
+          sha256: '1'.repeat(64),
+          width: 2,
+          height: 2,
+          sourceRegion: { left: 5, top: 5, width: 2, height: 2 },
+          sourceOffset: { x: 5, y: 5 },
+        },
+      },
+    },
+    {
+      caseId: wrongCanvas.caseId,
+      imageSha256: wrongCanvas.imageSha256,
+      classify: { status: 'classified', choice: 'present' },
+      extraction: {
+        status: 'located',
+        seed: { ...common, region: { left: 5, top: 5, width: 2, height: 2 } },
+        mask: {
+          file: 'mask.u8',
+          sha256: '2'.repeat(64),
+          width: 21,
+          height: 2,
+          sourceRegion: { left: 5, top: 5, width: 2, height: 2 },
+          sourceOffset: { x: 5, y: 5 },
+        },
+      },
+    },
+    {
+      caseId: seedOnly.caseId,
+      imageSha256: seedOnly.imageSha256,
+      classify: { status: 'classified', choice: 'present' },
+      extraction: {
+        status: 'located',
+        seed: { ...common, region: { left: 5, top: 5, width: 1, height: 1 } },
+      },
+    },
+  ]
+  const report = await evaluateV03Pilot({
+    corpus: testCorpus,
+    rows,
+    truth,
+    imageRoot: '/missing-reference-root-unused-when-no-mask-truth',
+    outputRoot: '/missing-output-root',
+  })
+  assert.equal(report.denominators.positiveSuccesses, 0)
+  assert.equal(report.denominators.positiveBoxesMeasured, 0)
+  assert.equal(report.wholeObjectLocalization.status, 'not-measured-seed-only-or-no-boxes')
+  assert.equal(report.wholeObjectLocalization.rateAmongAllPositives, null)
+  assert.equal(report.denominators.invalidMaskArtifacts, 2)
+  assert.equal(
+    report.cases.find((row) => row.caseId === forged.caseId)?.maskArtifactReason,
+    'mask-file-unreadable',
+  )
+  assert.equal(
+    report.cases.find((row) => row.caseId === wrongCanvas.caseId)?.maskArtifactReason,
+    'mask-canvas-outside-source',
+  )
+  assert.equal(
+    report.cases.find((row) => row.caseId === seedOnly.caseId)?.wholeBoxStatus,
+    'not-measured-no-mask-box',
+  )
+})
+
+await test('full-source masks use their actual support as the whole-object box', async () => {
+  const corpus = await loadV03PilotCorpus(imageRoot, new AbortController().signal)
+  const originalTruth = await loadV03PilotTruth()
+  const truth = originalTruth.map((item) => ({
+    ...item,
+    sourceWidth: 20,
+    sourceHeight: 20,
+    boxes: item.presence === 'present' ? [{ left: 5, top: 5, width: 2, height: 2 }] : [],
+    referenceMasks: [],
+  }))
+  const testCorpus = corpus.cases.map((item) => ({
+    ...item,
+    image: { ...item.image, width: 20, height: 20 },
+  }))
+  const item = truth[0]!
+  const temp = await mkdtemp(join(tmpdir(), 'v03-pilot-full-mask-'))
+  await mkdir(join(temp, item.caseId), { recursive: true })
+  try {
+    const pixels = new Uint8Array(20 * 20)
+    for (let y = 5; y < 7; y++) for (let x = 5; x < 7; x++) pixels[y * 20 + x] = 1
+    await writeFile(join(temp, item.caseId, 'mask.u8'), pixels)
+    const report = await evaluateV03Pilot({
+      corpus: testCorpus,
+      truth,
+      rows: [
+        {
+          caseId: item.caseId,
+          imageSha256: item.imageSha256,
+          classify: { status: 'classified', choice: 'present' },
+          extraction: {
+            status: 'extracted',
+            seed: { status: 'unknown' },
+            mask: {
+              file: 'mask.u8',
+              sha256: hash(pixels),
+              width: 20,
+              height: 20,
+              sourceRegion: { left: 5, top: 5, width: 2, height: 2 },
+              sourceOffset: { x: 0, y: 0 },
+            },
+          },
+        },
+      ],
+      imageRoot: temp,
+      outputRoot: temp,
+    })
+    assert.equal(report.denominators.positiveSuccesses, 1)
+    assert.equal(report.denominators.positiveBoxesMeasured, 1)
+    assert.equal(report.denominators.invalidMaskArtifacts, 0)
+    assert.deepEqual(report.cases[0]?.finalBox, { left: 5, top: 5, width: 2, height: 2 })
   } finally {
     await rm(temp, { recursive: true, force: true })
   }
