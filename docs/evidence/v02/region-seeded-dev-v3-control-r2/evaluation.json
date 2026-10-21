@@ -1,0 +1,136 @@
+{
+  "schema": "region-seeded-dev-v3-r2-pair-evidence-v1",
+  "phase": "dev",
+  "status": "candidate and prospective control R2 strictly evaluated; original control attempt preserved unscored",
+  "qualification": "DEV evidence only; not heldout or release qualification",
+  "freeze": {
+    "candidateProfileId": "native-luna-presence-first-checked-region-sam-dev-v3",
+    "controlProfileId": "native-luna-presence-first-region-no-image-control-dev-v3",
+    "producerSourceSha256": "be43090b13951e9a6ffa65daffb9413a6a539d8dae335925dc885733a467fb20",
+    "controlR2FreezeSha256": "99251dc8bd69734d64625040ecd4595e81107eeeffb2134d31db4d8c71c4a3df",
+    "candidateVariantSha256": "f4ed437c17160ab1a694961e9b38b63ad76a290a21dbe82aa79d51e169c19697",
+    "controlR2VariantSha256": "b2d85c509ff454ee62299d46a9f7dc7cb3009ca0aaf0ef015344c8a6dc45ed35",
+    "inputAndTruthPins": [
+      {
+        "cases": 20,
+        "inputSha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a",
+        "truthSha256": "793e26845deaa2cb56748ef270b8cb02877218d680068573f02e5af92b26af6a"
+      },
+      {
+        "cases": 10,
+        "inputSha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc",
+        "truthSha256": "c7944190e1cadab695f2688351df10a14132986040dafb72794bb1df4571abfe"
+      },
+      {
+        "cases": 10,
+        "inputSha256": "b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15",
+        "truthSha256": "874971d3e9344f7c54207064115257e5c802260d2a996a53f96bb6a68b2afad3"
+      }
+    ]
+  },
+  "candidate": {
+    "runId": "v02-region-seeded-dev-2026-10-20T235301825Z-10b11642",
+    "manifestSha256": "e18ca240cb35d7f3081d5ab8bf19f93b451e638e5e7887975cce4715c243a819",
+    "summarySha256": "fea18ed9b5dce920495bce1d9cb9e190675ec5630c07b0ae07f73623d731be39",
+    "completionSealSha256": "c65fc9001acdbdedd2e823764012b0ad6b6dbfc9ef820f6aceb073f95fa0f25b",
+    "independentEvaluationSha256": "2ac4d19caaf58ab7ce9c666b7b4a166ec3cc7008e48f869c8849a9891eae0a89",
+    "classification": {
+      "correct": 35,
+      "denominator": 40
+    },
+    "wholeObject": {
+      "positiveMatches": 6,
+      "positiveDenominator": 30,
+      "falseLocations": 0,
+      "negativeDenominator": 10,
+      "unknown": 13,
+      "failed": 6,
+      "notFound": 5
+    },
+    "seedSearch": {
+      "located": 22,
+      "positiveBoxIntersections": 18,
+      "falseSeedLocations": 0,
+      "falseExtractions": 0
+    },
+    "boxChecks": {
+      "successfulAttempts": 28,
+      "verdicts": {
+        "complete": 16,
+        "needsExpansion": 12,
+        "unknown": 0
+      },
+      "expansionOutcomes": {
+        "notNeeded": 13,
+        "noEnclosingMask": 3,
+        "expanded": 6
+      }
+    },
+    "masks": {
+      "referenceInstances": 7,
+      "exactCanvasScored": 4,
+      "iouAtLeast0_8": 1,
+      "unavailable": 3
+    },
+    "physical": {
+      "calls": 162,
+      "knownCostUsd": 0.0645113,
+      "unknownCostCalls": 6,
+      "accountedExposureUsd": 0.3645113
+    }
+  },
+  "controlR2": {
+    "runId": "v02-region-seeded-dev-2026-10-21T000450468Z-35df9878",
+    "manifestSha256": "e4053461190962008d47587fc41b7d4e98afbec8da40d085d2e7808b199332c5",
+    "summarySha256": "d5bd5a5c15b39b4432e815bdf5271f8ee2a15355d76519918576586a7c3cc98e",
+    "completionSealSha256": "12b6d4eb0f49e45310c7f497ec066efb51a0cf959e1634a7398c89ca66f74e06",
+    "independentEvaluationSha256": "132184827f6dcd132b269194453977d72fa6345648422299d40f928fe269f394",
+    "sourceUnchanged": true,
+    "complete": true,
+    "denominator": 40,
+    "classification": {
+      "correct": 10,
+      "denominator": 40
+    },
+    "extractionStatuses": {
+      "notFound": 40
+    },
+    "seedLocations": 0,
+    "maskReferencesUnavailableWithoutPrediction": 7,
+    "physical": {
+      "calls": 40,
+      "knownCostUsd": 0.0008353,
+      "unknownCostCalls": 0,
+      "accountedExposureUsd": 0.0008353
+    }
+  },
+  "pairedPhotoSeedSearch": {
+    "positivePhotoPairs": 16,
+    "method": "paired-percentile-nearest-rank-bootstrap",
+    "iterations": 10000,
+    "seed": "0x5a4f5259",
+    "coarseBoxIntersectionSeedProxy": {
+      "candidateMinusControl": 0.625,
+      "lower95": 0.375,
+      "upper95": 0.875,
+      "passesPositiveDifference": true
+    },
+    "exactReferenceMaskForegroundSeedHit": {
+      "availablePairs": 5,
+      "candidateMinusControl": 0.8,
+      "lower95": 0.4,
+      "upper95": 1,
+      "passesPositiveDifference": true
+    },
+    "interpretation": "These paired comparisons measure seed search only. Seed-cell overlap is a coarse proxy; the exact-mask result applies only to the five photo positives with comparable reference masks. Neither is whole-object localization or cutout accuracy."
+  },
+  "originalControlIdentityFailure": {
+    "manifestSha256": "a0e756cf750ec9d8b8d46aa42d64d7346492f28723d6c729a30077fac58010d9",
+    "summarySha256": "5ea51a5795f645ad39324281bc5e9e2fec6bef501549dce31f43408451bd9733",
+    "completionSealSha256": "6e7a3786da5548d98d6a69bf5772a86e4741333aa0d20883a1c3eb98f66eec5c",
+    "expectedVariantSha256": "5a64ebc3f0261dd7ece37d8428ccae77c9e0c47019216d3cf2876f5b30983511",
+    "observedVariantSha256": "b2d85c509ff454ee62299d46a9f7dc7cb3009ca0aaf0ef015344c8a6dc45ed35",
+    "scored": false,
+    "preservedUnchanged": true
+  }
+}
