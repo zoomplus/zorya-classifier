@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "benchmark": "public-mobile-sam-region-checked-segmentation-resource-v1",
+  "attempt": "987ac32-threads2-20261020T2335Z",
+  "status": "not-qualified",
+  "execution": {
+    "sourceCommit": "987ac32a50150399ef9e4cd75d8ae0c74ac85a74",
+    "sourceManifestSha256": "82f360acba1c99f276b5d0aafb550ce434727f8182d3a8f0b0bc935ad66fcb4f",
+    "sourceFileCount": 59,
+    "sourceManifestUnchanged": true,
+    "archiveReferenceSha256": "265de82fc4f4bdbc0bc5036efb268382c69681a945c42ac8a28c033bb31fcaa0",
+    "archiveInstalledByHarness": false,
+    "platform": "Linux 6.6.87.2 WSL2 x64",
+    "node": "v24.12.0",
+    "nativeThreads": 2,
+    "forcedGc": false,
+    "providerHttpCalls": 0,
+    "latencyUse": "Diagnostic only; shared-host timings are not ranked."
+  },
+  "physicalRun": {
+    "pid": 1609668,
+    "startTicks": 20095846,
+    "clockTicksPerSecond": 100,
+    "startedAtUtc": "2026-10-20T23:36:17.360Z",
+    "measurementStartedAtUtc": "2026-10-20T23:47:23.033Z",
+    "busyStartedAtUtc": "2026-10-20T23:47:55.967Z",
+    "endedAtUtc": "2026-10-21T01:46:25.022Z",
+    "kernelWitnessLastLiveAgeSeconds": 7211.56,
+    "kernelWitnessTerminalStatus": "process-exited",
+    "samePidAndStartTicksVerified": true
+  },
+  "durationAcceptance": {
+    "accepted": false,
+    "reason": "The explicit idle-before phase guard measured 29,999.622479 ms against the required 30,000 ms; the independent ResourceRunner phase anchors span 29,999.850713 ms. These are short by 0.377521 ms and 0.149287 ms respectively. No rounding or wall-clock correction was applied.",
+    "idleSampleEvidence": {
+      "firstIdleSampleMs": 0.13935,
+      "lastIdleSampleMs": 25010.948979,
+      "sampledSpanMs": 25010.809629,
+      "lastIdleLabelledSampleWasNotAtThePhaseBoundary": true,
+      "conclusion": "Samples do not independently establish a 30-second idle window."
+    },
+    "warmupMs": 600431.886769,
+    "idleBeforeMs": 29999.622479,
+    "busyMs": 6541265.349577,
+    "idleAfterMs": 30001.101348,
+    "measurementObservedMs": 6601299.819651,
+    "processObservedMs": 7211437.868273,
+    "requestedTotalMs": 7200000,
+    "kernelWitnessConfirmsProcessLiveForAtLeast7200Seconds": true,
+    "sourceManifestUnchanged": true,
+    "noOwnedChildrenRemain": true,
+    "allOwnedChildrenClosed": true
+  },
+  "work": {
+    "operations": 3176,
+    "locate": 1588,
+    "extract": 1588,
+    "located": 1588,
+    "extracted": 1588,
+    "extractedWithForegroundSeed": 1588,
+    "boxChecks": 4764,
+    "expansionRequests": 1588,
+    "completedAfterExpansion": 794,
+    "unknown": 0,
+    "failed": 0,
+    "timeouts": 0,
+    "providerHttpCalls": 0
+  },
+  "ownedChildLifecycle": {
+    "starts": 4764,
+    "closes": 4764,
+    "stillOwnedAtExit": 0,
+    "passed": true
+  },
+  "idleMemory": {
+    "sampleIntervalMs": 5000,
+    "before": {
+      "sampleCount": 6,
+      "firstTimestampMs": 0.13935,
+      "lastTimestampMs": 25010.948979,
+      "rssBytesMedian": 316346368,
+      "heapUsedBytesMedian": 20454420,
+      "externalBytesMedian": 10319678,
+      "arrayBuffersBytesMedian": 6976182
+    },
+    "after": {
+      "sampleCount": 8,
+      "firstTimestampMs": 6571265.471285,
+      "lastTimestampMs": 6601292.153624,
+      "rssBytesMedian": 350695424,
+      "heapUsedBytesMedian": 23698236,
+      "externalBytesMedian": 8728395,
+      "arrayBuffersBytesMedian": 6155534
+    },
+    "deltas": {
+      "rssBytes": 34349056,
+      "rssMiB": 32.7587890625,
+      "heapUsedBytes": 3243816,
+      "heapUsedMiB": 3.0939178466796875,
+      "externalBytes": -1588283,
+      "arrayBuffersBytes": -820648
+    },
+    "investigationThresholds": {
+      "rssRule": "max(20% of before-idle median, 128 MiB)",
+      "rssThresholdBytes": 134217728,
+      "rssIncreaseBelowThreshold": true,
+      "heapExternalArrayBuffersRule": "max(10% of before-idle median, 16 MiB)",
+      "heapExternalArrayBuffersThresholdBytes": 16777216,
+      "allThreeHeapRelatedIncreasesBelowThreshold": true,
+      "interpretation": "The RSS increase was 32.76 MiB and remained in the final idle median, below the 128 MiB investigation threshold. Heap, external, and ArrayBuffer medians did not exceed their 16 MiB thresholds. This is threshold evidence, not proof that the process has no retained memory."
+    },
+    "parentPeakBytes": {
+      "rss": 353456128,
+      "heapUsed": 39165272,
+      "external": 23478763,
+      "arrayBuffers": 18360082
+    },
+    "ownedChildPeakRssBytes": 563793920
+  },
+  "host": {
+    "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+    "logicalCpus": 16,
+    "physicalMemoryBytes": 33185517568,
+    "availableMemoryBytesBefore": 26706857984,
+    "availableMemoryBytesAfter": 27450941440,
+    "swapTotalBytes": 8589934592,
+    "cgroupLimits": "unavailable",
+    "hostAfterSnapshotAtUtc": "2026-10-21T01:48:38.708Z"
+  },
+  "rawArtifacts": {
+    "report": {
+      "path": ".run/v02/region-checked-soak-987ac32-threads2-20261020T2335Z/report.json",
+      "sha256": "29165562566c507565a64cf268d2a4b55728a13f5324cf6c96aa4bcc22c92e56"
+    },
+    "kernelWitness": {
+      "path": ".run/v02/region-checked-soak-987ac32-threads2-20261020T2335Z/proc-dense-witness.tsv",
+      "sha256": "b7214cc450e19d1bb042716a6bd5fc717be4e35a305786a7dc7a7ebe87169489"
+    },
+    "sourceManifest": {
+      "path": ".run/v02/region-checked-soak-987ac32-threads2-20261020T2335Z/source-manifest.json",
+      "sha256": "82f360acba1c99f276b5d0aafb550ce434727f8182d3a8f0b0bc935ad66fcb4f"
+    },
+    "hostBefore": {
+      "path": ".run/v02/region-checked-soak-987ac32-threads2-20261020T2335Z/host-before.json",
+      "sha256": "3effbb4f76d1636d8b6d838d101dd9c17380e095841ee84dc6448913f521fa47"
+    },
+    "hostAfter": {
+      "path": ".run/v02/region-checked-soak-987ac32-threads2-20261020T2335Z/host-after.json",
+      "sha256": "9e6ff1f0a9b10f7fc37a8367dc717fd38f540aa1271df651ad3cb516d440243d"
+    }
+  },
+  "scopeLimitations": [
+    "This attempt exercises the checked region-segmentation workflow on the pinned source and preserves the full raw report, but it is not qualified because the required idle-before monotonic guard was short by less than 0.4 ms.",
+    "The process lived longer than 7,200 seconds according to the external PID/start-ticks witness, but that does not override the explicit phase guard failure.",
+    "Wall-clock timestamps and nearby kernel-witness rows are retained as metadata; the idle phase endpoints were not independently logged against the kernel monotonic clock, so they do not prove the missing fraction of a millisecond.",
+    "Reported timings are diagnostic only because other CPU workloads were active during the run."
+  ]
+}
