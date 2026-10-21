@@ -13,6 +13,7 @@ const RUNNER = join(BENCHMARK_DIR, 'h11-sa2va-runner.py')
 const COMMON = join(BENCHMARK_DIR, 'h11-sa2va-common.py')
 const WORKER = join(BENCHMARK_DIR, 'h11-sa2va-worker.py')
 const CONTRACT = join(BENCHMARK_DIR, 'h11-sa2va-contract.json')
+const H10_COMMON = join(BENCHMARK_DIR, 'h10-clipseg-common.py')
 const MINIMAL_MANIFEST = '/root/work/zorya-classifier/.run/v03/h10/minimal-inputs.json'
 const MINIMAL_MANIFEST_SHA = '98e8a5e767a6604a02fec0e561fa1b0128cb76783e4a405df4cb96e4b75fd084'
 
@@ -405,6 +406,209 @@ print("ok")
 `
   const result = runPythonScript(python, script)
   assert.equal(result.code, 0, result.stderr)
+})
+
+await test('cuda_runtime_details child source keeps loader work outside the spec guard', async () => {
+  const python = resolvePython()
+  const script = `
+import ast, importlib.util, sys
+from pathlib import Path
+
+COMMON = Path(${JSON.stringify(COMMON)})
+H10_COMMON = Path(${JSON.stringify(H10_COMMON)})
+
+spec = importlib.util.spec_from_file_location("h11_cuda_child_ast", COMMON)
+mod = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = mod
+spec.loader.exec_module(mod)
+
+child_source = mod._cuda_runtime_details_child_source()
+compile(child_source, "<cuda_runtime_details_child>", "exec")
+module = ast.parse(child_source)
+
+def stmt_text(node: ast.AST) -> str:
+    return ast.get_source_segment(child_source, node) or ""
+
+if_nodes = [node for node in module.body if isinstance(node, ast.If)]
+assert len(if_nodes) == 1, "child source must have a single spec guard"
+guard = if_nodes[0]
+assert len(guard.body) == 1 and isinstance(guard.body[0], ast.Raise), guard.body
+assert guard.orelse == []
+
+guard_index = module.body.index(guard)
+after_guard = module.body[guard_index + 1 :]
+joined_after = "\\n".join(stmt_text(node) for node in after_guard)
+assert "module_from_spec" in joined_after
+assert "exec_module" in joined_after
+assert "cuda_runtime_details" in joined_after
+
+after_texts = [stmt_text(node) for node in after_guard]
+mod_from_idx = next(i for i, t in enumerate(after_texts) if "module_from_spec" in t)
+sys_mod_idx = next(
+    i for i, t in enumerate(after_texts) if "sys.modules" in t and "spec.name" in t
+)
+exec_idx = next(i for i, t in enumerate(after_texts) if "exec_module" in t)
+assert mod_from_idx < sys_mod_idx < exec_idx, after_texts
+
+buggy = (
+    "import importlib.util, json, sys; "
+    f"p = {repr(str(H10_COMMON.resolve()))}; "
+    "spec = importlib.util.spec_from_file_location('h10_cuda_runtime_probe', p); "
+    "if spec is None or spec.loader is None: "
+    "raise RuntimeError('cuda probe child failed to load h10 common'); "
+    "mod = importlib.util.module_from_spec(spec); "
+    "spec.loader.exec_module(mod); "
+    "sys.stdout.write(json.dumps(mod.cuda_runtime_details()))"
+)
+try:
+    ast.parse(buggy)
+except SyntaxError:
+    pass
+else:
+    raise AssertionError("semicolon-packed module-level if must be invalid syntax")
+
+nested_bug = (
+    "if True: "
+    "raise RuntimeError('cuda probe child failed to load h10 common'); "
+    "mod = importlib.util.module_from_spec(spec)"
+)
+nested_module = ast.parse(nested_bug)
+nested_if = next(node for node in nested_module.body if isinstance(node, ast.If))
+assert len(nested_if.body) > 1, "semicolon one-liner incorrectly nests loader work under the guard"
+
+print("ok")
+`
+  const result = runPythonScript(python, script)
+  assert.equal(result.code, 0, result.stderr + result.stdout)
+  assert.match(result.stdout, /ok/)
+})
+
+await test('cuda_runtime_details probes CUDA metadata in a short-lived child only', async () => {
+  const python = resolvePython()
+  const script = `
+import importlib.util, json, subprocess, sys
+from pathlib import Path
+from unittest.mock import patch
+
+COMMON = Path(${JSON.stringify(COMMON)})
+H10_COMMON = Path(${JSON.stringify(H10_COMMON)})
+
+spec = importlib.util.spec_from_file_location("h11_cuda_probe", COMMON)
+mod = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = mod
+spec.loader.exec_module(mod)
+
+def forbid_h10_cuda_probe(*args, **kwargs):
+    raise AssertionError("parent must not call h10.cuda_runtime_details")
+
+mod.h10.cuda_runtime_details = forbid_h10_cuda_probe
+
+probe_calls: list[tuple[list[str], dict]] = []
+
+class Completed:
+    def __init__(self, stdout) -> None:
+        self.stdout = stdout
+        self.stderr = ""
+
+def record_run(argv, **kwargs):
+    probe_calls.append((list(argv), dict(kwargs)))
+    return Completed(json.dumps({"cuda_available": False}))
+
+def expect_h11_error(fn):
+    try:
+        fn()
+    except mod.H11Error:
+        return
+    raise AssertionError("expected H11Error")
+
+with patch.object(subprocess, "run", side_effect=record_run):
+    false_only = mod.cuda_runtime_details()
+assert false_only == {"cuda_available": False}
+
+argv, kwargs = probe_calls[-1]
+assert argv[0] == sys.executable
+assert argv[1] == "-c"
+assert str(H10_COMMON.resolve()) in argv[2]
+assert kwargs.get("capture_output") is True
+assert kwargs.get("text") is True
+assert kwargs.get("check") is True
+assert kwargs.get("timeout") == mod.CUDA_RUNTIME_PROBE_TIMEOUT_SECONDS
+
+true_payload = {
+    "cuda_available": True,
+    "cuda_device_index": 0,
+    "cuda_device_name": "fixture GPU",
+    "cuda_version": "12.4",
+}
+
+def record_true(argv, **kwargs):
+    probe_calls.append((list(argv), dict(kwargs)))
+    return Completed(json.dumps(true_payload))
+
+with patch.object(subprocess, "run", side_effect=record_true):
+    true_details = mod.cuda_runtime_details()
+assert true_details == true_payload
+
+def raise_timeout(*args, **kwargs):
+    raise subprocess.TimeoutExpired(cmd=args[0] if args else [], timeout=1)
+
+with patch.object(subprocess, "run", side_effect=raise_timeout):
+    expect_h11_error(mod.cuda_runtime_details)
+
+def raise_nonzero(*args, **kwargs):
+    raise subprocess.CalledProcessError(1, args[0] if args else [])
+
+with patch.object(subprocess, "run", side_effect=raise_nonzero):
+    expect_h11_error(mod.cuda_runtime_details)
+
+def bad_json(*args, **kwargs):
+    return Completed("not-json")
+
+with patch.object(subprocess, "run", side_effect=bad_json):
+    expect_h11_error(mod.cuda_runtime_details)
+
+def missing_flag(*args, **kwargs):
+    return Completed(json.dumps({"cuda_device_index": 0}))
+
+with patch.object(subprocess, "run", side_effect=missing_flag):
+    expect_h11_error(mod.cuda_runtime_details)
+
+def non_bool_flag(*args, **kwargs):
+    return Completed(json.dumps({"cuda_available": "yes"}))
+
+with patch.object(subprocess, "run", side_effect=non_bool_flag):
+    expect_h11_error(mod.cuda_runtime_details)
+
+def non_dict(*args, **kwargs):
+    return Completed(json.dumps([{"cuda_available": True}]))
+
+with patch.object(subprocess, "run", side_effect=non_dict):
+    expect_h11_error(mod.cuda_runtime_details)
+
+def raise_oserror(*args, **kwargs):
+    raise OSError("launch blocked")
+
+with patch.object(subprocess, "run", side_effect=raise_oserror):
+    expect_h11_error(mod.cuda_runtime_details)
+
+def non_string_stdout(*args, **kwargs):
+    return Completed(None)
+
+with patch.object(subprocess, "run", side_effect=non_string_stdout):
+    expect_h11_error(mod.cuda_runtime_details)
+
+def oversize_stdout(*args, **kwargs):
+    payload = "x" * (mod.CUDA_RUNTIME_PROBE_MAX_STDOUT_BYTES + 1)
+    return Completed(payload)
+
+with patch.object(subprocess, "run", side_effect=oversize_stdout):
+    expect_h11_error(mod.cuda_runtime_details)
+
+print("ok")
+`
+  const result = runPythonScript(python, script)
+  assert.equal(result.code, 0, result.stderr + result.stdout)
+  assert.match(result.stdout, /ok/)
 })
 
 await test('owned worker bootstrap requires Linux parent-death guard before imports', async () => {

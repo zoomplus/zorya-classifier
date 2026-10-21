@@ -42,6 +42,8 @@ MAX_ENCODED_BYTES = h10.MAX_ENCODED_BYTES
 MAX_ORIENTED_PIXELS = h10.MAX_ORIENTED_PIXELS
 WHOLE_RUN_TIMEOUT_SECONDS = 600
 CASE_TIMEOUT_SECONDS = 60
+CUDA_RUNTIME_PROBE_TIMEOUT_SECONDS = 15
+CUDA_RUNTIME_PROBE_MAX_STDOUT_BYTES = 4096
 
 GENERATION_MAX_NEW_TOKENS = 128
 GENERATION_DO_SAMPLE = False
@@ -479,10 +481,57 @@ def collect_runtime_receipt(python_executable: Path) -> dict[str, Any]:
     return receipt
 
 
-def cuda_runtime_details() -> dict[str, Any]:
-    import torch
+def _cuda_runtime_details_child_source() -> str:
+    h10_path = json.dumps(str(_H10_COMMON_PATH.resolve()))
+    return (
+        "import importlib.util, json, sys\n"
+        f"p = {h10_path}\n"
+        "spec = importlib.util.spec_from_file_location('h10_cuda_runtime_probe', p)\n"
+        "if spec is None or spec.loader is None:\n"
+        "    raise RuntimeError('cuda probe child failed to load h10 common')\n"
+        "mod = importlib.util.module_from_spec(spec)\n"
+        "sys.modules[spec.name] = mod\n"
+        "spec.loader.exec_module(mod)\n"
+        "sys.stdout.write(json.dumps(mod.cuda_runtime_details()))"
+    )
 
-    return h10.cuda_runtime_details()
+
+def cuda_runtime_details() -> dict[str, Any]:
+    import subprocess
+
+    try:
+        completed = subprocess.run(
+            [sys.executable, "-c", _cuda_runtime_details_child_source()],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=CUDA_RUNTIME_PROBE_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as error:
+        raise H11Error("CUDA runtime probe timed out") from error
+    except subprocess.CalledProcessError as error:
+        raise H11Error("CUDA runtime probe exited unsuccessfully") from error
+    except OSError as error:
+        raise H11Error("CUDA runtime probe failed to start") from error
+
+    raw_stdout = completed.stdout
+    if not isinstance(raw_stdout, str):
+        raise H11Error("CUDA runtime probe returned invalid output")
+
+    stdout = raw_stdout.strip()
+    if len(stdout.encode("utf-8")) > CUDA_RUNTIME_PROBE_MAX_STDOUT_BYTES:
+        raise H11Error("CUDA runtime probe returned malformed JSON")
+
+    try:
+        parsed = json.loads(stdout)
+    except json.JSONDecodeError as error:
+        raise H11Error("CUDA runtime probe returned malformed JSON") from error
+    if not isinstance(parsed, dict):
+        raise H11Error("CUDA runtime probe returned non-dict JSON")
+    cuda_available = parsed.get("cuda_available")
+    if not isinstance(cuda_available, bool):
+        raise H11Error("CUDA runtime probe missing cuda_available bool")
+    return parsed
 
 
 def assert_runtime_pins(runtime: Mapping[str, Any]) -> None:
