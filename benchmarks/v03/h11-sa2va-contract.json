@@ -1,0 +1,370 @@
+{
+  "schema": "v03-h11-sa2va-producer-contract-v1",
+  "hypothesis": "h11-sa2va-text-mask",
+  "status": "planned",
+  "execution": {
+    "wave": 1,
+    "inference_executed": false,
+    "evaluator_executed": false,
+    "note": "Documentation and frozen producer contract only. No DEV result, qualification, or promotion."
+  },
+  "status_note": "Research-only bounded DEV prototype; evaluator truth and reference geometry are never producer inputs.",
+  "model": {
+    "model_id": "ByteDance/Sa2VA-Qwen3-VL-2B",
+    "revision": "173fb6512b3ad6f3c1fe25efa09e723d01d5b6d4",
+    "license": "apache-2.0",
+    "upstream_repository": "https://github.com/bytedance/Sa2VA",
+    "canonical_base_url": "https://huggingface.co/ByteDance/Sa2VA-Qwen3-VL-2B",
+    "pinned_tree_url": "https://huggingface.co/ByteDance/Sa2VA-Qwen3-VL-2B/tree/173fb6512b3ad6f3c1fe25efa09e723d01d5b6d4",
+    "resolve_base_url": "https://huggingface.co/ByteDance/Sa2VA-Qwen3-VL-2B/resolve/173fb6512b3ad6f3c1fe25efa09e723d01d5b6d4",
+    "integrity_note": "Wave 1 did not download model weight files. The three safetensors shard byte and sha256 locks come from official pinned-revision Hugging Face LFS metadata supplied and verified by the owner. All other listed companion artifacts were downloaded from resolve/ URLs at the pinned revision and their byte/sha256 locks were computed from those bytes. Hugging Face API tree git blob OIDs are not SHA-256 and must not be used as locks.",
+    "planned_local_asset_directory": "/root/work/zorya-classifier/.run/v03/assets/sa2va-qwen3-vl-2b-173fb651",
+    "loader": {
+      "entrypoint": "transformers.AutoModel",
+      "from_pretrained": {
+        "local_files_only": true,
+        "trust_remote_code": true,
+        "low_cpu_mem_usage": true,
+        "torch_dtype": "bfloat16",
+        "revision": "173fb6512b3ad6f3c1fe25efa09e723d01d5b6d4"
+      },
+      "eval_mode": true,
+      "inference_mode": true,
+      "requested_device": "cuda:0",
+      "attention": {
+        "eager": true,
+        "use_flash_attn": false,
+        "forbidden_fallbacks": ["fp32_autocast_fallback", "cpu_fallback", "flash_attn_fallback", "device_map_auto_without_explicit_authorization"]
+      },
+      "architecture": {
+        "class_name": "Sa2VAChatModelQwen",
+        "config_class": "Sa2VAChatConfigQwen",
+        "auto_map": {
+          "AutoConfig": "configuration_sa2va_chat.Sa2VAChatConfigQwen",
+          "AutoModel": "modeling_sa2va_qwen.Sa2VAChatModelQwen"
+        }
+      },
+      "remote_code_policy": {
+        "required": true,
+        "no_generic_class_fallback": true,
+        "executable_pins_required": true,
+        "major_risk": "Pinned Python modules execute at load and forward time; unaudited code must be hash-locked and verified before any inference."
+      }
+    },
+    "forward_path": {
+      "method": "predict_forward",
+      "upstream_source_file": "modeling_sa2va_qwen.py",
+      "returns": ["prediction", "prediction_masks"],
+      "upstream_inner_generate_defaults": {
+        "max_new_tokens": 2048,
+        "do_sample": false,
+        "output_hidden_states": true,
+        "return_dict_in_generate": true,
+        "note": "Documented from pinned upstream; H11 runtime must not use these defaults."
+      },
+      "forbidden": ["edit_vendored_upstream", "bypass_generate_interceptor"]
+    },
+    "sam2_runtime_guard": {
+      "source_review": "pinned sam2.py at contract hash lock",
+      "dormant_under_verified_defaults": {
+        "helper": "get_connected_components (os.system wget and JIT extension path)",
+        "reachability": "only via fill_holes_in_mask_scores when SAM2VideoPredictor.fill_hole_area > 0",
+        "note": "Dormant under verified defaults; not an observed runtime blocker when attestation holds."
+      },
+      "required_attestation": {
+        "fill_hole_area": 0,
+        "compile_image_encoder": false
+      },
+      "fail_closed_on_mismatch": true,
+      "forbidden_on_mismatch": ["wget_download_fallback", "jit_extension_compile_fallback", "silent_continue"]
+    }
+  },
+  "processor": {
+    "entrypoint": "transformers.AutoProcessor",
+    "from_pretrained": {
+      "trust_remote_code": true,
+      "use_fast": false,
+      "local_files_only": true,
+      "revision": "173fb6512b3ad6f3c1fe25efa09e723d01d5b6d4"
+    },
+    "preprocessor_config_declared": {
+      "processor_class": "Qwen3VLProcessor",
+      "image_processor_type": "Qwen2VLImageProcessorFast",
+      "note": "Declared metadata only in preprocessor_config.json; expected runtime image processor class differs because use_fast=false."
+    },
+    "expected_runtime_classes": {
+      "processor_class": "Qwen3VLProcessor",
+      "processor_module": "transformers.models.qwen3_vl.processing_qwen3_vl",
+      "image_processor_class": "Qwen2VLImageProcessor",
+      "image_processor_module": "transformers.models.qwen2_vl.image_processing_qwen2_vl",
+      "load_argument_use_fast": false
+    },
+    "smoke_processor_gate": {
+      "description": "Smoke must verify runtime processor and image_processor class and module match expected_runtime_classes exactly after AutoProcessor(..., use_fast=false). Fail closed on any mismatch; do not accept a newly observed mismatch as updated attestation or freeze truth.",
+      "verify_fields": ["processor_class", "processor_module", "image_processor_class", "image_processor_module"]
+    },
+    "official_example_reference": "Model card: AutoProcessor.from_pretrained(..., trust_remote_code=True, use_fast=False)"
+  },
+  "generation_enforcement": {
+    "intercept_target": "inner self.model.generate invoked from predict_forward",
+    "required_call_args": {
+      "max_new_tokens": 128,
+      "do_sample": false
+    },
+    "must_record": ["actual_max_new_tokens_applied", "generated_token_count", "stopped_on_eos", "truncated"],
+    "test_requirement": "Prove effective generate arguments via interception tests, not self-reported metadata alone.",
+    "truncation_policy": {
+      "outcome": "technical_or_integrity_failure",
+      "clean_pass_allowed": false
+    }
+  },
+  "prompt": {
+    "template": "<image>Segment one visible object matching the description below. If no such object is visible, answer not found and do not produce a segmentation mask. If several objects match, segment one of them.\nObject description: {authored_target}",
+    "authored_target_policy": {
+      "preserve_byte_for_byte": true,
+      "no_rewrite": true,
+      "no_prompt_sweep": true,
+      "no_candidate_variants": true
+    }
+  },
+  "required_model_files": [
+    { "path": "README.md", "bytes": 7920, "sha256": "a869c2d4e3c2420604d8bc654e039b1399be34bd1180988df2e853e8de2ab267" },
+    { "path": "added_tokens.json", "bytes": 798, "sha256": "cdece9724d3292a6449f2c0a7024e618630fa1ea03761da5f2a34232708ce3b5" },
+    { "path": "chat_template.jinja", "bytes": 5292, "sha256": "3636d0f0bd6bef02654cdffdc447b79cb2cef8ab02cc75267345946291a489e4" },
+    { "path": "config.json", "bytes": 1721, "sha256": "ca996334e8ec5d2bc3881edb97c92f54d638f2ae6b3f56a216e28b26e35fd44c" },
+    { "path": "configuration_sa2va_chat.py", "bytes": 908, "sha256": "146aaa1001fb23e64b85481eb230792b42a3b361a27797f1101de3e0be08facb" },
+    { "path": "merges.txt", "bytes": 1671853, "sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5" },
+    { "path": "model.safetensors.index.json", "bytes": 167576, "sha256": "a1dbe0d08dd3e22dd8efb7416ba2a5e1d44c4829bf2afe62a599d5de1bc47d76" },
+    { "path": "model-00001-of-00003.safetensors", "bytes": 4984499384, "sha256": "7cc03916bae54cfcbfa2980babd51aa76f7b9f4cc32b9750db461a0fd07e96c3" },
+    { "path": "model-00002-of-00003.safetensors", "bytes": 4998015368, "sha256": "0f3fccf6fca3f76881f2f001787fe3e1642cf00377a7d17a882920de2b9eeda0" },
+    { "path": "model-00003-of-00003.safetensors", "bytes": 684797432, "sha256": "7ce4070a6ff44f7e37a960a7049849590ce6b1557394178d906a296d34654414" },
+    { "path": "modeling_sa2va_qwen.py", "bytes": 9407, "sha256": "67984fe54e96dd483518db42761220cfff4f47b53663ba45c27efb4118705ece" },
+    { "path": "preprocessor_config.json", "bytes": 782, "sha256": "93585062a80db5e8ca038efc7726a3e6411d9db948472d81d63c6303993be8c5" },
+    { "path": "sam2.py", "bytes": 176490, "sha256": "c891b540bf92e102895c5eac17de64c14b7ea6184ded6d2359f24e8b46593fcc" },
+    { "path": "special_tokens_map.json", "bytes": 613, "sha256": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd" },
+    { "path": "templates.py", "bytes": 6956, "sha256": "585663d5c3cf9bba1ee095ae45f88af0866129d70436cbc2ef8aefe957db38d2" },
+    { "path": "tokenizer.json", "bytes": 11423560, "sha256": "ade4f08c34dfcbd3b4d11082162940b785e27af18f916549aa4bc223155c91b8" },
+    { "path": "tokenizer_config.json", "bytes": 6328, "sha256": "5b0d78def291c852daf8a28ed334384019dd561bb877102140364c976fe33264" },
+    { "path": "video_preprocessor_config.json", "bytes": 817, "sha256": "59c5c9eb52182eb14c06ffb10ca9effd29adce5f238a95de23ca14a38dbd2cb1" },
+    { "path": "vocab.json", "bytes": 2776833, "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910" }
+  ],
+  "explicitly_excluded_artifacts": {
+    "description": "Must not be required, loaded, or substituted for pinned safetensors shards.",
+    "patterns": [
+      "pytorch_model.bin",
+      "model.safetensors",
+      "*.ckpt",
+      "*.bin",
+      "*.onnx",
+      "*.pt",
+      "*.pth",
+      "**/__pycache__/**",
+      "unsafe_non_safetensors_weight_formats"
+    ]
+  },
+  "source_bounds": {
+    "max_encoded_bytes": 25165824,
+    "max_oriented_pixels": 2097152,
+    "reject_oversize_without_resize": true,
+    "per_row_image_sha256_required_at_run": true,
+    "explicitly_not_used": "16777216 public cutout cap"
+  },
+  "harness_input_manifest": {
+    "path": "/root/work/zorya-classifier/.run/v03/h10/minimal-inputs.json",
+    "sha256": "98e8a5e767a6604a02fec0e561fa1b0128cb76783e4a405df4cb96e4b75fd084",
+    "schema": "v03-h10-input-manifest-v1",
+    "required_row_count": 12,
+    "row_fields": {
+      "row_index": { "type": "integer", "minimum": 0, "maximum": 11 },
+      "row_key": { "type": "string", "minLength": 1 },
+      "source_path": { "type": "string", "minLength": 1 },
+      "source_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+      "authored_target": { "type": "string", "minLength": 1 }
+    },
+    "forbidden_row_fields": [
+      "stratum",
+      "label",
+      "truth",
+      "reference_mask_path",
+      "reference_box",
+      "expected_mask",
+      "h8_selected_mask",
+      "h9_output",
+      "h10_output",
+      "evaluator_fields"
+    ]
+  },
+  "model_conditioning_payload": {
+    "description": "Only oriented source RGB and the frozen composed prompt may reach the model forward path.",
+    "fields": ["oriented_source_rgb", "composed_prompt_with_authored_target"]
+  },
+  "harness_only_fields": {
+    "description": "Accounting and I/O; never passed into model conditioning.",
+    "fields": ["row_index", "row_key", "source_path", "source_sha256"]
+  },
+  "mask_handling": {
+    "native_fields": ["prediction", "prediction_masks"],
+    "retain_native_masks_max_count": 8,
+    "retain_native_masks_max_bytes_per_row": 16777216,
+    "cap_exceeded_outcome": "technical_error",
+    "selection_policy": {
+      "method": "first_nonempty_in_emission_order",
+      "forbidden": ["truth_guided_selection", "score_based_selection", "largest_area_heuristic"]
+    },
+    "required_selected_mask_shape": "[1, H, W]",
+    "required_selected_mask_dtype": ["bool", "uint8_binary"],
+    "required_spatial_alignment": "oriented_source_height_width",
+    "bounds_derivation": "actual_foreground_pixels_only",
+    "prediction_text_policy": {
+      "diagnostic_only": true,
+      "forbidden": ["parse_not_found", "keyword_or_regex_gate", "text_mask_cooccurrence_integrity_failure"]
+    },
+    "negative_row_scoring": {
+      "evaluator_only": true,
+      "any_final_selected_mask": "false_output",
+      "note": "Producer selects first nonempty mask regardless of prediction text; independent evaluator applies false-output rule on negative manifest rows."
+    },
+    "forbidden_postprocess": ["morphology", "connected_components_pick", "threshold_sweep", "prompt_variants", "resize_to_fixed_grid"]
+  },
+  "row_output": {
+    "required_fields": [
+      "row_index",
+      "row_key",
+      "outcome_kind",
+      "source_width",
+      "source_height",
+      "source_sha256",
+      "oriented_rgb_sha256",
+      "authored_target",
+      "composed_prompt_sha256",
+      "prediction_text",
+      "native_mask_count",
+      "selected_mask_index",
+      "generation_token_count",
+      "generation_truncated"
+    ],
+    "outcome_kind": {
+      "candidate": "First nonempty native mask selected; bounds populated; shape/dtype/alignment verified.",
+      "unresolved_no_mask": "No nonempty mask after capped retention/selection; not proof of semantic absence; negatives judged by evaluator.",
+      "technical_error": "Pin mismatch, bounds violation, timeout, cancellation, cap exceeded, shape/dtype mismatch, truncation, generate-hook failure, worker failure.",
+      "integrity_failure": "Freeze attestation mismatch (e.g. processor class/module ≠ contract pins); not prediction-text parsing."
+    },
+    "candidate_fields": ["mask_path", "mask_sha256", "foreground_bounds"],
+    "timing_fields": ["prep_ms", "forward_ms", "post_ms", "wall_ms"],
+    "diagnostic_fields": ["peak_vram_allocated_bytes", "peak_vram_reserved_bytes", "retained_mask_indices"]
+  },
+  "run_output": {
+    "required_terminal_row_count": 12,
+    "artifacts": ["freeze.json", "run.json", "rows.jsonl", "masks/"],
+    "atomic_finalize": true
+  },
+  "freeze_closure": {
+    "requested_device": "Explicit run authorization; run --device must equal freeze requested_device.",
+    "script_receipts": [
+      { "path_field": "worker_script_path", "sha256_field": "worker_script_sha256" },
+      { "path_field": "runner_script_path", "sha256_field": "runner_script_sha256" },
+      { "path_field": "common_script_path", "sha256_field": "common_script_sha256" }
+    ],
+    "planned_dev_device": "cuda:0",
+    "fake_fixture_device": "fake",
+    "runtime_version_attestation_required": true,
+    "note": "Record Python/Torch/CUDA/Transformers versions and processor class/module smoke gate against expected_runtime_classes; not self-reported hardware proof."
+  },
+  "resource_budget": {
+    "whole_run_timeout_seconds": 600,
+    "per_case_timeout_seconds": 60,
+    "owned_worker": true,
+    "serial_rows": true,
+    "single_model_load": true,
+    "bounded_ipc": true,
+    "physical_child_cancellation": true,
+    "h10_mechanism_reuse": {
+      "mode": "read_only",
+      "scope": ["process_lifecycle", "ipc_framing", "cancellation_join"],
+      "forbidden_transplant": ["clipseg_352_grid", "clip_77_token_assumption", "logits_bilinear_interpolation_pipeline"]
+    }
+  },
+  "base_runtime_observed": {
+    "python": "3.12.3",
+    "torch": "2.6.0+cu124",
+    "transformers": "4.57.3",
+    "torchvision": "present",
+    "note": "Observed environment snapshot for Wave 2 planning; Wave 1 performed no install or mutation."
+  },
+  "overlay_installer_wheels": {
+    "description": "Isolated pip overlay installer-only artifacts; not npm or library runtime dependencies. Install with pip --no-deps and sha256-verified wheels only.",
+    "forbidden": ["mutate_shared_base_env", "reinstall_torch_or_transformers", "implicit_pip_deps_without_hash_pins"],
+    "wheels": [
+      {
+        "name": "qwen-vl-utils",
+        "version": "0.0.14",
+        "filename": "qwen_vl_utils-0.0.14-py3-none-any.whl",
+        "bytes": 8120,
+        "sha256": "5e28657bfd031e56bd447c5901b58ddfc3835285ed100f4c56580e0ade054e96"
+      },
+      {
+        "name": "av",
+        "version": "16.0.1",
+        "filename": "av-16.0.1-cp312-cp312-manylinux_2_28_x86_64.whl",
+        "bytes": 40549383,
+        "sha256": "daecc2072b82b6a942acbdaa9a2e00c05234c61fef976b22713983c020b07992"
+      },
+      {
+        "name": "accelerate",
+        "version": "1.11.0",
+        "filename": "accelerate-1.11.0-py3-none-any.whl",
+        "bytes": 375777,
+        "sha256": "a628fa6beb069b8e549460fc449135d5bd8d73e7a11fd09f0bc9fc4ace7f06f1"
+      },
+      {
+        "name": "psutil",
+        "version": "7.1.0",
+        "filename": "psutil-7.1.0-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "bytes": 291163,
+        "sha256": "8c70e113920d51e89f212dd7be06219a9b88014e63a4cec69b684c327bc474e3"
+      }
+    ],
+    "source_import_evidence": ["qwen_vl_utils.process_vision_info", "tqdm in sam2.py"]
+  },
+  "dev_advancement_gate_reference": {
+    "aggregate_only": true,
+    "positive_same_mask_successes_minimum": 7,
+    "positive_denominator": 9,
+    "false_outputs_maximum": 0,
+    "negative_denominator": 3,
+    "technical_or_integrity_defects_maximum": 0,
+    "evaluator_module": "benchmarks/v03/evaluate-pilot.ts",
+    "evaluator_metric": "mask_derived_decision_box_iou_ge_0_50_and_reference_box_coverage_ge_0_90",
+    "diagnostic_only": ["native_mask_count", "oracle_mask_pixel_iou_when_available"],
+    "note": "DEV gate is diagnostic; this contract does not qualify or promote. Fail/stop hypothesis on gate miss without sweeps or fallback models."
+  },
+  "wave_2_ownership": {
+    "description": "Two Luna coordination supervisors (each gpt-6-luna, reasoning high) supervise only exact Cursor composer-2.5-fast in disjoint worktrees; main remains review/integration owner. Producer and evaluator may run in parallel.",
+    "main_integration_owner": "review and integration only",
+    "producer": {
+      "worktree": "/root/work/zorya-classifier-worktrees/v03/h11-sa2va",
+      "owned_files_only": [
+        "benchmarks/v03/h11-sa2va-common.py",
+        "benchmarks/v03/h11-sa2va-worker.py",
+        "benchmarks/v03/h11-sa2va-runner.py",
+        "benchmarks/v03/h11-sa2va-runner.test.ts"
+      ],
+      "supervisor": { "model": "gpt-6-luna", "reasoning": "high", "implementation_agent": "composer-2.5-fast" }
+    },
+    "evaluator": {
+      "worktree": "/root/work/zorya-classifier-worktrees/v03/h11-evaluator",
+      "owned_files_only": [
+        "benchmarks/v03/evaluate-h11-sa2va.ts",
+        "benchmarks/v03/evaluate-h11-sa2va.test.ts"
+      ],
+      "supervisor": { "model": "gpt-6-luna", "reasoning": "high", "implementation_agent": "composer-2.5-fast" }
+    },
+    "h10_reuse": {
+      "mode": "read_only_import",
+      "preferred": "H10.execute_rows where appropriate",
+      "h11_adapter": "Strip H10-only technical metadata; write H11 contract and run identity.",
+      "forbidden": ["copy_whole_h10_runner_approx_500_lines", "broad_shared_helper_refactor"]
+    },
+    "read_only_reuse": "benchmarks/v03/h10-clipseg-* process/IPC/lifecycle helpers where applicable"
+  }
+}

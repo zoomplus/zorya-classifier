@@ -1,0 +1,118 @@
+# H11 prospective plan: Sa2VA Qwen3-VL-2B text-conditioned segmentation masks
+
+**Status: Wave 1 — planned, not executed (2026-10-21).** This document and `benchmarks/v03/h11-sa2va-contract.json` freeze methodology and producer constraints only. **No** staging, inference, evaluator receipt, qualification, npm export, default provider, or production integration is authorized from this wave. **No** DEV result is claimed until a separately executed frozen run and independent evaluation exist.
+
+**Worktree:** `/root/work/zorya-classifier-worktrees/v03/h11-sa2va`, branch `work/classifier-h11-sa2va`.
+
+## Objective
+
+Run **one** bounded local DEV evaluation of **ByteDance/Sa2VA-Qwen3-VL-2B** at pinned revision `173fb6512b3ad6f3c1fe25efa09e723d01d5b6d4`, using the **same twelve-case producer-safe input manifest** as H10, a **fixed** text+image prompt, and **native model-emitted masks** (not CLIPSeg-style dense logits). Compare outcomes against the frozen H10/H8a context **only after** independent scoring; this plan does **not** predict improvement.
+
+## Hypothesis (testable, not proven)
+
+**H11:** A Sa2VA chat segmentation head, driven by a **single** natural-language target on the **full oriented source**, can emit at least one **whole-object-usable** binary mask on some DEV strata where **H10 CLIPSeg direct logits failed** (independent H10 result: **0/9** positive same-object successes, **1/3** false outputs on negatives; see [H10 plan](v03-h10-clipseg-direct-mask-plan.md)).
+
+**Why this is plausible (inference, not fact):** Sa2VA couples a Qwen3-VL backbone with SAM2-style mask decoding and is trained for **referring segmentation** from language, whereas H10 used a fixed **352×352** CLIPSeg logits grid with **no** generative “not found” path. Sa2VA may handle UI/map language and variable aspect ratios differently.
+
+**Why this may still fail (equally plausible):** Remote custom code, **~10.67 GB (9.93 GiB)** weight footprint and BF16 VRAM on RTX 4080, generative truncation at **128** tokens, processor/class mismatches (`use_fast=false` vs config names), or multi-mask ambiguity. A failed gate **stops** the line without retuning on the same twelve cases.
+
+## Primary sources (facts vs inference)
+
+| Topic | Verified fact | Explicitly not claimed |
+| ----- | ------------- | ---------------------- |
+| Model | HF **`ByteDance/Sa2VA-Qwen3-VL-2B`**, revision **`173fb6512b3ad6f3c1fe25efa09e723d01d5b6d4`** ([pinned tree](https://huggingface.co/ByteDance/Sa2VA-Qwen3-VL-2B/tree/173fb6512b3ad6f3c1fe25efa09e723d01d5b6d4)). | Checkpoints other than this revision. |
+| Upstream code | Official repo [bytedance/Sa2VA](https://github.com/bytedance/Sa2VA) (**Apache-2.0**). Model card load example: `AutoModel.from_pretrained(..., torch_dtype=torch.bfloat16, low_cpu_mem_usage=True, trust_remote_code=True).eval().cuda()` and `AutoProcessor.from_pretrained(..., trust_remote_code=True, use_fast=False)`. | Legal/production approval; automatic trust of unaudited remote code in product paths. |
+| Architecture | Pinned `config.json` **`auto_map`**: `configuration_sa2va_chat.Sa2VAChatConfigQwen`, `modeling_sa2va_qwen.Sa2VAChatModelQwen`; **`architectures`**: `Sa2VAChatModelQwen`. Preprocessor declares **`processor_class`**: `Qwen3VLProcessor`, **`image_processor_type`**: `Qwen2VLImageProcessorFast` (declared metadata only; expected runtime image processor is **`Qwen2VLImageProcessor`** because **`use_fast=false`**). | Effective runtime classes without smoke class/module check against contract pins. |
+| Custom code risk | Executable pinned files include `modeling_sa2va_qwen.py`, `configuration_sa2va_chat.py`, `sam2.py`, `templates.py`; **`trust_remote_code=true`** is **mandatory** for load. **No** fallback to generic Transformers classes if custom code fails. | Static review of all remote code paths in Wave 1. |
+| Weights | Three **safetensors** shards with byte/SHA-256 pins in contract (total **~10.67 GB (9.93 GiB)**). **Wave 1 did not download model weights**; shard sizes/hashes come from official pinned-revision Hugging Face LFS metadata supplied and verified by the owner. | Non-safetensors or partial shard sets; claiming weights were byte-verified via local download in Wave 1. |
+| Generation (upstream) | `predict_forward` in pinned `modeling_sa2va_qwen.py` calls inner `self.model.generate(..., max_new_tokens=2048, do_sample=False, output_hidden_states=True, return_dict_in_generate=True)`. | H11 must **not** rely on upstream **2048**; the future worker must intercept inner **`model.generate`** and enforce exactly **128** tokens (see § Fixed methodology item 5). |
+| SAM2 runtime (pinned `sam2.py`, source review) | `get_connected_components()` may invoke `os.system(wget…)` and a JIT extension, but is reached only via `fill_holes_in_mask_scores` when **`SAM2VideoPredictor.fill_hole_area > 0`**. Native constructor default **`fill_hole_area=0`**; upstream Sa2VA SAM2 builder passes **`compile_image_encoder=False`**. Under those defaults the helper is **dormant** (not an observed runtime blocker). | Download/compile fallback if attestation differs; treating the helper as active without verifying **`fill_hole_area == 0`** and **`compile_image_encoder == false`**. |
+| Outputs (upstream API) | Model returns **`prediction`** (text) and **`prediction_masks`** (mask array(s)). | Mask count, dtype, and source resolution without runtime probe. |
+| Dependencies (source imports) | Pinned model code imports **`qwen_vl_utils.process_vision_info`**; **`sam2.py`** uses **`tqdm`**. | Overlay wheels install cleanly with **`--no-deps`** hash verification on Python **3.12.3** without touching base Torch/Transformers. |
+| H10 baseline | Closed **0/9** positives, **1/3** false outputs on the shared twelve-case DEV cohort. | H11 beats H8a (**7/9**, **2/3** false) or H10 without a new frozen run. |
+| Main qualification | [0.3.0-quality-plan.md](../0.3.0-quality-plan.md) **120-case** gate unchanged. | This **12-case DEV** pilot qualifies or promotes anything. |
+
+**Hash provenance (Wave 1):** **No model weight files were fetched.** The three **safetensors** shard **byte** and **SHA-256** pins come from official pinned-revision Hugging Face **LFS metadata** supplied and verified by the owner. All other listed companion artifacts (configs, tokenizer, remote Python, index, etc.) were **downloaded from `resolve/173fb651…/<path>`** at the pinned revision and their **byte**/**SHA-256** locks were computed from those bytes. Hugging Face **API tree git blob OIDs are not SHA-256** and are not used as integrity pins.
+
+## Fixed methodology (producer contract summary)
+
+Full machine-readable rules: **`benchmarks/v03/h11-sa2va-contract.json`**.
+
+1. **Input manifest (harness only):** `/root/work/zorya-classifier/.run/v03/h10/minimal-inputs.json`, SHA-256 **`98e8a5e767a6604a02fec0e561fa1b0128cb76783e4a405df4cb96e4b75fd084`**. Exactly **12** rows, fixed order; schema fields **`row_index`**, **`row_key`**, **`source_path`**, **`source_sha256`**, **`authored_target`**. Later harness **re-hashes each image** independently; manifest paths are I/O only.
+2. **Zero-leakage:** Producer/model receive **only** oriented source RGB bytes and the composed prompt (including **`authored_target` byte-for-byte**). **No** truth, strata, labels, reference masks/boxes, evaluator fields, or prior hypothesis outputs.
+3. **Prompt (frozen, no sweep):**
+
+   `<image>Segment one visible object matching the description below. If no such object is visible, answer not found and do not produce a segmentation mask. If several objects match, segment one of them.`
+   followed by newline and `Object description: {authored_target}`.
+
+4. **Load:** Local pinned asset directory only; **`local_files_only=true`**, **`trust_remote_code=true`**, every executable/tokenizer/processor file hash-locked; **`AutoProcessor(..., use_fast=False)`** per official 2B example; **`torch.bfloat16`**, **`eval()`**, **`torch.inference_mode()`**, device **`cuda:0`**; **eager** attention / **`use_flash_attn=false`**; **no** dtype/device/backend fallback.
+5. **Generation enforcement:** Future worker **must intercept** the actual inner **`model.generate`** invoked from **`predict_forward`** and enforce **`max_new_tokens=128`**, **`do_sample=false`**, recording **actual** generated token count, **EOS**, and **truncation**. Tests must prove the effective call args, not metadata alone. **Do not edit** vendored upstream Python in the asset tree.
+6. **Mask handling:** Retain up to **8** native masks and **16 MiB** mask payload per row; overflow is **technical_error**. Select the **first nonempty** mask in native emission order (**never** truth-based selection). Require shape **`[1, H, W]`** at **oriented source** **`H×W`**, bool or binary uint8; bounds from **actual foreground pixels**. **`prediction`** text is **diagnostic only** — **no** parsing of “not found”, **no** keyword/regex gate, and **no** rule that co-occurrence of text and masks is an integrity or technical failure. On negative manifest rows, any emitted **final selected mask** is scored as a **false output** by the independent evaluator. Rows with **no** nonempty mask after selection are **`unresolved_no_mask`** (evaluator judges negatives; **not** proof of semantic absence).
+7. **Source bounds:** Encoded bytes **≤ 24 MiB**; oriented pixels **≤ 2,097,152**; reject oversize without resize (same caps as H10 manifest policy).
+8. **Run shape:** One owned worker, **one** model load, **serial** twelve rows; **60 s** per row, **600 s** total; bounded IPC; physical child cancellation. **Reuse H10 process/IPC/lifecycle helpers read-only** in Wave 2; **do not** transplant CLIPSeg **352×352**, **77-token**, or logits-interpolation assumptions.
+
+## Evaluator gate (diagnostic only)
+
+Future evaluator reuses **`benchmarks/v03/evaluate-pilot.ts`** whole-object metric: **mask-derived decision-box IoU ≥ 0.50** and **reference-box coverage ≥ 0.90** per positive. **Frozen DEV advancement:** **≥ 7/9** positive successes and **≤ 0/3** false outputs on negatives, **zero** technical or integrity defects in the scored run. Multiple-mask counts and oracle availability are **diagnostics only**, not selection inputs. **Failure stops the hypothesis** without prompt/threshold/postprocess sweeps, fallback models, or auto-promotion.
+
+## Process ownership and waves
+
+| Wave | Scope | This worktree |
+| ---- | ----- | ------------- |
+| **1 (this)** | Research plan + frozen producer contract JSON only | `docs/research/v03-h11-sa2va-text-mask-plan.md`, `benchmarks/v03/h11-sa2va-contract.json` |
+| **2 (planned elsewhere)** | H11 producer harness + independent evaluator; **two Luna coordination supervisors** (each **`gpt-6-luna`**, reasoning **`high`**) each supervising **only** exact Cursor **`composer-2.5-fast`** in **disjoint** worktrees; **main** remains review/integration owner | See § Wave 2 ownership |
+| **Run** | Single bounded DEV inference + freeze receipts | Caller-owned asset dir outside repo |
+| **Score** | Independent evaluator receipt | Evaluator reads truth; producer never does |
+
+### Wave 2 ownership (coordination)
+
+| Role | Worktree | Owned paths only | Supervisor |
+| ---- | -------- | ---------------- | ---------- |
+| **Producer** | `/root/work/zorya-classifier-worktrees/v03/h11-sa2va` | `benchmarks/v03/h11-sa2va-common.py`, `h11-sa2va-worker.py`, `h11-sa2va-runner.py`, `benchmarks/v03/h11-sa2va-runner.test.ts` | Luna **`gpt-6-luna`** (reasoning **`high`**) → **`composer-2.5-fast`** |
+| **Evaluator** | `/root/work/zorya-classifier-worktrees/v03/h11-evaluator` | `benchmarks/v03/evaluate-h11-sa2va.ts`, `benchmarks/v03/evaluate-h11-sa2va.test.ts` | Luna **`gpt-6-luna`** (reasoning **`high`**) → **`composer-2.5-fast`** |
+
+Producer and evaluator may run **in parallel** because worktrees and file paths are **disjoint**. **Reuse** existing **`H10.execute_rows`** (read-only **import** where appropriate). The H11 adapter **strips H10-only technical metadata** and writes **H11 contract/run identity**. **Do not** copy the whole ~500-line H10 runner or refactor shared helpers beyond this narrow reuse.
+
+Wave 2 **must not** mutate shared Python env or reinstall Torch/Transformers; optional **overlay** installs **`qwen-vl-utils`**, **`av`**, **`accelerate`**, **`psutil`** with **`pip install --no-deps`** and contract wheel SHA-256 checks only.
+
+## Runtime and dependency constraints (recorded, not installed in Wave 1)
+
+- **Observed base (fact from owner):** Python **3.12.3**, Torch **2.6 cu124**, Transformers **4.57.3**, torchvision; base includes packaging, Pillow, requests, numpy, tqdm, pyyaml; **`psutil` missing** until overlay.
+- **Overlay-only PyPI pins** (installer artifacts, **not** npm/library dependencies): see contract `overlay_installer_wheels`.
+- **Expected slow processor (contract pins, not ad-hoc attestation):** **`processor_class=Qwen3VLProcessor`**, module **`transformers.models.qwen3_vl.processing_qwen3_vl`**; **`image_processor_class=Qwen2VLImageProcessor`**, module **`transformers.models.qwen2_vl.image_processing_qwen2_vl`**; load with **`AutoProcessor(..., use_fast=False)`**. Preprocessor config **`image_processor_type=Qwen2VLImageProcessorFast`** is declared metadata only — runtime must use the slow image processor class above. Smoke **fails closed** on any class/module mismatch; do **not** accept a newly observed mismatch as a new attestation.
+- **Open checks:** Verify **`qwen_vl_utils`** import path at smoke; confirm mask API dtypes/shapes on synthetic and one real row; measure load VRAM on RTX 4080; confirm generate hook cannot be bypassed.
+
+## Smoke → run sequence (Wave 2+)
+
+1. Stage all contract-locked files under caller-owned directory; verify every byte/SHA-256; refuse on mismatch.
+2. **Attestation smoke:** Record Python/Torch/CUDA/Transformers versions, **`trust_remote_code`**, processor and image-processor **class/module** against contract pins (with **`use_fast=False`** load arg), attention backend flags, and SAM2 **`fill_hole_area == 0`** plus **`compile_image_encoder == false`** — **fail closed** on mismatch with contract (no silent fallback, **no** wget/JIT download-or-compile fallback, **no** recording a mismatch as updated truth).
+3. **Generate-hook unit test:** Assert intercepted **`generate`** receives **`max_new_tokens=128`**, **`do_sample=False`**; simulate truncation → non-pass outcome.
+4. **Mask contract tests:** Synthetic `[1,H,W]` masks, multi-mask ordering, cap breaches, bounds derivation; **no** text-parse or not-found integrity cases.
+5. **IPC/cancellation tests:** Reuse H10 patterns (silent/stderr-flood fixtures as applicable) with H11 schema.
+6. **Single DEV run:** Twelve manifest rows, serial, freeze **`freeze.json` / `run.json` / `rows.jsonl` / masks/**.
+7. **Independent evaluation** against frozen gate; publish receipt or stop.
+
+## Acceptance and stop rules
+
+- **Advance** only if evaluator reports **≥ 7/9** and **0/3** false outputs with **no** integrity/technical defects.
+- **Stop** on gate failure without retuning prompts, thresholds, postprocessing, or model choice on the **same** twelve rows unless root accepts a **new named experiment**.
+- Preserve all failures, stderr, truncation events, and partial masks in diagnostics.
+- **At most two** complete DEV comparisons per hypothesis family per [0.3.0-quality-plan.md](../0.3.0-quality-plan.md); bad scores do not authorize corrective tuning reruns.
+- **Do not** chain H11 masks into LLM selection on these DEV rows without a separate approved plan.
+
+## Risks and open checks
+
+| Risk | Mitigation / gate |
+| ---- | ----------------- |
+| **Remote custom code** | Full file pin; no fallback; treat any unaudited exec as major security/reproducibility risk. |
+| **VRAM / load on RTX 4080** | BF16, single load, serial rows; smoke records peak VRAM; fail technical if OOM. |
+| **Processor class vs `use_fast=False`** | Smoke checks **pinned** class+module pairs; fail closed on mismatch (declared **`Qwen2VLImageProcessorFast`** in config ≠ expected runtime **`Qwen2VLImageProcessor`**). |
+| **Native `max_new_tokens=2048`** | Mandatory generate interception; truncation → typed failure, cannot clean-pass. |
+| **Multi-mask ambiguity** | First-nonempty emission order only; count logged as diagnostic. |
+| **Prediction text vs masks** | Text is diagnostic only; evaluator scores false outputs on negatives when any final mask is emitted; producer does not parse text or fail rows on phrase/mask co-occurrence. |
+| **Overlay deps (`av`, `qwen-vl-utils`, …)** | Isolated `--no-deps` install with wheel hash verification; never mutate pinned Torch/Transformers. |
+| **Dependency drift in base env** | Record versions in freeze; mismatch → stop. |
+
+## Deferred (explicitly out of Wave 1)
+
+- Asset staging, worker/runner code, tests, inference, evaluator implementation, commits, package installs, weight downloads into repo, sealed truth access, and any claim of qualification or library integration.
