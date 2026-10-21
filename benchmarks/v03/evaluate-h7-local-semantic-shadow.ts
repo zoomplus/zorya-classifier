@@ -3,6 +3,7 @@ import { createReadStream } from 'node:fs'
 import { lstat, readFile, realpath, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { isAbsolute, relative, resolve, sep } from 'node:path'
+import { isDeepStrictEqual } from 'node:util'
 import type { H5AvailabilityReport } from './evaluate-h5-selection.js'
 
 const H5A_RUN_SHA256 = '86d0aab4f7fad3ce0fae182b840ddd540275309471b27cb091dc4e85866d56f0'
@@ -102,6 +103,7 @@ export type H7Freeze = {
   input_json: { path: string; sha256: string; bytes: number }
   case_ids: string[]
   limits: Record<string, unknown>
+  recipe: Record<string, unknown>
   python_runtime: Record<string, unknown>
 }
 
@@ -113,7 +115,7 @@ export type H7LocalSemanticShadowRun = {
   rows: H7Row[]
   source_closure_post: H7Freeze['source_closure']
   asset_lock_post: H7AssetLock
-  worker: { pid: number; exit_code: number | null; closed: boolean }
+  worker: { pid: number | null; exit_code: number | null; closed: boolean }
 }
 
 type CandidateReceipt = {
@@ -150,6 +152,7 @@ type FrozenInputCase = {
   source_sha256?: string
   source_width?: number
   source_height?: number
+  source_roots?: H7SourceRoots
   image?: { path: string; sha256: string; width: number; height: number }
   locate?: { target: string }
 }
@@ -165,7 +168,7 @@ async function validateH7Inputs(
   assert(Array.isArray(payload.cases), 'h7-input-cases')
   assert(payload.source_roots, 'h7-input-source-roots')
   assert(
-    JSON.stringify(payload.source_roots) === JSON.stringify(freeze.source_roots),
+    isDeepStrictEqual(payload.source_roots, freeze.source_roots),
     'h7-input-source-roots-mismatch',
   )
   const frozenManifests = []
@@ -191,6 +194,11 @@ async function validateH7Inputs(
     const expected = expectedById.get(caseId)
     const truth = availabilityById.get(caseId)
     assert(expected && truth, `h7-input-unexpected-case-${caseId}`)
+    if (item.source_roots)
+      assert(
+        isDeepStrictEqual(item.source_roots, freeze.source_roots),
+        `h7-case-source-roots-${caseId}`,
+      )
     const target = item.target ?? item.locate?.target
     const sourceSha256 = item.source_sha256 ?? item.image?.sha256
     const sourceWidth = item.source_width ?? item.image?.width
@@ -280,6 +288,7 @@ function checkRanks(row: H7Row): void {
 }
 
 function validateRow(row: H7Row, truth: H5AvailabilityReport['perCase'][number]): void {
+  assert(['complete', 'error', 'timeout'].includes(row.status), `h7-row-status-${row.case_id}`)
   assert(typeof row.target === 'string' && row.target.length > 0, `h7-target-row-${row.case_id}`)
   assert(row.source_sha256 === truth.sourceSha256, `h7-source-hash-${row.case_id}`)
   assert(
@@ -432,6 +441,32 @@ export function evaluateH7LocalSemanticShadow(
   assert(availability.freezeSha256 === H5A_FREEZE_SHA256, 'h7-h5a-freeze-lock')
   assert(freeze.schema === 'v03-h7-local-semantic-shadow-freeze-v1', 'h7-freeze-schema')
   assert(freeze.status === 'frozen-before-inference', 'h7-freeze-status')
+  assert(
+    isDeepStrictEqual(freeze.limits, {
+      initialization_ms: 120_000,
+      case_ms: 240_000,
+      candidates: 72,
+      per_family: 36,
+      packed_bytes: 19 * 1024 * 1024,
+      cuda_allocated_bytes: 10 * 1024 ** 3,
+      batch_candidates: 2,
+    }),
+    'h7-freeze-limits',
+  )
+  assert(
+    isDeepStrictEqual(freeze.recipe, {
+      context_fraction: 0.25,
+      view_weights: [0.5, 0.5],
+      input_size: 512,
+      padding_rgb: [128, 128, 128],
+      text_padding: 'max_length',
+      truncate: false,
+      processor_resize: false,
+      normalize_dtype: 'float32',
+      presence: 'not-a-presence-decision',
+    }),
+    'h7-freeze-recipe',
+  )
   assert(freeze.source_locks.h5a_run_sha256 === H5A_RUN_SHA256, 'h7-native-run-lock')
   assert(freeze.source_locks.h5a_freeze_sha256 === H5A_FREEZE_SHA256, 'h7-native-freeze-lock')
   assert(
@@ -492,13 +527,18 @@ export function evaluateH7LocalSemanticShadow(
   assert(replay.schema === 'v03-h7-local-semantic-shadow-run-v1', 'h7-schema')
   assert(JSON.stringify(freeze.case_ids) === JSON.stringify(CASE_IDS), 'h7-freeze-case-order')
   assert(JSON.stringify(replay.case_ids) === JSON.stringify(CASE_IDS), 'h7-run-case-order')
-  assert(replay.worker.closed, 'h7-worker-not-closed')
+  assert(replay.worker.pid === null || Number.isInteger(replay.worker.pid), 'h7-worker-pid')
   assert(
-    JSON.stringify(replay.source_closure_post) === JSON.stringify(freeze.source_closure),
+    replay.worker.exit_code === null || Number.isInteger(replay.worker.exit_code),
+    'h7-worker-exit-code',
+  )
+  assert(typeof replay.worker.closed === 'boolean', 'h7-worker-closed-state')
+  assert(
+    isDeepStrictEqual(replay.source_closure_post, freeze.source_closure),
     'h7-source-closure-postrun-mismatch',
   )
   assert(
-    JSON.stringify(replay.asset_lock_post) === JSON.stringify(freeze.asset_lock),
+    isDeepStrictEqual(replay.asset_lock_post, freeze.asset_lock),
     'h7-asset-lock-postrun-mismatch',
   )
   assert(
@@ -509,7 +549,7 @@ export function evaluateH7LocalSemanticShadow(
     JSON.stringify(replay.rows.map((row) => row.case_id)) === JSON.stringify(CASE_IDS),
     'h7-row-case-order',
   )
-  assert(typeof replay.status === 'string' && replay.status.length > 0, 'h7-run-status')
+  assert(['complete', 'incomplete'].includes(replay.status), 'h7-run-status')
 
   const truthByCase = new Map(availability.perCase.map((row) => [row.caseId, row]))
   const candidateAvailability = new Map<string, boolean>()
@@ -731,6 +771,19 @@ export async function evaluateH7LocalSemanticShadowRun(
   assert(inputReceipt.sha256 === freeze.input_json.sha256, 'h7-input-json-hash-mismatch')
   const inputJson = JSON.parse(await readFile(inputPath, 'utf8')) as unknown
   await validateH7Inputs(inputJson, availability, freeze, repositoryRoot)
+  const frozenInputCases = (inputJson as { cases: FrozenInputCase[] }).cases
+  const frozenTargetByCase = new Map(
+    frozenInputCases.map((item) => [
+      item.case_id ?? item.caseId!,
+      item.target ?? item.locate?.target,
+    ]),
+  )
+  for (const row of replay.rows) {
+    assert(
+      row.target === frozenTargetByCase.get(row.case_id),
+      `h7-row-target-mismatch-${row.case_id}`,
+    )
+  }
   const closureVerification = []
   for (const item of freeze.source_closure) {
     assert(isAbsolute(item.path), 'h7-source-closure-path')

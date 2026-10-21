@@ -193,7 +193,26 @@ function fixture() {
     source_closure: [],
     input_json: { path: '/tmp/h7-input.json', sha256: digest('e'), bytes: 1 },
     case_ids: [...caseIds],
-    limits: {},
+    limits: {
+      initialization_ms: 120_000,
+      case_ms: 240_000,
+      candidates: 72,
+      per_family: 36,
+      packed_bytes: 19 * 1024 * 1024,
+      cuda_allocated_bytes: 10 * 1024 ** 3,
+      batch_candidates: 2,
+    },
+    recipe: {
+      context_fraction: 0.25,
+      view_weights: [0.5, 0.5],
+      input_size: 512,
+      padding_rgb: [128, 128, 128],
+      text_padding: 'max_length',
+      truncate: false,
+      processor_resize: false,
+      normalize_dtype: 'float32',
+      presence: 'not-a-presence-decision',
+    },
     python_runtime: {},
   }
   const replay: H7LocalSemanticShadowRun = {
@@ -312,6 +331,18 @@ await test('H7 rejects mask identity drift, forged scores, and unstable ranks', 
 })
 
 await test('H7 rejects changed source locks and post-run asset or source closure drift', () => {
+  const keyOrderOnly = fixture()
+  const { model_id, revision, license, asset_directory, files } =
+    keyOrderOnly.replay.asset_lock_post
+  keyOrderOnly.replay.asset_lock_post = { files, asset_directory, license, revision, model_id }
+  assert.doesNotThrow(() =>
+    evaluateH7LocalSemanticShadow(
+      keyOrderOnly.availability,
+      keyOrderOnly.freeze,
+      keyOrderOnly.replay,
+    ),
+  )
+
   const wrongLock = fixture()
   wrongLock.freeze.source_locks.h4e_run_sha256 = digest('f')
   assert.throws(
