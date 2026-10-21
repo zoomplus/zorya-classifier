@@ -550,3 +550,57 @@ await test('mask evidence distinguishes wrong reference canvas, rejects bad pred
     await rm(directory, { recursive: true, force: true })
   }
 })
+
+await test('reference masks may omit byte-count metadata while retaining bounded hash and pixel validation', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-reference-bytes-'))
+  try {
+    const value = await createRegionSeededEvaluatorFixture(directory, 'region-seeded-sam')
+    const truth = value.options.truths[0]!
+    const rows = JSON.parse((await readFile(truth.path)).toString('utf8')) as Array<{
+      referenceMasks?: Array<Record<string, unknown>>
+    }>
+    assert.equal(rows[0]?.referenceMasks?.length, 1)
+    delete rows[0]!.referenceMasks![0]!.bytes
+    const truthBytes = Buffer.from(JSON.stringify(rows))
+    await writeFile(truth.path, truthBytes)
+    const options = {
+      ...value.options,
+      truths: value.options.truths.map((item, index) =>
+        index === 0 ? { path: item.path, sha256: digest(truthBytes) } : item,
+      ),
+    }
+
+    const report = await evaluateRegionSeededRun(options, signal)
+    assert.equal(report.mask.referenceInstances, 1)
+    assert.equal(report.mask.scored, 1)
+    assert.equal(report.mask.passedAtIoU08, 1)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('reference masks with supplied incorrect byte counts remain rejected', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'region-evaluator-reference-bad-bytes-'))
+  try {
+    const value = await createRegionSeededEvaluatorFixture(directory, 'region-seeded-sam')
+    const truth = value.options.truths[0]!
+    const rows = JSON.parse((await readFile(truth.path)).toString('utf8')) as Array<{
+      referenceMasks?: Array<Record<string, unknown>>
+    }>
+    assert.equal(rows[0]?.referenceMasks?.length, 1)
+    const referenceBytes = await readFile(join(value.options.referenceRoot, 'ref.png'))
+    rows[0]!.referenceMasks![0]!.bytes = referenceBytes.length + 1
+    const truthBytes = Buffer.from(JSON.stringify(rows))
+    await writeFile(truth.path, truthBytes)
+    const options = {
+      ...value.options,
+      truths: value.options.truths.map((item, index) =>
+        index === 0 ? { path: item.path, sha256: digest(truthBytes) } : item,
+      ),
+    }
+
+    await assert.rejects(evaluateRegionSeededRun(options, signal), /size or digest mismatch/u)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})

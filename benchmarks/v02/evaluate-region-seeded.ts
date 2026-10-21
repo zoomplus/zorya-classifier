@@ -46,7 +46,8 @@ const referenceMask = z
       .number()
       .int()
       .positive()
-      .max(16 * 1024 * 1024),
+      .max(16 * 1024 * 1024)
+      .optional(),
     width: z.number().int().positive().max(2048),
     height: z.number().int().positive().max(2048),
   })
@@ -716,9 +717,12 @@ async function scoreReferenceMasks(args: {
       ? resolve(descriptor.path)
       : resolve(referenceRoot, descriptor.path)
     const path = await actualPath(referenceRoot, joined, 'Reference mask')
-    const bytes = await readBoundedCorpusFile(path, descriptor.bytes, signal)
+    const bytes = await readBoundedCorpusFile(path, descriptor.bytes ?? 16 * 1024 * 1024, signal)
     try {
-      if (bytes.length !== descriptor.bytes || digest(bytes) !== descriptor.sha256)
+      if (
+        (descriptor.bytes !== undefined && bytes.length !== descriptor.bytes) ||
+        digest(bytes) !== descriptor.sha256
+      )
         throw new Error('Reference mask size or digest mismatch')
       const decoded = await sharp(bytes, { limitInputPixels: 2_097_152, failOn: 'error' })
         .greyscale()
