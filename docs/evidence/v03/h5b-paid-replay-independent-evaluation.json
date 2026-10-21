@@ -1,0 +1,621 @@
+{
+  "schema": "v03-h5b-independent-selection-evaluation-v1",
+  "production": {
+    "status": "complete",
+    "h5aRunSha256": "86d0aab4f7fad3ce0fae182b840ddd540275309471b27cb091dc4e85866d56f0",
+    "h5aFreezeSha256": "b808985a17b150c1adbc2467bd0df4797a3a6b242db2ba99b174c2fb0f9e6566",
+    "budget": {
+      "admitted_physical_calls": 32,
+      "known_cost_usd": 0.014963899999999999,
+      "unknown_cost_calls": 0,
+      "in_flight_calls": 0,
+      "accounted_exposure_usd": 0.014963899999999999,
+      "max_physical_calls": 36,
+      "max_cost_usd": 2,
+      "unknown_reserve_usd_per_call": 0.1
+    },
+    "physicalCallCount": 32,
+    "logicalCallCount": 32,
+    "budgetCountersClean": true,
+    "closureInterpretation": "independently verified run/freeze bytes, executable source closure, frozen input hashes, provider-call artifacts and selected-mask pixels",
+    "runSha256": "e97c61da98313e49525b43ff8efc89e6da76b16600a01dbde5674aefbb2a574a",
+    "freezeSha256": "356630a9dd3e2961fdddc94ac925977254f782b523f674609e86f62d05c93571",
+    "executableSourceSha256": "b1eabe5e772e5f1136e0dd4dc7ee20ab22e1d97f40ad07db56d9dcbf0c8bb27b",
+    "sourceClosure": {
+      "verifiedFiles": 288,
+      "status": "verified"
+    },
+    "physicalReceipts": {
+      "status": "verified",
+      "verifiedPhysicalCalls": 32,
+      "fileHashes": [
+        {
+          "path": "provider-calls/physical-admission-1.json",
+          "sha256": "36707fe2bea2e3dad639c6f186e0bdbdc52c05a65ac9e99d580c510b432fc3af"
+        },
+        {
+          "path": "provider-calls/physical-http-1.json",
+          "sha256": "a11131071a2c4507336f9f364c55616e2234abae7e25957f0c7b4552790e7187"
+        },
+        {
+          "path": "provider-calls/physical-receipt-1.json",
+          "sha256": "6bc7e885b2537ba03e01072b16b02ee2f8cfaa298e836b200aba2cf7c6e1018d"
+        },
+        {
+          "path": "provider-calls/physical-admission-2.json",
+          "sha256": "6ab74931ea0f5768a1c115687a7a84281f102cdfaa0b98df72f95fef3c1e8f75"
+        },
+        {
+          "path": "provider-calls/physical-http-2.json",
+          "sha256": "dc2543f36b8a197f2aa6fb70369ec562c1124bc50b292e3d8b6166b66f8df90f"
+        },
+        {
+          "path": "provider-calls/physical-receipt-2.json",
+          "sha256": "b31525ef96906a0e5b4a37e0cfa7ead275af1b0137c063c25fd23daf19c93a98"
+        },
+        {
+          "path": "provider-calls/physical-admission-3.json",
+          "sha256": "c403e458c6bda008a7d9555559ba353bce0281f6199199b9c7adc1fcad588e57"
+        },
+        {
+          "path": "provider-calls/physical-http-3.json",
+          "sha256": "d36debb2d861ad37e6f6c245a191c71890430ad847ddee7b4c946ced19b1c54c"
+        },
+        {
+          "path": "provider-calls/physical-receipt-3.json",
+          "sha256": "b6a5468e77194db5e9ec8338b85e964d301478103416b94a0eb9d9e87f9ec708"
+        },
+        {
+          "path": "provider-calls/physical-admission-4.json",
+          "sha256": "6a7950d95de25aae89a471bb067909a760eb24cc560ad64d053cea7d46a553b1"
+        },
+        {
+          "path": "provider-calls/physical-http-4.json",
+          "sha256": "31ef0f9b43acc5f2261394828de004984c70fe1bdec09c80b225c99c1d1b2574"
+        },
+        {
+          "path": "provider-calls/physical-receipt-4.json",
+          "sha256": "ebd39c7238b7146efa4dbe22f5f4f492cec4a16f9ee132af9fdf3c8c049e653c"
+        },
+        {
+          "path": "provider-calls/physical-admission-5.json",
+          "sha256": "0d18db289805e8bcf8ce8c66b37cdf837e9c175ffbe4bff4e9fa72ae56d8e1cb"
+        },
+        {
+          "path": "provider-calls/physical-http-5.json",
+          "sha256": "b808556523a8f22adb0bb9ce61ef40168db7097c073ccc30281a4430fbbf5cc9"
+        },
+        {
+          "path": "provider-calls/physical-receipt-5.json",
+          "sha256": "08b38eb5cb651a8a3cdcc83e7a40ebbbecc866b46242ada50df812082a2a1440"
+        },
+        {
+          "path": "provider-calls/physical-admission-6.json",
+          "sha256": "e8f7eecf0cfe82d3a5bad118e7777a0cf099f5bcaa7071aff904d083bb10d8b5"
+        },
+        {
+          "path": "provider-calls/physical-http-6.json",
+          "sha256": "f2f4d1ae58c3efc7e54e97c3fe5c6364bb026207859852bcb74ef4fda57462b9"
+        },
+        {
+          "path": "provider-calls/physical-receipt-6.json",
+          "sha256": "5c242656dac76c9b54ac98d618f6022331e0717dcea341c5a42ba1167d2968a1"
+        },
+        {
+          "path": "provider-calls/physical-admission-7.json",
+          "sha256": "0f6bb0ca6440d835f3bdd835ad2bd2da93481885a7fda65bfa653a50d60c5063"
+        },
+        {
+          "path": "provider-calls/physical-http-7.json",
+          "sha256": "f545f2625c949274b9f73f2e25eff4a54ec60f529e43e0b181431db3d432e587"
+        },
+        {
+          "path": "provider-calls/physical-receipt-7.json",
+          "sha256": "db20fd304f3f7e539921e2dbfdae8e1c21c20318c365cc1c961c02acfb296d27"
+        },
+        {
+          "path": "provider-calls/physical-admission-8.json",
+          "sha256": "0e9ecbe9602eed42a1dbe7c362ec47b4b8d8e1d8683c16b5b3aede3ee83328bf"
+        },
+        {
+          "path": "provider-calls/physical-http-8.json",
+          "sha256": "6c32784812995e9e8c93471396f64aa32d0185be29af21d70e9d41a786cc12c2"
+        },
+        {
+          "path": "provider-calls/physical-receipt-8.json",
+          "sha256": "666a47f38f0477d32d595034de6245dd6eb8c144b10117b54e761989def97aba"
+        },
+        {
+          "path": "provider-calls/physical-admission-9.json",
+          "sha256": "b1a44bf2417b0871883359ec5967af2b46f23453eac5d42a0c986e1908a15cdf"
+        },
+        {
+          "path": "provider-calls/physical-http-9.json",
+          "sha256": "d574163ce4bca1795a08a687cf02499e8469fa771a844ba9584d51d8086543c3"
+        },
+        {
+          "path": "provider-calls/physical-receipt-9.json",
+          "sha256": "7df54b53d04b81011923e3c189aba0bb0eb21e85538c448e1d90e948f8fa3306"
+        },
+        {
+          "path": "provider-calls/physical-admission-10.json",
+          "sha256": "0892200cbc48e543353423d58de7046907d148d8662548dd95808927f141e843"
+        },
+        {
+          "path": "provider-calls/physical-http-10.json",
+          "sha256": "6b26ff5c5cce2840d574e1688a4534296cace06e43e6ba4bb57ee098a33e7291"
+        },
+        {
+          "path": "provider-calls/physical-receipt-10.json",
+          "sha256": "f87b5df2b9d70249594ff6392a8568ae3c58feaa2749b8be7b1892f6e236fa1d"
+        },
+        {
+          "path": "provider-calls/physical-admission-11.json",
+          "sha256": "81c1b30ab22ea78a89ab71a2a7fb5ced2d9aced0015b606e151ca0c2af8b24c3"
+        },
+        {
+          "path": "provider-calls/physical-http-11.json",
+          "sha256": "1483e1957dc3403c0eadd7c9ad456a3bffd1bd6e94a3482bd0397922f62a7d2a"
+        },
+        {
+          "path": "provider-calls/physical-receipt-11.json",
+          "sha256": "c527b96f68abc4891f14266823d4516e2eacc385706602dbf8340a676049a911"
+        },
+        {
+          "path": "provider-calls/physical-admission-12.json",
+          "sha256": "602a5943bcee76d4b7a3dbbb51f1b41c16ca4261eaca83de5105dddbac8164c6"
+        },
+        {
+          "path": "provider-calls/physical-http-12.json",
+          "sha256": "51b9807a4a1c697a46e62de3dd1ec32bea7ce1ffda352bc4b4cf039ecf855d28"
+        },
+        {
+          "path": "provider-calls/physical-receipt-12.json",
+          "sha256": "333f7e1d3a22a05e76998e594c941e7edfaf3361a501c122eac2bedc99eee79a"
+        },
+        {
+          "path": "provider-calls/physical-admission-13.json",
+          "sha256": "d5c0752c39fea0ff83eaae825732ef8bfa0fde20688232c2b77d8b3f72109ac9"
+        },
+        {
+          "path": "provider-calls/physical-http-13.json",
+          "sha256": "f7625e01b11692ed6bed3abf82d2c8255afc8223ad7f54444465a7a638bee035"
+        },
+        {
+          "path": "provider-calls/physical-receipt-13.json",
+          "sha256": "f925a70b1ff69fb50ccc7c0e03aeeea0b2f74d31ea6fe8f70bcadc89d7f22da3"
+        },
+        {
+          "path": "provider-calls/physical-admission-14.json",
+          "sha256": "a9212b7e661996eb9442fce8d79d145b05ae49cecd7f3bf106abc1a99579c8e5"
+        },
+        {
+          "path": "provider-calls/physical-http-14.json",
+          "sha256": "a46d52729179a12f0f233823c6561024cc7e4891df58d109df2ac479b3df357e"
+        },
+        {
+          "path": "provider-calls/physical-receipt-14.json",
+          "sha256": "977748d5c4b3aa7c428da8acc6f0211f354aee439cdca0d4a5e61ff7b521029d"
+        },
+        {
+          "path": "provider-calls/physical-admission-15.json",
+          "sha256": "95dd134e6877bb8aa19549f76f8a77c8367979752f50fcd3e950157a2cf27132"
+        },
+        {
+          "path": "provider-calls/physical-http-15.json",
+          "sha256": "874567a5e15424f6d8a26e860b4756372bee3fa9d6c14282f90e372896cd63d3"
+        },
+        {
+          "path": "provider-calls/physical-receipt-15.json",
+          "sha256": "2acda205d1632455d9f699a8c7bb0a526d13ffacb557eee348b5be94a02bd195"
+        },
+        {
+          "path": "provider-calls/physical-admission-16.json",
+          "sha256": "b5fdad75ed5681b1c6321bf82f938f56ca9a469bcf0123212a789c531158d157"
+        },
+        {
+          "path": "provider-calls/physical-http-16.json",
+          "sha256": "6193fb68cc2ecc299601a8347377f600bae48254ba0613fbd8a044aded980609"
+        },
+        {
+          "path": "provider-calls/physical-receipt-16.json",
+          "sha256": "9946eb4c10db0a52ee00706a65f8838ff5037c287d88ffd6148e74c0e2832549"
+        },
+        {
+          "path": "provider-calls/physical-admission-17.json",
+          "sha256": "99fbd4f0efca3ef60ea8324dd3842bd7ed1ee556f1f2cf0e0f989f8ca2c89d29"
+        },
+        {
+          "path": "provider-calls/physical-http-17.json",
+          "sha256": "c5ef86152577dcaf4d7c36ab00de6cb3bbe323dc9c3b79b04d988c0edd8a9a1d"
+        },
+        {
+          "path": "provider-calls/physical-receipt-17.json",
+          "sha256": "06ae5d669796f69402fc8aad339641775a6aea1da2148b69b13326583b24d93e"
+        },
+        {
+          "path": "provider-calls/physical-admission-18.json",
+          "sha256": "eefca916801c30428a2fba69fb3ba27894a2b2091a10f791484618f0448f603e"
+        },
+        {
+          "path": "provider-calls/physical-http-18.json",
+          "sha256": "3541fdf9ca96d00553a2173019cac736b7f6b34858e7c0aa4e0da37a3e01be4c"
+        },
+        {
+          "path": "provider-calls/physical-receipt-18.json",
+          "sha256": "289cf04c126eecf58d14904ad73efecc87df4129331e99b254307a5be8300b70"
+        },
+        {
+          "path": "provider-calls/physical-admission-19.json",
+          "sha256": "62b4321acab44d454e244a67e4bbb849ecfd4ac360dec7c976cfd03e2c1e2ca3"
+        },
+        {
+          "path": "provider-calls/physical-http-19.json",
+          "sha256": "fe5c1810a91dcf8c0c46f9ddb407f46288a4297492253cfc3940606ca2b7a6c0"
+        },
+        {
+          "path": "provider-calls/physical-receipt-19.json",
+          "sha256": "f13143afebfa7a2fec8527b0db9af66d94db18a2ff042ebb327c56feab3c72af"
+        },
+        {
+          "path": "provider-calls/physical-admission-20.json",
+          "sha256": "28870cb78fde539b689ca8a2e1b9aa3b67e1ce2e13e4924d7898d21f9f134d98"
+        },
+        {
+          "path": "provider-calls/physical-http-20.json",
+          "sha256": "cdf3d8cad096bea9fabfc6961b82a1e93654dea929f0ef6bbc3cb804c858086f"
+        },
+        {
+          "path": "provider-calls/physical-receipt-20.json",
+          "sha256": "8ed77a328aa7b63eb1c995dd0d26a44ac488da41f3b2f8659c8d26e98499320d"
+        },
+        {
+          "path": "provider-calls/physical-admission-21.json",
+          "sha256": "210b22f7ffa786d72ca2b7ad064135fba80c506c778d6827bbbce0bac6bd8651"
+        },
+        {
+          "path": "provider-calls/physical-http-21.json",
+          "sha256": "846f7fd7283c94469624bc638b8990c0a9833ecb839eeae106e87254c06e8d8a"
+        },
+        {
+          "path": "provider-calls/physical-receipt-21.json",
+          "sha256": "e5b67b3cb90055742860329707c7d5df5bdd2185d926bcda3667aefa9a06519f"
+        },
+        {
+          "path": "provider-calls/physical-admission-22.json",
+          "sha256": "8810ed9ab5334c90e60bacacecf8ef0e219d3a7d60943ccdc07a6b0bc138297c"
+        },
+        {
+          "path": "provider-calls/physical-http-22.json",
+          "sha256": "ae3206d177b0adf6181819a90ae9d41c23aafafe3d5db69d6789c2c202831af3"
+        },
+        {
+          "path": "provider-calls/physical-receipt-22.json",
+          "sha256": "8ac8a181e93ab247fcae6da0683c02be86b7f9a3edc2027b9a87868beeac3739"
+        },
+        {
+          "path": "provider-calls/physical-admission-23.json",
+          "sha256": "f92a81c188001901ee65b0808b3242f0a7a8aa803966a9d9be4238ec133df9cd"
+        },
+        {
+          "path": "provider-calls/physical-http-23.json",
+          "sha256": "b454b83a071c645e98d95f30498f9556f3fdc45ec43cdc07d2376ca0fffc1281"
+        },
+        {
+          "path": "provider-calls/physical-receipt-23.json",
+          "sha256": "318832ce11c0694fbf08de56ddc4ae8118b8def99bd11165f7b4e692423291cc"
+        },
+        {
+          "path": "provider-calls/physical-admission-24.json",
+          "sha256": "858963e6c594bfef9d807855610e16d2f4a41b076412699748c06c21c27ecec0"
+        },
+        {
+          "path": "provider-calls/physical-http-24.json",
+          "sha256": "fb42cce57b71306dfb0b05393d45229717d0c3361f32e49149461c359e520ce2"
+        },
+        {
+          "path": "provider-calls/physical-receipt-24.json",
+          "sha256": "35231dcf300855f21e50e1c3cfbc7ac63777f9a698d0a43d2325dbd457819057"
+        },
+        {
+          "path": "provider-calls/physical-admission-25.json",
+          "sha256": "a085400d171d7e405c0dabf31d2c1326637c6b2e9361f8689a0ca4d8632d2fba"
+        },
+        {
+          "path": "provider-calls/physical-http-25.json",
+          "sha256": "b4157d8b11565888519f4b676a8e5b6ab909ed6962a1f89c437327df092acedd"
+        },
+        {
+          "path": "provider-calls/physical-receipt-25.json",
+          "sha256": "8bd8e73b6cd49a74907adc5a4486df1cb99f7c77103943772d7b5d1a2d8886eb"
+        },
+        {
+          "path": "provider-calls/physical-admission-26.json",
+          "sha256": "d368a3e802f086b469e72d074edb583e27c9def9218f0b89e7a0a9025eb9fb39"
+        },
+        {
+          "path": "provider-calls/physical-http-26.json",
+          "sha256": "c222d56feb4eb2ec63f4b98aca1aab5fafdd8d0a4bf58b08ef4addb5d0418d6d"
+        },
+        {
+          "path": "provider-calls/physical-receipt-26.json",
+          "sha256": "93a3ac3da42d6a76a524b5704072ca771c83add5e83245f97d534c11cadecdb1"
+        },
+        {
+          "path": "provider-calls/physical-admission-27.json",
+          "sha256": "40de680e77714eba026a630763bcbf62a03fb3a7449a79664d2f5dfe4ad7cf3a"
+        },
+        {
+          "path": "provider-calls/physical-http-27.json",
+          "sha256": "399d1c06c4145caa3436ea63b7b64d644bc5d10b759a18e54e4d314f928f9e80"
+        },
+        {
+          "path": "provider-calls/physical-receipt-27.json",
+          "sha256": "9970cb3a10fb789a08d197798db7f790687efbc6c6b31abc449fd96e0a80749e"
+        },
+        {
+          "path": "provider-calls/physical-admission-28.json",
+          "sha256": "c2866e823ea548aa811a7090be7ba3eeb4ef766a2905bc778b581b2697431fe5"
+        },
+        {
+          "path": "provider-calls/physical-http-28.json",
+          "sha256": "db84f164eb9934daf48af027cd41c2a1eb4fd66f0d40eb4f1fc0dd14a7efcb61"
+        },
+        {
+          "path": "provider-calls/physical-receipt-28.json",
+          "sha256": "99f5e7bf6718fd83265d9e74abd385f194c86c86fb7eb133984de9c666426513"
+        },
+        {
+          "path": "provider-calls/physical-admission-29.json",
+          "sha256": "337629eff67b2307c4aa04b94a0a08d5a4d515bcb0416e2e9178de0d99621d44"
+        },
+        {
+          "path": "provider-calls/physical-http-29.json",
+          "sha256": "838dbf2fdad9c7d0238ae019d167dba51b1698284d1019498f6b5e26fc13ba0b"
+        },
+        {
+          "path": "provider-calls/physical-receipt-29.json",
+          "sha256": "26ea8a7119c8a562cfdc7671fb3cc48be3b756c864ad8b670ecd2051dd93cdea"
+        },
+        {
+          "path": "provider-calls/physical-admission-30.json",
+          "sha256": "286ff19f52bd1f521fc42bf30a9963f98e92c3835472cc62b445e7399540ee90"
+        },
+        {
+          "path": "provider-calls/physical-http-30.json",
+          "sha256": "2588cd568c35c608de6196ed1e417e0a7220df72e940e35d96f2f5b5d63eb6ef"
+        },
+        {
+          "path": "provider-calls/physical-receipt-30.json",
+          "sha256": "a50eafee19d8be9517b5786cf6395a2c6dacd61ebcb9ce9997e81147e4a78e4e"
+        },
+        {
+          "path": "provider-calls/physical-admission-31.json",
+          "sha256": "656331f0d7c900c064831aa25214218a4e962f20c880b59d9aa6429aac6eaa9f"
+        },
+        {
+          "path": "provider-calls/physical-http-31.json",
+          "sha256": "eff2fe2ffd162cf847d22cd229264a4a4e0e671c0c4c43ea592e311506dcac85"
+        },
+        {
+          "path": "provider-calls/physical-receipt-31.json",
+          "sha256": "09aebf06a461d8777a2a1c8a4149cde09185dda5924d4a7af2c197fed61fa7d3"
+        },
+        {
+          "path": "provider-calls/physical-admission-32.json",
+          "sha256": "f3788083fcd204e10c38528280e255d7bbcd8a8a9758b7a4ea73b5d078156c29"
+        },
+        {
+          "path": "provider-calls/physical-http-32.json",
+          "sha256": "6211083d906c260e04a071c9ddfb0abacbde22657f1c1f67532620b000990aaa"
+        },
+        {
+          "path": "provider-calls/physical-receipt-32.json",
+          "sha256": "127adaebb6816b208fb6f32ee9f56027c4cfa30078a619b1f014b85578203df5"
+        }
+      ]
+    },
+    "selectedMaskArtifactsVerified": 9,
+    "selectedMaskArtifactsExpected": 9,
+    "physicalReceiptsComplete": true,
+    "freezeAndExecutableClosureVerified": true
+  },
+  "positiveSummary": {
+    "denominator": 9,
+    "unionAvailable": 8,
+    "nominatedAvailable": 6,
+    "selectedSameMaskPass": 3,
+    "generationLoss": ["pilot-v03-map-02"],
+    "nominationLoss": ["pilot-v03-ui-03", "pilot-v03-map-01"],
+    "finalSelectionLoss": ["pilot-v03-photo-03", "pilot-v03-ui-02", "pilot-v03-map-03"]
+  },
+  "negativeSummary": {
+    "denominator": 3,
+    "correctUnknown": 0,
+    "selectedOutputs": ["pilot-v03-photo-04", "pilot-v03-ui-04", "pilot-v03-map-04"],
+    "rows": [
+      {
+        "caseId": "pilot-v03-photo-04",
+        "presence": "absent",
+        "status": "located",
+        "unionAvailable": false,
+        "nominatedAvailable": false,
+        "selectedSameMaskPass": false,
+        "selectedMaskArtifactValid": true,
+        "selected": true,
+        "correctNegativeUnknown": false,
+        "errorCode": null
+      },
+      {
+        "caseId": "pilot-v03-ui-04",
+        "presence": "absent",
+        "status": "located",
+        "unionAvailable": false,
+        "nominatedAvailable": false,
+        "selectedSameMaskPass": false,
+        "selectedMaskArtifactValid": true,
+        "selected": true,
+        "correctNegativeUnknown": false,
+        "errorCode": null
+      },
+      {
+        "caseId": "pilot-v03-map-04",
+        "presence": "absent",
+        "status": "located",
+        "unionAvailable": false,
+        "nominatedAvailable": false,
+        "selectedSameMaskPass": false,
+        "selectedMaskArtifactValid": true,
+        "selected": true,
+        "correctNegativeUnknown": false,
+        "errorCode": null
+      }
+    ]
+  },
+  "allRows": [
+    {
+      "caseId": "pilot-v03-photo-01",
+      "presence": "present",
+      "status": "located",
+      "unionAvailable": true,
+      "nominatedAvailable": true,
+      "selectedSameMaskPass": true,
+      "selectedMaskArtifactValid": true,
+      "selected": true,
+      "correctNegativeUnknown": null,
+      "errorCode": null
+    },
+    {
+      "caseId": "pilot-v03-photo-02",
+      "presence": "present",
+      "status": "located",
+      "unionAvailable": true,
+      "nominatedAvailable": true,
+      "selectedSameMaskPass": true,
+      "selectedMaskArtifactValid": true,
+      "selected": true,
+      "correctNegativeUnknown": null,
+      "errorCode": null
+    },
+    {
+      "caseId": "pilot-v03-photo-03",
+      "presence": "present",
+      "status": "unknown",
+      "unionAvailable": true,
+      "nominatedAvailable": true,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": false,
+      "selected": false,
+      "correctNegativeUnknown": null,
+      "errorCode": null
+    },
+    {
+      "caseId": "pilot-v03-photo-04",
+      "presence": "absent",
+      "status": "located",
+      "unionAvailable": false,
+      "nominatedAvailable": false,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": true,
+      "selected": true,
+      "correctNegativeUnknown": false,
+      "errorCode": null
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "status": "located",
+      "unionAvailable": true,
+      "nominatedAvailable": true,
+      "selectedSameMaskPass": true,
+      "selectedMaskArtifactValid": true,
+      "selected": true,
+      "correctNegativeUnknown": null,
+      "errorCode": null
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "status": "located",
+      "unionAvailable": true,
+      "nominatedAvailable": true,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": true,
+      "selected": true,
+      "correctNegativeUnknown": null,
+      "errorCode": null
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "status": "located",
+      "unionAvailable": true,
+      "nominatedAvailable": false,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": true,
+      "selected": true,
+      "correctNegativeUnknown": null,
+      "errorCode": null
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "status": "located",
+      "unionAvailable": false,
+      "nominatedAvailable": false,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": true,
+      "selected": true,
+      "correctNegativeUnknown": false,
+      "errorCode": null
+    },
+    {
+      "caseId": "pilot-v03-map-01",
+      "presence": "present",
+      "status": "unknown",
+      "unionAvailable": true,
+      "nominatedAvailable": false,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": false,
+      "selected": false,
+      "correctNegativeUnknown": null,
+      "errorCode": null
+    },
+    {
+      "caseId": "pilot-v03-map-02",
+      "presence": "present",
+      "status": "unknown",
+      "unionAvailable": false,
+      "nominatedAvailable": false,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": false,
+      "selected": false,
+      "correctNegativeUnknown": null,
+      "errorCode": null
+    },
+    {
+      "caseId": "pilot-v03-map-03",
+      "presence": "present",
+      "status": "located",
+      "unionAvailable": true,
+      "nominatedAvailable": true,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": true,
+      "selected": true,
+      "correctNegativeUnknown": null,
+      "errorCode": null
+    },
+    {
+      "caseId": "pilot-v03-map-04",
+      "presence": "absent",
+      "status": "located",
+      "unionAvailable": false,
+      "nominatedAvailable": false,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": true,
+      "selected": true,
+      "correctNegativeUnknown": false,
+      "errorCode": null
+    }
+  ]
+}

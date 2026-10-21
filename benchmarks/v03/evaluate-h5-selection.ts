@@ -816,6 +816,8 @@ export async function evaluateH5SelectionRun(
       ...runIdentity,
       sourceClosure,
       physicalReceipts,
+      closureInterpretation:
+        'independently verified run/freeze bytes, executable source closure, frozen input hashes, provider-call artifacts and selected-mask pixels',
       selectedMaskArtifactsVerified: selectedMasks.size,
       selectedMaskArtifactsExpected: replay.rows.filter((row) => row.status === 'located').length,
       budgetCountersClean:
