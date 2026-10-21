@@ -1,0 +1,2328 @@
+{
+  "schema": "v03-grounded-proposals-oracle-availability-v1",
+  "evaluationType": "oracle-candidate-availability-ceiling",
+  "productionResult": false,
+  "negativeCandidateSemantics": "candidate presence is availability only; no false-positive judgment without downstream selection",
+  "runSha256": "df26427390fa0bc20ceaa12d372041a7c012d47bd9e1483c379171c43960e401",
+  "producerScriptSha256": "7695cb42cd6e4e583f6cb5bab08d93d40c18d08c188651948b4fed0b43fdc8b5",
+  "environmentFreezeSha256": "b4f15b3a61228eb660a26e78c88684f7a448624461f3241feb56780de40cac2f",
+  "runStatus": "complete",
+  "plannedCases": 12,
+  "positives": 9,
+  "negatives": 3,
+  "positiveMaskBoxPasses": 5,
+  "positiveMaskBoxAvailabilityRate": 0.5555555555555556,
+  "positiveCasesWithReferenceMasks": 1,
+  "positiveCasesWithEvaluableReferenceMasks": 1,
+  "positiveCasesWithUnavailableReferenceMasks": 0,
+  "negativesWithCandidates": 3,
+  "totalCandidatesOnNegatives": 20,
+  "failedOrMissingCases": 0,
+  "zeroMaskCandidateCases": 0,
+  "truncatedCases": 0,
+  "stratumSummary": {
+    "photo": {
+      "cases": 4,
+      "positives": 3,
+      "positiveMaskBoxPasses": 3,
+      "negatives": 1,
+      "negativesWithCandidates": 1,
+      "failedOrMissing": 0,
+      "truncatedCases": 0
+    },
+    "ui": {
+      "cases": 4,
+      "positives": 3,
+      "positiveMaskBoxPasses": 0,
+      "negatives": 1,
+      "negativesWithCandidates": 1,
+      "failedOrMissing": 0,
+      "truncatedCases": 0
+    },
+    "map": {
+      "cases": 4,
+      "positives": 3,
+      "positiveMaskBoxPasses": 2,
+      "negatives": 1,
+      "negativesWithCandidates": 1,
+      "failedOrMissing": 0,
+      "truncatedCases": 0
+    }
+  },
+  "perCase": [
+    {
+      "caseId": "pilot-v03-photo-01",
+      "stratum": "photo",
+      "presence": "present",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 3,
+      "maskCandidateCount": 3,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": true,
+      "bestMaskBoxIoU": 0.9852681359642762,
+      "bestDetectorBoxIoU": 0.9912758385979624,
+      "bestMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 54.144744873046875,
+            "top": 2.2846436500549316,
+            "width": 937.7529602050781,
+            "height": 647.4143309593201
+          },
+          "detectorMaxBoxIoU": 0.9912758385979624,
+          "detectorWholeBoxPass": true,
+          "maskPath": "masks/pilot-v03-photo-01/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 56,
+            "top": 0,
+            "width": 933,
+            "height": 653
+          },
+          "maskMaxBoxIoU": 0.9852681359642762,
+          "maskWholeBoxPass": true,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C01",
+          "detectorIndex": 1,
+          "detectorBox": {
+            "left": 1.5784378051757812,
+            "top": 59.886253356933594,
+            "width": 174.39324188232422,
+            "height": 256.7376480102539
+          },
+          "detectorMaxBoxIoU": 0.9231324111513429,
+          "detectorWholeBoxPass": true,
+          "maskPath": "masks/pilot-v03-photo-01/C01.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 0,
+            "top": 66,
+            "width": 175,
+            "height": 250
+          },
+          "maskMaxBoxIoU": 0.9563349360223953,
+          "maskWholeBoxPass": true,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C02",
+          "detectorIndex": 2,
+          "detectorBox": {
+            "left": 948.22998046875,
+            "top": 92.04300689697266,
+            "width": 73.2369384765625,
+            "height": 181.3958969116211
+          },
+          "detectorMaxBoxIoU": 0.885951335105182,
+          "detectorWholeBoxPass": true,
+          "maskPath": "masks/pilot-v03-photo-01/C02.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 951,
+            "top": 100,
+            "width": 73,
+            "height": 174
+          },
+          "maskMaxBoxIoU": 0.96118275049666,
+          "maskWholeBoxPass": true,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-photo-02",
+      "stratum": "photo",
+      "presence": "present",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 1,
+      "maskCandidateCount": 1,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": true,
+      "bestMaskBoxIoU": 0.9539234280929056,
+      "bestDetectorBoxIoU": 0.919015880003461,
+      "bestMaskIoU": 0.9020429943588961,
+      "referenceMaskCount": 1,
+      "evaluableReferenceMaskCount": 1,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 351.7803649902344,
+            "top": 217.95040893554688,
+            "width": 351.6966857910156,
+            "height": 244.859375
+          },
+          "detectorMaxBoxIoU": 0.919015880003461,
+          "detectorWholeBoxPass": true,
+          "maskPath": "masks/pilot-v03-photo-02/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 357,
+            "top": 227,
+            "width": 342,
+            "height": 223
+          },
+          "maskMaxBoxIoU": 0.9539234280929056,
+          "maskWholeBoxPass": true,
+          "referenceMaskIoUs": [
+            {
+              "reference": "benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-06-01.png",
+              "iou": 0.9020429943588961,
+              "error": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-photo-03",
+      "stratum": "photo",
+      "presence": "present",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 7,
+      "maskCandidateCount": 7,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": true,
+      "bestMaskBoxIoU": 0.9832474971750843,
+      "bestDetectorBoxIoU": 0.9583934354816986,
+      "bestMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 494.175048828125,
+            "top": 19.832542419433594,
+            "width": 452.8765869140625,
+            "height": 744.9039688110352
+          },
+          "detectorMaxBoxIoU": 0.9556965510938615,
+          "detectorWholeBoxPass": true,
+          "maskPath": "masks/pilot-v03-photo-03/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 505,
+            "top": 22,
+            "width": 439,
+            "height": 746
+          },
+          "maskMaxBoxIoU": 0.9277761614206127,
+          "maskWholeBoxPass": true,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C01",
+          "detectorIndex": 1,
+          "detectorBox": {
+            "left": 1.8985137939453125,
+            "top": 1.170135498046875,
+            "width": 394.3762664794922,
+            "height": 410.7325134277344
+          },
+          "detectorMaxBoxIoU": 0.913045749786698,
+          "detectorWholeBoxPass": true,
+          "maskPath": "masks/pilot-v03-photo-03/C01.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 0,
+            "top": 0,
+            "width": 399,
+            "height": 416
+          },
+          "maskMaxBoxIoU": 0.8995103141282127,
+          "maskWholeBoxPass": true,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C02",
+          "detectorIndex": 2,
+          "detectorBox": {
+            "left": 505.631591796875,
+            "top": 47.246463775634766,
+            "width": 208.9019775390625,
+            "height": 246.81121444702148
+          },
+          "detectorMaxBoxIoU": 0.9501646488338924,
+          "detectorWholeBoxPass": true,
+          "maskPath": "masks/pilot-v03-photo-03/C02.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 508,
+            "top": 51,
+            "width": 205,
+            "height": 205
+          },
+          "maskMaxBoxIoU": 0.8206041371625624,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C03",
+          "detectorIndex": 3,
+          "detectorBox": {
+            "left": 126.14828491210938,
+            "top": 1.3339004516601562,
+            "width": 341.1868896484375,
+            "height": 408.55941009521484
+          },
+          "detectorMaxBoxIoU": 0.9583934354816986,
+          "detectorWholeBoxPass": true,
+          "maskPath": "masks/pilot-v03-photo-03/C03.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 135,
+            "top": 0,
+            "width": 328,
+            "height": 417
+          },
+          "maskMaxBoxIoU": 0.9832474971750843,
+          "maskWholeBoxPass": true,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C04",
+          "detectorIndex": 4,
+          "detectorBox": {
+            "left": 449.69708251953125,
+            "top": 209.3815155029297,
+            "width": 203.5411376953125,
+            "height": 126.41844177246094
+          },
+          "detectorMaxBoxIoU": 0.6553208274503411,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-photo-03/C04.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 453,
+            "top": 199,
+            "width": 194,
+            "height": 132
+          },
+          "maskMaxBoxIoU": 0.7423931937334725,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C05",
+          "detectorIndex": 5,
+          "detectorBox": {
+            "left": 451.97607421875,
+            "top": 47.49093246459961,
+            "width": 262.8076171875,
+            "height": 290.1731300354004
+          },
+          "detectorMaxBoxIoU": 0.660815537623425,
+          "detectorWholeBoxPass": true,
+          "maskPath": "masks/pilot-v03-photo-03/C05.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 453,
+            "top": 51,
+            "width": 260,
+            "height": 259
+          },
+          "maskMaxBoxIoU": 0.740990830754521,
+          "maskWholeBoxPass": true,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C06",
+          "detectorIndex": 6,
+          "detectorBox": {
+            "left": 339.0029602050781,
+            "top": 204.0830841064453,
+            "width": 319.9043884277344,
+            "height": 558.7404632568359
+          },
+          "detectorMaxBoxIoU": 0.2366401262534598,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-photo-03/C06.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 353,
+            "top": 205,
+            "width": 325,
+            "height": 563
+          },
+          "maskMaxBoxIoU": 0.26798896100058367,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-photo-04",
+      "stratum": "photo",
+      "presence": "absent",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 4,
+      "maskCandidateCount": 4,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": false,
+      "bestMaskBoxIoU": 0,
+      "bestDetectorBoxIoU": 0,
+      "bestMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 250.29446411132812,
+            "top": 104.53679656982422,
+            "width": 602.0845642089844,
+            "height": 413.06909942626953
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-photo-04/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 253,
+            "top": 110,
+            "width": 596,
+            "height": 403
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C01",
+          "detectorIndex": 1,
+          "detectorBox": {
+            "left": 251.91885375976562,
+            "top": 280.0251770019531,
+            "width": 599.7277526855469,
+            "height": 237.81838989257812
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-photo-04/C01.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 255,
+            "top": 286,
+            "width": 595,
+            "height": 227
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C02",
+          "detectorIndex": 2,
+          "detectorBox": {
+            "left": 1.1198959350585938,
+            "top": 117.25589752197266,
+            "width": 228.15930938720703,
+            "height": 398.8226547241211
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-photo-04/C02.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 0,
+            "top": 121,
+            "width": 228,
+            "height": 394
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C03",
+          "detectorIndex": 3,
+          "detectorBox": {
+            "left": 252.70999145507812,
+            "top": 323.6555480957031,
+            "width": 596.0607604980469,
+            "height": 192.90756225585938
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-photo-04/C03.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 256,
+            "top": 321,
+            "width": 591,
+            "height": 192
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "stratum": "ui",
+      "presence": "present",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 9,
+      "maskCandidateCount": 9,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": false,
+      "bestMaskBoxIoU": 0.005384879997883094,
+      "bestDetectorBoxIoU": 0.005249775527643964,
+      "bestMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 187.48776245117188,
+            "top": 84.18500518798828,
+            "width": 909.2283020019531,
+            "height": 627.4581832885742
+          },
+          "detectorMaxBoxIoU": 0.002853623462149173,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-01/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 189,
+            "top": 88,
+            "width": 901,
+            "height": 622
+          },
+          "maskMaxBoxIoU": 0.0029049537669827382,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C01",
+          "detectorIndex": 1,
+          "detectorBox": {
+            "left": 849.1578369140625,
+            "top": 134.82095336914062,
+            "width": 46.63470458984375,
+            "height": 38.414306640625
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-01/C01.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 851,
+            "top": 136,
+            "width": 44,
+            "height": 38
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C02",
+          "detectorIndex": 2,
+          "detectorBox": {
+            "left": 340.9452819824219,
+            "top": 201.37435913085938,
+            "width": 744.9797668457031,
+            "height": 338.2047424316406
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-01/C02.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 350,
+            "top": 214,
+            "width": 734,
+            "height": 319
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C03",
+          "detectorIndex": 3,
+          "detectorBox": {
+            "left": 190.03985595703125,
+            "top": 95.00662994384766,
+            "width": 903.0140991210938,
+            "height": 454.6744613647461
+          },
+          "detectorMaxBoxIoU": 0.0039651471445370495,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-01/C03.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 190,
+            "top": 88,
+            "width": 900,
+            "height": 455
+          },
+          "maskMaxBoxIoU": 0.003975579975579975,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C04",
+          "detectorIndex": 4,
+          "detectorBox": {
+            "left": 791.0072021484375,
+            "top": 134.96051025390625,
+            "width": 47.08984375,
+            "height": 38.243988037109375
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-01/C04.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 795,
+            "top": 136,
+            "width": 42,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C05",
+          "detectorIndex": 5,
+          "detectorBox": {
+            "left": 1047.04833984375,
+            "top": 133.87339782714844,
+            "width": 41.5614013671875,
+            "height": 40.852996826171875
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-01/C05.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 1049,
+            "top": 136,
+            "width": 39,
+            "height": 38
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C06",
+          "detectorIndex": 6,
+          "detectorBox": {
+            "left": 404.04400634765625,
+            "top": 135.71022033691406,
+            "width": 43.969940185546875,
+            "height": 36.481903076171875
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-01/C06.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 403,
+            "top": 136,
+            "width": 45,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C07",
+          "detectorIndex": 7,
+          "detectorBox": {
+            "left": 459.6723937988281,
+            "top": 134.10069274902344,
+            "width": 91.83370971679688,
+            "height": 39.712860107421875
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-01/C07.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 462,
+            "top": 136,
+            "width": 88,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C08",
+          "detectorIndex": 8,
+          "detectorBox": {
+            "left": 332.97149658203125,
+            "top": 136.12184143066406,
+            "width": 757.0542602539062,
+            "height": 408.2692108154297
+          },
+          "detectorMaxBoxIoU": 0.005249775527643964,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-01/C08.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 347,
+            "top": 135,
+            "width": 741,
+            "height": 408
+          },
+          "maskMaxBoxIoU": 0.005384879997883094,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "stratum": "ui",
+      "presence": "present",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 8,
+      "maskCandidateCount": 8,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": false,
+      "bestMaskBoxIoU": 0.005384879997883094,
+      "bestDetectorBoxIoU": 0.005184691227064975,
+      "bestMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 187.68569946289062,
+            "top": 84.39996337890625,
+            "width": 908.6291198730469,
+            "height": 627.0736694335938
+          },
+          "detectorMaxBoxIoU": 0.0028572562028967626,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-02/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 189,
+            "top": 88,
+            "width": 901,
+            "height": 622
+          },
+          "maskMaxBoxIoU": 0.0029049537669827382,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C01",
+          "detectorIndex": 1,
+          "detectorBox": {
+            "left": 849.4762573242188,
+            "top": 135.08917236328125,
+            "width": 45.8782958984375,
+            "height": 37.90058898925781
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-02/C01.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 851,
+            "top": 136,
+            "width": 44,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C02",
+          "detectorIndex": 2,
+          "detectorBox": {
+            "left": 1047.4656982421875,
+            "top": 134.274169921875,
+            "width": 40.915771484375,
+            "height": 40.196380615234375
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-02/C02.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 1049,
+            "top": 136,
+            "width": 39,
+            "height": 38
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C03",
+          "detectorIndex": 3,
+          "detectorBox": {
+            "left": 190.51608276367188,
+            "top": 94.46337127685547,
+            "width": 902.0137023925781,
+            "height": 453.0871047973633
+          },
+          "detectorMaxBoxIoU": 0.003983451773319579,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-02/C03.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 190,
+            "top": 88,
+            "width": 900,
+            "height": 455
+          },
+          "maskMaxBoxIoU": 0.003975579975579975,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C04",
+          "detectorIndex": 4,
+          "detectorBox": {
+            "left": 341.56024169921875,
+            "top": 201.610595703125,
+            "width": 744.8275756835938,
+            "height": 338.02093505859375
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-02/C04.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 350,
+            "top": 214,
+            "width": 734,
+            "height": 319
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C05",
+          "detectorIndex": 5,
+          "detectorBox": {
+            "left": 791.218505859375,
+            "top": 135.05894470214844,
+            "width": 46.75262451171875,
+            "height": 38.06834411621094
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-02/C05.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 795,
+            "top": 136,
+            "width": 42,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C06",
+          "detectorIndex": 6,
+          "detectorBox": {
+            "left": 664.4178466796875,
+            "top": 135.3527069091797,
+            "width": 45.1370849609375,
+            "height": 37.27500915527344
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-02/C06.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 667,
+            "top": 137,
+            "width": 42,
+            "height": 35
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C07",
+          "detectorIndex": 7,
+          "detectorBox": {
+            "left": 334.5928955078125,
+            "top": 136.8176727294922,
+            "width": 755.74169921875,
+            "height": 406.25807189941406
+          },
+          "detectorMaxBoxIoU": 0.005184691227064975,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-02/C07.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 347,
+            "top": 135,
+            "width": 741,
+            "height": 408
+          },
+          "maskMaxBoxIoU": 0.005384879997883094,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "stratum": "ui",
+      "presence": "present",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 8,
+      "maskCandidateCount": 8,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": false,
+      "bestMaskBoxIoU": 0.0043070397259156535,
+      "bestDetectorBoxIoU": 0.004177710856584169,
+      "bestMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 187.34600830078125,
+            "top": 84.2996597290039,
+            "width": 908.5964965820312,
+            "height": 627.2609481811523
+          },
+          "detectorMaxBoxIoU": 0.002779302826819156,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-03/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 189,
+            "top": 88,
+            "width": 901,
+            "height": 622
+          },
+          "maskMaxBoxIoU": 0.0028264415030102314,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C01",
+          "detectorIndex": 1,
+          "detectorBox": {
+            "left": 340.0558776855469,
+            "top": 201.5977325439453,
+            "width": 745.1352844238281,
+            "height": 337.7275848388672
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-03/C01.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 350,
+            "top": 214,
+            "width": 734,
+            "height": 319
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C02",
+          "detectorIndex": 2,
+          "detectorBox": {
+            "left": 849.1864013671875,
+            "top": 135.0890350341797,
+            "width": 46.383056640625,
+            "height": 37.906524658203125
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-03/C02.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 851,
+            "top": 136,
+            "width": 44,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C03",
+          "detectorIndex": 3,
+          "detectorBox": {
+            "left": 193.83145141601562,
+            "top": 129.10414123535156,
+            "width": 898.6147155761719,
+            "height": 421.9327850341797
+          },
+          "detectorMaxBoxIoU": 0.004177710856584169,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-03/C03.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 191,
+            "top": 133,
+            "width": 897,
+            "height": 410
+          },
+          "maskMaxBoxIoU": 0.0043070397259156535,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C04",
+          "detectorIndex": 4,
+          "detectorBox": {
+            "left": 1047.1939697265625,
+            "top": 134.03965759277344,
+            "width": 41.1676025390625,
+            "height": 40.425445556640625
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-03/C04.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 1049,
+            "top": 136,
+            "width": 39,
+            "height": 38
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C05",
+          "detectorIndex": 5,
+          "detectorBox": {
+            "left": 459.6128845214844,
+            "top": 134.13128662109375,
+            "width": 91.75234985351562,
+            "height": 39.28291320800781
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-03/C05.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 462,
+            "top": 136,
+            "width": 88,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C06",
+          "detectorIndex": 6,
+          "detectorBox": {
+            "left": 403.6300354003906,
+            "top": 135.2126922607422,
+            "width": 44.450897216796875,
+            "height": 36.993743896484375
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-03/C06.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 403,
+            "top": 136,
+            "width": 45,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C07",
+          "detectorIndex": 7,
+          "detectorBox": {
+            "left": 790.7669067382812,
+            "top": 135.080078125,
+            "width": 47.01251220703125,
+            "height": 37.91398620605469
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-03/C07.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 795,
+            "top": 136,
+            "width": 42,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "stratum": "ui",
+      "presence": "absent",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 9,
+      "maskCandidateCount": 9,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": false,
+      "bestMaskBoxIoU": 0,
+      "bestDetectorBoxIoU": 0,
+      "bestMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 187.49046325683594,
+            "top": 83.90636444091797,
+            "width": 908.4944000244141,
+            "height": 627.626594543457
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-04/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 189,
+            "top": 88,
+            "width": 901,
+            "height": 622
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C01",
+          "detectorIndex": 1,
+          "detectorBox": {
+            "left": 849.3692016601562,
+            "top": 135.1195831298828,
+            "width": 46.12457275390625,
+            "height": 38.09568786621094
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-04/C01.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 851,
+            "top": 136,
+            "width": 44,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C02",
+          "detectorIndex": 2,
+          "detectorBox": {
+            "left": 189.74301147460938,
+            "top": 95.15257263183594,
+            "width": 902.7678527832031,
+            "height": 454.5074005126953
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-04/C02.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 190,
+            "top": 88,
+            "width": 900,
+            "height": 455
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C03",
+          "detectorIndex": 3,
+          "detectorBox": {
+            "left": 340.8323974609375,
+            "top": 200.29428100585938,
+            "width": 745.0406494140625,
+            "height": 339.3002014160156
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-04/C03.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 350,
+            "top": 214,
+            "width": 734,
+            "height": 319
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C04",
+          "detectorIndex": 4,
+          "detectorBox": {
+            "left": 1047.1839599609375,
+            "top": 134.09298706054688,
+            "width": 41.3021240234375,
+            "height": 40.65895080566406
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-04/C04.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 1049,
+            "top": 136,
+            "width": 39,
+            "height": 38
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C05",
+          "detectorIndex": 5,
+          "detectorBox": {
+            "left": 790.9933471679688,
+            "top": 135.1289825439453,
+            "width": 46.81842041015625,
+            "height": 38.130645751953125
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-04/C05.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 795,
+            "top": 136,
+            "width": 42,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C06",
+          "detectorIndex": 6,
+          "detectorBox": {
+            "left": 404.2198486328125,
+            "top": 135.8416748046875,
+            "width": 43.55889892578125,
+            "height": 36.32136535644531
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-04/C06.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 403,
+            "top": 136,
+            "width": 45,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C07",
+          "detectorIndex": 7,
+          "detectorBox": {
+            "left": 459.86358642578125,
+            "top": 134.24412536621094,
+            "width": 91.467041015625,
+            "height": 39.51863098144531
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-04/C07.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 462,
+            "top": 136,
+            "width": 88,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C08",
+          "detectorIndex": 8,
+          "detectorBox": {
+            "left": 412.4666748046875,
+            "top": 141.37477111816406,
+            "width": 26.32177734375,
+            "height": 25.957000732421875
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-ui-04/C08.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 407,
+            "top": 138,
+            "width": 40,
+            "height": 33
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-map-01",
+      "stratum": "map",
+      "presence": "present",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 8,
+      "maskCandidateCount": 8,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": true,
+      "bestMaskBoxIoU": 0.7020408163265306,
+      "bestDetectorBoxIoU": 0.7584005279999225,
+      "bestMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 535.7682495117188,
+            "top": 242.98117065429688,
+            "width": 365.19866943359375,
+            "height": 326.2557678222656
+          },
+          "detectorMaxBoxIoU": 0.014435806833993703,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-01/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 541,
+            "top": 248,
+            "width": 353,
+            "height": 317
+          },
+          "maskMaxBoxIoU": 0.01537072948409755,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C01",
+          "detectorIndex": 1,
+          "detectorBox": {
+            "left": 59.56623077392578,
+            "top": 452.21234130859375,
+            "width": 47.71649932861328,
+            "height": 51.15631103515625
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-01/C01.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 61,
+            "top": 454,
+            "width": 45,
+            "height": 48
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C02",
+          "detectorIndex": 2,
+          "detectorBox": {
+            "left": 67.33155059814453,
+            "top": 461.2899169921875,
+            "width": 39.842674255371094,
+            "height": 36.60546875
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-01/C02.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 64,
+            "top": 462,
+            "width": 42,
+            "height": 39
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C03",
+          "detectorIndex": 3,
+          "detectorBox": {
+            "left": 705.7941284179688,
+            "top": 378.3612976074219,
+            "width": 42.40679931640625,
+            "height": 42.29766845703125
+          },
+          "detectorMaxBoxIoU": 0.7584005279999225,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-01/C03.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 704,
+            "top": 375,
+            "width": 49,
+            "height": 50
+          },
+          "maskMaxBoxIoU": 0.7020408163265306,
+          "maskWholeBoxPass": true,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C04",
+          "detectorIndex": 4,
+          "detectorBox": {
+            "left": 8.735618591308594,
+            "top": 19.22307014465332,
+            "width": 1265.2658462524414,
+            "height": 766.6302013397217
+          },
+          "detectorMaxBoxIoU": 0.0017732123096511326,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-01/C04.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 5,
+            "top": 21,
+            "width": 1272,
+            "height": 776
+          },
+          "maskMaxBoxIoU": 0.0017425273941515918,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C05",
+          "detectorIndex": 5,
+          "detectorBox": {
+            "left": 686.6317138671875,
+            "top": 371.5505065917969,
+            "width": 77.9737548828125,
+            "height": 62.48675537109375
+          },
+          "detectorMaxBoxIoU": 0.35301407701202936,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-01/C05.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 681,
+            "top": 374,
+            "width": 82,
+            "height": 58
+          },
+          "maskMaxBoxIoU": 0.3616484440706476,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C06",
+          "detectorIndex": 6,
+          "detectorBox": {
+            "left": 59.78739929199219,
+            "top": 452.0467834472656,
+            "width": 32.44331359863281,
+            "height": 50.899200439453125
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-01/C06.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 61,
+            "top": 454,
+            "width": 33,
+            "height": 48
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C07",
+          "detectorIndex": 7,
+          "detectorBox": {
+            "left": 81.6035385131836,
+            "top": 462.51507568359375,
+            "width": 25.80425262451172,
+            "height": 34.13494873046875
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-01/C07.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 81,
+            "top": 464,
+            "width": 25,
+            "height": 31
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-map-02",
+      "stratum": "map",
+      "presence": "present",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 12,
+      "maskCandidateCount": 12,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": false,
+      "bestMaskBoxIoU": 0.7752293577981649,
+      "bestDetectorBoxIoU": 0.7825419531663901,
+      "bestMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 540.0306396484375,
+            "top": 242.3135528564453,
+            "width": 362.3016357421875,
+            "height": 326.5192108154297
+          },
+          "detectorMaxBoxIoU": 0.01453949806294635,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-02/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 541,
+            "top": 247,
+            "width": 353,
+            "height": 318
+          },
+          "maskMaxBoxIoU": 0.015322393856789067,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C01",
+          "detectorIndex": 1,
+          "detectorBox": {
+            "left": 59.61669158935547,
+            "top": 452.3500061035156,
+            "width": 47.57096862792969,
+            "height": 51.199127197265625
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-02/C01.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 61,
+            "top": 454,
+            "width": 45,
+            "height": 48
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C02",
+          "detectorIndex": 2,
+          "detectorBox": {
+            "left": 72.57594299316406,
+            "top": 461.8333435058594,
+            "width": 34.66596984863281,
+            "height": 34.736907958984375
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-02/C02.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 70,
+            "top": 463,
+            "width": 36,
+            "height": 37
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C03",
+          "detectorIndex": 3,
+          "detectorBox": {
+            "left": 704.401611328125,
+            "top": 374.9876708984375,
+            "width": 47.23846435546875,
+            "height": 48.095733642578125
+          },
+          "detectorMaxBoxIoU": 0.6996991820715961,
+          "detectorWholeBoxPass": true,
+          "maskPath": "masks/pilot-v03-map-02/C03.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 704,
+            "top": 373,
+            "width": 44,
+            "height": 48
+          },
+          "maskMaxBoxIoU": 0.6581566421462569,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C04",
+          "detectorIndex": 4,
+          "detectorBox": {
+            "left": 710.1434936523438,
+            "top": 381.25164794921875,
+            "width": 20.521240234375,
+            "height": 40.63970947265625
+          },
+          "detectorMaxBoxIoU": 0.47173006821934127,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-02/C04.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 712,
+            "top": 382,
+            "width": 20,
+            "height": 40
+          },
+          "maskMaxBoxIoU": 0.4651162790697673,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C05",
+          "detectorIndex": 5,
+          "detectorBox": {
+            "left": 833.3954467773438,
+            "top": 324.1188659667969,
+            "width": 28.65771484375,
+            "height": 38.061004638671875
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-02/C05.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 832,
+            "top": 327,
+            "width": 30,
+            "height": 35
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C06",
+          "detectorIndex": 6,
+          "detectorBox": {
+            "left": 726.2161865234375,
+            "top": 381.6291198730469,
+            "width": 25.17718505859375,
+            "height": 35.065093994140625
+          },
+          "detectorMaxBoxIoU": 0.43614979974635515,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-02/C06.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 727,
+            "top": 383,
+            "width": 22,
+            "height": 31
+          },
+          "maskMaxBoxIoU": 0.39651162790697664,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C07",
+          "detectorIndex": 7,
+          "detectorBox": {
+            "left": 709.9588012695312,
+            "top": 380.1275329589844,
+            "width": 41.26861572265625,
+            "height": 39.58056640625
+          },
+          "detectorMaxBoxIoU": 0.7825419531663901,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-02/C07.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 705,
+            "top": 380,
+            "width": 43,
+            "height": 41
+          },
+          "maskMaxBoxIoU": 0.7752293577981649,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C08",
+          "detectorIndex": 8,
+          "detectorBox": {
+            "left": 704.5513305664062,
+            "top": 373.0609436035156,
+            "width": 31.427001953125,
+            "height": 49.259368896484375
+          },
+          "detectorMaxBoxIoU": 0.4989107256127368,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-02/C08.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 704,
+            "top": 374,
+            "width": 33,
+            "height": 47
+          },
+          "maskMaxBoxIoU": 0.5011473152822394,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C09",
+          "detectorIndex": 9,
+          "detectorBox": {
+            "left": 59.92041015625,
+            "top": 452.46697998046875,
+            "width": 31.242401123046875,
+            "height": 50.65057373046875
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-02/C09.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 61,
+            "top": 454,
+            "width": 32,
+            "height": 48
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C10",
+          "detectorIndex": 10,
+          "detectorBox": {
+            "left": 73.27301025390625,
+            "top": 67.68180847167969,
+            "width": 59.19386291503906,
+            "height": 72.72274780273438
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-02/C10.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 75,
+            "top": 70,
+            "width": 55,
+            "height": 70
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C11",
+          "detectorIndex": 11,
+          "detectorBox": {
+            "left": 8.38043212890625,
+            "top": 19.08588409423828,
+            "width": 1265.6249389648438,
+            "height": 766.3098068237305
+          },
+          "detectorMaxBoxIoU": 0.0017734503710069452,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-02/C11.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 4,
+            "top": 22,
+            "width": 1273,
+            "height": 775
+          },
+          "maskMaxBoxIoU": 0.0017434052150115298,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-map-03",
+      "stratum": "map",
+      "presence": "present",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 9,
+      "maskCandidateCount": 9,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": true,
+      "bestMaskBoxIoU": 0.6473029045643153,
+      "bestDetectorBoxIoU": 0.750000070956546,
+      "bestMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 547.4373779296875,
+            "top": 243.65826416015625,
+            "width": 353.9219970703125,
+            "height": 325.3699951171875
+          },
+          "detectorMaxBoxIoU": 0.014936312459162574,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-03/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 551,
+            "top": 248,
+            "width": 344,
+            "height": 318
+          },
+          "maskMaxBoxIoU": 0.015723270440251572,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C01",
+          "detectorIndex": 1,
+          "detectorBox": {
+            "left": 59.26567840576172,
+            "top": 451.9406433105469,
+            "width": 47.80517578125,
+            "height": 51.54931640625
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-03/C01.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 61,
+            "top": 454,
+            "width": 45,
+            "height": 48
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C02",
+          "detectorIndex": 2,
+          "detectorBox": {
+            "left": 706.5359497070312,
+            "top": 379.616943359375,
+            "width": 46.04083251953125,
+            "height": 41.07244873046875
+          },
+          "detectorMaxBoxIoU": 0.750000070956546,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-03/C02.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 705,
+            "top": 376,
+            "width": 50,
+            "height": 45
+          },
+          "maskMaxBoxIoU": 0.6473029045643153,
+          "maskWholeBoxPass": true,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C03",
+          "detectorIndex": 3,
+          "detectorBox": {
+            "left": 76.12554168701172,
+            "top": 462.32904052734375,
+            "width": 31.194290161132812,
+            "height": 34.226531982421875
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-03/C03.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 76,
+            "top": 463,
+            "width": 30,
+            "height": 32
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C04",
+          "detectorIndex": 4,
+          "detectorBox": {
+            "left": 59.86146926879883,
+            "top": 452.1734313964844,
+            "width": 31.415576934814453,
+            "height": 51.061431884765625
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-03/C04.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 61,
+            "top": 454,
+            "width": 32,
+            "height": 48
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C05",
+          "detectorIndex": 5,
+          "detectorBox": {
+            "left": 702.92138671875,
+            "top": 373.3456115722656,
+            "width": 50.00274658203125,
+            "height": 49.615142822265625
+          },
+          "detectorMaxBoxIoU": 0.6393965586990953,
+          "detectorWholeBoxPass": true,
+          "maskPath": "masks/pilot-v03-map-03/C05.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 704,
+            "top": 373,
+            "width": 51,
+            "height": 48
+          },
+          "maskMaxBoxIoU": 0.598159509202454,
+          "maskWholeBoxPass": true,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C06",
+          "detectorIndex": 6,
+          "detectorBox": {
+            "left": 9.16046142578125,
+            "top": 18.72484588623047,
+            "width": 1264.8756713867188,
+            "height": 766.9168167114258
+          },
+          "detectorMaxBoxIoU": 0.0017730963938170574,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-03/C06.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 5,
+            "top": 21,
+            "width": 1272,
+            "height": 776
+          },
+          "maskMaxBoxIoU": 0.0017425273941515918,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C07",
+          "detectorIndex": 7,
+          "detectorBox": {
+            "left": 721.4409790039062,
+            "top": 382.3868408203125,
+            "width": 30.7679443359375,
+            "height": 34.50164794921875
+          },
+          "detectorMaxBoxIoU": 0.5193777319386275,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-03/C07.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 721,
+            "top": 385,
+            "width": 33,
+            "height": 29
+          },
+          "maskMaxBoxIoU": 0.4353887399463806,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C08",
+          "detectorIndex": 8,
+          "detectorBox": {
+            "left": 706.0072021484375,
+            "top": 378.0169372558594,
+            "width": 27.4150390625,
+            "height": 44.228271484375
+          },
+          "detectorMaxBoxIoU": 0.5041327585403803,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-03/C08.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 705,
+            "top": 375,
+            "width": 31,
+            "height": 46
+          },
+          "maskMaxBoxIoU": 0.5031055900621116,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-map-04",
+      "stratum": "map",
+      "presence": "absent",
+      "status": "complete",
+      "workerError": null,
+      "detectorCandidateCount": 7,
+      "maskCandidateCount": 7,
+      "truncatedDetectorCount": 0,
+      "candidateAvailabilityPass": false,
+      "bestMaskBoxIoU": 0,
+      "bestDetectorBoxIoU": 0,
+      "bestMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidateErrors": [],
+      "candidates": [
+        {
+          "id": "C00",
+          "detectorIndex": 0,
+          "detectorBox": {
+            "left": 59.20387268066406,
+            "top": 451.64385986328125,
+            "width": 47.97279357910156,
+            "height": 51.925079345703125
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-04/C00.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 61,
+            "top": 454,
+            "width": 45,
+            "height": 48
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C01",
+          "detectorIndex": 1,
+          "detectorBox": {
+            "left": 547.1093139648438,
+            "top": 241.62164306640625,
+            "width": 353.22674560546875,
+            "height": 327.30682373046875
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-04/C01.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 553,
+            "top": 247,
+            "width": 337,
+            "height": 318
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C02",
+          "detectorIndex": 2,
+          "detectorBox": {
+            "left": 702.9108276367188,
+            "top": 373.3494873046875,
+            "width": 58.5155029296875,
+            "height": 50.939300537109375
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-04/C02.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 704,
+            "top": 373,
+            "width": 58,
+            "height": 49
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C03",
+          "detectorIndex": 3,
+          "detectorBox": {
+            "left": 60.93115234375,
+            "top": 453.0711669921875,
+            "width": 29.79974365234375,
+            "height": 50.2410888671875
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-04/C03.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 61,
+            "top": 454,
+            "width": 32,
+            "height": 48
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C04",
+          "detectorIndex": 4,
+          "detectorBox": {
+            "left": 706.93359375,
+            "top": 377.4577941894531,
+            "width": 28.567626953125,
+            "height": 44.689971923828125
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-04/C04.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 704,
+            "top": 374,
+            "width": 34,
+            "height": 49
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C05",
+          "detectorIndex": 5,
+          "detectorBox": {
+            "left": 75.58142852783203,
+            "top": 461.6240539550781,
+            "width": 31.613250732421875,
+            "height": 35.039215087890625
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-04/C05.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 76,
+            "top": 463,
+            "width": 30,
+            "height": 33
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "id": "C06",
+          "detectorIndex": 6,
+          "detectorBox": {
+            "left": 726.0828857421875,
+            "top": 382.0013427734375,
+            "width": 25.47119140625,
+            "height": 34.984375
+          },
+          "detectorMaxBoxIoU": 0,
+          "detectorWholeBoxPass": false,
+          "maskPath": "masks/pilot-v03-map-04/C06.png",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskBox": {
+            "left": 725,
+            "top": 382,
+            "width": 28,
+            "height": 32
+          },
+          "maskMaxBoxIoU": 0,
+          "maskWholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    }
+  ]
+}
