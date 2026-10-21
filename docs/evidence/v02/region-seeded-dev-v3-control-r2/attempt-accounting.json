@@ -1,0 +1,55 @@
+{
+  "schema": "region-seeded-dev-v3-all-attempt-accounting-v1",
+  "scope": "All three physically dispatched DEV runs, including the unscored original control identity failure. This is not an account invoice.",
+  "attempts": [
+    {
+      "attempt": "candidate",
+      "summarySha256": "fea18ed9b5dce920495bce1d9cb9e190675ec5630c07b0ae07f73623d731be39",
+      "cases": 40,
+      "usedInPairedEvaluation": true,
+      "admittedPhysicalCalls": 162,
+      "knownCostUsd": 0.06451130000000004,
+      "unknownCostCalls": 6,
+      "inFlightCalls": 0,
+      "accountedExposureUsd": 0.3645113000000001,
+      "maxPhysicalCalls": 250,
+      "maxCostUsd": 5
+    },
+    {
+      "attempt": "original-control",
+      "summarySha256": "5ea51a5795f645ad39324281bc5e9e2fec6bef501549dce31f43408451bd9733",
+      "cases": 40,
+      "usedInPairedEvaluation": false,
+      "admittedPhysicalCalls": 40,
+      "knownCostUsd": 0.0008353000000000002,
+      "unknownCostCalls": 0,
+      "inFlightCalls": 0,
+      "accountedExposureUsd": 0.0008353000000000002,
+      "maxPhysicalCalls": 250,
+      "maxCostUsd": 5
+    },
+    {
+      "attempt": "control-r2",
+      "summarySha256": "d5bd5a5c15b39b4432e815bdf5271f8ee2a15355d76519918576586a7c3cc98e",
+      "cases": 40,
+      "usedInPairedEvaluation": true,
+      "admittedPhysicalCalls": 40,
+      "knownCostUsd": 0.0008353000000000002,
+      "unknownCostCalls": 0,
+      "inFlightCalls": 0,
+      "accountedExposureUsd": 0.0008353000000000002,
+      "maxPhysicalCalls": 250,
+      "maxCostUsd": 5
+    }
+  ],
+  "total": {
+    "knownCostUsd": 0.06618190000000004,
+    "accountedExposureUsd": 0.3661819000000001,
+    "admittedPhysicalCalls": 242,
+    "unknownCostCalls": 6,
+    "inFlightCalls": 0
+  },
+  "unknownCostReserveUsd": 0.05,
+  "allFailuresAndChargesPreserved": true,
+  "preparationOnlyHeldoutCalls": 0
+}

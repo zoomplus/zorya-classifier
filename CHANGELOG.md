@@ -6,6 +6,7 @@
 - Return a transparent PNG, cropped binary mask, source offset and bounding-box centre. Empty, ungrounded or unconfirmed masks remain unknown; backend failures remain errors. A cell is never substituted for a mask.
 - Add explicit caller-owned MobileSAM and GrabCut adapters with pinned local assets, bounded native queues, physical cancellation/join and complete disposal. Model weights and optional native runtimes are separate prerequisites; imports never download weights or start workers.
 - Preserve default region/classification compatibility and explicit optional legacy interval/proposal research strategies. The caller chooses every decision model, provider and segmenter.
+- Prepare full-source containment images for both native and ordinary public transports while retaining original mask coordinates. Add regressions for small images, desktop-sized images, producer/evaluator receipts and independent per-profile freeze identities.
 - Compare six text-only image representations in benchmark tooling. None qualified; the public experimental image selector rejects explicitly rather than silently selecting a losing encoder.
 - Extend source, installed-archive, native Windows/Linux, resource and secret checks. Current qualification and limitations are recorded in [acceptance](docs/acceptance.md); this entry does not assert that the release is already published.
 

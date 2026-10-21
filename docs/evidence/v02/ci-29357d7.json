@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "sourceCommit": "29357d7f811246086c625d26924dfd0837a332db",
+  "workflowRun": 39519229328,
+  "url": "https://github.com/zoomplus/zorya-classifier/actions/runs/39519229328",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "verify (windows-latest, 22)",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (ubuntu-latest, 24)",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (windows-latest, 24)",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify (ubuntu-latest, 22)",
+      "conclusion": "success"
+    }
+  ],
+  "rawReceiptSha256": "e608a83e712fae1f4e61f750f85aecfccc5c518f031702dc616b889119b72ba2",
+  "offlineTests": 563,
+  "scope": "Strict source, build, format and installed-archive gates on Windows/Linux x Node 22/24, including public producer/evaluator and per-variant freeze guard fixtures; no live quality or resource qualification."
+}
