@@ -21,20 +21,20 @@ From [the prospective plan](v03-h10-clipseg-direct-mask-plan.md): on candidate m
 
 ## Per-row gate evidence (positives and false output)
 
-| case_id (stratum)  | truth   | Producer outcome | Gate result | IoU (decision box) | Reference coverage | Notes                               |
-| ------------------ | ------- | ---------------- | ----------- | ------------------ | ------------------ | ----------------------------------- |
-| pilot-v03-photo-01 | present | candidate mask   | fail        | 0.8677450661       | 0.8900384283       | coverage < 0.90                     |
-| pilot-v03-photo-02 | present | candidate mask   | fail        | 0.8024148344       | 0.8028552008       | coverage < 0.90                     |
-| pilot-v03-photo-03 | present | candidate mask   | fail        | 0.3733355423       | 1.0000000000       | IoU < 0.50 (oversized decision box) |
-| pilot-v03-photo-04 | absent  | candidate mask   | **false**   | (passes box gate)  | —                  | negative false output (1/3)         |
-| pilot-v03-ui-01    | present | unresolved_empty | n/a         | —                  | —                  | valid empty mask                    |
-| pilot-v03-ui-02    | present | unresolved_empty | n/a         | —                  | —                  | valid empty mask                    |
-| pilot-v03-ui-03    | present | unresolved_empty | n/a         | —                  | —                  | valid empty mask                    |
-| pilot-v03-ui-04    | absent  | unresolved_empty | n/a         | —                  | —                  | no false output                     |
-| pilot-v03-map-01   | present | unresolved_empty | n/a         | —                  | —                  | valid empty mask                    |
-| pilot-v03-map-02   | present | unresolved_empty | n/a         | —                  | —                  | valid empty mask                    |
-| pilot-v03-map-03   | present | unresolved_empty | n/a         | —                  | —                  | valid empty mask                    |
-| pilot-v03-map-04   | absent  | unresolved_empty | n/a         | —                  | —                  | no false output                     |
+| case_id (stratum)  | truth   | Producer outcome | Gate result | IoU (decision box)  | Reference coverage | Notes                               |
+| ------------------ | ------- | ---------------- | ----------- | ------------------- | ------------------ | ----------------------------------- |
+| pilot-v03-photo-01 | present | candidate mask   | fail        | 0.8677450661        | 0.8900384283       | coverage < 0.90                     |
+| pilot-v03-photo-02 | present | candidate mask   | fail        | 0.8024148344        | 0.8028552008       | coverage < 0.90                     |
+| pilot-v03-photo-03 | present | candidate mask   | fail        | 0.3733355423        | 1.0000000000       | IoU < 0.50 (oversized decision box) |
+| pilot-v03-photo-04 | absent  | candidate mask   | **false**   | n/a (absent target) | —                  | negative false output (1/3)         |
+| pilot-v03-ui-01    | present | unresolved_empty | n/a         | —                   | —                  | valid empty mask                    |
+| pilot-v03-ui-02    | present | unresolved_empty | n/a         | —                   | —                  | valid empty mask                    |
+| pilot-v03-ui-03    | present | unresolved_empty | n/a         | —                   | —                  | valid empty mask                    |
+| pilot-v03-ui-04    | absent  | unresolved_empty | n/a         | —                   | —                  | no false output                     |
+| pilot-v03-map-01   | present | unresolved_empty | n/a         | —                   | —                  | valid empty mask                    |
+| pilot-v03-map-02   | present | unresolved_empty | n/a         | —                   | —                  | valid empty mask                    |
+| pilot-v03-map-03   | present | unresolved_empty | n/a         | —                   | —                  | valid empty mask                    |
+| pilot-v03-map-04   | absent  | unresolved_empty | n/a         | —                   | —                  | no false output                     |
 
 ## Completed run (authoritative)
 
@@ -47,7 +47,7 @@ From [the prospective plan](v03-h10-clipseg-direct-mask-plan.md): on candidate m
 | ---------------------------------------------------- | ------------------------------------------------------------------ |
 | `freeze.json`                                        | `927d2880991b75a7f2d89606d624036afa091ff4087635ac18a6b4d93e8ec127` |
 | `run.json`                                           | `c0d49b345832d982592d657e7d8512bd411e9d0d3193b21dfd4126ad0c97b1d7` |
-| Staged asset manifest (in freeze/run)                | `98e8a5e767a6604a02fec0e561fa1b0128cb76783e4a405df4cb96e4b75fd084` |
+| Minimal DEV input manifest                           | `98e8a5e767a6604a02fec0e561fa1b0128cb76783e4a405df4cb96e4b75fd084` |
 | Producer contract                                    | `2d14512c74da492a2185b26d6d0703a83158fa5e99589274251d04cc4dcad70e` |
 | Runner script                                        | `70868ac896cdbf16b5ef9846b37e374318c38944c846e6e6f3d328d24d9db5f9` |
 | Common script                                        | `c32954eeae39a3de5093a1c2227f239b11915d3d520fc144e633b23113869a20` |

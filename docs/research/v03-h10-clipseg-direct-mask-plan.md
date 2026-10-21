@@ -121,14 +121,14 @@ Report **separately**:
 
 ## Deferred and separately authorized work
 
-| Step                                                                                      | Authorization                                                                                                                             |
-| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Root review and acceptance of **this** plan                                               | Completed before staging and the single bounded DEV run.                                                                                  |
-| Operator staging of `CIDAS/clipseg-rd64-refined` at pinned revision with recorded SHA-256 | Caller-owned; used for the completed run (manifest hash in results).                                                                      |
-| Implementation worktree, bounded local worker, freeze manifest, twelve-case run           | Completed once (`c997af4b-…`); a prior **prepared-not-executed** freeze (`3a03353e-…`) is preserved separately and did not run inference. |
-| Independent evaluator receipt and audit JSON/MD                                           | Completed; repository copy at `docs/evidence/v03/h10-clipseg-direct-mask-independent-evaluation.json`.                                    |
-| Any npm export, default segmenter, or production integration                              | Explicitly **out of scope** until qualification path says otherwise.                                                                      |
-| **SAM 3** or other gated/personal-license checkpoints                                     | **Deferred.** Requires a **separate manual personal-license gate**; **no** auto-accept from this plan.                                    |
+| Step                                                                                      | Authorization                                                                                                                                                                                                          |
+| ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Root review and acceptance of **this** plan                                               | Completed before staging and the single bounded DEV run.                                                                                                                                                               |
+| Operator staging of `CIDAS/clipseg-rd64-refined` at pinned revision with recorded SHA-256 | Caller-owned; used for the completed run. Staged asset byte/SHA receipts are recorded in `freeze.json`; the minimal DEV input manifest hash is listed separately in [results](v03-h10-clipseg-direct-mask-results.md). |
+| Implementation worktree, bounded local worker, freeze manifest, twelve-case run           | Completed once (`c997af4b-…`); a prior **prepared-not-executed** freeze (`3a03353e-…`) is preserved separately and did not run inference.                                                                              |
+| Independent evaluator receipt and audit JSON/MD                                           | Completed; repository copy at `docs/evidence/v03/h10-clipseg-direct-mask-independent-evaluation.json`.                                                                                                                 |
+| Any npm export, default segmenter, or production integration                              | Explicitly **out of scope** until qualification path says otherwise.                                                                                                                                                   |
+| **SAM 3** or other gated/personal-license checkpoints                                     | **Deferred.** Requires a **separate manual personal-license gate**; **no** auto-accept from this plan.                                                                                                                 |
 
 ## Worktree scope
 

@@ -239,11 +239,16 @@ await test('probe-postprocess includes zero logit boundary as foreground', async
   const result = await runRunner(python, ['probe-postprocess', '--width', '64', '--height', '48'])
   assert.equal(result.code, 0)
   const payload = JSON.parse(result.stdout) as {
-    results: Array<{ case: string; center_value: number | null; foreground: boolean }>
+    results: Array<{
+      case: string
+      grid_center_value: number | null
+      center_value: number | null
+      foreground: boolean
+    }>
   }
   const zero = payload.results.find((entry) => entry.case === 'zero_boundary')
   assert.ok(zero)
-  assert.equal(zero.center_value, 1)
+  assert.equal(zero.grid_center_value, 1)
   const plane = payload.results.find((entry) => entry.case === 'zero_plane')
   assert.ok(plane)
   assert.equal(plane.center_value, 1)
