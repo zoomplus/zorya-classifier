@@ -31,3 +31,9 @@ Advance to a separately planned end-to-end composition only if H7 retains all th
 - Evaluation owner: finish and preserve the H6 audit, then add a small H7 score-to-mask receipt evaluator using the existing H5a truth evidence. No producer changes or truth access in the worker. Report stage ceilings honestly.
 - Spatial owner: finish H6 post-run visual diagnosis of wrong-location versus object-part selections. Use the failure evidence and primary research to suggest the next spatial/absence mechanism; do not send new provider calls or alter H7's recipe.
 - Root: owns this prospective plan, checkpoint authorization, asset-location choice, merges, frozen run dispatch, independent review and advancement decision. Models/assets remain explicitly supplied by consumers if a strategy is later promoted; this benchmark does not install or choose models for library users.
+
+## Pre-development implementation review
+
+The synthetic runtime probe is evidence of local execution only, not ranking quality. Before any twelve-case inference, use the [official SigLIP text preparation requirement](https://huggingface.co/docs/transformers/model_doc/siglip#notes): tokenize the unchanged target once without truncation, reject overflow, then pad that encoding to the configured maximum sequence length. The first synthetic prototype used an unpadded encoding; preserve its receipt and repeat only the synthetic runtime check after correction. Do not introduce the classification pipeline's optional target template into this fixed authored-target experiment.
+
+The two views are already contained and padded to 512 by 512; explicitly disable the processor's further resizing. Perform embedding normalization in float32 after float16 inference. These details complete the implementation specification before development outcomes exist; the fixed crop, equal score weights and advancement gate remain unchanged.
