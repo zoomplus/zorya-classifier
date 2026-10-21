@@ -1,6 +1,8 @@
 # H9 prospective plan: target-blind mask facts and closed identity check
 
-**Status: accepted for implementation and a bounded development run under the owner's existing authorization, 2026-10-21.** The root reviewed the H8b audit and the primary sources before accepting this plan. Dispatch still requires the controlled-fetch checks and an executable source/prompt/input freeze described below. H8a Luna is the baseline because it achieved the same 7/9 positive same-mask result and the same two false outputs as H8b Sol, at much lower observed cost. H8a stays immutable; H9 is a separately named recipe with separately frozen prompts and budget.
+**Status: closed and rejected (2026-10-21).** The bounded corrected live run completed independent evaluation and **failed** the predeclared gate: **2/9** positive same-mask retained versus the frozen H8a baseline **7/9**, with **0/3** negative false outputs. See [results](v03-h9-target-blind-mask-identity-results.md) and [sanitized independent evaluation](../evidence/v03/h9-target-blind-mask-identity-independent-evaluation.json). A prior stopped run preserved a schema-only HTTP 400 on stage two; that technical failure is separate from this semantic gate outcome. **Do not tune prompts, schemas, or thresholds against these same twelve cases** to recover a pass; stop this continuation line. No production promotion or release recommendation.
+
+The plan text below remains as originally accepted for audit traceability. H8a Luna is the baseline because it achieved the same 7/9 positive same-mask result and the same two false outputs as H8b Sol, at much lower observed cost. H8a stays immutable; H9 is a separately named recipe with separately frozen prompts and budget.
 
 ## Hypothesis
 

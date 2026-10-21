@@ -1,0 +1,169 @@
+{
+  "schema": "v03-h9-target-blind-mask-identity-independent-evaluation-v2",
+  "artifactSha256": "987fd22e28b53099b52045b6f96b28fb329bec0253c1539f215859754967f646",
+  "production": {
+    "runSha256": "cfee4f009e0219524178cf3ba39c1f4ed48c924c833a6959e2f300f7cfcf9240",
+    "freezeSha256": "1ee99de162d23dd997302a4c3268114a6dabf64bea8384beae6c16e76a33b665",
+    "transportNeverRan": false,
+    "budgetVerified": true,
+    "physicalReceiptAudit": {
+      "verifiedPhysicalCalls": 22,
+      "verifiedProviderLedgers": 22,
+      "sourceFilesVerified": 159,
+      "sourceClosureUniqueEntries": 53,
+      "sourceClosureUniqueContentHashes": 51,
+      "sourceFilesVerifiedInterpretation": "159 counts three verification passes over the same 53 source-closure entries (hash-matched), not 159 unique files."
+    }
+  },
+  "gate": {
+    "criteriaFrozenFromPlan": {
+      "minimumPositiveSameMaskRetained": 7,
+      "h8aBaselinePositiveSameMaskRetained": 7,
+      "maximumNegativeFalseOutputs": 0
+    },
+    "positiveDenominator": 9,
+    "positiveSameMaskRetained": 2,
+    "positiveSameMaskRetainedByStratum": {
+      "photo": "2/3",
+      "ui": "0/3",
+      "map": "0/3"
+    },
+    "negativeDenominator": 3,
+    "negativeOutcomes": {
+      "rejected": 1,
+      "insufficientEvidence": 1,
+      "skippedNoBaselineMask": 1,
+      "technicalUnknowns": 0,
+      "invalidResponses": 0,
+      "otherUnknowns": 0,
+      "falseOutputs": 0
+    },
+    "falseOutputCaseIds": [],
+    "pass": false
+  },
+  "budget": {
+    "physicalCallsCompletedHttp200SchemaValid": 22,
+    "admittedPhysicalCalls": 22,
+    "logicalCalls": 22,
+    "knownCostUsd": 0.00649876,
+    "unknownCostCalls": 0,
+    "inFlightCalls": 0
+  },
+  "requestLatencyMs": {
+    "scope": "per-physical-request duration_ms only; not end-to-end production-pipeline latency",
+    "sampleCount": 22,
+    "p50": 6542.566,
+    "p95NearestRank": 22731.537,
+    "sum": 192348.566
+  },
+  "rows": [
+    {
+      "case_id": "pilot-v03-photo-01",
+      "truth": "present",
+      "baseline_mask_sha256": "3d3314244bd50bc3e4632b7f9dd2dfca6b03b4f6b6bef1289ee9b5c781eca189",
+      "baseline_same_mask_pass": true,
+      "status": "complete",
+      "outcome": "match",
+      "retained_mask_sha256": "3d3314244bd50bc3e4632b7f9dd2dfca6b03b4f6b6bef1289ee9b5c781eca189"
+    },
+    {
+      "case_id": "pilot-v03-photo-02",
+      "truth": "present",
+      "baseline_mask_sha256": "fc7fd396c2e1f63f77431b67a44994fdce14d4cff4e86793074bfb2c7c3b7683",
+      "baseline_same_mask_pass": true,
+      "status": "complete",
+      "outcome": "match",
+      "retained_mask_sha256": "fc7fd396c2e1f63f77431b67a44994fdce14d4cff4e86793074bfb2c7c3b7683"
+    },
+    {
+      "case_id": "pilot-v03-photo-03",
+      "truth": "present",
+      "baseline_mask_sha256": "a9e0cecfff862f99a815072696becbf7796bdb257f1b4c94d965287347a8177f",
+      "baseline_same_mask_pass": true,
+      "status": "complete",
+      "outcome": "mismatch",
+      "retained_mask_sha256": null
+    },
+    {
+      "case_id": "pilot-v03-photo-04",
+      "truth": "absent",
+      "baseline_mask_sha256": "1da0bc9f57e4f2c4892652a76593eb091feb1aee50010c548a8e056e10052302",
+      "baseline_same_mask_pass": false,
+      "status": "complete",
+      "outcome": "mismatch",
+      "retained_mask_sha256": null
+    },
+    {
+      "case_id": "pilot-v03-ui-01",
+      "truth": "present",
+      "baseline_mask_sha256": "3cd506232c97b57b4d0a0e5f0f7d3c7eb3e5c77d47b346eeb633e11f0f1f2bd4",
+      "baseline_same_mask_pass": true,
+      "status": "complete",
+      "outcome": "insufficient-evidence",
+      "retained_mask_sha256": null
+    },
+    {
+      "case_id": "pilot-v03-ui-02",
+      "truth": "present",
+      "baseline_mask_sha256": "43c5606ffa063b9f78735f7ba48a8f6b0bfe6f2490fd56e1db425419112fb38d",
+      "baseline_same_mask_pass": true,
+      "status": "complete",
+      "outcome": "insufficient-evidence",
+      "retained_mask_sha256": null
+    },
+    {
+      "case_id": "pilot-v03-ui-03",
+      "truth": "present",
+      "baseline_mask_sha256": "6ba3c3e6564eb55cebae1ab96c236f8f4bbdb4b60e18e0c87c0d2a88e47ec373",
+      "baseline_same_mask_pass": true,
+      "status": "complete",
+      "outcome": "insufficient-evidence",
+      "retained_mask_sha256": null
+    },
+    {
+      "case_id": "pilot-v03-ui-04",
+      "truth": "absent",
+      "baseline_mask_sha256": "43c5606ffa063b9f78735f7ba48a8f6b0bfe6f2490fd56e1db425419112fb38d",
+      "baseline_same_mask_pass": false,
+      "status": "complete",
+      "outcome": "insufficient-evidence",
+      "retained_mask_sha256": null
+    },
+    {
+      "case_id": "pilot-v03-map-01",
+      "truth": "present",
+      "baseline_mask_sha256": "9f470cd5aca845684e908296db590bd5d6a57a619660fb16cf03cfed5f32d137",
+      "baseline_same_mask_pass": true,
+      "status": "complete",
+      "outcome": "insufficient-evidence",
+      "retained_mask_sha256": null
+    },
+    {
+      "case_id": "pilot-v03-map-02",
+      "truth": "present",
+      "baseline_mask_sha256": "db3fdc5f4959ca438c9eb61bbc2a753f609244385aaa766533dfd95fdf2ac564",
+      "baseline_same_mask_pass": false,
+      "status": "complete",
+      "outcome": "insufficient-evidence",
+      "retained_mask_sha256": null
+    },
+    {
+      "case_id": "pilot-v03-map-03",
+      "truth": "present",
+      "baseline_mask_sha256": "1c5ac4959afb57e80845d164cba3785e5630bef3c00c0c209b24782210aead5c",
+      "baseline_same_mask_pass": false,
+      "status": "complete",
+      "outcome": "insufficient-evidence",
+      "retained_mask_sha256": null
+    },
+    {
+      "case_id": "pilot-v03-map-04",
+      "truth": "absent",
+      "baseline_mask_sha256": null,
+      "baseline_same_mask_pass": false,
+      "status": "skipped_no_mask",
+      "outcome": null,
+      "retained_mask_sha256": null
+    }
+  ]
+}
