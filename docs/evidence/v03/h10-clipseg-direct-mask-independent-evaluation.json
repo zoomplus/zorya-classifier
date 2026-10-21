@@ -1,0 +1,332 @@
+{
+  "schema": "v03-h10-clipseg-evaluation-v1",
+  "hypothesis": "h10-clipseg-direct-mask",
+  "integrityErrors": [],
+  "gate": {
+    "positiveDenominator": 9,
+    "positiveSuccessesMinimum": 7,
+    "positiveSuccesses": 0,
+    "negativeDenominator": 3,
+    "falseOutputsMaximum": 0,
+    "falseOutputs": 1,
+    "cleanPass": false
+  },
+  "referenceBaselineH8a": {
+    "positiveSuccesses": 7,
+    "falseOutputs": 2
+  },
+  "stratumSummary": {
+    "photo": {
+      "positives": 3,
+      "positiveSuccesses": 0,
+      "negatives": 1,
+      "falseOutputs": 1
+    },
+    "ui": {
+      "positives": 3,
+      "positiveSuccesses": 0,
+      "negatives": 1,
+      "falseOutputs": 0
+    },
+    "map": {
+      "positives": 3,
+      "positiveSuccesses": 0,
+      "negatives": 1,
+      "falseOutputs": 0
+    }
+  },
+  "perRow": [
+    {
+      "row_index": 0,
+      "row_key": "pilot-v03-photo-01",
+      "caseId": "pilot-v03-photo-01",
+      "stratum": "photo",
+      "presence": "present",
+      "outcome_kind": "candidate",
+      "positiveSuccess": false,
+      "negativeFalseOutput": false,
+      "wholeObjectMatched": false,
+      "bestIoU": 0.867745066114889,
+      "bestCoverage": 0.8900384283036916,
+      "maskAudit": {
+        "status": "valid",
+        "reason": null,
+        "maskDerivedBox": {
+          "left": 0,
+          "top": 63,
+          "width": 173,
+          "height": 232
+        },
+        "recomputedBounds": {
+          "x_min": 0,
+          "y_min": 63,
+          "x_max": 172,
+          "y_max": 294
+        }
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    },
+    {
+      "row_index": 1,
+      "row_key": "pilot-v03-photo-02",
+      "caseId": "pilot-v03-photo-02",
+      "stratum": "photo",
+      "presence": "present",
+      "outcome_kind": "candidate",
+      "positiveSuccess": false,
+      "negativeFalseOutput": false,
+      "wholeObjectMatched": false,
+      "bestIoU": 0.8024148343925305,
+      "bestCoverage": 0.8028552007958831,
+      "maskAudit": {
+        "status": "valid",
+        "reason": null,
+        "maskDerivedBox": {
+          "left": 371,
+          "top": 225,
+          "width": 296,
+          "height": 217
+        },
+        "recomputedBounds": {
+          "x_min": 371,
+          "y_min": 225,
+          "x_max": 666,
+          "y_max": 441
+        }
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    },
+    {
+      "row_index": 2,
+      "row_key": "pilot-v03-photo-03",
+      "caseId": "pilot-v03-photo-03",
+      "stratum": "photo",
+      "presence": "present",
+      "outcome_kind": "candidate",
+      "positiveSuccess": false,
+      "negativeFalseOutput": false,
+      "wholeObjectMatched": false,
+      "bestIoU": 0.3733355422799545,
+      "bestCoverage": 1.0000000000000002,
+      "maskAudit": {
+        "status": "valid",
+        "reason": null,
+        "maskDerivedBox": {
+          "left": 4,
+          "top": 0,
+          "width": 942,
+          "height": 489
+        },
+        "recomputedBounds": {
+          "x_min": 4,
+          "y_min": 0,
+          "x_max": 945,
+          "y_max": 488
+        }
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    },
+    {
+      "row_index": 3,
+      "row_key": "pilot-v03-photo-04",
+      "caseId": "pilot-v03-photo-04",
+      "stratum": "photo",
+      "presence": "absent",
+      "outcome_kind": "candidate",
+      "positiveSuccess": false,
+      "negativeFalseOutput": true,
+      "wholeObjectMatched": false,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "maskAudit": {
+        "status": "valid",
+        "reason": null,
+        "maskDerivedBox": {
+          "left": 125,
+          "top": 205,
+          "width": 722,
+          "height": 300
+        },
+        "recomputedBounds": {
+          "x_min": 125,
+          "y_min": 205,
+          "x_max": 846,
+          "y_max": 504
+        }
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    },
+    {
+      "row_index": 4,
+      "row_key": "pilot-v03-ui-01",
+      "caseId": "pilot-v03-ui-01",
+      "stratum": "ui",
+      "presence": "present",
+      "outcome_kind": "unresolved_empty",
+      "positiveSuccess": false,
+      "negativeFalseOutput": false,
+      "wholeObjectMatched": false,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "maskAudit": {
+        "status": "not_applicable",
+        "reason": null,
+        "maskDerivedBox": null,
+        "recomputedBounds": null
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    },
+    {
+      "row_index": 5,
+      "row_key": "pilot-v03-ui-02",
+      "caseId": "pilot-v03-ui-02",
+      "stratum": "ui",
+      "presence": "present",
+      "outcome_kind": "unresolved_empty",
+      "positiveSuccess": false,
+      "negativeFalseOutput": false,
+      "wholeObjectMatched": false,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "maskAudit": {
+        "status": "not_applicable",
+        "reason": null,
+        "maskDerivedBox": null,
+        "recomputedBounds": null
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    },
+    {
+      "row_index": 6,
+      "row_key": "pilot-v03-ui-03",
+      "caseId": "pilot-v03-ui-03",
+      "stratum": "ui",
+      "presence": "present",
+      "outcome_kind": "unresolved_empty",
+      "positiveSuccess": false,
+      "negativeFalseOutput": false,
+      "wholeObjectMatched": false,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "maskAudit": {
+        "status": "not_applicable",
+        "reason": null,
+        "maskDerivedBox": null,
+        "recomputedBounds": null
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    },
+    {
+      "row_index": 7,
+      "row_key": "pilot-v03-ui-04",
+      "caseId": "pilot-v03-ui-04",
+      "stratum": "ui",
+      "presence": "absent",
+      "outcome_kind": "unresolved_empty",
+      "positiveSuccess": false,
+      "negativeFalseOutput": false,
+      "wholeObjectMatched": false,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "maskAudit": {
+        "status": "not_applicable",
+        "reason": null,
+        "maskDerivedBox": null,
+        "recomputedBounds": null
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    },
+    {
+      "row_index": 8,
+      "row_key": "pilot-v03-map-01",
+      "caseId": "pilot-v03-map-01",
+      "stratum": "map",
+      "presence": "present",
+      "outcome_kind": "unresolved_empty",
+      "positiveSuccess": false,
+      "negativeFalseOutput": false,
+      "wholeObjectMatched": false,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "maskAudit": {
+        "status": "not_applicable",
+        "reason": null,
+        "maskDerivedBox": null,
+        "recomputedBounds": null
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    },
+    {
+      "row_index": 9,
+      "row_key": "pilot-v03-map-02",
+      "caseId": "pilot-v03-map-02",
+      "stratum": "map",
+      "presence": "present",
+      "outcome_kind": "unresolved_empty",
+      "positiveSuccess": false,
+      "negativeFalseOutput": false,
+      "wholeObjectMatched": false,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "maskAudit": {
+        "status": "not_applicable",
+        "reason": null,
+        "maskDerivedBox": null,
+        "recomputedBounds": null
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    },
+    {
+      "row_index": 10,
+      "row_key": "pilot-v03-map-03",
+      "caseId": "pilot-v03-map-03",
+      "stratum": "map",
+      "presence": "present",
+      "outcome_kind": "unresolved_empty",
+      "positiveSuccess": false,
+      "negativeFalseOutput": false,
+      "wholeObjectMatched": false,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "maskAudit": {
+        "status": "not_applicable",
+        "reason": null,
+        "maskDerivedBox": null,
+        "recomputedBounds": null
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    },
+    {
+      "row_index": 11,
+      "row_key": "pilot-v03-map-04",
+      "caseId": "pilot-v03-map-04",
+      "stratum": "map",
+      "presence": "absent",
+      "outcome_kind": "unresolved_empty",
+      "positiveSuccess": false,
+      "negativeFalseOutput": false,
+      "wholeObjectMatched": false,
+      "bestIoU": 0,
+      "bestCoverage": 0,
+      "maskAudit": {
+        "status": "not_applicable",
+        "reason": null,
+        "maskDerivedBox": null,
+        "recomputedBounds": null
+      },
+      "joinErrors": [],
+      "rowErrors": []
+    }
+  ]
+}

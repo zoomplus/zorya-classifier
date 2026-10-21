@@ -1,0 +1,148 @@
+{
+  "schema": "v03-h10-clipseg-producer-contract-v1",
+  "hypothesis": "h10-clipseg-direct-mask",
+  "status_note": "Research-only bounded DEV prototype; evaluator truth and reference geometry are never producer inputs.",
+  "model": {
+    "model_id": "CIDAS/clipseg-rd64-refined",
+    "revision": "999e0328d9e10b484360c477313983f9afdd7050",
+    "canonical_base_url": "https://huggingface.co/CIDAS/clipseg-rd64-refined",
+    "loader": {
+      "class": "CLIPSegForImageSegmentation",
+      "local_files_only": true,
+      "trust_remote_code": false,
+      "torch_dtype": "float32",
+      "eval_mode": true,
+      "inference_mode": true
+    },
+    "forward": {
+      "text_only": true,
+      "interpolate_pos_encoding": true,
+      "forbidden": ["conditional_pixel_values", "conditional_embeddings", "labels"]
+    },
+    "expected_weight_pin": {
+      "path": "model.safetensors",
+      "bytes": 603049496,
+      "sha256": "d00ca85d6b859f9d07b7cfb8ef26fe9771cb275b34c9368f2ecf603139307f55"
+    }
+  },
+  "processor": {
+    "class": "CLIPSegProcessor",
+    "loader": {
+      "use_fast": false,
+      "expected_image_processor_class": "ViTImageProcessor",
+      "expected_image_processor_module": "transformers.models.vit.image_processing_vit"
+    },
+    "expected_preprocessor_config": {
+      "size": { "height": 352, "width": 352 },
+      "resample": 2,
+      "do_resize": true,
+      "do_rescale": true,
+      "do_normalize": true,
+      "rescale_factor": 0.00392156862745098,
+      "image_mean": [0.485, 0.456, 0.406],
+      "image_std": [0.229, 0.224, 0.225]
+    },
+    "vision_config_image_size_reference": 224,
+    "processor_input_pixels": { "height": 352, "width": 352 },
+    "logits_grid": { "height": 352, "width": 352 }
+  },
+  "source_bounds": {
+    "max_encoded_bytes": 25165824,
+    "max_oriented_pixels": 2097152,
+    "reject_oversize_without_resize": true,
+    "explicitly_not_used": "16777216 public cutout cap"
+  },
+  "postprocess": {
+    "logits_resize": { "mode": "bilinear", "align_corners": false },
+    "threshold": { "logit": ">= 0", "sigmoid_equivalent": ">= 0.5" },
+    "forbidden": ["morphology", "connected_components", "threshold_sweep", "prompt_variants"]
+  },
+  "tokenizer_policy": {
+    "reject_overlength": true,
+    "no_truncation": true,
+    "no_target_rewrite": true,
+    "expected_clip_context_tokens": 77,
+    "record_model_max_length_at_freeze": true
+  },
+  "harness_input_manifest": {
+    "description": "Exactly twelve ordered rows for the fixed DEV pilot manifest.",
+    "required_row_count": 12,
+    "row_fields": {
+      "row_index": { "type": "integer", "minimum": 0, "maximum": 11 },
+      "row_key": { "type": "string", "minLength": 1 },
+      "source_path": { "type": "string", "minLength": 1 },
+      "authored_target": { "type": "string", "minLength": 1 }
+    },
+    "forbidden_row_fields": [
+      "stratum",
+      "label",
+      "truth",
+      "reference_mask_path",
+      "reference_box",
+      "expected_mask",
+      "h8_selected_mask",
+      "h9_output",
+      "evaluator_fields"
+    ]
+  },
+  "model_conditioning_payload": {
+    "description": "Only these fields may reach the CLIPSeg forward path.",
+    "fields": ["oriented_source_rgb", "authored_target_string"]
+  },
+  "harness_only_fields": {
+    "description": "Accounting and I/O; never passed into model forward.",
+    "fields": ["row_index", "row_key", "source_path", "source_sha256"]
+  },
+  "row_output": {
+    "required_fields": [
+      "row_index",
+      "row_key",
+      "outcome_kind",
+      "source_width",
+      "source_height",
+      "source_sha256",
+      "oriented_rgb_sha256",
+      "authored_target",
+      "model_max_length",
+      "interpolate_pos_encoding"
+    ],
+    "outcome_kind": {
+      "candidate": "Nonempty binary mask PNG written; bounds populated.",
+      "unresolved_empty": "Valid empty mask after logit >= 0; not a technical error.",
+      "technical_error": "Corrupt input, bounds violation, timeout, cancellation, pin mismatch, overlength target, worker failure."
+    },
+    "candidate_fields": ["mask_path", "mask_sha256", "foreground_bounds"],
+    "timing_fields": ["prep_ms", "forward_ms", "post_ms", "wall_ms"]
+  },
+  "run_output": {
+    "required_terminal_row_count": 12,
+    "artifacts": ["freeze.json", "run.json", "rows.jsonl", "masks/"],
+    "atomic_finalize": true
+  },
+  "freeze_closure": {
+    "requested_device": "Explicit run authorization; run --device must equal freeze requested_device.",
+    "script_receipts": [
+      { "path_field": "worker_script_path", "sha256_field": "worker_script_sha256" },
+      { "path_field": "runner_script_path", "sha256_field": "runner_script_sha256" },
+      { "path_field": "common_script_path", "sha256_field": "common_script_sha256" }
+    ],
+    "planned_dev_device": "cuda:0",
+    "fake_fixture_device": "fake"
+  },
+  "resource_budget": {
+    "whole_run_timeout_seconds": 600,
+    "per_case_timeout_seconds": 60,
+    "owned_worker": true,
+    "serial_rows": true,
+    "single_model_load": true
+  },
+  "dev_advancement_gate_reference": {
+    "aggregate_only": true,
+    "positive_same_mask_successes_minimum": 7,
+    "positive_denominator": 9,
+    "false_outputs_maximum": 0,
+    "negative_denominator": 3,
+    "evaluator_metric": "mask_derived_decision_box_iou_ge_0_50_and_reference_box_coverage_ge_0_90",
+    "note": "DEV gate is diagnostic; this contract does not qualify or promote."
+  }
+}

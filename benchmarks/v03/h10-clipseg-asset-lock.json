@@ -1,0 +1,45 @@
+{
+  "schema": "v03-h10-clipseg-asset-lock-v1",
+  "model_id": "CIDAS/clipseg-rd64-refined",
+  "revision": "999e0328d9e10b484360c477313983f9afdd7050",
+  "license": "apache-2.0",
+  "canonical_base_url": "https://huggingface.co/CIDAS/clipseg-rd64-refined",
+  "asset_directory": "/root/work/zorya-classifier/.run/v03/assets/clipseg-rd64-refined-999e0328",
+  "files": [
+    {
+      "path": "config.json",
+      "sha256": "c023375966d31b3b1392764f7bd91df47098ce19f62f11b0263d8eedcf708bcd",
+      "bytes": 4732
+    },
+    {
+      "path": "merges.txt",
+      "sha256": "9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a",
+      "bytes": 524619
+    },
+    {
+      "path": "model.safetensors",
+      "sha256": "d00ca85d6b859f9d07b7cfb8ef26fe9771cb275b34c9368f2ecf603139307f55",
+      "bytes": 603049496
+    },
+    {
+      "path": "preprocessor_config.json",
+      "sha256": "4fb09ebcfd7651205ca8299b993c30088e5535ef350a72d46c5c4580eeac0440",
+      "bytes": 380
+    },
+    {
+      "path": "special_tokens_map.json",
+      "sha256": "c4864a9376a8401918425bed71fc14fc0e81f9b59ec45c1cf96cccb2df508eac",
+      "bytes": 472
+    },
+    {
+      "path": "tokenizer_config.json",
+      "sha256": "4c75d57fd9bd0be8478ad2d6f8b9cebdd4a45338eb108547329c2b6333476ca6",
+      "bytes": 974
+    },
+    {
+      "path": "vocab.json",
+      "sha256": "e089ad92ba36837a0d31433e555c8f45fe601ab5c221d4f607ded32d9f7a4349",
+      "bytes": 1059962
+    }
+  ]
+}
