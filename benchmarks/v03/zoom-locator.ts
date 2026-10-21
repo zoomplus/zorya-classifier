@@ -1,4 +1,5 @@
 import { performance } from 'node:perf_hooks'
+import sharp from 'sharp'
 import { z } from 'zod'
 import type {
   DecisionMetadata,
@@ -17,6 +18,7 @@ import { createSharpRaster, createVisionRepresentation } from '../../src/infrast
 import { locateInput } from '../../src/processes/locate.js'
 
 const tileLabels = ['A', 'B', 'C', 'D'] as const
+const tileViewMaxSide = 1568
 const inputSchema = z
   .object({
     image: z.custom<Uint8Array>((value) => value instanceof Uint8Array),
@@ -97,6 +99,29 @@ function contains(outer: PixelRect, inner: PixelRect): boolean {
   )
 }
 
+async function enlargedTileView(
+  image: RasterImage,
+  region: PixelRect,
+  signal: AbortSignal,
+): Promise<RasterImage> {
+  assertActive(signal)
+  const scale = Math.min(2, tileViewMaxSide / Math.max(region.width, region.height))
+  const width = Math.max(1, Math.round(region.width * scale))
+  const height = Math.max(1, Math.round(region.height * scale))
+  const pipeline = sharp(image.bytes, { limitInputPixels: limits.imagePixels })
+    .extract(region)
+    .resize(width, height, { kernel: 'nearest' })
+  try {
+    const bytes = await pipeline.png().toBuffer()
+    assertActive(signal)
+    if (bytes.byteLength > limits.imageBytes)
+      throw new ClassifierError('RESOURCE_LIMIT', 'Enlarged zoom tile is too large')
+    return { bytes, width, height }
+  } finally {
+    pipeline.destroy()
+  }
+}
+
 /** Four deterministic ~60%-sized quadrants, giving about 20% overlap on each axis. */
 export function zoomTileRegions(region: PixelRect): PixelRect[] {
   const safeRegion = parse(pixelRectSchema, region)
@@ -167,10 +192,7 @@ function withResult(
   return { ...result, metadata: metadata(image, stages, preparedViews, started) }
 }
 
-/**
- * Research-only zoom fallback. The caller owns the decision route and decides
- * whether this helper runs after any separate classification/presence stage.
- */
+/** The caller owns the decision route and selects this helper as an independent profile. */
 export async function locateWithZoom(
   input: ZoomLocatorInput,
   options: ZoomLocatorOptions,
@@ -209,9 +231,12 @@ export async function locateWithZoom(
   assertActive(signal)
 
   const cropImages: RasterImage[] = []
+  const tileViews: RasterImage[] = []
   for (const tile of tiles) {
     assertActive(signal)
     cropImages.push(await raster.crop(image, tile, signal))
+    assertActive(signal)
+    tileViews.push(await enlargedTileView(image, tile, signal))
   }
   assertActive(signal)
   const views = [
@@ -221,7 +246,7 @@ export async function locateWithZoom(
       image,
       sourceRegion: { left: 0, top: 0, width: image.width, height: image.height },
     },
-    ...cropImages.map((crop, index) => ({
+    ...tileViews.map((crop, index) => ({
       id: `tile-${tileLabels[index]}`,
       role: 'crop' as const,
       image: crop,

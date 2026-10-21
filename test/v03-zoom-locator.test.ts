@@ -161,6 +161,35 @@ await test('selected crop result maps through its known source offset and stays 
   assert.equal(zoomed.metadata.knownCostUsd, 0.04)
 })
 
+await test('tile-choice views enlarge 1024px source regions and record exact prepared scales', async () => {
+  const largeImage = await sharp({
+    create: { width: 1024, height: 1024, channels: 3, background: 'slategray' },
+  })
+    .png()
+    .toBuffer()
+  const fixture = fixtureDecision()
+  const result = await locateWithZoom(
+    { image: largeImage, target: 'target', signal: signal() },
+    { decision: fixture.decision },
+  )
+  assert.equal(result.status, 'located')
+  const expectedRegion = zoomTileRegions({ left: 0, top: 0, width: 1024, height: 1024 })[0]!
+  const view = result.metadata.preparedViews.find((candidate) => candidate.id === 'tile-A')
+  assert.ok(view)
+  assert.deepEqual(view.sourceRegion, expectedRegion)
+  assert.ok(view.scaleX > 1)
+  assert.ok(view.scaleY > 1)
+  assert.ok(view.content.width <= 1568)
+  assert.ok(view.content.height <= 1568)
+  assert.equal(view.scaleX, view.content.width / view.sourceRegion.width)
+  assert.equal(view.scaleY, view.content.height / view.sourceRegion.height)
+  assert.ok(
+    Math.abs(
+      view.content.width / view.content.height - expectedRegion.width / expectedRegion.height,
+    ) < 0.01,
+  )
+})
+
 await test('tile-choice ties use stable input order and none remains unknown', async () => {
   const tied = fixtureDecision('tie')
   const tieResult = await locateWithZoom(
