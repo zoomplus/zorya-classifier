@@ -1,0 +1,125 @@
+{
+  "schema": "region-seeded-heldout-readiness-audit-v3",
+  "auditScope": "metadata-only, before any heldout dispatch",
+  "auditResult": "corrected-v2-draft-matches-runner; dispatch-not-authorized",
+  "selection": {
+    "methodSelectionSha256": "65efa36af59b26b6d78d9a24c614386fc123bf08391dad25f799c8c398ca8173",
+    "selectedDevCandidate": "native-luna-presence-first-checked-region-sam-dev-v3",
+    "pairedDevControl": "native-luna-presence-first-region-no-image-control-dev-v3",
+    "heldoutCandidateProfile": "native-luna-presence-first-checked-region-sam-heldout-v3",
+    "heldoutControlProfile": "native-luna-presence-first-region-no-image-control-heldout-v3"
+  },
+  "drafts": {
+    "preservedRejectedV1": {
+      "readinessSha256": "1d2744a9b0d035af540f770a6ad6dcba916e660e8dc81f94041fe2bd88e56ce0",
+      "freezeDraftSha256": "2be59cfd7c155059234a5c4c3c77a4e64c70cfa71f949882000581aab6df6e93",
+      "candidateVariantSha256": "915c14151b7e0d04a0baf585ec0b74166a35f570c81440de673fbf69e821a989",
+      "controlVariantSha256": "c8d3ca3b394ae7f5e886178be3ec3e27c6048728fdd7c00dc6345f783deb324e",
+      "rejection": "promptPolicy property order differed from the producer's JSON.stringify hash input; no dispatch occurred"
+    },
+    "correctedV2": {
+      "readinessSha256": "c8629d7ebd4871397a03617e53cdb5e1cabb1dd5a89b776a22c827f8e1a38059",
+      "freezeDraftSha256": "c63ea216ad0aab04188b195dcb76d1d0091aa29a263122ab301c24e28726c0f7",
+      "candidateAuthorizationSha256": "bc2748af688cae9db8763366622cc5c83de17b0dc1c1b243fb9f6a34b762a11b",
+      "controlAuthorizationSha256": "c7be0a75278f3dbb3696598724aafd00e8cca776bdc15bdfc2a71db3358e24bc",
+      "candidateOfflinePreflightSha256": "846beb31d731007f093fb56f4beec4591571418cb21ed04cffce04407da4e371",
+      "controlOfflinePreflightSha256": "d19b3901c8723598727635911a08267934a8b4887b289f928c9a339fa20ca57c",
+      "candidateVariantSha256": "cf17516c888a8ef952ad608472bc64e2b1d4c1746d6c5057440036e242b9ceee",
+      "controlVariantSha256": "1ec1668798a587daa585ba37a079acd38d7d97ef9d735f7b2732f2fa18e5bce4",
+      "variantReconstruction": "independently rebuilt from runner exports and exact ordered profile policy, prompt policy, route, manifests, task hashes, source pin, and native-asset descriptor"
+    }
+  },
+  "producerSource": {
+    "fileCount": 68,
+    "allFilesRehashed": true,
+    "sha256": "be43090b13951e9a6ffa65daffb9413a6a539d8dae335925dc885733a467fb20"
+  },
+  "inputs": {
+    "caseCount": 80,
+    "groupCounts": {
+      "photo": 40,
+      "ui": 20,
+      "map": 20
+    },
+    "sha256": [
+      "ce0d7af70cace50fbee83d3cc21cc83fa4c213759f49758ba53397509660906c",
+      "9f31d033fe1b48d2d312c8bfb0274b5f30494978e6c95115508b283d38ce76d2",
+      "d7c0e31f0b798a1e79d79d56434b4622f1bd09ee48debb2a5047b6d92a03abe8"
+    ],
+    "unchangedFromPriorFrozenV2": true,
+    "taskHashRows": 80,
+    "uniqueTaskCaseIds": 80
+  },
+  "evaluatorTruthPins": {
+    "photo": "8bd4db0d5818df6902c99c2d6cb1d338e662af29903d9885dcffa17a8f0b344a",
+    "uiCanonicalEvaluatorArray": "dbfa76930880361a54c87baf6b652d832b1999af2bcf68a6aaaea4595e558df2",
+    "map": "f57629035545b8d3ac36c24b7f19faf8ddf25cf1a1f86fd89eac226b92515f42",
+    "unchangedFromPriorFrozenV2": true,
+    "readByThisAudit": false
+  },
+  "profiles": {
+    "phase": "heldout",
+    "candidate": {
+      "variant": "region-seeded-sam",
+      "extractPolicy": "original three-choice region search, full-source MobileSAM seed-region extraction, at most two closed box checks, at most one enclosing-mask expansion and recheck"
+    },
+    "control": {
+      "variant": "no-image-control",
+      "extractPolicy": "original three-choice region search only; image parts removed at the DecisionPort boundary; no segmenter"
+    },
+    "sharedPolicy": {
+      "modelRecipe": "openai/gpt-6-luna-decisions",
+      "timeoutMs": 120000,
+      "maxInFlightCases": 2,
+      "nativeMaxActive": 1,
+      "nativeMaxWaiting": 2,
+      "nativeThreads": 2,
+      "maxPhysicalCalls": 600,
+      "maxCostUsd": 10,
+      "unknownCostReserveUsd": 0.05,
+      "retries": 0,
+      "fallbacks": false,
+      "latencyRankingEligible": false,
+      "requireClassifiedPresence": true,
+      "checkedRegion": true
+    },
+    "distinctExtractionPolicies": true,
+    "nativeAssetDescriptorMethod": "mobile-sam-seed-region-v1",
+    "actualRuntimeSegmentationMethod": "mobile-sam-seed-point-v1",
+    "methodLabelDifferenceIsDocumented": true
+  },
+  "preflights": {
+    "candidateVerifiedImages": 80,
+    "controlVerifiedImages": 80,
+    "candidateVerifiedNativeAssets": 2,
+    "controlVerifiedNativeAssets": 0,
+    "providerCalls": 0
+  },
+  "blindAdmissionGates": {
+    "completeCasesPerProfile": 80,
+    "maxFalseSeedLocationsOn20Negatives": 1,
+    "maxFalseExtractionsOn20Negatives": 1,
+    "minimumCorrectMaskDerivedBox": 1,
+    "minimumExactCanvasMaskAtIoU08": 1,
+    "photoExactForegroundSeedPairedBootstrapLowerMustBePositive": true,
+    "photoCoarseBoxSeedPairedBootstrapLowerMustBePositive": true,
+    "bootstrapResamples": 10000,
+    "bootstrapSeed": "0x5a4f5259",
+    "objectBoxCriterion": "mask-derived box IoU >= 0.5 and reference-box coverage >= 0.9",
+    "maskCriterion": "per-reference pixel IoU >= 0.8 on exact-canvas masks; unavailable references remain explicit"
+  },
+  "dispatch": {
+    "offlinePreflightProviderCalls": 0,
+    "heldoutProviderCalls": 0,
+    "dispatchAuthorized": false,
+    "resourceAcceptanceRequired": true,
+    "resourceAcceptanceAtAudit": "pending",
+    "reason": "awaiting required two-hour resource acceptance and explicit integrator authorization"
+  },
+  "auditBoundary": {
+    "producerInputsOrPerCaseTaskValuesPrinted": false,
+    "evaluatorTruthArraysRead": false,
+    "imageFilesReadByThisAudit": false,
+    "providerOrNativeCallsByThisAudit": 0
+  }
+}
