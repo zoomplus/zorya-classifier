@@ -27,6 +27,8 @@ import {
   validateApprovedH11ContractShape,
   validateH11ProducerOutcomeRowFields,
   verifyFirstNonemptyMaskSelection,
+  hashH11AssetFileOnDisk,
+  verifyH11AssetFileReceiptOnDisk,
   verifyH11AssetReceiptMetadata,
   verifyH11EmittedMaskInventory,
   verifyH11InputImageReceipts,
@@ -1085,6 +1087,62 @@ await test('verifyH11EmittedMaskInventory rejects stray mask files', async () =>
 await test('verifyH11AssetReceiptMetadata requires full Sa2VA companion lock set', () => {
   const errors = verifyH11AssetReceiptMetadata({})
   assert.ok(errors.some((item) => item.startsWith('asset-receipt-missing-')))
+})
+
+const H11_ASSET_STREAM_CHUNK_BYTES = 8192
+
+await test('hashH11AssetFileOnDisk streams multi-chunk files without whole-file buffering', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'zorya-h11-asset-hash-'))
+  const filePath = join(dir, 'multi-chunk.bin')
+  const payload = Buffer.alloc(H11_ASSET_STREAM_CHUNK_BYTES + 1, 0x5a)
+  await writeFile(filePath, payload)
+  try {
+    const streamed = await hashH11AssetFileOnDisk(filePath)
+    const reference = createHash('sha256').update(payload).digest('hex')
+    assert.equal(streamed.sha256, reference)
+    assert.equal(streamed.bytes, payload.byteLength)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+await test('verifyH11AssetFileReceiptOnDisk distinguishes digest, size, missing, and unreadable paths', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'zorya-h11-asset-verify-'))
+  const filePath = join(dir, 'receipt.bin')
+  const payload = Buffer.alloc(H11_ASSET_STREAM_CHUNK_BYTES + 1, 0xab)
+  const expected = {
+    sha256: createHash('sha256').update(payload).digest('hex'),
+    bytes: payload.byteLength,
+  }
+  await writeFile(filePath, payload)
+  try {
+    assert.equal(await verifyH11AssetFileReceiptOnDisk(filePath, expected), 'ok')
+    assert.equal(
+      await verifyH11AssetFileReceiptOnDisk(filePath, {
+        ...expected,
+        sha256: '0'.repeat(64),
+      }),
+      'bytes-mismatch',
+    )
+    assert.equal(
+      await verifyH11AssetFileReceiptOnDisk(filePath, {
+        ...expected,
+        bytes: expected.bytes - 1,
+      }),
+      'bytes-mismatch',
+    )
+    assert.equal(
+      await verifyH11AssetFileReceiptOnDisk(join(dir, 'absent.bin'), expected),
+      'missing',
+    )
+    await mkdir(join(dir, 'as-directory'), { recursive: true })
+    assert.equal(
+      await verifyH11AssetFileReceiptOnDisk(join(dir, 'as-directory'), expected),
+      'unreadable',
+    )
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
 })
 
 await test('diagnostics report multiple native mask counts without affecting selection', async () => {

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { createReadStream } from 'node:fs'
 import type { Dirent } from 'node:fs'
 import { lstat, readdir, readFile, realpath, stat } from 'node:fs/promises'
 import { isAbsolute, relative, resolve, sep } from 'node:path'
@@ -15,7 +16,6 @@ import {
   compareLockedManifestToFreezeRows,
   expectedManifestRowsMatch,
   foregroundBoundsToBox,
-  hashFileOnDisk,
   maskForegroundBounds,
   resolveMaskPathWithinRunRoot,
   verifyCudaDevRunReceiptConsistency,
@@ -467,6 +467,57 @@ function sha256(bytes: Uint8Array | Buffer): string {
   return createHash('sha256').update(bytes).digest('hex')
 }
 
+/** Bounded read chunk size for H11 on-disk asset SHA-256 (must stay below Node buffer limits). */
+const H11_ASSET_STREAM_HIGH_WATER_MARK = 8192
+
+export type H11AssetFileDigest = { sha256: string; bytes: number }
+
+export type H11AssetFileVerifyResult = 'ok' | 'bytes-mismatch' | 'missing' | 'unreadable'
+
+function isH11AssetPathMissingError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null || !('code' in error)) return false
+  const code = (error as { code?: unknown }).code
+  return code === 'ENOENT' || code === 'ENOTDIR'
+}
+
+export async function hashH11AssetFileOnDisk(path: string): Promise<H11AssetFileDigest> {
+  return await new Promise((resolve, reject) => {
+    const hash = createHash('sha256')
+    let bytes = 0
+    const stream = createReadStream(path, { highWaterMark: H11_ASSET_STREAM_HIGH_WATER_MARK })
+    stream.on('data', (chunk: Buffer | string) => {
+      const buf = typeof chunk === 'string' ? Buffer.from(chunk) : chunk
+      bytes += buf.byteLength
+      hash.update(buf)
+    })
+    stream.on('error', reject)
+    stream.on('end', () => {
+      resolve({ sha256: hash.digest('hex'), bytes })
+    })
+  })
+}
+
+export async function verifyH11AssetFileReceiptOnDisk(
+  filePath: string,
+  expected: { sha256: string; bytes: number },
+): Promise<H11AssetFileVerifyResult> {
+  let link: Awaited<ReturnType<typeof lstat>>
+  try {
+    link = await lstat(filePath)
+  } catch (error: unknown) {
+    return isH11AssetPathMissingError(error) ? 'missing' : 'unreadable'
+  }
+  if (link.isDirectory() || (!link.isFile() && !link.isSymbolicLink())) return 'unreadable'
+  let digest: H11AssetFileDigest
+  try {
+    digest = await hashH11AssetFileOnDisk(filePath)
+  } catch (error: unknown) {
+    return isH11AssetPathMissingError(error) ? 'missing' : 'unreadable'
+  }
+  if (digest.sha256 !== expected.sha256 || digest.bytes !== expected.bytes) return 'bytes-mismatch'
+  return 'ok'
+}
+
 export function recomputeH11ComposedPromptSha256(
   promptTemplate: string,
   authoredTarget: string,
@@ -531,11 +582,18 @@ export async function verifyH11AssetDirectoryOnDisk(
       integrityErrors.push(`asset-path-escape-${name}`)
       continue
     }
+    const receiptStatus = await verifyH11AssetFileReceiptOnDisk(candidate, expected)
+    if (receiptStatus === 'bytes-mismatch') integrityErrors.push(`asset-bytes-mismatch-${name}`)
+    if (receiptStatus === 'missing') {
+      integrityErrors.push(`asset-file-missing-${name}`)
+      continue
+    }
+    if (receiptStatus === 'unreadable') {
+      integrityErrors.push(`asset-file-unreadable-${name}`)
+      continue
+    }
     try {
       const link = await lstat(candidate)
-      const digest = await hashFileOnDisk(candidate)
-      if (digest.sha256 !== expected.sha256 || digest.bytes !== expected.bytes)
-        integrityErrors.push(`asset-bytes-mismatch-${name}`)
       const resolved = await realpath(candidate)
       const escaped = relative(root, resolved)
       if (!escaped || escaped.startsWith(`..${sep}`) || isAbsolute(escaped))
@@ -543,7 +601,7 @@ export async function verifyH11AssetDirectoryOnDisk(
       if (link.isSymbolicLink() && resolved !== candidate)
         integrityErrors.push(`asset-symlink-redirect-${name}`)
     } catch {
-      integrityErrors.push(`asset-file-missing-${name}`)
+      integrityErrors.push(`asset-file-unreadable-${name}`)
     }
   }
 }
