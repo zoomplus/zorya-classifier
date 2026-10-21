@@ -1,0 +1,445 @@
+{
+  "schema": "region-seeded-heldout-v3-independent-evaluation-summary-v1",
+  "freeze": {
+    "path": "docs/evidence/v02/region-seeded-heldout-run-freeze-20261021-v3.json",
+    "sha256": "5efcea0a0556dda41cf67fd0178ec7e0208b3a51ca3fdaf03e9b26b13afae73b",
+    "producerSourceSha256": "be43090b13951e9a6ffa65daffb9413a6a539d8dae335925dc885733a467fb20",
+    "profileVariantSha256": {
+      "candidate": "cf17516c888a8ef952ad608472bc64e2b1d4c1746d6c5057440036e242b9ceee",
+      "control": "1ec1668798a587daa585ba37a079acd38d7d97ef9d735f7b2732f2fa18e5bce4"
+    }
+  },
+  "rawPins": {
+    "inputs": [
+      {
+        "file": "photo-inputs.json",
+        "sha256": "ce0d7af70cace50fbee83d3cc21cc83fa4c213759f49758ba53397509660906c",
+        "cases": 40
+      },
+      {
+        "file": "ui-inputs.json",
+        "sha256": "9f31d033fe1b48d2d312c8bfb0274b5f30494978e6c95115508b283d38ce76d2",
+        "cases": 20
+      },
+      {
+        "file": "map-inputs.json",
+        "sha256": "d7c0e31f0b798a1e79d79d56434b4622f1bd09ee48debb2a5047b6d92a03abe8",
+        "cases": 20
+      }
+    ],
+    "truths": [
+      {
+        "file": "photoTruth.json",
+        "sha256": "8bd4db0d5818df6902c99c2d6cb1d338e662af29903d9885dcffa17a8f0b344a"
+      },
+      {
+        "file": "ui-evaluator-truth.json",
+        "sha256": "dbfa76930880361a54c87baf6b652d832b1999af2bcf68a6aaaea4595e558df2"
+      },
+      {
+        "file": "mapTruth.json",
+        "sha256": "f57629035545b8d3ac36c24b7f19faf8ddf25cf1a1f86fd89eac226b92515f42"
+      }
+    ],
+    "candidate": {
+      "runManifestSha256": "aceb5ff8405e8c581122c640ca265e91c6776c941007cc4f7df4a4351c91f306",
+      "summaryBytesSha256": "f1f99c77057a47a350e80c98ebdde91f74d161fbcabbd0b5917a6113b32e4a1d",
+      "completionSealSha256": "a5b0e5f74c41879ff4e55bafe80c391391671e3a11b3bce5970bfd79c64918fa",
+      "normalizedSummarySha256": "90eb519963f7d7dd09a68766d939fa95ddb1d35bc99099816156ebf2b867ec2c"
+    },
+    "control": {
+      "runManifestSha256": "e4984dc87dcda6208fa9d30a6890d9ba4b48c26fac7c8da82624f3dbeefb7029",
+      "summaryBytesSha256": "d7917230421ef2f1aa6260f389174119e5b296525bfd9ffa82f15f26683d66ec",
+      "completionSealSha256": "b93cea4d44274a47f024896b68b1b28dedb02476d6e2a26ef433eebcf3082b14",
+      "normalizedSummarySha256": "b86acb1258f6c59f4a12664bb2a2abae28a1ce894065a7f5573edd3adc418d87"
+    }
+  },
+  "evaluator": {
+    "commit": "77c84facb0edc95b3e5f0904a011e33856094d9f",
+    "candidateReportSha256": "9602cf0df1d69f43ef1fd6d12178af95ba748363910998157b1390b2855d4b83",
+    "controlReportSha256": "89af2c90e18ae82cf862cc49f6fe8b03d5221fb7eb20463bb4e64d2576d72daa",
+    "pairedReportSha256": "9dc5638204141c0f45b0bf18e2f35373437d320b0a8bb3e4488d56f7ef2bb183",
+    "referenceByteMetadataCompatibility": "The first strict evaluator attempt stopped at truth-schema parsing before scoring because frozen photo reference descriptors omit redundant byte counts. The evaluator now accepts absent byte metadata, enforces a 16 MiB read bound, and still verifies raw SHA, exact source canvas/dimensions, and binary pixels; any supplied byte count is checked exactly. Frozen truth bytes and hashes were unchanged."
+  },
+  "selection": {
+    "candidate": "native-luna-presence-first-checked-region-sam-heldout-v3",
+    "control": "native-luna-presence-first-region-no-image-control-heldout-v3",
+    "sourceUnchanged": true,
+    "allInputsAndTruthPinsMatchFreeze": true
+  },
+  "candidate": {
+    "profileId": "native-luna-presence-first-checked-region-sam-heldout-v3",
+    "variant": "region-seeded-sam",
+    "variantSha256": "cf17516c888a8ef952ad608472bc64e2b1d4c1746d6c5057440036e242b9ceee",
+    "complete": true,
+    "denominator": 80,
+    "classification": {
+      "denominator": 80,
+      "answered": 80,
+      "correct": 65,
+      "accuracy": 0.8125,
+      "unanswered": 0,
+      "errors": 15
+    },
+    "groups": {
+      "photo": {
+        "cases": 40,
+        "positives": 30,
+        "negatives": 10,
+        "classificationCorrect": 37,
+        "classificationStatus": {
+          "ok": 40
+        },
+        "extractionStatus": {
+          "extracted": 11,
+          "failed": 2,
+          "not-found": 7,
+          "unknown": 20
+        },
+        "seedStatus": {
+          "failed": 2,
+          "located": 20,
+          "not-reached": 7,
+          "unknown": 11
+        },
+        "seedLocations": 20,
+        "positiveSeedBoxIntersections": 20,
+        "positiveExactMaskForegroundHits": 20,
+        "wholeObjectBoxesMatched": 8,
+        "falseSeedLocations": 0,
+        "falseExtractions": 0,
+        "exactCanvasMaskReferenceInstances": 30
+      },
+      "ui": {
+        "cases": 20,
+        "positives": 15,
+        "negatives": 5,
+        "classificationCorrect": 19,
+        "classificationStatus": {
+          "ok": 20
+        },
+        "extractionStatus": {
+          "extracted": 5,
+          "not-found": 6,
+          "unknown": 9
+        },
+        "seedStatus": {
+          "located": 6,
+          "not-reached": 6,
+          "unknown": 8
+        },
+        "seedLocations": 6,
+        "positiveSeedBoxIntersections": 6,
+        "positiveExactMaskForegroundHits": null,
+        "wholeObjectBoxesMatched": 0,
+        "falseSeedLocations": 0,
+        "falseExtractions": 0,
+        "exactCanvasMaskReferenceInstances": 0
+      },
+      "map": {
+        "cases": 20,
+        "positives": 15,
+        "negatives": 5,
+        "classificationCorrect": 9,
+        "classificationStatus": {
+          "ok": 20
+        },
+        "extractionStatus": {
+          "not-found": 14,
+          "unknown": 6
+        },
+        "seedStatus": {
+          "not-reached": 14,
+          "unknown": 6
+        },
+        "seedLocations": 0,
+        "positiveSeedBoxIntersections": 0,
+        "positiveExactMaskForegroundHits": null,
+        "wholeObjectBoxesMatched": 0,
+        "falseSeedLocations": 0,
+        "falseExtractions": 0,
+        "exactCanvasMaskReferenceInstances": 0
+      }
+    },
+    "extractionStatuses": {
+      "extracted": 16,
+      "unknown": 35,
+      "failed": 2,
+      "not-found": 27
+    },
+    "seedRegion": {
+      "located": 26,
+      "locatedOnPresent": 26,
+      "locatedOnAbsent": 0,
+      "positiveReferenceBoxIntersections": 26,
+      "falseSeedLocations": 0,
+      "falseExtractions": 0,
+      "metric": "any positive-area intersection of seed cell and independent target box; coarse proxy only"
+    },
+    "wholeObject": {
+      "attempted": 80,
+      "positives": 60,
+      "negatives": 20,
+      "matched": 8,
+      "localizationRate": 0.13333333333333333,
+      "falseLocations": 0,
+      "unknown": 35,
+      "failed": 2
+    },
+    "boxVerification": {
+      "casesWithAttempt": 26,
+      "casesWithoutAttempt": 54,
+      "successfulAttempts": 31,
+      "failedAttempts": 0,
+      "verdicts": {
+        "complete": 16,
+        "needs-expansion": 15,
+        "unknown": 0
+      },
+      "expansionOutcomes": {
+        "not-needed": 16,
+        "unsupported": 0,
+        "no-enclosing-mask": 5,
+        "rejected-mask": 0,
+        "expanded": 5
+      },
+      "extractionStatuses": {
+        "extracted": 16,
+        "region-only": 0,
+        "unknown": 35,
+        "not-found": 27,
+        "failed": 2
+      }
+    },
+    "mask": {
+      "referenceInstances": 30,
+      "scored": 11,
+      "passedAtIoU08": 8,
+      "scoredBelowThreshold": 3,
+      "unavailable": 19,
+      "unannotatedCases": 50,
+      "unavailableReasons": {
+        "unavailable-no-predicted-mask": 19
+      },
+      "referenceInstancesByStratum": {
+        "photo": 30,
+        "ui": 0,
+        "map": 0
+      }
+    },
+    "physical": {
+      "count": 266,
+      "knownCostUsd": 0.10520950000000014,
+      "unknownCostCalls": 2,
+      "accountedExposureUsd": 0.20520950000000016,
+      "receiptCount": 266,
+      "httpStatusCounts": {
+        "200": 264,
+        "502": 2
+      },
+      "receiptErrorCodes": {
+        "PROVIDER": 2
+      }
+    }
+  },
+  "control": {
+    "profileId": "native-luna-presence-first-region-no-image-control-heldout-v3",
+    "variant": "no-image-control",
+    "variantSha256": "1ec1668798a587daa585ba37a079acd38d7d97ef9d735f7b2732f2fa18e5bce4",
+    "complete": true,
+    "denominator": 80,
+    "classification": {
+      "denominator": 80,
+      "answered": 80,
+      "correct": 20,
+      "accuracy": 0.25,
+      "unanswered": 0,
+      "errors": 60
+    },
+    "groups": {
+      "photo": {
+        "cases": 40,
+        "positives": 30,
+        "negatives": 10,
+        "classificationCorrect": 10,
+        "classificationStatus": {
+          "ok": 40
+        },
+        "extractionStatus": {
+          "not-found": 40
+        },
+        "seedStatus": {
+          "not-reached": 40
+        },
+        "seedLocations": 0,
+        "positiveSeedBoxIntersections": 0,
+        "positiveExactMaskForegroundHits": 0,
+        "wholeObjectBoxesMatched": 0,
+        "falseSeedLocations": 0,
+        "falseExtractions": 0,
+        "exactCanvasMaskReferenceInstances": 30
+      },
+      "ui": {
+        "cases": 20,
+        "positives": 15,
+        "negatives": 5,
+        "classificationCorrect": 5,
+        "classificationStatus": {
+          "ok": 20
+        },
+        "extractionStatus": {
+          "not-found": 20
+        },
+        "seedStatus": {
+          "not-reached": 20
+        },
+        "seedLocations": 0,
+        "positiveSeedBoxIntersections": 0,
+        "positiveExactMaskForegroundHits": null,
+        "wholeObjectBoxesMatched": 0,
+        "falseSeedLocations": 0,
+        "falseExtractions": 0,
+        "exactCanvasMaskReferenceInstances": 0
+      },
+      "map": {
+        "cases": 20,
+        "positives": 15,
+        "negatives": 5,
+        "classificationCorrect": 5,
+        "classificationStatus": {
+          "ok": 20
+        },
+        "extractionStatus": {
+          "not-found": 20
+        },
+        "seedStatus": {
+          "not-reached": 20
+        },
+        "seedLocations": 0,
+        "positiveSeedBoxIntersections": 0,
+        "positiveExactMaskForegroundHits": null,
+        "wholeObjectBoxesMatched": 0,
+        "falseSeedLocations": 0,
+        "falseExtractions": 0,
+        "exactCanvasMaskReferenceInstances": 0
+      }
+    },
+    "extractionStatuses": {
+      "not-found": 80
+    },
+    "seedRegion": {
+      "located": 0,
+      "locatedOnPresent": 0,
+      "locatedOnAbsent": 0,
+      "positiveReferenceBoxIntersections": 0,
+      "falseSeedLocations": 0,
+      "falseExtractions": 0,
+      "metric": "any positive-area intersection of seed cell and independent target box; coarse proxy only"
+    },
+    "wholeObject": null,
+    "boxVerification": {
+      "casesWithAttempt": 0,
+      "casesWithoutAttempt": 80,
+      "successfulAttempts": 0,
+      "failedAttempts": 0,
+      "verdicts": {
+        "complete": 0,
+        "needs-expansion": 0,
+        "unknown": 0
+      },
+      "expansionOutcomes": {
+        "not-needed": 0,
+        "unsupported": 0,
+        "no-enclosing-mask": 0,
+        "rejected-mask": 0,
+        "expanded": 0
+      },
+      "extractionStatuses": {
+        "extracted": 0,
+        "region-only": 0,
+        "unknown": 0,
+        "not-found": 80,
+        "failed": 0
+      }
+    },
+    "mask": {
+      "referenceInstances": 30,
+      "scored": 0,
+      "passedAtIoU08": 0,
+      "scoredBelowThreshold": 0,
+      "unavailable": 30,
+      "unannotatedCases": 50,
+      "unavailableReasons": {
+        "unavailable-no-predicted-mask": 30
+      },
+      "referenceInstancesByStratum": {
+        "photo": 30,
+        "ui": 0,
+        "map": 0
+      }
+    },
+    "physical": {
+      "count": 80,
+      "knownCostUsd": 0.001616999999999999,
+      "unknownCostCalls": 0,
+      "accountedExposureUsd": 0.001616999999999999,
+      "receiptCount": 80,
+      "httpStatusCounts": {
+        "200": 80
+      },
+      "receiptErrorCodes": {},
+      "imageFetchAudit": {
+        "checkedFetches": 80,
+        "imagePartFetches": 0,
+        "allRequestsVerifiedImageFree": true
+      }
+    }
+  },
+  "pairedPhotoPositiveSeeds": {
+    "photoPositivePairs": 30,
+    "coarseBoxIntersectionSeedProxy": {
+      "pairs": 30,
+      "iterations": 10000,
+      "seed": "0x5a4f5259",
+      "method": "paired-percentile-nearest-rank",
+      "difference": 0.6666666666666666,
+      "confidence": 0.95,
+      "lower": 0.5,
+      "upper": 0.8333333333333334,
+      "passes": true
+    },
+    "exactReferenceMaskForegroundSeedHit": {
+      "pairs": 30,
+      "iterations": 10000,
+      "seed": "0x5a4f5259",
+      "method": "paired-percentile-nearest-rank",
+      "difference": 0.6666666666666666,
+      "confidence": 0.95,
+      "lower": 0.5,
+      "upper": 0.8333333333333334,
+      "passes": true
+    },
+    "interpretation": "Paired seed-search proxy only. Region-cell intersection is not whole-object localization; no candidate mask box is paired against a control seed cell."
+  },
+  "frozenAdmissionCriteria": {
+    "completeCasesPerProfile": 80,
+    "maxFalseSeedLocationsOn20Negatives": 1,
+    "maxFalseExtractionsOn20Negatives": 1,
+    "minimumCorrectMaskDerivedBox": 1,
+    "minimumExactCanvasMaskAtIoU08": 1,
+    "photoExactMaskSeedPairedBootstrapLowerMustBePositive": true,
+    "photoCoarseBoxSeedPairedBootstrapLowerMustBePositive": true,
+    "allSourceSecurityArchivePlatformResourceGatesBeforePublication": true
+  },
+  "gateResults": {
+    "complete80PerProfile": true,
+    "falseSeedLocationsOn20Negatives": true,
+    "falseExtractionsOn20Negatives": true,
+    "maskDerivedBoxesAtLeastOne": true,
+    "exactCanvasMasksIoU08AtLeastOne": true,
+    "pairedExactForegroundLowerPositive": true,
+    "pairedCoarseProxyLowerPositive": true,
+    "overall": true
+  },
+  "interpretation": "Frozen blind admission criteria pass for this candidate. This is a corpus-gate result, not a general accuracy guarantee. The task is any visible target instance; seed cell intersection is a coarse proposal metric, not whole-object localization. The controlled UI and map strata represent one application family and one game family respectively."
+}
