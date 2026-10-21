@@ -158,7 +158,7 @@ def cmd_prepare_freeze(args: argparse.Namespace) -> int:
         "requested_device": requested_device,
         "runtime": runtime,
         "processor_attestation": h11.processor_attestation_from_contract(contract),
-        "recipe": h11.build_recipe(requested_device=requested_device),
+        "recipe": h11.build_recipe(requested_device=requested_device, contract=contract),
         "rows": rows,
         "script_receipts": h11.build_script_receipts(
             h11_common=common_script,

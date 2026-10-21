@@ -13,6 +13,9 @@ const RUNNER = join(BENCHMARK_DIR, 'h11-sa2va-runner.py')
 const COMMON = join(BENCHMARK_DIR, 'h11-sa2va-common.py')
 const WORKER = join(BENCHMARK_DIR, 'h11-sa2va-worker.py')
 const CONTRACT = join(BENCHMARK_DIR, 'h11-sa2va-contract.json')
+const H11B_CONTRACT = join(BENCHMARK_DIR, 'h11b-sa2va-direct-gpu-contract.json')
+const H11B_CONTRACT_SHA = 'ee623e58181f5db22d77720760438b0b34342c708a9f5f99037446d4d3846908'
+const H11_LEGACY_CONTRACT_SHA = '14281b417d8fc2838cd52ff6bf05cb63aae493bc9968b5a4f20b6b482d58ccdd'
 const H10_COMMON = join(BENCHMARK_DIR, 'h10-clipseg-common.py')
 const MINIMAL_MANIFEST = '/root/work/zorya-classifier/.run/v03/h10/minimal-inputs.json'
 const MINIMAL_MANIFEST_SHA = '98e8a5e767a6604a02fec0e561fa1b0128cb76783e4a405df4cb96e4b75fd084'
@@ -776,6 +779,358 @@ print("ok")
   const result = runPythonScript(python, script)
   assert.equal(result.code, 0, result.stderr + result.stdout)
   assert.match(result.stdout, /ok/)
+})
+
+await test('build_recipe preserves legacy recipe and adds loader_device_map only for H11b', async () => {
+  const python = resolvePython()
+  const script = `
+import importlib.util, json, sys
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location("h11c", ${JSON.stringify(COMMON)})
+mod = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = mod
+spec.loader.exec_module(mod)
+
+legacy = mod.build_recipe(requested_device="cuda:0")
+baseline = mod.build_recipe(requested_device="cuda:0", contract=None)
+assert legacy == baseline
+assert "loader_device_map" not in legacy
+
+legacy_contract = json.loads(Path(${JSON.stringify(CONTRACT)}).read_text(encoding="utf-8"))
+legacy_with_contract = mod.build_recipe(requested_device="cuda:0", contract=legacy_contract)
+assert legacy_with_contract == legacy
+
+h11b_contract = json.loads(Path(${JSON.stringify(H11B_CONTRACT)}).read_text(encoding="utf-8"))
+h11b_recipe = mod.build_recipe(requested_device="cuda:0", contract=h11b_contract)
+assert h11b_recipe != legacy
+assert set(h11b_recipe.keys()) - set(legacy.keys()) == {"loader_device_map"}
+assert h11b_recipe["loader_device_map"] == mod.H11B_AUTHORIZED_LOADER_DEVICE_MAP
+
+def expect_fail(fn):
+    try:
+        fn()
+    except mod.H11Error:
+        return
+    raise AssertionError("expected H11Error")
+
+bad_profile = dict(h11b_contract)
+bad_profile["runtime_profile_id"] = "unknown-profile"
+expect_fail(lambda: mod.build_recipe(requested_device="cuda:0", contract=bad_profile))
+
+bad_map = dict(h11b_contract)
+bad_map["model"] = dict(h11b_contract["model"])
+bad_map["model"]["loader"] = dict(h11b_contract["model"]["loader"])
+bad_map["model"]["loader"]["from_pretrained"] = dict(
+    h11b_contract["model"]["loader"]["from_pretrained"]
+)
+bad_map["model"]["loader"]["from_pretrained"]["device_map"] = {"": "cuda:1"}
+expect_fail(lambda: mod.build_recipe(requested_device="cuda:0", contract=bad_map))
+
+auto_map = dict(h11b_contract)
+auto_map["model"] = dict(h11b_contract["model"])
+auto_map["model"]["loader"] = dict(h11b_contract["model"]["loader"])
+auto_map["model"]["loader"]["from_pretrained"] = dict(
+    h11b_contract["model"]["loader"]["from_pretrained"]
+)
+auto_map["model"]["loader"]["from_pretrained"]["device_map"] = "auto"
+expect_fail(lambda: mod.build_recipe(requested_device="cuda:0", contract=auto_map))
+
+orphan_map = dict(legacy_contract)
+orphan_map["model"] = dict(legacy_contract["model"])
+orphan_map["model"]["loader"] = dict(legacy_contract["model"]["loader"])
+orphan_map["model"]["loader"]["from_pretrained"] = dict(
+    legacy_contract["model"]["loader"]["from_pretrained"]
+)
+orphan_map["model"]["loader"]["from_pretrained"]["device_map"] = {"": "cuda:0"}
+expect_fail(lambda: mod.build_recipe(requested_device="cuda:0", contract=orphan_map))
+
+print("ok")
+`
+  const result = runPythonScript(python, script)
+  assert.equal(result.code, 0, result.stderr + result.stdout)
+  assert.match(result.stdout, /ok/)
+  assert.equal(sha256File(H11B_CONTRACT, python), H11B_CONTRACT_SHA)
+  assert.equal(sha256File(CONTRACT, python), H11_LEGACY_CONTRACT_SHA)
+})
+
+await test('load_stack uses device_map without to() for H11b and legacy to() without device_map', async () => {
+  const python = resolvePython()
+  const script = `
+import hashlib, importlib.util, json, os, sys, tempfile, types
+from pathlib import Path
+import torch
+
+os.environ["H10_EXPECTED_LAUNCHER_PID"] = str(os.getppid())
+
+BENCHMARK = Path(${JSON.stringify(BENCHMARK_DIR)})
+COMMON = BENCHMARK / "h11-sa2va-common.py"
+WORKER = BENCHMARK / "h11-sa2va-worker.py"
+H11B_CONTRACT = Path(${JSON.stringify(H11B_CONTRACT)})
+LEGACY_CONTRACT = Path(${JSON.stringify(CONTRACT)})
+
+def load_module(path: Path, name: str):
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+h11 = load_module(COMMON, "h11_loader_common")
+worker = load_module(WORKER, "h11_loader_worker")
+
+GOOD_SAM2 = '''
+class SAM2VideoPredictor:
+    def __init__(self, fill_hole_area=0):
+        self.fill_hole_area = fill_hole_area
+
+class SAM2:
+    def __init__(self):
+        SAM2VideoPredictor(compile_image_encoder=False)
+'''
+
+def sam2_contract(source: str) -> dict:
+    payload = source.encode("utf-8")
+    return {
+        "required_model_files": [
+            {"path": "sam2.py", "sha256": hashlib.sha256(payload).hexdigest(), "bytes": len(payload)}
+        ]
+    }
+
+class ImageEncoder:
+    def forward(self):
+        return None
+
+class Sam2Runtime:
+    def __init__(self):
+        self.fill_hole_area = 0
+        self.image_encoder = ImageEncoder()
+
+class GroundingEncoder:
+    def __init__(self, sam2_model):
+        self.sam2_model = sam2_model
+
+class Sa2VAChatConfigQwen:
+    def __init__(self):
+        self._attn_implementation = "eager"
+        self.use_flash_attn = False
+
+class Sa2VAChatModelQwen(torch.nn.Module):
+    def __init__(self, *, direct: bool, asset_dir: Path):
+        super().__init__()
+        self.config = Sa2VAChatConfigQwen()
+        self.grounding_encoder = GroundingEncoder(Sam2Runtime())
+        self.name_or_path = str(asset_dir)
+        self.hf_device_map = {"": "cuda:0"}
+        self._direct = direct
+        self._device_storage = torch.device("cpu")
+        self.weight = torch.nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.bfloat16))
+        self.register_buffer("buf", torch.zeros(2, device="cuda:0", dtype=torch.int32))
+
+    def eval(self):
+        return self
+
+    def to(self, device):
+        if self._direct:
+            raise AssertionError("h11b load must not call model.to")
+        self._device_storage = torch.device(device)
+        return self
+
+class Qwen2VLImageProcessor:
+    pass
+
+class Qwen3VLProcessor:
+    def __init__(self):
+        self.image_processor = Qwen2VLImageProcessor()
+        self.tokenizer = types.SimpleNamespace(eos_token_id=2)
+
+Qwen3VLProcessor.__module__ = "transformers.models.qwen3_vl.processing_qwen3_vl"
+Qwen2VLImageProcessor.__module__ = "transformers.models.qwen2_vl.image_processing_qwen2_vl"
+
+from_pretrained_calls: list[dict] = []
+
+def fake_processor_from_pretrained(*args, **kwargs):
+    return Qwen3VLProcessor()
+
+def fake_model_from_pretrained(*args, **kwargs):
+    from_pretrained_calls.append(dict(kwargs))
+    direct = "device_map" in kwargs
+    return Sa2VAChatModelQwen(direct=direct, asset_dir=Path(args[0]))
+
+asset_dir = Path(tempfile.mkdtemp(prefix="h11-loader-"))
+(asset_dir / "sam2.py").write_text(GOOD_SAM2, encoding="utf-8")
+local_contract = sam2_contract(GOOD_SAM2)
+original_verify_assets = h11.verify_asset_directory
+h11.verify_asset_directory = lambda directory, c: {"sam2.py": {"sha256": local_contract["required_model_files"][0]["sha256"], "bytes": local_contract["required_model_files"][0]["bytes"]}}
+
+import transformers
+transformers.AutoProcessor.from_pretrained = fake_processor_from_pretrained
+transformers.AutoModel.from_pretrained = fake_model_from_pretrained
+
+if not torch.cuda.is_available():
+    torch.cuda.is_available = lambda: True
+
+legacy_contract = json.loads(LEGACY_CONTRACT.read_text(encoding="utf-8"))
+legacy_contract = {**legacy_contract, **local_contract}
+h11b_contract = json.loads(H11B_CONTRACT.read_text(encoding="utf-8"))
+h11b_contract = {**h11b_contract, **local_contract}
+
+try:
+    from_pretrained_calls.clear()
+    worker.load_stack(asset_dir, "cuda:0", legacy_contract)
+    assert "device_map" not in from_pretrained_calls[-1]
+    assert worker._pending_ready_loader_placement is None
+
+    from_pretrained_calls.clear()
+    worker.load_stack(asset_dir, "cuda:0", h11b_contract)
+    assert from_pretrained_calls[-1]["device_map"] == h11.H11B_AUTHORIZED_LOADER_DEVICE_MAP
+    placement = worker._pending_ready_loader_placement
+    assert placement["hf_device_map"] == h11.H11B_AUTHORIZED_LOADER_DEVICE_MAP
+    assert placement["parameter_count"] == 1
+    assert placement["buffer_count"] == 1
+    assert placement["all_parameters_cuda0"] is True
+    assert placement["floating_parameters_bfloat16"] is True
+finally:
+    h11.verify_asset_directory = original_verify_assets
+
+print("ok")
+`
+  const result = runPythonScript(python, script)
+  assert.equal(result.code, 0, result.stderr + result.stdout)
+  assert.match(result.stdout, /ok/)
+})
+
+await test('verify_h11b_loader_placement accepts cuda0 and rejects drift meta cpu and dtype', async () => {
+  const python = resolvePython()
+  const script = `
+import importlib.util, sys
+import torch
+from torch import nn
+
+spec = importlib.util.spec_from_file_location("h11c", ${JSON.stringify(COMMON)})
+mod = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = mod
+spec.loader.exec_module(mod)
+
+class FakeModel(nn.Module):
+    def __init__(self, hf_device_map, param, buf):
+        super().__init__()
+        self.hf_device_map = hf_device_map
+        self.weight = param
+        self.register_buffer("buf", buf)
+
+def expect_fail(fn):
+    try:
+        fn()
+    except mod.H11Error:
+        return
+    raise AssertionError("expected H11Error")
+
+good = FakeModel(
+    {"": "cuda:0"},
+    nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.bfloat16)),
+    torch.zeros(2, device="cuda:0", dtype=torch.int32),
+)
+attestation = mod.verify_h11b_loader_placement(good)
+assert attestation["parameter_count"] == 1
+assert attestation["buffer_count"] == 1
+
+int_map = FakeModel(
+    {"": 0},
+    nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.bfloat16)),
+    torch.zeros(2, device="cuda:0", dtype=torch.int32),
+)
+assert mod.verify_h11b_loader_placement(int_map)["hf_device_map"] == mod.H11B_AUTHORIZED_LOADER_DEVICE_MAP
+
+expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cpu"}, nn.Parameter(torch.zeros(2)), torch.zeros(2))))
+expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"layer": "cuda:0", "": "cuda:0"}, nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.bfloat16)), torch.zeros(2, device="cuda:0"))))
+expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, nn.Parameter(torch.zeros(2, device="cpu", dtype=torch.bfloat16)), torch.zeros(2, device="cuda:0"))))
+expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, nn.Parameter(torch.zeros(2, device="meta", dtype=torch.bfloat16)), torch.zeros(2, device="cuda:0"))))
+expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.float32)), torch.zeros(2, device="cuda:0"))))
+
+class EmptyModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.hf_device_map = {"": "cuda:0"}
+
+expect_fail(lambda: mod.verify_h11b_loader_placement(EmptyModel()))
+
+print("ok")
+`
+  const result = runPythonScript(python, script)
+  assert.equal(result.code, 0, result.stderr + result.stdout)
+  assert.match(result.stdout, /ok/)
+})
+
+await test('prepare-freeze and revalidate bind H11b contract recipe loader_device_map', async () => {
+  const python = resolvePython()
+  const h11bContract = JSON.parse(await readFile(H11B_CONTRACT, 'utf8')) as Record<string, unknown>
+  const legacyRecipeScript = `
+import importlib.util, json, sys
+spec = importlib.util.spec_from_file_location("h11c", ${JSON.stringify(COMMON)})
+mod = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = mod
+spec.loader.exec_module(mod)
+print(json.dumps(mod.build_recipe(requested_device="cuda:0")))
+`
+  const legacyRecipeResult = runPythonScript(python, legacyRecipeScript)
+  assert.equal(legacyRecipeResult.code, 0, legacyRecipeResult.stderr)
+  const legacyRecipe = JSON.parse(legacyRecipeResult.stdout.trim()) as Record<string, unknown>
+
+  const h11bRecipeScript = `
+import importlib.util, json, sys
+from pathlib import Path
+spec = importlib.util.spec_from_file_location("h11c", ${JSON.stringify(COMMON)})
+mod = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = mod
+spec.loader.exec_module(mod)
+contract = json.loads(Path(${JSON.stringify(H11B_CONTRACT)}).read_text(encoding="utf-8"))
+print(json.dumps(mod.build_recipe(requested_device="cuda:0", contract=contract)))
+`
+  const h11bRecipeResult = runPythonScript(python, h11bRecipeScript)
+  assert.equal(h11bRecipeResult.code, 0, h11bRecipeResult.stderr)
+  const h11bRecipe = JSON.parse(h11bRecipeResult.stdout.trim()) as Record<string, unknown>
+  assert.deepEqual(h11bRecipe.loader_device_map, { '': 'cuda:0' })
+  assert.deepEqual(
+    Object.keys(h11bRecipe).filter((key) => !(key in legacyRecipe)),
+    ['loader_device_map'],
+  )
+
+  const revalidateScript = `
+import importlib.util, json, sys
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location("h11c", ${JSON.stringify(COMMON)})
+mod = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = mod
+spec.loader.exec_module(mod)
+
+contract_path = Path(${JSON.stringify(H11B_CONTRACT)})
+contract = mod.load_contract(contract_path)
+freeze = {
+    "schema": mod.FREEZE_SCHEMA,
+    "manifest_path": "/tmp/unused-manifest.json",
+    "manifest_sha256": "0" * 64,
+    "asset_dir": "/tmp/unused-assets",
+    "requested_device": "cuda:0",
+    "recipe": json.loads(${JSON.stringify(JSON.stringify(h11bRecipe))}),
+    "contract_sha256": mod.file_digest_hex(contract_path),
+    "processor_attestation": mod.processor_attestation_from_contract(contract),
+}
+expected = mod.build_recipe(requested_device="cuda:0", contract=contract)
+assert freeze["recipe"] == expected
+assert mod.build_recipe(requested_device="cuda:0", contract=contract) != mod.build_recipe(requested_device="cuda:0")
+
+legacy_path = Path(${JSON.stringify(CONTRACT)})
+legacy_contract = mod.load_contract(legacy_path)
+legacy_freeze_recipe = mod.build_recipe(requested_device="cuda:0", contract=legacy_contract)
+assert "loader_device_map" not in legacy_freeze_recipe
+print("ok")
+`
+  const revalidateResult = runPythonScript(python, revalidateScript)
+  assert.equal(revalidateResult.code, 0, revalidateResult.stderr + revalidateResult.stdout)
+  assert.match(revalidateResult.stdout, /ok/)
+  assert.equal(h11bContract.runtime_profile_id, 'h11b-direct-cuda-v1')
 })
 
 await test('composed offline fake-native regression: run_row, eager load pins, and run finalization', async () => {

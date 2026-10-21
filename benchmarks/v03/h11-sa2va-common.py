@@ -34,6 +34,9 @@ MODEL_REVISION = "173fb6512b3ad6f3c1fe25efa09e723d01d5b6d4"
 
 SAM2_PINNED_REL_PATH = "sam2.py"
 CONTRACT_PATH = Path(__file__).with_name("h11-sa2va-contract.json")
+H11B_CONTRACT_SHA256 = "ee623e58181f5db22d77720760438b0b34342c708a9f5f99037446d4d3846908"
+H11B_RUNTIME_PROFILE_ID = "h11b-direct-cuda-v1"
+H11B_AUTHORIZED_LOADER_DEVICE_MAP: dict[str, str] = {"": "cuda:0"}
 
 MINIMAL_DEV_MANIFEST_PATH = Path("/root/work/zorya-classifier/.run/v03/h10/minimal-inputs.json")
 MINIMAL_DEV_MANIFEST_SHA256 = "98e8a5e767a6604a02fec0e561fa1b0128cb76783e4a405df4cb96e4b75fd084"
@@ -534,6 +537,158 @@ def cuda_runtime_details() -> dict[str, Any]:
     return parsed
 
 
+def _contract_from_pretrained_device_map(contract: Mapping[str, Any]) -> Any:
+    model_section = contract.get("model")
+    if not isinstance(model_section, dict):
+        return None
+    loader_section = model_section.get("loader")
+    if not isinstance(loader_section, dict):
+        return None
+    from_pretrained = loader_section.get("from_pretrained")
+    if not isinstance(from_pretrained, dict):
+        return None
+    if "device_map" not in from_pretrained:
+        return None
+    return from_pretrained.get("device_map")
+
+
+def _contract_device_map_is_authorized_h11b(device_map: Any) -> bool:
+    if not isinstance(device_map, dict):
+        return False
+    if set(device_map.keys()) != {""}:
+        return False
+    value = device_map.get("")
+    if isinstance(value, str):
+        if value == "auto":
+            return False
+        lowered = value.lower()
+        if "cpu" in lowered or "disk" in lowered:
+            return False
+        return value == H11B_AUTHORIZED_LOADER_DEVICE_MAP[""]
+    return False
+
+
+def validate_contract_runtime_profile(contract: Mapping[str, Any]) -> None:
+    profile = contract.get("runtime_profile_id")
+    device_map = _contract_from_pretrained_device_map(contract)
+    if profile is None:
+        if device_map is not None:
+            raise H11Error("contract device_map requires authorized h11b runtime profile")
+        return
+    if profile != H11B_RUNTIME_PROFILE_ID:
+        raise H11Error(f"unsupported runtime_profile_id: {profile!r}")
+    if not _contract_device_map_is_authorized_h11b(device_map):
+        raise H11Error(
+            "h11b contract requires model.loader.from_pretrained.device_map "
+            f"{H11B_AUTHORIZED_LOADER_DEVICE_MAP!r}"
+        )
+
+
+def is_h11b_direct_cuda_contract(contract: Mapping[str, Any]) -> bool:
+    return contract.get("runtime_profile_id") == H11B_RUNTIME_PROFILE_ID
+
+
+def _normalize_hf_device_map_value(value: Any) -> str | None:
+    if value == 0:
+        return "cuda:0"
+    if isinstance(value, str):
+        if value == "0":
+            return "cuda:0"
+        if value == "cuda:0":
+            return "cuda:0"
+        return None
+    device_type = getattr(value, "type", None)
+    device_index = getattr(value, "index", None)
+    if device_type == "cuda" and device_index in (None, 0):
+        return "cuda:0"
+    return None
+
+
+def _normalized_hf_device_map(model: Any) -> dict[str, str]:
+    raw_map = getattr(model, "hf_device_map", None)
+    if not isinstance(raw_map, dict) or not raw_map:
+        raise H11Error("model missing non-empty hf_device_map after h11b load")
+    normalized: dict[str, str] = {}
+    for key, value in raw_map.items():
+        if not isinstance(key, str):
+            raise H11Error("hf_device_map keys must be strings")
+        mapped = _normalize_hf_device_map_value(value)
+        if mapped is None:
+            raise H11Error(f"hf_device_map value {value!r} is not authorized cuda:0")
+        normalized[key] = mapped
+    return normalized
+
+
+def _tensor_on_cuda0(tensor: Any) -> bool:
+    device = getattr(tensor, "device", None)
+    if device is None:
+        return False
+    device_type = getattr(device, "type", None)
+    if device_type == "meta":
+        return False
+    if device_type != "cuda":
+        return False
+    index = getattr(device, "index", None)
+    return index in (None, 0)
+
+
+def verify_h11b_loader_placement(model: Any) -> dict[str, Any]:
+    import torch
+
+    normalized_map = _normalized_hf_device_map(model)
+    if normalized_map != H11B_AUTHORIZED_LOADER_DEVICE_MAP:
+        raise H11Error(
+            f"hf_device_map must be {H11B_AUTHORIZED_LOADER_DEVICE_MAP!r}, got {normalized_map!r}"
+        )
+
+    named_parameters = list(model.named_parameters())
+    named_buffers = list(model.named_buffers())
+    if not named_parameters:
+        raise H11Error("h11b placement requires at least one parameter")
+
+    all_parameters_cuda0 = True
+    all_buffers_cuda0 = True
+    no_meta_tensors = True
+    floating_parameters_bfloat16 = True
+
+    for _name, parameter in named_parameters:
+        if parameter.device.type == "meta":
+            no_meta_tensors = False
+            all_parameters_cuda0 = False
+            continue
+        if not _tensor_on_cuda0(parameter):
+            all_parameters_cuda0 = False
+        if parameter.is_floating_point() and parameter.dtype != torch.bfloat16:
+            floating_parameters_bfloat16 = False
+
+    for _name, buffer in named_buffers:
+        if buffer.device.type == "meta":
+            no_meta_tensors = False
+            all_buffers_cuda0 = False
+            continue
+        if not _tensor_on_cuda0(buffer):
+            all_buffers_cuda0 = False
+
+    if not all_parameters_cuda0:
+        raise H11Error("h11b placement requires all parameters on cuda:0")
+    if not all_buffers_cuda0:
+        raise H11Error("h11b placement requires all buffers on cuda:0")
+    if not no_meta_tensors:
+        raise H11Error("h11b placement rejects meta tensors")
+    if not floating_parameters_bfloat16:
+        raise H11Error("h11b placement requires bfloat16 floating-point parameters")
+
+    return {
+        "hf_device_map": dict(H11B_AUTHORIZED_LOADER_DEVICE_MAP),
+        "parameter_count": len(named_parameters),
+        "buffer_count": len(named_buffers),
+        "all_parameters_cuda0": True,
+        "all_buffers_cuda0": True,
+        "no_meta_tensors": True,
+        "floating_parameters_bfloat16": True,
+    }
+
+
 def assert_runtime_pins(runtime: Mapping[str, Any]) -> None:
     if runtime.get("python_version") != EXPECTED_PYTHON_VERSION:
         raise H11Error(
@@ -550,7 +705,7 @@ def assert_runtime_pins(runtime: Mapping[str, Any]) -> None:
         raise H11Error("torchvision must be present in runtime receipt")
 
 
-def build_recipe(*, requested_device: str) -> dict[str, Any]:
+def _legacy_recipe(*, requested_device: str) -> dict[str, Any]:
     return {
         "model_id": MODEL_ID,
         "revision": MODEL_REVISION,
@@ -571,6 +726,16 @@ def build_recipe(*, requested_device: str) -> dict[str, Any]:
         "retain_native_masks_max_count": RETAIN_MASK_MAX_COUNT,
         "retain_native_masks_max_bytes_per_row": RETAIN_MASK_MAX_BYTES_PER_ROW,
     }
+
+
+def build_recipe(*, requested_device: str, contract: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    recipe = _legacy_recipe(requested_device=requested_device)
+    if contract is None:
+        return recipe
+    validate_contract_runtime_profile(contract)
+    if is_h11b_direct_cuda_contract(contract):
+        recipe = {**recipe, "loader_device_map": dict(H11B_AUTHORIZED_LOADER_DEVICE_MAP)}
+    return recipe
 
 
 def overlay_wheels_from_contract(contract: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -1155,7 +1320,10 @@ def revalidate_freeze_closure(
     frozen_scripts = freeze.get("script_receipts")
     if expected_scripts != frozen_scripts:
         raise H11Error("script receipts changed since freeze")
-    if freeze.get("recipe") != build_recipe(requested_device=str(freeze.get("requested_device"))):
+    if freeze.get("recipe") != build_recipe(
+        requested_device=str(freeze.get("requested_device")),
+        contract=contract,
+    ):
         raise H11Error("immutable recipe differs from accepted H11 method")
     attestation = processor_attestation_from_contract(contract)
     if freeze.get("processor_attestation") != attestation:

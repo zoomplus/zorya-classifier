@@ -52,6 +52,8 @@ h11 = importlib.util.module_from_spec(_spec)
 sys.modules[_spec.name] = h11
 _spec.loader.exec_module(h11)
 
+_pending_ready_loader_placement: dict[str, Any] | None = None
+
 
 def emit(message: dict[str, Any]) -> None:
     sys.stdout.write(json.dumps(message, separators=(",", ":")) + "\n")
@@ -69,7 +71,10 @@ def _configure_hf_cache(output_root: Path) -> None:
 
 
 def load_stack(asset_dir: Path, device: str, contract: dict[str, Any]) -> tuple[Any, Any, torch.device]:
+    global _pending_ready_loader_placement
+    _pending_ready_loader_placement = None
     h11.verify_asset_directory(asset_dir, contract)
+    h11.validate_contract_runtime_profile(contract)
     if device != "cuda:0":
         raise h11.H11Error(f"requested device must be cuda:0, got {device}")
     if not torch.cuda.is_available():
@@ -89,16 +94,20 @@ def load_stack(asset_dir: Path, device: str, contract: dict[str, Any]) -> tuple[
     )
     h11.verify_live_processor(processor)
 
-    model = AutoModel.from_pretrained(
-        str(asset_dir),
-        trust_remote_code=True,
-        local_files_only=True,
-        revision=h11.MODEL_REVISION,
-        low_cpu_mem_usage=True,
-        torch_dtype=torch.bfloat16,
-        attn_implementation="eager",
-        use_flash_attn=False,
-    )
+    from_pretrained_kwargs: dict[str, Any] = {
+        "trust_remote_code": True,
+        "local_files_only": True,
+        "revision": h11.MODEL_REVISION,
+        "low_cpu_mem_usage": True,
+        "torch_dtype": torch.bfloat16,
+        "attn_implementation": "eager",
+        "use_flash_attn": False,
+    }
+    use_direct_cuda_map = h11.is_h11b_direct_cuda_contract(contract)
+    if use_direct_cuda_map:
+        from_pretrained_kwargs["device_map"] = dict(h11.H11B_AUTHORIZED_LOADER_DEVICE_MAP)
+
+    model = AutoModel.from_pretrained(str(asset_dir), **from_pretrained_kwargs)
     model_type = type(model)
     if model_type.__name__ != "Sa2VAChatModelQwen":
         raise h11.H11Error(f"unexpected model class: {model_type.__name__}")
@@ -107,7 +116,10 @@ def load_stack(asset_dir: Path, device: str, contract: dict[str, Any]) -> tuple[
         if config_type.__name__ != "Sa2VAChatConfigQwen":
             raise h11.H11Error(f"unexpected config class: {config_type.__name__}")
 
-    model.to(torch_device)
+    if use_direct_cuda_map:
+        _pending_ready_loader_placement = h11.verify_h11b_loader_placement(model)
+    else:
+        model.to(torch_device)
     model.eval()
     h11.verify_attention_runtime(model)
     h11.verify_sam2_runtime(model, asset_dir=asset_dir, contract=contract)
@@ -329,13 +341,14 @@ def main() -> int:
         load_start = time.perf_counter()
         processor, model, torch_device = load_stack(asset_dir, device, contract)
         load_ms = (time.perf_counter() - load_start) * 1000.0
-        emit(
-            {
-                "type": "ready",
-                "load_ms": load_ms,
-                "device": str(torch_device),
-            }
-        )
+        ready_message: dict[str, Any] = {
+            "type": "ready",
+            "load_ms": load_ms,
+            "device": str(torch_device),
+        }
+        if _pending_ready_loader_placement is not None:
+            ready_message["loader_placement"] = _pending_ready_loader_placement
+        emit(ready_message)
         while True:
             line = sys.stdin.readline()
             if not line:
