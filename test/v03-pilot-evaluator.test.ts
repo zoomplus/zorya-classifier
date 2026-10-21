@@ -235,7 +235,7 @@ await test('forged boxes and invalid mask canvases cannot count as localization 
       classify: { status: 'classified', choice: 'present' },
       extraction: {
         status: 'located',
-        seed: { ...common, region: { left: 5, top: 5, width: 1, height: 1 } },
+        seed: { ...common, sourceWidth: 19, region: { left: 5, top: 5, width: 1, height: 1 } },
       },
     },
   ]
@@ -251,6 +251,8 @@ await test('forged boxes and invalid mask canvases cannot count as localization 
   assert.equal(report.wholeObjectLocalization.status, 'not-measured-seed-only-or-no-boxes')
   assert.equal(report.wholeObjectLocalization.rateAmongAllPositives, null)
   assert.equal(report.denominators.invalidMaskArtifacts, 2)
+  assert.equal(report.seedDiagnostic.positiveLocatedSeeds, 3)
+  assert.equal(report.seedDiagnostic.positiveSeedHits, 2)
   assert.equal(
     report.cases.find((row) => row.caseId === forged.caseId)?.maskArtifactReason,
     'mask-file-unreadable',

@@ -336,16 +336,21 @@ export async function evaluateV03Pilot(input: EvaluateV03PilotInput) {
 
     let seed = row?.extraction.seed.region
     const seedStatus = row?.extraction.seed.status
+    let seedValid = false
     if (row && seedStatus === 'located') {
+      let dimensionsMatch = true
       if (!seed) outputErrors.push('located-seed-without-region')
       if (
         row.extraction.seed.sourceWidth !== expected.sourceWidth ||
         row.extraction.seed.sourceHeight !== expected.sourceHeight
-      )
+      ) {
         outputErrors.push('seed-source-dimensions-disagree')
+        dimensionsMatch = false
+      }
       if (seed) {
         try {
           requireBoxWithin(seed, expected.sourceWidth, expected.sourceHeight)
+          seedValid = dimensionsMatch
         } catch {
           outputErrors.push('seed-region-outside-source')
           seed = undefined
@@ -369,6 +374,7 @@ export async function evaluateV03Pilot(input: EvaluateV03PilotInput) {
     if (outputErrors.length > 0) invalidOutputRows++
     const seedHit = Boolean(
       seed &&
+        seedValid &&
         expected.presence === 'present' &&
         expected.boxes.some(
           (box) =>
@@ -383,7 +389,7 @@ export async function evaluateV03Pilot(input: EvaluateV03PilotInput) {
             ) > 0,
         ),
     )
-    if (expected.presence === 'present' && seedStatus === 'located' && seed) {
+    if (expected.presence === 'present' && seedStatus === 'located') {
       seedAttempts++
       if (seedHit) seedHits++
     }
