@@ -1,0 +1,241 @@
+[
+  {
+    "caseId": "pilot-v03-photo-01",
+    "sourceCaseId": "photo-dev-present-05",
+    "stratum": "photo",
+    "presence": "present",
+    "imageSha256": "71b99532e14abb6098a704e9bd9c2c50eebba72588a49e60c8a4b89af4eea4c5",
+    "sourceWidth": 1024,
+    "sourceHeight": 683,
+    "boxes": [
+      {
+        "left": 0.0,
+        "top": 69.50884853000001,
+        "width": 173.68731648,
+        "height": 252.34734748999998
+      },
+      {
+        "left": 54.37168128,
+        "top": 0.0,
+        "width": 937.9115264000001,
+        "height": 646.7344962899999
+      },
+      {
+        "left": 951.504384,
+        "top": 96.70796436,
+        "width": 72.49561600000004,
+        "height": 179.81637422
+      }
+    ],
+    "referenceMasks": []
+  },
+  {
+    "caseId": "pilot-v03-photo-02",
+    "sourceCaseId": "photo-dev-present-06",
+    "stratum": "photo",
+    "presence": "present",
+    "imageSha256": "ad0eb4bf4a6c2c1be585846a943aa06ec2440696b7e8874374904eb25dcc594a",
+    "sourceWidth": 1024,
+    "sourceHeight": 683,
+    "boxes": [
+      {
+        "left": 354.92624384,
+        "top": 225.14823166,
+        "width": 350.39528960000007,
+        "height": 228.17034274
+      }
+    ],
+    "referenceMasks": [
+      {
+        "path": "benchmarks/cache/v02/corpus/masks-source-size/photo-dev-present-06-01.png",
+        "sha256": "0a82516a43057329a7b2cafa4fcbe1c714d997a87a9e1dbe6d84ffcbf1bbbe26",
+        "width": 1024,
+        "height": 683,
+        "resampling": "nearest-neighbor to the acquired Open Images JPEG raster; verified 0/255 binary values"
+      }
+    ]
+  },
+  {
+    "caseId": "pilot-v03-photo-03",
+    "sourceCaseId": "photo-dev-present-16",
+    "stratum": "photo",
+    "presence": "present",
+    "imageSha256": "4a0dffd0f9f85bacac77d4f372c1f3eb754ba6a7440de3bc7c7f6a42f4c53ecd",
+    "sourceWidth": 1024,
+    "sourceHeight": 768,
+    "boxes": [
+      {
+        "left": 0.0,
+        "top": 1.6000000511999999,
+        "width": 385.6,
+        "height": 387.1999999488
+      },
+      {
+        "left": 131.2,
+        "top": 0.0,
+        "width": 332.8,
+        "height": 416.00002559999996
+      },
+      {
+        "left": 451.2,
+        "top": 177.60000000000002,
+        "width": 198.40000000000003,
+        "height": 137.59999488
+      },
+      {
+        "left": 476.8,
+        "top": 17.600000256,
+        "width": 470.40000000000003,
+        "height": 750.399999744
+      },
+      {
+        "left": 508.8,
+        "top": 49.599997439999996,
+        "width": 203.2,
+        "height": 248.00000256
+      }
+    ],
+    "referenceMasks": []
+  },
+  {
+    "caseId": "pilot-v03-photo-04",
+    "sourceCaseId": "photo-dev-absent-04",
+    "stratum": "photo",
+    "presence": "absent",
+    "imageSha256": "085ac7dc3243e28816e69f5e1ad56b9e8858c7135fac366f3172ad862e28eeae",
+    "sourceWidth": 1024,
+    "sourceHeight": 683,
+    "boxes": [],
+    "referenceMasks": []
+  },
+  {
+    "caseId": "pilot-v03-ui-01",
+    "sourceCaseId": "ui-geany-oracle-dev-present-07",
+    "stratum": "ui",
+    "presence": "present",
+    "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+    "sourceWidth": 1280,
+    "sourceHeight": 800,
+    "boxes": [
+      {
+        "left": 608.0,
+        "top": 136.0,
+        "width": 44.00000000000006,
+        "height": 36.999999999999986
+      }
+    ],
+    "referenceMasks": []
+  },
+  {
+    "caseId": "pilot-v03-ui-02",
+    "sourceCaseId": "ui-geany-oracle-dev-present-06",
+    "stratum": "ui",
+    "presence": "present",
+    "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+    "sourceWidth": 1280,
+    "sourceHeight": 800,
+    "boxes": [
+      {
+        "left": 564.0,
+        "top": 136.0,
+        "width": 43.999999999999986,
+        "height": 36.999999999999986
+      }
+    ],
+    "referenceMasks": []
+  },
+  {
+    "caseId": "pilot-v03-ui-03",
+    "sourceCaseId": "ui-geany-oracle-dev-present-02",
+    "stratum": "ui",
+    "presence": "present",
+    "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+    "sourceWidth": 1280,
+    "sourceHeight": 800,
+    "boxes": [
+      {
+        "left": 277.0,
+        "top": 136.0,
+        "width": 44.00000000000002,
+        "height": 35.999999999999986
+      }
+    ],
+    "referenceMasks": []
+  },
+  {
+    "caseId": "pilot-v03-ui-04",
+    "sourceCaseId": "ui-geany-oracle-dev-absent-02",
+    "stratum": "ui",
+    "presence": "absent",
+    "imageSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+    "sourceWidth": 1280,
+    "sourceHeight": 800,
+    "boxes": [],
+    "referenceMasks": []
+  },
+  {
+    "caseId": "pilot-v03-map-01",
+    "sourceCaseId": "map-freeciv-oracle-dev-present-06",
+    "stratum": "map",
+    "presence": "present",
+    "imageSha256": "07e1ea0a28ea9e7e183e6c8c04797e0fee0995c9f91d0933293bac73f2ea4e2a",
+    "sourceWidth": 1280,
+    "sourceHeight": 800,
+    "boxes": [
+      {
+        "left": 709.0,
+        "top": 382.0,
+        "width": 40.0,
+        "height": 43.000000000000014
+      }
+    ],
+    "referenceMasks": []
+  },
+  {
+    "caseId": "pilot-v03-map-02",
+    "sourceCaseId": "map-freeciv-oracle-dev-present-05",
+    "stratum": "map",
+    "presence": "present",
+    "imageSha256": "a970216cbccf7456464e5ca25fc120e1e3994344e5fdc95607c1eb27d61ec205",
+    "sourceWidth": 1280,
+    "sourceHeight": 800,
+    "boxes": [
+      {
+        "left": 709.0,
+        "top": 382.0,
+        "width": 40.0,
+        "height": 43.000000000000014
+      }
+    ],
+    "referenceMasks": []
+  },
+  {
+    "caseId": "pilot-v03-map-03",
+    "sourceCaseId": "map-freeciv-oracle-dev-present-02",
+    "stratum": "map",
+    "presence": "present",
+    "imageSha256": "1d696fe4fd5ab990650da67c20b78d3240c048e4849ab8f043c398cfcf1ecc85",
+    "sourceWidth": 1280,
+    "sourceHeight": 800,
+    "boxes": [
+      {
+        "left": 709.0,
+        "top": 382.0,
+        "width": 40.0,
+        "height": 43.000000000000014
+      }
+    ],
+    "referenceMasks": []
+  },
+  {
+    "caseId": "pilot-v03-map-04",
+    "sourceCaseId": "map-freeciv-oracle-dev-absent-fighter",
+    "stratum": "map",
+    "presence": "absent",
+    "imageSha256": "4c48235b5a5c4413eccae22ad9ef2e89b697c073d40cf8c7b3c8978b662eacfa",
+    "sourceWidth": 1280,
+    "sourceHeight": 800,
+    "boxes": [],
+    "referenceMasks": []
+  }
+]
