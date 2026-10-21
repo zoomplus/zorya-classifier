@@ -7,7 +7,7 @@ import type { RasterPort } from '../../src/entities/contracts.js'
 import { ClassifierError, assertActive } from '../../src/entities/errors.js'
 import { unpackBinaryMask } from '../../src/features/segmentation/packed-mask.js'
 import { createSharpRaster } from '../../src/infrastructure/raster.js'
-import type { RunBudget } from '../v02/budget.js'
+import { RunBudget } from '../v02/budget.js'
 import {
   isRecorderBoundToBudget,
   type PhysicalCallRecord,
@@ -110,12 +110,19 @@ const armPolicy = {
   },
   [H8_SOL_MODEL]: {
     arm: 'h8b-openai-gpt-6.1-sol-chat',
-    maxCostUsd: 12,
+    maxCostUsd: 5,
     unknownReserveUsd: 0.25,
     inputUsdPerMillion: 2,
     outputUsdPerMillion: 10,
   },
 } as const
+
+/** Creates the explicitly selected arm's ledger using the shared admission limits. */
+export function createH8RunBudget(model: H8Route['model']): RunBudget {
+  const policy = armPolicy[model]
+  if (!policy) throw new ClassifierError('INVALID_INPUT', 'H8 model is outside frozen arms')
+  return new RunBudget(48, policy.maxCostUsd, policy.unknownReserveUsd)
+}
 
 function sha256(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex')

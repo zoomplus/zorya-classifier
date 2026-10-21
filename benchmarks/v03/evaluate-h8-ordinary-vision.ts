@@ -29,7 +29,7 @@ const ARMS = {
   },
   'h8b-openai-gpt-6.1-sol-chat': {
     model: 'openai/gpt-6.1-sol',
-    maxCost: 12,
+    maxCost: 5,
     reserve: 0.25,
     inputPrice: 2,
     outputPrice: 10,

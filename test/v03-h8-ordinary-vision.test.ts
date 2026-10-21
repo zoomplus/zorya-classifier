@@ -12,6 +12,8 @@ import { createOpenRouterVision } from '../src/infrastructure/openrouter-vision.
 import {
   H8_CHAT_ENDPOINT,
   H8_LUNA_MODEL,
+  H8_SOL_MODEL,
+  createH8RunBudget,
   runH8OrdinaryVisionReplay,
   type H8CapabilityReceipt,
   type H8Route,
@@ -24,6 +26,22 @@ const nativeRoot =
   '/root/work/zorya-classifier-worktrees/v03/segmentation-research/.run/v03'
 const h5aDirectory = resolve(nativeRoot, 'h5a-native-proposals-v2')
 const h4eDirectory = resolve(nativeRoot, 'h4e-sam2-context-prompt-v1')
+
+await test('both H8 arm budgets construct within the unchanged shared admission limits', () => {
+  for (const [model, maximum, reserve] of [
+    [H8_LUNA_MODEL, 2.4, 0.05],
+    [H8_SOL_MODEL, 5, 0.25],
+  ] as const) {
+    const budget = createH8RunBudget(model)
+    assert.equal(budget.maxPhysicalCalls, 48)
+    assert.equal(budget.maxCostUsd, maximum)
+    assert.equal(budget.unknownReserveUsd, reserve)
+    assert.equal(budget.snapshot().admittedPhysicalCalls, 0)
+    const id = budget.admit()
+    budget.settle(id, null)
+    assert.equal(budget.snapshot().accountedExposureUsd, reserve)
+  }
+})
 
 async function hasNativeArtifacts(): Promise<boolean> {
   try {
