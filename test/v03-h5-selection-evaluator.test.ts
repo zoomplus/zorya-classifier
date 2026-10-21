@@ -25,9 +25,9 @@ function fixture() {
     const sourceFamily = caseId.startsWith('pilot-v03-ui-') ? 'h4e-sam2' : 'h3-dino-sam2'
     const sourceAlias = sourceFamily === 'h4e-sam2' ? 'candidate-013' : 'C00'
     const maskSha256 = digest(String(index % 10))
-    const candidateReceipts = pass
-      ? [{ family: sourceFamily, id: sourceAlias, maskSha256, score: { pass: true } }]
-      : []
+    const candidateReceipts = [
+      { family: sourceFamily, id: sourceAlias, maskSha256, score: { pass } },
+    ]
     return {
       caseId,
       presence,
@@ -56,8 +56,6 @@ function fixture() {
   }
   const rows = cases.map((case_id, index) => {
     const truth = perCase[index]!
-    if (truth.presence === 'absent')
-      return { case_id, status: 'unknown' as const, nominations: [], candidateRoster: [] }
     const sourceFamily = case_id.startsWith('pilot-v03-ui-')
       ? ('h4e-sam2' as const)
       : ('h3b-dino-sam2' as const)
@@ -76,6 +74,8 @@ function fixture() {
         sourceMaskPath: 'candidate.png',
       },
     ]
+    if (truth.presence === 'absent')
+      return { case_id, status: 'unknown' as const, nominations: [], candidateRoster }
     const nominates = index !== 2
     const selects = index === 0
     return {

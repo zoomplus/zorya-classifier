@@ -168,6 +168,34 @@ export function evaluateH5Selection(
       rosterByAlias.size === replayRow.candidateRoster.length,
       `h5b-roster-duplicate-${caseId}`,
     )
+    const expectedRoster = [
+      ...receipts
+        .filter((item) => item.sourceFamily === 'h3b-dino-sam2')
+        .map((item) => ({ family: 'D' as const, item })),
+      ...receipts
+        .filter((item) => item.sourceFamily !== 'h3b-dino-sam2')
+        .map((item) => ({ family: 'U' as const, item })),
+    ]
+    assert(expectedRoster.length === replayRow.candidateRoster.length, `h5b-roster-count-${caseId}`)
+    assert(expectedRoster.length <= 72, `h5b-total-candidate-cap-${caseId}`)
+    const familyOrdinals = { D: 0, U: 0 }
+    for (let index = 0; index < expectedRoster.length; index++) {
+      const expected = expectedRoster[index]!
+      const entry = replayRow.candidateRoster[index]!
+      const ordinal = familyOrdinals[expected.family]++
+      assert(ordinal < 36, `h5b-family-candidate-cap-${caseId}`)
+      assert(entry.family === expected.family, `h5b-roster-family-order-${caseId}-${index}`)
+      assert(
+        entry.composerAlias === `${expected.family}${String(ordinal).padStart(2, '0')}`,
+        `h5b-roster-alias-order-${caseId}-${index}`,
+      )
+      assert(
+        entry.sourceFamily === expected.item.sourceFamily &&
+          entry.sourceAlias === expected.item.sourceAlias &&
+          entry.candidateMaskSha256 === expected.item.maskSha256,
+        `h5b-roster-source-mismatch-${caseId}-${index}`,
+      )
+    }
     for (const entry of replayRow.candidateRoster) {
       assert(entry.family === 'D' || entry.family === 'U', `h5b-roster-family-${caseId}`)
       assert(entry.composerAlias.length > 0, `h5b-roster-alias-${caseId}`)
@@ -178,6 +206,16 @@ export function evaluateH5Selection(
       assert(
         nomination.family === 'D' || nomination.family === 'U',
         `h5b-nomination-family-${caseId}`,
+      )
+      assert(nomination.topFour.length <= 4, `h5b-nomination-rank-cap-${caseId}`)
+      assert(
+        new Set(nomination.topFour).size === nomination.topFour.length,
+        `h5b-nomination-rank-duplicate-${caseId}`,
+      )
+      assert(
+        JSON.stringify(nomination.nomineeAliases) ===
+          JSON.stringify(nomination.topFour.filter((alias) => alias !== 'none')),
+        `h5b-nomination-alias-list-mismatch-${caseId}`,
       )
       for (const alias of nomination.nomineeAliases) {
         const candidate = rosterByAlias.get(alias)
@@ -199,6 +237,14 @@ export function evaluateH5Selection(
     let selectedSameMaskPass = false
     let selectedMaskArtifactValid = false
     if (selected) {
+      assert(
+        replayRow.nominations.some(
+          (nomination) =>
+            nomination.family === replayRow.family &&
+            nomination.nomineeAliases.includes(replayRow.composerAlias ?? ''),
+        ),
+        `h5b-selected-not-nominated-${caseId}`,
+      )
       const candidate = replayRow.candidateRoster.find(
         (entry) =>
           entry.family === replayRow.family &&
@@ -256,11 +302,12 @@ export function evaluateH5Selection(
       h5aRunSha256: replay.h5a.runSha256,
       h5aFreezeSha256: replay.h5a.freezeSha256,
       budget: replay.budget,
-      integrityPass:
-        replay.freezeMatched &&
+      budgetCountersClean:
         replay.budget.unknownCostCalls === 0 &&
         replay.budget.inFlightCalls === 0 &&
         replay.budget.persistenceFailures === 0,
+      closureInterpretation:
+        'semantic adapter does not independently verify producer closure receipts',
     },
     positiveSummary: {
       denominator: positiveRows.length,
@@ -297,7 +344,7 @@ async function sha256(path: string) {
     .digest('hex')
 }
 
-async function assertSameBinaryMask(
+export async function assertSameBinaryMask(
   sourcePath: string,
   outputPath: string,
   expectedSourceSha256: string,
@@ -308,13 +355,34 @@ async function assertSameBinaryMask(
   assert((await sha256(sourcePath)) === expectedSourceSha256, 'h5b-source-mask-hash')
   assert((await sha256(outputPath)) === expectedOutputSha256, 'h5b-selected-mask-hash')
   const [source, output] = await Promise.all([
-    sharp(sourcePath).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
-    sharp(outputPath).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
+    sharp(sourcePath).raw().toBuffer({ resolveWithObject: true }),
+    sharp(outputPath).raw().toBuffer({ resolveWithObject: true }),
   ])
   assert(source.info.width === width && source.info.height === height, 'h5b-source-mask-size')
   assert(output.info.width === width && output.info.height === height, 'h5b-output-mask-size')
-  assert(source.info.channels === 1 && output.info.channels === 1, 'h5b-mask-channel-count')
-  assert(source.data.equals(output.data), 'h5b-selected-mask-pixels-differ')
+  const binaryGray = (bytes: Buffer, channels: number): Uint8Array => {
+    assert([1, 2, 3, 4].includes(channels), 'h5b-mask-channel-count')
+    const colorChannels = channels === 1 || channels === 2 ? 1 : 3
+    const alphaChannel = channels === 2 ? 1 : channels === 4 ? 3 : -1
+    const pixels = width * height
+    const gray = new Uint8Array(pixels)
+    for (let pixel = 0; pixel < pixels; pixel++) {
+      const offset = pixel * channels
+      const value = bytes[offset]
+      assert(value === 0 || value === 255, 'h5b-mask-not-binary')
+      for (let channel = 1; channel < colorChannels; channel++)
+        assert(bytes[offset + channel] === value, 'h5b-mask-color-channels-disagree')
+      if (alphaChannel >= 0) assert(bytes[offset + alphaChannel] === 255, 'h5b-mask-not-opaque')
+      gray[pixel] = value
+    }
+    return gray
+  }
+  assert(
+    Buffer.from(binaryGray(source.data, source.info.channels)).equals(
+      Buffer.from(binaryGray(output.data, output.info.channels)),
+    ),
+    'h5b-selected-mask-pixels-differ',
+  )
 }
 
 export async function verifySelectedMaskArtifacts(
