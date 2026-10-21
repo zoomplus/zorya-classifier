@@ -1,0 +1,2127 @@
+{
+  "schema": "v03-h4e-sam2-context-prompt-independent-evaluation-v1",
+  "evaluationType": "same-candidate-whole-box-availability",
+  "productionResult": false,
+  "wholeObjectGate": {
+    "sameMaskDerivedBox": true,
+    "minimumIoU": 0.5,
+    "minimumReferenceCoverage": 0.9
+  },
+  "sourceSha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+  "negativeInterpretation": "mask availability on negatives is not a false-positive or semantic-selection judgment",
+  "runSha256": "dab327f4ee13af4b5b742e681fd180bbc96372a4669833754f77a3c5f9ea55d4",
+  "freezeSha256": "ea905f6e2468b0776207056d51b6c96d0eed9e6c8a6b2626b388fb14974032a2",
+  "evaluatorSha256": "5c3d71be76dd0ad4c1065c56f4f908c5fcfcd78130b924eb5e1e492580f57433",
+  "h4aRunSha256": "d1ff8a0fd97e6197834c673d399fe9f1ecfcd2d93182ab2a4fd3767e702755a1",
+  "h4aFreezeSha256": "30ff2cf2f1894745c8e5e227e35ef1858432c63f55ae454a1e10f86118668753",
+  "model": {
+    "repo": "facebook/sam2-hiera-tiny",
+    "revision": "7c218beaf0bb87874785f32b582f640134fc1c09",
+    "license": "Apache-2.0",
+    "assets": [
+      {
+        "bytes": 155841672,
+        "name": "model.safetensors",
+        "sha256": "1449035ba6ba2ed524c646da989e5cb3a9b93b97f1c1b2d474e598c3b748d99f"
+      },
+      {
+        "bytes": 5697,
+        "name": "config.json",
+        "sha256": "3239c7ecf212b1a9d9f98310c8993612335c5596a12c8cfba25e512e9dc5965b"
+      },
+      {
+        "bytes": 683,
+        "name": "preprocessor_config.json",
+        "sha256": "6ebf229ee259368ce4a8d4f2fe893a72b053023710853e257253939e601f583d"
+      },
+      {
+        "bytes": 95,
+        "name": "processor_config.json",
+        "sha256": "f8a68e865cfad115c1c2763f3d93eca7b1c622da06da2a9273eb437fb2389b6d"
+      }
+    ]
+  },
+  "protocol": {
+    "clip_to_box": false,
+    "image_encoding_calls": 1,
+    "mask_frame": "full original source",
+    "mask_threshold": 0,
+    "multimask_output": false,
+    "order": "frozen H4a candidate order",
+    "prompt": "box XYXY expanded 25% per original side and clipped to source",
+    "prompt_count": 36
+  },
+  "integrityUnchanged": true,
+  "validMaskCount": 36,
+  "emptyMaskCount": 0,
+  "positiveDenominator": 3,
+  "positiveCandidatesPassing": 3,
+  "negativeDenominator": 1,
+  "negativesWithMasks": 1,
+  "rows": [
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "candidateCount": 36,
+      "sameCandidateGatePasses": 1,
+      "candidateAvailabilityPass": true,
+      "bestCandidateOrdinal": 13,
+      "bestCandidateIoU": 0.8568421052631573,
+      "bestCandidateCoverage": 0.9999999999999991,
+      "referenceCount": 1
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "candidateCount": 36,
+      "sameCandidateGatePasses": 1,
+      "candidateAvailabilityPass": true,
+      "bestCandidateOrdinal": 14,
+      "bestCandidateIoU": 0.9520467836257315,
+      "bestCandidateCoverage": 1,
+      "referenceCount": 1
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "candidateCount": 36,
+      "sameCandidateGatePasses": 1,
+      "candidateAvailabilityPass": true,
+      "bestCandidateOrdinal": 19,
+      "bestCandidateIoU": 0.9512044471896233,
+      "bestCandidateCoverage": 0.9722222222222221,
+      "referenceCount": 1
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "candidateCount": 36,
+      "sameCandidateGatePasses": 0,
+      "candidateAvailabilityPass": false,
+      "bestCandidateOrdinal": 0,
+      "bestCandidateIoU": 0,
+      "bestCandidateCoverage": 0,
+      "referenceCount": 0
+    }
+  ],
+  "candidateScores": [
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 0,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 1,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 2,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 3,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 4,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 5,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 6,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 7,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 8,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 9,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 10,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 11,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 12,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 13,
+      "iou": 0.8568421052631573,
+      "coverage": 0.9999999999999991,
+      "pass": true
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 14,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 15,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 16,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 17,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 18,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 19,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 20,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 21,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 22,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 23,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 24,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 25,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 26,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 27,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 28,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 29,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 30,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 31,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 32,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 33,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 34,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "ordinal": 35,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 0,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 1,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 2,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 3,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 4,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 5,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 6,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 7,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 8,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 9,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 10,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 11,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 12,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 13,
+      "iou": 0.021424435437174295,
+      "coverage": 0.045454545454545484,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 14,
+      "iou": 0.9520467836257315,
+      "coverage": 1,
+      "pass": true
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 15,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 16,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 17,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 18,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 19,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 20,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 21,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 22,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 23,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 24,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 25,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 26,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 27,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 28,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 29,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 30,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 31,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 32,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 33,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 34,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "ordinal": 35,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 0,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 1,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 2,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 3,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 4,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 5,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 6,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 7,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 8,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 9,
+      "iou": 0.023529411764705882,
+      "coverage": 0.04545454545454545,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 10,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 11,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 12,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 13,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 14,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 15,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 16,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 17,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 18,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 19,
+      "iou": 0.9512044471896233,
+      "coverage": 0.9722222222222221,
+      "pass": true
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 20,
+      "iou": 0.023483365949119372,
+      "coverage": 0.04545454545454545,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 21,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 22,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 23,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 24,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 25,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 26,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 27,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 28,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 29,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 30,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 31,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 32,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 33,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 34,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "ordinal": 35,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 0,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 1,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 2,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 3,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 4,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 5,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 6,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 7,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 8,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 9,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 10,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 11,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 12,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 13,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 14,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 15,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 16,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 17,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 18,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 19,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 20,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 21,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 22,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 23,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 24,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 25,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 26,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 27,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 28,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 29,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 30,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 31,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 32,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 33,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 34,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "ordinal": 35,
+      "iou": 0,
+      "coverage": 0,
+      "pass": false
+    }
+  ],
+  "masks": [
+    {
+      "ordinal": 0,
+      "flatIndex": 2052,
+      "proposalBox": {
+        "left": 1058.392578125,
+        "top": 91.02783203125,
+        "width": 11.341796875,
+        "height": 11.920005798339844
+      },
+      "promptBox": {
+        "left": 1055.55712890625,
+        "top": 88.04783058166504,
+        "width": 17.0126953125,
+        "height": 17.880008697509766
+      },
+      "box": {
+        "left": 1057,
+        "top": 89,
+        "width": 16,
+        "height": 15
+      },
+      "area": 219,
+      "sha256": "f29f398f6a7904bd6aac2d94d904445de2b58964e68a3ad55cb7bf83b2a6ac5a"
+    },
+    {
+      "ordinal": 1,
+      "flatIndex": 2051,
+      "proposalBox": {
+        "left": 1042.369873046875,
+        "top": 90.96139526367188,
+        "width": 11.2255859375,
+        "height": 11.994102478027344
+      },
+      "promptBox": {
+        "left": 1039.5634765625,
+        "top": 87.96286964416504,
+        "width": 16.83837890625,
+        "height": 17.991153717041016
+      },
+      "box": {
+        "left": 1042,
+        "top": 89,
+        "width": 13,
+        "height": 15
+      },
+      "area": 186,
+      "sha256": "57cebc0c8ea23f9889e582ead24cf8d537ce614ff85b3cfda1fe866d1adc48be"
+    },
+    {
+      "ordinal": 2,
+      "flatIndex": 2054,
+      "proposalBox": {
+        "left": 1074.2861328125,
+        "top": 91.08397674560547,
+        "width": 11.470703125,
+        "height": 11.902275085449219
+      },
+      "promptBox": {
+        "left": 1071.41845703125,
+        "top": 88.10840797424316,
+        "width": 17.2060546875,
+        "height": 17.853412628173828
+      },
+      "box": {
+        "left": 1073,
+        "top": 88,
+        "width": 16,
+        "height": 18
+      },
+      "area": 251,
+      "sha256": "19d285594306a13ccede3eeb989bab93b70a97a644c514b81533a416bb81ca56"
+    },
+    {
+      "ordinal": 3,
+      "flatIndex": 3012,
+      "proposalBox": {
+        "left": 1049.497802734375,
+        "top": 136.8236083984375,
+        "width": 36.0845947265625,
+        "height": 35.511688232421875
+      },
+      "promptBox": {
+        "left": 1040.4766540527344,
+        "top": 127.94568634033203,
+        "width": 54.12689208984375,
+        "height": 53.26753234863281
+      },
+      "box": {
+        "left": 1048,
+        "top": 135,
+        "width": 42,
+        "height": 40
+      },
+      "area": 1592,
+      "sha256": "f45caccfd5a7efdc2e5d1b63823395869e7d50ea3c6f0ec7a57357a124e66069"
+    },
+    {
+      "ordinal": 4,
+      "flatIndex": 26497,
+      "proposalBox": {
+        "left": 189.7139892578125,
+        "top": 176.0826873779297,
+        "width": 155.54986572265625,
+        "height": 35.65679931640625
+      },
+      "promptBox": {
+        "left": 150.82652282714844,
+        "top": 167.16848754882812,
+        "width": 233.32479858398438,
+        "height": 53.485198974609375
+      },
+      "box": {
+        "left": 190,
+        "top": 174,
+        "width": 164,
+        "height": 41
+      },
+      "area": 5971,
+      "sha256": "13580622a550d7579d5a87a1bb9fe1545223a85b10a5a36fcce66d18f627ffb1"
+    },
+    {
+      "ordinal": 5,
+      "flatIndex": 3891,
+      "proposalBox": {
+        "left": 356.87554931640625,
+        "top": 176.67564392089844,
+        "width": 100.20779418945312,
+        "height": 36.36328125
+      },
+      "promptBox": {
+        "left": 331.82360076904297,
+        "top": 167.58482360839844,
+        "width": 150.3116912841797,
+        "height": 54.544921875
+      },
+      "box": {
+        "left": 347,
+        "top": 174,
+        "width": 111,
+        "height": 41
+      },
+      "area": 4177,
+      "sha256": "59fd673add2dd8885acab37892ce2d53ad27fdc245de0f3f1c203c9b3b793044"
+    },
+    {
+      "ordinal": 6,
+      "flatIndex": 2320,
+      "proposalBox": {
+        "left": 620.6096801757812,
+        "top": 107.98089599609375,
+        "width": 45.0057373046875,
+        "height": 22.980178833007812
+      },
+      "promptBox": {
+        "left": 609.3582458496094,
+        "top": 102.2358512878418,
+        "width": 67.50860595703125,
+        "height": 34.47026824951172
+      },
+      "box": {
+        "left": 610,
+        "top": 107,
+        "width": 68,
+        "height": 27
+      },
+      "area": 1600,
+      "sha256": "f0913adbe776884052aa03806118bb0037e5b954b1fcb8b306c4fd6b2d583504"
+    },
+    {
+      "ordinal": 7,
+      "flatIndex": 2316,
+      "proposalBox": {
+        "left": 572.1459350585938,
+        "top": 107.2315902709961,
+        "width": 47.4005126953125,
+        "height": 23.69091033935547
+      },
+      "promptBox": {
+        "left": 560.2958068847656,
+        "top": 101.30886268615723,
+        "width": 71.10076904296875,
+        "height": 35.5363655090332
+      },
+      "box": {
+        "left": 561,
+        "top": 107,
+        "width": 68,
+        "height": 26
+      },
+      "area": 1489,
+      "sha256": "57d9956864fd7f573fe58f16c601166591340a641aba10a264799211303ea5e0"
+    },
+    {
+      "ordinal": 8,
+      "flatIndex": 2308,
+      "proposalBox": {
+        "left": 523.1400146484375,
+        "top": 107.26683044433594,
+        "width": 47.66058349609375,
+        "height": 23.671218872070312
+      },
+      "promptBox": {
+        "left": 511.22486877441406,
+        "top": 101.34902572631836,
+        "width": 71.49087524414062,
+        "height": 35.50682830810547
+      },
+      "box": {
+        "left": 516,
+        "top": 107,
+        "width": 67,
+        "height": 25
+      },
+      "area": 1395,
+      "sha256": "8981b32f1408496994ff5ab22baed745c5609607b9d8af9e0302afcfe3599fed"
+    },
+    {
+      "ordinal": 9,
+      "flatIndex": 3071,
+      "proposalBox": {
+        "left": 239.6646728515625,
+        "top": 137.26162719726562,
+        "width": 34.687591552734375,
+        "height": 33.028961181640625
+      },
+      "promptBox": {
+        "left": 230.9927749633789,
+        "top": 129.00438690185547,
+        "width": 52.03138732910156,
+        "height": 49.54344177246094
+      },
+      "box": {
+        "left": 236,
+        "top": 136,
+        "width": 43,
+        "height": 36
+      },
+      "area": 1488,
+      "sha256": "a4fcce1aa24e3692b9fd8d667beda8c8a2fa988ddf900270fe85896b24c29332"
+    },
+    {
+      "ordinal": 10,
+      "flatIndex": 2946,
+      "proposalBox": {
+        "left": 507.78326416015625,
+        "top": 136.7802276611328,
+        "width": 41.72900390625,
+        "height": 35.45263671875
+      },
+      "promptBox": {
+        "left": 497.35101318359375,
+        "top": 127.91706848144531,
+        "width": 62.593505859375,
+        "height": 53.178955078125
+      },
+      "box": {
+        "left": 504,
+        "top": 136,
+        "width": 49,
+        "height": 38
+      },
+      "area": 1827,
+      "sha256": "8bf5922210ed80c1555f19c8969856a8b96d4891cf3ff08e1546f9155240e4a1"
+    },
+    {
+      "ordinal": 11,
+      "flatIndex": 2294,
+      "proposalBox": {
+        "left": 379.0162658691406,
+        "top": 107.59532165527344,
+        "width": 82.26507568359375,
+        "height": 23.812179565429688
+      },
+      "promptBox": {
+        "left": 358.4499969482422,
+        "top": 101.64227676391602,
+        "width": 123.39761352539062,
+        "height": 35.71826934814453
+      },
+      "box": {
+        "left": 362,
+        "top": 107,
+        "width": 126,
+        "height": 26
+      },
+      "area": 2432,
+      "sha256": "bbade3e8e8b7b0c7da0d5ea0ee51215d63504122bd2cc56a7984c2897ea839c3"
+    },
+    {
+      "ordinal": 12,
+      "flatIndex": 3066,
+      "proposalBox": {
+        "left": 194.9728546142578,
+        "top": 137.3886260986328,
+        "width": 41.62422180175781,
+        "height": 32.91297912597656
+      },
+      "promptBox": {
+        "left": 184.56679916381836,
+        "top": 129.16038131713867,
+        "width": 62.43633270263672,
+        "height": 49.369468688964844
+      },
+      "box": {
+        "left": 194,
+        "top": 137,
+        "width": 44,
+        "height": 35
+      },
+      "area": 1480,
+      "sha256": "cea4824eb051aa890b91cab5a95d661df9a328edcc5f7c8a9c207e9895338cc1"
+    },
+    {
+      "ordinal": 13,
+      "flatIndex": 3120,
+      "proposalBox": {
+        "left": 609.9671630859375,
+        "top": 137.06373596191406,
+        "width": 41.15570068359375,
+        "height": 35.022369384765625
+      },
+      "promptBox": {
+        "left": 599.6782379150391,
+        "top": 128.30814361572266,
+        "width": 61.733551025390625,
+        "height": 52.53355407714844
+      },
+      "box": {
+        "left": 606,
+        "top": 136,
+        "width": 50,
+        "height": 38
+      },
+      "area": 1834,
+      "sha256": "272060c1c3c21784f132035159304c75b9f6f8cfabe2bd0b779454dfa772afd4"
+    },
+    {
+      "ordinal": 14,
+      "flatIndex": 2952,
+      "proposalBox": {
+        "left": 564.4934692382812,
+        "top": 137.00592041015625,
+        "width": 41.53204345703125,
+        "height": 35.109588623046875
+      },
+      "promptBox": {
+        "left": 554.1104583740234,
+        "top": 128.22852325439453,
+        "width": 62.298065185546875,
+        "height": 52.66438293457031
+      },
+      "box": {
+        "left": 563,
+        "top": 136,
+        "width": 45,
+        "height": 38
+      },
+      "area": 1641,
+      "sha256": "5d9fc2928da9fda571acdec6aabcccba67c4b202484a3d83020fdabed4b72c29"
+    },
+    {
+      "ordinal": 15,
+      "flatIndex": 3099,
+      "proposalBox": {
+        "left": 462.40240478515625,
+        "top": 137.08241271972656,
+        "width": 42.006134033203125,
+        "height": 35.13226318359375
+      },
+      "promptBox": {
+        "left": 451.90087127685547,
+        "top": 128.29934692382812,
+        "width": 63.00920104980469,
+        "height": 52.698394775390625
+      },
+      "box": {
+        "left": 458,
+        "top": 136,
+        "width": 48,
+        "height": 38
+      },
+      "area": 1641,
+      "sha256": "ccb57e95e9deab0ee86006f2fbda1b71407ab8f0b6200197488df9451eb5eddf"
+    },
+    {
+      "ordinal": 16,
+      "flatIndex": 2976,
+      "proposalBox": {
+        "left": 755.5352172851562,
+        "top": 137.2523193359375,
+        "width": 35.1524658203125,
+        "height": 34.70774841308594
+      },
+      "promptBox": {
+        "left": 746.7471008300781,
+        "top": 128.57538223266602,
+        "width": 52.72869873046875,
+        "height": 52.061622619628906
+      },
+      "box": {
+        "left": 752,
+        "top": 136,
+        "width": 42,
+        "height": 38
+      },
+      "area": 1565,
+      "sha256": "d879617c28c6dc904c1aede80fe473bc655e2c20fedf216a7c44852848c2c675"
+    },
+    {
+      "ordinal": 17,
+      "flatIndex": 2934,
+      "proposalBox": {
+        "left": 405.6558837890625,
+        "top": 136.85873413085938,
+        "width": 41.867828369140625,
+        "height": 35.646697998046875
+      },
+      "promptBox": {
+        "left": 395.18892669677734,
+        "top": 127.94705963134766,
+        "width": 62.80174255371094,
+        "height": 53.47004699707031
+      },
+      "box": {
+        "left": 402,
+        "top": 135,
+        "width": 49,
+        "height": 39
+      },
+      "area": 1784,
+      "sha256": "eec5fae21b5e56ac239704842e4f4bb5aa70dafccf90853135bcd9e7909e987e"
+    },
+    {
+      "ordinal": 18,
+      "flatIndex": 2302,
+      "proposalBox": {
+        "left": 462.0257263183594,
+        "top": 107.22415161132812,
+        "width": 60.473724365234375,
+        "height": 23.825057983398438
+      },
+      "promptBox": {
+        "left": 446.9072952270508,
+        "top": 101.26788711547852,
+        "width": 90.71058654785156,
+        "height": 35.737586975097656
+      },
+      "box": {
+        "left": 450,
+        "top": 107,
+        "width": 89,
+        "height": 26
+      },
+      "area": 1949,
+      "sha256": "d35118aa670ec3f87194a51a26500775bf6b1ef7f1a1747d666bd17574d226a8"
+    },
+    {
+      "ordinal": 19,
+      "flatIndex": 3076,
+      "proposalBox": {
+        "left": 278.20452880859375,
+        "top": 137.29425048828125,
+        "width": 40.60430908203125,
+        "height": 32.996734619140625
+      },
+      "promptBox": {
+        "left": 268.05345153808594,
+        "top": 129.0450668334961,
+        "width": 60.906463623046875,
+        "height": 49.49510192871094
+      },
+      "box": {
+        "left": 277,
+        "top": 137,
+        "width": 45,
+        "height": 35
+      },
+      "area": 1486,
+      "sha256": "b94b71512fa72c3f32ea46c29601ba6639c516bf9dd2a7193eb406b325672416"
+    },
+    {
+      "ordinal": 20,
+      "flatIndex": 2921,
+      "proposalBox": {
+        "left": 321.9084167480469,
+        "top": 137.00411987304688,
+        "width": 36.936126708984375,
+        "height": 34.92179870605469
+      },
+      "promptBox": {
+        "left": 312.6743850708008,
+        "top": 128.2736701965332,
+        "width": 55.40419006347656,
+        "height": 52.38269805908203
+      },
+      "box": {
+        "left": 319,
+        "top": 136,
+        "width": 42,
+        "height": 37
+      },
+      "area": 1429,
+      "sha256": "8e9ce52919b78c6a4237c5467402bdde905fab0d0ea905e580244b3ac759ef93"
+    },
+    {
+      "ordinal": 21,
+      "flatIndex": 2928,
+      "proposalBox": {
+        "left": 360.98406982421875,
+        "top": 137.15237426757812,
+        "width": 41.128173828125,
+        "height": 34.9814453125
+      },
+      "promptBox": {
+        "left": 350.7020263671875,
+        "top": 128.40701293945312,
+        "width": 61.6922607421875,
+        "height": 52.47216796875
+      },
+      "box": {
+        "left": 357,
+        "top": 136,
+        "width": 48,
+        "height": 38
+      },
+      "area": 1675,
+      "sha256": "ef2a367de61ef02a535f885d1e82300ad536a2b394d8d8ffa7d2d0f22aef3427"
+    },
+    {
+      "ordinal": 22,
+      "flatIndex": 2965,
+      "proposalBox": {
+        "left": 666.371337890625,
+        "top": 137.08309936523438,
+        "width": 42.89739990234375,
+        "height": 35.848175048828125
+      },
+      "promptBox": {
+        "left": 655.6469879150391,
+        "top": 128.12105560302734,
+        "width": 64.34609985351562,
+        "height": 53.77226257324219
+      },
+      "box": {
+        "left": 663,
+        "top": 135,
+        "width": 48,
+        "height": 40
+      },
+      "area": 1764,
+      "sha256": "f7af6943106190adf7bda5b5df8b2c0bcdb6d8e301ad72f6c6fe0a84aa134916"
+    },
+    {
+      "ordinal": 23,
+      "flatIndex": 2970,
+      "proposalBox": {
+        "left": 711.735595703125,
+        "top": 137.63201904296875,
+        "width": 41.3172607421875,
+        "height": 34.53828430175781
+      },
+      "promptBox": {
+        "left": 701.4062805175781,
+        "top": 128.9974479675293,
+        "width": 61.97589111328125,
+        "height": 51.80742645263672
+      },
+      "box": {
+        "left": 706,
+        "top": 136,
+        "width": 50,
+        "height": 38
+      },
+      "area": 1797,
+      "sha256": "8a1000988fab5566f2a834b7def2e4191cc2f3af2968aebc5c1352cdd62f2ea0"
+    },
+    {
+      "ordinal": 24,
+      "flatIndex": 2438,
+      "proposalBox": {
+        "left": 270.5402526855469,
+        "top": 107.19557189941406,
+        "width": 59.241424560546875,
+        "height": 24.1182861328125
+      },
+      "promptBox": {
+        "left": 255.72989654541016,
+        "top": 101.16600036621094,
+        "width": 88.86213684082031,
+        "height": 36.17742919921875
+      },
+      "box": {
+        "left": 255,
+        "top": 107,
+        "width": 94,
+        "height": 27
+      },
+      "area": 2086,
+      "sha256": "d7c19962a9125a197fcfe78f53e6070cbd488d1a6893098fc9c14e506c1c903a"
+    },
+    {
+      "ordinal": 25,
+      "flatIndex": 26737,
+      "proposalBox": {
+        "left": 191.07315063476562,
+        "top": 214.58885192871094,
+        "width": 153.27145385742188,
+        "height": 32.686553955078125
+      },
+      "promptBox": {
+        "left": 152.75528717041016,
+        "top": 206.4172134399414,
+        "width": 229.9071807861328,
+        "height": 49.02983093261719
+      },
+      "box": {
+        "left": 190,
+        "top": 210,
+        "width": 163,
+        "height": 39
+      },
+      "area": 5614,
+      "sha256": "93acc45bc00440b6fd57ba258d9aa4367ffc887cc3f4893614ffa17e0a86357a"
+    },
+    {
+      "ordinal": 26,
+      "flatIndex": 26182,
+      "proposalBox": {
+        "left": 330.52850341796875,
+        "top": 106.89012145996094,
+        "width": 47.575927734375,
+        "height": 24.415359497070312
+      },
+      "promptBox": {
+        "left": 318.634521484375,
+        "top": 100.78628158569336,
+        "width": 71.3638916015625,
+        "height": 36.62303924560547
+      },
+      "box": {
+        "left": 318,
+        "top": 107,
+        "width": 75,
+        "height": 28
+      },
+      "area": 1753,
+      "sha256": "adbf183f78aa82acb19d788159fbec12efe5238e8107567a82d1cc064a00c2ea"
+    },
+    {
+      "ordinal": 27,
+      "flatIndex": 2980,
+      "proposalBox": {
+        "left": 793.69970703125,
+        "top": 136.7325897216797,
+        "width": 43.0958251953125,
+        "height": 36.01838684082031
+      },
+      "promptBox": {
+        "left": 782.9257507324219,
+        "top": 127.72799301147461,
+        "width": 64.64373779296875,
+        "height": 54.02758026123047
+      },
+      "box": {
+        "left": 792,
+        "top": 135,
+        "width": 50,
+        "height": 40
+      },
+      "area": 1913,
+      "sha256": "279b7905e31bbee36dd6b2ebb24150bebd5d7a1d60752214be496af5c4e73c75"
+    },
+    {
+      "ordinal": 28,
+      "flatIndex": 2427,
+      "proposalBox": {
+        "left": 190.35154724121094,
+        "top": 106.837890625,
+        "width": 38.38932800292969,
+        "height": 24.541259765625
+      },
+      "promptBox": {
+        "left": 180.75421524047852,
+        "top": 100.70257568359375,
+        "width": 57.58399200439453,
+        "height": 36.8118896484375
+      },
+      "box": {
+        "left": 189,
+        "top": 106,
+        "width": 50,
+        "height": 31
+      },
+      "area": 1246,
+      "sha256": "b154459211d872971bdcdaf4c0ebceb0b8c457b86c2f673497e0860fa6e0bcc7"
+    },
+    {
+      "ordinal": 29,
+      "flatIndex": 2432,
+      "proposalBox": {
+        "left": 229.69224548339844,
+        "top": 106.91088104248047,
+        "width": 40.60676574707031,
+        "height": 24.07738494873047
+      },
+      "promptBox": {
+        "left": 219.54055404663086,
+        "top": 100.89153480529785,
+        "width": 60.91014862060547,
+        "height": 36.1160774230957
+      },
+      "box": {
+        "left": 220,
+        "top": 107,
+        "width": 63,
+        "height": 27
+      },
+      "area": 1533,
+      "sha256": "3e3d9422b7e54c24771c4907a7da5b9e80d700f3f66b444f82687efdeddaf186"
+    },
+    {
+      "ordinal": 30,
+      "flatIndex": 3461,
+      "proposalBox": {
+        "left": 793.8226318359375,
+        "top": 163.84873962402344,
+        "width": 43.064697265625,
+        "height": 10.601959228515625
+      },
+      "promptBox": {
+        "left": 783.0564575195312,
+        "top": 161.19824981689453,
+        "width": 64.5970458984375,
+        "height": 15.902938842773438
+      },
+      "box": {
+        "left": 792,
+        "top": 158,
+        "width": 49,
+        "height": 18
+      },
+      "area": 307,
+      "sha256": "02060c988bcc6cd3539e823f9ce34b894c1f7723351a69a2c7ca05bf03881545"
+    },
+    {
+      "ordinal": 31,
+      "flatIndex": 3412,
+      "proposalBox": {
+        "left": 405.93988037109375,
+        "top": 163.85025024414062,
+        "width": 41.802001953125,
+        "height": 10.078720092773438
+      },
+      "promptBox": {
+        "left": 395.4893798828125,
+        "top": 161.33057022094727,
+        "width": 62.7030029296875,
+        "height": 15.118080139160156
+      },
+      "box": {
+        "left": 402,
+        "top": 163,
+        "width": 46,
+        "height": 12
+      },
+      "area": 340,
+      "sha256": "4e81b55885c1901708c6a1c278ad409efc87880082e104166db8c4ebac3d7747"
+    },
+    {
+      "ordinal": 32,
+      "flatIndex": 32419,
+      "proposalBox": {
+        "left": 395.5047912597656,
+        "top": 239.61288452148438,
+        "width": 566.7552185058594,
+        "height": 283.9584655761719
+      },
+      "promptBox": {
+        "left": 253.81598663330078,
+        "top": 168.6232681274414,
+        "width": 850.1328277587891,
+        "height": 425.9376983642578
+      },
+      "box": {
+        "left": 321,
+        "top": 177,
+        "width": 767,
+        "height": 368
+      },
+      "area": 258185,
+      "sha256": "ab8482c03ce222bdacc90ae80d6f3cc9352df39e0573248be2641d6a3fa38dc5"
+    },
+    {
+      "ordinal": 33,
+      "flatIndex": 3469,
+      "proposalBox": {
+        "left": 850.6427612304688,
+        "top": 164.93113708496094,
+        "width": 43.9808349609375,
+        "height": 9.648956298828125
+      },
+      "promptBox": {
+        "left": 839.6475524902344,
+        "top": 162.5188980102539,
+        "width": 65.97125244140625,
+        "height": 14.473434448242188
+      },
+      "box": {
+        "left": 842,
+        "top": 163,
+        "width": 57,
+        "height": 13
+      },
+      "area": 252,
+      "sha256": "7720a1580cdca51578b9815129927c4dd5fca66075efe38727db4a04f1745392"
+    },
+    {
+      "ordinal": 34,
+      "flatIndex": 4520,
+      "proposalBox": {
+        "left": 320.9121398925781,
+        "top": 224.36695861816406,
+        "width": 14.990692138671875,
+        "height": 12.987106323242188
+      },
+      "promptBox": {
+        "left": 317.16446685791016,
+        "top": 221.12018203735352,
+        "width": 22.486038208007812,
+        "height": 19.48065948486328
+      },
+      "box": {
+        "left": 320,
+        "top": 223,
+        "width": 19,
+        "height": 15
+      },
+      "area": 242,
+      "sha256": "c24c09db12d66e6fc1fe8974c22c2042d11b6ef614fc21da157e165a7fe5b531"
+    },
+    {
+      "ordinal": 35,
+      "flatIndex": 3446,
+      "proposalBox": {
+        "left": 666.0145263671875,
+        "top": 164.9150390625,
+        "width": 43.43798828125,
+        "height": 9.420455932617188
+      },
+      "promptBox": {
+        "left": 655.155029296875,
+        "top": 162.5599250793457,
+        "width": 65.156982421875,
+        "height": 14.130683898925781
+      },
+      "box": {
+        "left": 663,
+        "top": 163,
+        "width": 51,
+        "height": 13
+      },
+      "area": 271,
+      "sha256": "79533fc15d9d31ba05392bfe8b77d26a87b8042255450107d3ba6cd4bbd01082"
+    }
+  ]
+}

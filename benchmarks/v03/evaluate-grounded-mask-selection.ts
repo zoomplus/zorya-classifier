@@ -15,6 +15,13 @@ import { v03PilotManifests, v03PilotRepositoryRoot } from './pilot-manifest.js'
 
 const hashSchema = z.string().regex(/^[a-f0-9]{64}$/u)
 const H3_NATIVE_RUN_SHA256 = 'df26427390fa0bc20ceaa12d372041a7c012d47bd9e1483c379171c43960e401'
+const H3B_SELECTOR_SHA256 = '46416dd3ab98b51e0870a8f55eb09bc764adbec004b718b2ad29ed974acc0737'
+const H3C_VERDICTS = [
+  'match-complete-pure',
+  'wrong-object-or-contaminated',
+  'match-incomplete',
+  'unknown',
+] as const
 const expectedIds = [
   ...Array.from(
     { length: 4 },
@@ -55,7 +62,7 @@ const resultRowSchema = z
       .nullable(),
     boxCheck: z
       .object({
-        verdict: z.enum(['complete', 'needs-expansion', 'unknown']),
+        verdict: z.enum(['complete', 'needs-expansion', 'unknown', ...H3C_VERDICTS]),
         maskDerivedBox: rectSchema.nullable(),
       })
       .passthrough()
@@ -73,15 +80,22 @@ const resultRowSchema = z
   .passthrough()
 const freezeSchema = z
   .object({
-    schema: z.literal('v03-grounded-mask-selection-freeze-v1'),
+    schema: z.enum(['v03-grounded-mask-selection-freeze-v1', 'v03-grounded-mask-h3c-freeze-v1']),
+    verificationProfile: z.literal('h3c').optional(),
     nativeRun: z.object({ path: z.string(), sha256: hashSchema }).passthrough(),
-    producerClosure: z.object({ sha256: hashSchema }).passthrough(),
+    producerClosure: z
+      .object({
+        sha256: hashSchema,
+        files: z.array(z.object({ path: z.string(), sha256: hashSchema }).passthrough()).optional(),
+      })
+      .passthrough(),
     nativeArtifacts: z.array(z.object({ path: z.string(), sha256: hashSchema }).passthrough()),
   })
   .passthrough()
 const runSchema = z
   .object({
-    schema: z.literal('v03-grounded-mask-selection-pilot-v1'),
+    schema: z.enum(['v03-grounded-mask-selection-pilot-v1', 'v03-grounded-mask-h3c-pilot-v1']),
+    verificationProfile: z.literal('h3c').optional(),
     status: z.enum(['complete', 'incomplete', 'dry-run']),
     cohort: z.literal('fixed-v03-dev-12-effc2e8'),
     replayComposition: z.literal(true),
@@ -89,11 +103,20 @@ const runSchema = z
     nativeRunSha256: hashSchema,
     initialProducerClosureSha256: hashSchema,
     finalProducerClosureSha256: hashSchema,
+    initialProducerClosure: z
+      .array(z.object({ path: z.string(), sha256: hashSchema }).passthrough())
+      .optional(),
+    finalProducerClosure: z
+      .array(z.object({ path: z.string(), sha256: hashSchema }).passthrough())
+      .optional(),
     initialNativeArtifacts: z.array(
       z.object({ path: z.string(), sha256: hashSchema }).passthrough(),
     ),
     finalNativeArtifacts: z.array(z.object({ path: z.string(), sha256: hashSchema }).passthrough()),
     finalNativeRunSha256: hashSchema,
+    model: z.string().nullable().optional(),
+    provider: z.string().nullable().optional(),
+    fallbacks: z.boolean().optional(),
     caseDeadlineMs: z.number().finite().positive(),
     budget: z
       .object({
@@ -122,6 +145,7 @@ export interface SelectedMaskCaseResult {
   stratum: 'photo' | 'ui' | 'map'
   presence: 'present' | 'absent'
   status: string
+  finalVerifierVerdict: string | null
   finalOutputStatus: 'valid-complete' | 'missing' | 'invalid'
   artifactError: string | null
   maskSha256: string | null
@@ -186,7 +210,11 @@ export function finalOutputDisposition(input: {
   maskPath: string | null
   cutoutPath: string | null
 }): 'missing' | 'invalid' | 'validate-artifacts' {
-  if (input.status !== 'complete' || input.verdict !== 'complete') return 'missing'
+  if (
+    input.status !== 'complete' ||
+    (input.verdict !== 'complete' && input.verdict !== 'match-complete-pure')
+  )
+    return 'missing'
   if (!input.selected || !input.maskPath || !input.cutoutPath) return 'invalid'
   return 'validate-artifacts'
 }
@@ -196,7 +224,14 @@ async function readFinalArtifact(
   path: string,
   dimensions: { width: number; height: number },
   kind: 'mask' | 'cutout',
-): Promise<{ hash: string; bits?: Uint8Array; box?: Box }> {
+): Promise<{
+  hash: string
+  bits?: Uint8Array
+  box?: Box
+  rgba?: Buffer
+  width?: number
+  height?: number
+}> {
   const candidate = containedPath(runRoot, path)
   const realRoot = await realpath(runRoot)
   const realCandidate = await realpath(candidate)
@@ -240,7 +275,56 @@ async function readFinalArtifact(
   let alphaPixels = 0
   for (let i = 3; i < decoded.data.length; i += 4) if (decoded.data[i] !== 0) alphaPixels++
   if (alphaPixels === 0) throw new Error('cutout-empty')
-  return { hash: sha256(bytes) }
+  return {
+    hash: sha256(bytes),
+    rgba: decoded.data,
+    width: metadata.width,
+    height: metadata.height,
+  }
+}
+
+async function assertCutoutMatchesMask(input: {
+  imageRoot: string
+  source: FreshCase
+  mask: { bits?: Uint8Array; box?: Box }
+  cutout: { rgba?: Buffer; width?: number; height?: number }
+}) {
+  const box = input.mask.box
+  const bits = input.mask.bits
+  const cutout = input.cutout
+  if (!box || !bits || !cutout.rgba || cutout.width !== box.width || cutout.height !== box.height)
+    throw new Error('cutout-geometry-does-not-match-mask-bounds')
+  const sourceBytes = await readFile(resolve(input.imageRoot, input.source.image.path))
+  if (sha256(sourceBytes) !== input.source.image.sha256)
+    throw new Error('source-image-hash-mismatch')
+  const source = await sharp(sourceBytes, { failOn: 'error' })
+    .rotate()
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+  if (
+    source.info.width !== input.source.image.width ||
+    source.info.height !== input.source.image.height ||
+    source.info.channels !== 4 ||
+    source.data.byteLength !== input.source.image.width * input.source.image.height * 4
+  )
+    throw new Error('source-image-pixel-geometry-mismatch')
+  const expected = Buffer.alloc(box.width * box.height * 4)
+  try {
+    for (let y = 0; y < box.height; y++) {
+      for (let x = 0; x < box.width; x++) {
+        const sourcePixel = (box.top + y) * input.source.image.width + box.left + x
+        if (bits[sourcePixel] !== 1) continue
+        const sourceOffset = sourcePixel * 4
+        const outputOffset = (y * box.width + x) * 4
+        source.data.copy(expected, outputOffset, sourceOffset, sourceOffset + 4)
+      }
+    }
+    if (!cutout.rgba.equals(expected)) throw new Error('cutout-pixels-do-not-match-source-mask')
+  } finally {
+    source.data.fill(0)
+    expected.fill(0)
+  }
 }
 
 async function readReferenceMask(
@@ -289,6 +373,69 @@ async function readReferenceMask(
   return bits
 }
 
+export function groundedMaskProfileIdentity(
+  runRecord: unknown,
+  freezeRecord: unknown,
+): 'h3b' | 'h3c' {
+  const closureFileSchema = z.array(
+    z.object({ path: z.string(), sha256: hashSchema }).passthrough(),
+  )
+  const runIdentitySchema = z
+    .object({
+      schema: z.enum(['v03-grounded-mask-selection-pilot-v1', 'v03-grounded-mask-h3c-pilot-v1']),
+      verificationProfile: z.literal('h3c').optional(),
+      initialProducerClosureSha256: hashSchema,
+      finalProducerClosureSha256: hashSchema,
+      initialProducerClosure: closureFileSchema.optional(),
+      finalProducerClosure: closureFileSchema.optional(),
+    })
+    .passthrough()
+  const freezeIdentitySchema = z
+    .object({
+      schema: z.enum(['v03-grounded-mask-selection-freeze-v1', 'v03-grounded-mask-h3c-freeze-v1']),
+      verificationProfile: z.literal('h3c').optional(),
+      producerClosure: z
+        .object({
+          sha256: hashSchema,
+          files: closureFileSchema.optional(),
+        })
+        .passthrough(),
+    })
+    .passthrough()
+  const run = runIdentitySchema.parse(runRecord)
+  const freeze = freezeIdentitySchema.parse(freezeRecord)
+  const isH3b =
+    run.schema === 'v03-grounded-mask-selection-pilot-v1' &&
+    freeze.schema === 'v03-grounded-mask-selection-freeze-v1' &&
+    run.verificationProfile === undefined &&
+    freeze.verificationProfile === undefined
+  if (isH3b) return 'h3b'
+
+  if (
+    run.schema !== 'v03-grounded-mask-h3c-pilot-v1' ||
+    freeze.schema !== 'v03-grounded-mask-h3c-freeze-v1' ||
+    run.verificationProfile !== 'h3c' ||
+    freeze.verificationProfile !== 'h3c' ||
+    run.initialProducerClosureSha256 !== freeze.producerClosure.sha256 ||
+    run.finalProducerClosureSha256 !== freeze.producerClosure.sha256 ||
+    !freeze.producerClosure.files ||
+    !run.initialProducerClosure ||
+    !run.finalProducerClosure ||
+    !isDeepStrictEqual(run.initialProducerClosure, freeze.producerClosure.files) ||
+    !isDeepStrictEqual(run.finalProducerClosure, freeze.producerClosure.files)
+  )
+    throw new Error('grounded-profile-identity-mismatch')
+  const selector = freeze.producerClosure.files.find(
+    (file) => file.path === 'benchmarks/v03/grounded-mask-selector.ts',
+  )
+  const verifier = freeze.producerClosure.files.find(
+    (file) => file.path === 'benchmarks/v03/h3c-verifier.ts',
+  )
+  if (selector?.sha256 !== H3B_SELECTOR_SHA256 || !verifier)
+    throw new Error('H3c-selector-or-verifier-identity-mismatch')
+  return 'h3c'
+}
+
 function validateLocks(args: {
   run: unknown
   freeze: unknown
@@ -299,8 +446,34 @@ function validateLocks(args: {
 }) {
   if (args.runSha256 !== args.expectedRunSha256 || args.freezeSha256 !== args.expectedFreezeSha256)
     throw new Error('external-run-or-freeze-lock-mismatch')
+  const profile = groundedMaskProfileIdentity(args.run, args.freeze)
   const freeze = freezeSchema.parse(args.freeze)
   const run = runSchema.parse(args.run)
+  if (profile === 'h3c') {
+    if (
+      run.schema !== 'v03-grounded-mask-h3c-pilot-v1' ||
+      freeze.schema !== 'v03-grounded-mask-h3c-freeze-v1' ||
+      run.model !== 'openai/gpt-6-luna-decisions' ||
+      run.provider !== 'openai' ||
+      run.fallbacks !== false ||
+      run.caseDeadlineMs !== 120_000 ||
+      run.budget.maxPhysicalCalls !== 24 ||
+      run.budget.maxCostUsd !== 2
+    )
+      throw new Error('H3c-route-or-task-policy-mismatch')
+    const routeSchema = z
+      .object({
+        route: z
+          .object({
+            model: z.literal('openai/gpt-6-luna-decisions'),
+            provider: z.literal('openai'),
+            allowFallbacks: z.literal(false),
+          })
+          .passthrough(),
+      })
+      .passthrough()
+    for (const call of run.recorder?.physicalCalls ?? []) routeSchema.parse(call)
+  }
   if (
     !run.freezeMatched ||
     run.nativeRunSha256 !== H3_NATIVE_RUN_SHA256 ||
@@ -331,7 +504,7 @@ function validateLocks(args: {
     run.budget.admittedPhysicalCalls
   )
     throw new Error('per-case-call-accounting-mismatch')
-  return { run, freeze }
+  return { run, freeze, profile }
 }
 
 export async function evaluateGroundedMaskSelection(input: {
@@ -347,7 +520,7 @@ export async function evaluateGroundedMaskSelection(input: {
   imageRoot: string
 }) {
   if (input.corpus.length !== 12) throw new Error('Expected exact frozen DEV12 cohort')
-  const { run, freeze } = validateLocks({
+  const { run, freeze, profile } = validateLocks({
     run: input.runRecord,
     freeze: input.freezeRecord,
     runSha256: input.runSha256,
@@ -464,6 +637,11 @@ export async function evaluateGroundedMaskSelection(input: {
         for (let pixel = 0; pixel < mask.bits.length; pixel++)
           if (mask.bits[pixel] !== original.bits[pixel])
             throw new Error('final-mask-differs-from-selected-native-candidate')
+        try {
+          await assertCutoutMatchesMask({ imageRoot: input.imageRoot, source, mask, cutout })
+        } finally {
+          cutout.rgba?.fill(0)
+        }
         maskSha256 = mask.hash
         cutoutSha256 = cutout.hash
         maskBits = mask.bits ?? null
@@ -505,6 +683,7 @@ export async function evaluateGroundedMaskSelection(input: {
       stratum: truth.stratum,
       presence: truth.presence,
       status: row.status,
+      finalVerifierVerdict: row.boxCheck?.verdict ?? null,
       finalOutputStatus,
       artifactError,
       maskSha256,
@@ -531,6 +710,7 @@ export async function evaluateGroundedMaskSelection(input: {
   const strata = ['photo', 'ui', 'map'] as const
   return {
     schema: 'v03-grounded-mask-selection-evaluation-v1',
+    profile,
     runSha256: input.runSha256,
     freezeSha256: input.freezeSha256,
     runStatus: run.status,
@@ -542,6 +722,12 @@ export async function evaluateGroundedMaskSelection(input: {
     negativeFalseCompleteBoxes: negatives.filter(
       (row) => row.finalOutputStatus === 'valid-complete',
     ).length,
+    finalVerifierVerdicts: Object.fromEntries(
+      ['complete', 'needs-expansion', 'unknown', ...H3C_VERDICTS].map((verdict) => [
+        verdict,
+        perCase.filter((row) => row.finalVerifierVerdict === verdict).length,
+      ]),
+    ),
     unresolvedOrMissing: perCase.filter(
       (row) => row.finalOutputStatus !== 'valid-complete' && row.status !== 'none',
     ).length,

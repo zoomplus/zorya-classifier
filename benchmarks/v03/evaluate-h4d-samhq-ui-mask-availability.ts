@@ -106,6 +106,17 @@ const h4aSchema = z
   })
   .passthrough()
 
+export interface H4dMaskReceipt {
+  mask_path: string
+  mask_sha256: string
+  mask_bytes?: number
+  mask_box_xyxy: number[] | null
+  mask_pixel_area: number
+  source_width: number
+  source_height: number
+  empty: boolean
+}
+
 function sha256(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex')
 }
@@ -155,7 +166,7 @@ function toXyxy(box: Box | null): number[] | null {
   return box ? [box.left, box.top, box.left + box.width, box.top + box.height] : null
 }
 
-async function decodeMask(root: string, result: z.infer<typeof runSchema>['results'][number]) {
+export async function decodeH4dMask(root: string, result: H4dMaskReceipt) {
   if (isAbsolute(result.mask_path)) throw new Error('mask-path-absolute')
   const full = resolve(root, result.mask_path)
   const rel = relative(root, full)
@@ -168,6 +179,8 @@ async function decodeMask(root: string, result: z.infer<typeof runSchema>['resul
     throw new Error('mask-symlink-escape')
   const bytes = await readFile(realFile)
   if (sha256(bytes) !== result.mask_sha256) throw new Error('mask-hash-mismatch')
+  if (result.mask_bytes !== undefined && bytes.byteLength !== result.mask_bytes)
+    throw new Error('mask-byte-size-mismatch')
   const meta = await sharp(bytes, { failOn: 'error' }).metadata()
   if (
     meta.format !== 'png' ||
@@ -281,7 +294,7 @@ export async function evaluateH4dSamHqUi(args: {
   const rows = []
   const candidateScores = []
   for (const row of run.results) {
-    const decoded = await decodeMask(runRoot, row)
+    const decoded = await decodeH4dMask(runRoot, row)
     results.push({
       ordinal: row.proposal_ordinal,
       flatIndex: row.flat_index,
