@@ -1,0 +1,132 @@
+{
+  "schema": "region-seeded-development-control-r2-freeze-v1",
+  "createdAt": "2026-10-21T00:04:01.979Z",
+  "phase": "dev",
+  "producerSourceSha256": "be43090b13951e9a6ffa65daffb9413a6a539d8dae335925dc885733a467fb20",
+  "route": {
+    "model": "openai/gpt-6-luna-decisions",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "apiEndpoint": "/api/alpha/decisions",
+    "allowFallbacks": false
+  },
+  "inputs": [
+    {
+      "sha256": "6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a",
+      "cases": 20
+    },
+    {
+      "sha256": "6013a54bebba277f6457765cd8ef78e12e2dd5bab4453a752967233ebb429bfc",
+      "cases": 10
+    },
+    {
+      "sha256": "b04ba6cac5b39c927281f61e4af7dcc7a5c5c2272a637aa9676ab3009fbd5d15",
+      "cases": 10
+    }
+  ],
+  "profileIds": {
+    "candidate": "native-luna-presence-first-checked-region-sam-dev-v3",
+    "control": "native-luna-presence-first-region-no-image-control-dev-v3"
+  },
+  "variantSha256": {
+    "candidate": "f4ed437c17160ab1a694961e9b38b63ad76a290a21dbe82aa79d51e169c19697",
+    "control": "b2d85c509ff454ee62299d46a9f7dc7cb3009ca0aaf0ef015344c8a6dc45ed35"
+  },
+  "promptPolicies": {
+    "candidate": {
+      "targetPolicy": "target-plus-neutral-instruction-v1",
+      "classificationClasses": [
+        {
+          "id": "present",
+          "description": "The target in the question is visible in this image."
+        },
+        {
+          "id": "absent",
+          "description": "The target in the question is not visible in this image."
+        }
+      ],
+      "classificationInstruction": "Use only the supplied image. Choose exactly one closed label.",
+      "extraction": "Original three-choice region search once; full-source MobileSAM seed-region extraction; up to two closed visible-box containment checks, with at most one native enclosing-mask expansion and one recheck; no separate extent search.",
+      "noImageControl": "Remove all image parts at DecisionPort boundary; assert no image part at actual fetch; no segmentation, OCR, or hidden CV.",
+      "presenceFirstGate": "Reuse the existing closed classification result. Run no region search or segmentation unless classification succeeded with value present; absent and failed classifications are retained with extraction skipped."
+    },
+    "control": {
+      "targetPolicy": "target-plus-neutral-instruction-v1",
+      "classificationClasses": [
+        {
+          "id": "present",
+          "description": "The target in the question is visible in this image."
+        },
+        {
+          "id": "absent",
+          "description": "The target in the question is not visible in this image."
+        }
+      ],
+      "classificationInstruction": "Use only the supplied image. Choose exactly one closed label.",
+      "extraction": "Paired no-image control runs only the original three-choice region search; no segmentation or visible-box checks.",
+      "noImageControl": "Remove all image parts at DecisionPort boundary; assert no image part at actual fetch; no segmentation, OCR, or hidden CV.",
+      "presenceFirstGate": "Reuse the existing closed classification result. Run no region search or segmentation unless classification succeeded with value present; absent and failed classifications are retained with extraction skipped."
+    }
+  },
+  "originalFreeze": {
+    "file": "region-seeded-development-freeze-20261021-v3.json",
+    "sha256": "d980af0ee5c3ae38f2e397db8e195686663d2b2862afad53c9e6f62b68b113a2",
+    "modified": false
+  },
+  "retainedCandidate": {
+    "runId": "v02-region-seeded-dev-2026-10-20T235301825Z-10b11642",
+    "manifestSha256": "e18ca240cb35d7f3081d5ab8bf19f93b451e638e5e7887975cce4715c243a819",
+    "summarySha256": "fea18ed9b5dce920495bce1d9cb9e190675ec5630c07b0ae07f73623d731be39",
+    "completionSealSha256": "c65fc9001acdbdedd2e823764012b0ad6b6dbfc9ef820f6aceb073f95fa0f25b",
+    "cases": 40,
+    "rerun": false
+  },
+  "originalControl": {
+    "manifestSha256": "a0e756cf750ec9d8b8d46aa42d64d7346492f28723d6c729a30077fac58010d9",
+    "status": "Preserved unscored; does not satisfy original pre-dispatch variant pin.",
+    "useInPairedSelection": false
+  },
+  "controlR2": {
+    "plannedCases": 40,
+    "policy": {
+      "model": "openai/gpt-6-luna-decisions",
+      "provider": "openai",
+      "providerName": "OpenAI",
+      "apiEndpoint": "/api/alpha/decisions",
+      "allowFallbacks": false,
+      "native": "none; no-image control does not configure a segmenter",
+      "timeoutMs": 120000,
+      "maxInFlightCases": 2,
+      "nativeMaxActive": 1,
+      "nativeMaxWaiting": 2,
+      "nativeThreads": 2,
+      "regionSearchPasses": 3,
+      "extentCalls": 0,
+      "sameInstanceCalls": 0,
+      "maxLogicalCallsPerCase": 4,
+      "maxPhysicalCallsPerCase": 4,
+      "maxPhysicalCalls": 250,
+      "maxCostUsd": 5,
+      "unknownCostReserveUsd": 0.05,
+      "retries": 0,
+      "fallback": false,
+      "latencyRankingEligible": false,
+      "boxCheckPolicy": "none-no-segmenter-configured",
+      "maxBoxCheckCalls": 0,
+      "requireClassifiedPresence": true
+    },
+    "runSerially": true,
+    "retries": 0,
+    "fallback": false,
+    "physicalCallsBeforeThisFreeze": 0
+  },
+  "verification": {
+    "toolFile": "benchmarks/v02/region-seeded-freeze-audit.ts",
+    "toolSha256": "127913b46c1b484a656f52123a26b2248f48e21d331dbd90b968166f15e738ec",
+    "guard": "Explicit per-variant prompt policies; reproduce the immutable candidate identity and prospective control identity independently; never copy candidate extraction policy to control.",
+    "sourceFiles": 68
+  },
+  "diagnosis": "The original readiness copied candidate promptPolicy into the control identity calculation. Producer behavior was correct. Repeat only the complete control prospectively; reuse the original immutable candidate, without rerunning or selecting a better outcome.",
+  "freshHeldoutDispatched": false,
+  "releaseQualified": false
+}
