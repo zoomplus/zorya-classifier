@@ -1,0 +1,7 @@
+# H4c evaluator plan
+
+This evaluator will read only a closed, hash-pinned H4c SAM2 run and its immutable H4a detector run. It will independently verify that all 36 H4c rows map by proposal ordinal, flattened index, confidence, and source-pixel box to the corresponding frozen H4a proposal. It will verify source/freeze receipts, binary full-source masks, artifact hashes, geometry and pixel-derived bounds/areas; producer-supplied boxes and areas are cross-checks only.
+
+After run closure, it will join the four fixed Geany DEV truth rows by case ID and source identity. For each of the three positives it will score all 36 derived mask boxes using the existing fixed IoU >= 0.50 and target coverage >= 0.90 rule, keeping missing, empty, invalid and failed masks in the complete proposal/positive denominator. It will also report available independent pixel-mask IoU only when a pinned reference exists. On the one absent query it will report proposal and artifact availability without treating proposals as false-positive localizations.
+
+The result is an oracle candidate-availability ceiling, not a candidate-selection, production, or general UI performance result. It will preserve the exact H4a 0/3 box-gate result, report H4c as a separate paired mask-refinement hypothesis, and state that the four queries are correlated rows from one styled Geany screenshot with neon backgrounds and magenta borders.

@@ -1,0 +1,3844 @@
+{
+  "schema": "v03-h4c-sam2-ui-mask-availability-v1",
+  "evaluationType": "oracle-candidate-mask-availability-ceiling",
+  "productionResult": false,
+  "negativeCandidateSemantics": "candidate masks are availability only; no false-positive judgment without semantic selection",
+  "h4aRunSha256": "d1ff8a0fd97e6197834c673d399fe9f1ecfcd2d93182ab2a4fd3767e702755a1",
+  "h4aFreezeSha256": "30ff2cf2f1894745c8e5e227e35ef1858432c63f55ae454a1e10f86118668753",
+  "h4cRunSha256": "a59c5cda38f31b05f3a59675f9d18f2267f1126bf5b3fc01900da5b7fe1a79cd",
+  "h4cFreezeSha256": "a61feecf2a6fde20cbd6729d548703abdb0836d6191f0fcfda93c8fafbd6435c",
+  "h4cStatus": "complete",
+  "plannedCases": 4,
+  "positives": 3,
+  "negatives": 1,
+  "positiveBoxAvailabilityPasses": 1,
+  "positiveBoxAvailabilityRate": 0.3333333333333333,
+  "negativesWithMaskCandidates": 1,
+  "validMasksOnNegatives": 36,
+  "failedOrMissingRows": 0,
+  "invalidMasks": 0,
+  "emptyMasks": 0,
+  "rowErrors": [],
+  "strata": {
+    "ui": {
+      "positiveCases": 3,
+      "positiveBoxAvailabilityPasses": 1,
+      "negativeCases": 1,
+      "negativeCasesWithMasks": 1
+    }
+  },
+  "perCase": [
+    {
+      "caseId": "pilot-v03-ui-01",
+      "presence": "present",
+      "status": "complete",
+      "proposalCount": 36,
+      "validMaskCount": 36,
+      "emptyMaskCount": 0,
+      "invalidMaskCount": 0,
+      "boxAvailabilityPass": true,
+      "bestMaskBoxIoU": 0.9029484029484022,
+      "bestMaskBoxCoverage": 0.9029484029484022,
+      "bestPixelMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidates": [
+        {
+          "proposalOrdinal": 0,
+          "flatIndex": 2052,
+          "score": 0.8330649137496948,
+          "promptBox": {
+            "left": 1058.392578125,
+            "top": 91.02783203125,
+            "width": 11.341796875,
+            "height": 11.920005798339844
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-000-mask.png",
+          "foregroundPixels": 130,
+          "maskBox": {
+            "left": 1058,
+            "top": 91,
+            "width": 12,
+            "height": 12
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 1,
+          "flatIndex": 2051,
+          "score": 0.824320912361145,
+          "promptBox": {
+            "left": 1042.369873046875,
+            "top": 90.96139526367188,
+            "width": 11.2255859375,
+            "height": 11.994102478027344
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-001-mask.png",
+          "foregroundPixels": 123,
+          "maskBox": {
+            "left": 1042,
+            "top": 91,
+            "width": 12,
+            "height": 12
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 2,
+          "flatIndex": 2054,
+          "score": 0.8188150525093079,
+          "promptBox": {
+            "left": 1074.2861328125,
+            "top": 91.08397674560547,
+            "width": 11.470703125,
+            "height": 11.902275085449219
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-002-mask.png",
+          "foregroundPixels": 141,
+          "maskBox": {
+            "left": 1074,
+            "top": 90,
+            "width": 13,
+            "height": 13
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 3,
+          "flatIndex": 3012,
+          "score": 0.7711932063102722,
+          "promptBox": {
+            "left": 1049.497802734375,
+            "top": 136.8236083984375,
+            "width": 36.0845947265625,
+            "height": 35.511688232421875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-003-mask.png",
+          "foregroundPixels": 1330,
+          "maskBox": {
+            "left": 1049,
+            "top": 136,
+            "width": 38,
+            "height": 37
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 4,
+          "flatIndex": 26497,
+          "score": 0.7329358458518982,
+          "promptBox": {
+            "left": 189.7139892578125,
+            "top": 176.0826873779297,
+            "width": 155.54986572265625,
+            "height": 35.65679931640625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-004-mask.png",
+          "foregroundPixels": 5352,
+          "maskBox": {
+            "left": 190,
+            "top": 176,
+            "width": 156,
+            "height": 38
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 5,
+          "flatIndex": 3891,
+          "score": 0.7227770090103149,
+          "promptBox": {
+            "left": 356.87554931640625,
+            "top": 176.67564392089844,
+            "width": 100.20779418945312,
+            "height": 36.36328125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-005-mask.png",
+          "foregroundPixels": 3452,
+          "maskBox": {
+            "left": 356,
+            "top": 177,
+            "width": 101,
+            "height": 37
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 6,
+          "flatIndex": 2320,
+          "score": 0.7025025486946106,
+          "promptBox": {
+            "left": 620.6096801757812,
+            "top": 107.98089599609375,
+            "width": 45.0057373046875,
+            "height": 22.980178833007812
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-006-mask.png",
+          "foregroundPixels": 559,
+          "maskBox": {
+            "left": 624,
+            "top": 109,
+            "width": 35,
+            "height": 21
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 7,
+          "flatIndex": 2316,
+          "score": 0.6945149898529053,
+          "promptBox": {
+            "left": 572.1459350585938,
+            "top": 107.2315902709961,
+            "width": 47.4005126953125,
+            "height": 23.69091033935547
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-007-mask.png",
+          "foregroundPixels": 877,
+          "maskBox": {
+            "left": 571,
+            "top": 108,
+            "width": 49,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 8,
+          "flatIndex": 2308,
+          "score": 0.683326780796051,
+          "promptBox": {
+            "left": 523.1400146484375,
+            "top": 107.26683044433594,
+            "width": 47.66058349609375,
+            "height": 23.671218872070312
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-008-mask.png",
+          "foregroundPixels": 628,
+          "maskBox": {
+            "left": 529,
+            "top": 108,
+            "width": 37,
+            "height": 20
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 9,
+          "flatIndex": 3071,
+          "score": 0.6691093444824219,
+          "promptBox": {
+            "left": 239.6646728515625,
+            "top": 137.26162719726562,
+            "width": 34.687591552734375,
+            "height": 33.028961181640625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-009-mask.png",
+          "foregroundPixels": 1179,
+          "maskBox": {
+            "left": 239,
+            "top": 137,
+            "width": 36,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 10,
+          "flatIndex": 2946,
+          "score": 0.6670494079589844,
+          "promptBox": {
+            "left": 507.78326416015625,
+            "top": 136.7802276611328,
+            "width": 41.72900390625,
+            "height": 35.45263671875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-010-mask.png",
+          "foregroundPixels": 1481,
+          "maskBox": {
+            "left": 506,
+            "top": 137,
+            "width": 43,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 11,
+          "flatIndex": 2294,
+          "score": 0.6666226983070374,
+          "promptBox": {
+            "left": 379.0162658691406,
+            "top": 107.59532165527344,
+            "width": 82.26507568359375,
+            "height": 23.812179565429688
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-011-mask.png",
+          "foregroundPixels": 1403,
+          "maskBox": {
+            "left": 382,
+            "top": 108,
+            "width": 76,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 12,
+          "flatIndex": 3066,
+          "score": 0.6564303040504456,
+          "promptBox": {
+            "left": 194.9728546142578,
+            "top": 137.3886260986328,
+            "width": 41.62422180175781,
+            "height": 32.91297912597656
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-012-mask.png",
+          "foregroundPixels": 1390,
+          "maskBox": {
+            "left": 195,
+            "top": 137,
+            "width": 42,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 13,
+          "flatIndex": 3120,
+          "score": 0.6179100871086121,
+          "promptBox": {
+            "left": 609.9671630859375,
+            "top": 137.06373596191406,
+            "width": 41.15570068359375,
+            "height": 35.022369384765625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-013-mask.png",
+          "foregroundPixels": 1411,
+          "maskBox": {
+            "left": 609,
+            "top": 137,
+            "width": 42,
+            "height": 35
+          },
+          "bestBoxIoU": 0.9029484029484022,
+          "bestTargetCoverage": 0.9029484029484022,
+          "wholeBoxPass": true,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 14,
+          "flatIndex": 2952,
+          "score": 0.6075353622436523,
+          "promptBox": {
+            "left": 564.4934692382812,
+            "top": 137.00592041015625,
+            "width": 41.53204345703125,
+            "height": 35.109588623046875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-014-mask.png",
+          "foregroundPixels": 1416,
+          "maskBox": {
+            "left": 565,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 15,
+          "flatIndex": 3099,
+          "score": 0.6071423888206482,
+          "promptBox": {
+            "left": 462.40240478515625,
+            "top": 137.08241271972656,
+            "width": 42.006134033203125,
+            "height": 35.13226318359375
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-015-mask.png",
+          "foregroundPixels": 1410,
+          "maskBox": {
+            "left": 463,
+            "top": 136,
+            "width": 41,
+            "height": 36
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 16,
+          "flatIndex": 2976,
+          "score": 0.6042386293411255,
+          "promptBox": {
+            "left": 755.5352172851562,
+            "top": 137.2523193359375,
+            "width": 35.1524658203125,
+            "height": 34.70774841308594
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-016-mask.png",
+          "foregroundPixels": 1171,
+          "maskBox": {
+            "left": 755,
+            "top": 137,
+            "width": 35,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 17,
+          "flatIndex": 2934,
+          "score": 0.5919612050056458,
+          "promptBox": {
+            "left": 405.6558837890625,
+            "top": 136.85873413085938,
+            "width": 41.867828369140625,
+            "height": 35.646697998046875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-017-mask.png",
+          "foregroundPixels": 1469,
+          "maskBox": {
+            "left": 404,
+            "top": 137,
+            "width": 44,
+            "height": 36
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 18,
+          "flatIndex": 2302,
+          "score": 0.5681448578834534,
+          "promptBox": {
+            "left": 462.0257263183594,
+            "top": 107.22415161132812,
+            "width": 60.473724365234375,
+            "height": 23.825057983398438
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-018-mask.png",
+          "foregroundPixels": 1001,
+          "maskBox": {
+            "left": 462,
+            "top": 108,
+            "width": 59,
+            "height": 22
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 19,
+          "flatIndex": 3076,
+          "score": 0.5592926144599915,
+          "promptBox": {
+            "left": 278.20452880859375,
+            "top": 137.29425048828125,
+            "width": 40.60430908203125,
+            "height": 32.996734619140625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-019-mask.png",
+          "foregroundPixels": 1343,
+          "maskBox": {
+            "left": 279,
+            "top": 137,
+            "width": 41,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 20,
+          "flatIndex": 2921,
+          "score": 0.5541149377822876,
+          "promptBox": {
+            "left": 321.9084167480469,
+            "top": 137.00411987304688,
+            "width": 36.936126708984375,
+            "height": 34.92179870605469
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-020-mask.png",
+          "foregroundPixels": 1167,
+          "maskBox": {
+            "left": 322,
+            "top": 137,
+            "width": 36,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 21,
+          "flatIndex": 2928,
+          "score": 0.5269801616668701,
+          "promptBox": {
+            "left": 360.98406982421875,
+            "top": 137.15237426757812,
+            "width": 41.128173828125,
+            "height": 34.9814453125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-021-mask.png",
+          "foregroundPixels": 1420,
+          "maskBox": {
+            "left": 361,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 22,
+          "flatIndex": 2965,
+          "score": 0.5007555484771729,
+          "promptBox": {
+            "left": 666.371337890625,
+            "top": 137.08309936523438,
+            "width": 42.89739990234375,
+            "height": 35.848175048828125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-022-mask.png",
+          "foregroundPixels": 1428,
+          "maskBox": {
+            "left": 667,
+            "top": 137,
+            "width": 42,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 23,
+          "flatIndex": 2970,
+          "score": 0.49396228790283203,
+          "promptBox": {
+            "left": 711.735595703125,
+            "top": 137.63201904296875,
+            "width": 41.3172607421875,
+            "height": 34.53828430175781
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-023-mask.png",
+          "foregroundPixels": 1366,
+          "maskBox": {
+            "left": 711,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 24,
+          "flatIndex": 2438,
+          "score": 0.4471842050552368,
+          "promptBox": {
+            "left": 270.5402526855469,
+            "top": 107.19557189941406,
+            "width": 59.241424560546875,
+            "height": 24.1182861328125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-024-mask.png",
+          "foregroundPixels": 861,
+          "maskBox": {
+            "left": 275,
+            "top": 108,
+            "width": 49,
+            "height": 22
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 25,
+          "flatIndex": 26737,
+          "score": 0.44167792797088623,
+          "promptBox": {
+            "left": 191.07315063476562,
+            "top": 214.58885192871094,
+            "width": 153.27145385742188,
+            "height": 32.686553955078125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-025-mask.png",
+          "foregroundPixels": 4880,
+          "maskBox": {
+            "left": 191,
+            "top": 214,
+            "width": 153,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 26,
+          "flatIndex": 26182,
+          "score": 0.4325844347476959,
+          "promptBox": {
+            "left": 330.52850341796875,
+            "top": 106.89012145996094,
+            "width": 47.575927734375,
+            "height": 24.415359497070312
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-026-mask.png",
+          "foregroundPixels": 934,
+          "maskBox": {
+            "left": 331,
+            "top": 108,
+            "width": 48,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 27,
+          "flatIndex": 2980,
+          "score": 0.41462546586990356,
+          "promptBox": {
+            "left": 793.69970703125,
+            "top": 136.7325897216797,
+            "width": 43.0958251953125,
+            "height": 36.01838684082031
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-027-mask.png",
+          "foregroundPixels": 1428,
+          "maskBox": {
+            "left": 795,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 28,
+          "flatIndex": 2427,
+          "score": 0.367864191532135,
+          "promptBox": {
+            "left": 190.35154724121094,
+            "top": 106.837890625,
+            "width": 38.38932800292969,
+            "height": 24.541259765625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-028-mask.png",
+          "foregroundPixels": 789,
+          "maskBox": {
+            "left": 190,
+            "top": 107,
+            "width": 39,
+            "height": 25
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 29,
+          "flatIndex": 2432,
+          "score": 0.34462714195251465,
+          "promptBox": {
+            "left": 229.69224548339844,
+            "top": 106.91088104248047,
+            "width": 40.60676574707031,
+            "height": 24.07738494873047
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-029-mask.png",
+          "foregroundPixels": 856,
+          "maskBox": {
+            "left": 234,
+            "top": 107,
+            "width": 45,
+            "height": 25
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 30,
+          "flatIndex": 3461,
+          "score": 0.3372959494590759,
+          "promptBox": {
+            "left": 793.8226318359375,
+            "top": 163.84873962402344,
+            "width": 43.064697265625,
+            "height": 10.601959228515625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-030-mask.png",
+          "foregroundPixels": 229,
+          "maskBox": {
+            "left": 796,
+            "top": 163,
+            "width": 40,
+            "height": 11
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 31,
+          "flatIndex": 3412,
+          "score": 0.31748101115226746,
+          "promptBox": {
+            "left": 405.93988037109375,
+            "top": 163.85025024414062,
+            "width": 41.802001953125,
+            "height": 10.078720092773438
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-031-mask.png",
+          "foregroundPixels": 284,
+          "maskBox": {
+            "left": 406,
+            "top": 163,
+            "width": 41,
+            "height": 10
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 32,
+          "flatIndex": 32419,
+          "score": 0.2976302206516266,
+          "promptBox": {
+            "left": 395.5047912597656,
+            "top": 239.61288452148438,
+            "width": 566.7552185058594,
+            "height": 283.9584655761719
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-032-mask.png",
+          "foregroundPixels": 169828,
+          "maskBox": {
+            "left": 392,
+            "top": 232,
+            "width": 578,
+            "height": 296
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 33,
+          "flatIndex": 3469,
+          "score": 0.2972332239151001,
+          "promptBox": {
+            "left": 850.6427612304688,
+            "top": 164.93113708496094,
+            "width": 43.9808349609375,
+            "height": 9.648956298828125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-033-mask.png",
+          "foregroundPixels": 227,
+          "maskBox": {
+            "left": 852,
+            "top": 166,
+            "width": 42,
+            "height": 8
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 34,
+          "flatIndex": 4520,
+          "score": 0.28024402260780334,
+          "promptBox": {
+            "left": 320.9121398925781,
+            "top": 224.36695861816406,
+            "width": 14.990692138671875,
+            "height": 12.987106323242188
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-034-mask.png",
+          "foregroundPixels": 180,
+          "maskBox": {
+            "left": 321,
+            "top": 224,
+            "width": 16,
+            "height": 14
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 35,
+          "flatIndex": 3446,
+          "score": 0.27316737174987793,
+          "promptBox": {
+            "left": 666.0145263671875,
+            "top": 164.9150390625,
+            "width": 43.43798828125,
+            "height": 9.420455932617188
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-035-mask.png",
+          "foregroundPixels": 330,
+          "maskBox": {
+            "left": 666,
+            "top": 163,
+            "width": 42,
+            "height": 11
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "presence": "present",
+      "status": "complete",
+      "proposalCount": 36,
+      "validMaskCount": 36,
+      "emptyMaskCount": 0,
+      "invalidMaskCount": 0,
+      "boxAvailabilityPass": false,
+      "bestMaskBoxIoU": 0.881449631449632,
+      "bestMaskBoxCoverage": 0.8814496314496321,
+      "bestPixelMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidates": [
+        {
+          "proposalOrdinal": 0,
+          "flatIndex": 2052,
+          "score": 0.8330649137496948,
+          "promptBox": {
+            "left": 1058.392578125,
+            "top": 91.02783203125,
+            "width": 11.341796875,
+            "height": 11.920005798339844
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-000-mask.png",
+          "foregroundPixels": 130,
+          "maskBox": {
+            "left": 1058,
+            "top": 91,
+            "width": 12,
+            "height": 12
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 1,
+          "flatIndex": 2051,
+          "score": 0.824320912361145,
+          "promptBox": {
+            "left": 1042.369873046875,
+            "top": 90.96139526367188,
+            "width": 11.2255859375,
+            "height": 11.994102478027344
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-001-mask.png",
+          "foregroundPixels": 123,
+          "maskBox": {
+            "left": 1042,
+            "top": 91,
+            "width": 12,
+            "height": 12
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 2,
+          "flatIndex": 2054,
+          "score": 0.8188150525093079,
+          "promptBox": {
+            "left": 1074.2861328125,
+            "top": 91.08397674560547,
+            "width": 11.470703125,
+            "height": 11.902275085449219
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-002-mask.png",
+          "foregroundPixels": 141,
+          "maskBox": {
+            "left": 1074,
+            "top": 90,
+            "width": 13,
+            "height": 13
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 3,
+          "flatIndex": 3012,
+          "score": 0.7711932063102722,
+          "promptBox": {
+            "left": 1049.497802734375,
+            "top": 136.8236083984375,
+            "width": 36.0845947265625,
+            "height": 35.511688232421875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-003-mask.png",
+          "foregroundPixels": 1330,
+          "maskBox": {
+            "left": 1049,
+            "top": 136,
+            "width": 38,
+            "height": 37
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 4,
+          "flatIndex": 26497,
+          "score": 0.7329358458518982,
+          "promptBox": {
+            "left": 189.7139892578125,
+            "top": 176.0826873779297,
+            "width": 155.54986572265625,
+            "height": 35.65679931640625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-004-mask.png",
+          "foregroundPixels": 5352,
+          "maskBox": {
+            "left": 190,
+            "top": 176,
+            "width": 156,
+            "height": 38
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 5,
+          "flatIndex": 3891,
+          "score": 0.7227770090103149,
+          "promptBox": {
+            "left": 356.87554931640625,
+            "top": 176.67564392089844,
+            "width": 100.20779418945312,
+            "height": 36.36328125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-005-mask.png",
+          "foregroundPixels": 3452,
+          "maskBox": {
+            "left": 356,
+            "top": 177,
+            "width": 101,
+            "height": 37
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 6,
+          "flatIndex": 2320,
+          "score": 0.7025025486946106,
+          "promptBox": {
+            "left": 620.6096801757812,
+            "top": 107.98089599609375,
+            "width": 45.0057373046875,
+            "height": 22.980178833007812
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-006-mask.png",
+          "foregroundPixels": 559,
+          "maskBox": {
+            "left": 624,
+            "top": 109,
+            "width": 35,
+            "height": 21
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 7,
+          "flatIndex": 2316,
+          "score": 0.6945149898529053,
+          "promptBox": {
+            "left": 572.1459350585938,
+            "top": 107.2315902709961,
+            "width": 47.4005126953125,
+            "height": 23.69091033935547
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-007-mask.png",
+          "foregroundPixels": 877,
+          "maskBox": {
+            "left": 571,
+            "top": 108,
+            "width": 49,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 8,
+          "flatIndex": 2308,
+          "score": 0.683326780796051,
+          "promptBox": {
+            "left": 523.1400146484375,
+            "top": 107.26683044433594,
+            "width": 47.66058349609375,
+            "height": 23.671218872070312
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-008-mask.png",
+          "foregroundPixels": 628,
+          "maskBox": {
+            "left": 529,
+            "top": 108,
+            "width": 37,
+            "height": 20
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 9,
+          "flatIndex": 3071,
+          "score": 0.6691093444824219,
+          "promptBox": {
+            "left": 239.6646728515625,
+            "top": 137.26162719726562,
+            "width": 34.687591552734375,
+            "height": 33.028961181640625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-009-mask.png",
+          "foregroundPixels": 1179,
+          "maskBox": {
+            "left": 239,
+            "top": 137,
+            "width": 36,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 10,
+          "flatIndex": 2946,
+          "score": 0.6670494079589844,
+          "promptBox": {
+            "left": 507.78326416015625,
+            "top": 136.7802276611328,
+            "width": 41.72900390625,
+            "height": 35.45263671875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-010-mask.png",
+          "foregroundPixels": 1481,
+          "maskBox": {
+            "left": 506,
+            "top": 137,
+            "width": 43,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 11,
+          "flatIndex": 2294,
+          "score": 0.6666226983070374,
+          "promptBox": {
+            "left": 379.0162658691406,
+            "top": 107.59532165527344,
+            "width": 82.26507568359375,
+            "height": 23.812179565429688
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-011-mask.png",
+          "foregroundPixels": 1403,
+          "maskBox": {
+            "left": 382,
+            "top": 108,
+            "width": 76,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 12,
+          "flatIndex": 3066,
+          "score": 0.6564303040504456,
+          "promptBox": {
+            "left": 194.9728546142578,
+            "top": 137.3886260986328,
+            "width": 41.62422180175781,
+            "height": 32.91297912597656
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-012-mask.png",
+          "foregroundPixels": 1390,
+          "maskBox": {
+            "left": 195,
+            "top": 137,
+            "width": 42,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 13,
+          "flatIndex": 3120,
+          "score": 0.6179100871086121,
+          "promptBox": {
+            "left": 609.9671630859375,
+            "top": 137.06373596191406,
+            "width": 41.15570068359375,
+            "height": 35.022369384765625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-013-mask.png",
+          "foregroundPixels": 1411,
+          "maskBox": {
+            "left": 609,
+            "top": 137,
+            "width": 42,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 14,
+          "flatIndex": 2952,
+          "score": 0.6075353622436523,
+          "promptBox": {
+            "left": 564.4934692382812,
+            "top": 137.00592041015625,
+            "width": 41.53204345703125,
+            "height": 35.109588623046875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-014-mask.png",
+          "foregroundPixels": 1416,
+          "maskBox": {
+            "left": 565,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0.881449631449632,
+          "bestTargetCoverage": 0.8814496314496321,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 15,
+          "flatIndex": 3099,
+          "score": 0.6071423888206482,
+          "promptBox": {
+            "left": 462.40240478515625,
+            "top": 137.08241271972656,
+            "width": 42.006134033203125,
+            "height": 35.13226318359375
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-015-mask.png",
+          "foregroundPixels": 1410,
+          "maskBox": {
+            "left": 463,
+            "top": 136,
+            "width": 41,
+            "height": 36
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 16,
+          "flatIndex": 2976,
+          "score": 0.6042386293411255,
+          "promptBox": {
+            "left": 755.5352172851562,
+            "top": 137.2523193359375,
+            "width": 35.1524658203125,
+            "height": 34.70774841308594
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-016-mask.png",
+          "foregroundPixels": 1171,
+          "maskBox": {
+            "left": 755,
+            "top": 137,
+            "width": 35,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 17,
+          "flatIndex": 2934,
+          "score": 0.5919612050056458,
+          "promptBox": {
+            "left": 405.6558837890625,
+            "top": 136.85873413085938,
+            "width": 41.867828369140625,
+            "height": 35.646697998046875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-017-mask.png",
+          "foregroundPixels": 1469,
+          "maskBox": {
+            "left": 404,
+            "top": 137,
+            "width": 44,
+            "height": 36
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 18,
+          "flatIndex": 2302,
+          "score": 0.5681448578834534,
+          "promptBox": {
+            "left": 462.0257263183594,
+            "top": 107.22415161132812,
+            "width": 60.473724365234375,
+            "height": 23.825057983398438
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-018-mask.png",
+          "foregroundPixels": 1001,
+          "maskBox": {
+            "left": 462,
+            "top": 108,
+            "width": 59,
+            "height": 22
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 19,
+          "flatIndex": 3076,
+          "score": 0.5592926144599915,
+          "promptBox": {
+            "left": 278.20452880859375,
+            "top": 137.29425048828125,
+            "width": 40.60430908203125,
+            "height": 32.996734619140625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-019-mask.png",
+          "foregroundPixels": 1343,
+          "maskBox": {
+            "left": 279,
+            "top": 137,
+            "width": 41,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 20,
+          "flatIndex": 2921,
+          "score": 0.5541149377822876,
+          "promptBox": {
+            "left": 321.9084167480469,
+            "top": 137.00411987304688,
+            "width": 36.936126708984375,
+            "height": 34.92179870605469
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-020-mask.png",
+          "foregroundPixels": 1167,
+          "maskBox": {
+            "left": 322,
+            "top": 137,
+            "width": 36,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 21,
+          "flatIndex": 2928,
+          "score": 0.5269801616668701,
+          "promptBox": {
+            "left": 360.98406982421875,
+            "top": 137.15237426757812,
+            "width": 41.128173828125,
+            "height": 34.9814453125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-021-mask.png",
+          "foregroundPixels": 1420,
+          "maskBox": {
+            "left": 361,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 22,
+          "flatIndex": 2965,
+          "score": 0.5007555484771729,
+          "promptBox": {
+            "left": 666.371337890625,
+            "top": 137.08309936523438,
+            "width": 42.89739990234375,
+            "height": 35.848175048828125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-022-mask.png",
+          "foregroundPixels": 1428,
+          "maskBox": {
+            "left": 667,
+            "top": 137,
+            "width": 42,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 23,
+          "flatIndex": 2970,
+          "score": 0.49396228790283203,
+          "promptBox": {
+            "left": 711.735595703125,
+            "top": 137.63201904296875,
+            "width": 41.3172607421875,
+            "height": 34.53828430175781
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-023-mask.png",
+          "foregroundPixels": 1366,
+          "maskBox": {
+            "left": 711,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 24,
+          "flatIndex": 2438,
+          "score": 0.4471842050552368,
+          "promptBox": {
+            "left": 270.5402526855469,
+            "top": 107.19557189941406,
+            "width": 59.241424560546875,
+            "height": 24.1182861328125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-024-mask.png",
+          "foregroundPixels": 861,
+          "maskBox": {
+            "left": 275,
+            "top": 108,
+            "width": 49,
+            "height": 22
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 25,
+          "flatIndex": 26737,
+          "score": 0.44167792797088623,
+          "promptBox": {
+            "left": 191.07315063476562,
+            "top": 214.58885192871094,
+            "width": 153.27145385742188,
+            "height": 32.686553955078125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-025-mask.png",
+          "foregroundPixels": 4880,
+          "maskBox": {
+            "left": 191,
+            "top": 214,
+            "width": 153,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 26,
+          "flatIndex": 26182,
+          "score": 0.4325844347476959,
+          "promptBox": {
+            "left": 330.52850341796875,
+            "top": 106.89012145996094,
+            "width": 47.575927734375,
+            "height": 24.415359497070312
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-026-mask.png",
+          "foregroundPixels": 934,
+          "maskBox": {
+            "left": 331,
+            "top": 108,
+            "width": 48,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 27,
+          "flatIndex": 2980,
+          "score": 0.41462546586990356,
+          "promptBox": {
+            "left": 793.69970703125,
+            "top": 136.7325897216797,
+            "width": 43.0958251953125,
+            "height": 36.01838684082031
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-027-mask.png",
+          "foregroundPixels": 1428,
+          "maskBox": {
+            "left": 795,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 28,
+          "flatIndex": 2427,
+          "score": 0.367864191532135,
+          "promptBox": {
+            "left": 190.35154724121094,
+            "top": 106.837890625,
+            "width": 38.38932800292969,
+            "height": 24.541259765625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-028-mask.png",
+          "foregroundPixels": 789,
+          "maskBox": {
+            "left": 190,
+            "top": 107,
+            "width": 39,
+            "height": 25
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 29,
+          "flatIndex": 2432,
+          "score": 0.34462714195251465,
+          "promptBox": {
+            "left": 229.69224548339844,
+            "top": 106.91088104248047,
+            "width": 40.60676574707031,
+            "height": 24.07738494873047
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-029-mask.png",
+          "foregroundPixels": 856,
+          "maskBox": {
+            "left": 234,
+            "top": 107,
+            "width": 45,
+            "height": 25
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 30,
+          "flatIndex": 3461,
+          "score": 0.3372959494590759,
+          "promptBox": {
+            "left": 793.8226318359375,
+            "top": 163.84873962402344,
+            "width": 43.064697265625,
+            "height": 10.601959228515625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-030-mask.png",
+          "foregroundPixels": 229,
+          "maskBox": {
+            "left": 796,
+            "top": 163,
+            "width": 40,
+            "height": 11
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 31,
+          "flatIndex": 3412,
+          "score": 0.31748101115226746,
+          "promptBox": {
+            "left": 405.93988037109375,
+            "top": 163.85025024414062,
+            "width": 41.802001953125,
+            "height": 10.078720092773438
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-031-mask.png",
+          "foregroundPixels": 284,
+          "maskBox": {
+            "left": 406,
+            "top": 163,
+            "width": 41,
+            "height": 10
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 32,
+          "flatIndex": 32419,
+          "score": 0.2976302206516266,
+          "promptBox": {
+            "left": 395.5047912597656,
+            "top": 239.61288452148438,
+            "width": 566.7552185058594,
+            "height": 283.9584655761719
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-032-mask.png",
+          "foregroundPixels": 169828,
+          "maskBox": {
+            "left": 392,
+            "top": 232,
+            "width": 578,
+            "height": 296
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 33,
+          "flatIndex": 3469,
+          "score": 0.2972332239151001,
+          "promptBox": {
+            "left": 850.6427612304688,
+            "top": 164.93113708496094,
+            "width": 43.9808349609375,
+            "height": 9.648956298828125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-033-mask.png",
+          "foregroundPixels": 227,
+          "maskBox": {
+            "left": 852,
+            "top": 166,
+            "width": 42,
+            "height": 8
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 34,
+          "flatIndex": 4520,
+          "score": 0.28024402260780334,
+          "promptBox": {
+            "left": 320.9121398925781,
+            "top": 224.36695861816406,
+            "width": 14.990692138671875,
+            "height": 12.987106323242188
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-034-mask.png",
+          "foregroundPixels": 180,
+          "maskBox": {
+            "left": 321,
+            "top": 224,
+            "width": 16,
+            "height": 14
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 35,
+          "flatIndex": 3446,
+          "score": 0.27316737174987793,
+          "promptBox": {
+            "left": 666.0145263671875,
+            "top": 164.9150390625,
+            "width": 43.43798828125,
+            "height": 9.420455932617188
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-035-mask.png",
+          "foregroundPixels": 330,
+          "maskBox": {
+            "left": 666,
+            "top": 163,
+            "width": 42,
+            "height": 11
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "presence": "present",
+      "status": "complete",
+      "proposalCount": 36,
+      "validMaskCount": 36,
+      "emptyMaskCount": 0,
+      "invalidMaskCount": 0,
+      "boxAvailabilityPass": false,
+      "bestMaskBoxIoU": 0.8800505050505051,
+      "bestMaskBoxCoverage": 0.880050505050505,
+      "bestPixelMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidates": [
+        {
+          "proposalOrdinal": 0,
+          "flatIndex": 2052,
+          "score": 0.8330649137496948,
+          "promptBox": {
+            "left": 1058.392578125,
+            "top": 91.02783203125,
+            "width": 11.341796875,
+            "height": 11.920005798339844
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-000-mask.png",
+          "foregroundPixels": 130,
+          "maskBox": {
+            "left": 1058,
+            "top": 91,
+            "width": 12,
+            "height": 12
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 1,
+          "flatIndex": 2051,
+          "score": 0.824320912361145,
+          "promptBox": {
+            "left": 1042.369873046875,
+            "top": 90.96139526367188,
+            "width": 11.2255859375,
+            "height": 11.994102478027344
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-001-mask.png",
+          "foregroundPixels": 123,
+          "maskBox": {
+            "left": 1042,
+            "top": 91,
+            "width": 12,
+            "height": 12
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 2,
+          "flatIndex": 2054,
+          "score": 0.8188150525093079,
+          "promptBox": {
+            "left": 1074.2861328125,
+            "top": 91.08397674560547,
+            "width": 11.470703125,
+            "height": 11.902275085449219
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-002-mask.png",
+          "foregroundPixels": 141,
+          "maskBox": {
+            "left": 1074,
+            "top": 90,
+            "width": 13,
+            "height": 13
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 3,
+          "flatIndex": 3012,
+          "score": 0.7711932063102722,
+          "promptBox": {
+            "left": 1049.497802734375,
+            "top": 136.8236083984375,
+            "width": 36.0845947265625,
+            "height": 35.511688232421875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-003-mask.png",
+          "foregroundPixels": 1330,
+          "maskBox": {
+            "left": 1049,
+            "top": 136,
+            "width": 38,
+            "height": 37
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 4,
+          "flatIndex": 26497,
+          "score": 0.7329358458518982,
+          "promptBox": {
+            "left": 189.7139892578125,
+            "top": 176.0826873779297,
+            "width": 155.54986572265625,
+            "height": 35.65679931640625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-004-mask.png",
+          "foregroundPixels": 5352,
+          "maskBox": {
+            "left": 190,
+            "top": 176,
+            "width": 156,
+            "height": 38
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 5,
+          "flatIndex": 3891,
+          "score": 0.7227770090103149,
+          "promptBox": {
+            "left": 356.87554931640625,
+            "top": 176.67564392089844,
+            "width": 100.20779418945312,
+            "height": 36.36328125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-005-mask.png",
+          "foregroundPixels": 3452,
+          "maskBox": {
+            "left": 356,
+            "top": 177,
+            "width": 101,
+            "height": 37
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 6,
+          "flatIndex": 2320,
+          "score": 0.7025025486946106,
+          "promptBox": {
+            "left": 620.6096801757812,
+            "top": 107.98089599609375,
+            "width": 45.0057373046875,
+            "height": 22.980178833007812
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-006-mask.png",
+          "foregroundPixels": 559,
+          "maskBox": {
+            "left": 624,
+            "top": 109,
+            "width": 35,
+            "height": 21
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 7,
+          "flatIndex": 2316,
+          "score": 0.6945149898529053,
+          "promptBox": {
+            "left": 572.1459350585938,
+            "top": 107.2315902709961,
+            "width": 47.4005126953125,
+            "height": 23.69091033935547
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-007-mask.png",
+          "foregroundPixels": 877,
+          "maskBox": {
+            "left": 571,
+            "top": 108,
+            "width": 49,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 8,
+          "flatIndex": 2308,
+          "score": 0.683326780796051,
+          "promptBox": {
+            "left": 523.1400146484375,
+            "top": 107.26683044433594,
+            "width": 47.66058349609375,
+            "height": 23.671218872070312
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-008-mask.png",
+          "foregroundPixels": 628,
+          "maskBox": {
+            "left": 529,
+            "top": 108,
+            "width": 37,
+            "height": 20
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 9,
+          "flatIndex": 3071,
+          "score": 0.6691093444824219,
+          "promptBox": {
+            "left": 239.6646728515625,
+            "top": 137.26162719726562,
+            "width": 34.687591552734375,
+            "height": 33.028961181640625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-009-mask.png",
+          "foregroundPixels": 1179,
+          "maskBox": {
+            "left": 239,
+            "top": 137,
+            "width": 36,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 10,
+          "flatIndex": 2946,
+          "score": 0.6670494079589844,
+          "promptBox": {
+            "left": 507.78326416015625,
+            "top": 136.7802276611328,
+            "width": 41.72900390625,
+            "height": 35.45263671875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-010-mask.png",
+          "foregroundPixels": 1481,
+          "maskBox": {
+            "left": 506,
+            "top": 137,
+            "width": 43,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 11,
+          "flatIndex": 2294,
+          "score": 0.6666226983070374,
+          "promptBox": {
+            "left": 379.0162658691406,
+            "top": 107.59532165527344,
+            "width": 82.26507568359375,
+            "height": 23.812179565429688
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-011-mask.png",
+          "foregroundPixels": 1403,
+          "maskBox": {
+            "left": 382,
+            "top": 108,
+            "width": 76,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 12,
+          "flatIndex": 3066,
+          "score": 0.6564303040504456,
+          "promptBox": {
+            "left": 194.9728546142578,
+            "top": 137.3886260986328,
+            "width": 41.62422180175781,
+            "height": 32.91297912597656
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-012-mask.png",
+          "foregroundPixels": 1390,
+          "maskBox": {
+            "left": 195,
+            "top": 137,
+            "width": 42,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 13,
+          "flatIndex": 3120,
+          "score": 0.6179100871086121,
+          "promptBox": {
+            "left": 609.9671630859375,
+            "top": 137.06373596191406,
+            "width": 41.15570068359375,
+            "height": 35.022369384765625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-013-mask.png",
+          "foregroundPixels": 1411,
+          "maskBox": {
+            "left": 609,
+            "top": 137,
+            "width": 42,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 14,
+          "flatIndex": 2952,
+          "score": 0.6075353622436523,
+          "promptBox": {
+            "left": 564.4934692382812,
+            "top": 137.00592041015625,
+            "width": 41.53204345703125,
+            "height": 35.109588623046875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-014-mask.png",
+          "foregroundPixels": 1416,
+          "maskBox": {
+            "left": 565,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 15,
+          "flatIndex": 3099,
+          "score": 0.6071423888206482,
+          "promptBox": {
+            "left": 462.40240478515625,
+            "top": 137.08241271972656,
+            "width": 42.006134033203125,
+            "height": 35.13226318359375
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-015-mask.png",
+          "foregroundPixels": 1410,
+          "maskBox": {
+            "left": 463,
+            "top": 136,
+            "width": 41,
+            "height": 36
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 16,
+          "flatIndex": 2976,
+          "score": 0.6042386293411255,
+          "promptBox": {
+            "left": 755.5352172851562,
+            "top": 137.2523193359375,
+            "width": 35.1524658203125,
+            "height": 34.70774841308594
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-016-mask.png",
+          "foregroundPixels": 1171,
+          "maskBox": {
+            "left": 755,
+            "top": 137,
+            "width": 35,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 17,
+          "flatIndex": 2934,
+          "score": 0.5919612050056458,
+          "promptBox": {
+            "left": 405.6558837890625,
+            "top": 136.85873413085938,
+            "width": 41.867828369140625,
+            "height": 35.646697998046875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-017-mask.png",
+          "foregroundPixels": 1469,
+          "maskBox": {
+            "left": 404,
+            "top": 137,
+            "width": 44,
+            "height": 36
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 18,
+          "flatIndex": 2302,
+          "score": 0.5681448578834534,
+          "promptBox": {
+            "left": 462.0257263183594,
+            "top": 107.22415161132812,
+            "width": 60.473724365234375,
+            "height": 23.825057983398438
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-018-mask.png",
+          "foregroundPixels": 1001,
+          "maskBox": {
+            "left": 462,
+            "top": 108,
+            "width": 59,
+            "height": 22
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 19,
+          "flatIndex": 3076,
+          "score": 0.5592926144599915,
+          "promptBox": {
+            "left": 278.20452880859375,
+            "top": 137.29425048828125,
+            "width": 40.60430908203125,
+            "height": 32.996734619140625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-019-mask.png",
+          "foregroundPixels": 1343,
+          "maskBox": {
+            "left": 279,
+            "top": 137,
+            "width": 41,
+            "height": 34
+          },
+          "bestBoxIoU": 0.8800505050505051,
+          "bestTargetCoverage": 0.880050505050505,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 20,
+          "flatIndex": 2921,
+          "score": 0.5541149377822876,
+          "promptBox": {
+            "left": 321.9084167480469,
+            "top": 137.00411987304688,
+            "width": 36.936126708984375,
+            "height": 34.92179870605469
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-020-mask.png",
+          "foregroundPixels": 1167,
+          "maskBox": {
+            "left": 322,
+            "top": 137,
+            "width": 36,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 21,
+          "flatIndex": 2928,
+          "score": 0.5269801616668701,
+          "promptBox": {
+            "left": 360.98406982421875,
+            "top": 137.15237426757812,
+            "width": 41.128173828125,
+            "height": 34.9814453125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-021-mask.png",
+          "foregroundPixels": 1420,
+          "maskBox": {
+            "left": 361,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 22,
+          "flatIndex": 2965,
+          "score": 0.5007555484771729,
+          "promptBox": {
+            "left": 666.371337890625,
+            "top": 137.08309936523438,
+            "width": 42.89739990234375,
+            "height": 35.848175048828125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-022-mask.png",
+          "foregroundPixels": 1428,
+          "maskBox": {
+            "left": 667,
+            "top": 137,
+            "width": 42,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 23,
+          "flatIndex": 2970,
+          "score": 0.49396228790283203,
+          "promptBox": {
+            "left": 711.735595703125,
+            "top": 137.63201904296875,
+            "width": 41.3172607421875,
+            "height": 34.53828430175781
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-023-mask.png",
+          "foregroundPixels": 1366,
+          "maskBox": {
+            "left": 711,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 24,
+          "flatIndex": 2438,
+          "score": 0.4471842050552368,
+          "promptBox": {
+            "left": 270.5402526855469,
+            "top": 107.19557189941406,
+            "width": 59.241424560546875,
+            "height": 24.1182861328125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-024-mask.png",
+          "foregroundPixels": 861,
+          "maskBox": {
+            "left": 275,
+            "top": 108,
+            "width": 49,
+            "height": 22
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 25,
+          "flatIndex": 26737,
+          "score": 0.44167792797088623,
+          "promptBox": {
+            "left": 191.07315063476562,
+            "top": 214.58885192871094,
+            "width": 153.27145385742188,
+            "height": 32.686553955078125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-025-mask.png",
+          "foregroundPixels": 4880,
+          "maskBox": {
+            "left": 191,
+            "top": 214,
+            "width": 153,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 26,
+          "flatIndex": 26182,
+          "score": 0.4325844347476959,
+          "promptBox": {
+            "left": 330.52850341796875,
+            "top": 106.89012145996094,
+            "width": 47.575927734375,
+            "height": 24.415359497070312
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-026-mask.png",
+          "foregroundPixels": 934,
+          "maskBox": {
+            "left": 331,
+            "top": 108,
+            "width": 48,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 27,
+          "flatIndex": 2980,
+          "score": 0.41462546586990356,
+          "promptBox": {
+            "left": 793.69970703125,
+            "top": 136.7325897216797,
+            "width": 43.0958251953125,
+            "height": 36.01838684082031
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-027-mask.png",
+          "foregroundPixels": 1428,
+          "maskBox": {
+            "left": 795,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 28,
+          "flatIndex": 2427,
+          "score": 0.367864191532135,
+          "promptBox": {
+            "left": 190.35154724121094,
+            "top": 106.837890625,
+            "width": 38.38932800292969,
+            "height": 24.541259765625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-028-mask.png",
+          "foregroundPixels": 789,
+          "maskBox": {
+            "left": 190,
+            "top": 107,
+            "width": 39,
+            "height": 25
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 29,
+          "flatIndex": 2432,
+          "score": 0.34462714195251465,
+          "promptBox": {
+            "left": 229.69224548339844,
+            "top": 106.91088104248047,
+            "width": 40.60676574707031,
+            "height": 24.07738494873047
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-029-mask.png",
+          "foregroundPixels": 856,
+          "maskBox": {
+            "left": 234,
+            "top": 107,
+            "width": 45,
+            "height": 25
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 30,
+          "flatIndex": 3461,
+          "score": 0.3372959494590759,
+          "promptBox": {
+            "left": 793.8226318359375,
+            "top": 163.84873962402344,
+            "width": 43.064697265625,
+            "height": 10.601959228515625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-030-mask.png",
+          "foregroundPixels": 229,
+          "maskBox": {
+            "left": 796,
+            "top": 163,
+            "width": 40,
+            "height": 11
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 31,
+          "flatIndex": 3412,
+          "score": 0.31748101115226746,
+          "promptBox": {
+            "left": 405.93988037109375,
+            "top": 163.85025024414062,
+            "width": 41.802001953125,
+            "height": 10.078720092773438
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-031-mask.png",
+          "foregroundPixels": 284,
+          "maskBox": {
+            "left": 406,
+            "top": 163,
+            "width": 41,
+            "height": 10
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 32,
+          "flatIndex": 32419,
+          "score": 0.2976302206516266,
+          "promptBox": {
+            "left": 395.5047912597656,
+            "top": 239.61288452148438,
+            "width": 566.7552185058594,
+            "height": 283.9584655761719
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-032-mask.png",
+          "foregroundPixels": 169828,
+          "maskBox": {
+            "left": 392,
+            "top": 232,
+            "width": 578,
+            "height": 296
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 33,
+          "flatIndex": 3469,
+          "score": 0.2972332239151001,
+          "promptBox": {
+            "left": 850.6427612304688,
+            "top": 164.93113708496094,
+            "width": 43.9808349609375,
+            "height": 9.648956298828125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-033-mask.png",
+          "foregroundPixels": 227,
+          "maskBox": {
+            "left": 852,
+            "top": 166,
+            "width": 42,
+            "height": 8
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 34,
+          "flatIndex": 4520,
+          "score": 0.28024402260780334,
+          "promptBox": {
+            "left": 320.9121398925781,
+            "top": 224.36695861816406,
+            "width": 14.990692138671875,
+            "height": 12.987106323242188
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-034-mask.png",
+          "foregroundPixels": 180,
+          "maskBox": {
+            "left": 321,
+            "top": 224,
+            "width": 16,
+            "height": 14
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 35,
+          "flatIndex": 3446,
+          "score": 0.27316737174987793,
+          "promptBox": {
+            "left": 666.0145263671875,
+            "top": 164.9150390625,
+            "width": 43.43798828125,
+            "height": 9.420455932617188
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-035-mask.png",
+          "foregroundPixels": 330,
+          "maskBox": {
+            "left": 666,
+            "top": 163,
+            "width": 42,
+            "height": 11
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "presence": "absent",
+      "status": "complete",
+      "proposalCount": 36,
+      "validMaskCount": 36,
+      "emptyMaskCount": 0,
+      "invalidMaskCount": 0,
+      "boxAvailabilityPass": false,
+      "bestMaskBoxIoU": 0,
+      "bestMaskBoxCoverage": 0,
+      "bestPixelMaskIoU": null,
+      "referenceMaskCount": 0,
+      "evaluableReferenceMaskCount": 0,
+      "candidates": [
+        {
+          "proposalOrdinal": 0,
+          "flatIndex": 2052,
+          "score": 0.8330649137496948,
+          "promptBox": {
+            "left": 1058.392578125,
+            "top": 91.02783203125,
+            "width": 11.341796875,
+            "height": 11.920005798339844
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-000-mask.png",
+          "foregroundPixels": 130,
+          "maskBox": {
+            "left": 1058,
+            "top": 91,
+            "width": 12,
+            "height": 12
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 1,
+          "flatIndex": 2051,
+          "score": 0.824320912361145,
+          "promptBox": {
+            "left": 1042.369873046875,
+            "top": 90.96139526367188,
+            "width": 11.2255859375,
+            "height": 11.994102478027344
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-001-mask.png",
+          "foregroundPixels": 123,
+          "maskBox": {
+            "left": 1042,
+            "top": 91,
+            "width": 12,
+            "height": 12
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 2,
+          "flatIndex": 2054,
+          "score": 0.8188150525093079,
+          "promptBox": {
+            "left": 1074.2861328125,
+            "top": 91.08397674560547,
+            "width": 11.470703125,
+            "height": 11.902275085449219
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-002-mask.png",
+          "foregroundPixels": 141,
+          "maskBox": {
+            "left": 1074,
+            "top": 90,
+            "width": 13,
+            "height": 13
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 3,
+          "flatIndex": 3012,
+          "score": 0.7711932063102722,
+          "promptBox": {
+            "left": 1049.497802734375,
+            "top": 136.8236083984375,
+            "width": 36.0845947265625,
+            "height": 35.511688232421875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-003-mask.png",
+          "foregroundPixels": 1330,
+          "maskBox": {
+            "left": 1049,
+            "top": 136,
+            "width": 38,
+            "height": 37
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 4,
+          "flatIndex": 26497,
+          "score": 0.7329358458518982,
+          "promptBox": {
+            "left": 189.7139892578125,
+            "top": 176.0826873779297,
+            "width": 155.54986572265625,
+            "height": 35.65679931640625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-004-mask.png",
+          "foregroundPixels": 5352,
+          "maskBox": {
+            "left": 190,
+            "top": 176,
+            "width": 156,
+            "height": 38
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 5,
+          "flatIndex": 3891,
+          "score": 0.7227770090103149,
+          "promptBox": {
+            "left": 356.87554931640625,
+            "top": 176.67564392089844,
+            "width": 100.20779418945312,
+            "height": 36.36328125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-005-mask.png",
+          "foregroundPixels": 3452,
+          "maskBox": {
+            "left": 356,
+            "top": 177,
+            "width": 101,
+            "height": 37
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 6,
+          "flatIndex": 2320,
+          "score": 0.7025025486946106,
+          "promptBox": {
+            "left": 620.6096801757812,
+            "top": 107.98089599609375,
+            "width": 45.0057373046875,
+            "height": 22.980178833007812
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-006-mask.png",
+          "foregroundPixels": 559,
+          "maskBox": {
+            "left": 624,
+            "top": 109,
+            "width": 35,
+            "height": 21
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 7,
+          "flatIndex": 2316,
+          "score": 0.6945149898529053,
+          "promptBox": {
+            "left": 572.1459350585938,
+            "top": 107.2315902709961,
+            "width": 47.4005126953125,
+            "height": 23.69091033935547
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-007-mask.png",
+          "foregroundPixels": 877,
+          "maskBox": {
+            "left": 571,
+            "top": 108,
+            "width": 49,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 8,
+          "flatIndex": 2308,
+          "score": 0.683326780796051,
+          "promptBox": {
+            "left": 523.1400146484375,
+            "top": 107.26683044433594,
+            "width": 47.66058349609375,
+            "height": 23.671218872070312
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-008-mask.png",
+          "foregroundPixels": 628,
+          "maskBox": {
+            "left": 529,
+            "top": 108,
+            "width": 37,
+            "height": 20
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 9,
+          "flatIndex": 3071,
+          "score": 0.6691093444824219,
+          "promptBox": {
+            "left": 239.6646728515625,
+            "top": 137.26162719726562,
+            "width": 34.687591552734375,
+            "height": 33.028961181640625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-009-mask.png",
+          "foregroundPixels": 1179,
+          "maskBox": {
+            "left": 239,
+            "top": 137,
+            "width": 36,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 10,
+          "flatIndex": 2946,
+          "score": 0.6670494079589844,
+          "promptBox": {
+            "left": 507.78326416015625,
+            "top": 136.7802276611328,
+            "width": 41.72900390625,
+            "height": 35.45263671875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-010-mask.png",
+          "foregroundPixels": 1481,
+          "maskBox": {
+            "left": 506,
+            "top": 137,
+            "width": 43,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 11,
+          "flatIndex": 2294,
+          "score": 0.6666226983070374,
+          "promptBox": {
+            "left": 379.0162658691406,
+            "top": 107.59532165527344,
+            "width": 82.26507568359375,
+            "height": 23.812179565429688
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-011-mask.png",
+          "foregroundPixels": 1403,
+          "maskBox": {
+            "left": 382,
+            "top": 108,
+            "width": 76,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 12,
+          "flatIndex": 3066,
+          "score": 0.6564303040504456,
+          "promptBox": {
+            "left": 194.9728546142578,
+            "top": 137.3886260986328,
+            "width": 41.62422180175781,
+            "height": 32.91297912597656
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-012-mask.png",
+          "foregroundPixels": 1390,
+          "maskBox": {
+            "left": 195,
+            "top": 137,
+            "width": 42,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 13,
+          "flatIndex": 3120,
+          "score": 0.6179100871086121,
+          "promptBox": {
+            "left": 609.9671630859375,
+            "top": 137.06373596191406,
+            "width": 41.15570068359375,
+            "height": 35.022369384765625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-013-mask.png",
+          "foregroundPixels": 1411,
+          "maskBox": {
+            "left": 609,
+            "top": 137,
+            "width": 42,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 14,
+          "flatIndex": 2952,
+          "score": 0.6075353622436523,
+          "promptBox": {
+            "left": 564.4934692382812,
+            "top": 137.00592041015625,
+            "width": 41.53204345703125,
+            "height": 35.109588623046875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-014-mask.png",
+          "foregroundPixels": 1416,
+          "maskBox": {
+            "left": 565,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 15,
+          "flatIndex": 3099,
+          "score": 0.6071423888206482,
+          "promptBox": {
+            "left": 462.40240478515625,
+            "top": 137.08241271972656,
+            "width": 42.006134033203125,
+            "height": 35.13226318359375
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-015-mask.png",
+          "foregroundPixels": 1410,
+          "maskBox": {
+            "left": 463,
+            "top": 136,
+            "width": 41,
+            "height": 36
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 16,
+          "flatIndex": 2976,
+          "score": 0.6042386293411255,
+          "promptBox": {
+            "left": 755.5352172851562,
+            "top": 137.2523193359375,
+            "width": 35.1524658203125,
+            "height": 34.70774841308594
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-016-mask.png",
+          "foregroundPixels": 1171,
+          "maskBox": {
+            "left": 755,
+            "top": 137,
+            "width": 35,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 17,
+          "flatIndex": 2934,
+          "score": 0.5919612050056458,
+          "promptBox": {
+            "left": 405.6558837890625,
+            "top": 136.85873413085938,
+            "width": 41.867828369140625,
+            "height": 35.646697998046875
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-017-mask.png",
+          "foregroundPixels": 1469,
+          "maskBox": {
+            "left": 404,
+            "top": 137,
+            "width": 44,
+            "height": 36
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 18,
+          "flatIndex": 2302,
+          "score": 0.5681448578834534,
+          "promptBox": {
+            "left": 462.0257263183594,
+            "top": 107.22415161132812,
+            "width": 60.473724365234375,
+            "height": 23.825057983398438
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-018-mask.png",
+          "foregroundPixels": 1001,
+          "maskBox": {
+            "left": 462,
+            "top": 108,
+            "width": 59,
+            "height": 22
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 19,
+          "flatIndex": 3076,
+          "score": 0.5592926144599915,
+          "promptBox": {
+            "left": 278.20452880859375,
+            "top": 137.29425048828125,
+            "width": 40.60430908203125,
+            "height": 32.996734619140625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-019-mask.png",
+          "foregroundPixels": 1343,
+          "maskBox": {
+            "left": 279,
+            "top": 137,
+            "width": 41,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 20,
+          "flatIndex": 2921,
+          "score": 0.5541149377822876,
+          "promptBox": {
+            "left": 321.9084167480469,
+            "top": 137.00411987304688,
+            "width": 36.936126708984375,
+            "height": 34.92179870605469
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-020-mask.png",
+          "foregroundPixels": 1167,
+          "maskBox": {
+            "left": 322,
+            "top": 137,
+            "width": 36,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 21,
+          "flatIndex": 2928,
+          "score": 0.5269801616668701,
+          "promptBox": {
+            "left": 360.98406982421875,
+            "top": 137.15237426757812,
+            "width": 41.128173828125,
+            "height": 34.9814453125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-021-mask.png",
+          "foregroundPixels": 1420,
+          "maskBox": {
+            "left": 361,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 22,
+          "flatIndex": 2965,
+          "score": 0.5007555484771729,
+          "promptBox": {
+            "left": 666.371337890625,
+            "top": 137.08309936523438,
+            "width": 42.89739990234375,
+            "height": 35.848175048828125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-022-mask.png",
+          "foregroundPixels": 1428,
+          "maskBox": {
+            "left": 667,
+            "top": 137,
+            "width": 42,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 23,
+          "flatIndex": 2970,
+          "score": 0.49396228790283203,
+          "promptBox": {
+            "left": 711.735595703125,
+            "top": 137.63201904296875,
+            "width": 41.3172607421875,
+            "height": 34.53828430175781
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-023-mask.png",
+          "foregroundPixels": 1366,
+          "maskBox": {
+            "left": 711,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 24,
+          "flatIndex": 2438,
+          "score": 0.4471842050552368,
+          "promptBox": {
+            "left": 270.5402526855469,
+            "top": 107.19557189941406,
+            "width": 59.241424560546875,
+            "height": 24.1182861328125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-024-mask.png",
+          "foregroundPixels": 861,
+          "maskBox": {
+            "left": 275,
+            "top": 108,
+            "width": 49,
+            "height": 22
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 25,
+          "flatIndex": 26737,
+          "score": 0.44167792797088623,
+          "promptBox": {
+            "left": 191.07315063476562,
+            "top": 214.58885192871094,
+            "width": 153.27145385742188,
+            "height": 32.686553955078125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-025-mask.png",
+          "foregroundPixels": 4880,
+          "maskBox": {
+            "left": 191,
+            "top": 214,
+            "width": 153,
+            "height": 34
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 26,
+          "flatIndex": 26182,
+          "score": 0.4325844347476959,
+          "promptBox": {
+            "left": 330.52850341796875,
+            "top": 106.89012145996094,
+            "width": 47.575927734375,
+            "height": 24.415359497070312
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-026-mask.png",
+          "foregroundPixels": 934,
+          "maskBox": {
+            "left": 331,
+            "top": 108,
+            "width": 48,
+            "height": 23
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 27,
+          "flatIndex": 2980,
+          "score": 0.41462546586990356,
+          "promptBox": {
+            "left": 793.69970703125,
+            "top": 136.7325897216797,
+            "width": 43.0958251953125,
+            "height": 36.01838684082031
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-027-mask.png",
+          "foregroundPixels": 1428,
+          "maskBox": {
+            "left": 795,
+            "top": 137,
+            "width": 41,
+            "height": 35
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 28,
+          "flatIndex": 2427,
+          "score": 0.367864191532135,
+          "promptBox": {
+            "left": 190.35154724121094,
+            "top": 106.837890625,
+            "width": 38.38932800292969,
+            "height": 24.541259765625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-028-mask.png",
+          "foregroundPixels": 789,
+          "maskBox": {
+            "left": 190,
+            "top": 107,
+            "width": 39,
+            "height": 25
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 29,
+          "flatIndex": 2432,
+          "score": 0.34462714195251465,
+          "promptBox": {
+            "left": 229.69224548339844,
+            "top": 106.91088104248047,
+            "width": 40.60676574707031,
+            "height": 24.07738494873047
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-029-mask.png",
+          "foregroundPixels": 856,
+          "maskBox": {
+            "left": 234,
+            "top": 107,
+            "width": 45,
+            "height": 25
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 30,
+          "flatIndex": 3461,
+          "score": 0.3372959494590759,
+          "promptBox": {
+            "left": 793.8226318359375,
+            "top": 163.84873962402344,
+            "width": 43.064697265625,
+            "height": 10.601959228515625
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-030-mask.png",
+          "foregroundPixels": 229,
+          "maskBox": {
+            "left": 796,
+            "top": 163,
+            "width": 40,
+            "height": 11
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 31,
+          "flatIndex": 3412,
+          "score": 0.31748101115226746,
+          "promptBox": {
+            "left": 405.93988037109375,
+            "top": 163.85025024414062,
+            "width": 41.802001953125,
+            "height": 10.078720092773438
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-031-mask.png",
+          "foregroundPixels": 284,
+          "maskBox": {
+            "left": 406,
+            "top": 163,
+            "width": 41,
+            "height": 10
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 32,
+          "flatIndex": 32419,
+          "score": 0.2976302206516266,
+          "promptBox": {
+            "left": 395.5047912597656,
+            "top": 239.61288452148438,
+            "width": 566.7552185058594,
+            "height": 283.9584655761719
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-032-mask.png",
+          "foregroundPixels": 169828,
+          "maskBox": {
+            "left": 392,
+            "top": 232,
+            "width": 578,
+            "height": 296
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 33,
+          "flatIndex": 3469,
+          "score": 0.2972332239151001,
+          "promptBox": {
+            "left": 850.6427612304688,
+            "top": 164.93113708496094,
+            "width": 43.9808349609375,
+            "height": 9.648956298828125
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-033-mask.png",
+          "foregroundPixels": 227,
+          "maskBox": {
+            "left": 852,
+            "top": 166,
+            "width": 42,
+            "height": 8
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 34,
+          "flatIndex": 4520,
+          "score": 0.28024402260780334,
+          "promptBox": {
+            "left": 320.9121398925781,
+            "top": 224.36695861816406,
+            "width": 14.990692138671875,
+            "height": 12.987106323242188
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-034-mask.png",
+          "foregroundPixels": 180,
+          "maskBox": {
+            "left": 321,
+            "top": 224,
+            "width": 16,
+            "height": 14
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        },
+        {
+          "proposalOrdinal": 35,
+          "flatIndex": 3446,
+          "score": 0.27316737174987793,
+          "promptBox": {
+            "left": 666.0145263671875,
+            "top": 164.9150390625,
+            "width": 43.43798828125,
+            "height": 9.420455932617188
+          },
+          "status": "complete",
+          "artifactStatus": "valid",
+          "artifactError": null,
+          "maskPath": "masks/candidate-035-mask.png",
+          "foregroundPixels": 330,
+          "maskBox": {
+            "left": 666,
+            "top": 163,
+            "width": 42,
+            "height": 11
+          },
+          "bestBoxIoU": 0,
+          "bestTargetCoverage": 0,
+          "wholeBoxPass": false,
+          "referenceMaskIoUs": []
+        }
+      ]
+    }
+  ]
+}
