@@ -13,10 +13,7 @@
     },
     "classify": {
       "question": "Does this photograph contain a physical Car?",
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   },
   {
@@ -33,10 +30,7 @@
     },
     "classify": {
       "question": "Does this photograph contain a physical Bird?",
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   },
   {
@@ -53,10 +47,7 @@
     },
     "classify": {
       "question": "Does this photograph contain a physical Person?",
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   },
   {
@@ -73,10 +64,7 @@
     },
     "classify": {
       "question": "Does this photograph contain a physical Bowl?",
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   }
 ]

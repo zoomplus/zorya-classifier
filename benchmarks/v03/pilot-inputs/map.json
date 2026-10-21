@@ -11,10 +11,7 @@
       "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
     },
     "classify": {
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   },
   {
@@ -29,10 +26,7 @@
       "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
     },
     "classify": {
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   },
   {
@@ -47,10 +41,7 @@
       "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
     },
     "classify": {
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   },
   {
@@ -65,10 +56,7 @@
       "target": "the visible body sprite of unit type Fighter in the main Freeciv map canvas; exclude health bars and selection brackets"
     },
     "classify": {
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   }
 ]

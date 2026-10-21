@@ -9,15 +9,15 @@ const directory = dirname(fileURLToPath(import.meta.url))
 export const v03PilotManifests = Object.freeze([
   Object.freeze({
     path: resolve(directory, 'pilot-inputs/photo.json'),
-    sha256: 'daa1759c5a08b7abf827641843df80e6b777fae8c0c04ac651fa7435235003fa',
+    sha256: 'ee1d36d254f3aeddd9b9739143754dfbdc3409e155ab76334e10cf04e0bfb44b',
   }),
   Object.freeze({
     path: resolve(directory, 'pilot-inputs/ui.json'),
-    sha256: '7b1038e6ecb32b7ddce0af7fabe1b9afbcc63e6aaa075b77591357a28681b1bb',
+    sha256: '5732d534990bfa98299a4e85f760acfa5319e0193e86bc182853558786cb0e9f',
   }),
   Object.freeze({
     path: resolve(directory, 'pilot-inputs/map.json'),
-    sha256: '602844b8c2add14ec6d96424dc03a8c0a39c4cb15a0397f78a9d29778d805d81',
+    sha256: '6886670e7f9529805196fe8502975f78c968ff612bfa3279c323cad215ba89c4',
   }),
 ] as const)
 

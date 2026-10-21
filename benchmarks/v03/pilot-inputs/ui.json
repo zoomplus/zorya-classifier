@@ -11,10 +11,7 @@
       "target": "the Forward navigation button in the Geany toolbar, including its whole visible button background and border"
     },
     "classify": {
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   },
   {
@@ -29,10 +26,7 @@
       "target": "the Back navigation button in the Geany toolbar, including its whole visible button background and border"
     },
     "classify": {
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   },
   {
@@ -47,10 +41,7 @@
       "target": "the Open document button in the Geany toolbar, including its whole visible button background and border"
     },
     "classify": {
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   },
   {
@@ -65,10 +56,7 @@
       "target": "the Undo action button in the Geany toolbar, including its whole visible button background and border"
     },
     "classify": {
-      "options": [
-        "present",
-        "absent"
-      ]
+      "options": ["present", "absent"]
     }
   }
 ]
