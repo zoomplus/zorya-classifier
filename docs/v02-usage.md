@@ -1,17 +1,19 @@
 # Region-seeded masks and extraction (0.2)
 
+Everything in this guide—default region `locate`, `locate({ mode: 'whole-object' })`, `extract`, optional `RefinementPort`, `SegmentationPort`, box-check composition, `objectProposals`, and exported native factories—is **experimental and unqualified** for general use. Passing structural or lifecycle checks does not establish semantic object accuracy or mask quality. Further accuracy experiments on these paths are stopped; no spatial or extraction strategy is promoted. Historical metrics in `docs/evidence/**` are unchanged.
+
 The [accepted plan](0.2.0-plan.md) and [acceptance status](acceptance.md) distinguish implementation, offline checks, live quality and platform qualification. The frozen caller recipe passed admission with only 8/60 complete positive object boxes; 19/30 mask references had no prediction. Configure and test the model and segmenter for your own data. No text-image encoder qualified.
 
 The library does not select or connect a model. Supply a `DecisionPort` to `createClassifier`, either by implementing the port or explicitly constructing a provider adapter. The Luna examples below are reproducible integration recipes, not defaults or a claim that one model is always more accurate; stronger model capability does not guarantee monotonic accuracy gains. Optional local segmenters and proposal generators are configured separately, and their runtime packages and model assets remain the caller's responsibility.
 
 ## Choose the operation
 
-| Operation                                               | Result                                                                       | Model requests                                 |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
-| `classify`                                              | One supplied class                                                           | One                                            |
-| `locate` (default / `mode: 'region'`)                   | A grid cell that may contain an object fragment                              | Up to three                                    |
-| `locate` with `mode: 'whole-object'` and `segmentation` | Visible bounds and center derived from a mask                                | Up to five, plus local segmentation/correction |
-| `extract` with `segmentation`                           | Mask-derived bounds, center, transparent PNG, cropped mask and source offset | Up to five, plus local segmentation/correction |
+| Operation                                               | Status       | Result                                                                       | Model requests                                 |
+| ------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| `classify`                                              | Supported    | One supplied class                                                           | One                                            |
+| `locate` (default / `mode: 'region'`)                   | Experimental | A grid cell that may contain an object fragment                              | Up to three                                    |
+| `locate` with `mode: 'whole-object'` and `segmentation` | Experimental | Visible bounds and center derived from a mask                                | Up to five, plus local segmentation/correction |
+| `extract` with `segmentation`                           | Experimental | Mask-derived bounds, center, transparent PNG, cropped mask and source offset | Up to five, plus local segmentation/correction |
 
 The primary object workflow is the unchanged region locator followed by an explicitly configured segmenter. Segmentation receives the locator's seed prompt on the full EXIF-oriented source image; it does not receive a seed crop or treat the seed as an object box. Bounds and center come from actual foreground mask pixels. After the initial mask, a closed decision checks the original image with the actual mask box and original seed anchor: `complete`, `needs-expansion`, or `unknown`. It reuses the caller-supplied `DecisionPort`. An incomplete box permits one actual enclosing-mask correction and one final check; there is no separate extent search or generated model geometry. Default `locate` behavior remains compatible.
 

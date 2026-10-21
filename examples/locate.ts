@@ -1,3 +1,4 @@
+/** Experimental: default region locate is unqualified coarse grid search, not whole-object geometry. */
 import { readFile } from 'node:fs/promises'
 import { createClassifier } from 'zorya-classifier'
 import { createOpenRouterDecisions } from 'zorya-classifier/openrouter'

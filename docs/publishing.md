@@ -28,3 +28,9 @@ Use the original-region/full-source-segmentation workflow in the current usage g
 Before release, match every runtime file in the final archive to the bytes covered by native/resource acceptance, and require green Windows/Linux × Node 22/24 CI for the release source. A later documentation-only archive can have a different package SHA while retaining the tested runtime; record both complete archive hashes and the explicit runtime-file parity proof. Keep a final independently installed consumer check for the actual release archive.
 
 Keep the final release manifest outside its own archives to avoid self-reference. It records the clean source commit, archive hashes/integrities, model recipe and corpus seals, preserved failures, native/resource receipts, CI run and redacted secret scan. Publish those exact archive bytes, verify the registry response and dist-tag, then attach the matching source and npm artifact to the GitHub release. Do not replace failed accuracy or resource gates with an offline test count.
+
+## 0.2.1 release-candidate handoff
+
+This branch prepares a local **0.2.1 release candidate** from the published **0.2.0** package baseline. Only experimental status documentation, JSDoc, CLI help, the package description, and a test-only Git fixture isolation fix in `test/secrets.test.ts` changed. There are no model, default, or algorithm/runtime behavior changes relative to 0.2.0. npm or GitHub publication has **not** occurred for 0.2.1.
+
+A failed pre-commit attempt during local release preparation is preserved in the maintainer’s local release-preparation logs. That failure led to the narrow test-only isolation fix so hook-provided `GIT_*` variables cannot redirect fixture repositories or mutate unrelated sentinel indexes during secret scans.

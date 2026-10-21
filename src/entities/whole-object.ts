@@ -14,8 +14,11 @@ export const wholeObjectSchema = locateSchema.extend({
   boxTolerancePx: z.number().int().min(1).max(64).default(8),
   maxExtentPasses: z.number().int().min(1).max(3).default(3),
 })
+/** @experimental Same unqualified coarse region search as default {@link LocateInput}. */
 export type RegionLocateInput = LocateInput
+/** @experimental Whole-object localization (interval or caller segmentation); unqualified for general use. */
 export type WholeObjectLocateInput = z.input<typeof wholeObjectSchema> & { signal?: AbortSignal }
+/** @experimental Region or whole-object locate input; spatial paths are experimental. */
 export type AnyLocateInput = RegionLocateInput | WholeObjectLocateInput
 export interface BoundaryInterval {
   start: number
@@ -61,4 +64,5 @@ export type WholeObjectFailure =
       metadata: LocalizationMetadata
       verification?: SegmentationVerification
     }
+/** @experimental Whole-object localization outcome; passing structural checks does not establish mask or box accuracy. */
 export type WholeObjectLocalizationResult = WholeObjectLocated | WholeObjectFailure

@@ -45,19 +45,24 @@ export interface ClassifierOptions {
   concurrency?: number
   maxQueue?: number
   maxInputBytes?: number
+  /** @experimental Optional legacy region refinement; unqualified for general use. */
   refinement?: RefinementPort
-  /** Caller-owned; classifier disposal never disposes a shared segmenter. */
+  /** Caller-owned; classifier disposal never disposes a shared segmenter. @experimental Unqualified segmentation adapter. */
   segmentation?: SegmentationPort
-  /** Optional caller-owned containment checker; by default reuses the injected decision port. */
+  /** Optional caller-owned containment checker; by default reuses the injected decision port. @experimental Unqualified box-check override. */
   segmentationBoxCheck?: SegmentationBoxCheckPort
-  /** Explicit, caller-owned pixel-mask proposal strategy for whole-object operations. */
+  /** Explicit, caller-owned pixel-mask proposal strategy for whole-object operations. @experimental Unqualified proposal path. */
   objectProposals?: ObjectProposalPort
 }
 export interface Classifier {
   classify(input: ClassifyInput): Promise<ClassificationResult>
+  /** @experimental Unqualified spatial localization; see {@link LocateInput} and {@link WholeObjectLocateInput}. */
   locate(input: WholeObjectLocateInput): Promise<WholeObjectLocalizationResult>
+  /** @experimental Unqualified coarse region search; returns a hypothesized grid cell. */
   locate(input: LocateInput): Promise<LocalizationResult>
+  /** @experimental Unqualified spatial localization. */
   locate(input: AnyLocateInput): Promise<LocalizationResult | WholeObjectLocalizationResult>
+  /** @experimental Region-seeded extraction; unqualified for general mask or object accuracy. */
   extract(input: ExtractInput): Promise<ExtractionResult>
   dispose(): Promise<void>
 }

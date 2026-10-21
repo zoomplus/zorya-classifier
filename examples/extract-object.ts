@@ -1,3 +1,4 @@
+/** Experimental: extract and native segmentation are unqualified; structural success ≠ semantic mask quality. */
 import { readFile, writeFile } from 'node:fs/promises'
 import { createClassifier, type Classifier } from 'zorya-classifier'
 import { createOpenRouterDecisions } from 'zorya-classifier/openrouter'

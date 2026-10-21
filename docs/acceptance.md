@@ -1,6 +1,6 @@
 # Acceptance: standalone library
 
-This acceptance concerns the extracted MIT Node.js library, not the Zorya desktop application, installer, microphone or game session. The caller supplies a `DecisionPort` or explicitly configures an adapter; model/provider recipes below are examples, not library defaults. Ordinary vision chat, direct OpenAI-compatible servers and native decisions are all supported. Jev is optional historical compatibility.
+This acceptance concerns the extracted MIT Node.js library, not the Zorya desktop application, installer, microphone or game session. The caller supplies a `DecisionPort` or explicitly configures an adapter; model/provider recipes below are examples, not library defaults. Closed `classify` and explicitly configured provider/transport adapters are supported integration paths. Region `locate`, whole-object location, extraction, `RefinementPort`, segmentation/box-check composition, `objectProposals`, and native segmentation factories are experimental and unqualified; public API symbols carry `@experimental`. Further spatial accuracy experiments are stopped; no strategy is promoted. Jev is optional historical compatibility.
 
 ## Current 0.2 acceptance
 
