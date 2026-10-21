@@ -32,9 +32,27 @@ import { loadV03PilotCorpus, v03PilotRepositoryRoot } from './pilot-manifest.js'
 export const H11_CONTRACT_SHA256 =
   '14281b417d8fc2838cd52ff6bf05cb63aae493bc9968b5a4f20b6b482d58ccdd'
 
+/** Frozen H11b direct-GPU producer contract digest (Wave 1 lock). */
+export const H11B_CONTRACT_SHA256 =
+  'ee623e58181f5db22d77720760438b0b34342c708a9f5f99037446d4d3846908'
+
 export const H11_REPOSITORY_CONTRACT_PATH = fileURLToPath(
   new URL('./h11-sa2va-contract.json', import.meta.url),
 )
+
+export const H11B_REPOSITORY_CONTRACT_PATH = fileURLToPath(
+  new URL('./h11b-sa2va-direct-gpu-contract.json', import.meta.url),
+)
+
+export const H11B_RUNTIME_PROFILE_ID = 'h11b-direct-cuda-v1'
+
+const H11B_APPROVED_LOADER_DEVICE_MAP = Object.freeze({ '': 'cuda:0' } as const)
+
+const h11LoaderDeviceMapSchema = z.object({ '': z.literal('cuda:0') }).strict()
+
+export function isApprovedH11ContractSha256(digest: string): boolean {
+  return digest === H11_CONTRACT_SHA256 || digest === H11B_CONTRACT_SHA256
+}
 
 export const H11_POSITIVE_DENOMINATOR = 9
 export const H11_NEGATIVE_DENOMINATOR = 3
@@ -168,6 +186,7 @@ const h11RecipeSchema = z
     max_oriented_pixels: z.literal(2_097_152),
     retain_native_masks_max_count: z.literal(H11_NATIVE_MASK_MAX_COUNT),
     retain_native_masks_max_bytes_per_row: z.literal(H11_NATIVE_MASK_MAX_BYTES_PER_ROW),
+    loader_device_map: h11LoaderDeviceMapSchema.optional(),
   })
   .strict()
 
@@ -606,6 +625,37 @@ export async function verifyH11AssetDirectoryOnDisk(
   }
 }
 
+function readContractFromPretrainedLoaderArgs(
+  contract: Record<string, unknown>,
+): Record<string, unknown> | undefined {
+  const model = contract.model as
+    | { loader?: { from_pretrained?: Record<string, unknown> } }
+    | undefined
+  return model?.loader?.from_pretrained
+}
+
+function hasContractLoaderDeviceMapProperty(contract: Record<string, unknown>): boolean {
+  const fromPretrained = readContractFromPretrainedLoaderArgs(contract)
+  if (fromPretrained === undefined) return false
+  return Object.prototype.hasOwnProperty.call(fromPretrained, 'device_map')
+}
+
+function readContractLoaderDeviceMap(
+  contract: Record<string, unknown>,
+): Record<string, unknown> | null | undefined {
+  const fromPretrained = readContractFromPretrainedLoaderArgs(contract)
+  if (fromPretrained === undefined) return undefined
+  return fromPretrained.device_map as Record<string, unknown> | null | undefined
+}
+
+function contractLoaderDeviceMapMatchesApproved(
+  deviceMap: Record<string, unknown> | null,
+): boolean {
+  const keys = Object.keys(deviceMap ?? {})
+  if (keys.length !== 1 || keys[0] !== '') return false
+  return deviceMap?.[''] === H11B_APPROVED_LOADER_DEVICE_MAP['']
+}
+
 export function validateApprovedH11ContractShape(contract: Record<string, unknown>): string[] {
   const errors: string[] = []
   if (contract.schema !== 'v03-h11-sa2va-producer-contract-v1')
@@ -629,6 +679,58 @@ export function validateApprovedH11ContractShape(contract: Record<string, unknow
   return errors
 }
 
+export function validateH11ContractProfileIdentity(
+  contractSha256: string,
+  contract: Record<string, unknown>,
+): string[] {
+  const errors: string[] = []
+  if (!isApprovedH11ContractSha256(contractSha256)) {
+    errors.push('contract-sha256-not-approved')
+    return errors
+  }
+  const runtimeProfileId = contract.runtime_profile_id
+  const deviceMap = readContractLoaderDeviceMap(contract)
+  const hasRuntimeProfileId = Object.prototype.hasOwnProperty.call(contract, 'runtime_profile_id')
+  const hasDeviceMapProperty = hasContractLoaderDeviceMapProperty(contract)
+
+  if (contractSha256 === H11_CONTRACT_SHA256) {
+    if (hasRuntimeProfileId) errors.push('contract-runtime-profile-id-unexpected')
+    if (hasDeviceMapProperty) errors.push('contract-loader-device-map-unexpected')
+    return errors
+  }
+
+  if (!hasRuntimeProfileId) errors.push('contract-runtime-profile-id-missing')
+  else if (runtimeProfileId !== H11B_RUNTIME_PROFILE_ID)
+    errors.push('contract-runtime-profile-id-mismatch')
+  if (!hasDeviceMapProperty) errors.push('contract-loader-device-map-missing')
+  else if (!contractLoaderDeviceMapMatchesApproved(deviceMap ?? null))
+    errors.push('contract-loader-device-map-mismatch')
+  return errors
+}
+
+export function verifyH11RecipeProfileBinding(
+  recipe: z.infer<typeof h11RecipeSchema>,
+  contractSha256: string,
+): string[] {
+  const errors: string[] = []
+  if (!isApprovedH11ContractSha256(contractSha256)) {
+    errors.push('recipe-contract-sha256-not-approved')
+    return errors
+  }
+  const hasLoaderDeviceMap = recipe.loader_device_map !== undefined
+  if (contractSha256 === H11_CONTRACT_SHA256) {
+    if (hasLoaderDeviceMap) errors.push('recipe-loader-device-map-unexpected-for-legacy-profile')
+    return errors
+  }
+  if (!hasLoaderDeviceMap) errors.push('recipe-loader-device-map-missing-for-h11b-profile')
+  else if (
+    recipe.loader_device_map?.[''] !== H11B_APPROVED_LOADER_DEVICE_MAP[''] ||
+    Object.keys(recipe.loader_device_map).length !== 1
+  )
+    errors.push('recipe-loader-device-map-mismatch')
+  return errors
+}
+
 export async function verifyH11ContractFile(
   contractPath: string,
   expectedSha256: string,
@@ -646,6 +748,7 @@ export async function verifyH11ContractFile(
     if (sha256(bytes) !== expectedSha256) integrityErrors.push('contract-bytes-sha256-mismatch')
     const contract = JSON.parse(bytes.toString('utf8')) as Record<string, unknown>
     integrityErrors.push(...validateApprovedH11ContractShape(contract))
+    integrityErrors.push(...validateH11ContractProfileIdentity(expectedSha256, contract))
     return contract
   } catch {
     integrityErrors.push('contract-bytes-unreadable')
@@ -1468,10 +1571,10 @@ async function verifyDevRunReceipts(input: {
     integrityErrors.push('freeze-manifest-sha256-not-minimal-dev-lock')
   if (runRecord.manifest_sha256 !== MINIMAL_DEV_MANIFEST_SHA256)
     integrityErrors.push('run-manifest-sha256-not-minimal-dev-lock')
-  if (freezeRecord.contract_sha256 !== H11_CONTRACT_SHA256)
-    integrityErrors.push('freeze-contract-sha256-not-h11-lock')
-  if (runRecord.contract_sha256 !== H11_CONTRACT_SHA256)
-    integrityErrors.push('run-contract-sha256-not-h11-lock')
+  if (!isApprovedH11ContractSha256(freezeRecord.contract_sha256))
+    integrityErrors.push('freeze-contract-sha256-not-approved-h11-lock')
+  if (!isApprovedH11ContractSha256(runRecord.contract_sha256))
+    integrityErrors.push('run-contract-sha256-not-approved-h11-lock')
   try {
     const manifestBytes = await readFile(freezeRecord.manifest_path)
     if (sha256(manifestBytes) !== MINIMAL_DEV_MANIFEST_SHA256)
@@ -1490,6 +1593,9 @@ async function verifyDevRunReceipts(input: {
   )
   integrityErrors.push(...verifyProcessorAttestation(freezeRecord.processor_attestation))
   integrityErrors.push(...verifyH11Recipe(freezeRecord.recipe))
+  integrityErrors.push(
+    ...verifyH11RecipeProfileBinding(freezeRecord.recipe, freezeRecord.contract_sha256),
+  )
   if (contract) {
     const prompt = contract.prompt as { template?: string } | undefined
     if (prompt?.template && freezeRecord.recipe.prompt_template !== prompt.template)

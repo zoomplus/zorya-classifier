@@ -9,6 +9,9 @@ import type { Box } from '../v02/metrics.js'
 import { wholeObjectMatch } from '../v02/metrics.js'
 import {
   EXPECTED_H11_OVERLAY_WHEELS,
+  H11B_CONTRACT_SHA256,
+  H11B_REPOSITORY_CONTRACT_PATH,
+  H11B_RUNTIME_PROFILE_ID,
   H11_CONTRACT_SHA256,
   H11_FALSE_OUTPUTS_MAXIMUM,
   H11_GENERATION_MAX_NEW_TOKENS,
@@ -25,7 +28,12 @@ import {
   h11RunSchema,
   maskForegroundBounds,
   validateApprovedH11ContractShape,
+  validateH11ContractProfileIdentity,
   validateH11ProducerOutcomeRowFields,
+  verifyH11ContractFile,
+  verifyH11RecipeProfileBinding,
+  h11RecipeSchema,
+  isApprovedH11ContractSha256,
   verifyFirstNonemptyMaskSelection,
   hashH11AssetFileOnDisk,
   verifyH11AssetFileReceiptOnDisk,
@@ -481,10 +489,206 @@ function syntheticProducerRunRecord(freezeRecord: z.infer<typeof h11FreezeSchema
   }
 }
 
+function canonicalLegacyH11Recipe() {
+  return {
+    model_id: 'ByteDance/Sa2VA-Qwen3-VL-2B' as const,
+    revision: '173fb6512b3ad6f3c1fe25efa09e723d01d5b6d4' as const,
+    torch_dtype: 'bfloat16' as const,
+    eval_mode: true as const,
+    inference_mode: true as const,
+    requested_device: H10_REAL_RUN_DEVICE,
+    attention_eager: true as const,
+    use_flash_attn: false as const,
+    prompt_template: H11_PROMPT_TEMPLATE,
+    prompt_template_sha256: H11_PROMPT_TEMPLATE_SHA256,
+    generation_max_new_tokens: H11_GENERATION_MAX_NEW_TOKENS,
+    generation_do_sample: false as const,
+    sam2_fill_hole_area: 0 as const,
+    sam2_compile_image_encoder: false as const,
+    max_encoded_bytes: 25_165_824 as const,
+    max_oriented_pixels: 2_097_152 as const,
+    retain_native_masks_max_count: H11_NATIVE_MASK_MAX_COUNT,
+    retain_native_masks_max_bytes_per_row: H11_NATIVE_MASK_MAX_BYTES_PER_ROW,
+  }
+}
+
+function canonicalH11bRecipe() {
+  return {
+    ...canonicalLegacyH11Recipe(),
+    loader_device_map: { '': 'cuda:0' } as const,
+  }
+}
+
 await test('repository H11 contract matches pinned SHA-256 lock', async () => {
   const bytes = await readFile(H11_REPOSITORY_CONTRACT_PATH)
+  const contract = JSON.parse(bytes.toString('utf8')) as Record<string, unknown>
   assert.equal(createHash('sha256').update(bytes).digest('hex'), H11_CONTRACT_SHA256)
-  assert.equal(validateApprovedH11ContractShape(JSON.parse(bytes.toString('utf8'))).length, 0)
+  assert.equal(validateApprovedH11ContractShape(contract).length, 0)
+  assert.equal(validateH11ContractProfileIdentity(H11_CONTRACT_SHA256, contract).length, 0)
+})
+
+await test('repository H11b contract matches pinned SHA-256 lock and profile identity', async () => {
+  const bytes = await readFile(H11B_REPOSITORY_CONTRACT_PATH)
+  const contract = JSON.parse(bytes.toString('utf8')) as Record<string, unknown>
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), H11B_CONTRACT_SHA256)
+  assert.equal(validateApprovedH11ContractShape(contract).length, 0)
+  assert.equal(validateH11ContractProfileIdentity(H11B_CONTRACT_SHA256, contract).length, 0)
+  assert.equal(contract.runtime_profile_id, H11B_RUNTIME_PROFILE_ID)
+})
+
+await test('approved H11 contract digests are closed to legacy and H11b only', () => {
+  assert.equal(isApprovedH11ContractSha256(H11_CONTRACT_SHA256), true)
+  assert.equal(isApprovedH11ContractSha256(H11B_CONTRACT_SHA256), true)
+  assert.equal(isApprovedH11ContractSha256('0'.repeat(64)), false)
+})
+
+await test('validateH11ContractProfileIdentity accepts valid legacy and H11b pairs', async () => {
+  const legacyBytes = await readFile(H11_REPOSITORY_CONTRACT_PATH)
+  const legacyContract = JSON.parse(legacyBytes.toString('utf8')) as Record<string, unknown>
+  const h11bBytes = await readFile(H11B_REPOSITORY_CONTRACT_PATH)
+  const h11bContract = JSON.parse(h11bBytes.toString('utf8')) as Record<string, unknown>
+  assert.deepEqual(validateH11ContractProfileIdentity(H11_CONTRACT_SHA256, legacyContract), [])
+  assert.deepEqual(validateH11ContractProfileIdentity(H11B_CONTRACT_SHA256, h11bContract), [])
+})
+
+await test('validateH11ContractProfileIdentity rejects hybrid and altered profile shapes', async () => {
+  const legacyContract = JSON.parse(
+    (await readFile(H11_REPOSITORY_CONTRACT_PATH)).toString('utf8'),
+  ) as Record<string, unknown>
+  const h11bContract = JSON.parse(
+    (await readFile(H11B_REPOSITORY_CONTRACT_PATH)).toString('utf8'),
+  ) as Record<string, unknown>
+  assert.ok(
+    validateH11ContractProfileIdentity(H11_CONTRACT_SHA256, {
+      ...legacyContract,
+      runtime_profile_id: H11B_RUNTIME_PROFILE_ID,
+    }).includes('contract-runtime-profile-id-unexpected'),
+  )
+  const legacyWithMap = structuredClone(legacyContract) as Record<string, unknown>
+  const legacyModel = legacyWithMap.model as Record<string, unknown>
+  const legacyLoader = legacyModel.loader as Record<string, unknown>
+  const legacyFromPretrained = legacyLoader.from_pretrained as Record<string, unknown>
+  legacyFromPretrained.device_map = { '': 'cuda:0' }
+  assert.ok(
+    validateH11ContractProfileIdentity(H11_CONTRACT_SHA256, legacyWithMap).includes(
+      'contract-loader-device-map-unexpected',
+    ),
+  )
+  const legacyWithNullDeviceMap = structuredClone(legacyContract) as Record<string, unknown>
+  const legacyNullModel = legacyWithNullDeviceMap.model as Record<string, unknown>
+  const legacyNullLoader = legacyNullModel.loader as Record<string, unknown>
+  const legacyNullFromPretrained = legacyNullLoader.from_pretrained as Record<string, unknown>
+  legacyNullFromPretrained.device_map = null
+  assert.ok(
+    validateH11ContractProfileIdentity(H11_CONTRACT_SHA256, legacyWithNullDeviceMap).includes(
+      'contract-loader-device-map-unexpected',
+    ),
+  )
+  const legacyWithEmptyDeviceMap = structuredClone(legacyContract) as Record<string, unknown>
+  const legacyEmptyModel = legacyWithEmptyDeviceMap.model as Record<string, unknown>
+  const legacyEmptyLoader = legacyEmptyModel.loader as Record<string, unknown>
+  const legacyEmptyFromPretrained = legacyEmptyLoader.from_pretrained as Record<string, unknown>
+  legacyEmptyFromPretrained.device_map = {}
+  assert.ok(
+    validateH11ContractProfileIdentity(H11_CONTRACT_SHA256, legacyWithEmptyDeviceMap).includes(
+      'contract-loader-device-map-unexpected',
+    ),
+  )
+  assert.ok(
+    validateH11ContractProfileIdentity(H11B_CONTRACT_SHA256, {
+      ...h11bContract,
+      runtime_profile_id: 'wrong-profile',
+    }).includes('contract-runtime-profile-id-mismatch'),
+  )
+  const h11bMissingProfile = structuredClone(h11bContract) as Record<string, unknown>
+  delete h11bMissingProfile.runtime_profile_id
+  assert.ok(
+    validateH11ContractProfileIdentity(H11B_CONTRACT_SHA256, h11bMissingProfile).includes(
+      'contract-runtime-profile-id-missing',
+    ),
+  )
+  const h11bWrongMap = structuredClone(h11bContract) as Record<string, unknown>
+  const h11bModel = h11bWrongMap.model as Record<string, unknown>
+  const h11bLoader = h11bModel.loader as Record<string, unknown>
+  const h11bFromPretrained = h11bLoader.from_pretrained as Record<string, unknown>
+  h11bFromPretrained.device_map = { '': 'cpu' }
+  assert.ok(
+    validateH11ContractProfileIdentity(H11B_CONTRACT_SHA256, h11bWrongMap).includes(
+      'contract-loader-device-map-mismatch',
+    ),
+  )
+  const h11bMissingMap = structuredClone(h11bContract) as Record<string, unknown>
+  const h11bMissingMapModel = h11bMissingMap.model as Record<string, unknown>
+  const h11bMissingMapLoader = h11bMissingMapModel.loader as Record<string, unknown>
+  const h11bMissingMapFromPretrained = h11bMissingMapLoader.from_pretrained as Record<
+    string,
+    unknown
+  >
+  delete h11bMissingMapFromPretrained.device_map
+  assert.ok(
+    validateH11ContractProfileIdentity(H11B_CONTRACT_SHA256, h11bMissingMap).includes(
+      'contract-loader-device-map-missing',
+    ),
+  )
+  assert.ok(
+    validateH11ContractProfileIdentity('f'.repeat(64), legacyContract).includes(
+      'contract-sha256-not-approved',
+    ),
+  )
+})
+
+await test('verifyH11RecipeProfileBinding enforces loader_device_map by contract profile', () => {
+  const legacyRecipe = h11RecipeSchema.parse(canonicalLegacyH11Recipe())
+  const h11bRecipe = h11RecipeSchema.parse(canonicalH11bRecipe())
+  assert.deepEqual(verifyH11RecipeProfileBinding(legacyRecipe, H11_CONTRACT_SHA256), [])
+  assert.deepEqual(verifyH11RecipeProfileBinding(h11bRecipe, H11B_CONTRACT_SHA256), [])
+  const legacyWithMap = h11RecipeSchema.parse({
+    ...canonicalLegacyH11Recipe(),
+    loader_device_map: { '': 'cuda:0' },
+  })
+  assert.ok(
+    verifyH11RecipeProfileBinding(legacyWithMap, H11_CONTRACT_SHA256).includes(
+      'recipe-loader-device-map-unexpected-for-legacy-profile',
+    ),
+  )
+  assert.ok(
+    verifyH11RecipeProfileBinding(legacyRecipe, H11B_CONTRACT_SHA256).includes(
+      'recipe-loader-device-map-missing-for-h11b-profile',
+    ),
+  )
+  assert.throws(() =>
+    h11RecipeSchema.parse({
+      ...canonicalH11bRecipe(),
+      loader_device_map: { '': 'cpu' },
+    }),
+  )
+  assert.throws(() =>
+    h11RecipeSchema.parse({
+      ...canonicalH11bRecipe(),
+      loader_device_map: { '': 'cuda:0', disk: 'cpu' },
+    }),
+  )
+  assert.throws(() =>
+    h11RecipeSchema.parse({
+      ...canonicalLegacyH11Recipe(),
+      loader_device_map: { '': 'auto' },
+    }),
+  )
+  const h11bWrongMap = {
+    ...h11bRecipe,
+    loader_device_map: { '': 'cuda:1' },
+  } as unknown as z.infer<typeof h11RecipeSchema>
+  assert.ok(
+    verifyH11RecipeProfileBinding(h11bWrongMap, H11B_CONTRACT_SHA256).includes(
+      'recipe-loader-device-map-mismatch',
+    ),
+  )
+})
+
+await test('verifyH11ContractFile rejects mismatched receipt hash against on-disk bytes', async () => {
+  const errors: string[] = []
+  await verifyH11ContractFile(H11_REPOSITORY_CONTRACT_PATH, H11B_CONTRACT_SHA256, errors)
+  assert.ok(errors.includes('contract-bytes-sha256-mismatch'))
 })
 
 await test('buildExpectedH10PilotRows still supplies twelve-case DEV join for H11', async () => {
