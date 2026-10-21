@@ -1,0 +1,82 @@
+[
+  {
+    "caseId": "pilot-v03-photo-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/e4cb43222c9bee50.jpg",
+      "sha256": "71b99532e14abb6098a704e9bd9c2c50eebba72588a49e60c8a4b89af4eea4c5",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Car",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Car?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "pilot-v03-photo-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/4f05ad23beaefd46.jpg",
+      "sha256": "ad0eb4bf4a6c2c1be585846a943aa06ec2440696b7e8874374904eb25dcc594a",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Bird",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bird?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "pilot-v03-photo-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/b0a59eeab8c5166c.jpg",
+      "sha256": "4a0dffd0f9f85bacac77d4f372c1f3eb754ba6a7440de3bc7c7f6a42f4c53ecd",
+      "width": 1024,
+      "height": 768
+    },
+    "locate": {
+      "target": "Person",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Person?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "pilot-v03-photo-04",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/photos/398a3ffc8a7e36a8.jpg",
+      "sha256": "085ac7dc3243e28816e69f5e1ad56b9e8858c7135fac366f3172ad862e28eeae",
+      "width": 1024,
+      "height": 683
+    },
+    "locate": {
+      "target": "Bowl",
+      "instruction": "Locate the visible physical instance of the named object; return unknown when unsupported."
+    },
+    "classify": {
+      "question": "Does this photograph contain a physical Bowl?",
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  }
+]

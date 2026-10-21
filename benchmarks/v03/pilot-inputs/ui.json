@@ -1,0 +1,74 @@
+[
+  {
+    "caseId": "pilot-v03-ui-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Forward navigation button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "pilot-v03-ui-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Back navigation button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "pilot-v03-ui-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Open document button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "pilot-v03-ui-04",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-ui/geany-dev-oracle-20261020-run02.png",
+      "sha256": "0f9fc1eee9473f8ecf03a61e9dc7fccf369e1bc58feb9d0671165b16eded1a09",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the Undo action button in the Geany toolbar, including its whole visible button background and border"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  }
+]

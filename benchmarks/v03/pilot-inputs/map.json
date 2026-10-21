@@ -1,0 +1,74 @@
+[
+  {
+    "caseId": "pilot-v03-map-01",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-24-20261020.png",
+      "sha256": "07e1ea0a28ea9e7e183e6c8c04797e0fee0995c9f91d0933293bac73f2ea4e2a",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "pilot-v03-map-02",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-23-20261020.png",
+      "sha256": "a970216cbccf7456464e5ca25fc120e1e3994344e5fdc95607c1eb27d61ec205",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "pilot-v03-map-03",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-explorer-a6-16-20261020.png",
+      "sha256": "1d696fe4fd5ab990650da67c20b78d3240c048e4849ab8f043c398cfcf1ecc85",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Explorer in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  },
+  {
+    "caseId": "pilot-v03-map-04",
+    "image": {
+      "path": "benchmarks/cache/v02/corpus/independent-map/freeciv-dev-inventory-a6-29-20261020.png",
+      "sha256": "4c48235b5a5c4413eccae22ad9ef2e89b697c073d40cf8c7b3c8978b662eacfa",
+      "width": 1280,
+      "height": 800
+    },
+    "locate": {
+      "target": "the visible body sprite of unit type Fighter in the main Freeciv map canvas; exclude health bars and selection brackets"
+    },
+    "classify": {
+      "options": [
+        "present",
+        "absent"
+      ]
+    }
+  }
+]
