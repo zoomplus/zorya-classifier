@@ -6,7 +6,7 @@ import {
   seedCenteredBox,
 } from '../benchmarks/v03/segmentation-prompt-probe.js'
 
-test('seed-centered context box uses a fixed 3x factor and contains the original cell', () => {
+await test('seed-centered context box uses a fixed 3x factor and contains the original cell', () => {
   const box = seedCenteredBox({ left: 448, top: 256, width: 64, height: 57 }, 1024, 685)
   assert.deepEqual(box, { left: 384, top: 199, width: 192, height: 171 })
   assert.ok(box.left <= 448)
@@ -15,12 +15,12 @@ test('seed-centered context box uses a fixed 3x factor and contains the original
   assert.ok(box.top + box.height >= 313)
 })
 
-test('seed-centered context box clips at the source edge without excluding seed pixels', () => {
+await test('seed-centered context box clips at the source edge without excluding seed pixels', () => {
   const box = seedCenteredBox({ left: 0, top: 0, width: 64, height: 57 }, 100, 100)
   assert.deepEqual(box, { left: 0, top: 0, width: 100, height: 100 })
 })
 
-test('point-seed and seed-plus-box prompts preserve the fixed point and SAM box labels', () => {
+await test('point-seed and seed-plus-box prompts preserve the fixed point and SAM box labels', () => {
   const seed = { left: 448, top: 256, width: 64, height: 57 }
   const point = promptTensors('point-seed', seed, 1024, 685)
   assert.deepEqual([...point.labels], [1, -1])
@@ -31,7 +31,7 @@ test('point-seed and seed-plus-box prompts preserve the fixed point and SAM box 
   assert.deepEqual(box.box, { left: 384, top: 199, width: 192, height: 171 })
 })
 
-test('all four masks remain present and diagnostic selection uses only seed-hit masks', () => {
+await test('all four masks remain present and diagnostic selection uses only seed-hit masks', () => {
   const width = 4
   const height = 2
   const pixels = width * height

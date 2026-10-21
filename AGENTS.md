@@ -1,6 +1,7 @@
 # Zorya Classifier contributor rules
 
 This repository is independent of Zorya Games. Implement the accepted MIT library plan in docs/plan.md.
+For the current accuracy iteration follow docs/0.3.0-quality-plan.md. The owner authorizes testing alternative localization/segmentation mechanisms with internet research and a written hypothesis before implementation. Preserve v0.2 evidence and default API compatibility; do not treat the historical v0.2 primary flow as a prohibition on separately named benchmark experiments. Promote only a candidate that passes the new independent quality gate.
 Use strict TypeScript and Zod at public/provider boundaries. No explicit any, unchecked external casts, broad lint disables, or swallowed rejected promises.
 Layers: app composes; processes orchestrate features; features use entities/shared; infrastructure implements ports. Entities/shared never import infrastructure.
 Use the explicitly configured model/provider, with no fallback. Ordinary vision language models must work without native classifier APIs. Rank-only answers must not be converted into fake probabilities. Native Choice scores are categorical: select a maximum, retain raw scores, stable input-order ties; no universal 0.8 gate. Preserve raw quantized probabilities and require the explicit adapter annotation/interval test for non-unit mass; never silently normalize scores. Noul presence is a separate binary decision. Never call cell geometry a segmented object.

@@ -1,12 +1,10 @@
 import { createHash } from 'node:crypto'
-import { createRequire } from 'node:module'
+import sharp from 'sharp'
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-const requireFromWorkspace = createRequire('/root/work/zorya-classifier/node_modules/package.json')
-const sharp = requireFromWorkspace('sharp') as typeof import('sharp')
 const inputManifest =
   '/root/work/zorya-classifier-worktrees/v02/independent-oracle-proof/.run/oracle-proof/combined-corpus-v1/photo-inputs.json'
 const truthManifest =

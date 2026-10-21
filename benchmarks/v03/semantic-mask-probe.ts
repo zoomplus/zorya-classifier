@@ -1,11 +1,10 @@
 import { createHash } from 'node:crypto'
-import { createRequire } from 'node:module'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { parseEnv } from 'node:util'
 import { fileURLToPath } from 'node:url'
-import sharp from 'sharp'
-import type { DecisionPort, DecisionRequest, ImagePart } from '../../src/entities/contracts.js'
+import sharpDependency from 'sharp'
+import type { DecisionRequest, ImagePart } from '../../src/entities/contracts.js'
 import { createOpenRouterDecisions } from '../../src/infrastructure/openrouter.js'
 import { selection, validateDecision } from '../../src/features/choice.js'
 import { RunBudget } from '../v02/budget.js'
@@ -49,8 +48,6 @@ const prompt = Object.freeze({
   },
 })
 
-const requireFromWorkspace = createRequire('/root/work/zorya-classifier/node_modules/package.json')
-const sharpDependency = requireFromWorkspace('sharp') as typeof import('sharp')
 const rasterModule = await import('../../src/infrastructure/raster.js')
 const raster = rasterModule.createSharpRaster()
 
@@ -318,8 +315,8 @@ async function dispatch() {
   )
   assert(sha256(JSON.stringify(prompt)) === freeze.promptSha256, 'Prompt changed after freeze')
   const env = parseEnv(await readFile(envFile, 'utf8'))
-  const apiKey = env.OPENROUTER_API_KEY
-  assert(apiKey, 'Configured OpenRouter credential is absent')
+  const credential = env.OPENROUTER_API_KEY
+  assert(credential, 'Configured OpenRouter credential is absent')
   const prepared = [] as Array<{ item: CasePin; originalBytes: Buffer; candidateBytes: Buffer[] }>
   for (const item of freeze.cases) {
     const originalBytes = await readFile(item.originalPresentation.path)
@@ -359,7 +356,7 @@ async function dispatch() {
     const recorder = recordProvider(
       (fetch) =>
         createOpenRouterDecisions({
-          apiKey,
+          apiKey: credential,
           model: route.model,
           provider: route.provider,
           providerName: route.providerName,

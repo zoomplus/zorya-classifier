@@ -1,14 +1,10 @@
 import { createHash } from 'node:crypto'
-import { createRequire } from 'node:module'
+import sharp from 'sharp'
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-const requireFromInstalledWorkspace = createRequire(
-  '/root/work/zorya-classifier/node_modules/package.json',
-)
-const sharp = requireFromInstalledWorkspace('sharp') as typeof import('sharp')
 const artifactRoot = resolve(repoRoot, '.run/v03/segmentation-prompt-probe-v1')
 const imageRoot =
   '/root/work/zorya-classifier-worktrees/v02/independent-oracle-proof/.run/oracle-proof/combined-corpus-v1/imageRoot'

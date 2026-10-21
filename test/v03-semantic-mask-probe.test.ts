@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import sharp from 'sharp'
 import { renderCandidate, requestFor } from '../benchmarks/v03/semantic-mask-probe.js'
 
-test('semantic mask presentation preserves the full raster and marks only mask foreground', async () => {
+await test('semantic mask presentation preserves the full raster and marks only mask foreground', async () => {
   const width = 64
   const height = 64
   const rawSource = Buffer.alloc(width * height * 4, 0)
@@ -32,7 +32,7 @@ test('semantic mask presentation preserves the full raster and marks only mask f
   mask.fill(0)
 })
 
-test('semantic selection request is one closed five-way Choice over source and four candidates', () => {
+await test('semantic selection request is one closed five-way Choice over source and four candidates', () => {
   const images = Array.from({ length: 5 }, () => Buffer.from('image'))
   const request = requestFor('Bird', images)
   assert.deepEqual(Object.keys(request.questions), ['selection'])

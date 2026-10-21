@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
-import { createRequire } from 'node:module'
+import sharp from 'sharp'
+import * as ort from 'onnxruntime-node'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -19,10 +20,6 @@ type ProbeCase = CaseInput & { seed: Rect }
 type ProfileId = 'point-seed' | 'seed-plus-box'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-const moduleAnchor = '/root/work/zorya-classifier/node_modules/package.json'
-const requireFromInstalledWorkspace = createRequire(moduleAnchor)
-const sharp = requireFromInstalledWorkspace('sharp') as typeof import('sharp')
-const ort = requireFromInstalledWorkspace('onnxruntime-node') as typeof import('onnxruntime-node')
 
 export const probePaths = {
   imageRoot:
@@ -151,7 +148,7 @@ export function masksFromLogits(input: {
     if (
       hit &&
       (nativeIndex === null ||
-        score > scores[nativeIndex] ||
+        score > scores[nativeIndex]! ||
         (score === scores[nativeIndex] && candidate < nativeIndex))
     )
       nativeIndex = candidate
