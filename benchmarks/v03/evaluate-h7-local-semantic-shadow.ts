@@ -66,6 +66,8 @@ export type H7Row = {
   source_width: number
   source_height: number
   candidates: H7Candidate[]
+  timing_ms?: Record<string, number>
+  memory?: { allocated_peak_bytes: number | null; reserved_peak_bytes: number | null }
   error_code?: string | null
 }
 
@@ -116,6 +118,11 @@ export type H7LocalSemanticShadowRun = {
   source_closure_post: H7Freeze['source_closure']
   asset_lock_post: H7AssetLock
   worker: { pid: number | null; exit_code: number | null; closed: boolean }
+  runtime?: Record<string, unknown> | null
+  elapsed_ms?: number
+  error?: string | null
+  integrity_errors?: string[]
+  input_artifacts_unchanged?: boolean
 }
 
 type CandidateReceipt = {
@@ -589,6 +596,8 @@ export function evaluateH7LocalSemanticShadow(
       presenceTruth: truth.presence,
       rowStatus: row.status,
       errorCode: row.error_code ?? null,
+      timingMs: row.timing_ms ?? null,
+      memory: row.memory ?? null,
       candidateCount: row.candidates.length,
       topOneAvailable: isPositive ? Boolean(top1) : null,
       topFourAvailable: isPositive ? Boolean(top4) : null,
@@ -799,6 +808,11 @@ export async function evaluateH7LocalSemanticShadowRun(
     production: {
       status: replay.status,
       worker: replay.worker,
+      runtime: replay.runtime ?? null,
+      elapsedMs: replay.elapsed_ms ?? null,
+      error: replay.error ?? null,
+      integrityErrors: replay.integrity_errors ?? [],
+      inputArtifactsUnchanged: replay.input_artifacts_unchanged ?? null,
       artifactBytesVerified: artifacts.status === 'verified',
       verifiedAssetFiles: artifacts.verifiedAssetFiles,
       verifiedUniqueMaskFiles: artifacts.verifiedUniqueMaskFiles,
@@ -806,6 +820,7 @@ export async function evaluateH7LocalSemanticShadowRun(
       assetLock: freeze.asset_lock,
       artifactVerification: artifacts,
       sourceClosureVerified: closureVerification.length,
+      sourceClosureSha256: sha256(Buffer.from(JSON.stringify(freeze.source_closure))),
       inputJsonSha256: freeze.input_json.sha256,
     },
   }
