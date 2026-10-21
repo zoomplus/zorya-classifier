@@ -48,6 +48,7 @@ const proposalOptionsSchema = z
     decoderPath: z.string().min(1).max(4096),
     executionProvider: z.literal('cpu').default('cpu'),
     threads: z.number().int().min(1).max(8).default(2),
+    sampling: z.enum(['seed-grid', 'seed-center']).default('seed-grid'),
   })
   .strict()
 export type MobileSamObjectProposalsOptions = z.input<typeof proposalOptionsSchema>
@@ -357,7 +358,7 @@ export function createMobileSamPortForPool(
   }
 }
 
-/** Explicit CPU-only, caller-owned one-shot 3x3-point / 36-mask proposal adapter. */
+/** Explicit CPU-only proposals: historical 3x3/36 default or opt-in seed-center/four. */
 export async function createMobileSamObjectProposals(
   options: MobileSamObjectProposalsOptions,
 ): Promise<ObjectProposalPort> {
@@ -392,7 +393,13 @@ export async function createMobileSamObjectProposals(
     import.meta.url,
   )
   // Probe the explicitly requested CPU provider in an owned child, disposing it before return.
-  await probeBackend(workerUrl, 'mobile-sam', { options: { ...parsed, executionProvider: 'cpu' } })
+  const modelOptions = {
+    encoderPath: parsed.encoderPath,
+    decoderPath: parsed.decoderPath,
+    executionProvider: 'cpu' as const,
+    threads: parsed.threads,
+  }
+  await probeBackend(workerUrl, 'mobile-sam', { options: modelOptions })
   const pool = new NativeChildPool<SerializedProposalTask>({
     workerUrl,
     maxActive: 1,
@@ -428,12 +435,21 @@ export async function createMobileSamObjectProposals(
           rgba: Buffer.from(image.data).toString('base64'),
           seedRegion: snapshot.seedRegion,
           roi: snapshot.roi,
-          options: { ...parsed, executionProvider: 'cpu' as const },
+          sampling: parsed.sampling,
+          options: modelOptions,
         }
       })
       const reply = nativeObjectProposalReplySchema.parse(raw)
-      if (reply.width !== image.width || reply.height !== image.height)
-        throw new ClassifierError('INVALID_RESPONSE', 'Proposal dimensions do not match the input')
+      const expectedCount = parsed.sampling === 'seed-center' ? 4 : 36
+      if (
+        reply.width !== image.width ||
+        reply.height !== image.height ||
+        reply.proposals.length !== expectedCount
+      )
+        throw new ClassifierError(
+          'INVALID_RESPONSE',
+          'Proposal dimensions or candidate count do not match the request',
+        )
       const expectedBytes = Math.ceil((image.width * image.height) / 8)
       let aggregateBytes = 0
       const proposals = reply.proposals.map((proposal, index) => {
@@ -465,7 +481,10 @@ export async function createMobileSamObjectProposals(
       return {
         proposals,
         metadata: {
-          method: 'mobile-sam-nine-point-proposals-v1',
+          method:
+            parsed.sampling === 'seed-center'
+              ? 'mobile-sam-seed-center-proposals-v1'
+              : 'mobile-sam-nine-point-proposals-v1',
           backend: 'mobile-sam',
           durationMs: Math.max(0, performance.now() - started),
           input: { width: image.width, height: image.height },

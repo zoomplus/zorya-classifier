@@ -736,13 +736,31 @@ export async function runMobileSamExpandTask(
 
 type ProposalRequest = Extract<NativeSegmentationRequest, { kind: 'mobile-sam-proposals' }>
 
-/** Produce the fixed row-major 3x3 prompt grid from the actual seed rectangle. */
-export function mobileSamProposalPoints(rect: {
-  left: number
-  top: number
-  width: number
-  height: number
-}): Array<{ x: number; y: number }> {
+/** Produce either the historical 3x3 grid or one geometric-center prompt. */
+export function mobileSamProposalPoints(
+  rect: {
+    left: number
+    top: number
+    width: number
+    height: number
+  },
+  sampling: 'seed-grid' | 'seed-center' = 'seed-grid',
+): Array<{ x: number; y: number }> {
+  if (
+    !Number.isSafeInteger(rect.left) ||
+    !Number.isSafeInteger(rect.top) ||
+    !Number.isSafeInteger(rect.width) ||
+    !Number.isSafeInteger(rect.height) ||
+    rect.left < 0 ||
+    rect.top < 0 ||
+    rect.width < 1 ||
+    rect.height < 1
+  )
+    throw new Error('Invalid MobileSAM seed rectangle')
+  if (sampling !== 'seed-grid' && sampling !== 'seed-center')
+    throw new Error('Invalid MobileSAM proposal sampling profile')
+  if (sampling === 'seed-center')
+    return [{ x: rect.left + (rect.width - 1) / 2, y: rect.top + (rect.height - 1) / 2 }]
   return Array.from({ length: 9 }, (_, index) => {
     const row = Math.floor(index / 3)
     const column = index % 3
@@ -807,7 +825,7 @@ export function packMobileSamProposalCandidates(input: {
   return proposals
 }
 
-/** One encoder pass followed by nine independent positive-point decoder calls. */
+/** One encoder pass followed by a profile-bounded set of positive-point decoder calls. */
 export async function runMobileSamObjectProposalTask(
   request: ProposalRequest,
 ): Promise<NativeObjectProposalReply> {
@@ -877,7 +895,7 @@ export async function runMobileSamObjectProposalTask(
       const yScale = resizedHeight / request.height
       const proposals: NativeObjectProposalReply['proposals'] = []
       let packedBytes = 0
-      const points = mobileSamProposalPoints(request.seedRegion)
+      const points = mobileSamProposalPoints(request.seedRegion, request.sampling)
       for (let pointIndex = 0; pointIndex < points.length; pointIndex++) {
         const point = points[pointIndex]
         if (!point) throw new Error('Missing MobileSAM proposal point')

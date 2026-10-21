@@ -4,6 +4,7 @@ import { test } from 'node:test'
 import {
   mobileSamProposalPoints,
   packMobileSamProposalCandidates,
+  mobileSamSegmentationPrompt,
 } from '../src/infrastructure/segmentation/mobile-sam/worker-inference.js'
 import { unpackBinaryMask } from '../src/features/segmentation/packed-mask.js'
 
@@ -22,6 +23,32 @@ await test('MobileSAM maps a seed rectangle to nine bounded row-major prompt poi
   assert.deepEqual(
     mobileSamProposalPoints({ left: 3, top: 4, width: 1, height: 1 }),
     Array.from({ length: 9 }, () => ({ x: 3, y: 4 })),
+  )
+})
+
+await test('seed-center profile uses one exact geometric-center point and preserves default grid', () => {
+  const seed = { left: 7, top: 11, width: 6, height: 5 }
+  assert.deepEqual(mobileSamProposalPoints(seed, 'seed-center'), [{ x: 9.5, y: 13 }])
+  const legacyPrompt = mobileSamSegmentationPrompt({
+    prompt: 'seed-region',
+    seedRegion: seed,
+    wholeRegion: seed,
+    xScale: 0.75,
+    yScale: 0.5,
+  })
+  assert.deepEqual(
+    mobileSamProposalPoints(seed, 'seed-center').map((point) => [point.x * 0.75, point.y * 0.5]),
+    [[legacyPrompt.coordinates[0], legacyPrompt.coordinates[1]]],
+    'seed-center matches the historical fractional seed prompt coordinates',
+  )
+  assert.equal(
+    mobileSamProposalPoints(seed).length,
+    9,
+    'omitted profile remains nine-point compatible',
+  )
+  assert.throws(
+    () => mobileSamProposalPoints({ left: 7, top: 11, width: 0, height: 5 }, 'seed-center'),
+    /rectangle/u,
   )
 })
 
@@ -60,6 +87,38 @@ await test('proposal packing retains all four tokens, hard-clips ROI and invisib
       }),
     ],
     [0, 0, 1, 0, 1, 1],
+  )
+})
+
+await test('seed-center retains exactly C00..C03 as packed masks clipped to visible ROI', () => {
+  const width = 5
+  const height = 3
+  const rgba = new Uint8Array(width * height * 4)
+  for (let index = 0; index < width * height; index++) rgba[index * 4 + 3] = 255
+  rgba[(1 * width + 2) * 4 + 3] = 0
+  const proposals = packMobileSamProposalCandidates({
+    width,
+    height,
+    rgba,
+    roi: { left: 1, top: 1, width: 3, height: 2 },
+    pointIndex: 0,
+    logits: new Float32Array(4 * width * height).fill(1),
+    scores: Float32Array.of(0.1, 0.2, 0.3, 0.4),
+  })
+  assert.deepEqual(
+    proposals.map(({ id }) => id),
+    ['C00', 'C01', 'C02', 'C03'],
+  )
+  assert.deepEqual(
+    [
+      ...unpackBinaryMask({
+        data: Buffer.from(proposals[0]!.mask, 'base64'),
+        width,
+        height,
+        format: 'binary-lsb0',
+      }),
+    ],
+    [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0],
   )
 })
 

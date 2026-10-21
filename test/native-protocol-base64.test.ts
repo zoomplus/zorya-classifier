@@ -47,9 +47,19 @@ await test('native request schema accepts full UI and map RGBA payloads', () => 
 
   for (const source of [ui, map]) {
     const { wholeRegion: _wholeRegion, ...proposal } = source
+    const defaultProposal = nativeSegmentationRequestSchema.parse({
+      ...proposal,
+      kind: 'mobile-sam-proposals',
+    })
+    assert.equal(defaultProposal.kind, 'mobile-sam-proposals')
+    if (defaultProposal.kind === 'mobile-sam-proposals')
+      assert.equal(defaultProposal.sampling, 'seed-grid')
     assert.equal(
-      nativeSegmentationRequestSchema.safeParse({ ...proposal, kind: 'mobile-sam-proposals' })
-        .success,
+      nativeSegmentationRequestSchema.safeParse({
+        ...proposal,
+        kind: 'mobile-sam-proposals',
+        sampling: 'seed-center',
+      }).success,
       true,
     )
     const { options: _options, ...grabCut } = source
@@ -89,4 +99,37 @@ await test('proposal reply schema accepts all 36 packed masks at 1280×800 size'
   }
   assert.equal(mask.length, 170_668)
   assert.equal(nativeObjectProposalReplySchema.safeParse(reply).success, true)
+})
+
+await test('proposal reply schema accepts exactly four center candidates and rejects other counts', () => {
+  const mask = zeroBytesBase64(1)
+  const base = {
+    id,
+    status: 'proposals',
+    width: 1,
+    height: 1,
+    proposals: Array.from({ length: 4 }, (_, index) => ({
+      id: `C${String(index).padStart(2, '0')}`,
+      mask,
+      qualityScore: 0.5,
+    })),
+  }
+  assert.equal(nativeObjectProposalReplySchema.safeParse(base).success, true)
+  assert.equal(
+    nativeObjectProposalReplySchema.safeParse({
+      ...base,
+      proposals: [...base.proposals, { id: 'C04', mask, qualityScore: 0.5 }],
+    }).success,
+    false,
+  )
+  assert.equal(
+    nativeObjectProposalReplySchema.safeParse({
+      ...base,
+      proposals: base.proposals.map((proposal, index) => ({
+        ...proposal,
+        id: index === 2 ? 'C03' : proposal.id,
+      })),
+    }).success,
+    false,
+  )
 })

@@ -127,6 +127,7 @@ const mobileSamProposalsRequestSchema = z
     rgba: base64Schema(11_200_000),
     seedRegion: pixelRectSchema,
     roi: pixelRectSchema,
+    sampling: z.enum(['seed-grid', 'seed-center']).default('seed-grid'),
     options: modelOptionsSchema.extend({ executionProvider: z.literal('cpu') }),
   })
   .strict()
@@ -223,9 +224,22 @@ export const nativeObjectProposalReplySchema = z
           })
           .strict(),
       )
-      .length(36),
+      .min(4)
+      .max(36),
   })
   .strict()
+  .superRefine((value, context) => {
+    if (value.proposals.length !== 4 && value.proposals.length !== 36)
+      context.addIssue({ code: 'custom', message: 'Proposal reply must contain four or 36 masks' })
+    for (const [index, proposal] of value.proposals.entries()) {
+      const expectedId = `C${String(index).padStart(2, '0')}`
+      if (proposal.id !== expectedId)
+        context.addIssue({
+          code: 'custom',
+          message: 'Proposal aliases must be contiguous from C00',
+        })
+    }
+  })
 export type NativeObjectProposalReply = z.infer<typeof nativeObjectProposalReplySchema>
 
 export const nativeProbeReplySchema = z

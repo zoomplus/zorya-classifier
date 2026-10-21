@@ -302,6 +302,50 @@ await test('proposal localization returns exact packed-mask bounds and sends onl
   assert.ok(providerText.includes('presence'))
 })
 
+await test('four seed-center masks are preserved as one closed semantic candidate set', async () => {
+  const batch = baseBatch({
+    proposals: [
+      {
+        id: 'C00',
+        mask: { data: rectMask(2, 2, 1, 1), width: 8, height: 8, format: 'binary-lsb0' },
+        qualityScore: 0.99,
+      },
+      {
+        id: 'C01',
+        mask: { data: rectMask(2, 2, 2, 2), width: 8, height: 8, format: 'binary-lsb0' },
+        qualityScore: 0.95,
+      },
+      {
+        id: 'C02',
+        mask: { data: rectMask(2, 2, 3, 3), width: 8, height: 8, format: 'binary-lsb0' },
+        qualityScore: 0.9,
+      },
+      {
+        id: 'C03',
+        mask: { data: rectMask(2, 2, 4, 4), width: 8, height: 8, format: 'binary-lsb0' },
+        qualityScore: 0.5,
+      },
+    ],
+  })
+  const h = harness({ batch, selection: 'C03', wholeScore: 0.9 })
+  const result = await locateFromProposals(h.input, h.dependencies, h.signal)
+  assert.equal(result.location.status, 'located')
+  assert.deepEqual(h.presentationCalls[0]?.ids, ['C00', 'C01', 'C02', 'C03'])
+  const choiceRequest = h.requests.find(
+    (request) => request.questions.selection && !request.questions.presence,
+  )
+  assert.ok(choiceRequest)
+  const choiceQuestion = choiceRequest.questions.selection
+  assert.ok(choiceQuestion?.type === 'choice')
+  assert.deepEqual(Object.keys(choiceQuestion.criteria), ['C00', 'C01', 'C02', 'C03', 'none'])
+  assert.equal(
+    JSON.stringify(choiceRequest.state).includes('qualityScore'),
+    false,
+    'native scores stay diagnostic and are not semantic selection inputs',
+  )
+  assert.equal(h.requests.at(-1)?.questions['presence']?.type, 'noul')
+})
+
 await test('proposal choice none and whole-target score at or below 0.5 stay unknown', async (t) => {
   await t.test('none', async () => {
     const h = harness({ selection: 'none' })
