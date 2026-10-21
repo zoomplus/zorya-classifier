@@ -230,6 +230,9 @@ function validateRun(availability: H5AvailabilityReport, replay: H8Envelope) {
         providerName: 'OpenAI',
         apiEndpoint: '/api/v1/chat/completions',
         allowFallbacks: false,
+        responseFormat: 'json-schema',
+        reasoningEffort: 'medium',
+        maxOutputTokens: 4096,
       }),
       'h8-physical-route',
     )
@@ -435,6 +438,7 @@ export async function evaluateH8OrdinaryVisionRun(
   runRoot: string,
   availability: H5AvailabilityReport,
   capabilityDirectory: string,
+  repositoryRoot: string,
   recordingRoot = resolve(runRoot, 'provider-calls'),
 ) {
   const root = resolve(runRoot)
@@ -487,6 +491,40 @@ export async function evaluateH8OrdinaryVisionRun(
       replay.capability_receipt.outputUsdPerMillion === arm.outputPrice,
     'h8-capability-claims',
   )
+  const receiptPath = replay.capability_receipt.receiptPath
+  assert(typeof receiptPath === 'string', 'h8-capability-path-missing')
+  assert(
+    (await hashFile(receiptPath)) === replay.capability_receipt.receiptSha256,
+    'h8-capability-content-hash',
+  )
+  const rawCapability = JSON.parse(await readFile(receiptPath, 'utf8')) as {
+    data?: {
+      architecture?: { input_modalities?: string[] }
+      endpoints?: Array<{
+        model_id?: string
+        provider_name?: string
+        pricing?: { prompt?: string; completion?: string }
+        supported_parameters?: string[]
+      }>
+    }
+  }
+  assert(
+    rawCapability.data?.architecture?.input_modalities?.includes('image'),
+    'h8-capability-image-input',
+  )
+  assert(
+    rawCapability.data?.endpoints?.some(
+      (endpoint) =>
+        endpoint.model_id === arm.model &&
+        endpoint.provider_name === 'OpenAI' &&
+        Math.abs(Number(endpoint.pricing?.prompt) * 1_000_000 - arm.inputPrice) < 1e-9 &&
+        Math.abs(Number(endpoint.pricing?.completion) * 1_000_000 - arm.outputPrice) < 1e-9 &&
+        endpoint.supported_parameters?.includes('response_format') &&
+        endpoint.supported_parameters.includes('structured_outputs') &&
+        endpoint.supported_parameters.includes('reasoning_effort'),
+    ),
+    'h8-capability-route-parameters',
+  )
   const onDisk = JSON.parse(await readFile(resolve(root, 'run.json'), 'utf8')) as H8Envelope
   assert(isDeepStrictEqual(onDisk, replay), 'h8-run-read-stability')
   const sourceFiles = [
@@ -500,8 +538,10 @@ export async function evaluateH8OrdinaryVisionRun(
     if (previous) assert(previous === file.sha256, `h8-source-hash-conflict-${file.path}`)
     else checked.set(file.path, file.sha256)
   }
-  for (const [path, expected] of checked)
-    assert((await hashFile(path)) === expected, `h8-source-hash-${path}`)
+  for (const [path, expected] of checked) {
+    const absolutePath = resolve(repositoryRoot, path)
+    assert((await hashFile(absolutePath)) === expected, `h8-source-hash-${path}`)
+  }
   assert(
     isDeepStrictEqual(replay.executable_source, replay.executable_source_after),
     'h8-executable-source-changed',
@@ -511,9 +551,13 @@ export async function evaluateH8OrdinaryVisionRun(
     replay as unknown as H6ReplayEnvelope,
     availability,
   )
+  const physicalReceiptReplay = {
+    ...replay,
+    physical_calls: replay.physical_calls.map(({ chat_parameters: _chat, ...call }) => call),
+  }
   const physical = await verifyH6PhysicalReceiptArtifacts(
     recordingRoot,
-    replay as unknown as H6ReplayEnvelope,
+    physicalReceiptReplay as unknown as H6ReplayEnvelope,
   )
   const traces = await verifyH6DecisionTraceArtifacts(
     recordingRoot,
@@ -544,6 +588,8 @@ export async function evaluateH8OrdinaryVisionRun(
       arm: replay.arm,
       route: replay.route,
       capabilityReceipt: replay.capability_receipt,
+      capabilityArtifactSha256: replay.capability_receipt.receiptSha256,
+      capabilityArtifactVerifiedAgainstReceipt: true,
       budget: replay.budget,
       replayElapsedMs: replay.replay_elapsed_ms,
       physicalCallCount: replay.physical_call_count,
@@ -616,10 +662,11 @@ export async function evaluateH8OrdinaryVisionRun(
 }
 
 async function main() {
-  const [runRoot, outputPath, capabilityDirectory, recordingRoot] = process.argv.slice(2)
+  const [runRoot, outputPath, capabilityDirectory, repositoryRoot, recordingRoot] =
+    process.argv.slice(2)
   assert(
-    runRoot && outputPath && capabilityDirectory,
-    'usage: evaluate-h8-ordinary-vision <run-root> <output-json> <capability-directory> [provider-calls-root]',
+    runRoot && outputPath && capabilityDirectory && repositoryRoot,
+    'usage: evaluate-h8-ordinary-vision <run-root> <output-json> <capability-directory> <repository-root> [provider-calls-root]',
   )
   const availability = JSON.parse(
     await readFile(
@@ -631,6 +678,7 @@ async function main() {
     runRoot,
     availability,
     capabilityDirectory,
+    repositoryRoot,
     recordingRoot,
   )
   await writeFile(resolve(outputPath), `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' })

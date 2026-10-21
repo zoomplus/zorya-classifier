@@ -1,0 +1,16 @@
+{
+  "schema": "v03-h8-ordinary-vision-independent-audit-attempt-v1",
+  "attempt": 4,
+  "runDirectory": "/root/work/zorya-classifier-runs/v03/h8a-luna-chat-8633fe55-47af-441b-9265-a159d3e4efc8",
+  "runJsonSha256": "1def8b64894f520e6e3ddd9c432212e1333684ae5db1e7c5747485c185cbb98a",
+  "freezeSha256": "d371f64a76effb8b96951709c03a4801e1751f8f8032d363623ba1903b33ed27",
+  "status": "supplemental-capability-check-error-before-scoring",
+  "error": {
+    "code": "h8-capability-route-parameters",
+    "expected": "compare decimal prices with a numerical tolerance",
+    "observed": "Multiplying the frozen per-token price 0.0000001 by 1,000,000 yielded a floating-point value slightly below 0.1."
+  },
+  "classification": "independent-evaluator-numeric-comparison-defect",
+  "producerArtifactsChanged": false,
+  "qualityScoresComputedInThisAttempt": false
+}

@@ -1,0 +1,960 @@
+{
+  "schema": "v03-h8-ordinary-vision-independent-evaluation-v1",
+  "production": {
+    "status": "complete",
+    "runSha256": "1def8b64894f520e6e3ddd9c432212e1333684ae5db1e7c5747485c185cbb98a",
+    "freezeSha256": "d371f64a76effb8b96951709c03a4801e1751f8f8032d363623ba1903b33ed27",
+    "arm": "h8a-openai-luna-chat",
+    "route": {
+      "model": "openai/gpt-6-luna",
+      "provider": "openai",
+      "providerName": "OpenAI",
+      "apiEndpoint": "/api/v1/chat/completions",
+      "allowFallbacks": false,
+      "responseFormat": "json-schema",
+      "reasoningEffort": "medium",
+      "maxOutputTokens": 4096
+    },
+    "capabilityReceipt": {
+      "source": "https://openrouter.ai/api/v1/models/openai/gpt-6-luna/endpoints",
+      "capturedAt": "2026-10-21T11:26:29.006591+00:00",
+      "receiptSha256": "867ab2e2faac97629fecad817f78aa537d63379d2003a62f7c2ea42cf11957dd",
+      "receiptPath": "/root/work/zorya-classifier/.run/v03/h8-capabilities/gpt-6-luna.json",
+      "model": "openai/gpt-6-luna",
+      "provider": "openai",
+      "endpoint": "/api/v1/chat/completions",
+      "modalities": ["text", "image"],
+      "structuredOutputs": true,
+      "inputUsdPerMillion": 0.1,
+      "outputUsdPerMillion": 0.5
+    },
+    "budget": {
+      "admitted_physical_calls": 41,
+      "known_cost_usd": 0.035909300000000005,
+      "unknown_cost_calls": 0,
+      "in_flight_calls": 0,
+      "accounted_exposure_usd": 0.035909300000000005,
+      "max_physical_calls": 48,
+      "max_cost_usd": 2.4,
+      "unknown_reserve_usd_per_call": 0.05
+    },
+    "replayElapsedMs": 580561.589394,
+    "physicalCallCount": 41,
+    "logicalCallCount": 41,
+    "physicalReceiptAudit": {
+      "status": "verified",
+      "verifiedPhysicalCalls": 41,
+      "fileHashes": [
+        {
+          "path": "physical-admission-1.json",
+          "sha256": "e5f83f67073af398f87e1b13f917bfa16e0091b8faf9f43ee946a03f600ea714"
+        },
+        {
+          "path": "physical-http-1.json",
+          "sha256": "6736b7c4797b7e94559c5cf1b0789c9009abeaf9dca4d53e6fb7154dbb39394f"
+        },
+        {
+          "path": "physical-receipt-1.json",
+          "sha256": "6110bdf44edcd636b8ac0b9db68075f41d3bd6458b185933e8ad43a85b63599b"
+        },
+        {
+          "path": "physical-admission-2.json",
+          "sha256": "2e490cc3125f7a79ca949722bbfab0711037e01e229c21434dd404e0da6149fd"
+        },
+        {
+          "path": "physical-http-2.json",
+          "sha256": "12ff566eb353a9b09c5b4701c7801b41889da9fad8009668ad5aea45cc096416"
+        },
+        {
+          "path": "physical-receipt-2.json",
+          "sha256": "2f3dd94ef6a2355ad3e8957232a6835d9c91491a0f144128450d62874fc34b2a"
+        },
+        {
+          "path": "physical-admission-3.json",
+          "sha256": "46fbdff9c8d1f569c9ebd1784bfa384a6ddaa31989581903b07d4e1392088129"
+        },
+        {
+          "path": "physical-http-3.json",
+          "sha256": "f65300a2a951607e034ba9c021e5503cce9aafdf0d99bb0e2f7db7ac89c52af8"
+        },
+        {
+          "path": "physical-receipt-3.json",
+          "sha256": "73949e37981be737baec917719818f3ad2d42be895859206b235b996c7fbfaef"
+        },
+        {
+          "path": "physical-admission-4.json",
+          "sha256": "78f0d40d1eacf226cd9076059490ccc5b812f0aea1d1efe4da7f48d0bb9beea6"
+        },
+        {
+          "path": "physical-http-4.json",
+          "sha256": "bca13c9181093b912028f2624243b6690aaa9d52dcf0ee6c1530bca263daa40d"
+        },
+        {
+          "path": "physical-receipt-4.json",
+          "sha256": "291a4e81d6ce1e208edffc3201af50031a564a7a7b496ac91b63aff9a85e4e04"
+        },
+        {
+          "path": "physical-admission-5.json",
+          "sha256": "8a7465e0c8fb8209fc79790816a05da3272cb7bbe7373da395aa391a124998a5"
+        },
+        {
+          "path": "physical-http-5.json",
+          "sha256": "b82ca2a4d907d9e00b6febb1e82f634db79985ec288c1efb3b3516e22928eadf"
+        },
+        {
+          "path": "physical-receipt-5.json",
+          "sha256": "c0d5f9e52196cf7235f58451c7496175b64fe7f774e386fc03fa7a1ae17b8e9c"
+        },
+        {
+          "path": "physical-admission-6.json",
+          "sha256": "f89a278185921ad6aefb878f3374dac084dd36236c7a2816633ae8d4522a9ccf"
+        },
+        {
+          "path": "physical-http-6.json",
+          "sha256": "a545d737721622070cb9d0651a5423a08908361a9e951bd714e76e08b726d151"
+        },
+        {
+          "path": "physical-receipt-6.json",
+          "sha256": "ff2d6afe651b43ab121322d9a414d39f38b1eb61771807cd4088afaf62ad9fbc"
+        },
+        {
+          "path": "physical-admission-7.json",
+          "sha256": "df2a07456934a4f8a5c87c344736c86cccd2206260ee5ae0961c7366c1fc36c5"
+        },
+        {
+          "path": "physical-http-7.json",
+          "sha256": "3983fe9aa2fc59cb4f5fbe4d6b47ea12f97b7252834adb1b2c7ecf0e85259262"
+        },
+        {
+          "path": "physical-receipt-7.json",
+          "sha256": "a47f546f492003bd137ea11431efb9e37d8c037d06b69a74cb61ff6041a81bd1"
+        },
+        {
+          "path": "physical-admission-8.json",
+          "sha256": "d61629777cde58c9c4819577a6bd4d2aadf9d42daf40414cbb84d64139b39bb0"
+        },
+        {
+          "path": "physical-http-8.json",
+          "sha256": "ecc2e7bee1dc1233bd1948f6a5b7572c9324ac575b9ba2dea4e4a9aedc327323"
+        },
+        {
+          "path": "physical-receipt-8.json",
+          "sha256": "56966cc6aa9bde1f21c487fbb5ab4bf4d44d467ffce27ad6eecca8c1370adada"
+        },
+        {
+          "path": "physical-admission-9.json",
+          "sha256": "25d62c80b594b0e989f5c28aaff6ad65845a3f73a9bb65933ea554aee3de03ba"
+        },
+        {
+          "path": "physical-http-9.json",
+          "sha256": "134d52db04d4c4bb4dd0eb4f4385acbfb0efc33b5c31b88e8f40ef479d0df43b"
+        },
+        {
+          "path": "physical-receipt-9.json",
+          "sha256": "f28cb5ea67d032730ed97f28696afa69a3fff7625a6f41cefe995544fb1488cc"
+        },
+        {
+          "path": "physical-admission-10.json",
+          "sha256": "604b1e18e533741a1b11a7b68cc82babd412a16e0273b31f83f0374a5f14bbc5"
+        },
+        {
+          "path": "physical-http-10.json",
+          "sha256": "7b52819959bd6f0828e9d37c242a8e645cf7a2db0dd52a4b6c9e0b1da16b4431"
+        },
+        {
+          "path": "physical-receipt-10.json",
+          "sha256": "bb5ca3d056080f1b560a1bd96056561fe9dd8dc668cab3bb02c203649509054b"
+        },
+        {
+          "path": "physical-admission-11.json",
+          "sha256": "b52426fa9d6b9cbec91f7679630c8b80d0e62af57bb2f2f71356f522186f132b"
+        },
+        {
+          "path": "physical-http-11.json",
+          "sha256": "5e843def63b4761566575a269a081d8a81e8958a74d2a9931dcaa7cc78c53bba"
+        },
+        {
+          "path": "physical-receipt-11.json",
+          "sha256": "244392cf39dbaae4b26d352c44e3f79820ec1be0c2225059c7a5811cf7214658"
+        },
+        {
+          "path": "physical-admission-12.json",
+          "sha256": "6a2154f3ab0898ab0d8c556e24736737d6a18c8553e3ed70605f98fe82b37e23"
+        },
+        {
+          "path": "physical-http-12.json",
+          "sha256": "1047eb895a5285fa8e9b32cfcb532d17df25cd1fabaa6e35e09fdb5901d1d038"
+        },
+        {
+          "path": "physical-receipt-12.json",
+          "sha256": "e03cce45e4c84226d02325111e1b09df6eae406ed3459cf0e7b17810b945dafd"
+        },
+        {
+          "path": "physical-admission-13.json",
+          "sha256": "9cd0e75c8f1fd110cb12464db2a199ed485007555a9223655f77c37aa8d976d1"
+        },
+        {
+          "path": "physical-http-13.json",
+          "sha256": "f7549af09b05cad897805de8e2344cc532381bcf47d8795dd98c704138ef7b26"
+        },
+        {
+          "path": "physical-receipt-13.json",
+          "sha256": "34c9fd4702f3f31d45ee04dedbd73f691ae761f30e63af694c8b1809593a6b6b"
+        },
+        {
+          "path": "physical-admission-14.json",
+          "sha256": "3c46e833f74aeea4ed1ccb3c9b19ec5e6a21de23c0ecef0725fc9f1ff20f36f4"
+        },
+        {
+          "path": "physical-http-14.json",
+          "sha256": "c4159481cfec439370173a7141cfa652fbb8ffe4e5388bb6de6b4763f9204116"
+        },
+        {
+          "path": "physical-receipt-14.json",
+          "sha256": "d838f530514e1ab57d94fbe4b6b225b41f6759110f1823ac2920e6a636927a93"
+        },
+        {
+          "path": "physical-admission-15.json",
+          "sha256": "4d4c1e5589444c9264a084490e2280b7f5537da8ee7ae9e545080aaad98abdb9"
+        },
+        {
+          "path": "physical-http-15.json",
+          "sha256": "0a5707f2dea0fb75bf64cf91969dc3ff8b5a6298c891621061406cf4f176d9af"
+        },
+        {
+          "path": "physical-receipt-15.json",
+          "sha256": "d8a3e2838331134c5bcf6824e849c788bad5282e297c209af327d3a1763a113d"
+        },
+        {
+          "path": "physical-admission-16.json",
+          "sha256": "7f0225c2fcabd41ebd3952b5e11f4bbcb99982d9d6ab36d7b3119c20fd5063bc"
+        },
+        {
+          "path": "physical-http-16.json",
+          "sha256": "03061564ba22276591eef6f6b39d015db1c8a654b75e210270d0c9ac12796e35"
+        },
+        {
+          "path": "physical-receipt-16.json",
+          "sha256": "6b14598c268125666b2cbaefcaac833a6627318d235e6d0e5c395972a30b8fa9"
+        },
+        {
+          "path": "physical-admission-17.json",
+          "sha256": "f6ea9f3e342d0940f43b57f6335e8b360c032c7c64403645b242c501fa4cba30"
+        },
+        {
+          "path": "physical-http-17.json",
+          "sha256": "e815ea300925ee3d1f5fa6f4dde267a0db7e38bea27f45de53336ea40711db29"
+        },
+        {
+          "path": "physical-receipt-17.json",
+          "sha256": "4a47db395f490dd42195941fab1a562003d5e1b289ad0229a4118f3337a86a4d"
+        },
+        {
+          "path": "physical-admission-18.json",
+          "sha256": "a5429afc1411c0224212b62b7a5988fbfaa104f9f4e1a69d2dd4a9b7a6fc4c70"
+        },
+        {
+          "path": "physical-http-18.json",
+          "sha256": "931ed2d97a36a5e4817b5f006bca444ffd53824448492b075ad1214faf554e16"
+        },
+        {
+          "path": "physical-receipt-18.json",
+          "sha256": "cf126dbdd9165466cd0628d5e9a1229dc466f1e7ec4a19a57e7bf90c36775ec0"
+        },
+        {
+          "path": "physical-admission-19.json",
+          "sha256": "d6df43dbbc1fe6f9af798b6193a81fce8d5f4b60509221f28b46be02fdbcfbb3"
+        },
+        {
+          "path": "physical-http-19.json",
+          "sha256": "10a7fff73f281ba940e4009e37bb44b51265bbd8e7439acbc899fd508a37916a"
+        },
+        {
+          "path": "physical-receipt-19.json",
+          "sha256": "fffdda0385077258960fe717dc8b7d815db7d457b8c20c10cf2ae117a994146c"
+        },
+        {
+          "path": "physical-admission-20.json",
+          "sha256": "8646f16b7edb2bb4e28f11edfb153c0c7507fa446c409e351cce052fdde0859f"
+        },
+        {
+          "path": "physical-http-20.json",
+          "sha256": "48cf66c1cb55fc451226a0d0cda5dac40ff6a2633ab3857309711455bc0475f3"
+        },
+        {
+          "path": "physical-receipt-20.json",
+          "sha256": "3f06643f0af9d77df252ff8a468ebef393fa1bdf77f14c4acea1110de3da76a5"
+        },
+        {
+          "path": "physical-admission-21.json",
+          "sha256": "589e7a2ba0ba9c064db6ac4e3c0046f4e4f272e62029ad84185e87bab2379ffa"
+        },
+        {
+          "path": "physical-http-21.json",
+          "sha256": "5087a3734d59de241eb811b5e0c1917d5bde206169eca919535bf5d25a8f7f54"
+        },
+        {
+          "path": "physical-receipt-21.json",
+          "sha256": "0dae8a441d842de7c3dc62f9d1b3161ab79df77e0c207c6df47a9ad469512a2a"
+        },
+        {
+          "path": "physical-admission-22.json",
+          "sha256": "93b6ae4e54389970d2c9faf7d351448fb493f38702276a4b178af6b8b9470c71"
+        },
+        {
+          "path": "physical-http-22.json",
+          "sha256": "fb5633f7e242389df623a81f776373bd985f5afdd05a143e7976f7c153910c66"
+        },
+        {
+          "path": "physical-receipt-22.json",
+          "sha256": "9e2b1eec1b9929adf0197a8b6edc7127680f299f879ce4f8b970a931f3793e5b"
+        },
+        {
+          "path": "physical-admission-23.json",
+          "sha256": "a188f69087727be9657a50e9391217cbd0be0d104453010fcc20b62329ad9906"
+        },
+        {
+          "path": "physical-http-23.json",
+          "sha256": "8d4792c8765d3c79f549a02f826735534f2e8f1dcb23f44c7b57e7bbef3eb20f"
+        },
+        {
+          "path": "physical-receipt-23.json",
+          "sha256": "e6c1f4e0720600ad81e079a74294eddebef4f029387ff6955d9819d041ec0ce4"
+        },
+        {
+          "path": "physical-admission-24.json",
+          "sha256": "a001eb870f04949e2ba7804e48f9c94d2f70f785909fa02958a1d512194a626c"
+        },
+        {
+          "path": "physical-http-24.json",
+          "sha256": "49a4c5168905b6ea96e6eb00b1fb4978dbfa6504fa48f251816240037115805f"
+        },
+        {
+          "path": "physical-receipt-24.json",
+          "sha256": "0c65a6df5c75d0840d324b6bdc60c379a26fec88a5a925c42116f5c8c7d80706"
+        },
+        {
+          "path": "physical-admission-25.json",
+          "sha256": "11fe2a651243c8267e0088509f4455e85b7422f360ba8a0cd5f3f871e195828d"
+        },
+        {
+          "path": "physical-http-25.json",
+          "sha256": "dd799dc2c6ea91f2bba0f621498e418da715b34bc3c0a27f1eef2797c0a7aade"
+        },
+        {
+          "path": "physical-receipt-25.json",
+          "sha256": "0ef4dc544bbdccaba73513953ebde1a8b37d3730d400b0624ca0e0ec4d9bef8e"
+        },
+        {
+          "path": "physical-admission-26.json",
+          "sha256": "2e1a220352906223e85971515a8bdf40c5f1f6bbc74ae86435ddb1d5badf2bf3"
+        },
+        {
+          "path": "physical-http-26.json",
+          "sha256": "1a4b037b116ce83ff800eb446ba7f8157f30356ad92f76e1ed662ef37a990563"
+        },
+        {
+          "path": "physical-receipt-26.json",
+          "sha256": "e4aa462caa2b5c7df076137596a951b86c973ccc4995a57da36ea5ae4e1889a7"
+        },
+        {
+          "path": "physical-admission-27.json",
+          "sha256": "30f0062f5be8cff1b190625b2635b42475e65d10049817d421d0b10beb356785"
+        },
+        {
+          "path": "physical-http-27.json",
+          "sha256": "d33a501a2b0994610f59917508e04c5ce5e8e8e6be1fd66035568cce7b1c3532"
+        },
+        {
+          "path": "physical-receipt-27.json",
+          "sha256": "d6897434243d2ef06c9eb0e0a59265154fedaf2137468e8a4660dd68e36a3998"
+        },
+        {
+          "path": "physical-admission-28.json",
+          "sha256": "c10aa6f198ceddec9531d49455612ab5f41d362bf636df8a999522020243275e"
+        },
+        {
+          "path": "physical-http-28.json",
+          "sha256": "3a6d833e2666da62163bb74f471b2d5c7bc1c403c296d2569c94159d94cd4148"
+        },
+        {
+          "path": "physical-receipt-28.json",
+          "sha256": "c4b7fda2989379029ae14914213819f052a80754841835f33a5a02b358d8780d"
+        },
+        {
+          "path": "physical-admission-29.json",
+          "sha256": "c331698ef9fac69564de75381748437b862ff470d7d2e09292c8df867ae36f55"
+        },
+        {
+          "path": "physical-http-29.json",
+          "sha256": "d4b434251fd28d56cded7e47cf1004287a0bfc54a9306835999ac8b1d35f9cac"
+        },
+        {
+          "path": "physical-receipt-29.json",
+          "sha256": "e316bbe8db0500bd0716997f9d1ab0f86891394b8932553e17186e54ec45001a"
+        },
+        {
+          "path": "physical-admission-30.json",
+          "sha256": "d5b9f29319e56c9bfb19fe884c7a1e63e39451a940ecd088c96e24f6de20ec9f"
+        },
+        {
+          "path": "physical-http-30.json",
+          "sha256": "a2b55b99e94cae0aeafe6a9aaf04373abb15f6f22704c9ec65fa18730738ebc3"
+        },
+        {
+          "path": "physical-receipt-30.json",
+          "sha256": "2b985a717db27960c04dff64b4b689525eb58d108aba9b0a4768fdd08e436662"
+        },
+        {
+          "path": "physical-admission-31.json",
+          "sha256": "0e761e7f4b64226625bc193f25c6473584263360d4f3b02eb7c97226dd034f0b"
+        },
+        {
+          "path": "physical-http-31.json",
+          "sha256": "b5d91e6015b55ed92d97879ccaeda90d18ca984fa5c2f7bcc4f145e66bc107a1"
+        },
+        {
+          "path": "physical-receipt-31.json",
+          "sha256": "35e5d7c4f839cdd2fb3038f57fa67ba7a901eb6773716e6c2d35057987466248"
+        },
+        {
+          "path": "physical-admission-32.json",
+          "sha256": "4f860014f77f959dab1995708ae6d0b6625ea82712dc2b25a1374884e0b7f300"
+        },
+        {
+          "path": "physical-http-32.json",
+          "sha256": "d2869677e265d07cbc8a979381faad0e898fe0d6ca3ff9d55b51fb7b395a1ca9"
+        },
+        {
+          "path": "physical-receipt-32.json",
+          "sha256": "3d92b4db55a4d0f44dda2c7a3d680d1a1c03670d898fea41b1a6b320c61253bf"
+        },
+        {
+          "path": "physical-admission-33.json",
+          "sha256": "bd71227761fd71f6c9ac1dc947fcde8e9fbb48ebfab150ff4bd11d06e80da7d4"
+        },
+        {
+          "path": "physical-http-33.json",
+          "sha256": "aab984431f3d2408901bd2de8d14afd00ce75a1c046833364b31ccec4353b12d"
+        },
+        {
+          "path": "physical-receipt-33.json",
+          "sha256": "e339834fbbf8a660388bf3f31093b14a6efc0c817f0565296426850e1d06ccbb"
+        },
+        {
+          "path": "physical-admission-34.json",
+          "sha256": "dc37b62d8e455e937eaa6147e1c1b8086116ef00748ab4b6ee26675d3b85038d"
+        },
+        {
+          "path": "physical-http-34.json",
+          "sha256": "dde4725c0a348ac843c90c392e335f3fd9f376acfba6324c4f1a4f53d41830f4"
+        },
+        {
+          "path": "physical-receipt-34.json",
+          "sha256": "853e28aa2cef695911ae88a1220ae87be7af88059b32497a71ca7aa14a5a1e5b"
+        },
+        {
+          "path": "physical-admission-35.json",
+          "sha256": "0db989a7bec77343812fce81741904bb7bd921989ffc125ed25450bd9ab80b4a"
+        },
+        {
+          "path": "physical-http-35.json",
+          "sha256": "34328f74b7ad253d36176b1383a7ad6674efdf723c941896e4e2970abfdccae9"
+        },
+        {
+          "path": "physical-receipt-35.json",
+          "sha256": "23aec1e6945a043617a9899d41530d5cdb3bf16f503407f032333b0cd1ae44cd"
+        },
+        {
+          "path": "physical-admission-36.json",
+          "sha256": "f5f602ead6a88790083997a7a68ef5d63f64b1bd399090c801bbc7aa9b1f4430"
+        },
+        {
+          "path": "physical-http-36.json",
+          "sha256": "f2172a2e13faf357b56bd10cb23c41f998decf8c88fe565d778cd26eeb70bbb0"
+        },
+        {
+          "path": "physical-receipt-36.json",
+          "sha256": "dbc30ebf796e6c81bb97ec210e6683e3faa9bd18ced80da45c3781ebf6b4de7e"
+        },
+        {
+          "path": "physical-admission-37.json",
+          "sha256": "abc61973074214c4154c955af5c7e97847dd738563e318749e38ab225ac2e66a"
+        },
+        {
+          "path": "physical-http-37.json",
+          "sha256": "3aead9d226cc1719fa333a0fe088fb8133078d5bb8949ac72d9f50ebf9d0d039"
+        },
+        {
+          "path": "physical-receipt-37.json",
+          "sha256": "ddb1a746fb43c08b0cda69fc80b37052c980764ae5c49a36e8e055395e463d6b"
+        },
+        {
+          "path": "physical-admission-38.json",
+          "sha256": "e3d3ec6324831dd38bf5b37a2e740a7740bfeff50bc6a3ca0b61478dfdb098e3"
+        },
+        {
+          "path": "physical-http-38.json",
+          "sha256": "89be08c7687ff58cb2ec1b86d5de270fbcb3355b67a3b89d8b5993d0c4c7b94f"
+        },
+        {
+          "path": "physical-receipt-38.json",
+          "sha256": "5a4c3a994c547cb7994d288dbb1beb2ad93794eed7cedad54d852d2f4943635c"
+        },
+        {
+          "path": "physical-admission-39.json",
+          "sha256": "3510377c8bc5a9013bee6c697a32a41439a7619bd0a96a6719a01fd30bf98e38"
+        },
+        {
+          "path": "physical-http-39.json",
+          "sha256": "602cf93f402b059f40224e9bc6912009601d7d45113f1ef9423c7227413681eb"
+        },
+        {
+          "path": "physical-receipt-39.json",
+          "sha256": "6d7d624f686045001b7a021aecea0451b9da94a6b6c09cb908d1076e1220fb61"
+        },
+        {
+          "path": "physical-admission-40.json",
+          "sha256": "f71e59e05f5b087f898f05868ca03c7a09fe66890e783236d1a9bc56804fa8a2"
+        },
+        {
+          "path": "physical-http-40.json",
+          "sha256": "0cd17130c54914d075e68ebe20bb5a7b4fb236a5dd21a464adc5013081da130c"
+        },
+        {
+          "path": "physical-receipt-40.json",
+          "sha256": "4091bf9a3599c7cdd08ffdd2adf4a53ce0deb88a27e62cafdb52032b9b4d5b68"
+        },
+        {
+          "path": "physical-admission-41.json",
+          "sha256": "32e12426b6476ea9b0f48796464f2711c45316c6d7a380f4f936ab6573939114"
+        },
+        {
+          "path": "physical-http-41.json",
+          "sha256": "f8097ac976e1a5ea22543150270cc95c80ab353621c6c57817d6760c2491e7ed"
+        },
+        {
+          "path": "physical-receipt-41.json",
+          "sha256": "7d8754e92e2be98b82e24684e6110cae665d28e4a92e108ab0b63a0eac37c6ca"
+        }
+      ]
+    },
+    "rawDecisionTraceAudit": {
+      "status": "verified",
+      "verifiedStages": 41,
+      "fileHashes": [
+        {
+          "path": "decision-trace-1.json",
+          "sha256": "2081b1864e96eac6b4238f2337d1fbfceabb6901eb08b99c387cc7325362ef90"
+        },
+        {
+          "path": "decision-trace-2.json",
+          "sha256": "88c2224c01d03f861ea8adf1923b1c5228729178c67b081e64fc97e224f0099e"
+        },
+        {
+          "path": "decision-trace-3.json",
+          "sha256": "088d6bdcb788c801b24b9a957312114f66693c9358e37cf57b10ca4ce2ed49d5"
+        },
+        {
+          "path": "decision-trace-4.json",
+          "sha256": "2081b1864e96eac6b4238f2337d1fbfceabb6901eb08b99c387cc7325362ef90"
+        },
+        {
+          "path": "decision-trace-5.json",
+          "sha256": "a5709c94e6b68352b9da907eca248882d448203baaee8645c5ab06869a72eb38"
+        },
+        {
+          "path": "decision-trace-6.json",
+          "sha256": "50a4fcec77d117415d17930812cf72130dee9283ed3656103aaba5908c9faa0c"
+        },
+        {
+          "path": "decision-trace-7.json",
+          "sha256": "ad962011e614559d681df5e5be62cab29cf6640cf25877213ba1cfbd01414491"
+        },
+        {
+          "path": "decision-trace-8.json",
+          "sha256": "56637e1d4ef2ada4642cae95a34bf01662ee9af72d43f5bf5ec5ad2794b1053f"
+        },
+        {
+          "path": "decision-trace-9.json",
+          "sha256": "3560c5558b8b3ede62887974cb262a19bcce396022c34cc5490a4f0ebb478593"
+        },
+        {
+          "path": "decision-trace-10.json",
+          "sha256": "2081b1864e96eac6b4238f2337d1fbfceabb6901eb08b99c387cc7325362ef90"
+        },
+        {
+          "path": "decision-trace-11.json",
+          "sha256": "0f736b5fb209b9a720244c9fd671f03b118cbe581117cc5fd2985d1f7372b2b9"
+        },
+        {
+          "path": "decision-trace-12.json",
+          "sha256": "789790566beb47ea764b67040230b0762462ea526af62d99e4b4b2c7da2a105d"
+        },
+        {
+          "path": "decision-trace-13.json",
+          "sha256": "0f1f8ba972f316d803041d92bb259e927f45c171c86792b70b3104c0850dcad8"
+        },
+        {
+          "path": "decision-trace-14.json",
+          "sha256": "22f71fde291e5ec711c5fae8bd4269c97f8289e523649e70397a794b89990f49"
+        },
+        {
+          "path": "decision-trace-15.json",
+          "sha256": "3dc0fc6a5bb0adec255c2d3dedd3e793eb27aade1b3231c884b8e09e02e6024b"
+        },
+        {
+          "path": "decision-trace-16.json",
+          "sha256": "b6a1fa1427f3568e6656744e4f4d2a29aff3b4f1bba76826d0129973ab6c30fb"
+        },
+        {
+          "path": "decision-trace-17.json",
+          "sha256": "0f1f8ba972f316d803041d92bb259e927f45c171c86792b70b3104c0850dcad8"
+        },
+        {
+          "path": "decision-trace-18.json",
+          "sha256": "dcd09aaa8d6a3b6a36c87cedb73157b41fda294e9d69bc769a04645f04d6a52a"
+        },
+        {
+          "path": "decision-trace-19.json",
+          "sha256": "ff4811a7087b459fa856f62c25a49ffbd123b7449e9c98b14fae83cc5b5b084f"
+        },
+        {
+          "path": "decision-trace-20.json",
+          "sha256": "964ec652e640e190eb398933be0783111a9243ddec244ec395c819caf420ceee"
+        },
+        {
+          "path": "decision-trace-21.json",
+          "sha256": "0f1f8ba972f316d803041d92bb259e927f45c171c86792b70b3104c0850dcad8"
+        },
+        {
+          "path": "decision-trace-22.json",
+          "sha256": "6b3d3ba613587dcf4458c43f66b7b2e98f8f6da1226f635841909870aaa3da8d"
+        },
+        {
+          "path": "decision-trace-23.json",
+          "sha256": "db53814540ea923b37f8db295f098ceea5f8d8a5644c270bcd40146651c783a8"
+        },
+        {
+          "path": "decision-trace-24.json",
+          "sha256": "1768d8762bdb367a30f9747ec8c3bcc25a7bae5a026283437fb86bf17b145eb8"
+        },
+        {
+          "path": "decision-trace-25.json",
+          "sha256": "0f1f8ba972f316d803041d92bb259e927f45c171c86792b70b3104c0850dcad8"
+        },
+        {
+          "path": "decision-trace-26.json",
+          "sha256": "2d296f847beb54d1f2cf102c91168c153c615c076d3f51700c29c9b77836ad71"
+        },
+        {
+          "path": "decision-trace-27.json",
+          "sha256": "2970f7e973614a3cb44a4451dd4cafe2a872c557231e3bb24273e44055c26807"
+        },
+        {
+          "path": "decision-trace-28.json",
+          "sha256": "56eaee7ccdf5f1a4f7187d1e90382df31cefbee83d13fc288a3bd5e3205d6d3a"
+        },
+        {
+          "path": "decision-trace-29.json",
+          "sha256": "0f1f8ba972f316d803041d92bb259e927f45c171c86792b70b3104c0850dcad8"
+        },
+        {
+          "path": "decision-trace-30.json",
+          "sha256": "eb0da3b3cfb28f6e85fba32844331c6b2b1f31ed657ec8467bbb8b2359721e7a"
+        },
+        {
+          "path": "decision-trace-31.json",
+          "sha256": "66bfb1fa3ace36a05499ccb235ef1655d47a187819de5de8e14cc6db6a474ced"
+        },
+        {
+          "path": "decision-trace-32.json",
+          "sha256": "b3dfc5a13457543790184f3b86ad325d4da4ba5e1d090d2260a11d67a1d0a579"
+        },
+        {
+          "path": "decision-trace-33.json",
+          "sha256": "0f1f8ba972f316d803041d92bb259e927f45c171c86792b70b3104c0850dcad8"
+        },
+        {
+          "path": "decision-trace-34.json",
+          "sha256": "8bae434ea6369207b31ee8780ad12e1c764263f786c9a611c2cf4534a375e997"
+        },
+        {
+          "path": "decision-trace-35.json",
+          "sha256": "dd0cfbdc8df97f3723c2521068049168d4fb6cdc7454e0af22cad62db395ee3c"
+        },
+        {
+          "path": "decision-trace-36.json",
+          "sha256": "059203fd66a2206877e7451aec4ba3172873b206e01f998d26f14adca18fb3b5"
+        },
+        {
+          "path": "decision-trace-37.json",
+          "sha256": "0f1f8ba972f316d803041d92bb259e927f45c171c86792b70b3104c0850dcad8"
+        },
+        {
+          "path": "decision-trace-38.json",
+          "sha256": "70b450a9e971bea3a223e09265fde15238ec208c8ce8f4ac2bf2ea312e893467"
+        },
+        {
+          "path": "decision-trace-39.json",
+          "sha256": "b630828984aef85e32241cef3512b32de0eae3aca13dfc3b4455715fa3815b66"
+        },
+        {
+          "path": "decision-trace-40.json",
+          "sha256": "1e961d023532222a846f09828546280d9f78c5c5edeaf0b6e8047f657ce82491"
+        },
+        {
+          "path": "decision-trace-41.json",
+          "sha256": "990ade9d728c93f164214ec557c6c4b3b72a4abe4e2af729b9c150fa92cb6591"
+        }
+      ]
+    },
+    "selectedMaskArtifactsVerified": 11,
+    "selectedMaskArtifactsExpected": 11,
+    "sourceFilesHashed": 358,
+    "advancementGate": {
+      "pass": false,
+      "successesByStratum": {
+        "photo": 3,
+        "ui": 3,
+        "map": 1
+      },
+      "falseOutputCount": 2
+    }
+  },
+  "positiveSummary": {
+    "denominator": 9,
+    "unionAvailable": 8,
+    "presenceAdmittedAfterUnion": 8,
+    "nominatedAvailable": 8,
+    "selectedSameMaskPass": 7,
+    "byStratum": {
+      "photo": {
+        "denominator": 3,
+        "successes": 3,
+        "cases": ["pilot-v03-photo-01", "pilot-v03-photo-02", "pilot-v03-photo-03"]
+      },
+      "ui": {
+        "denominator": 3,
+        "successes": 3,
+        "cases": ["pilot-v03-ui-01", "pilot-v03-ui-02", "pilot-v03-ui-03"]
+      },
+      "map": {
+        "denominator": 3,
+        "successes": 1,
+        "cases": ["pilot-v03-map-01"]
+      }
+    },
+    "generationLoss": ["pilot-v03-map-02"],
+    "presenceLoss": [],
+    "nominationLoss": [],
+    "finalSelectionLoss": ["pilot-v03-map-03"]
+  },
+  "negativeSummary": {
+    "denominator": 3,
+    "presenceChoices": {
+      "present": 2,
+      "absent": 1,
+      "uncertain": 0
+    },
+    "falseAtPresence": ["pilot-v03-photo-04", "pilot-v03-ui-04"],
+    "correctTargetAbsent": ["pilot-v03-map-04"],
+    "uncertain": [],
+    "falseOutputs": ["pilot-v03-photo-04", "pilot-v03-ui-04"],
+    "errors": []
+  },
+  "rows": [
+    {
+      "caseId": "pilot-v03-photo-01",
+      "stratum": "photo",
+      "truth": "present",
+      "status": "located",
+      "presenceChoice": "present",
+      "unionAvailable": true,
+      "presenceAdmitted": true,
+      "nominatedAvailable": true,
+      "selected": true,
+      "selectedSameMaskPass": true,
+      "selectedMaskArtifactValid": true,
+      "errorCode": null,
+      "unknownReason": null,
+      "physicalCalls": 3
+    },
+    {
+      "caseId": "pilot-v03-photo-02",
+      "stratum": "photo",
+      "truth": "present",
+      "status": "located",
+      "presenceChoice": "present",
+      "unionAvailable": true,
+      "presenceAdmitted": true,
+      "nominatedAvailable": true,
+      "selected": true,
+      "selectedSameMaskPass": true,
+      "selectedMaskArtifactValid": true,
+      "errorCode": null,
+      "unknownReason": null,
+      "physicalCalls": 3
+    },
+    {
+      "caseId": "pilot-v03-photo-03",
+      "stratum": "photo",
+      "truth": "present",
+      "status": "located",
+      "presenceChoice": "present",
+      "unionAvailable": true,
+      "presenceAdmitted": true,
+      "nominatedAvailable": true,
+      "selected": true,
+      "selectedSameMaskPass": true,
+      "selectedMaskArtifactValid": true,
+      "errorCode": null,
+      "unknownReason": null,
+      "physicalCalls": 3
+    },
+    {
+      "caseId": "pilot-v03-photo-04",
+      "stratum": "photo",
+      "truth": "absent",
+      "status": "located",
+      "presenceChoice": "present",
+      "unionAvailable": false,
+      "presenceAdmitted": true,
+      "nominatedAvailable": false,
+      "selected": true,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": true,
+      "errorCode": null,
+      "unknownReason": null,
+      "physicalCalls": 3
+    },
+    {
+      "caseId": "pilot-v03-ui-01",
+      "stratum": "ui",
+      "truth": "present",
+      "status": "located",
+      "presenceChoice": "present",
+      "unionAvailable": true,
+      "presenceAdmitted": true,
+      "nominatedAvailable": true,
+      "selected": true,
+      "selectedSameMaskPass": true,
+      "selectedMaskArtifactValid": true,
+      "errorCode": null,
+      "unknownReason": null,
+      "physicalCalls": 4
+    },
+    {
+      "caseId": "pilot-v03-ui-02",
+      "stratum": "ui",
+      "truth": "present",
+      "status": "located",
+      "presenceChoice": "present",
+      "unionAvailable": true,
+      "presenceAdmitted": true,
+      "nominatedAvailable": true,
+      "selected": true,
+      "selectedSameMaskPass": true,
+      "selectedMaskArtifactValid": true,
+      "errorCode": null,
+      "unknownReason": null,
+      "physicalCalls": 4
+    },
+    {
+      "caseId": "pilot-v03-ui-03",
+      "stratum": "ui",
+      "truth": "present",
+      "status": "located",
+      "presenceChoice": "present",
+      "unionAvailable": true,
+      "presenceAdmitted": true,
+      "nominatedAvailable": true,
+      "selected": true,
+      "selectedSameMaskPass": true,
+      "selectedMaskArtifactValid": true,
+      "errorCode": null,
+      "unknownReason": null,
+      "physicalCalls": 4
+    },
+    {
+      "caseId": "pilot-v03-ui-04",
+      "stratum": "ui",
+      "truth": "absent",
+      "status": "located",
+      "presenceChoice": "present",
+      "unionAvailable": false,
+      "presenceAdmitted": true,
+      "nominatedAvailable": false,
+      "selected": true,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": true,
+      "errorCode": null,
+      "unknownReason": null,
+      "physicalCalls": 4
+    },
+    {
+      "caseId": "pilot-v03-map-01",
+      "stratum": "map",
+      "truth": "present",
+      "status": "located",
+      "presenceChoice": "present",
+      "unionAvailable": true,
+      "presenceAdmitted": true,
+      "nominatedAvailable": true,
+      "selected": true,
+      "selectedSameMaskPass": true,
+      "selectedMaskArtifactValid": true,
+      "errorCode": null,
+      "unknownReason": null,
+      "physicalCalls": 4
+    },
+    {
+      "caseId": "pilot-v03-map-02",
+      "stratum": "map",
+      "truth": "present",
+      "status": "located",
+      "presenceChoice": "present",
+      "unionAvailable": false,
+      "presenceAdmitted": true,
+      "nominatedAvailable": false,
+      "selected": true,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": true,
+      "errorCode": null,
+      "unknownReason": null,
+      "physicalCalls": 4
+    },
+    {
+      "caseId": "pilot-v03-map-03",
+      "stratum": "map",
+      "truth": "present",
+      "status": "located",
+      "presenceChoice": "present",
+      "unionAvailable": true,
+      "presenceAdmitted": true,
+      "nominatedAvailable": true,
+      "selected": true,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": true,
+      "errorCode": null,
+      "unknownReason": null,
+      "physicalCalls": 4
+    },
+    {
+      "caseId": "pilot-v03-map-04",
+      "stratum": "map",
+      "truth": "absent",
+      "status": "unknown",
+      "presenceChoice": "absent",
+      "unionAvailable": false,
+      "presenceAdmitted": false,
+      "nominatedAvailable": false,
+      "selected": false,
+      "selectedSameMaskPass": false,
+      "selectedMaskArtifactValid": false,
+      "errorCode": null,
+      "unknownReason": "target-absent",
+      "physicalCalls": 1
+    }
+  ]
+}

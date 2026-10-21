@@ -1,0 +1,16 @@
+{
+  "schema": "v03-h8-ordinary-vision-independent-audit-attempt-v1",
+  "attempt": 3,
+  "runDirectory": "/root/work/zorya-classifier-runs/v03/h8a-luna-chat-8633fe55-47af-441b-9265-a159d3e4efc8",
+  "runJsonSha256": "1def8b64894f520e6e3ddd9c432212e1333684ae5db1e7c5747485c185cbb98a",
+  "freezeSha256": "d371f64a76effb8b96951709c03a4801e1751f8f8032d363623ba1903b33ed27",
+  "status": "evaluator-error-before-scoring",
+  "error": {
+    "code": "h8-physical-route",
+    "expected": "validate each physical route including H8 response-format, reasoning-effort, and output-token parameters",
+    "observed": "The evaluator expected only the five common route fields, while the H8 runner correctly repeated its frozen chat parameters inside the physical route."
+  },
+  "classification": "independent-evaluator-route-shape-defect",
+  "producerArtifactsChanged": false,
+  "qualityScoresComputed": false
+}
