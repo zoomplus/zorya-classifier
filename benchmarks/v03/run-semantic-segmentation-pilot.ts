@@ -13,7 +13,7 @@ import { createMobileSamObjectProposals } from '../../src/infrastructure/segment
 import type { ObjectProposalPort } from '../../src/entities/object-proposals.js'
 import { RunBudget } from '../v02/budget.js'
 import type { BudgetSnapshot } from '../v02/budget.js'
-import { processRegionSeededCase } from '../v02/region-seeded-runner.js'
+import { assertRecorderHealthy, processRegionSeededCase } from '../v02/region-seeded-runner.js'
 import type { RegionSeededCaseResult } from '../v02/region-seeded-runner.js'
 import { createNativeCategoricalPresencePort } from '../v02/native-categorical-presence-port.js'
 import { recordProvider } from '../v02/recording.js'
@@ -130,6 +130,7 @@ export interface SemanticPilotResult extends SemanticPilotPlan {
   sourceUnchanged: boolean
   profileResults: Record<string, Array<RegionSeededCaseResult | null>>
   profileBudgets: Record<string, BudgetSnapshot>
+  cleanupErrors: string[]
   errorCode?: string
   outputDirectory: string
 }
@@ -153,6 +154,7 @@ const defaultSourceEntries = [
   join(moduleDirectory, '../../src/infrastructure/segmentation/native-worker.ts'),
   join(moduleDirectory, '../../src/app/create-classifier.ts'),
   join(moduleDirectory, '../../package-lock.json'),
+  join(moduleDirectory, '../../package.json'),
 ]
 
 export function buildSemanticPilotOrder(cases: readonly Pick<FreshCase, 'caseId'>[]) {
@@ -356,8 +358,6 @@ export async function runSemanticSegmentationPilot(
   const outputDirectory = resolve(options.outputRoot, `semantic-segmentation-${runId}`)
   const controller = new AbortController()
   const onAbort = () => controller.abort(options.signal?.reason)
-  if (options.signal?.aborted) onAbort()
-  else options.signal?.addEventListener('abort', onAbort, { once: true })
   let proposals: ObjectProposalPort | undefined
   let baseline: SegmentationPort | undefined
   let semantic: SegmentationPort | undefined
@@ -376,9 +376,12 @@ export async function runSemanticSegmentationPilot(
   let status: SemanticPilotResult['status'] = 'failed'
   let sourceUnchanged = false
   let errorCode: string | undefined
+  const cleanupErrors: string[] = []
   await mkdir(options.outputRoot, { recursive: true })
   await mkdir(outputDirectory, { recursive: false })
   try {
+    if (options.signal?.aborted) onAbort()
+    else options.signal?.addEventListener('abort', onAbort, { once: true })
     const corpus = await (options.loadCorpus ?? loadV03PilotCorpus)(
       options.imageRoot,
       controller.signal,
@@ -481,7 +484,6 @@ export async function runSemanticSegmentationPilot(
       const runOne = async (item: FreshCase, index: number, profile: 'baseline' | 'semantic') => {
         const caseDirectory = join(outputDirectory, profile, item.caseId)
         await mkdir(dirname(caseDirectory), { recursive: true })
-        await mkdir(caseDirectory, { recursive: false })
         const decision = makeRecorder(caseDirectory, profile)
         activeDecisionRecorder = decision
         const recorder = recorders.get(`${profile}:${caseDirectory}`)!
@@ -494,23 +496,27 @@ export async function runSemanticSegmentationPilot(
                 settle: semantic!.settle.bind(semantic),
                 async dispose() {},
               }
-        const row = await processRegionSeededCase({
-          item,
-          root: corpus.imageRoot,
-          caseDirectory,
-          classifierFactory,
-          decision,
-          segmentation: segmenter,
-          variant: 'region-seeded-sam',
-          requireClassifiedPresence: true,
-          checkedRegion: true,
-          recorder,
-          signal: controller.signal,
-        })
-        assertSixCallLimit(row, recorder)
-        await immutable(join(caseDirectory, 'result.json'), row)
-        resultsByProfile[profile]![index] = row
-        activeDecisionRecorder = undefined
+        try {
+          const row = await processRegionSeededCase({
+            item,
+            root: corpus.imageRoot,
+            caseDirectory,
+            classifierFactory,
+            decision,
+            segmentation: segmenter,
+            variant: 'region-seeded-sam',
+            requireClassifiedPresence: true,
+            checkedRegion: true,
+            recorder,
+            signal: controller.signal,
+          })
+          assertRecorderHealthy(recorder)
+          assertSixCallLimit(row, recorder)
+          await immutable(join(caseDirectory, 'result.json'), row)
+          resultsByProfile[profile]![index] = row
+        } finally {
+          activeDecisionRecorder = undefined
+        }
       }
       for (const [index, item] of corpus.cases.entries()) {
         if (controller.signal.aborted) throw controller.signal.reason
@@ -528,10 +534,39 @@ export async function runSemanticSegmentationPilot(
     status = 'failed'
   } finally {
     options.signal?.removeEventListener('abort', onAbort)
-    try {
-      await Promise.allSettled([baseline?.settle(), semantic?.settle(), proposals?.settle()])
-    } finally {
-      await Promise.allSettled([baseline?.dispose(), semantic?.dispose(), proposals?.dispose()])
+    const ownedPorts: Array<
+      [string, { settle(): Promise<void>; dispose(): Promise<void> } | undefined]
+    > = [
+      ['baseline', baseline],
+      ['semantic', semantic],
+      ['proposals', proposals],
+    ]
+    for (const [name, port] of ownedPorts) {
+      if (!port) continue
+      try {
+        await port.settle()
+      } catch {
+        cleanupErrors.push(`${name}.settle:CLEANUP_FAILURE`)
+      }
+    }
+    for (const [name, port] of ownedPorts) {
+      if (!port) continue
+      try {
+        await port.dispose()
+      } catch {
+        cleanupErrors.push(`${name}.dispose:CLEANUP_FAILURE`)
+      }
+    }
+    for (const [key, recorder] of recorders) {
+      try {
+        assertRecorderHealthy(recorder)
+      } catch {
+        cleanupErrors.push(`${key}:RECORDER_UNHEALTHY`)
+      }
+    }
+    for (const [name, budget] of Object.entries(profileBudgets)) {
+      if (budget.snapshot().inFlightCalls !== 0)
+        cleanupErrors.push(`${name}.budget:IN_FLIGHT_CALLS`)
     }
     if (plan) {
       try {
@@ -542,6 +577,10 @@ export async function runSemanticSegmentationPilot(
         sourceUnchanged = false
         status = 'source-changed'
       }
+      if (cleanupErrors.length > 0) {
+        status = status === 'source-changed' ? 'source-changed' : 'failed'
+        errorCode ??= 'CLEANUP_FAILURE'
+      }
       finalResult = {
         ...plan,
         status,
@@ -551,6 +590,7 @@ export async function runSemanticSegmentationPilot(
           baseline: profileBudgets.baseline.snapshot(),
           semantic: profileBudgets.semantic.snapshot(),
         },
+        cleanupErrors,
         ...(errorCode ? { errorCode } : {}),
         outputDirectory,
       }
@@ -560,6 +600,7 @@ export async function runSemanticSegmentationPilot(
         status,
         sourceClosureSha256: plan.sourceClosureSha256,
         sourceUnchanged,
+        cleanupErrors,
         summarySha256: sha256(Buffer.from(JSON.stringify(finalResult))),
       })
     }
@@ -589,19 +630,31 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     return resolve(value)
   }
   const outputRoot = required('output')
+  const imageRoot = required('images')
+  const encoderPath = required('encoder')
+  const decoderPath = required('decoder')
+  const controller = new AbortController()
+  const abort = () => controller.abort(new Error('Process interrupted'))
+  process.once('SIGINT', abort)
+  process.once('SIGTERM', abort)
   runSemanticSegmentationPilot({
-    imageRoot: required('images'),
+    imageRoot,
     outputRoot,
-    encoderPath: required('encoder'),
-    decoderPath: required('decoder'),
+    encoderPath,
+    decoderPath,
     ...(allowPaid ? { allowPaid: true } : {}),
     ...(process.env.OPENROUTER_API_KEY ? { apiKey: process.env.OPENROUTER_API_KEY } : {}),
+    signal: controller.signal,
   })
     .then((result) => {
       process.stdout.write(
         `${JSON.stringify({ status: result.status, outputDirectory: result.outputDirectory })}\n`,
       )
       if (result.status !== 'complete' && result.status !== 'dry-run-complete') process.exitCode = 1
+    })
+    .finally(() => {
+      process.removeListener('SIGINT', abort)
+      process.removeListener('SIGTERM', abort)
     })
     .catch((error: unknown) => {
       process.stderr.write(`${error instanceof Error ? error.message : 'H2c runner failed'}\n`)

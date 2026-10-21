@@ -6,6 +6,9 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import test from 'node:test'
+import type { Classifier } from '../src/app/create-classifier.js'
+import type { SegmentationPort } from '../src/entities/segmentation.js'
+import type { ObjectProposalPort } from '../src/entities/object-proposals.js'
 import type { RegionSeededCaseResult } from '../benchmarks/v02/region-seeded-runner.js'
 import type { FreshCase, FreshCorpus } from '../benchmarks/v02/fresh-corpus.js'
 import { hashCanonical } from '../benchmarks/v02/protocol.js'
@@ -61,9 +64,139 @@ await test('source closure hashes imports and does not include evaluator truth',
   assert.ok(closure.files.some((file) => file.path.endsWith('semantic-mask-segmenter.ts')))
   assert.ok(closure.files.some((file) => file.path.endsWith('worker-inference.ts')))
   assert.ok(closure.files.some((file) => file.path === 'package-lock.json'))
+  assert.ok(closure.files.some((file) => file.path === 'package.json'))
   assert.ok(closure.files.some((file) => file.path.endsWith('pilot-inputs/photo.json')))
   assert.ok(closure.files.every((file) => !file.path.includes('evaluator-data')))
   assert.equal(closure.sha256, hashCanonical(closure.files))
+})
+
+async function runMockedPaidPilot(settleFailure = false) {
+  const temporary = await mkdtemp(join(tmpdir(), 'v03-h2c-process-'))
+  const imageRoot = join(temporary, 'images')
+  const outputRoot = join(temporary, 'runs')
+  await (await import('node:fs/promises')).mkdir(imageRoot)
+  const cases: FreshCase[] = []
+  for (let index = 0; index < 12; index++) {
+    const bytes = await sharp({
+      create: {
+        width: 1,
+        height: 1,
+        channels: 4,
+        background: { r: index, g: 5, b: 7, alpha: 1 },
+      },
+    })
+      .png()
+      .toBuffer()
+    await writeFile(join(imageRoot, `${index}.png`), bytes)
+    cases.push(freshCase(index, digest(bytes)))
+  }
+  const corpus: FreshCorpus = {
+    cases,
+    imageRoot,
+    manifests: [
+      { sha256: 'a'.repeat(64), cases: 4 },
+      { sha256: 'b'.repeat(64), cases: 4 },
+      { sha256: 'c'.repeat(64), cases: 4 },
+    ],
+  }
+  const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+  const runnerSource = fileURLToPath(
+    new URL('../benchmarks/v03/run-semantic-segmentation-pilot.ts', import.meta.url),
+  )
+  const callCounts = { classify: 0, baselineSettle: 0, baselineDispose: 0 }
+  const emptySegmenter = {
+    async segment() {
+      return {
+        status: 'unknown',
+        reason: 'stub',
+        metadata: {
+          method: 'stub',
+          backend: 'stub',
+          durationMs: 0,
+          input: { width: 1, height: 1 },
+        },
+      }
+    },
+    async settle() {},
+    async dispose() {},
+  } as SegmentationPort
+  const proposals = {
+    async propose() {
+      throw new Error('proposal inference must not run for absent classifications')
+    },
+    async settle() {},
+    async dispose() {},
+  } as unknown as ObjectProposalPort
+  try {
+    const result = await runSemanticSegmentationPilot({
+      imageRoot,
+      outputRoot,
+      encoderPath: 'unused-encoder',
+      decoderPath: 'unused-decoder',
+      apiKey: 'test-key-never-used',
+      allowPaid: true,
+      sourceEntries: [runnerSource, join(repoRoot, 'package-lock.json')],
+      loadCorpus: async () => corpus,
+      verifyAssets: async () => ({
+        encoder: { bytes: 1, sha256: 'd'.repeat(64) },
+        decoder: { bytes: 1, sha256: 'e'.repeat(64) },
+      }),
+      createBaseline: async () => ({
+        ...emptySegmenter,
+        async settle() {
+          callCounts.baselineSettle++
+          if (settleFailure) throw new Error('stub settle failure')
+        },
+        async dispose() {
+          callCounts.baselineDispose++
+        },
+      }),
+      createProposals: async () => proposals,
+      createSemanticWrapper: () => emptySegmenter,
+      createClassifier: () =>
+        ({
+          async classify() {
+            callCounts.classify++
+            return { choice: 'absent' }
+          },
+          async locate() {
+            throw new Error('absent classification must skip localization')
+          },
+          async extract() {
+            throw new Error('absent classification must skip extraction')
+          },
+          async dispose() {},
+        }) as unknown as Classifier,
+    })
+    return { result, callCounts }
+  } finally {
+    await rm(temporary, { recursive: true, force: true })
+  }
+}
+
+await test('paired runner lets processRegionSeededCase create the leaf and completes all mocked profiles', async () => {
+  const { result, callCounts } = await runMockedPaidPilot()
+  assert.equal(result.status, 'complete')
+  assert.equal(result.profileResults.baseline?.length, 12)
+  assert.equal(result.profileResults.semantic?.length, 12)
+  assert.ok(result.profileResults.baseline?.every((row) => row?.classify.value === 'absent'))
+  assert.ok(
+    result.profileResults.semantic?.every(
+      (row) => row?.extraction.reason === 'classification-absent',
+    ),
+  )
+  assert.equal(callCounts.classify, 24)
+  assert.equal(callCounts.baselineSettle, 1)
+  assert.equal(callCounts.baselineDispose, 1)
+  assert.deepEqual(result.cleanupErrors, [])
+})
+
+await test('runner fails completion when owned-port cleanup rejects but still attempts disposal', async () => {
+  const { result, callCounts } = await runMockedPaidPilot(true)
+  assert.equal(result.status, 'failed')
+  assert.equal(result.errorCode, 'CLEANUP_FAILURE')
+  assert.ok(result.cleanupErrors.includes('baseline.settle:CLEANUP_FAILURE'))
+  assert.equal(callCounts.baselineDispose, 1)
 })
 
 await test('dry run checks the frozen twelve-case producer corpus and never invokes paid or native factories', async () => {
