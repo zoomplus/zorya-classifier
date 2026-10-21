@@ -164,43 +164,68 @@ export function createH3cVerifier(options: H3cVerifierOptions) {
         )
       )
         throw new ClassifierError('INVALID_INPUT', 'Invalid H3c verification input')
-      const image = copyRaster(value.image)
+      const width = value.image.width
+      const height = value.image.height
+      const maskWidth = value.mask.width
+      const maskHeight = value.mask.height
+      const pixels = width * height
+      if (
+        value.image.format !== 'rgba8' ||
+        !Number.isSafeInteger(width) ||
+        !Number.isSafeInteger(height) ||
+        width < 1 ||
+        height < 1 ||
+        width > 16384 ||
+        height > 16384 ||
+        !Number.isSafeInteger(pixels) ||
+        pixels < 1 ||
+        pixels > limits.imagePixels ||
+        value.image.data.byteLength !== pixels * 4 ||
+        !Number.isSafeInteger(maskWidth) ||
+        !Number.isSafeInteger(maskHeight) ||
+        maskWidth !== width ||
+        maskHeight !== height ||
+        value.mask.data.byteLength !== pixels
+      )
+        throw new ClassifierError('INVALID_INPUT', 'H3c image and mask dimensions disagree')
+      const image = copyRaster({
+        data: value.image.data,
+        width,
+        height,
+        format: 'rgba8',
+      })
       const mask: BinaryMask = {
         data: Uint8Array.from(value.mask.data),
-        width: value.mask.width,
-        height: value.mask.height,
+        width: maskWidth,
+        height: maskHeight,
         format: 'binary-u8',
       }
+      const alias = value.alias
+      const target = value.target
       const exclusions = [...value.exclusions]
+      const box: PixelRect = {
+        left: value.box.left,
+        top: value.box.top,
+        width: value.box.width,
+        height: value.box.height,
+      }
+      const signal = value.signal
       let fullPng: Buffer | undefined
       let cleanPng: Buffer | undefined
       let overlayPng: Buffer | undefined
       let cutoutPng: Buffer | undefined
       const scratch: Buffer[] = []
       try {
-        assertActive(value.signal)
-        const pixels = image.width * image.height
-        if (
-          !Number.isSafeInteger(pixels) ||
-          pixels < 1 ||
-          pixels > limits.imagePixels ||
-          image.width > 16384 ||
-          image.height > 16384 ||
-          image.data.byteLength !== pixels * 4 ||
-          mask.width !== image.width ||
-          mask.height !== image.height ||
-          mask.data.byteLength !== pixels
-        )
-          throw new ClassifierError('INVALID_INPUT', 'H3c image and mask dimensions disagree')
+        assertActive(signal)
         const bounds = foregroundBounds(mask)
-        if (!bounds || !sameRect(bounds, value.box))
+        if (!bounds || !sameRect(bounds, box))
           throw new ClassifierError(
             'INVALID_INPUT',
             'H3c box must exactly match actual mask foreground',
           )
         const witness = witnessOf(mask)
         const crop = cropAround(bounds, image.width, image.height)
-        fullPng = await pngFromRgba(image, value.signal)
+        fullPng = await pngFromRgba(image, signal)
         const cleanPipeline = sharp(image.data, {
           raw: { width: image.width, height: image.height, channels: 4 },
           limitInputPixels: limits.imagePixels,
@@ -213,14 +238,18 @@ export function createH3cVerifier(options: H3cVerifierOptions) {
         } finally {
           cleanPipeline.destroy()
         }
-        assertActive(value.signal)
+        assertActive(signal)
 
         const context = Buffer.from(image.data)
+        scratch.push(context)
         const overlayPixels = Buffer.alloc(crop.width * crop.height * 4)
+        scratch.push(overlayPixels)
         const cutoutPixels = Buffer.alloc(crop.width * crop.height * 4)
+        scratch.push(cutoutPixels)
         const crossSvg = Buffer.from(
           `<svg xmlns="http://www.w3.org/2000/svg" width="${crop.width}" height="${crop.height}"><path d="M ${witness.x - crop.left - 5} ${witness.y - crop.top} H ${witness.x - crop.left + 5} M ${witness.x - crop.left} ${witness.y - crop.top - 5} V ${witness.y - crop.top + 5}" stroke="#ff00ff" stroke-width="2"/></svg>`,
         )
+        scratch.push(crossSvg)
         for (let y = crop.top; y < crop.top + crop.height; y++) {
           for (let x = crop.left; x < crop.left + crop.width; x++) {
             const sourceIndex = (y * image.width + x) * 4
@@ -249,8 +278,8 @@ export function createH3cVerifier(options: H3cVerifierOptions) {
           .extract(crop)
           .raw()
           .toBuffer()
-        scratch.push(context, overlayPixels, cutoutPixels, crossSvg, cropRaw)
-        assertActive(value.signal)
+        scratch.push(cropRaw)
+        assertActive(signal)
         const overlayComposed = await sharp(cropRaw, {
           raw: { width: crop.width, height: crop.height, channels: 4 },
         })
@@ -266,7 +295,7 @@ export function createH3cVerifier(options: H3cVerifierOptions) {
         })
           .png({ compressionLevel: 6 })
           .toBuffer()
-        assertActive(value.signal)
+        assertActive(signal)
         if (
           [fullPng, cleanPng, overlayPng, cutoutPng].some(
             (part) => part.byteLength > limits.imageBytes,
@@ -277,17 +306,14 @@ export function createH3cVerifier(options: H3cVerifierOptions) {
         for (const [index, bytes] of [fullPng, cleanPng, overlayPng, cutoutPng].entries()) {
           const dimensions = index === 0 ? { width: image.width, height: image.height } : crop
           states.push(
-            await options.imageState(
-              { bytes: Uint8Array.from(bytes), ...dimensions },
-              value.signal,
-            ),
+            await options.imageState({ bytes: Uint8Array.from(bytes), ...dimensions }, signal),
           )
-          assertActive(value.signal)
+          assertActive(signal)
         }
-        assertActive(value.signal)
+        assertActive(signal)
         const state = [
-          `Authored target (JSON string): ${JSON.stringify(value.target)}. Authored exclusions (JSON strings): ${JSON.stringify(exclusions)}.`,
-          `Selected candidate: ${value.alias}. The box is derived from the selected mask's actual foreground pixels: ${JSON.stringify(bounds)}. Deterministic witness from selected-mask foreground: ${JSON.stringify(witness)}.`,
+          `Authored target (JSON string): ${JSON.stringify(target)}. Authored exclusions (JSON strings): ${JSON.stringify(exclusions)}.`,
+          `Selected candidate: ${alias}. The box is derived from the selected mask's actual foreground pixels: ${JSON.stringify(bounds)}. Deterministic witness from selected-mask foreground: ${JSON.stringify(witness)}.`,
           'Unmodified full source:',
           ...states[0]!,
           'Clean context crop around the selected mask-derived box:',
@@ -297,13 +323,13 @@ export function createH3cVerifier(options: H3cVerifierOptions) {
           'Exact selected-mask cutout over neutral gray:',
           ...states[3]!,
         ]
-        assertActive(value.signal)
+        assertActive(signal)
         const request = {
           state,
-          questions: { verification: questionFor(value.target, exclusions) },
+          questions: { verification: questionFor(target, exclusions) },
         }
-        const raw = await options.decision.decide(request, value.signal)
-        assertActive(value.signal)
+        const raw = await options.decision.decide(request, signal)
+        assertActive(signal)
         const checked = validateDecision(request, raw)
         const chosen = selection(checked, H3C_VERDICTS, 1, 'verification')
         return {

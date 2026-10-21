@@ -6,6 +6,7 @@ import { ClassifierError } from '../src/entities/errors.js'
 import { createSharpRaster } from '../src/infrastructure/raster.js'
 import { createOpenRouterDecisions } from '../src/openrouter.js'
 import { createH3cVerifier, H3C_VERDICTS } from '../benchmarks/v03/h3c-verifier.js'
+import type { H3cVerificationInput } from '../benchmarks/v03/h3c-verifier.js'
 
 const metadata = {
   model: 'openai/gpt-6-luna-decisions',
@@ -132,6 +133,100 @@ await test('H3c rejects a box that invents extent beyond actual foreground befor
     (error: unknown) => error instanceof ClassifierError && error.code === 'INVALID_INPUT',
   )
   assert.equal(calls, 0)
+})
+
+await test('H3c rejects oversized dimensions and invalid byte lengths before image preparation or dispatch', async () => {
+  let imageStateCalls = 0
+  let decisionCalls = 0
+  const verifier = createH3cVerifier({
+    imageState: async () => {
+      imageStateCalls++
+      return []
+    },
+    decision: {
+      async decide() {
+        decisionCalls++
+        throw new Error('must not dispatch')
+      },
+    },
+  })
+  const base = await image()
+  const validMask = mask()
+  const cases: H3cVerificationInput[] = [
+    {
+      image: {
+        data: new Uint8Array(4),
+        width: 16385,
+        height: 1,
+        format: 'rgba8',
+      },
+      mask: { data: new Uint8Array(16385), width: 16385, height: 1, format: 'binary-u8' },
+      box: { left: 0, top: 0, width: 1, height: 1 },
+      alias: 'C00',
+      target: 'Bowl',
+      exclusions: [],
+      signal: new AbortController().signal,
+    },
+    {
+      image: { data: base.data.subarray(0, 4), width: 32, height: 24, format: 'rgba8' },
+      mask: validMask,
+      box: { left: 12, top: 8, width: 8, height: 6 },
+      alias: 'C00',
+      target: 'Bowl',
+      exclusions: [],
+      signal: new AbortController().signal,
+    },
+  ]
+  for (const input of cases) {
+    await assert.rejects(
+      verifier.verify(input),
+      (error: unknown) => error instanceof ClassifierError && error.code === 'INVALID_INPUT',
+    )
+  }
+  assert.equal(imageStateCalls, 0)
+  assert.equal(decisionCalls, 0)
+})
+
+await test('H3c snapshots target, alias, box, and signal before asynchronous image preparation', async () => {
+  const source = await image()
+  const originalSignal = new AbortController().signal
+  const replacementSignal = new AbortController().signal
+  let seenSignal: AbortSignal | undefined
+  let requestSeen: DecisionRequest | undefined
+  const verifier = createH3cVerifier({
+    imageState: createSharpRaster().imageState,
+    decision: {
+      async decide(request, signal) {
+        requestSeen = request
+        seenSignal = signal
+        return result(request, 'match-complete-pure')
+      },
+    },
+  })
+  const input: H3cVerificationInput = {
+    image: { data: source.data, width: source.width, height: source.height, format: 'rgba8' },
+    mask: mask(),
+    box: { left: 12, top: 8, width: 8, height: 6 },
+    alias: 'C00',
+    target: 'Authored Bowl',
+    exclusions: ['not a plate'],
+    signal: originalSignal,
+  }
+  const pending = verifier.verify(input)
+  input.alias = 'Changed'
+  input.target = 'Changed target'
+  input.box.left = 11
+  input.signal = replacementSignal
+  const checked = await pending
+  assert.equal(checked.verdict, 'match-complete-pure')
+  assert.equal(seenSignal, originalSignal)
+  assert.ok(requestSeen)
+  const textState = requestSeen.state.filter((part): part is string => typeof part === 'string')
+  assert.ok(textState.some((part) => part.includes('C00')))
+  assert.ok(textState.some((part) => part.includes('Authored Bowl')))
+  assert.ok(textState.some((part) => part.includes('"left":12')))
+  assert.match(JSON.stringify(requestSeen.questions.verification), /Authored Bowl/u)
+  assert.doesNotMatch(textState.join('\n'), /Changed/u)
 })
 
 await test('H3c honors cancellation after a late decision and never returns late success', async () => {
