@@ -1,5 +1,7 @@
 # H5b paid replay independent audit
 
+Post-run evidence clarification: the historical trace sanitizer omitted separate `decision-trace` files for D/U aliases. Raw choices/distributions remain in the run rows, and the checks below verified physical receipts, source closure and output-mask provenance; they did not independently replay separate raw answer traces. This limitation does not change the measured mask scores or justify rerunning this rejected recipe. See the [subsequent transport diagnostic](v03-multi-image-reference-probe-audit.md) and the prospective bounded trace-schema repair for H6.
+
 The closed H5b replay does not support advancing this profile to qualification. The pipeline selected a gate-passing same-source mask for 3/9 positive cases and returned a located result for all three negative cases. All 12 rows completed without runner errors; three positive rows ended `unknown` with `none-selected`.
 
 | Positive stratum  | Same-mask candidate available | Passing candidate nominated | Passing mask selected |

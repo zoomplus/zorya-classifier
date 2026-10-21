@@ -1,0 +1,917 @@
+{
+  "schema": "multi-image-reference-v1",
+  "status": "complete",
+  "route": {
+    "model": "openai/gpt-6-luna-decisions",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "apiEndpoint": "/api/alpha/decisions",
+    "allowFallbacks": false
+  },
+  "producer": {
+    "sha256": "3857cdfe0ade484214a4bab6e303a75a28cb365cd11b1b558441c5ff1a8cfc5c",
+    "files": [
+      {
+        "path": "benchmarks/v02/budget.ts",
+        "sha256": "c1b1b84125bc8dc7890b353cb71ad2cc5332715766a76f0e6131208bd1826218"
+      },
+      {
+        "path": "benchmarks/v02/protocol.ts",
+        "sha256": "2cd0a66e3f27b60484924bc97d7d9a5ade012f7df3d6e8436bf3739b347bd957"
+      },
+      {
+        "path": "benchmarks/v02/recording.ts",
+        "sha256": "b196f5a4f633ed1ebe1649159da9fef57f0357c80e8ff88df597d1aaa62b950b"
+      },
+      {
+        "path": "benchmarks/v03/h5-proposal-composer.ts",
+        "sha256": "c10e6e9cee8422c245571e20ad071f72bbc17d68d787b8a0f617cd93824346d5"
+      },
+      {
+        "path": "benchmarks/v03/replay-source-closure.ts",
+        "sha256": "1b06bcb1fb2efbe17b082ebbe586d711321e9178c399ca0b834b393d33bcd531"
+      },
+      {
+        "path": "benchmarks/v03/run-h5b-paid-replay.ts",
+        "sha256": "3fd4c49c9c9b9a0b8bf9676da5781ed0c2027027d8b6366653e5868148e5001e"
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "61543b204b5fe38a94b32f4528e4d1e32b0061a304beab6e5ee5f19887868baf"
+      },
+      {
+        "path": "package.json",
+        "sha256": "11d19ae22e106be1ae2cb2c5e1c08a7359d9f89c2ca943846b29d415c45a69bd"
+      },
+      {
+        "path": "src/app/cli-arguments.ts",
+        "sha256": "cc072ada300d459ca070dce6312e0205afb1125888a4be7373c9c6a50a5498a4"
+      },
+      {
+        "path": "src/app/cli-route.ts",
+        "sha256": "769b0f2e8fa6d1fabbf2e7bd000fec724c1b94a3c6233eea7b93d55503052aad"
+      },
+      {
+        "path": "src/app/create-classifier.ts",
+        "sha256": "060087fac98c1a2538fc202699c6ba5e82f8b12a1ab64ab809c690e12a15c870"
+      },
+      {
+        "path": "src/app/extraction-files.ts",
+        "sha256": "e86d9ef07eda5537572398a2d4d0a9fb41a8f3dff447279f6a55b6b1f9136c69"
+      },
+      {
+        "path": "src/cli.ts",
+        "sha256": "887dbf2a987f1241e2f1e1a659321ea87a5148a03956438678969923579206eb"
+      },
+      {
+        "path": "src/entities/boundary-view.ts",
+        "sha256": "187ae80d2952cc2452752f06bbb1eeba200c715c12f8dd9ada4fd29156141655"
+      },
+      {
+        "path": "src/entities/contracts.ts",
+        "sha256": "7710dad19cd6caa1d10516babb2f9d9f108af1c7040302f09bf53b9b478187cd"
+      },
+      {
+        "path": "src/entities/cutout-raster.ts",
+        "sha256": "51fc476ced53f451f82eb9a2881c124d751b9d1b071c32d4b82cbd2d0edfbe45"
+      },
+      {
+        "path": "src/entities/errors.ts",
+        "sha256": "1c92c94c9ed6917953ac5192bfd2d8896cdb6fe13b7d05593573b7f2103330b0"
+      },
+      {
+        "path": "src/entities/object-proposals.ts",
+        "sha256": "112e182eedc46a402f9f94b776494c2afad8194dc692ed045a2d286d15775434"
+      },
+      {
+        "path": "src/entities/representation.ts",
+        "sha256": "67cfafea702e28b25bc472b4d961914102628db24679b6099d31c4d32ebf5088"
+      },
+      {
+        "path": "src/entities/segmentation-metadata.ts",
+        "sha256": "b8cc02740523e90d1b9493c6d9d8c6a33f963e6b08b5b1c8636e3fed3aa8b270"
+      },
+      {
+        "path": "src/entities/segmentation-verification.ts",
+        "sha256": "ceb66b36360d4b5be0d32ee23568bbb7d6aff179fa62c6a1ff1710c8d5e80561"
+      },
+      {
+        "path": "src/entities/segmentation.ts",
+        "sha256": "d99c765bd2524459d257babb8e1ee08140bba2d11821a74f0b5eab6981ea7194"
+      },
+      {
+        "path": "src/entities/whole-object.ts",
+        "sha256": "cbf4d489890f9c18ba75312d93e865f7edf921ad3a4528006235e052541a2002"
+      },
+      {
+        "path": "src/features/choice-beam-layout.ts",
+        "sha256": "8f61d6f784e0e6273467cea01315f17bbfa4fffa695dd7a7bb9cd5cac5354e1a"
+      },
+      {
+        "path": "src/features/choice.ts",
+        "sha256": "2ec3e20a00966bafdd0793fc895109a2c7a10be465a11d56cc45dcb6599b47eb"
+      },
+      {
+        "path": "src/features/prompts.ts",
+        "sha256": "b808ed8f42e8c92daf08060d2805da618f2b140f99b6a9b07df49622d57b62aa"
+      },
+      {
+        "path": "src/features/segmentation/box-check.ts",
+        "sha256": "8467a240b42a3a641ad50ba81eb4b5aa103c4bb5db785a0404e1a25a2fdd51c6"
+      },
+      {
+        "path": "src/features/segmentation/mask.ts",
+        "sha256": "5d13115284bb6474e2312409d4464891eb4cf55174a9da6a92fe89d62aececc9"
+      },
+      {
+        "path": "src/features/segmentation/packed-mask.ts",
+        "sha256": "38dc9a7d15f07e9e11c31598df3e1c8369330f6e46722f04fe3e35fc216ef523"
+      },
+      {
+        "path": "src/features/uniform-grid.ts",
+        "sha256": "8cee38aee52ba2c4ac2eaed909d5f53cc0e5aa2c04fe87585c66b29573e21c4d"
+      },
+      {
+        "path": "src/index.ts",
+        "sha256": "4907d97e97a0620c9224050d35384dbd6305903603f1d4f6ffc8a234b2108619"
+      },
+      {
+        "path": "src/infrastructure/boundary-view.ts",
+        "sha256": "2fb5546ae4a47a2a08f13ccad74c5a9cc7b9736ff052738637bfd65f1acd7775"
+      },
+      {
+        "path": "src/infrastructure/openrouter-common.ts",
+        "sha256": "415462c42da7a3748c6bfe942ee99085fba71bc1f4158d369edda8269efeb124"
+      },
+      {
+        "path": "src/infrastructure/openrouter-vision.ts",
+        "sha256": "b72e4699e132c1ac598772c49287edb0b5ca355ad2af33481f9c741ddcb13eaa"
+      },
+      {
+        "path": "src/infrastructure/openrouter.ts",
+        "sha256": "486a919853949e6789dd4035b7699fd89b9682cb3e928632c77b216656f44c55"
+      },
+      {
+        "path": "src/infrastructure/raster.ts",
+        "sha256": "615626e6fe04e377712ec7a3e3d8f2ea5e35ec17c2fd3982ea9df940ce5303dd"
+      },
+      {
+        "path": "src/infrastructure/segmentation/box-presentation.ts",
+        "sha256": "bc2151c3a0f27ed84f26f2fc23327bd561c65e035c4c6f8d75b27901790043ea"
+      },
+      {
+        "path": "src/infrastructure/segmentation/cutout-raster.ts",
+        "sha256": "f0ff7e1dd8b6670bb6320813ed4a0bb17d8054b766fc016bcedb17d097eafbfe"
+      },
+      {
+        "path": "src/infrastructure/segmentation/grabcut/index.ts",
+        "sha256": "87e6ce49bc9dcfb085fc3e4ba9abc7d13effd3e45976a307a1de0b950766482a"
+      },
+      {
+        "path": "src/infrastructure/segmentation/grabcut/worker-inference.ts",
+        "sha256": "b34d9ec1c23145f7c380a71634ea2d53c191e13a35c6765dbf8d2e381a31db29"
+      },
+      {
+        "path": "src/infrastructure/segmentation/index.ts",
+        "sha256": "91f683e7b4cd73c79534c141858a50d376c606f15845dc48340a4462f83deed4"
+      },
+      {
+        "path": "src/infrastructure/segmentation/mobile-sam/index.ts",
+        "sha256": "6be8e5ad19756d2e72c4d12608a1795a49de970820e44f00f82f7472a6365e60"
+      },
+      {
+        "path": "src/infrastructure/segmentation/mobile-sam/worker-inference.ts",
+        "sha256": "4d043cf68579f73e30f072470c1503353170a77820bb6c22ad450b095452e280"
+      },
+      {
+        "path": "src/infrastructure/segmentation/native-child.ts",
+        "sha256": "94f0ccea6aec1d93a93256553cae92c3f19220f1ffbd3ac14060c2daa8ee2f83"
+      },
+      {
+        "path": "src/infrastructure/segmentation/native-protocol.ts",
+        "sha256": "42263de2b5671b1fe5f894608780c3faf527c227ff5f6f9550cdce8132409322"
+      },
+      {
+        "path": "src/infrastructure/segmentation/native-worker.ts",
+        "sha256": "44751f75741a2ebee092682e4c83b41d076ab357e8effb680fa6e980aa42f17e"
+      },
+      {
+        "path": "src/infrastructure/segmentation/probe-backend.ts",
+        "sha256": "32cfee334bd014b16134f7efae5cbb9ca1953e5b578fd466105e869ce73a66ff"
+      },
+      {
+        "path": "src/infrastructure/segmentation/proposal-presentation.ts",
+        "sha256": "7bc50776ff1ae52496923014ae621e030dcde45c47e9216277f6617faa8de707"
+      },
+      {
+        "path": "src/infrastructure/segmentation/verify-asset.ts",
+        "sha256": "2a8479dabf84622003a5eb01f3c1a116347e808108e8a0c8971129b18e1c5ef1"
+      },
+      {
+        "path": "src/infrastructure/text-representation.ts",
+        "sha256": "7f392f1bcdb77969eaccf40be4b6d5c8a4a11a8b3708dda9b91ff1d8584c2061"
+      },
+      {
+        "path": "src/infrastructure/vision-chat.ts",
+        "sha256": "314e2c236a75ad43023c6ae34544a849df027f025eda32abdc2a7e1d49c742f3"
+      },
+      {
+        "path": "src/openai-compatible.ts",
+        "sha256": "5461c54dbf3a691b3391834511d06baaf511b07487849f3d823b357fed9d8513"
+      },
+      {
+        "path": "src/openrouter.ts",
+        "sha256": "8b28a235bacec5ad7c00ab0ac72fcabdc58658dd72971a5935f2a1572f572bf9"
+      },
+      {
+        "path": "src/processes/boundary-state.ts",
+        "sha256": "77c636e2a2311ed989e514ee78adef66f80230d5eee394549917c9ff13fc99d7"
+      },
+      {
+        "path": "src/processes/classify.ts",
+        "sha256": "0edf3e8a05333c2325f53ddd06c1c903d3daca80ca082ba2e3609ff9de6ffb9d"
+      },
+      {
+        "path": "src/processes/extract-from-region.ts",
+        "sha256": "15587884eea7f75f006d1834d0efdb5d98f2332d00ef8a030f46de0599f3a1d1"
+      },
+      {
+        "path": "src/processes/extract.ts",
+        "sha256": "9e1b2b3a4b36cc938d081f2a2e1deadd26576fcacccf17218c9364adbd749d8b"
+      },
+      {
+        "path": "src/processes/locate.ts",
+        "sha256": "a5a1320c2dff4060a3c5ab5e32cb5f0af2d94fcad458caba3818b6a0a28dab3d"
+      },
+      {
+        "path": "src/processes/proposal-location.ts",
+        "sha256": "a037c63a92db2df54ccd573af6cfa7926dcda869398ce7be9770219aa33f849e"
+      },
+      {
+        "path": "src/processes/whole-object.ts",
+        "sha256": "548a0de8ee72956da3162023f43983d7596a2df9ec2756e33c952ca27b3fc320"
+      },
+      {
+        "path": "src/segmentation.ts",
+        "sha256": "5ca90e5f6cc1a688667d1ee3bf041654404a80129fab93677106fa55dea2b253"
+      },
+      {
+        "path": "src/shared/choice-mass.ts",
+        "sha256": "7f645998d9cd2688ca425b4765ec0bf7d125e932f085f9e84599b4c3b97743a3"
+      },
+      {
+        "path": "src/shared/gate.ts",
+        "sha256": "97e4e32749dc9d3a9def6faaea2566b5d0ed831ba4451999740c719fafa8e576"
+      },
+      {
+        "path": "src/shared/input-budget.ts",
+        "sha256": "f47f084681d0a559b2154ce731d1897d9dde0c293a5d52c885236b9eb459e050"
+      },
+      {
+        "path": "src/shared/scope.ts",
+        "sha256": "cc557e9fd83a838f5366c64d026859db119491d927dfb3a84ef4320b2f0b0beb"
+      },
+      {
+        "path": "tsconfig.build.json",
+        "sha256": "2fb88969c470cde98f96200d6eae229ad6356722d6b5ff385a477051b004b1f2"
+      },
+      {
+        "path": "tsconfig.json",
+        "sha256": "0c60f234442e71af880e2ef0e3beece0a6737359e985f917f39b5ed86119ad7e"
+      }
+    ]
+  },
+  "sourceSha256": "077cc662ebfd6b643b4b5a50869ea3773b16f9304656d9b6946faf040f0ef210",
+  "rows": [
+    {
+      "caseId": "multi-1",
+      "expected": "R01",
+      "selected": {
+        "choice": "R01",
+        "nativeChoice": "R01",
+        "probabilities": {
+          "R01": 1,
+          "R02": 0,
+          "R03": 0,
+          "R04": 0,
+          "R05": 0,
+          "R06": 0,
+          "R07": 0,
+          "R08": 0,
+          "R09": 0,
+          "none": 0
+        },
+        "tied": ["R01"],
+        "confidence": 1
+      },
+      "status": "complete",
+      "correct": true,
+      "requestSha256": "4a15e492288ba891f965ca5f429274463513fa2eb85dc843da4ed4ba70db0a29",
+      "metadata": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578474-gXsrA47DOxcASLZPNv2s",
+        "durationMs": 1053.6380519999998,
+        "costUsd": 0.0002231,
+        "attempts": 1
+      },
+      "elapsedMs": 1076.523853,
+      "physicalCalls": 1
+    },
+    {
+      "caseId": "multi-2",
+      "expected": "R05",
+      "selected": {
+        "choice": "R05",
+        "nativeChoice": "R05",
+        "probabilities": {
+          "R01": 0,
+          "R02": 0,
+          "R03": 0,
+          "R04": 0,
+          "R05": 0.99,
+          "R06": 0.01,
+          "R07": 0,
+          "R08": 0,
+          "R09": 0,
+          "none": 0
+        },
+        "tied": ["R05"],
+        "confidence": 0.99
+      },
+      "status": "complete",
+      "correct": true,
+      "requestSha256": "946dc95e1efe0e3441f329d3400ea83ed2ce2f3ac6e664af004c2aea5c46f093",
+      "metadata": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578474-EkfNhrN5cgTauNdtUMTL",
+        "durationMs": 535.5353619999999,
+        "costUsd": 0.0002231,
+        "attempts": 1
+      },
+      "elapsedMs": 555.6278360000001,
+      "physicalCalls": 1
+    },
+    {
+      "caseId": "multi-3",
+      "expected": "R09",
+      "selected": {
+        "choice": "R09",
+        "nativeChoice": "R09",
+        "probabilities": {
+          "R01": 0,
+          "R02": 0,
+          "R03": 0,
+          "R04": 0,
+          "R05": 0,
+          "R06": 0,
+          "R07": 0,
+          "R08": 0,
+          "R09": 0.97,
+          "none": 0.03
+        },
+        "tied": ["R09"],
+        "confidence": 0.97
+      },
+      "status": "complete",
+      "correct": true,
+      "requestSha256": "7e9a44e57fed8ad40293ef4bd3f1ab2a5e4e72f43d8333905e708447c876064a",
+      "metadata": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578475-oEgbAHKNUAkDmrS4LhYv",
+        "durationMs": 512.6262239999996,
+        "costUsd": 0.0002231,
+        "attempts": 1
+      },
+      "elapsedMs": 534.0079969999997,
+      "physicalCalls": 1
+    },
+    {
+      "caseId": "multi-4",
+      "expected": "R09",
+      "selected": {
+        "choice": "R09",
+        "nativeChoice": "R09",
+        "probabilities": {
+          "R01": 0,
+          "R02": 0,
+          "R03": 0,
+          "R04": 0,
+          "R05": 0,
+          "R06": 0,
+          "R07": 0,
+          "R08": 0,
+          "R09": 1,
+          "none": 0
+        },
+        "tied": ["R09"],
+        "confidence": 1
+      },
+      "status": "complete",
+      "correct": true,
+      "requestSha256": "159debf13621fe38439d8c8cce6f5cee46ab13e901dc9307e719da3f0812690f",
+      "metadata": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578476-2VZpNTAv3ZFDQcW8K6WI",
+        "durationMs": 489.40834399999994,
+        "costUsd": 0.0002231,
+        "attempts": 1
+      },
+      "elapsedMs": 510.26900000000023,
+      "physicalCalls": 1
+    },
+    {
+      "caseId": "multi-5",
+      "expected": "R05",
+      "selected": {
+        "choice": "R05",
+        "nativeChoice": "R05",
+        "probabilities": {
+          "R01": 0,
+          "R02": 0,
+          "R03": 0,
+          "R04": 0,
+          "R05": 1,
+          "R06": 0,
+          "R07": 0,
+          "R08": 0,
+          "R09": 0,
+          "none": 0
+        },
+        "tied": ["R05"],
+        "confidence": 1
+      },
+      "status": "complete",
+      "correct": true,
+      "requestSha256": "a24bf6d36e5ef134f578540755dc2ae4446569c0b8122e7f2c6cda34aa5c1780",
+      "metadata": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578476-XKHXEmdJL1o5I6VNXMH7",
+        "durationMs": 386.4447650000002,
+        "costUsd": 0.0002231,
+        "attempts": 1
+      },
+      "elapsedMs": 406.30839799999967,
+      "physicalCalls": 1
+    },
+    {
+      "caseId": "multi-6",
+      "expected": "R01",
+      "selected": {
+        "choice": "R01",
+        "nativeChoice": "R01",
+        "probabilities": {
+          "R01": 1,
+          "R02": 0,
+          "R03": 0,
+          "R04": 0,
+          "R05": 0,
+          "R06": 0,
+          "R07": 0,
+          "R08": 0,
+          "R09": 0,
+          "none": 0
+        },
+        "tied": ["R01"],
+        "confidence": 1
+      },
+      "status": "complete",
+      "correct": true,
+      "requestSha256": "d3cb9281596a037b284ae8c181c8ed8e8f83387ccb4bdae2533e8edb7180f003",
+      "metadata": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578477-ZEwg8jkj2fTTBiZ9xs8K",
+        "durationMs": 439.4789129999999,
+        "costUsd": 0.0002231,
+        "attempts": 1
+      },
+      "elapsedMs": 458.56202600000006,
+      "physicalCalls": 1
+    },
+    {
+      "caseId": "multi-7",
+      "expected": "none",
+      "selected": {
+        "choice": "none",
+        "nativeChoice": "none",
+        "probabilities": {
+          "R01": 0.01,
+          "R02": 0.01,
+          "R03": 0.02,
+          "R04": 0.01,
+          "R05": 0.01,
+          "R06": 0.08,
+          "R07": 0.01,
+          "R08": 0.01,
+          "R09": 0.02,
+          "none": 0.82
+        },
+        "tied": ["none"],
+        "confidence": 0.8
+      },
+      "status": "complete",
+      "correct": true,
+      "requestSha256": "14162969eac8825e8a5bdffbca15a95945ecf0a4f0b6b084ff19cbecf15aef74",
+      "metadata": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578477-xzLrpdD4LUHyySfj8FTC",
+        "durationMs": 415.38228800000024,
+        "costUsd": 0.0002231,
+        "attempts": 1
+      },
+      "elapsedMs": 434.25026899999966,
+      "physicalCalls": 1
+    },
+    {
+      "caseId": "multi-8",
+      "expected": "none",
+      "selected": {
+        "choice": "none",
+        "nativeChoice": "none",
+        "probabilities": {
+          "R01": 0.01,
+          "R02": 0.01,
+          "R03": 0,
+          "R04": 0.32,
+          "R05": 0,
+          "R06": 0,
+          "R07": 0,
+          "R08": 0,
+          "R09": 0.01,
+          "none": 0.65
+        },
+        "tied": ["none"],
+        "confidence": 0.61
+      },
+      "status": "complete",
+      "correct": true,
+      "requestSha256": "d575c2031a7748432b602b3aba3b195baa28befb25dc1b85c0bb2d307d4058ac",
+      "metadata": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578477-KS33GuZeeIqa3psgKIUz",
+        "durationMs": 545.1102409999994,
+        "costUsd": 0.0002231,
+        "attempts": 1
+      },
+      "elapsedMs": 563.6202959999991,
+      "physicalCalls": 1
+    }
+  ],
+  "budget": {
+    "admittedPhysicalCalls": 8,
+    "knownCostUsd": 0.0017847999999999998,
+    "unknownCostCalls": 0,
+    "inFlightCalls": 0,
+    "accountedExposureUsd": 0.0017847999999999998,
+    "maxPhysicalCalls": 8,
+    "maxCostUsd": 0.5
+  },
+  "calls": [
+    {
+      "physicalId": 1,
+      "reservationId": 1,
+      "logicalId": 1,
+      "requestSha256": "4a15e492288ba891f965ca5f429274463513fa2eb85dc843da4ed4ba70db0a29",
+      "requestBodySha256": "6187fea0b2f8af9e70d6e6066206816bbc70e270e201534dfd4aff96edd6f985",
+      "admittedAt": "2026-10-21T10:27:50.697Z",
+      "durationMs": 1052.488341,
+      "dispatched": true,
+      "httpStatus": 200,
+      "wireReceipt": {
+        "responseModel": "openai/gpt-6-luna-decisions-20261006",
+        "responseProvider": "OpenAI",
+        "responseId": "gen-dec-1792578474-gXsrA47DOxcASLZPNv2s",
+        "usageCostUsd": 0.0002231,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "typed-decisions-response",
+        "finishReason": null,
+        "bodyRead": "parsed"
+      },
+      "route": {
+        "model": "openai/gpt-6-luna-decisions",
+        "provider": "openai",
+        "providerName": "OpenAI",
+        "apiEndpoint": "/api/alpha/decisions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578474-gXsrA47DOxcASLZPNv2s",
+        "costUsd": 0.0002231,
+        "durationMs": 1053.6380519999998,
+        "attempts": 1
+      }
+    },
+    {
+      "physicalId": 2,
+      "reservationId": 2,
+      "logicalId": 2,
+      "requestSha256": "946dc95e1efe0e3441f329d3400ea83ed2ce2f3ac6e664af004c2aea5c46f093",
+      "requestBodySha256": "a1a13ac685bfb75bdb199ab75d22bdbbb680c49520c0ae7d28b6c7a46b764deb",
+      "admittedAt": "2026-10-21T10:27:54.698Z",
+      "durationMs": 534.9336119999998,
+      "dispatched": true,
+      "httpStatus": 200,
+      "wireReceipt": {
+        "responseModel": "openai/gpt-6-luna-decisions-20261006",
+        "responseProvider": "OpenAI",
+        "responseId": "gen-dec-1792578474-EkfNhrN5cgTauNdtUMTL",
+        "usageCostUsd": 0.0002231,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "typed-decisions-response",
+        "finishReason": null,
+        "bodyRead": "parsed"
+      },
+      "route": {
+        "model": "openai/gpt-6-luna-decisions",
+        "provider": "openai",
+        "providerName": "OpenAI",
+        "apiEndpoint": "/api/alpha/decisions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578474-EkfNhrN5cgTauNdtUMTL",
+        "costUsd": 0.0002231,
+        "durationMs": 535.5353619999999,
+        "attempts": 1
+      }
+    },
+    {
+      "physicalId": 3,
+      "reservationId": 3,
+      "logicalId": 3,
+      "requestSha256": "7e9a44e57fed8ad40293ef4bd3f1ab2a5e4e72f43d8333905e708447c876064a",
+      "requestBodySha256": "1879a0de2a80d4a82904d9b773f18db7b3b2d422f076d68e86b1fbf46a364d40",
+      "admittedAt": "2026-10-21T10:27:55.255Z",
+      "durationMs": 511.946766,
+      "dispatched": true,
+      "httpStatus": 200,
+      "wireReceipt": {
+        "responseModel": "openai/gpt-6-luna-decisions-20261006",
+        "responseProvider": "OpenAI",
+        "responseId": "gen-dec-1792578475-oEgbAHKNUAkDmrS4LhYv",
+        "usageCostUsd": 0.0002231,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "typed-decisions-response",
+        "finishReason": null,
+        "bodyRead": "parsed"
+      },
+      "route": {
+        "model": "openai/gpt-6-luna-decisions",
+        "provider": "openai",
+        "providerName": "OpenAI",
+        "apiEndpoint": "/api/alpha/decisions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578475-oEgbAHKNUAkDmrS4LhYv",
+        "costUsd": 0.0002231,
+        "durationMs": 512.6262239999996,
+        "attempts": 1
+      }
+    },
+    {
+      "physicalId": 4,
+      "reservationId": 4,
+      "logicalId": 4,
+      "requestSha256": "159debf13621fe38439d8c8cce6f5cee46ab13e901dc9307e719da3f0812690f",
+      "requestBodySha256": "9bda22b1b0bed769c7beeaca36be4a91754f9c45784fe55d3a6693996855d88b",
+      "admittedAt": "2026-10-21T10:27:55.789Z",
+      "durationMs": 488.8682550000003,
+      "dispatched": true,
+      "httpStatus": 200,
+      "wireReceipt": {
+        "responseModel": "openai/gpt-6-luna-decisions-20261006",
+        "responseProvider": "OpenAI",
+        "responseId": "gen-dec-1792578476-2VZpNTAv3ZFDQcW8K6WI",
+        "usageCostUsd": 0.0002231,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "typed-decisions-response",
+        "finishReason": null,
+        "bodyRead": "parsed"
+      },
+      "route": {
+        "model": "openai/gpt-6-luna-decisions",
+        "provider": "openai",
+        "providerName": "OpenAI",
+        "apiEndpoint": "/api/alpha/decisions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578476-2VZpNTAv3ZFDQcW8K6WI",
+        "costUsd": 0.0002231,
+        "durationMs": 489.40834399999994,
+        "attempts": 1
+      }
+    },
+    {
+      "physicalId": 5,
+      "reservationId": 5,
+      "logicalId": 5,
+      "requestSha256": "a24bf6d36e5ef134f578540755dc2ae4446569c0b8122e7f2c6cda34aa5c1780",
+      "requestBodySha256": "8e0c6e259b28fdab82a13f3f65d04aafba91f29244a4037cf43e4aca08776a1b",
+      "admittedAt": "2026-10-21T10:27:56.299Z",
+      "durationMs": 385.2377550000001,
+      "dispatched": true,
+      "httpStatus": 200,
+      "wireReceipt": {
+        "responseModel": "openai/gpt-6-luna-decisions-20261006",
+        "responseProvider": "OpenAI",
+        "responseId": "gen-dec-1792578476-XKHXEmdJL1o5I6VNXMH7",
+        "usageCostUsd": 0.0002231,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "typed-decisions-response",
+        "finishReason": null,
+        "bodyRead": "parsed"
+      },
+      "route": {
+        "model": "openai/gpt-6-luna-decisions",
+        "provider": "openai",
+        "providerName": "OpenAI",
+        "apiEndpoint": "/api/alpha/decisions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578476-XKHXEmdJL1o5I6VNXMH7",
+        "costUsd": 0.0002231,
+        "durationMs": 386.4447650000002,
+        "attempts": 1
+      }
+    },
+    {
+      "physicalId": 6,
+      "reservationId": 6,
+      "logicalId": 6,
+      "requestSha256": "d3cb9281596a037b284ae8c181c8ed8e8f83387ccb4bdae2533e8edb7180f003",
+      "requestBodySha256": "25051f6f304693b6c9c768203b72d9b012902de314e6b3774b0546a3a425e4a2",
+      "admittedAt": "2026-10-21T10:27:56.705Z",
+      "durationMs": 438.90047200000026,
+      "dispatched": true,
+      "httpStatus": 200,
+      "wireReceipt": {
+        "responseModel": "openai/gpt-6-luna-decisions-20261006",
+        "responseProvider": "OpenAI",
+        "responseId": "gen-dec-1792578477-ZEwg8jkj2fTTBiZ9xs8K",
+        "usageCostUsd": 0.0002231,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "typed-decisions-response",
+        "finishReason": null,
+        "bodyRead": "parsed"
+      },
+      "route": {
+        "model": "openai/gpt-6-luna-decisions",
+        "provider": "openai",
+        "providerName": "OpenAI",
+        "apiEndpoint": "/api/alpha/decisions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578477-ZEwg8jkj2fTTBiZ9xs8K",
+        "costUsd": 0.0002231,
+        "durationMs": 439.4789129999999,
+        "attempts": 1
+      }
+    },
+    {
+      "physicalId": 7,
+      "reservationId": 7,
+      "logicalId": 7,
+      "requestSha256": "14162969eac8825e8a5bdffbca15a95945ecf0a4f0b6b084ff19cbecf15aef74",
+      "requestBodySha256": "a0f027b1192329e187ce82225835786579a1f9ffc493be313c577b050d07e12a",
+      "admittedAt": "2026-10-21T10:27:57.164Z",
+      "durationMs": 414.7647670000001,
+      "dispatched": true,
+      "httpStatus": 200,
+      "wireReceipt": {
+        "responseModel": "openai/gpt-6-luna-decisions-20261006",
+        "responseProvider": "OpenAI",
+        "responseId": "gen-dec-1792578477-xzLrpdD4LUHyySfj8FTC",
+        "usageCostUsd": 0.0002231,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "typed-decisions-response",
+        "finishReason": null,
+        "bodyRead": "parsed"
+      },
+      "route": {
+        "model": "openai/gpt-6-luna-decisions",
+        "provider": "openai",
+        "providerName": "OpenAI",
+        "apiEndpoint": "/api/alpha/decisions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578477-xzLrpdD4LUHyySfj8FTC",
+        "costUsd": 0.0002231,
+        "durationMs": 415.38228800000024,
+        "attempts": 1
+      }
+    },
+    {
+      "physicalId": 8,
+      "reservationId": 8,
+      "logicalId": 8,
+      "requestSha256": "d575c2031a7748432b602b3aba3b195baa28befb25dc1b85c0bb2d307d4058ac",
+      "requestBodySha256": "8cd2a9d09896267ace427b64bac14e806b8889053d4e51990fc1a5edce9d6dd2",
+      "admittedAt": "2026-10-21T10:27:57.598Z",
+      "durationMs": 544.4385990000001,
+      "dispatched": true,
+      "httpStatus": 200,
+      "wireReceipt": {
+        "responseModel": "openai/gpt-6-luna-decisions-20261006",
+        "responseProvider": "OpenAI",
+        "responseId": "gen-dec-1792578477-KS33GuZeeIqa3psgKIUz",
+        "usageCostUsd": 0.0002231,
+        "errorType": null,
+        "errorCode": null,
+        "errorParameter": null,
+        "errorCategory": null,
+        "errorReason": null,
+        "rateLimitScope": null,
+        "retryAfterSeconds": null,
+        "responseDisposition": "typed-decisions-response",
+        "finishReason": null,
+        "bodyRead": "parsed"
+      },
+      "route": {
+        "model": "openai/gpt-6-luna-decisions",
+        "provider": "openai",
+        "providerName": "OpenAI",
+        "apiEndpoint": "/api/alpha/decisions",
+        "allowFallbacks": false
+      },
+      "receipt": {
+        "model": "openai/gpt-6-luna-decisions-20261006",
+        "provider": "OpenAI",
+        "requestId": "gen-dec-1792578477-KS33GuZeeIqa3psgKIUz",
+        "costUsd": 0.0002231,
+        "durationMs": 545.1102409999994,
+        "attempts": 1
+      }
+    }
+  ],
+  "persistenceFailures": [],
+  "correct": 8,
+  "total": 8
+}
