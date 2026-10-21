@@ -211,7 +211,8 @@ try {
   for (const f of packed.files) {
     if (
       !/^(dist\/|docs\/|README\.md$|LICENSE$|NOTICE\.md$|package\.json$)/.test(f.path) ||
-      /(\.env|node_modules|\.map$|session\.log|\.run)/.test(f.path)
+      /(\.env|node_modules|\.map$|session\.log|\.run)/.test(f.path) ||
+      /^docs\/(?:research\/v03-|evidence\/v03\/|0\.3\.0-quality-plan\.md$)/.test(f.path)
     )
       throw new Error(`Unwanted package file: ${f.path}`)
     const bytes = await readFile(resolve(f.path)),
