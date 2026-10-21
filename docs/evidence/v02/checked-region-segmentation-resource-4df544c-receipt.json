@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "benchmark": "public-mobile-sam-region-checked-segmentation-resource-v1",
+  "attempt": "4df544c-threads2-20261021T0154Z",
+  "status": "qualified",
+  "workflow": "region-checked-segmentation",
+  "execution": {
+    "sourceCommit": "4df544c1180e82751a22902f410d9fe8a3c58fb4",
+    "sourceManifestSha256": "3edc855221203510545368d7fb8ede9c56010188204928ff6974fe210c1797a6",
+    "sourceFileCount": 59,
+    "sourceManifestUnchanged": true,
+    "archiveReferenceSha256": "265de82fc4f4bdbc0bc5036efb268382c69681a945c42ac8a28c033bb31fcaa0",
+    "archiveInstalledByHarness": false,
+    "platform": "Linux 6.6.87.2 WSL2 x64",
+    "node": "v24.12.0",
+    "nativeThreads": 2,
+    "forcedGc": false,
+    "providerHttpCalls": 0,
+    "latencyUse": "Diagnostic only; no ranking claim."
+  },
+  "physicalRun": {
+    "pid": 1758290,
+    "startTicks": 20860863,
+    "clockTicksPerSecond": 100,
+    "startedAtUtc": "2026-10-21T01:54:15.873Z",
+    "measurementStartedAtUtc": "2026-10-21T02:05:07.993Z",
+    "busyStartedAtUtc": "2026-10-21T02:05:40.928Z",
+    "endedAtUtc": "2026-10-21T04:04:56.086Z",
+    "kernelWitnessLastLiveAgeSeconds": 7212.11,
+    "kernelWitnessTerminalStatus": "process-exited",
+    "samePidAndStartTicksVerified": true
+  },
+  "durationAcceptance": {
+    "accepted": true,
+    "clock": "performance.now monotonic deadline loops; wall-clock timestamps are metadata only",
+    "warmupMs": 601136.000964,
+    "idleBeforeMs": 30000.836489,
+    "busyMs": 6542081.550886,
+    "idleAfterMs": 30001.24119,
+    "measurementObservedMs": 6602118.845414,
+    "processObservedMs": 7212607.320959,
+    "requestedTotalMs": 7200000,
+    "allPhaseAndCleanupFlags": true,
+    "kernelWitnessConfirmsProcessLiveForAtLeast7200Seconds": true
+  },
+  "work": {
+    "operations": 3295,
+    "locate": 1648,
+    "extract": 1647,
+    "located": 1648,
+    "extracted": 1647,
+    "extractedWithForegroundSeed": 1647,
+    "boxChecks": 4942,
+    "expansionRequests": 1647,
+    "completedAfterExpansion": 823,
+    "unknown": 0,
+    "failed": 0,
+    "timeouts": 0,
+    "providerHttpCalls": 0
+  },
+  "ownedChildLifecycle": {
+    "starts": 4942,
+    "closes": 4942,
+    "stillOwnedAtExit": 0,
+    "passed": true,
+    "abortAndPhysicalJoin": "passed",
+    "queueAndDispose": "passed",
+    "parentLossChildExit": "passed"
+  },
+  "idleMemory": {
+    "sampleIntervalMs": 5000,
+    "before": {
+      "sampleCount": 6,
+      "firstTimestampMs": 0.109749,
+      "lastTimestampMs": 25009.733897,
+      "rssBytesMedian": 295481344,
+      "heapUsedBytesMedian": 16304808,
+      "externalBytesMedian": 30678280,
+      "arrayBuffersBytesMedian": 1599991,
+      "sampleGapMs": {
+        "min": 5000.089504,
+        "median": 5001.878777,
+        "max": 5003.874563
+      }
+    },
+    "after": {
+      "sampleCount": 8,
+      "firstTimestampMs": 6572082.910157,
+      "lastTimestampMs": 6602109.819525,
+      "rssBytesMedian": 349417472,
+      "heapUsedBytesMedian": 25330692,
+      "externalBytesMedian": 10295319,
+      "arrayBuffersBytesMedian": 7445438,
+      "sampleGapMs": {
+        "min": 1684.719553,
+        "median": 5002.342477,
+        "max": 5004.856228
+      }
+    },
+    "deltas": {
+      "rssBytes": 53936128,
+      "rssMiB": 51.44140625,
+      "heapUsedBytes": 9025884,
+      "heapUsedMiB": 8.606204986572266,
+      "externalBytes": -20382961,
+      "arrayBuffersBytes": 5845447,
+      "arrayBuffersMiB": 5.574271202087402
+    },
+    "investigationThresholds": {
+      "rssRule": "max(20% of before-idle median, 128 MiB)",
+      "rssThresholdBytes": 134217728,
+      "rssIncreaseBelowThreshold": true,
+      "heapExternalArrayBuffersRule": "max(10% of before-idle median, 16 MiB)",
+      "heapExternalArrayBuffersThresholdBytes": 16777216,
+      "allThreeHeapRelatedIncreasesBelowThreshold": true,
+      "interpretation": "RSS rose by 51.44 MiB and remained in the final idle median, below the 128 MiB investigation threshold. Heap and ArrayBuffer increases were below their 16 MiB thresholds; external memory decreased. This is threshold evidence, not proof that the process has no retained memory."
+    },
+    "parentPeakBytes": {
+      "rss": 352370688,
+      "heapUsed": 39264368,
+      "external": 30678280,
+      "arrayBuffers": 24690060
+    },
+    "ownedChildPeakRssBytes": 335400960
+  },
+  "host": {
+    "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+    "logicalCpus": 16,
+    "physicalMemoryBytes": 33185517568,
+    "availableMemoryBytesBefore": 27562618880,
+    "availableMemoryBytesAfter": 27365339136,
+    "swapTotalBytes": 8589934592,
+    "cgroupLimits": "unavailable",
+    "hostAfterSnapshotAtUtc": "2026-10-21T04:05:40Z"
+  },
+  "rawArtifacts": {
+    "report": {
+      "path": ".run/v02/region-checked-soak-4df544c-threads2-20261021T0154Z/report.json",
+      "sha256": "89501d828d44a23bee02648b5ce095a04a94dd6c0f54465acd4bee07766bec72"
+    },
+    "kernelWitness": {
+      "path": ".run/v02/region-checked-soak-4df544c-threads2-20261021T0154Z/proc-dense-witness.tsv",
+      "sha256": "d00f8ffe8626527ddefd8b40ba543c2680c6b019f371fdba61b9906dad434ff2"
+    },
+    "sourceManifest": {
+      "path": ".run/v02/region-checked-soak-4df544c-threads2-20261021T0154Z/source-manifest.json",
+      "sha256": "3edc855221203510545368d7fb8ede9c56010188204928ff6974fe210c1797a6"
+    },
+    "smoke": {
+      "path": ".run/v02/region-checked-soak-4df544c-threads2-20261021T0153Z/smoke.json",
+      "sha256": "6c9cbd88bfe860b35641f029c8a789c571036934932ada0ceae2176c6b4f5792"
+    },
+    "hostBefore": {
+      "path": ".run/v02/region-checked-soak-4df544c-threads2-20261021T0154Z/host-before.json",
+      "sha256": "2b04d44271b8ae3b6ba7fed8f73177c9addb66dada5b42dfde999e885741b5d5"
+    },
+    "hostAfter": {
+      "path": ".run/v02/region-checked-soak-4df544c-threads2-20261021T0154Z/host-after.json",
+      "sha256": "c2c8874e200dd429fc3f62a702ca03dbb78204f03d50ebcdfb376aabf7ffce63"
+    }
+  },
+  "scopeLimitations": [
+    "The harness ran the working tree pinned by the 59-file source manifest; the referenced archive SHA is not a claim that the harness installed that archive.",
+    "The 5-second sampler's last idle-after gap includes its final sample near shutdown; the dense kernel witness independently confirms process identity and at least 7,200 seconds of live age.",
+    "Timing percentiles are diagnostic only because workloads on the shared host may affect latency; no ranking or accuracy claim is made."
+  ]
+}
