@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
 import sharp from 'sharp'
 import { test } from 'node:test'
-import type { DecisionRequest, DecisionResult, RasterImage } from '../../src/entities/contracts.js'
-import type { PackedBinaryMask } from '../../src/entities/object-proposals.js'
-import type { RgbaRaster } from '../../src/entities/representation.js'
-import { ClassifierError } from '../../src/entities/errors.js'
+import type { DecisionRequest, DecisionResult, RasterImage } from '../src/entities/contracts.js'
+import type { PackedBinaryMask } from '../src/entities/object-proposals.js'
+import type { RgbaRaster } from '../src/entities/representation.js'
+import { ClassifierError } from '../src/entities/errors.js'
 import {
   createH6ContextComposer,
   createSharpH6Presentation,
@@ -12,7 +12,7 @@ import {
   type H6DecisionStage,
   type H6Family,
   type H6ProposalCandidate,
-} from './h6-context-composer.js'
+} from '../benchmarks/v03/h6-context-composer.js'
 
 const target = 'the small amber marker beside the north road'
 const metadata = {
