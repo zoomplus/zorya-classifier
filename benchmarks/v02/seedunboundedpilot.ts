@@ -67,6 +67,14 @@ const sourceFiles = [
   '../../src/infrastructure/openrouter.ts',
   '../../src/infrastructure/openrouter-vision.ts',
   '../../src/infrastructure/vision-chat.ts',
+  '../../src/infrastructure/vision-chat/options.ts',
+  '../../src/infrastructure/vision-chat/request.ts',
+  '../../src/infrastructure/vision-chat/response.ts',
+  '../../src/infrastructure/decision-transport/errors.ts',
+  '../../src/infrastructure/decision-transport/request.ts',
+  '../../src/infrastructure/decision-transport/images.ts',
+  '../../src/infrastructure/decision-transport/response.ts',
+  '../../src/infrastructure/decision-transport/route-identity.ts',
   '../../src/infrastructure/boundary-view.ts',
 ] as const
 

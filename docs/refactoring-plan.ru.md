@@ -39,16 +39,22 @@
 - Разделение `create-classifier.ts` на `classifier-contracts`, `classifier-config`, `classifier-runtime`, `classifier-spatial`, `classifier-representation`; публичные export names и поведение без изменений.
 - **Checkpoint Linux22 (root):** commit `1515f15c1ff7c11cc0fcb6240619f57115d5cf2c`; `npm run check` **764/764**; pack 393/136/208 — receipts `wave4-root-pack.log` (не перезаписывать).
 
-## Волна 5 — extraction / proposals / presentation (ACTIVE)
+## Волна 5 — extraction / proposals / presentation (DONE)
 
 - Shared segmentation validation: `src/features/segmentation/validation.ts`, `source-mask.ts`, `region-result.ts`; processes `extract.ts`, `extract-from-region.ts` — orchestration only.
 - Proposal validation/presentation: `src/features/proposals/validation.ts`, `presentation.ts`; process `proposal-location.ts`.
 - Infrastructure split: `proposal-presentation-input.ts`, `proposal-presentation-pixels.ts` из `proposal-presentation.ts`.
 - Публичные entrypoints и семантика v0.2 region flow без изменений; `contains()` wrapper удалён — прямой `containsNonEmptyRect`.
+- **Checkpoint Linux22 (root):** commit `abc68b3a4fd39afa8e454d44a5262d213c23c3de`; `npm run check` **765/765** (receipt checkpoint владельца, не перезаписывать).
 
-## Волны 6–9 (ожидают)
+## Волна 6 — transports / native (ACTIVE)
 
-6. Transports / native
+| #   | Владение                                                                                                                                                                                         | Статус    |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| 6A  | `decision-transport/*`, split `vision-chat/*`, фасад `vision-chat.ts`; удалён `openrouter-common.ts`; closure/metadata в `ordinaryvisionpilot.ts`, `seedunboundedpilot.ts`, `model-selection.ts` | IN REVIEW |
+
+## Волны 7–9 (ожидают)
+
 7. Research / npm dist + dead-code (полный Knip по benchmarks)
 8. Русская документация / provenance (расширение)
 9. Финальный review: check, pack, Windows/Node 24 matrix, integration evidence

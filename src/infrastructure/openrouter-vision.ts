@@ -1,6 +1,6 @@
 import { createVisionChat, visionOptionsSchema } from './vision-chat.js'
 import type { VisionChatOptions } from './vision-chat.js'
-import { validated } from './openrouter-common.js'
+import { validated } from './decision-transport/errors.js'
 import { z } from 'zod'
 import type { DecisionPort } from '../entities/contracts.js'
 

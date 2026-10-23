@@ -2,21 +2,21 @@ import { z } from 'zod'
 import type { DecisionPort, DecisionRequest, DecisionResult } from '../entities/contracts.js'
 import { ClassifierError } from '../entities/errors.js'
 import { acceptsChoiceMass } from '../shared/choice-mass.js'
+import { active, failure, invalid, ownedError, validated } from './decision-transport/errors.js'
+import { validateImage } from './decision-transport/images.js'
 import {
-  active,
-  validated,
-  ownedError,
-  invalid,
-  preflightJson,
-  requestSchema,
-  validateImage,
-  failure,
-  readResponse,
-  requestLimit,
-  responseLimit,
-  probability,
   key,
-} from './openrouter-common.js'
+  preflightJson,
+  probability,
+  requestLimit,
+  requestSchema,
+  responseLimit,
+} from './decision-transport/request.js'
+import { readResponse } from './decision-transport/response.js'
+import {
+  acceptsResponseModel,
+  unexpectedResponseProvider,
+} from './decision-transport/route-identity.js'
 
 const endpoint = 'https://openrouter.ai/api/alpha/decisions'
 const responseSchema = z
@@ -94,9 +94,6 @@ const optionsSchema = legacyOptionsSchema
   })
   .strict()
 type Options = z.infer<typeof optionsSchema>
-function routeName(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]/gu, '')
-}
 function serialize(
   input: DecisionRequest,
   maxBytes: number,
@@ -122,17 +119,6 @@ function serialize(
   for (const part of request.state) if (typeof part !== 'string') validateImage(part.image_url.url)
   return { request, body }
 }
-function acceptedModel(value: string, options: Options): boolean {
-  if (value === options.model || options.responseModelIds?.includes(value)) return true
-  if (!value.startsWith(options.model + '-')) return false
-  const suffix = value.slice(options.model.length + 1)
-  if (!/^\d{4}-?\d{2}-?\d{2}$/u.test(suffix)) return false
-  const digits = suffix.replaceAll('-', ''),
-    date = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`
-  const parsed = new Date(date + 'T00:00:00.000Z')
-  return Number.isFinite(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === date
-}
-
 function result(
   raw: string,
   request: DecisionRequest,
@@ -147,12 +133,9 @@ function result(
     throw invalid('INVALID_RESPONSE', 'Provider returned invalid JSON')
   }
   const value = validated(responseSchema, json, 'INVALID_RESPONSE')
-  if (value.model && !acceptedModel(value.model, options))
+  if (value.model && !acceptsResponseModel(value.model, options))
     throw invalid('INVALID_RESPONSE', 'Provider returned an unexpected model')
-  if (
-    value.provider &&
-    routeName(value.provider) !== routeName(options.providerName ?? options.provider)
-  )
+  if (value.provider && unexpectedResponseProvider(value.provider, options))
     throw invalid('INVALID_RESPONSE', 'Provider returned an unexpected route')
   const questionIds = Object.keys(request.questions)
   if (Object.keys(value.answers).length !== questionIds.length)

@@ -1,7 +1,7 @@
 import { createVisionChat, visionOptionsSchema } from './infrastructure/vision-chat.js'
 import type { VisionChatOptions } from './infrastructure/vision-chat.js'
 import type { DecisionPort } from './entities/contracts.js'
-import { validated } from './infrastructure/openrouter-common.js'
+import { validated } from './infrastructure/decision-transport/errors.js'
 
 export type OpenAICompatibleVisionOptions = Omit<VisionChatOptions, 'provider' | 'providerName'>
 const schema = visionOptionsSchema.omit({ provider: true, providerName: true }).strict()

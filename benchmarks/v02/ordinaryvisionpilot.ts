@@ -44,8 +44,15 @@ const sourceFiles = [
   '../../src/features/choice-beam-layout.ts',
   '../../src/features/uniform-grid.ts',
   '../../src/infrastructure/vision-chat.ts',
+  '../../src/infrastructure/vision-chat/options.ts',
+  '../../src/infrastructure/vision-chat/request.ts',
+  '../../src/infrastructure/vision-chat/response.ts',
   '../../src/infrastructure/openrouter-vision.ts',
-  '../../src/infrastructure/openrouter-common.ts',
+  '../../src/infrastructure/decision-transport/errors.ts',
+  '../../src/infrastructure/decision-transport/request.ts',
+  '../../src/infrastructure/decision-transport/images.ts',
+  '../../src/infrastructure/decision-transport/response.ts',
+  '../../src/infrastructure/decision-transport/route-identity.ts',
   '../../src/infrastructure/boundary-view.ts',
 ] as const
 
@@ -203,8 +210,8 @@ export async function runOrdinaryVisionPilot(options: OrdinaryVisionPilotOptions
       reasoningEffort: ordinaryVisionAxisVariant.reasoningEffort,
       maxOutputTokens: ordinaryVisionAxisVariant.maxOutputTokens,
       promptId: ordinaryVisionAxisVariant.promptId,
-      promptSource: 'src/infrastructure/vision-chat.ts',
-      promptSourceSha256: sourceHashes['../../src/infrastructure/vision-chat.ts'],
+      promptSource: 'src/infrastructure/vision-chat/request.ts',
+      promptSourceSha256: sourceHashes['../../src/infrastructure/vision-chat/request.ts'],
       modelEvidence: 'https://openrouter.ai/openai/gpt-6-luna',
       transportEvidence:
         'https://openrouter.ai/docs/api/api-reference/chat/send-chat-completion-request?explorer=true',

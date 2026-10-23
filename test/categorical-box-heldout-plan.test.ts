@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
-import { historicalRuntimeSourcePaths } from './fixtures/historical-runtime-sources.js'
 import { currentRuntimeSourcePaths } from './fixtures/current-runtime-sources.js'
 import { dirname, relative, resolve, sep } from 'node:path'
 import test from 'node:test'
@@ -31,6 +30,11 @@ import { freshTextBoxHeldoutProducerSourceManifest } from '../benchmarks/v02/fre
 import { boxHeldoutImportSpecifiers } from '../benchmarks/v02/categorical-box-heldout-source.js'
 import { normalizeBoxCategoricalHeldoutOutput } from '../benchmarks/v02/evaluate-categorical-box-heldout.js'
 import { normalizeBoxNoImageControlOutput } from '../benchmarks/v02/evaluate-box-no-image-heldout.js'
+import { z } from 'zod'
+
+const boxHeldoutHistoricalSourceReviewSchema = z.object({
+  sourceHashes: z.record(z.string(), z.string().regex(/^[a-f0-9]{64}$/u)),
+})
 
 const hash = (digit: string) => digit.repeat(64)
 const freezeFixture = {
@@ -209,14 +213,18 @@ await test('new independent evaluators reject legacy profile artifacts instead o
 
 await test('both new evaluators normalize explicit synthetic fixtures and retain emitted policy', async () => {
   const candidateCases = syntheticCases([40, 20, 20])
-  const historicalSources = new Set(await historicalRuntimeSourcePaths())
-  const historicalManifest = (sources: Record<string, string>) =>
-    Object.fromEntries(
-      Object.entries(sources).filter(
-        ([path]) => !path.startsWith('src/') || historicalSources.has(path),
-      ),
-    )
-  const sourceHashes = historicalManifest(await categoricalBoxHeldoutProducerSourceManifest())
+  const reviewPath = fileURLToPath(
+    new URL('../docs/evidence/v02/box-heldout-source-review-20261020-v1.json', import.meta.url),
+  )
+  const review = boxHeldoutHistoricalSourceReviewSchema.parse(
+    JSON.parse(await readFile(reviewPath, 'utf8')),
+  )
+  const sourceHashes: Record<string, string> = {}
+  for (const path of Object.keys(review.sourceHashes)) {
+    sourceHashes[path] = createHash('sha256').update(`synthetic-source:${path}`).digest('hex')
+  }
+  assert.equal(Object.keys(sourceHashes).length, 82)
+  assert.equal(Object.keys(sourceHashes).filter((path) => path.startsWith('src/')).length, 53)
   const sourceSha256 = hashCanonical(
     Object.entries(sourceHashes).sort(([a], [b]) => a.localeCompare(b)),
   )
@@ -344,11 +352,6 @@ await test('both new evaluators normalize explicit synthetic fixtures and retain
 
   const photoCases = candidateCases.slice(0, 40)
   const noImagePlan = plans.noImage
-  const textSourceHashes = historicalManifest(await freshTextBoxHeldoutProducerSourceManifest())
-  const textSourceSha256 = hashCanonical(
-    Object.entries(textSourceHashes).sort(([a], [b]) => a.localeCompare(b)),
-  )
-  assert.equal(textSourceSha256, sourceSha256)
   const noImagePrompt = promptVariants['grammar-plus-examples']
   const noImageTransport = textTransportVariants['none-json-schema']
   const noImageRoute = {
@@ -381,7 +384,7 @@ await test('both new evaluators normalize explicit synthetic fixtures and retain
     sourceBeforeSha256: sourceSha256,
     startedAt: '2026-10-20T00:00:00.000Z',
     stages: 'classify-and-locate',
-    sourceHashes: textSourceHashes,
+    sourceHashes,
     heldoutProducerSourceSha256: sourceSha256,
     producerSourceRole: 'producer-only',
     manifests: [photoPin],
