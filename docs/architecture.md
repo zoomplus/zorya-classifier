@@ -1,12 +1,36 @@
 # Architecture and lifecycle
 
+Russian guide with layer map, SOLID notes and current paths: [architecture.ru.md](architecture.ru.md). Development onboarding: [development.ru.md](development.ru.md).
+
 Closed `classify` and injected `DecisionPort`/adapter transport are supported integration paths. Region `locate`, whole-object location, extraction, `RefinementPort`, caller-owned segmentation and box-check composition, `ObjectProposalPort`, and explicit native segmentation factories are experimental and unqualified; they are labeled `@experimental` on the public API. No spatial or extraction strategy is promoted; evidence under `docs/evidence/**` remains historical.
 
-The public factory composes the caller-supplied `DecisionPort` and a Sharp-backed `RasterPort`. The library does not select a model, provider or endpoint; applications either inject an existing port or explicitly build one with a supported adapter. Processes orchestrate classify/locate; features contain pure Choice interpretation, grid geometry and prompt construction; entities define validated public contracts; infrastructure owns provider HTTP and image processing. No application runtime, game-state schema or workspace import is required.
+The public factory composes the caller-supplied `DecisionPort` and a Sharp-backed `RasterPort`. The library exposes four package entries (`.`, `./openrouter`, `./openai-compatible`, `./segmentation`); the CLI is a separate bin, not a fifth library export. The library does not select a model, provider or endpoint; applications either inject an existing port or explicitly build one with a supported adapter. **Import layers:** `app` composes `processes` and `infrastructure`; `processes` depend on `features`, `entities`, and `shared` port contracts only (no direct `processes` → `infrastructure` imports); `infrastructure` implements ports and may use `features`/`entities`/`shared`. Runtime calls reach HTTP, raster, and native work through injected port instances wired in `app`. Processes orchestrate classify/locate; features contain pure Choice interpretation, grid geometry and prompt construction; entities define validated public contracts. Benchmark runners live under `benchmarks/v02/`, `benchmarks/v03/`, and the repo root as well as helpers in `benchmarks/experiments/`; not all runners are under `experiments/`. No application runtime, game-state schema or workspace import is required.
 
 The primary 0.2 object path preserves the original region locator. Its selected seed prompts an explicitly configured segmenter on the full oriented source image; actual mask pixels determine bounds, center and the optional cutout. A generic closed containment checker receives the full source with the mask-derived box and original seed anchor. It uses the injected decision port and a presentation port; the process allows at most one actual enclosing-mask correction and a final check. The segmenter can implement optional `expand`; corrected foreground must strictly contain the old visible foreground and grow the real box within the hard ROI. The process rejects unresolved checks without publishing a partial cutout. Its absolute deadline, cancellation and byte ownership cover every stage. No additional extent search or model-generated coordinates are used. `locate({ mode: 'whole-object' })` and `extract` use the same mask-derived geometry when a segmenter is configured. Boundary-interval location and `ObjectProposalPort` remain optional legacy strategies with their own request flows.
 
 Extraction composes the selected locator with a caller-owned `SegmentationPort` and a `CutoutRasterPort`; processes import neither Sharp nor native inference. Explicitly created native adapters own their workers and queues, while the caller supplies and manages their optional runtime packages and local model assets. No weights are selected, installed or downloaded by the library. [Operation and ownership details](v02-usage.md) are explicit; no experimental text-image profile is publicly qualified yet.
+
+```mermaid
+flowchart TB
+  subgraph appLayer [app]
+    APP[create-classifier]
+  end
+  subgraph procLayer [processes]
+    PROC[classify / locate / extract]
+  end
+  subgraph featLayer [features + entities + shared]
+    FEAT[choice / grid / contracts / gate]
+  end
+  subgraph infraLayer [infrastructure]
+    INF[decision-transport / raster / native segmentation]
+  end
+  APP --> PROC
+  APP --> INF
+  PROC --> FEAT
+  INF --> FEAT
+```
+
+Runtime orchestration (same primary extract semantics as below):
 
 ```mermaid
 flowchart LR
@@ -16,12 +40,14 @@ flowchart LR
   L --> S[Caller-owned segmenter on full source with seed prompt]
   S --> M[Validate mask and derive visible bounds / center]
   M --> B[Closed box check on full source and seed anchor]
-  B -->|complete| X[Optional transparent cutout]
+  B -->|complete| X[Result / optional transparent cutout]
   B -->|unknown| U[Explicit unresolved result]
-  B -->|needs expansion| E[At most one actual enclosing-mask correction]
-  E --> R[Validate foreground containment and recheck actual box]
+  B -->|needs-expansion| E[At most one actual enclosing-mask correction]
+  E -->|success| P[Preserve every prior visible foreground pixel]
+  E -->|no expand / no valid enclosing mask| U
+  P --> R[Final check on actual box]
   R -->|complete| X
-  R -->|unresolved / no parent| U
+  R -->|unknown / needs-expansion| U
 ```
 
 One deadline covers the whole operation, including queue time. AbortSignal passes through every boundary; guards after awaits reject late results. Physical Sharp/provider work retains its slot until its promise settles. Timers/listeners are cleared in finally. There is no import-time worker, automatic retry, persistent image cache, database or background polling loop.

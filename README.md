@@ -6,7 +6,7 @@ Provider-independent text/image classification for Node.js and TypeScript, with 
 
 Use an explicitly configured image-capable model through a supported adapter, or implement the small `DecisionPort` for another protocol. OpenRouter is an optional adapter, not a mandatory service. A more capable model may help on a task, but model strength does not guarantee a monotonic accuracy improvement. Compatibility and quality vary; see the exact [tested models/results](docs/vision-results.md), [acceptance](docs/acceptance.md), and historical [Jev baseline](docs/results.md).
 
-[Русское руководство](docs/README.ru.md) · [API](docs/api.md) · [Architecture](docs/architecture.md) · [Benchmarks](docs/benchmarks.md)
+[Русское руководство](docs/README.ru.md) · [API](docs/api.md) · [Architecture](docs/architecture.md) · [Архитектура (RU)](docs/architecture.ru.md) · [Разработка (RU)](docs/development.ru.md) · [Benchmarks](docs/benchmarks.md)
 
 Version 0.2 adds region-seeded segmentation, mask-derived bounds and optional transparent cutouts, with a closed completeness check and one bounded mask expansion. See the [usage guide](docs/v02-usage.md) for contracts, backend ownership and CLI.
 
@@ -22,7 +22,7 @@ Node.js 22.12+ is required. Source: [zoomplus/zorya-classifier](https://github.c
 npm install zorya-classifier
 ```
 
-The release archive also installs with `npm install ./zorya-classifier-0.1.0.tgz`. Runtime dependencies are Zod and Sharp; model weights, Electron, a database and background services are not included. Optional local segmentation backends and their model assets are a separate responsibility of the caller; the library does not download or choose them.
+The release archive also installs with `npm install ./zorya-classifier-0.2.0.tgz` (filename follows `package.json` version; not a claim of a newly published release). Runtime dependencies are Zod and Sharp; model weights, Electron, a database and background services are not included. Optional local segmentation backends and their model assets are a separate responsibility of the caller; the library does not download or choose them.
 
 ## Capability and status
 
@@ -135,7 +135,7 @@ The locator uses up to three sequential calls: coarse 4×4 regions, fine grids i
 
 ## Extract a mask-derived object (experimental)
 
-Extraction and caller-owned segmentation are experimental and unqualified. For a visible object box, center, or transparent cutout, use `extract` with an explicitly configured caller-owned segmenter. The existing region locator supplies a seed; the segmenter receives that seed while processing the full oriented source image. The library derives the returned box and center from actual mask pixels. After segmentation, the caller's decision port checks the original image with the mask-derived box and seed anchor. An incomplete box permits one enclosing-mask correction and one recheck; unresolved results remain unknown. This adds one or two closed checks to the normal region requests, without model-generated coordinates or an extent search. See the [0.2 usage guide](docs/v02-usage.md) and runnable [`extract-object.ts`](examples/extract-object.ts). The classifier and segmenter are separately caller-owned and both must be disposed.
+Extraction and caller-owned segmentation are experimental and unqualified. For a visible object box, center, or transparent cutout, use `extract` with an explicitly configured caller-owned segmenter. The existing region locator supplies a seed; the segmenter receives that seed while processing the full oriented source image. The library derives the returned box and center from actual mask pixels only. After segmentation, the caller's decision port checks the full source with the mask-derived box and original seed anchor: `complete` yields the result (optional cutout); `needs-expansion` allows at most one enclosing-mask expansion and one final check (a final `complete` can still produce the result); unresolved checks, missing expansion support, no valid enclosing mask, or a failed final check yield `unknown` with no second expansion. Crops, resize and padding preserve source/mask alignment; box-check rendering uses injected `RasterPort.imageState` on the full canvas. This adds one or two closed checks to the normal region requests, without model-generated coordinates or an extent search. See the [0.2 usage guide](docs/v02-usage.md) and runnable [`extract-object.ts`](examples/extract-object.ts). The classifier and segmenter are separately caller-owned and both must be disposed.
 
 ## Development and limits
 

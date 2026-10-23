@@ -1,82 +1,133 @@
-# План рефакторинга (принятые волны)
+# План рефакторинга (волны 1–9)
 
-Исторические планы и frozen evidence в `docs/` не редактировать задним числом. Список удалений пуст до доказанной избыточности (волна 7).
+Исторические планы и замороженные свидетельства в `docs/evidence/**` **не переписываются** задним числом. Полные потоки журналов хранятся **вне** репозитория (корень артефактов задачи рефакторинга); здесь — имена журналов/отчётов и измеренные итоги, подтверждённые проверками главного оркестратора.
 
-## Волна 1 — baseline (DONE)
+Ветка: `work/classifier-refactor-20261023`. Порядок работы агентов: [правила для агентов](agents.ru.md), [контракт участников](../AGENTS.md).
 
-- Зафиксирован baseline `npm test` (только `test/*.test.ts`): **674** теста, **671** pass, **3** fail.
-- Типичный сбой до WAVE2A: integrity receipt loader в H6 не сопоставлял symlink-алиасы каталогов с каноническим `realpath` (ломало replay/evaluator при разных путях к одному файлу).
-- **WAVE2A (DONE на ветке):** `buildIntegrityReceiptByRealPath` + portable тест `test/v03-h6-integrity-receipt-path-identity.test.ts`; evidence — `/root/.codex/artifacts/zorya-classifier-refactor-20261023/wave2a-*.log`.
+## Базовая линия до волн (сохранить)
 
-## Волна 2 — foundation (DONE)
+| Метрика                                     | Значение                                                                                                                                                                      |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ранний `npm test` (только `test/*.test.ts`) | **674** теста, **671** успех, **3** падения                                                                                                                                   |
+| Типичный блокер до волны `2A`               | H6: журнал целостности — идентичность путей-алиасов: разные пути, ведущие через симлинки к одному и тому же файлу, считаются одним и тем же; воспроизведение через `realpath` |
 
-| #   | Владение                                                                                             | Проверки                                |
-| --- | ---------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| 0   | `benchmarks/v03/h6-replay-kernel.ts`, тест integrity                                                 | отмена в catch `realpath`               |
-| 1   | `scripts/boundaries.mjs`, `test/boundaries.test.ts`                                                  | `npm run boundaries`                    |
-| 2   | `scripts/test-catalog.*`, `scripts/run-*-tests.mjs`, `package.json`, split H10 local test            | `test/test-catalog.test.ts`, `npm test` |
-| 3   | `knip.json`                                                                                          | `npm run dead-code:ci`                  |
-| 4   | `AGENTS.md`, `.cursor/rules/zorya-classifier.mdc`, `docs/agents.ru.md`, этот файл, `CONTRIBUTING.md` | review + CI                             |
+Дальнейший рост переносимого каталога (772), восстановление идентичности путей, регрессия владения байтами рендерера, явная конфигурация учётных данных каталога `benchmarks` — отражены в волнах 2–7.
 
-**WAVE2B (DONE):** review-fixes main — import-type/self-import/resolution в boundaries, Zod-каталог тестов, knip без избыточных benchmark entry, документация workflow Composer; исторические логи focused gates сохранены (`wave2b-final-check.log` и др.).
+**Тройки чисел архива** в проверках `pack:check`: сначала **всего** файлов в установленном архиве, затем файлов **среды выполнения** (`dist` и связанные артефакты), затем деклараций, проверенных через **отдельный** проект-потребитель.
 
-**Checkpoint Linux22 (root, measured):** commit `c3923f073de1f53c6a687bd9ef7e797d9ab53052` на `work/classifier-refactor-20261023`; `npm run check` **764/764** pass, 0 fail, 0 skip (secrets staged/worktree, typecheck, lint, boundaries, knip, build, format) — receipt `/root/.codex/artifacts/zorya-classifier-refactor-20261023/wave2-root-checkpoint-retry.log`. Ранний прогон того же checkpoint: **762/762** pass, единственный сбой commit hook — `format:check` на `test/boundaries.test.ts` (`wave2-root-checkpoint.log`, не перезаписывать). Shell Composer: Node **v24.22.1** at `/root/.local/share/cursor-agent/versions/2026.10.22-27dcf5f/node`. Root Linux22: `/usr/bin/node` **v22.23.2**. Успех Windows/CI matrix здесь **не заявлять**.
+### Пять зафиксированных регрессий/изменений поведения доказательств
 
-Инварианты совместимости: публичные entrypoints, v0.2 region flow, benchmark identities, secret hygiene без ослаблений.
+1. **Волна 2 / H6:** идентичность каталога-алиаса для воспроизведения целостности (`buildIntegrityReceiptByRealPath`, `test/v03-h6-integrity-receipt-path-identity.test.ts`): пути совпадают, если через симлинки они указывают на один и тот же реальный файл.
+2. **Рендерер:** Рендерер копирует RGBA-байты до чтения синхронного геттера `proposals`; отдельный тест проверяет мутацию исходного буфера этим геттером.
+3. **Историческая фикстура:** отделение синтетического манифеста «53 исходника / 82 ключа» от текущего набора исходников и списков зависимостей без переписывания замороженных хешей оценщика.
+4. **Будущие наборы манифестов исходников и списки зависимостей:** обновлены без изменения исторического JSON, хешей и порядка полей.
+5. **Учётные данные каталога `benchmarks`:** `benchmarks/credentials.ts`, переменные окружения процесса по умолчанию, необязательный `--env-file` только во вспомогательных раннерах.
 
-**Knip (п. 3):** сохранён glob `benchmarks/**/*.ts` в entry (без дублирующих named patterns); `eslint.config.mjs` убран из entry/project; скрипты вызывают `node --import tsx`. Полный переход на точечные entry — волна 7.
+---
 
-## Волна 3 — контракты + geometry (DONE)
+## Волна 1 — базовая линия (ЗАВЕРШЕНО)
 
-- Leaf-модули `geometry`, `image`, `decision`, `classification`, `localization`, `validation`; фасад `contracts.ts` сохраняет прежние export names.
-- Metadata: `decisionMetadataSchema` + локальные `.strict()`/`.extend()` (box-check max 256/512; extract-from-region stages strict); segmentation Zod (`segmentationMetadataSchema`, `segmentationMetadataSafeSchema`) и interface `SegmentationMetadata` в `segmentation-metadata.ts`.
-- Geometry: `containsRect`, `containsNonEmptyRect`, `intersectsRect`; extraction `contains()` = non-empty variant.
-- Публичный `dist/index.d.ts` совпадает с baseline manifest; `entities/contracts.d.ts` — re-export facade (доп. leaf `.d.ts` в dist). Evidence: `/root/.codex/artifacts/zorya-classifier-refactor-20261023/wave3-*`; post-review-fixes — `wave3-review-fixes-*`.
-- **Checkpoint Linux22 (root, measured):** commit `0a5095fcf5d2b4eec31ab920b17086c81be4cff6` на `work/classifier-refactor-20261023`; `npm run check` **764/764** pass, 0 fail, 0 skip (secrets staged/worktree, typecheck, lint, boundaries, knip, build, format); root `pack:check` — 383 archive files, 126 runtime dist files, 207 consumer declarations, 0 provider HTTP calls. Receipts: `/root/.codex/artifacts/zorya-classifier-refactor-20261023/wave3-root-checkpoint.log`, `wave3-root-pack.log`.
+**Итог:** зафиксирован исходный набор тестов и список блокеров.
 
-## Волна 4 — app factory / lifecycle (DONE)
+**Проверка:** базовая линия 674/671/3; ранние журналы в каталоге артефактов (сырые потоки не в репозитории).
 
-- Разделение `create-classifier.ts` на `classifier-contracts`, `classifier-config`, `classifier-runtime`, `classifier-spatial`, `classifier-representation`; публичные export names и поведение без изменений.
-- **Checkpoint Linux22 (root):** commit `1515f15c1ff7c11cc0fcb6240619f57115d5cf2c`; `npm run check` **764/764**; pack 393/136/208 — receipts `wave4-root-pack.log` (не перезаписывать).
+---
 
-## Волна 5 — extraction / proposals / presentation (DONE)
+## Волна 2 — фундамент (ЗАВЕРШЕНО)
 
-- Shared segmentation validation: `src/features/segmentation/validation.ts`, `source-mask.ts`, `region-result.ts`; processes `extract.ts`, `extract-from-region.ts` — orchestration only.
-- Proposal validation/presentation: `src/features/proposals/validation.ts`, `presentation.ts`; process `proposal-location.ts`.
-- Infrastructure split: `proposal-presentation-input.ts`, `proposal-presentation-pixels.ts` из `proposal-presentation.ts`.
-- Публичные entrypoints и семантика v0.2 region flow без изменений; `contains()` wrapper удалён — прямой `containsNonEmptyRect`.
-- **Checkpoint Linux22 (root):** commit `abc68b3a4fd39afa8e454d44a5262d213c23c3de`; `npm run check` **765/765** (receipt checkpoint владельца, не перезаписывать).
+**Модули:** `2A` — H6 и идентичность `realpath`; `2B` — проверка границ слоёв (`scripts/boundaries.mjs`), каталог тестов, `run-classified-tests.mjs`, `knip.json`, документация для участников разработки.
 
-## Волна 6 — transports / native (DONE)
+**Проверка (Linux Node 22, главный оркестратор):** коммит `c3923f0`; `npm run check` **764/764** — `wave2-root-checkpoint-retry.log`. Ранний сбой этапа Husky только на `format:check` — `wave2-root-checkpoint.log` (сохранён).
 
-| #   | Владение                                                                                                                                                                                         | Статус |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| 6A  | `decision-transport/*`, split `vision-chat/*`, фасад `vision-chat.ts`; удалён `openrouter-common.ts`; closure/metadata в `ordinaryvisionpilot.ts`, `seedunboundedpilot.ts`, `model-selection.ts` | DONE   |
-| 6B  | split `mobile-sam/*`, `grabcut/*` (фасады `index.ts` / `worker-inference.ts` сохраняют export names; parent/worker — прямые импорты pure helpers)                                                | DONE   |
+Узкие прогоны исполнителя Composer на встроенном Linux Node 24 — **не** полная продуктовая проверка Node 24.
 
-**WAVE6A checkpoint Linux22 (root, measured):** commit `9e9b4916159eec9b22fa24970877eea1dd760404` на `work/classifier-refactor-20261023`; `npm run check` **765/765** pass, 0 fail, 0 skip (secrets staged/worktree, typecheck, lint, boundaries, knip, build, format). Root `pack:check` — **421** archive files, **164** runtime dist files, **209** consumer declarations, 0 provider HTTP calls. Root verified 4 public entries, 67 exported types, value-export assignability vs baseline. Receipts: `/root/.codex/artifacts/zorya-classifier-refactor-20261023/wave6a-root-checkpoint-retry.log`, `wave6a-root-pack.log`.
+---
 
-**WAVE6A fixture (не production/evaluator):** checkpoint выявил тест, который строил исторический manifest 82 entry / 53 src фильтрацией сегодняшнего producer closure — frozen identity ломалась после легитимного переноса исходника. Тест теперь берёт **все** исторические keys из Zod-validated frozen source-review JSON и использует детерминированные synthetic digests; это сохранило фиксированную historical evaluator validation и frozen evidence после легитимного переноса исходника. Отдельный current-closure test сохранён.
+## Волна 3 — контракты и листовая геометрия (ЗАВЕРШЕНО)
 
-**WAVE6B checkpoint Linux22 (root, measured):** commit `e5b448b47a79a79571245809326ecf9355cb400c` на `work/classifier-refactor-20261023`; `npm run check` **765/765** pass, 0 fail, 0 skip; root `pack:check` — **449** archive files, **192** runtime dist files, **212** consumer declarations; root verified 4 public entries, **67** exported types и assignability value exports vs baseline. Receipts: владелец root Wave6B (не перезаписывать без нового checkpoint).
+**Итог:** листовые модули `entities/*`, фасад `contracts.ts`; разделение схемы метаданных сегментации.
 
-## Волна 7 — research isolation / npm dist (ACTIVE)
+**Проверка:** коммит `0a5095f`; **764/764**; архив пакета 383 / 126 / 207 — `wave3-root-checkpoint.log`, `wave3-root-pack.log`.
 
-| #   | Владение                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Статус    |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| 7A  | перенос `text-representation`, `boundary-view`, `createResearchClassifier` в `benchmarks/experiments/`; internal `composeClassifier`; pack-check reject research paths; closure/metadata/tests без public API changes; **коррекция source-closure:** будущие static research receipts сохраняют текущий literal prefix и дополняют `benchmarks/runtime-source-files.ts` + полный sorted inventory `src/**/*.ts`; frozen prior identities и historical receipts не переписываются | IN REVIEW |
-| 7B  | shared `integrity-receipts.ts`, H5 realpath-index, `benchmarks/credentials.ts` (default `process.env`, опциональный `--env-file`), единый `run-classified-tests.mjs`                                                                                                                                                                                                                                                                                                             | IN REVIEW |
-| 7C  | Knip: убраны blanket entry `benchmarks/**/*.ts` и `test/fixtures/**/*.ts`; точечные CLI/run/evaluate/test/mjs entry + `model-selection.ts` и `supported-screen-evaluator.ts`; приватизированы/удалены доказанно неиспользуемые export (4 dead fn, ~94 export-only); `onnxruntime-node` — единственное dependency-исключение                                                                                                                                                      | IN REVIEW |
+---
 
-**Local-evidence baseline (Wave7 root, measured):** `npm run test:local-evidence` **4/7** pass, **3** H5 realpath-index failures; receipt `/root/.codex/artifacts/zorya-classifier-refactor-20261023/wave7-root-local-evidence-baseline.log` — **сохранить**; Wave7B чинит H5 indexing без переписывания frozen receipts.
+## Волна 4 — разделение фабрики приложения (ЗАВЕРШЕНО)
 
-**Benchmark credentials (Wave7B):** paid CLI больше не читают файл окружения другого проекта по умолчанию; ключ — из `OPENROUTER_API_KEY` процесса или из явного `--env-file` без fallback.
+**Итог:** `classifier-{contracts,config,runtime,spatial,representation}.ts` и тонкий `create-classifier.ts`.
 
-## Волны 8–9 (ожидают)
+**Проверка:** коммит `1515f15`; **764/764**; архив 393/136/208 — `wave4-root-pack.log`.
 
-8. Русская документация / provenance (расширение)
-9. Финальный review: check, pack, Windows/Node 24 matrix, integration evidence
+---
 
-## Платформы
+## Волна 5 — извлечение и предложения (ЗАВЕРШЕНО)
 
-CI matrix (целевая): `ubuntu-latest`, `windows-latest` × Node 22 и 24. **Локально на хосте:** `/usr/bin/node` **v22.23.2**; прогоны Windows и Node 24 — **pending** (не заявлять успех CI или локального Node 24 без receipt).
+**Итог:** `features/segmentation/*`, `features/proposals/*`; процессы только оркестрируют.
+
+**Проверка:** коммит `abc68b3`; **765/765** — отчёт проверенной ревизии (сохранён).
+
+---
+
+## Волна 6 — транспорты и нативная сегментация (ЗАВЕРШЕНО)
+
+| Подволна | Зона ответственности                                                   | Проверка                                                                                                                                                     |
+| -------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `6A`     | `decision-transport/*`, `vision-chat/*`; удалён `openrouter-common.ts` | коммит `9e9b491`; **765/765**; архив **421** / **164** / **209**; API: 4 точки входа / 67 типов — `wave6a-root-checkpoint-retry.log`, `wave6a-root-pack.log` |
+| `6B`     | фасады `mobile-sam/*`, `grabcut/*`                                     | коммит `e5b448b`; **765/765**; архив **449** / **192** / **212** — журналы подволны `6B`                                                                     |
+
+**Фикстура `6A`:** исторический тест манифеста использует замороженные ключи JSON и синтетические дайджесты — хеши замороженного оценщика не менять.
+
+---
+
+## Волна 7 — изоляция исследований, состав npm и инструменты (ЗАВЕРШЕНО)
+
+| Подволна | Зона ответственности                                                                                                                                                                                     | Статус                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `7A`     | `benchmarks/experiments/{create-research-classifier,text-representation,boundary-view}`; `runtime-source-files.ts`; исследования вне дистрибутива npm                                                    | ЗАВЕРШЕНО — **767/767** — `wave7a-root-checkpoint.log`; коммит **`b7f8bd2`**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `7B`     | `integrity-receipts.ts`; индекс H5 по `realpath`; `credentials.ts`; единый раннер; удалён `run-portable-tests.mjs`                                                                                       | ЗАВЕРШЕНО — **7/7** группы `local-evidence` после исправления; H4e сравнивается по реальному пути, сохранена проверка родительского каталога; журналы `wave7b-h4e-realpath-identity-local-evidence.log`, `wave7b-composer-h5-test.log`, **`final-local-evidence-node22-configured.log`** (7/7 при корректной раскладке данных); полные проверки главного оркестратора **772/772** после замены тестовых поддельных ключей на низкоэнтропийные фикстуры — `wave7b-root-checkpoint-retry.log`; сохранены неудачные журналы **`wave7-root-local-evidence-baseline.log`** (4/7 до исправления) и **`final-local-evidence-node22.log`** (3 падения `grounded-mask` при неверной конфигурации); коммит **`0fd9507`** |
+| `7C`     | явные точки входа Knip; удалены **4** неиспользуемые функции и **1** неиспользуемый тип; доказанно неиспользуемые экспорты сделаны внутренними; единственное исключение зависимости — `onnxruntime-node` | ЗАВЕРШЕНО — коммит **`76d7ac6`**; **772/772**; архив **445** / **188** / **212**; API: 4 точки входа / 67 типов / проверка совместимости типов — `wave7c-root-checkpoint.log`, `wave7c-root-pack.log`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+
+**Защищённая базовая линия (волна `7C`):** **407** файлов, включая **весь** JSON каталога `benchmarks`, побайтово идентичны на `76d7ac6`; `package-lock.json` без изменений. Отчёт **`wave7-final-protected-evidence.json`**. Число **377** относилось к более узкому подмножеству — не путать с 407.
+
+**Учётные данные `7B`:** `process.env.OPENROUTER_API_KEY`; `--env-file` только во вспомогательных раннерах; без отката к чужому `.env`.
+
+Алгоритмы классификации и `extract` **не менялись** в `7C`; удаления мёртвого кода уже выполнены — отдельной области работ после волны 9 на удаления в исходниках **не** планируется.
+
+---
+
+## Волна 8 — документация и происхождение (В РАБОТЕ)
+
+**Зона ответственности:** связные русские руководства по архитектуре, разработке, агентам и этому плану; навигация в корневых руководствах и CONTRIBUTING, в [архитектуре на английском](architecture.md) и [эталонных прогонах](benchmarks.md); перспективные записи [provenance.json](provenance.json); указатели [контракта участников](../AGENTS.md) и [правила проекта](../.cursor/rules/zorya-classifier.mdc).
+
+**Ограничения:** задача только по документам, без правок исходников и тестов; без заявлений о прохождении волны 9.
+
+**Проверка:** локальные ссылки в разметке, `git diff --check`, `npm run secrets:check`, форматирование; редакторская проверка главного оркестратора и фиксация с этапами Husky.
+
+---
+
+## Волна 9 — финальная верификация (ОЖИДАЕТ)
+
+**Запланировано (главный оркестратор):** полный `npm run check` и `pack:check` на стабильном дереве исходников; интеграционные свидетельства Linux Node **22 и 24**; проверки потребительского проекта **Windows** — **только там, где хост и CI их поддерживают**; фактическое состояние интерпретатора Python и нативных предварительных условий по каталогу.
+
+**Не заявлять до новых журналов/отчётов.** Linux Node 22 волны `7C` **не** заменяет волну 9. На измеренном Linux-хосте проверки **Windows не запускались** и **не обещают** завершения недоступных Windows-проверок; полные проверки **Node 24** **ещё не выполнены**.
+
+---
+
+## Платформы и CI
+
+| Тема                            | Статус                                                                                                                            |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Матрица CI (проект)             | `ubuntu-latest`, `windows-latest` × Node 22 и 24                                                                                  |
+| Измерено (волна `7C`)           | Linux Node **22.23.2**, коммит **`76d7ac6`**, **772/772**, форматирование в этапе Husky перед коммитом                            |
+| Node 24, полные проверки        | **В ожидании журналов** (не то же самое, что встроенный Node 24 у исполнителя Composer)                                           |
+| Волна 8, финальная документация | **В ожидании**                                                                                                                    |
+| Windows локально/CI             | **Недоступно** на измеренном Linux-хосте — **не запускалось**; завершение Windows-проверок **не обещано** до отдельного хоста/CI  |
+| Python 3.12.3 (измерено)        | Установлены `PIL`/`Pillow`; **`numpy`**, **`torch`**, **`transformers`** **отсутствуют**; набор `python-native` **не запускался** |
+
+Успех удалённого CI и публикация **не** заявлены этим документом.
+
+## Инварианты на все волны
+
+- Публичные точки входа и семантика региона по умолчанию `v0.2` (закрытые проверки рамки в **текущем** основном потоке `extract`).
+- Гигиена секретов: индексированные и рабочее дерево + байты установленного архива; только пустой `.env.example`.
+- Без автоматической загрузки нативных весов; порты сегментатора и предложений на стороне вызывающего.
+- Исторические метки и метрики `v0.2` остаются **историческими**; непроверенные рецепты не переклассифицировать как текущий проверенный поток.
