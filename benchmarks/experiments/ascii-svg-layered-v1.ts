@@ -6,13 +6,13 @@ import { utf8Size } from './encoder-common.js'
 
 const header = 'ASCII_SVG_LAYERED_V1'
 
-export function encodeAsciiSvgLayeredV1(view: TextPixelView): string {
+function encodeAsciiSvgLayeredV1(view: TextPixelView): string {
   const ascii = encodeAsciiContoursV1(view)
   const svg = encodeSvgContoursV1(view)
   return `${header}\nwidth=${view.width} height=${view.height}\nascii:\n${ascii}\nsvg:\n${svg}`
 }
 
-export function asciiSvgLayeredV1MaxEncodedBytes(width: number, height: number): number {
+function asciiSvgLayeredV1MaxEncodedBytes(width: number, height: number): number {
   return (
     utf8Size(`${header}\nwidth=${width} height=${height}\nascii:\n`) +
     asciiContoursV1MaxEncodedBytes(width, height) +

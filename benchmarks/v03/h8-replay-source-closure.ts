@@ -20,7 +20,7 @@ const H8_SOURCE_FILES = [
   'tsconfig.build.json',
 ] as const
 
-export interface H8ReplaySourceClosure {
+interface H8ReplaySourceClosure {
   sha256: string
   files: Array<{ path: string; sha256: string }>
 }

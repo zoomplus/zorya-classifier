@@ -62,7 +62,7 @@ export const categoricalPilotPolicy = Object.freeze({
   latencyEnvironment: 'concurrent-development-screen-unranked',
 })
 
-export const categoricalPilotCaseIds = Object.freeze([
+const categoricalPilotCaseIds = Object.freeze([
   'photo-dev-present-01',
   'photo-dev-present-02',
   'photo-dev-absent-01',
@@ -76,7 +76,7 @@ export const categoricalPilotInput = Object.freeze({
   sha256: '6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a',
 })
 
-export const categoricalPilotAssets = Object.freeze({
+const categoricalPilotAssets = Object.freeze({
   method: 'mobile-sam-nine-point-proposals-v1',
   encoder: {
     bytes: 28_157_093,
@@ -104,7 +104,7 @@ const sourceFiles = [
   '../../package-lock.json',
 ] as const
 
-export interface CategoricalPilotOptions {
+interface CategoricalPilotOptions {
   inputManifestPath: string
   imageRoot: string
   outputRoot: string

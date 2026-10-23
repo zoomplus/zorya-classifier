@@ -28,7 +28,7 @@ const route = Object.freeze({
   apiEndpoint: '/api/alpha/decisions',
   allowFallbacks: false as const,
 })
-export const pointCandidatePolicy = Object.freeze({
+const pointCandidatePolicy = Object.freeze({
   timeoutMs: 45_000,
   retries: 0,
   fallback: false,
@@ -41,11 +41,11 @@ export const pointCandidatePolicy = Object.freeze({
   latencyRankingEligible: false,
 })
 
-export interface PointCandidateManifestPin {
+interface PointCandidateManifestPin {
   path: string
   sha256: string
 }
-export interface PointCandidateRunnerOptions {
+interface PointCandidateRunnerOptions {
   contactSheetManifests: PointCandidateManifestPin[]
   inputManifests: PointCandidateManifestPin[]
   imageRoot: string

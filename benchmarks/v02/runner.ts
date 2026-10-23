@@ -40,7 +40,7 @@ const routeTable = {
   },
 }
 
-export interface DiagnosticRunOptions {
+interface DiagnosticRunOptions {
   imageRoot: string
   outputRoot: string
   maxPhysicalCalls: number

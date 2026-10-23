@@ -21,7 +21,7 @@ import { classificationMetrics, localizationMetrics, parityMetrics } from './met
 import type { ClassificationAttempt, LocalizationAttempt, ParityAttempt } from './metrics.js'
 import { writeOverlay } from './overlay.js'
 
-export interface RunOptions {
+interface RunOptions {
   mode: 'offline' | 'live'
   allowPaid: boolean
   maxCalls: number

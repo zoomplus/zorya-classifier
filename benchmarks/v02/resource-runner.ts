@@ -15,9 +15,9 @@ interface ChildMemorySample {
 }
 
 type SamplingPhase = 'idle-before' | 'busy' | 'idle-after'
-export type MonotonicClock = () => number
+type MonotonicClock = () => number
 
-export interface FullSoakDurations {
+interface FullSoakDurations {
   warmupSeconds: number
   durationSeconds: number
   idleSeconds: number
@@ -94,7 +94,7 @@ export async function runMonotonicPhase(
   return Math.max(0, now() - startedAt)
 }
 
-export function hasMonotonicDeadlineElapsed(
+function hasMonotonicDeadlineElapsed(
   startedAtMs: number,
   durationMs: number,
   nowMs: number,

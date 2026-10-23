@@ -75,10 +75,10 @@ export type Split = 'dev' | 'heldout'
 export type PhotoCase = z.infer<typeof photoSchema> & { split: Split }
 export type PhotoTruth = z.infer<typeof photoTruthSchema>
 export type TextCase = { caseId: string; split: Split; text: string }
-export type TextTruth = { caseId: string; expected: string }
+type TextTruth = { caseId: string; expected: string }
 export const sha256 = (bytes: Uint8Array | string): string =>
   createHash('sha256').update(bytes).digest('hex')
-export async function readJson(path: string): Promise<unknown> {
+async function readJson(path: string): Promise<unknown> {
   return JSON.parse(await readFile(path, 'utf8')) as unknown
 }
 function local(root: string, path: string): string {

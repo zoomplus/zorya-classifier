@@ -59,7 +59,7 @@ export const freshTextPolicy = Object.freeze({
   latencyRankingEligible: false,
 })
 
-export type FreshTextPhase = 'dev' | 'heldout'
+type FreshTextPhase = 'dev' | 'heldout'
 
 export const heldoutPhotoInputSha256 =
   'b3afaee883990e01a464929727b7b7bb1315d6e0a70e239a10f20e2f82a3e35b'
@@ -160,14 +160,14 @@ const encoderIds = [
   'ascii-contours-v1',
   'ascii-svg-layered-v1',
 ] as const
-export type FreshTextProfileId = (typeof encoderIds)[number] | 'no-image-control'
+type FreshTextProfileId = (typeof encoderIds)[number] | 'no-image-control'
 
 export const freshTextProfiles: readonly FreshTextProfileId[] = Object.freeze([
   ...encoderIds,
   'no-image-control',
 ])
 
-export interface FreshTextRunnerOptions {
+interface FreshTextRunnerOptions {
   manifests: Array<{ path: string; sha256: string }>
   imageRoot: string
   outputRoot: string
@@ -209,7 +209,7 @@ interface ResultRow {
   locate?: StageResult
 }
 
-export interface NoImageFetchAudit {
+interface NoImageFetchAudit {
   fetchAttempts: number
   fetchesChecked: number
   zeroImagePartsConfirmed: number
@@ -328,17 +328,6 @@ async function sourceHashes(
     ),
   )
   return Object.fromEntries([...bench, ...src])
-}
-
-export async function freshTextProducerSourceSha256(): Promise<string> {
-  const hashes = await sourceHashes()
-  return hashCanonical(Object.entries(hashes).sort(([a], [b]) => a.localeCompare(b)))
-}
-
-/** Distinct source closure for the box-confirmation heldout no-image control. */
-export async function freshTextBoxHeldoutProducerSourceSha256(): Promise<string> {
-  const hashes = await freshTextBoxHeldoutProducerSourceManifest()
-  return hashCanonical(Object.entries(hashes).sort(([a], [b]) => a.localeCompare(b)))
 }
 
 export async function freshTextBoxHeldoutProducerSourceManifest(): Promise<Record<string, string>> {

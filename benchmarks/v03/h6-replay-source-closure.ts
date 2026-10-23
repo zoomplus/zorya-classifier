@@ -3,7 +3,7 @@ import { createReadStream } from 'node:fs'
 import { lstat, readdir, realpath } from 'node:fs/promises'
 import { join, relative, resolve } from 'node:path'
 
-export const H6_REPLAY_SOURCE_FILES = [
+const H6_REPLAY_SOURCE_FILES = [
   'benchmarks/v03/h6-context-composer.ts',
   'benchmarks/v03/integrity-receipts.ts',
   'benchmarks/v03/h6-replay-kernel.ts',
@@ -18,7 +18,7 @@ export const H6_REPLAY_SOURCE_FILES = [
   'tsconfig.build.json',
 ] as const
 
-export interface H6ReplaySourceClosure {
+interface H6ReplaySourceClosure {
   sha256: string
   files: Array<{ path: string; sha256: string }>
 }

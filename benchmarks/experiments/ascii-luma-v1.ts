@@ -5,7 +5,7 @@ import { assertPixelView, luma, rgbaAt, utf8Size } from './encoder-common.js'
 const ramp = '.:-=+*#%@'
 const header = 'ASCII_LUMA_V1'
 
-export function encodeAsciiLumaV1(view: TextPixelView): string {
+function encodeAsciiLumaV1(view: TextPixelView): string {
   assertPixelView(view)
   const rows: string[] = []
   for (let y = 0; y < view.height; y += 1) {
@@ -20,7 +20,7 @@ export function encodeAsciiLumaV1(view: TextPixelView): string {
   return `${header}\nwidth=${view.width} height=${view.height}\nlegend=opaque-luma-ramp,transparent:T\n\n${rows.join('\n')}`
 }
 
-export function asciiLumaV1MaxEncodedBytes(width: number, height: number): number {
+function asciiLumaV1MaxEncodedBytes(width: number, height: number): number {
   let size = utf8Size(
     `${header}\nwidth=${width} height=${height}\nlegend=opaque-luma-ramp,transparent:T\n\n`,
   )

@@ -1,6 +1,6 @@
 export type PromptVariantId = 'no-grammar' | 'grammar' | 'grammar-plus-examples'
 
-export interface PromptVariant {
+interface PromptVariant {
   id: PromptVariantId
   prepend: readonly string[]
   append: readonly string[]

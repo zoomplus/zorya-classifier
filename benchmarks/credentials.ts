@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { parseEnv } from 'node:util'
 import { z } from 'zod'
 
-export const OPENROUTER_API_KEY_ENV = 'OPENROUTER_API_KEY' as const
+const OPENROUTER_API_KEY_ENV = 'OPENROUTER_API_KEY' as const
 
 const unavailableMessage = 'OpenRouter API key is unavailable'
 const envFileUnavailableMessage = 'OpenRouter credential file is missing or unreadable'

@@ -199,7 +199,7 @@ const route = Object.freeze({
   allowFallbacks: false as const,
 })
 
-export interface RegionSeededRunnerOptions {
+interface RegionSeededRunnerOptions {
   manifests: Array<{ path: string; sha256: string }>
   imageRoot: string
   outputRoot: string
@@ -224,7 +224,7 @@ export interface RegionSeededRunnerOptions {
   createClassifier?: (options: ClassifierOptions) => Classifier
 }
 
-export interface SeedRecord {
+interface SeedRecord {
   status: 'located' | 'unknown' | 'not-found' | 'failed' | 'not-reached'
   region?: { left: number; top: number; width: number; height: number }
   sourceWidth?: number
@@ -238,7 +238,7 @@ export interface SeedRecord {
   errorCode?: string
 }
 
-export interface BoxCheckReceipt {
+interface BoxCheckReceipt {
   index: number
   status: 'ok' | 'failed'
   requestHash: string | null
@@ -251,7 +251,7 @@ export interface BoxCheckReceipt {
   errorCode?: string
 }
 
-export interface VerificationRecord {
+interface VerificationRecord {
   checks: Array<{
     verdict: SegmentationBoxCheckResult['verdict']
     selection: ChoiceSelection
@@ -260,7 +260,7 @@ export interface VerificationRecord {
   expansion: SegmentationVerification['expansion']
 }
 
-export interface RegionExtractionRecord {
+interface RegionExtractionRecord {
   status: 'extracted' | 'region-only' | 'unknown' | 'not-found' | 'failed'
   reason?: string
   errorCode?: string
@@ -457,7 +457,7 @@ export function removeImagesAtDecisionBoundary(port: DecisionPort): DecisionPort
   }
 }
 
-export interface NoImageFetchAudit {
+interface NoImageFetchAudit {
   checkedFetches: number
   imagePartFetches: number
 }

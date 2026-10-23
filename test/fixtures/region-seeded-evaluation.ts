@@ -7,7 +7,7 @@ import { hashCanonical } from '../../benchmarks/v02/protocol.js'
 import type { RegionSeededCaseResult } from '../../benchmarks/v02/region-seeded-runner.js'
 import type { PhysicalCallRecord } from '../../benchmarks/v02/recording.js'
 
-export type RegionSeededFixturePhysicalReceipt = Pick<
+type RegionSeededFixturePhysicalReceipt = Pick<
   PhysicalCallRecord,
   | 'physicalId'
   | 'logicalId'
@@ -24,7 +24,7 @@ export type RegionSeededFixturePhysicalReceipt = Pick<
   wireReceipt: { usageCostUsd: number | null } | PhysicalCallRecord['wireReceipt']
 }
 
-export interface RegionSeededEvaluatorFixtureSummary {
+interface RegionSeededEvaluatorFixtureSummary {
   runId: string
   profileId: string
   phase: 'dev'

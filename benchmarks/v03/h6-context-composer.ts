@@ -17,7 +17,7 @@ import type { RgbaRaster } from '../../src/entities/representation.js'
 import { selection, validateDecision } from '../../src/features/choice.js'
 import { unpackBinaryMask } from '../../src/features/segmentation/packed-mask.js'
 
-export const H6_FAMILIES = ['D', 'U'] as const
+const H6_FAMILIES = ['D', 'U'] as const
 export type H6Family = (typeof H6_FAMILIES)[number]
 export type H6DecisionStage = 'presence' | 'nominate-D' | 'nominate-U' | 'final-select'
 
@@ -42,7 +42,7 @@ export interface H6ProposalCandidate {
   mask: PackedBinaryMask
 }
 
-export interface H6ComposerInput {
+interface H6ComposerInput {
   image: RgbaRaster
   target: string
   exclusions: readonly string[]
@@ -50,7 +50,7 @@ export interface H6ComposerInput {
   signal: AbortSignal
 }
 
-export interface H6PresentedCandidate {
+interface H6PresentedCandidate {
   family: H6Family
   alias: string
   sourceAlias: string
@@ -58,7 +58,7 @@ export interface H6PresentedCandidate {
   bounds: PixelRect
 }
 
-export interface H6PresentationPort {
+interface H6PresentationPort {
   renderPresence(input: { image: RgbaRaster; signal: AbortSignal }): Promise<readonly RasterImage[]>
   renderNomination(input: {
     image: RgbaRaster
@@ -88,7 +88,7 @@ export interface H6DecisionBudgetRecordPort {
   }): void | Promise<void>
 }
 
-export interface H6ComposerOptions {
+interface H6ComposerOptions {
   decision: DecisionPort
   imageState: RasterPort['imageState']
   presentation: H6PresentationPort
@@ -108,13 +108,9 @@ export interface H6NominationEvidence {
   metadata: DecisionResult['metadata']
 }
 
-export type H6UnknownReason =
-  | 'target-absent'
-  | 'presence-unresolved'
-  | 'no-nominees'
-  | 'none-selected'
+type H6UnknownReason = 'target-absent' | 'presence-unresolved' | 'no-nominees' | 'none-selected'
 
-export type H6ComposerResult =
+type H6ComposerResult =
   | {
       status: 'located'
       family: H6Family
@@ -136,7 +132,7 @@ export type H6ComposerResult =
       nominations: H6NominationEvidence[]
     }
 
-export interface H6PartialEvidence {
+interface H6PartialEvidence {
   presence: H6PresenceEvidence | null
   nominations: H6NominationEvidence[]
 }

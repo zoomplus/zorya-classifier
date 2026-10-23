@@ -8,7 +8,6 @@ import { ClassifierError, assertActive } from '../../src/entities/errors.js'
 import {
   assertIntegrityReceiptForRealPath,
   buildIntegrityReceiptByRealPath,
-  type IntegrityReceiptFileEntry,
 } from './integrity-receipts.js'
 import type { PackedBinaryMask } from '../../src/entities/object-proposals.js'
 import type { RgbaRaster } from '../../src/entities/representation.js'
@@ -53,7 +52,7 @@ export interface H6NativeCase {
   masks: H6NativeMaskDescriptor[]
 }
 
-export interface H6NativeClosureEntry {
+interface H6NativeClosureEntry {
   path: string
   sha256: string
 }
@@ -64,7 +63,7 @@ export interface NativeRecipeTiming {
   replayElapsedMs: number
 }
 
-export interface NativeRecipePrepared {
+interface NativeRecipePrepared {
   dispose(): void
 }
 
@@ -281,7 +280,6 @@ const integritySchema = z
   .passthrough()
 
 export { assertIntegrityReceiptForRealPath, buildIntegrityReceiptByRealPath }
-export type { IntegrityReceiptFileEntry }
 
 function contentHash(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex')

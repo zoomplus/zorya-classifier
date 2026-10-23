@@ -64,7 +64,7 @@ const sourceFiles = [
   '../experiments/create-research-classifier.ts',
 ] as const
 
-export type FreshProfileId = (typeof freshProfileVariants)[number]['id']
+type FreshProfileId = (typeof freshProfileVariants)[number]['id']
 type FreshStageStatus = 'ok' | 'located' | 'unknown' | 'not-found' | 'failed'
 
 interface FreshStage {
@@ -78,7 +78,7 @@ interface FreshStage {
   errorCode?: string
 }
 
-export interface FreshResultRow {
+interface FreshResultRow {
   caseId: string
   imageSha256: string
   profileId: FreshProfileId
@@ -86,7 +86,7 @@ export interface FreshResultRow {
   locate: FreshStage
 }
 
-export interface FreshRunnerOptions {
+interface FreshRunnerOptions {
   manifests: Array<{ path: string; sha256: string }>
   imageRoot: string
   outputRoot: string
@@ -96,7 +96,7 @@ export interface FreshRunnerOptions {
   createDecision?: (fetcher: typeof globalThis.fetch) => DecisionPort
 }
 
-export interface FreshPreflight {
+interface FreshPreflight {
   corpus: Awaited<ReturnType<typeof loadFreshCorpus>>
   imageChecks: Map<string, { ok: true } | { ok: false; errorCode: string }>
 }

@@ -37,7 +37,7 @@ export interface H3cVerificationResult {
   witness: { x: number; y: number; origin: 'selected-mask-foreground' }
 }
 
-export interface H3cVerifierOptions {
+interface H3cVerifierOptions {
   decision: DecisionPort
   imageState: RasterPort['imageState']
 }

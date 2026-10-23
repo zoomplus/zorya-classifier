@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { z } from 'zod'
 
 export const heldoutTargetPolicies = Object.freeze(['target-plus-neutral-instruction-v1'] as const)
-export type HeldoutTargetPolicy = (typeof heldoutTargetPolicies)[number]
+type HeldoutTargetPolicy = (typeof heldoutTargetPolicies)[number]
 export const categoricalMethodSelectionSha256 =
   'fabb05c2c472c30a8cb20a5f9b6d697b932d94aedc43976359746463ef8708b9'
 
@@ -66,7 +66,7 @@ export const heldoutNoImageRoute = Object.freeze({
   ocr: false,
 })
 
-export interface HeldoutManifestPin {
+interface HeldoutManifestPin {
   group: 'photo' | 'ui' | 'map'
   sha256: string
   cases: number
@@ -130,7 +130,7 @@ const heldoutFreezeSchema = z
 
 const verifiedFreezes = new WeakSet<object>()
 
-export type VerifiedHeldoutFreeze = HeldoutRunFreeze
+type VerifiedHeldoutFreeze = HeldoutRunFreeze
 
 function deepFreeze<T>(value: T): T {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {

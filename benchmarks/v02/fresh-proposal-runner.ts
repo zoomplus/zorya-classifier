@@ -94,7 +94,7 @@ const sourceFiles = [
   '../../package-lock.json',
 ] as const
 
-export interface FreshProposalRunnerOptions {
+interface FreshProposalRunnerOptions {
   manifests: Array<{ path: string; sha256: string }>
   imageRoot: string
   outputRoot: string
@@ -134,7 +134,7 @@ interface StageRecord {
   }
 }
 
-export interface FreshProposalResult {
+interface FreshProposalResult {
   caseId: string
   imageSha256: string
   classify: StageRecord
@@ -142,7 +142,7 @@ export interface FreshProposalResult {
   extract: ExtractRecord
 }
 
-export interface ExtractRecord {
+interface ExtractRecord {
   status: 'extracted' | 'unknown' | 'not-found' | 'failed'
   durationMs: number
   reason?: string

@@ -2,7 +2,7 @@ import { realpath } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { ClassifierError, assertActive } from '../../src/entities/errors.js'
 
-export type IntegrityReceiptFileEntry = {
+type IntegrityReceiptFileEntry = {
   path: string
   sha256: string
   bytes: number

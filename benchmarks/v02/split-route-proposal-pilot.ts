@@ -47,7 +47,7 @@ export const splitPilotRoutes = Object.freeze({
   }),
 })
 
-export const splitPilotPolicy = Object.freeze({
+const splitPilotPolicy = Object.freeze({
   timeoutMs: 120_000,
   maxInFlightCases: 2,
   nativeMaxActive: 1,
@@ -63,7 +63,7 @@ export const splitPilotPolicy = Object.freeze({
   latencyEnvironment: 'concurrent-development-screen-unranked',
 })
 
-export const splitPilotCaseIds = Object.freeze([
+const splitPilotCaseIds = Object.freeze([
   'photo-dev-present-01',
   'photo-dev-present-02',
   'photo-dev-absent-01',
@@ -77,7 +77,7 @@ export const splitPilotInput = Object.freeze({
   sha256: '6c9ed29d8586c7887ae0861fc853baf203cb43790df4959390da4b5cc9ac679a',
 })
 
-export const splitPilotAssets = Object.freeze({
+const splitPilotAssets = Object.freeze({
   method: 'mobile-sam-nine-point-proposals-v1',
   encoder: {
     bytes: 28_157_093,
@@ -103,7 +103,7 @@ const sourceFiles = [
   '../../package-lock.json',
 ] as const
 
-export interface SplitPilotOptions {
+interface SplitPilotOptions {
   inputManifestPath: string
   imageRoot: string
   outputRoot: string

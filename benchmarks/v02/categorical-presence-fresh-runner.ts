@@ -69,7 +69,7 @@ export const categoricalFreshPolicy = Object.freeze({
   latencyRankingEligible: false,
 })
 
-export const categoricalHeldoutPolicy = Object.freeze({
+const categoricalHeldoutPolicy = Object.freeze({
   timeoutMs: categoricalFreshPolicy.timeoutMs,
   maxInFlight: categoricalFreshPolicy.maxInFlight,
   maxInFlightCases: categoricalFreshPolicy.maxInFlightCases,
@@ -201,7 +201,7 @@ interface StageRecord {
   }
 }
 
-export interface FreshProposalResult {
+interface FreshProposalResult {
   caseId: string
   imageSha256: string
   classify: StageRecord
@@ -209,7 +209,7 @@ export interface FreshProposalResult {
   extract: ExtractRecord
 }
 
-export interface ExtractRecord {
+interface ExtractRecord {
   status: 'extracted' | 'unknown' | 'not-found' | 'failed'
   durationMs: number
   reason?: string
@@ -359,7 +359,7 @@ export function assertCategoricalFreshCallBound(maxPhysicalCalls: number): void 
     throw new RangeError('Full DEV profile budget must cover 40 six-call cases and stay under cap')
 }
 
-export function assertCategoricalHeldoutCallBound(maxPhysicalCalls: number): void {
+function assertCategoricalHeldoutCallBound(maxPhysicalCalls: number): void {
   if (maxPhysicalCalls < 80 * CATEGORICAL_FRESH_MAX_PHYSICAL_PER_CASE || maxPhysicalCalls > 600)
     throw new RangeError('HELDOUT profile budget must cover 80 six-call cases and stay under cap')
 }

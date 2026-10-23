@@ -17,7 +17,7 @@ import type { RgbaRaster } from '../../src/entities/representation.js'
 import { selection, validateDecision } from '../../src/features/choice.js'
 import { unpackBinaryMask } from '../../src/features/segmentation/packed-mask.js'
 
-export const H5_FAMILIES = ['D', 'U'] as const
+const H5_FAMILIES = ['D', 'U'] as const
 export type H5Family = (typeof H5_FAMILIES)[number]
 export type H5DecisionStage = 'nominate-D' | 'nominate-U' | 'final-select'
 
@@ -43,7 +43,7 @@ export interface H5ComposerInput {
   signal: AbortSignal
 }
 
-export interface H5PresentedCandidate {
+interface H5PresentedCandidate {
   family: H5Family
   alias: string
   sourceAlias: string
@@ -89,7 +89,7 @@ export interface H5ComposerOptions {
   budgetRecord: H5DecisionBudgetRecordPort
 }
 
-export interface H5NominationEvidence {
+interface H5NominationEvidence {
   family: H5Family
   topFour: string[]
   nomineeAliases: string[]
@@ -97,7 +97,7 @@ export interface H5NominationEvidence {
   metadata: DecisionResult['metadata']
 }
 
-export type H5ComposerResult =
+type H5ComposerResult =
   | {
       status: 'located'
       family: H5Family

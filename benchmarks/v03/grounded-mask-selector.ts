@@ -20,7 +20,7 @@ export interface GroundedMaskCandidate {
   box: PixelRect
 }
 
-export interface GroundedMaskSelectorInput {
+interface GroundedMaskSelectorInput {
   image: RasterImage
   target: string
   exclusions?: readonly string[]
@@ -28,7 +28,7 @@ export interface GroundedMaskSelectorInput {
   signal: AbortSignal
 }
 
-export interface GroundedMaskSelectorOptions {
+interface GroundedMaskSelectorOptions {
   decision: DecisionPort
   imageState: RasterPort['imageState']
 }

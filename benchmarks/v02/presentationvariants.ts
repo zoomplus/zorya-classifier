@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { hashCanonical } from './protocol.js'
 
-export const presentationRoute = Object.freeze({
+const presentationRoute = Object.freeze({
   model: 'openai/gpt-6-luna-decisions',
   provider: 'openai',
   providerName: 'OpenAI',
@@ -51,7 +51,6 @@ export const presentationVariants = Object.freeze({
 })
 
 export type PresentationVariantId = keyof typeof presentationVariants
-export type PresentationVariant = (typeof presentationVariants)[PresentationVariantId]
 
 export function presentationVariantHash(
   id: PresentationVariantId,

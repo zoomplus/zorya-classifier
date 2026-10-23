@@ -4,7 +4,7 @@ import type { DecisionRequest, DecisionResult, PixelRect } from '../../src/entit
 import { pixelRectSchema } from '../../src/entities/contracts.js'
 import { validateDecision } from '../../src/features/choice.js'
 
-export const sourceSchema = z
+const sourceSchema = z
   .object({
     caseId: z.string().regex(/^photo-dev-\d{2}$/u),
     image: z
@@ -433,7 +433,7 @@ const decisionTraceSchema = z.discriminatedUnion('status', [
     })
     .strict(),
 ])
-export type DecisionTrace = z.infer<typeof decisionTraceSchema>
+type DecisionTrace = z.infer<typeof decisionTraceSchema>
 
 interface RequestGeometry {
   seedRegion: PixelRect | null

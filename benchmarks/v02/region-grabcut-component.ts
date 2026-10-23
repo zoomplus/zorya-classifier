@@ -68,7 +68,7 @@ const summarySchema = z
 const candidateRunId = 'v02-region-seeded-dev-2026-10-20T215428247Z-57df1119'
 const candidateSummarySha256 = 'dc48416d0d189bdd3856c6719d055fbb4c36f426d014cc8a231a1df98a761d6c'
 
-export interface ComponentBounds {
+interface ComponentBounds {
   left: { start: number; endExclusive: number }
   right: { start: number; endExclusive: number }
   top: { start: number; endExclusive: number }
@@ -143,7 +143,7 @@ function safeCode(error: unknown): string {
   return 'ERROR'
 }
 
-export interface GrabCutComponentOptions {
+interface GrabCutComponentOptions {
   summaryPath: string
   originalRunDir: string
   imageRoot: string

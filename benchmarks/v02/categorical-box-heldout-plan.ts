@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
 
-export const boxHeldoutSelectionVersion = 'box-confirmation-dev-method-selection-v1' as const
+const boxHeldoutSelectionVersion = 'box-confirmation-dev-method-selection-v1' as const
 export const boxHeldoutMethodSelectionSha256 =
   '3b576871c36d904203ef06e0cf26af5847a71a92c2df3647725d532238258c5e'
 export const boxHeldoutProfileIds = Object.freeze({
@@ -144,10 +144,6 @@ const boxHeldoutFreezeSchema = z
     }
   })
 
-export function parseBoxHeldoutFreeze(value: unknown): VerifiedBoxHeldoutFreeze {
-  return boxHeldoutFreezeSchema.parse(value)
-}
-
 const verifiedFreezes = new WeakSet<object>()
 
 function deepFreeze<T>(value: T): T {
@@ -158,8 +154,8 @@ function deepFreeze<T>(value: T): T {
   return value
 }
 
-export type VerifiedBoxHeldoutFreeze = z.infer<typeof boxHeldoutFreezeSchema>
-export type BoxHeldoutManifestPin = z.infer<typeof manifestPinSchema>
+type VerifiedBoxHeldoutFreeze = z.infer<typeof boxHeldoutFreezeSchema>
+type BoxHeldoutManifestPin = z.infer<typeof manifestPinSchema>
 
 export interface BoxHeldoutCandidatePlan {
   runIdPrefix: 'v02-box-confirmation-heldout-target-plus-neutral'
@@ -270,11 +266,4 @@ export function buildBoxHeldoutPlans(freezeInput: unknown): {
       route: boxHeldoutNoImageRoute,
     },
   })
-}
-
-export function boxHeldoutManifestPins(
-  freeze: VerifiedBoxHeldoutFreeze,
-): readonly BoxHeldoutManifestPin[] {
-  assertVerifiedBoxHeldoutFreeze(freeze)
-  return boxHeldoutFreezeSchema.parse(freeze).manifests
 }

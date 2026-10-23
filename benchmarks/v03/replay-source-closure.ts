@@ -17,7 +17,7 @@ export const H5_REPLAY_SOURCE_FILES = [
   'tsconfig.build.json',
 ] as const
 
-export interface ReplaySourceClosure {
+interface ReplaySourceClosure {
   sha256: string
   files: Array<{ path: string; sha256: string }>
 }

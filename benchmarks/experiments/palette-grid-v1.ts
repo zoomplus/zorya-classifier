@@ -45,7 +45,7 @@ function closestIndex(rgba: readonly number[], palette: readonly ColorEntry[]): 
   return bestIndex
 }
 
-export function encodePaletteGridV1(view: TextPixelView): string {
+function encodePaletteGridV1(view: TextPixelView): string {
   assertPixelView(view)
   const palette = makePalette(view)
   const rows: string[] = []
@@ -59,7 +59,7 @@ export function encodePaletteGridV1(view: TextPixelView): string {
   return `${header}\nwidth=${view.width} height=${view.height} colors=${palette.length}\n${paletteLines.join('\n')}\ngrid:\n${rows.join('\n')}`
 }
 
-export function paletteGridV1MaxEncodedBytes(width: number, height: number): number {
+function paletteGridV1MaxEncodedBytes(width: number, height: number): number {
   let size = utf8Size(`${header}\nwidth=${width} height=${height} colors=${paletteCap}\n`)
   for (let index = 0; index < paletteCap; index += 1)
     size += utf8Size(`${digits[index]}=#FFFFFFFF`) + (index === 0 ? 0 : 1)

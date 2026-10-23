@@ -18,7 +18,7 @@ const panelSchema = z
     labels: z.array(z.object({ id: z.string(), sourceRegion: regionSchema }).strict()).max(196),
   })
   .strict()
-export type PrefixResult =
+type PrefixResult =
   | { status: 'located'; region: PixelRect }
   | { status: 'not-found' | 'unknown' | 'failed'; reason: string }
 /** Native baseline uses the same maximum and stable input-order tie convention, without another library call. */

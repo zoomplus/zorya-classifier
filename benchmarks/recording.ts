@@ -54,7 +54,7 @@ export interface CallRecord {
   reservationId?: number
   dispatched: boolean
 }
-export interface Recorder {
+interface Recorder {
   port: DecisionPort
   calls: CallRecord[]
 }

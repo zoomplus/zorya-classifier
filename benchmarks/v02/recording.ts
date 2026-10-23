@@ -87,7 +87,7 @@ export interface PhysicalCallRecord {
   errorCode?: string
 }
 
-export interface LogicalCallRecord {
+interface LogicalCallRecord {
   logicalId: number
   requestSha256: string
   request: ReturnType<typeof sanitizeDecisionRequest>
@@ -111,7 +111,7 @@ export function isRecorderBoundToBudget(recorder: Recorder, budget: RunBudget): 
   return recorderBudgets.get(recorder) === budget
 }
 
-export interface RecorderPersistenceFailure {
+interface RecorderPersistenceFailure {
   stage:
     | 'physical-admission'
     | 'physical-http'

@@ -1,6 +1,6 @@
 export type TransportVariantId = 'low-json-schema' | 'none-json-schema'
 
-export interface TextTransportVariant {
+interface TextTransportVariant {
   id: TransportVariantId
   responseFormat: 'json-schema'
   reasoningEffort: 'low' | 'none'

@@ -4,7 +4,7 @@ import type { DecisionRequest, DecisionState, ImagePart } from '../../src/entiti
 import { limits } from '../../src/entities/contracts.js'
 import { assertActive, ClassifierError } from '../../src/entities/errors.js'
 
-export const jpegTransportProfile = {
+const jpegTransportProfile = {
   id: 'opaque-jpeg-if-smaller-v1',
   quality: 92,
   chromaSubsampling: '4:4:4',
@@ -14,7 +14,7 @@ export const jpegTransportProfile = {
   transparentImages: 'preserve-original-png',
 } as const
 
-export interface TransportImageAudit {
+interface TransportImageAudit {
   stateIndex: number
   width: number
   height: number

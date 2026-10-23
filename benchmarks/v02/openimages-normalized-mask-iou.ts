@@ -3,7 +3,7 @@ import { hasCompatibleIntegerRoundedAspect } from './categorical-photo-mask-trut
 const MAX_SOURCE_OR_PREDICTION_PIXELS = 2_097_152
 const MAX_ANNOTATION_CANVAS_PIXELS = 2048 * 2048
 
-export interface NormalizedCanvasMaskInput {
+interface NormalizedCanvasMaskInput {
   /** Binary 0/1 prediction in its cropped region. */
   predictedMask: Uint8Array
   predictedWidth: number

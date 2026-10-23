@@ -6,11 +6,27 @@
     "src/segmentation.ts",
     "src/cli.ts",
     "test/*.test.ts",
-    "test/fixtures/**/*.ts",
     "examples/*.ts",
-    "benchmarks/**/*.ts",
     "scripts/*.mjs",
-    "src/infrastructure/segmentation/native-worker.ts"
+    "src/infrastructure/segmentation/native-worker.ts",
+    "benchmarks/run.ts",
+    "benchmarks/model-selection.ts",
+    "benchmarks/v02/run.ts",
+    "benchmarks/**/run-*.ts",
+    "benchmarks/**/evaluate-*.ts",
+    "benchmarks/**/*.test.ts",
+    "benchmarks/**/*.mjs",
+    "benchmarks/v02/fresh-text-dev.ts",
+    "benchmarks/v02/native-smoke.ts",
+    "benchmarks/v02/proposal-resource-soak.ts",
+    "benchmarks/v02/region-segmentation-resource-soak.ts",
+    "benchmarks/v02/reconstruct-pilot-c03.ts",
+    "benchmarks/v02/derive-heldout-inputs.ts",
+    "benchmarks/v02/supported-screen-evaluator.ts",
+    "benchmarks/v03/segmentation-prompt-probe.ts",
+    "benchmarks/v03/semantic-mask-probe.ts",
+    "benchmarks/v03/semantic-mask-segmenter.ts",
+    "benchmarks/v03/zoom-locator.ts"
   ],
   "ignoreDependencies": ["onnxruntime-node"],
   "project": [
@@ -20,6 +36,7 @@
     "benchmarks/**/*.ts",
     "scripts/**/*.ts",
     "scripts/*.mjs",
-    "tools/*.mjs"
+    "tools/*.mjs",
+    "benchmarks/**/*.mjs"
   ]
 }
