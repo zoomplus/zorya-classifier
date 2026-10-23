@@ -10,6 +10,7 @@ import type {
   RasterPort,
 } from '../entities/contracts.js'
 import { parse, pixelRectSchema } from '../entities/contracts.js'
+import { decisionMetadataSchema } from '../entities/decision.js'
 import type { CutoutRasterPort } from '../entities/cutout-raster.js'
 import { ClassifierError, assertActive } from '../entities/errors.js'
 import type { RgbaRaster } from '../entities/representation.js'
@@ -36,16 +37,6 @@ import {
   validateSegmentationResult,
 } from './extract.js'
 
-const decisionMetadataSchema = z
-  .object({
-    model: z.string().nullable(),
-    provider: z.string().nullable(),
-    requestId: z.string().nullable(),
-    durationMs: z.number().finite().nonnegative(),
-    costUsd: z.number().finite().nonnegative().nullable(),
-    attempts: z.number().int().positive(),
-  })
-  .strict()
 const selectionSchema = z
   .object({
     choice: z.string().min(1),
@@ -74,7 +65,7 @@ const localizationMetadataSchema = z
         coordinateSpace: z.literal('oriented-source-pixels'),
       })
       .strict(),
-    stages: z.array(decisionMetadataSchema),
+    stages: z.array(decisionMetadataSchema.strict()),
     durationMs: z.number().finite().nonnegative(),
     knownCostUsd: z.number().finite().nonnegative(),
     unknownCostCount: z.number().int().nonnegative(),

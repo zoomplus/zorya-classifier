@@ -3,6 +3,8 @@ import { z } from 'zod'
 import type { PixelRect, RasterImage, RasterPort } from '../entities/contracts.js'
 import type { CutoutRasterPort } from '../entities/cutout-raster.js'
 import { parse } from '../entities/contracts.js'
+import { containsNonEmptyRect, intersectsRect } from '../entities/geometry.js'
+import { segmentationMetadataSchema } from '../entities/segmentation-metadata.js'
 import type {
   ExtractionResult,
   SegmentationMetadata,
@@ -33,17 +35,6 @@ const rgbaSchema = z
     width: z.number().int().positive().max(16384),
     height: z.number().int().positive().max(16384),
     format: z.literal('rgba8'),
-  })
-  .strict()
-const segmentationMetadataSchema = z
-  .object({
-    method: z.string().min(1).max(128),
-    backend: z.string().min(1).max(128),
-    durationMs: z.number().finite().nonnegative(),
-    input: z
-      .object({ width: z.number().int().positive(), height: z.number().int().positive() })
-      .strict(),
-    qualityScore: z.number().finite().optional(),
   })
   .strict()
 const segmentationResultSchema = z.discriminatedUnion('status', [
@@ -124,8 +115,8 @@ export async function extractObject(
     !contains({ left: 0, top: 0, width: image.width, height: image.height }, location.region) ||
     !contains(roi, location.region) ||
     !contains({ left: 0, top: 0, width: image.width, height: image.height }, location.seedRegion) ||
-    !intersects(location.region, location.seedRegion) ||
-    !intersects(roi, location.seedRegion)
+    !intersectsRect(location.region, location.seedRegion) ||
+    !intersectsRect(roi, location.seedRegion)
   )
     throw new ClassifierError(
       'INVALID_RESPONSE',
@@ -269,23 +260,7 @@ export function validateAndSnapshotRgba(value: unknown, width: number, height: n
 }
 
 export function contains(outer: PixelRect, inner: PixelRect): boolean {
-  return (
-    inner.left >= outer.left &&
-    inner.top >= outer.top &&
-    inner.width > 0 &&
-    inner.height > 0 &&
-    inner.left + inner.width <= outer.left + outer.width &&
-    inner.top + inner.height <= outer.top + outer.height
-  )
-}
-
-function intersects(first: PixelRect, second: PixelRect): boolean {
-  return (
-    first.left < second.left + second.width &&
-    second.left < first.left + first.width &&
-    first.top < second.top + second.height &&
-    second.top < first.top + first.height
-  )
+  return containsNonEmptyRect(outer, inner)
 }
 
 function snapshotMetadata(

@@ -11,6 +11,7 @@ import type {
   RasterPort,
 } from '../entities/contracts.js'
 import { limits, parse, pixelRectSchema } from '../entities/contracts.js'
+import { segmentationMetadataSafeSchema } from '../entities/segmentation-metadata.js'
 import { assertActive, ClassifierError } from '../entities/errors.js'
 import type { CutoutRasterPort } from '../entities/cutout-raster.js'
 import type {
@@ -54,24 +55,10 @@ const proposalSchema = z
     qualityScore: z.number().finite().optional(),
   })
   .strict()
-const metadataSchema = z
-  .object({
-    method: z.string().min(1).max(128),
-    backend: z.string().min(1).max(128),
-    durationMs: z.number().finite().nonnegative(),
-    input: z
-      .object({
-        width: z.number().int().positive().safe(),
-        height: z.number().int().positive().safe(),
-      })
-      .strict(),
-    qualityScore: z.number().finite().optional(),
-  })
-  .strict()
 const batchSchema = z
   .object({
     proposals: z.array(proposalSchema).max(objectProposalLimits.candidates),
-    metadata: metadataSchema,
+    metadata: segmentationMetadataSafeSchema,
   })
   .strict()
 

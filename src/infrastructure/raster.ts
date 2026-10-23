@@ -9,17 +9,10 @@ import type {
   RasterPort,
 } from '../entities/contracts.js'
 import { limits, parse, pixelRectSchema } from '../entities/contracts.js'
+import { containsRect } from '../entities/geometry.js'
 import { ClassifierError, assertActive } from '../entities/errors.js'
 import type { ImageRepresentationPort, RepresentationMetadata } from '../entities/representation.js'
 
-function contains(outer: PixelRect, inner: PixelRect): boolean {
-  return (
-    inner.left >= outer.left &&
-    inner.top >= outer.top &&
-    inner.left + inner.width <= outer.left + outer.width &&
-    inner.top + inner.height <= outer.top + outer.height
-  )
-}
 async function normalizeImage(bytes: Uint8Array, signal: AbortSignal): Promise<RasterImage> {
   assertActive(signal)
   const pipeline = sharp(bytes, { limitInputPixels: limits.imagePixels, failOn: 'error' })
@@ -59,7 +52,7 @@ async function cropImage(
   scale = 1,
 ): Promise<RasterImage> {
   assertActive(signal)
-  if (!contains({ left: 0, top: 0, width: image.width, height: image.height }, region))
+  if (!containsRect({ left: 0, top: 0, width: image.width, height: image.height }, region))
     throw new ClassifierError('INVALID_INPUT', 'ROI lies outside oriented source image')
   const pipeline = sharp(image.bytes, { limitInputPixels: limits.imagePixels })
     .extract(region)
@@ -255,7 +248,7 @@ export function createVisionRepresentation(raster: RasterPort): ImageRepresentat
           'INVALID_RESPONSE',
         )
         if (
-          !contains(
+          !containsRect(
             { left: 0, top: 0, ...transform.sourceImageTransform.output },
             transform.sourceImageTransform.content,
           )

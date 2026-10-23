@@ -6,6 +6,7 @@ import type {
 } from '../entities/contracts.js'
 
 import { pixelRectSchema } from '../entities/contracts.js'
+import { containsRect } from '../entities/geometry.js'
 import { uniformCoordinateCells } from './uniform-grid.js'
 
 type ChoiceMap =
@@ -23,14 +24,6 @@ function assertRegion(region: PixelRect): void {
     !Number.isSafeInteger(region.top + region.height)
   )
     throw new RangeError('Choice beam requires safe positive source-pixel rectangles')
-}
-function contains(outer: PixelRect, inner: PixelRect): boolean {
-  return (
-    inner.left >= outer.left &&
-    inner.top >= outer.top &&
-    inner.left + inner.width <= outer.left + outer.width &&
-    inner.top + inner.height <= outer.top + outer.height
-  )
 }
 /** Native Choice is validated by its consumer; this helper never normalizes raw probabilities. */
 export function rankChoiceBeamCells(cells: readonly GridCell[], answer: ChoiceMap): RankedCell[] {
@@ -149,7 +142,7 @@ export function choiceBeamPanels(
   if (coarseCells.length > 16) throw new RangeError('Choice beam first pass exceeds16 cells')
   for (const cell of coarseCells) {
     assertRegion(cell.region)
-    if (!contains(region, cell.region))
+    if (!containsRect(region, cell.region))
       throw new RangeError('Choice beam coarse cells must fit the requested source ROI')
   }
   const canonical = new Map<string, string>(),

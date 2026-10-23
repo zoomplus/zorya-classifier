@@ -1,4 +1,5 @@
 import type { PixelRect } from '../../entities/contracts.js'
+import { intersectsRect } from '../../entities/geometry.js'
 import type { BinaryMask } from '../../entities/segmentation.js'
 import type { RgbaRaster } from '../../entities/representation.js'
 
@@ -20,7 +21,7 @@ export function validateMask(
     mask.data.length !== pixels ||
     !inside(roi, image.width, image.height) ||
     !inside(seed, image.width, image.height) ||
-    !intersects(roi, seed)
+    !intersectsRect(roi, seed)
   )
     throw new TypeError('Segmentation dimensions or bounds do not match the canonical image')
 
@@ -93,14 +94,5 @@ function inside(rect: PixelRect, width: number, height: number): boolean {
     rect.height > 0 &&
     rect.left + rect.width <= width &&
     rect.top + rect.height <= height
-  )
-}
-
-function intersects(first: PixelRect, second: PixelRect): boolean {
-  return (
-    first.left < second.left + second.width &&
-    second.left < first.left + first.width &&
-    first.top < second.top + second.height &&
-    second.top < first.top + first.height
   )
 }
