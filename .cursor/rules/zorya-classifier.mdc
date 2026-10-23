@@ -1,0 +1,16 @@
+---
+description: Zorya Classifier project pointer to canonical rules and docs
+globs:
+  - '**/*'
+alwaysApply: true
+---
+
+# Zorya Classifier (project pointer)
+
+Canonical shared rules live under `/root/.cursor/rules/` (repository cleanliness, Context7 usage, and other owner-wide policies). Do not duplicate or contradict them here.
+
+Project contract and contributor invariants: [AGENTS.md](../../AGENTS.md).
+
+Refactor wave ownership and Russian summaries: [docs/refactoring-plan.ru.md](../../docs/refactoring-plan.ru.md), [docs/agents.ru.md](../../docs/agents.ru.md).
+
+Offline test catalog: default `npm test` runs classified portable suites via `node --import tsx scripts/run-portable-tests.mjs` (Zod-validated `scripts/test-catalog.ts`); local evidence and Python/native prerequisites use `npm run test:local-evidence` and `npm run test:python-native`. Refactor coding tasks use Composer via `gpt-6-luna` supervisor dispatch to `composer-2.5-fast` only (see `docs/agents.ru.md`, `AGENTS.md`); canonical owner rules live under `/root/.cursor/rules/`.

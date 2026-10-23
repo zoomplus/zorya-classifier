@@ -6,10 +6,10 @@
     "src/segmentation.ts",
     "src/cli.ts",
     "test/*.test.ts",
+    "test/fixtures/**/*.ts",
     "examples/*.ts",
     "benchmarks/**/*.ts",
     "scripts/*.mjs",
-    "eslint.config.mjs",
     "src/infrastructure/segmentation/native-worker.ts"
   ],
   "ignoreDependencies": ["onnxruntime-node"],
@@ -18,8 +18,8 @@
     "test/**/*.ts",
     "examples/**/*.ts",
     "benchmarks/**/*.ts",
+    "scripts/**/*.ts",
     "scripts/*.mjs",
-    "tools/*.mjs",
-    "eslint.config.mjs"
+    "tools/*.mjs"
   ]
 }

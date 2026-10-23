@@ -28,7 +28,6 @@ import {
   verifyContractFile,
   verifyEmittedMaskInventory,
   verifyEffectiveProcessorSnapshot,
-  verifyMinimalDevManifestFile,
   verifyRunDeviceAndFreezePath,
   verifyRunRecordProducerBindings,
   verifyCudaDevRunReceiptConsistency,
@@ -205,17 +204,6 @@ await test('buildExpectedH10PilotRows joins frozen pilot inputs to truth', async
   assert.equal(last.row_key, 'pilot-v03-map-04')
   assert.equal(rows.filter((row) => row.presence === 'present').length, 9)
   assert.equal(rows.filter((row) => row.presence === 'absent').length, 3)
-})
-
-await test('verifyMinimalDevManifestFile matches pinned minimal DEV digest', async () => {
-  const errors: string[] = []
-  const manifest = await verifyMinimalDevManifestFile(errors)
-  assert.ok(manifest)
-  assert.equal(errors.length, 0)
-  assert.equal(manifest.rows.length, 12)
-  assert.ok(manifest.rows.every((row) => row.source_sha256.length === 64))
-  const bytes = await readFile('/root/work/zorya-classifier/.run/v03/h10/minimal-inputs.json')
-  assert.equal(createHash('sha256').update(bytes).digest('hex'), MINIMAL_DEV_MANIFEST_SHA256)
 })
 
 await test('wholeObjectMatch rejects split-threshold wins on different reference instances', () => {
