@@ -4,7 +4,7 @@ import { parseArgs, parseEnv } from 'node:util'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { z } from 'zod'
-import { createResearchClassifier } from '../../src/app/create-classifier.js'
+import { createResearchClassifier } from '../experiments/create-research-classifier.js'
 import { runOrdinaryVisionPilot } from './ordinaryvisionpilot.js'
 import type { OrdinaryVisionPilotOptions } from './ordinaryvisionpilot.js'
 
@@ -36,9 +36,7 @@ async function readOpenRouterKey(): Promise<string> {
 }
 
 async function rendererHash(): Promise<string> {
-  const bytes = await readFile(
-    new URL('../../src/infrastructure/boundary-view.ts', import.meta.url),
-  )
+  const bytes = await readFile(new URL('../experiments/boundary-view.ts', import.meta.url))
   return createHash('sha256').update(bytes).digest('hex')
 }
 

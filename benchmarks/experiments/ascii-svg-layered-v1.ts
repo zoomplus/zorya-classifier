@@ -1,8 +1,5 @@
 import { assertActive } from '../../src/entities/errors.js'
-import type {
-  TextPixelView,
-  TextRepresentationEncoder,
-} from '../../src/infrastructure/text-representation.js'
+import type { TextPixelView, TextRepresentationEncoder } from './text-representation.js'
 import { asciiContoursV1MaxEncodedBytes, encodeAsciiContoursV1 } from './ascii-contours-v1.js'
 import { svgContoursV1MaxEncodedBytes, encodeSvgContoursV1 } from './svg-contours-v1.js'
 import { utf8Size } from './encoder-common.js'

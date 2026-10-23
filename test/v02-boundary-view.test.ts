@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import sharp from 'sharp'
 import type { RasterImage } from '../src/entities/contracts.js'
 import { ClassifierError } from '../src/entities/errors.js'
-import { createSharpBoundaryView } from '../src/infrastructure/boundary-view.js'
+import { createSharpBoundaryView } from '../benchmarks/experiments/boundary-view.js'
 
 const active = new AbortController().signal
 

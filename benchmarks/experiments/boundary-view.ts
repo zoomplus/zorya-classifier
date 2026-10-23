@@ -1,14 +1,15 @@
 import sharp from 'sharp'
 import { z } from 'zod'
-import type { PixelRect, RasterImage } from '../entities/contracts.js'
-import { limits, pixelRectSchema } from '../entities/contracts.js'
+import type { PixelRect, RasterImage } from '../../src/entities/contracts.js'
+import { limits, pixelRectSchema } from '../../src/entities/contracts.js'
 import type {
   BoundaryAxis,
   BoundaryCandidate,
   BoundaryViewInput,
   BoundaryViewPort,
-} from '../entities/boundary-view.js'
-import { ClassifierError, assertActive } from '../entities/errors.js'
+} from '../../src/entities/boundary-view.js'
+import { containsRect } from '../../src/entities/geometry.js'
+import { ClassifierError, assertActive } from '../../src/entities/errors.js'
 
 const sourceSchema = z
   .object({
@@ -56,15 +57,6 @@ const axisGutter = 210
 const outerGutter = 10
 const maxRenderedBytes = limits.imageBytes
 
-function contained(outer: PixelRect, inner: PixelRect): boolean {
-  return (
-    inner.left >= outer.left &&
-    inner.top >= outer.top &&
-    inner.left + inner.width <= outer.left + outer.width &&
-    inner.top + inner.height <= outer.top + outer.height
-  )
-}
-
 function escapeXml(value: string): string {
   return value.replace(/[&<>"']/gu, (char) => {
     switch (char) {
@@ -95,7 +87,7 @@ function validate(input: BoundaryViewInput): BoundaryViewInput {
       component: 'boundary-view',
     })
   const full = { left: 0, top: 0, width: value.source.width, height: value.source.height }
-  if (!contained(full, value.sourceRegion))
+  if (!containsRect(full, value.sourceRegion))
     failInput('Source region lies outside the oriented image')
   const xAxis = value.axis === 'left' || value.axis === 'right'
   const axisSize = xAxis ? value.source.width : value.source.height

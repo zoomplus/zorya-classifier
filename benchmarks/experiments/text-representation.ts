@@ -1,14 +1,15 @@
 import sharp from 'sharp'
-import type { DecisionState, PixelRect, RasterImage } from '../entities/contracts.js'
-import { limits } from '../entities/contracts.js'
-import { ClassifierError, assertActive } from '../entities/errors.js'
+import type { DecisionState, PixelRect, RasterImage } from '../../src/entities/contracts.js'
+import { limits } from '../../src/entities/contracts.js'
+import { ClassifierError, assertActive } from '../../src/entities/errors.js'
 import type {
   ImageRepresentationPort,
   RepresentationMetadata,
   RepresentationView,
-} from '../entities/representation.js'
-import { representationLimits } from '../entities/representation.js'
-import { readCanonicalPixels } from './raster.js'
+} from '../../src/entities/representation.js'
+import { representationLimits } from '../../src/entities/representation.js'
+import { containsRect } from '../../src/entities/geometry.js'
+import { readCanonicalPixels } from '../../src/infrastructure/raster.js'
 
 export interface TextPixelView {
   id: string
@@ -49,15 +50,6 @@ interface PlannedView {
   maxEncodedBytes: number
 }
 
-function isContained(outer: PixelRect, inner: PixelRect): boolean {
-  return (
-    inner.left >= outer.left &&
-    inner.top >= outer.top &&
-    inner.left + inner.width <= outer.left + outer.width &&
-    inner.top + inner.height <= outer.top + outer.height
-  )
-}
-
 function key(region: PixelRect): string {
   return `${region.left},${region.top},${region.width},${region.height}`
 }
@@ -79,7 +71,7 @@ function assertGridGeometry(view: RepresentationView, width: number, height: num
     height: Math.round((rect.height * height) / view.sourceRegion.height),
   })
   const mapped = view.grid.cells.map((cell) => map(cell.region))
-  if (view.grid.cells.some((cell) => !isContained(view.sourceRegion, cell.region)))
+  if (view.grid.cells.some((cell) => !containsRect(view.sourceRegion, cell.region)))
     throw new ClassifierError('INVALID_INPUT', 'Grid geometry lies outside its source region')
   if (mapped.some((rect) => rect.width < 1 || rect.height < 1))
     throw new ClassifierError(
@@ -108,7 +100,7 @@ async function cleanPixels(
   signal: AbortSignal,
 ): Promise<TextPixelView> {
   const region = view.sourceRegion
-  if (!isContained({ left: 0, top: 0, width: source.width, height: source.height }, region))
+  if (!containsRect({ left: 0, top: 0, width: source.width, height: source.height }, region))
     throw new ClassifierError(
       'INVALID_INPUT',
       'Representation view lies outside the oriented source',
@@ -256,7 +248,7 @@ export function createTextRepresentation(
       const groups = buildGroups(input.views)
       for (const group of groups) {
         if (
-          !isContained(
+          !containsRect(
             { left: 0, top: 0, width: input.source.width, height: input.source.height },
             group.sourceRegion,
           )

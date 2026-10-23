@@ -5,8 +5,8 @@ import { join } from 'node:path'
 import test from 'node:test'
 import sharp from 'sharp'
 import type { DecisionRequest, DecisionResult } from '../src/entities/contracts.js'
-import { createResearchClassifier } from '../src/app/create-classifier.js'
-import { createSharpBoundaryView } from '../src/infrastructure/boundary-view.js'
+import { createResearchClassifier } from '../benchmarks/experiments/create-research-classifier.js'
+import { createSharpBoundaryView } from '../benchmarks/experiments/boundary-view.js'
 import { RunBudget, RunBudgetExhausted } from '../benchmarks/v02/budget.js'
 import {
   createDecisionTrace,

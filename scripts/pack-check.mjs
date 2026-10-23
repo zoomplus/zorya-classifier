@@ -206,9 +206,23 @@ try {
     run(['pack', '--ignore-scripts', '--json', '--pack-destination', dir]),
   )[0]
   if (!packed?.filename || !Array.isArray(packed.files)) throw new Error('Invalid npm pack result')
+  const forbiddenResearchArchivePaths = new Set([
+    'dist/infrastructure/text-representation.js',
+    'dist/infrastructure/text-representation.d.ts',
+    'dist/infrastructure/boundary-view.js',
+    'dist/infrastructure/boundary-view.d.ts',
+    'dist/experiments/text-representation.js',
+    'dist/experiments/text-representation.d.ts',
+    'dist/experiments/boundary-view.js',
+    'dist/experiments/boundary-view.d.ts',
+    'dist/experiments/create-research-classifier.js',
+    'dist/experiments/create-research-classifier.d.ts',
+  ])
   const distPins = []
   const packagePins = new Map()
   for (const f of packed.files) {
+    if (forbiddenResearchArchivePaths.has(f.path))
+      throw new Error(`Research implementation must not ship in the public archive: ${f.path}`)
     if (
       !/^(dist\/|docs\/|README\.md$|LICENSE$|NOTICE\.md$|package\.json$)/.test(f.path) ||
       /(\.env|node_modules|\.map$|session\.log|\.run)/.test(f.path) ||

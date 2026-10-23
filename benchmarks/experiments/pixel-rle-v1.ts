@@ -1,8 +1,5 @@
 import { ClassifierError, assertActive } from '../../src/entities/errors.js'
-import type {
-  TextPixelView,
-  TextRepresentationEncoder,
-} from '../../src/infrastructure/text-representation.js'
+import type { TextPixelView, TextRepresentationEncoder } from './text-representation.js'
 
 const maxSide = 64
 const header = 'PIXEL_RLE_V1\n'

@@ -10,6 +10,7 @@ import type { ProducerManifest } from './protocol.js'
 import { RunBudget } from './budget.js'
 import type { SeedOutlinePilotOptions } from './seedoutlinepilot.js'
 import { runSeedOutlinePilot } from './seedoutlinepilot.js'
+import { appendRuntimeSourceFiles } from '../runtime-source-files.js'
 
 export const intervalPolicyVariants = Object.freeze([
   Object.freeze({ id: 'seed-outline-fixed-16-v1', intervalPolicy: 'fixed-16-v1' as const }),
@@ -58,7 +59,7 @@ export async function runIntervalPolicyPilot(options: IntervalPolicyPilotOptions
   const manifest: ProducerManifest = inputManifestSchema.parse(
     JSON.parse(await readFile(manifestUrl, 'utf8')),
   )
-  const sourcePaths = [
+  const sourcePathPrefix = [
     './intervalpolicy-pilot.ts',
     './run-interval-policy-pilot.ts',
     './seedoutlinepilot.ts',
@@ -78,8 +79,10 @@ export async function runIntervalPolicyPilot(options: IntervalPolicyPilotOptions
     '../../src/features/choice-beam-layout.ts',
     '../../src/features/uniform-grid.ts',
     '../../src/infrastructure/openrouter.ts',
-    '../../src/infrastructure/boundary-view.ts',
-  ]
+    '../experiments/boundary-view.ts',
+    '../experiments/create-research-classifier.ts',
+  ] as const
+  const sourcePaths = await appendRuntimeSourceFiles(sourcePathPrefix, import.meta.url)
   const sourceHashes = Object.fromEntries(
     await Promise.all(
       sourcePaths.map(async (path) => {

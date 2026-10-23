@@ -9,6 +9,7 @@
       "test/benchmark-evidence.test.ts",
       "test/benchmark-metrics.test.ts",
       "test/benchmark-runner.test.ts",
+      "test/benchmark-runtime-sources.test.ts",
       "test/boundaries.test.ts",
       "test/categorical-box-heldout-plan.test.ts",
       "test/categorical-heldout-plan.test.ts",

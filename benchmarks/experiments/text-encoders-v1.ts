@@ -1,4 +1,4 @@
-import type { TextRepresentationEncoder } from '../../src/infrastructure/text-representation.js'
+import type { TextRepresentationEncoder } from './text-representation.js'
 import { asciiContoursV1Encoder } from './ascii-contours-v1.js'
 import { asciiLumaV1Encoder } from './ascii-luma-v1.js'
 import { asciiSvgLayeredV1Encoder } from './ascii-svg-layered-v1.js'

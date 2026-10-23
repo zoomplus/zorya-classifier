@@ -17,6 +17,7 @@ import type { PhysicalCallRecord, Recorder } from './recording.js'
 import { recordProvider } from './recording.js'
 import { presentationVariantHash, presentationVariants } from './presentationvariants.js'
 import type { PresentationVariantId } from './presentationvariants.js'
+import { appendRuntimeSourceFiles } from '../runtime-source-files.js'
 
 const manifestUrl = new URL('./input-manifest.json', import.meta.url)
 const physicalCallLimit = 64
@@ -156,7 +157,7 @@ export async function runPresentationPilot(options: PresentationPilotOptions) {
   const outputDirectory = resolve(options.outputRoot, runId)
   await mkdir(options.outputRoot, { recursive: true })
   await mkdir(outputDirectory, { recursive: false })
-  const sourceFiles = [
+  const sourceFilePrefix = [
     './presentationpilot.ts',
     './presentationvariants.ts',
     '../../src/processes/whole-object.ts',
@@ -167,8 +168,10 @@ export async function runPresentationPilot(options: PresentationPilotOptions) {
     '../../src/features/choice-beam-layout.ts',
     '../../src/features/uniform-grid.ts',
     '../../src/infrastructure/openrouter.ts',
-    '../../src/infrastructure/boundary-view.ts',
+    '../experiments/boundary-view.ts',
+    '../experiments/create-research-classifier.ts',
   ] as const
+  const sourceFiles = await appendRuntimeSourceFiles(sourceFilePrefix, import.meta.url)
   const sourceParts = await Promise.all(
     sourceFiles.map(async (path) => ({
       path,
@@ -176,7 +179,7 @@ export async function runPresentationPilot(options: PresentationPilotOptions) {
     })),
   )
   const actualRendererSha256 = sha256(
-    sourceParts.find(({ path }) => path === '../../src/infrastructure/boundary-view.ts')!.source,
+    sourceParts.find(({ path }) => path === '../experiments/boundary-view.ts')!.source,
   )
   if (actualRendererSha256 !== options.rendererSha256)
     throw new TypeError('Renderer source digest does not match the supplied frozen digest')

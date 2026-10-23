@@ -8,7 +8,7 @@ import type { BoundaryViewPort } from '../../src/entities/boundary-view.js'
 import type { WholeObjectLocalizationResult } from '../../src/entities/whole-object.js'
 import type { WholeObjectIntervalPolicy } from '../../src/processes/whole-object.js'
 import { createOpenRouterDecisions } from '../../src/infrastructure/openrouter.js'
-import { createSharpBoundaryView } from '../../src/infrastructure/boundary-view.js'
+import { createSharpBoundaryView } from '../experiments/boundary-view.js'
 import { inputManifestSchema, hashCanonical } from './protocol.js'
 import type { ProducerCase, ProducerManifest } from './protocol.js'
 import { RunBudget } from './budget.js'
@@ -17,6 +17,7 @@ import { recordProvider } from './recording.js'
 import { safeErrorCode } from './presentationpilot.js'
 import { withSeedUnboundedPrompt } from './seedunboundedprompt.js'
 import { withSeedOutlinePresentation } from './seedoutlinepresentation.js'
+import { appendRuntimeSourceFiles } from '../runtime-source-files.js'
 
 const manifestUrl = new URL('./input-manifest.json', import.meta.url)
 const caseIds = ['photo-dev-02', 'photo-dev-03'] as const
@@ -59,7 +60,8 @@ const sourceFiles = [
   '../../src/features/choice-beam-layout.ts',
   '../../src/features/uniform-grid.ts',
   '../../src/infrastructure/openrouter.ts',
-  '../../src/infrastructure/boundary-view.ts',
+  '../experiments/boundary-view.ts',
+  '../experiments/create-research-classifier.ts',
 ] as const
 
 export interface SeedOutlinePilotOptions {
@@ -147,14 +149,13 @@ export async function runSeedOutlinePilot(options: SeedOutlinePilotOptions) {
   const intervalPolicy = options.intervalPolicy ?? 'fixed-16-v1'
   const variantId = options.variantId ?? 'original-seed-outline-v1'
   const variantPolicy = { ...policy, intervalPolicy, variantId }
-  const rendererBytes = await readFile(
-    new URL('../../src/infrastructure/boundary-view.ts', import.meta.url),
-  )
+  const rendererBytes = await readFile(new URL('../experiments/boundary-view.ts', import.meta.url))
   if (sha256(rendererBytes) !== options.rendererSha256)
     throw new TypeError('Boundary renderer digest changed since the variant was frozen')
+  const resolvedSourceFiles = await appendRuntimeSourceFiles(sourceFiles, import.meta.url)
   const sourceHashes = Object.fromEntries(
     await Promise.all(
-      sourceFiles.map(
+      resolvedSourceFiles.map(
         async (path) => [path, sha256(await readFile(new URL(path, import.meta.url)))] as const,
       ),
     ),

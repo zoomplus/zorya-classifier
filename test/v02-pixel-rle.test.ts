@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { decodePixelRleV1, encodePixelRleV1 } from '../benchmarks/experiments/pixel-rle-v1.js'
 import { pixelRleV1Encoder } from '../benchmarks/experiments/pixel-rle-v1.js'
-import type { TextPixelView } from '../src/infrastructure/text-representation.js'
+import type { TextPixelView } from '../benchmarks/experiments/text-representation.js'
 
 function view(width: number, height: number, data: number[]): TextPixelView {
   return {

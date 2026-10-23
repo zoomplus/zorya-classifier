@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import sharp from 'sharp'
-import type { TextPixelView } from '../src/infrastructure/text-representation.js'
+import type { TextPixelView } from '../benchmarks/experiments/text-representation.js'
 import { asciiContoursV1Encoder } from '../benchmarks/experiments/ascii-contours-v1.js'
 import { asciiLumaV1Encoder } from '../benchmarks/experiments/ascii-luma-v1.js'
 import { asciiSvgLayeredV1Encoder } from '../benchmarks/experiments/ascii-svg-layered-v1.js'

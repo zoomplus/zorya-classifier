@@ -3,7 +3,8 @@ import { resolve } from 'node:path'
 import { test } from 'node:test'
 import sharp from 'sharp'
 import type { DecisionPort, DecisionRequest, DecisionResult } from '../src/entities/contracts.js'
-import { createClassifier, createResearchClassifier } from '../src/app/create-classifier.js'
+import { createClassifier } from '../src/app/create-classifier.js'
+import { createResearchClassifier } from '../benchmarks/experiments/create-research-classifier.js'
 import {
   intervalPolicyPilotPolicy,
   intervalPolicyVariants,

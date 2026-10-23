@@ -8,7 +8,7 @@ import type { BoundaryViewPort } from '../../src/entities/boundary-view.js'
 import type { WholeObjectLocalizationResult } from '../../src/entities/whole-object.js'
 import { createOpenRouterDecisions } from '../../src/infrastructure/openrouter.js'
 import { createOpenRouterVision } from '../../src/infrastructure/openrouter-vision.js'
-import { createSharpBoundaryView } from '../../src/infrastructure/boundary-view.js'
+import { createSharpBoundaryView } from '../experiments/boundary-view.js'
 import { inputManifestSchema, hashCanonical } from './protocol.js'
 import type { ProducerCase, ProducerManifest } from './protocol.js'
 import { RunBudget } from './budget.js'
@@ -21,6 +21,7 @@ import {
   seedUnboundedPolicy,
   seedUnboundedVariantHash,
 } from './seedunboundedvariant.js'
+import { appendRuntimeSourceFiles } from '../runtime-source-files.js'
 
 const manifestUrl = new URL('./input-manifest.json', import.meta.url)
 const caseIds = ['photo-dev-02', 'photo-dev-03'] as const
@@ -75,7 +76,7 @@ const sourceFiles = [
   '../../src/infrastructure/decision-transport/images.ts',
   '../../src/infrastructure/decision-transport/response.ts',
   '../../src/infrastructure/decision-transport/route-identity.ts',
-  '../../src/infrastructure/boundary-view.ts',
+  '../experiments/boundary-view.ts',
 ] as const
 
 function sha256(value: Uint8Array | string): string {
@@ -156,14 +157,16 @@ function latencySummary(values: readonly number[]) {
 
 /** Paired two-route exposed-development comparison. It never reads evaluator truth. */
 export async function runSeedUnboundedPilot(options: SeedUnboundedPilotOptions) {
-  const rendererBytes = await readFile(
-    new URL('../../src/infrastructure/boundary-view.ts', import.meta.url),
-  )
+  const rendererBytes = await readFile(new URL('../experiments/boundary-view.ts', import.meta.url))
   if (sha256(rendererBytes) !== options.rendererSha256)
     throw new TypeError('Boundary renderer digest changed since the variant was frozen')
+  const resolvedSourceFiles = await appendRuntimeSourceFiles(
+    [...sourceFiles, '../experiments/create-research-classifier.ts'],
+    import.meta.url,
+  )
   const sourceHashes = Object.fromEntries(
     await Promise.all(
-      sourceFiles.map(
+      resolvedSourceFiles.map(
         async (path) => [path, sha256(await readFile(new URL(path, import.meta.url)))] as const,
       ),
     ),

@@ -4,7 +4,7 @@ import { parseArgs, parseEnv } from 'node:util'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { z } from 'zod'
-import { createResearchClassifier } from '../../src/app/create-classifier.js'
+import { createResearchClassifier } from '../experiments/create-research-classifier.js'
 import type { IntervalPolicyPilotOptions } from './intervalpolicy-pilot.js'
 import { runIntervalPolicyPilot } from './intervalpolicy-pilot.js'
 
@@ -37,9 +37,7 @@ async function readOpenRouterKey(): Promise<string> {
 async function runFromCommandLine(args: readonly string[]) {
   const options = parseIntervalPolicyPilotArgs(args)
   const apiKey = await readOpenRouterKey()
-  const renderer = await readFile(
-    new URL('../../src/infrastructure/boundary-view.ts', import.meta.url),
-  )
+  const renderer = await readFile(new URL('../experiments/boundary-view.ts', import.meta.url))
   const rendererSha256 = createHash('sha256').update(renderer).digest('hex')
   const composeClassifier: IntervalPolicyPilotOptions['composeClassifier'] = (
     decision,

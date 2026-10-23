@@ -1,5 +1,5 @@
 import { ClassifierError } from '../../src/entities/errors.js'
-import type { TextPixelView } from '../../src/infrastructure/text-representation.js'
+import type { TextPixelView } from './text-representation.js'
 
 export function assertPixelView(view: TextPixelView): void {
   if (

@@ -10,7 +10,7 @@ import type {
   WholeObjectLocalizationResult,
 } from '../../src/entities/whole-object.js'
 import { createOpenRouterVision } from '../../src/infrastructure/openrouter-vision.js'
-import { createSharpBoundaryView } from '../../src/infrastructure/boundary-view.js'
+import { createSharpBoundaryView } from '../experiments/boundary-view.js'
 import { inputManifestSchema, hashCanonical } from './protocol.js'
 import type { ProducerCase, ProducerManifest } from './protocol.js'
 import { RunBudget } from './budget.js'
@@ -21,6 +21,7 @@ import {
   ordinaryVisionAxisVariant,
   ordinaryVisionAxisVariantHash,
 } from './ordinaryvisionvariant.js'
+import { appendRuntimeSourceFiles } from '../runtime-source-files.js'
 
 const manifestUrl = new URL('./input-manifest.json', import.meta.url)
 const physicalCallLimit = 32
@@ -53,7 +54,7 @@ const sourceFiles = [
   '../../src/infrastructure/decision-transport/images.ts',
   '../../src/infrastructure/decision-transport/response.ts',
   '../../src/infrastructure/decision-transport/route-identity.ts',
-  '../../src/infrastructure/boundary-view.ts',
+  '../experiments/boundary-view.ts',
 ] as const
 
 export interface OrdinaryVisionPilotOptions {
@@ -162,14 +163,16 @@ export function shouldRunConditionalOrdinaryVisionCases(
 
 /** Ordinary Luna axis-view probe; evaluator truth never enters this producer. */
 export async function runOrdinaryVisionPilot(options: OrdinaryVisionPilotOptions) {
-  const renderer = await readFile(
-    new URL('../../src/infrastructure/boundary-view.ts', import.meta.url),
-  )
+  const renderer = await readFile(new URL('../experiments/boundary-view.ts', import.meta.url))
   const rendererSha256 = sha256(renderer)
   if (rendererSha256 !== options.rendererSha256)
     throw new TypeError('Boundary renderer source digest changed since the pilot was frozen')
+  const resolvedSourceFiles = await appendRuntimeSourceFiles(
+    [...sourceFiles, '../experiments/create-research-classifier.ts'],
+    import.meta.url,
+  )
   const sources = await Promise.all(
-    sourceFiles.map(async (path) => ({
+    resolvedSourceFiles.map(async (path) => ({
       path,
       sha256: sha256(await readFile(new URL(path, import.meta.url))),
     })),

@@ -30,17 +30,8 @@ export function createClassifier(options: ClassifierOptions): Classifier {
   return composeClassifier(options)
 }
 
-/** Internal benchmark composition. No research codec is exported by the npm entry points. */
-export function createResearchClassifier(
-  options: ClassifierOptions,
-  experimental?: ImageRepresentationPort,
-  boundaryView?: BoundaryViewPort,
-  intervalPolicy?: WholeObjectIntervalPolicy,
-): Classifier {
-  return composeClassifier(options, experimental, boundaryView, intervalPolicy)
-}
-
-function composeClassifier(
+/** Internal composition seam for benchmark helpers; not re-exported from public entry points. */
+export function composeClassifier(
   options: ClassifierOptions,
   experimental?: ImageRepresentationPort,
   boundaryView?: BoundaryViewPort,

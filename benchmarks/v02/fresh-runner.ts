@@ -4,11 +4,12 @@ import { join, relative, resolve, sep } from 'node:path'
 import { parseEnv } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import type { Classifier } from '../../src/app/create-classifier.js'
-import { createClassifier, createResearchClassifier } from '../../src/app/create-classifier.js'
+import { createClassifier } from '../../src/app/create-classifier.js'
+import { createResearchClassifier } from '../experiments/create-research-classifier.js'
 import type { DecisionPort } from '../../src/entities/contracts.js'
 import type { WholeObjectLocalizationResult } from '../../src/entities/whole-object.js'
 import { createOpenRouterDecisions } from '../../src/infrastructure/openrouter.js'
-import { createSharpBoundaryView } from '../../src/infrastructure/boundary-view.js'
+import { createSharpBoundaryView } from '../experiments/boundary-view.js'
 import { RunBudget } from './budget.js'
 import { freshProducerTask, loadFreshCorpus, loadFreshImage } from './fresh-corpus.js'
 import type { FreshCase } from './fresh-corpus.js'
@@ -59,6 +60,8 @@ const sourceFiles = [
   './protocol.ts',
   './seedoutlinepresentation.ts',
   './seedunboundedprompt.ts',
+  '../experiments/boundary-view.ts',
+  '../experiments/create-research-classifier.ts',
 ] as const
 
 export type FreshProfileId = (typeof freshProfileVariants)[number]['id']

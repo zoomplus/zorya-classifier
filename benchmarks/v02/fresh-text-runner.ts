@@ -5,12 +5,13 @@ import { parseEnv } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import type { DecisionPort, DecisionRequest } from '../../src/entities/contracts.js'
 import type { WholeObjectLocalizationResult } from '../../src/entities/whole-object.js'
-import { createClassifier, createResearchClassifier } from '../../src/app/create-classifier.js'
+import { createClassifier } from '../../src/app/create-classifier.js'
+import { createResearchClassifier } from '../experiments/create-research-classifier.js'
 import { createOpenRouterText } from '../../src/infrastructure/openrouter-vision.js'
-import { createTextRepresentation } from '../../src/infrastructure/text-representation.js'
+import { createTextRepresentation } from '../experiments/text-representation.js'
 import { ClassifierError } from '../../src/entities/errors.js'
 import { textEncodersV1 } from '../experiments/text-encoders-v1.js'
-import type { TextRepresentationEncoder } from '../../src/infrastructure/text-representation.js'
+import type { TextRepresentationEncoder } from '../experiments/text-representation.js'
 import { RunBudget } from './budget.js'
 import { freshProducerTask, loadFreshCorpus, loadFreshImage } from './fresh-corpus.js'
 import type { FreshCase } from './fresh-corpus.js'
@@ -284,6 +285,9 @@ const sourceFiles = [
   '../experiments/pixel-rle-v1.ts',
   '../experiments/ascii-contours-v1.ts',
   '../experiments/ascii-svg-layered-v1.ts',
+  '../experiments/text-representation.ts',
+  '../experiments/create-research-classifier.ts',
+  '../experiments/encoder-common.ts',
   '../../package.json',
   '../../package-lock.json',
 ] as const

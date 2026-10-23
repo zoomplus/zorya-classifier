@@ -9,7 +9,7 @@ import {
 import {
   createTextRepresentation,
   type TextPixelView,
-} from '../src/infrastructure/text-representation.js'
+} from '../benchmarks/experiments/text-representation.js'
 import type { RasterImage } from '../src/entities/contracts.js'
 import type { RepresentationView } from '../src/entities/representation.js'
 import {

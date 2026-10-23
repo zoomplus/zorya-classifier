@@ -1,8 +1,5 @@
 import { assertActive } from '../../src/entities/errors.js'
-import type {
-  TextPixelView,
-  TextRepresentationEncoder,
-} from '../../src/infrastructure/text-representation.js'
+import type { TextPixelView, TextRepresentationEncoder } from './text-representation.js'
 import { assertPixelView, luma, rgbaAt, utf8Size } from './encoder-common.js'
 
 const ramp = '.:-=+*#%@'

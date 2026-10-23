@@ -5,8 +5,9 @@ import { parseEnv } from 'node:util'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { z } from 'zod'
-import { createClassifier, createResearchClassifier } from '../../src/app/create-classifier.js'
-import { createSharpBoundaryView } from '../../src/infrastructure/boundary-view.js'
+import { createClassifier } from '../../src/app/create-classifier.js'
+import { createResearchClassifier } from '../experiments/create-research-classifier.js'
+import { createSharpBoundaryView } from '../experiments/boundary-view.js'
 import { presentationVariants } from './presentationvariants.js'
 import { runPresentationPilot } from './presentationpilot.js'
 import type { PresentationPilotOptions } from './presentationpilot.js'
@@ -38,9 +39,7 @@ async function readOpenRouterKey(): Promise<string> {
 }
 
 async function rendererHash(): Promise<string> {
-  const bytes = await readFile(
-    new URL('../../src/infrastructure/boundary-view.ts', import.meta.url),
-  )
+  const bytes = await readFile(new URL('../experiments/boundary-view.ts', import.meta.url))
   return createHash('sha256').update(bytes).digest('hex')
 }
 

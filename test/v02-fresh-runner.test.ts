@@ -94,7 +94,7 @@ await test('fresh producer records both stages without sending controller IDs, p
     assert.equal(JSON.stringify(runManifest).includes(sourceName), false)
     const sourceHashes = runManifest.sourceHashes as Record<string, string>
     for (const path of [
-      'src/infrastructure/boundary-view.ts',
+      '../experiments/boundary-view.ts',
       'src/processes/boundary-state.ts',
       'src/entities/boundary-view.ts',
     ])
