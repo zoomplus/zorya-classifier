@@ -12,6 +12,7 @@ import { NativeChildPool } from '../native-child.js'
 import { nativeErrorReplySchema, nativeSegmentationReplySchema } from '../native-protocol.js'
 import { verifyPinnedAsset } from '../verify-asset.js'
 import { probeBackend } from '../probe-backend.js'
+import { grabcutOpenCvArtifact } from './model-asset.js'
 
 const optionsSchema = z.object({ assetPath: z.string().min(1).max(4096) }).strict()
 /** @experimental Options for the unqualified GrabCut segmentation factory. */
@@ -38,14 +39,7 @@ export async function createGrabCutSegmenter(
   const checked = optionsSchema.safeParse(options)
   if (!checked.success) throw new ClassifierError('INVALID_INPUT', 'Invalid GrabCut options')
   const parsed = checked.data
-  await verifyPinnedAsset(
-    parsed.assetPath,
-    {
-      bytes: 10_964_323,
-      sha256: '63366510248adf3a7eddf3e793dd825404efb7df3749f4d6f8557c7fa4ca8aa0',
-    },
-    'OpenCV.js',
-  )
+  await verifyPinnedAsset(parsed.assetPath, grabcutOpenCvArtifact, 'OpenCV.js')
   const workerUrl = new URL(
     import.meta.url.endsWith('.ts') ? '../native-worker.ts' : '../native-worker.js',
     import.meta.url,

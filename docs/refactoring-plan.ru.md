@@ -51,7 +51,12 @@
 
 | #   | Владение                                                                                                                                                                                         | Статус    |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
-| 6A  | `decision-transport/*`, split `vision-chat/*`, фасад `vision-chat.ts`; удалён `openrouter-common.ts`; closure/metadata в `ordinaryvisionpilot.ts`, `seedunboundedpilot.ts`, `model-selection.ts` | IN REVIEW |
+| 6A  | `decision-transport/*`, split `vision-chat/*`, фасад `vision-chat.ts`; удалён `openrouter-common.ts`; closure/metadata в `ordinaryvisionpilot.ts`, `seedunboundedpilot.ts`, `model-selection.ts` | DONE      |
+| 6B  | split `mobile-sam/*`, `grabcut/*` (фасады `index.ts` / `worker-inference.ts` сохраняют export names; parent/worker — прямые импорты pure helpers)                                                | IN REVIEW |
+
+**WAVE6A checkpoint Linux22 (root, measured):** commit `9e9b4916159eec9b22fa24970877eea1dd760404` на `work/classifier-refactor-20261023`; `npm run check` **765/765** pass, 0 fail, 0 skip (secrets staged/worktree, typecheck, lint, boundaries, knip, build, format). Root `pack:check` — **421** archive files, **164** runtime dist files, **209** consumer declarations, 0 provider HTTP calls. Root verified 4 public entries, 67 exported types, value-export assignability vs baseline. Receipts: `/root/.codex/artifacts/zorya-classifier-refactor-20261023/wave6a-root-checkpoint-retry.log`, `wave6a-root-pack.log`.
+
+**WAVE6A fixture (не production/evaluator):** checkpoint выявил тест, который строил исторический manifest 82 entry / 53 src фильтрацией сегодняшнего producer closure — frozen identity ломалась после легитимного переноса исходника. Тест теперь берёт все исторические keys из Zod-validated frozen source-review файла и использует детерминированные synthetic digests; evaluator validation и frozen evidence не тронуты; отдельный current-closure test сохранён.
 
 ## Волны 7–9 (ожидают)
 
