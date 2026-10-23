@@ -1,6 +1,6 @@
 # Разработка Zorya Classifier
 
-Руководство для участников разработки и исполнителей Composer. Контракт: [AGENTS.md](../AGENTS.md). Слои и порты: [architecture.ru.md](architecture.ru.md). Порядок работы агентов: [agents.ru.md](agents.ru.md). **Измеренные контрольные точки** (Linux Node 22/24, Windows, интерпретатор Python) — в [плане рефакторинга](refactoring-plan.ru.md#платформы-и-ci).
+Руководство для участников разработки и исполнителей Composer. Контракт: [AGENTS.md](https://github.com/zoomplus/zorya-classifier/blob/main/AGENTS.md). Слои и порты: [architecture.ru.md](architecture.ru.md). Порядок работы агентов: [agents.ru.md](agents.ru.md). **Измеренные контрольные точки** (Linux Node 22/24, Windows, интерпретатор Python) — в [плане рефакторинга](refactoring-plan.ru.md#платформы-и-ci).
 
 ## Быстрый старт
 
@@ -17,12 +17,12 @@ npm run format:check
 ## Порядок чтения
 
 1. [README.ru.md](README.ru.md) — возможности, примеры, статус без универсальных заявлений о качестве.
-2. [Контракт участников](../AGENTS.md) — предметная область, жизненный цикл, каталог `benchmarks`, секреты.
+2. [Контракт участников](https://github.com/zoomplus/zorya-classifier/blob/main/AGENTS.md) — предметная область, жизненный цикл, каталог `benchmarks`, секреты.
 3. [Архитектура](architecture.ru.md) — зависимости слоёв, пространственный поток `extract`.
 4. [api.md](api.md) — публичные типы и лимиты.
-5. [CONTRIBUTING.md](../CONTRIBUTING.md) — ожидания запроса на слияние.
+5. [CONTRIBUTING.md](https://github.com/zoomplus/zorya-classifier/blob/main/CONTRIBUTING.md) — ожидания запроса на слияние.
 6. Пространственные сценарии v0.2: [v02-usage.md](v02-usage.md), [0.2.0-plan.md](0.2.0-plan.md).
-7. Итерация качества: [план 0.3.0](0.3.0-quality-plan.md).
+7. Итерация качества: [план 0.3.0](https://github.com/zoomplus/zorya-classifier/blob/main/docs/0.3.0-quality-plan.md).
 
 ## Скрипты
 
@@ -125,7 +125,7 @@ npm run test:python-native
 
 Принятая локальная матрица (ревизия `4877d05`): Windows Server 2025 build 26100, Node 22.23.4 и 24.22.1 — все проверки с exit 0, 765/772 с 7 заранее существовавшими пропусками (POSIX FIFO, симлинк без привилегий, две маски H3b/H4e, два H6, один H8); байты архива совпадают с Linux. Удалённый GitHub Actions CI не запускался.
 
-В WSL перед проверками проверьте `process.platform` и явные пути к `node`/`npm` ([контракт участников](../AGENTS.md)).
+В WSL перед проверками проверьте `process.platform` и явные пути к `node`/`npm` ([контракт участников](https://github.com/zoomplus/zorya-classifier/blob/main/AGENTS.md)).
 
 **Финальная верификация (волна 9):** полная матрица Linux + Windows + `python-native` на **`4877d05`** — [план рефакторинга](refactoring-plan.ru.md#волна-9--финальная-верификация-завершено). Исторический снимок только Linux на **`7a74226`** там же сохранён отдельно.
 

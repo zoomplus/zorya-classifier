@@ -32,3 +32,7 @@ Keep the final release manifest outside its own archives to avoid self-reference
 ## Research and consumer archive
 
 The v0.3 research plans and evidence stay in Git history under `docs/research/v03-*` and `docs/evidence/v03/`. They can contain local artifact references needed for reproducibility and are excluded from the npm consumer archive through `docs/.npmignore`, together with the unfinished v0.3 quality plan. Preserve their original evidence bytes; do not rewrite historical receipts to make packaging pass. Public API and usage documentation remains packaged. `pack:check` rejects accidental inclusion of these internal paths and still scans the actual installed archive for credentials and private paths. Before a release, ensure every packaged documentation link has a packaged or public GitHub destination.
+
+## 0.2.2 merge release scope
+
+Version **0.2.2** integrates the refactor worktree with **0.2.1** documentation and packaging safeguards from `main`: experimental status/JSDoc, archive documentation links, `docs/.npmignore` sensitive-evidence exclusions, and isolated Git fixture handling in `test/secrets.test.ts`. Runtime defaults and the primary 0.2 extraction contract are unchanged relative to the published **0.2.0** baseline. This note does not assert npm/GitHub publication, CI completion, or release artifacts; check the registry, repository releases, and external release receipt for current state.

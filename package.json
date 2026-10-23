@@ -1,6 +1,6 @@
 {
   "name": "zorya-classifier",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Provider-independent classification with experimental localization and object extraction for Node.js",
   "type": "module",
   "license": "MIT",
