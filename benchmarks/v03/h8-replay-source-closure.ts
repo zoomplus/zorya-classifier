@@ -5,6 +5,7 @@ import { join, relative, resolve } from 'node:path'
 
 const H8_SOURCE_FILES = [
   'benchmarks/v03/h6-context-composer.ts',
+  'benchmarks/v03/integrity-receipts.ts',
   'benchmarks/v03/h6-replay-kernel.ts',
   'benchmarks/v03/h6-replay-source-closure.ts',
   'benchmarks/v03/run-h8-ordinary-vision.ts',

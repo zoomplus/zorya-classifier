@@ -1,7 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { join, relative, resolve, sep } from 'node:path'
-import { parseEnv } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import type { Classifier } from '../../src/app/create-classifier.js'
 import { createClassifier } from '../../src/app/create-classifier.js'
@@ -25,7 +24,7 @@ import { recordProvider } from './recording.js'
 import type { PhysicalCallRecord, Recorder } from './recording.js'
 import { createSplitChoiceNoulPort } from './split-choice-noul-port.js'
 
-const credentialPath = '/root/work/element/.env.local'
+import { readOpenRouterKeyFromProcessEnv } from '../credentials.js'
 
 export const splitPilotRoutes = Object.freeze({
   choice: Object.freeze({
@@ -99,6 +98,7 @@ const sourceFiles = [
   './recording.ts',
   './budget.ts',
   './protocol.ts',
+  '../credentials.ts',
   '../../package.json',
   '../../package-lock.json',
 ] as const
@@ -875,7 +875,5 @@ async function runCase(
 }
 
 export async function readSplitPilotOpenRouterKey(): Promise<string> {
-  const value = parseEnv(await readFile(credentialPath, 'utf8')).OPENROUTER_API_KEY
-  if (!value) throw new Error('Configured OpenRouter credential is absent')
-  return value
+  return readOpenRouterKeyFromProcessEnv()
 }

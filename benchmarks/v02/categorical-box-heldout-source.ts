@@ -17,6 +17,7 @@ const includedBenchmarkFiles = [
   './recording.ts',
   './budget.ts',
   './protocol.ts',
+  '../credentials.ts',
   './fresh-text-runner.ts',
   './fresh-text-dev.ts',
   './promptvariants.ts',

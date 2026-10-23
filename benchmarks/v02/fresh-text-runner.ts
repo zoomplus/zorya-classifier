@@ -1,7 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { join, relative, resolve, sep } from 'node:path'
-import { parseEnv } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import type { DecisionPort, DecisionRequest } from '../../src/entities/contracts.js'
 import type { WholeObjectLocalizationResult } from '../../src/entities/whole-object.js'
@@ -29,7 +28,7 @@ import {
 } from './categorical-box-heldout-plan.js'
 import { categoricalBoxHeldoutProducerSourceManifest } from './categorical-box-heldout-source.js'
 
-const keyFile = '/root/work/element/.env.local'
+import { readOpenRouterKeyFromProcessEnv } from '../credentials.js'
 const route = Object.freeze({
   id: 'together-deepseek-flash-text-v1',
   model: 'deepseek/deepseek-v4.1-flash',
@@ -273,6 +272,7 @@ const sourceFiles = [
   './recording.ts',
   './budget.ts',
   './protocol.ts',
+  '../credentials.ts',
   './promptvariants.ts',
   './transportvariants.ts',
   './categorical-heldout-plan.ts',
@@ -595,9 +595,7 @@ async function persistCase(
 }
 
 export async function readFreshTextOpenRouterKey(): Promise<string> {
-  const key = parseEnv(await readFile(keyFile, 'utf8')).OPENROUTER_API_KEY
-  if (!key) throw new Error('Configured OpenRouter credential is absent')
-  return key
+  return readOpenRouterKeyFromProcessEnv()
 }
 
 /** Separate explicit HELDOUT entry point. It accepts only the strict frozen plan. */

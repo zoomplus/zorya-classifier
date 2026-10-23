@@ -19,6 +19,10 @@ import {
 } from './h5-proposal-composer.js'
 import type { RunBudget } from '../v02/budget.js'
 import type { Recorder } from '../v02/recording.js'
+import {
+  assertIntegrityReceiptForRealPath,
+  buildIntegrityReceiptByRealPath,
+} from './integrity-receipts.js'
 import { captureH5ReplaySource } from './replay-source-closure.js'
 
 export const H5A_RUN_SHA256 = '86d0aab4f7fad3ce0fae182b840ddd540275309471b27cb091dc4e85866d56f0'
@@ -248,11 +252,13 @@ async function hashFile(path: string, signal?: AbortSignal): Promise<string> {
   }
 }
 async function safeRealFile(path: string, expectedRoot?: string): Promise<string> {
-  const resolved = await realpath(path)
+  const resolved = await realpath(resolve(path))
   const parent = await realpath(dirname(resolve(path)))
   if (!inside(parent, resolved)) fail('Frozen artifact resolves outside its containing directory')
-  if (expectedRoot && !inside(await realpath(expectedRoot), resolved))
-    fail('Frozen artifact resolves outside its allowed root')
+  if (expectedRoot) {
+    const rootReal = await realpath(resolve(expectedRoot))
+    if (!inside(rootReal, resolved)) fail('Frozen artifact resolves outside its allowed root')
+  }
   return resolved
 }
 async function jsonFile(path: string): Promise<unknown> {
@@ -357,11 +363,16 @@ async function loadFrozenCases(
   const freeze = freezeSchema.parse(await jsonFile(freezePath))
   const integrity = integritySchema.parse(await jsonFile(integrityPath))
   if (integrity.h5a_run_sha256 !== H5A_RUN_SHA256) fail('H5a integrity sidecar targets another run')
-  const integrityByPath = new Map(integrity.files.map((entry) => [resolve(entry.path), entry]))
-  const assertIntegrityReceipt = (path: string, expected: string): void => {
-    const receipt = integrityByPath.get(resolve(path))
-    if (!receipt || receipt.sha256 !== expected)
-      fail('H5 candidate receipt is absent from the independent H5a integrity sidecar')
+  const integrityByRealPath = await buildIntegrityReceiptByRealPath(integrity.files, signal)
+  const h5AbsentIntegrityReceiptMessage =
+    'H5 candidate receipt is absent from the independent H5a integrity sidecar'
+  const assertIntegrityReceipt = (realPath: string, expected: string): void => {
+    assertIntegrityReceiptForRealPath(
+      integrityByRealPath,
+      realPath,
+      expected,
+      h5AbsentIntegrityReceiptMessage,
+    )
   }
   if (
     run.cases.length !== 12 ||
@@ -373,10 +384,13 @@ async function loadFrozenCases(
   if (run.h3b.run.sha256 !== H3B_RUN_SHA256 || run.h4e_ui_cache.run.sha256 !== H4E_RUN_SHA256)
     fail('Pinned H5a inherited H3b/H4e run identity mismatch')
   const h4eRunPath = resolve(h4e, 'run.json')
-  if (resolve(run.h4e_ui_cache.run.path) !== h4eRunPath)
-    fail('Supplied H4e directory differs from the H5a frozen receipt path')
-  if ((await hashFile(h4eRunPath)) !== H4E_RUN_SHA256) fail('Pinned H4e run changed')
   const h4eRunRealPath = await safeRealFile(h4eRunPath, h4e)
+  assertActive(signal)
+  const receiptH4eRunRealPath = await safeRealFile(run.h4e_ui_cache.run.path, h4e)
+  assertActive(signal)
+  if (receiptH4eRunRealPath !== h4eRunRealPath)
+    fail('Supplied H4e directory differs from the H5a frozen receipt path')
+  if ((await hashFile(h4eRunRealPath)) !== H4E_RUN_SHA256) fail('Pinned H4e run changed')
   closure.push({ path: h4eRunRealPath, sha256: H4E_RUN_SHA256 })
   const h3bRunPath = resolve(run.h3b.run.path)
   const h3bRunRealPath = await safeRealFile(h3bRunPath)
@@ -435,10 +449,9 @@ async function loadFrozenCases(
     }
     let omniCandidates: Array<z.infer<typeof maskCandidateSchema>> = []
     if (runCase.omni_source_result) {
-      if (!sourceResultPath || !inside(h5a, sourceResultPath))
-        fail('H5a per-source Omni output escaped its run root')
+      if (!sourceResultPath) fail('H5a per-source Omni output path is missing')
       const sourceResultRealPath = await safeRealFile(sourceResultPath, h5a)
-      const sourceResultReceipt = integrityByPath.get(sourceResultRealPath)
+      const sourceResultReceipt = integrityByRealPath.get(sourceResultRealPath)
       if (
         !sourceResultReceipt ||
         (await hashFile(sourceResultRealPath)) !== sourceResultReceipt.sha256
@@ -459,7 +472,6 @@ async function loadFrozenCases(
         null
       for (const [index, candidate] of omniCandidates.entries()) {
         const path = await safeRealFile(resolve(candidate.mask_path), h5a)
-        if (!inside(h5a, path)) fail('H5a Omni mask escaped its run root')
         assertIntegrityReceipt(path, candidate.mask_sha256)
         const id = candidate.id ?? `U${String(index).padStart(2, '0')}`
         if (id !== `U${String(index).padStart(2, '0')}`)

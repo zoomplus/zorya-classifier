@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
-import { parseArgs, parseEnv } from 'node:util'
+import { parseArgs } from 'node:util'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { z } from 'zod'
@@ -8,7 +8,7 @@ import { createResearchClassifier } from '../experiments/create-research-classif
 import { runSeedUnboundedPilot } from './seedunboundedpilot.js'
 import type { SeedUnboundedPilotOptions } from './seedunboundedpilot.js'
 
-const keyFile = '/root/work/element/.env.local'
+import { readOpenRouterKeyFromProcessEnv } from '../credentials.js'
 
 export function parseSeedUnboundedPilotArgs(args: readonly string[]) {
   const { values } = parseArgs({
@@ -29,9 +29,7 @@ export function parseSeedUnboundedPilotArgs(args: readonly string[]) {
 }
 
 async function readOpenRouterKey(): Promise<string> {
-  const key = parseEnv(await readFile(keyFile, 'utf8')).OPENROUTER_API_KEY
-  if (!key) throw new Error('OPENROUTER_API_KEY is absent from configured private environment')
-  return key
+  return readOpenRouterKeyFromProcessEnv()
 }
 
 async function runFromCommandLine(args: readonly string[]) {

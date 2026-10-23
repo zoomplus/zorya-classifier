@@ -618,6 +618,7 @@ export async function verifyH5bReplayFreeze(
   for (const required of [
     'benchmarks/v03/run-h5b-paid-replay.ts',
     'benchmarks/v03/h5-proposal-composer.ts',
+    'benchmarks/v03/integrity-receipts.ts',
     'benchmarks/v03/replay-source-closure.ts',
     'benchmarks/v02/recording.ts',
     'benchmarks/v02/budget.ts',

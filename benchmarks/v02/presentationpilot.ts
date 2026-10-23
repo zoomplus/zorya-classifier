@@ -160,6 +160,7 @@ export async function runPresentationPilot(options: PresentationPilotOptions) {
   const sourceFilePrefix = [
     './presentationpilot.ts',
     './presentationvariants.ts',
+    '../credentials.ts',
     '../../src/processes/whole-object.ts',
     '../../src/processes/boundary-state.ts',
     '../../src/processes/locate.ts',

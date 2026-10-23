@@ -67,6 +67,7 @@ export async function runIntervalPolicyPilot(options: IntervalPolicyPilotOptions
     './seedunboundedprompt.ts',
     './protocol.ts',
     './recording.ts',
+    '../credentials.ts',
     './budget.ts',
     '../../src/app/create-classifier.ts',
     '../../src/entities/whole-object.ts',

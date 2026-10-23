@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, realpath, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
@@ -86,7 +86,10 @@ function mockAnswer(profile: 'positive-first' | 'final-none') {
   return { mockFetch, calls: () => calls }
 }
 
-async function runProfile(profile: 'positive-first' | 'final-none') {
+async function runProfile(
+  profile: 'positive-first' | 'final-none',
+  h4eDirectory: string = H4E_DIRECTORY,
+) {
   const temporary = await mkdtemp(join(tmpdir(), 'zorya-h5b-replay-smoke-'))
   const outputDirectory = join(temporary, 'run')
   const budget = new RunBudget(36, 2, 0.1)
@@ -109,7 +112,7 @@ async function runProfile(profile: 'positive-first' | 'final-none') {
     const result = (await runH5bPaidReplay({
       repositoryRoot: REPOSITORY_ROOT,
       h5aDirectory: H5A_DIRECTORY,
-      h4eDirectory: H4E_DIRECTORY,
+      h4eDirectory,
       outputDirectory,
       recorder,
       budget,
@@ -164,7 +167,7 @@ async function runProfile(profile: 'positive-first' | 'final-none') {
 }
 
 await test('frozen H5 artifacts replay through the mock adapter with first actual mask selection', async () => {
-  const { result, recorder } = await runProfile('positive-first')
+  const { result, recorder } = await runProfile('positive-first', await realpath(H4E_DIRECTORY))
   assert.ok(result.rows.every((row) => row.status === 'located'))
   assert.equal(recorder.calls.length, result.physical_call_count)
 })

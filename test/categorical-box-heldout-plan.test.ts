@@ -534,8 +534,8 @@ await test('new source closures include the dedicated plan, CLI, and its transit
       .sort(),
     runtimePaths,
   )
-  assert.equal(Object.keys(candidate).length, runtimePaths.length + 32)
-  assert.equal(Object.keys(noImage).length, runtimePaths.length + 32)
+  assert.equal(Object.keys(candidate).length, runtimePaths.length + 33)
+  assert.equal(Object.keys(noImage).length, runtimePaths.length + 33)
   assert.ok(Object.hasOwn(candidate, 'src/processes/extract-from-region.ts'))
   for (const sources of [candidate, noImage]) {
     assert.ok(Object.hasOwn(sources, './categorical-box-heldout-plan.ts'))

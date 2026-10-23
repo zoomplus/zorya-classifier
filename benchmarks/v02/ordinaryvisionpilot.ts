@@ -36,6 +36,7 @@ const sourceFiles = [
   './presentationpilot.ts',
   './protocol.ts',
   './recording.ts',
+  '../credentials.ts',
   '../../src/app/create-classifier.ts',
   '../../src/processes/whole-object.ts',
   '../../src/processes/boundary-state.ts',

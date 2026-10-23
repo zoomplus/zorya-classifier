@@ -5,6 +5,7 @@
       "benchmarks/v03/evaluate-h10-clipseg.test.ts",
       "benchmarks/v03/evaluate-h11-sa2va.test.ts",
       "benchmarks/v03/evaluate-h8-ordinary-vision.test.ts",
+      "test/benchmark-credentials.test.ts",
       "test/benchmark-budget.test.ts",
       "test/benchmark-evidence.test.ts",
       "test/benchmark-metrics.test.ts",

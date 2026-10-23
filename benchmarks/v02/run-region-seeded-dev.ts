@@ -1,10 +1,10 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { parseArgs } from 'node:util'
-import { parseEnv } from 'node:util'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { z } from 'zod'
+import { readOpenRouterKeyFromEnvFile, readOpenRouterKeyFromProcessEnv } from '../credentials.js'
 import { loadFreshCorpus, loadFreshImage } from './fresh-corpus.js'
 import {
   regionSeededAssets,
@@ -31,7 +31,7 @@ const assetDefaults = {
   decoder:
     '/root/work/zorya-worktrees/locator-segmentation-model/.run/segmentation-model/models/sam_mask_decoder_multi.onnx',
 }
-const envFileDefault = '/root/work/element/.env.local'
+
 const hashSchema = z.string().regex(/^[a-f0-9]{64}$/u)
 
 export function parseRegionSeededArgs(args: readonly string[]) {
@@ -56,7 +56,7 @@ export function parseRegionSeededArgs(args: readonly string[]) {
       'map-sha256': { type: 'string', default: regionSeededDevManifests[2].sha256 },
       encoder: { type: 'string', default: assetDefaults.encoder },
       decoder: { type: 'string', default: assetDefaults.decoder },
-      'env-file': { type: 'string', default: envFileDefault },
+      'env-file': { type: 'string' },
       freeze: { type: 'string' },
       out: { type: 'string', default: '.run/v02/region-seeded' },
     },
@@ -137,7 +137,7 @@ export function parseRegionSeededArgs(args: readonly string[]) {
     ],
     encoderPath: resolve(values.encoder),
     decoderPath: resolve(values.decoder),
-    envFile: resolve(values['env-file']),
+    envFile: values['env-file'] ? resolve(values['env-file']) : undefined,
     freezePath: values.freeze ? resolve(values.freeze) : undefined,
     maxPhysicalCalls: phase === 'heldout' ? 600 : 250,
     maxCostUsd: phase === 'heldout' ? 10 : 5,
@@ -147,15 +147,6 @@ export function parseRegionSeededArgs(args: readonly string[]) {
 
 function sha256(value: Uint8Array): string {
   return createHash('sha256').update(value).digest('hex')
-}
-
-async function readApiKey(envFile: string): Promise<string> {
-  const text = await readFile(envFile, 'utf8')
-  const parsed = parseEnv(text)
-  const key = parsed.OPENROUTER_API_KEY
-  if (!key || key.length > 4096 || /\s/u.test(key))
-    throw new TypeError('Provider credential is unavailable')
-  return key
 }
 
 async function preflight(options: ReturnType<typeof parseRegionSeededArgs>) {
@@ -244,7 +235,9 @@ export async function runRegionSeededCli(args: readonly string[]) {
   const authorization = options.freezePath
     ? (JSON.parse(await readFile(options.freezePath, 'utf8')) as unknown)
     : undefined
-  const apiKey = await readApiKey(options.envFile)
+  const apiKey = options.envFile
+    ? await readOpenRouterKeyFromEnvFile(options.envFile)
+    : readOpenRouterKeyFromProcessEnv()
   const result = await runRegionSeededProfile({
     manifests: options.manifests,
     imageRoot: options.imageRoot,

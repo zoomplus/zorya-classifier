@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { parseArgs } from 'node:util'
-import { parseEnv } from 'node:util'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { z } from 'zod'
@@ -12,7 +11,8 @@ import { presentationVariants } from './presentationvariants.js'
 import { runPresentationPilot } from './presentationpilot.js'
 import type { PresentationPilotOptions } from './presentationpilot.js'
 
-const keyFile = '/root/work/element/.env.local'
+import { readOpenRouterKeyFromProcessEnv } from '../credentials.js'
+
 export function parsePresentationPilotArgs(args: readonly string[]) {
   const { values } = parseArgs({
     args: [...args],
@@ -32,10 +32,7 @@ export function parsePresentationPilotArgs(args: readonly string[]) {
 }
 
 async function readOpenRouterKey(): Promise<string> {
-  const parsed = parseEnv(await readFile(keyFile, 'utf8'))
-  const key = parsed.OPENROUTER_API_KEY
-  if (!key) throw new Error('OPENROUTER_API_KEY is absent from configured private environment')
-  return key
+  return readOpenRouterKeyFromProcessEnv()
 }
 
 async function rendererHash(): Promise<string> {

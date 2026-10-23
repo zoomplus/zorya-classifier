@@ -1,7 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { mkdir, open, readFile, readdir, realpath, writeFile } from 'node:fs/promises'
 import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path'
-import { parseEnv } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { z } from 'zod'
@@ -20,7 +19,7 @@ import type { PhysicalCallRecord, Recorder } from './recording.js'
 import { recordProvider } from './recording.js'
 import { hashCanonical } from './protocol.js'
 
-const envFile = '/root/work/element/.env.local'
+import { readOpenRouterKeyFromProcessEnv } from '../credentials.js'
 const route = Object.freeze({
   id: 'openai-gpt-6-luna-native-decisions-v1',
   model: 'openai/gpt-6-luna-decisions',
@@ -141,6 +140,7 @@ async function hashSources(): Promise<Record<string, string>> {
     './recording.ts',
     './budget.ts',
     './protocol.ts',
+    '../credentials.ts',
   ] as const
   const bench = await Promise.all(
     files.map(
@@ -728,7 +728,5 @@ export async function preflightPointCandidateChoice(
 }
 
 export async function readPointCandidateOpenRouterKey(): Promise<string> {
-  const key = parseEnv(await readFile(envFile, 'utf8')).OPENROUTER_API_KEY
-  if (!key) throw new Error('Configured OpenRouter credential is absent')
-  return key
+  return readOpenRouterKeyFromProcessEnv()
 }

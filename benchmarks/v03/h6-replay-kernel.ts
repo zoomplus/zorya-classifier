@@ -5,6 +5,11 @@ import sharp from 'sharp'
 import { z } from 'zod'
 import { limits } from '../../src/entities/contracts.js'
 import { ClassifierError, assertActive } from '../../src/entities/errors.js'
+import {
+  assertIntegrityReceiptForRealPath,
+  buildIntegrityReceiptByRealPath,
+  type IntegrityReceiptFileEntry,
+} from './integrity-receipts.js'
 import type { PackedBinaryMask } from '../../src/entities/object-proposals.js'
 import type { RgbaRaster } from '../../src/entities/representation.js'
 import { packBinaryMask } from '../../src/features/segmentation/packed-mask.js'
@@ -275,58 +280,8 @@ const integritySchema = z
   })
   .passthrough()
 
-type IntegrityFileEntry = z.infer<typeof integritySchema>['files'][number]
-
-/** Indexes frozen integrity receipts by resolved file identity so directory aliases match lookups. */
-export async function buildIntegrityReceiptByRealPath(
-  files: readonly IntegrityFileEntry[],
-  signal: AbortSignal,
-): Promise<Map<string, IntegrityFileEntry>> {
-  const integrityByRealPath = new Map<string, IntegrityFileEntry>()
-  for (const entry of files) {
-    assertActive(signal)
-    let realKey: string
-    try {
-      realKey = await realpath(resolve(entry.path))
-    } catch (error) {
-      assertActive(signal)
-      const code: unknown = error instanceof Error && 'code' in error ? error.code : undefined
-      if (code === 'ENOENT' || code === 'ENOTDIR')
-        throw new ClassifierError(
-          'INVALID_INPUT',
-          'Integrity receipt path does not resolve to a file',
-        )
-      throw error
-    }
-    assertActive(signal)
-    const prior = integrityByRealPath.get(realKey)
-    if (prior) {
-      // Path and label are alias bookkeeping; one physical file must agree on sha256 and bytes.
-      if (prior.sha256 !== entry.sha256 || prior.bytes !== entry.bytes)
-        throw new ClassifierError(
-          'INVALID_INPUT',
-          'Conflicting integrity receipts share one file identity',
-        )
-      continue
-    }
-    integrityByRealPath.set(realKey, entry)
-  }
-  assertActive(signal)
-  return integrityByRealPath
-}
-
-export function assertIntegrityReceiptForRealPath(
-  integrityByRealPath: Map<string, IntegrityFileEntry>,
-  realPath: string,
-  digest: string,
-): void {
-  const receipt = integrityByRealPath.get(realPath)
-  if (!receipt || receipt.sha256 !== digest)
-    throw new ClassifierError(
-      'INVALID_INPUT',
-      'Native mask is absent from its independent integrity receipt',
-    )
-}
+export { assertIntegrityReceiptForRealPath, buildIntegrityReceiptByRealPath }
+export type { IntegrityReceiptFileEntry }
 
 function contentHash(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex')

@@ -1,7 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { join, relative, resolve, sep } from 'node:path'
-import { parseEnv } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import type { Classifier } from '../../src/app/create-classifier.js'
 import { createClassifier } from '../../src/app/create-classifier.js'
@@ -35,7 +34,7 @@ import { categoricalBoxHeldoutProducerSourceManifest as boxHeldoutSourceManifest
 
 type CategoricalTargetPolicy = 'target-plus-neutral-instruction-v1' | 'target-only-v1'
 
-const keyFile = '/root/work/element/.env.local'
+import { readOpenRouterKeyFromProcessEnv } from '../credentials.js'
 
 export const CATEGORICAL_FRESH_MAX_PHYSICAL_PER_CASE = 6
 export const CATEGORICAL_FRESH_MAX_PHYSICAL_PER_PROFILE =
@@ -149,6 +148,7 @@ export const categoricalFreshProducerSourceFiles = [
   './recording.ts',
   './budget.ts',
   './protocol.ts',
+  '../credentials.ts',
   './categorical-presence-port.ts',
   './native-categorical-presence-port.ts',
   './categorical-presence-fresh-pair.md',
@@ -1331,7 +1331,5 @@ async function processFreshCase(options: ProcessFreshCaseOptions): Promise<Fresh
 }
 
 export async function readFreshProposalOpenRouterKey(): Promise<string> {
-  const key = parseEnv(await readFile(keyFile, 'utf8')).OPENROUTER_API_KEY
-  if (!key) throw new Error('Configured OpenRouter credential is absent')
-  return key
+  return readOpenRouterKeyFromProcessEnv()
 }

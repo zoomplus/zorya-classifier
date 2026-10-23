@@ -1,7 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { isAbsolute, join, relative, resolve, sep } from 'node:path'
-import { parseEnv } from 'node:util'
 import sharp from 'sharp'
 import type { DecisionPort, DecisionRequest } from '../../src/entities/contracts.js'
 import type { WholeObjectLocalizationResult } from '../../src/entities/whole-object.js'
@@ -21,8 +20,9 @@ import type { PromptVariantId } from './promptvariants.js'
 import { textTransportVariants } from './transportvariants.js'
 import type { TransportVariantId } from './transportvariants.js'
 
+import { readOpenRouterKeyFromProcessEnv } from '../credentials.js'
+
 const sourceManifestPath = new URL('./input-manifest.json', import.meta.url)
-const apiKeyPath = '/root/work/element/.env.local'
 const routeTable = {
   togetherText: {
     model: 'deepseek/deepseek-v4.1-flash',
@@ -108,10 +108,7 @@ async function loadImage(input: ProducerCase, imageRoot: string) {
 }
 
 async function openRouterKey(): Promise<string> {
-  const parsed = parseEnv(await readFile(apiKeyPath, 'utf8'))
-  const key = parsed.OPENROUTER_API_KEY
-  if (!key) throw new Error('OPENROUTER_API_KEY is absent from the configured private env file')
-  return key
+  return readOpenRouterKeyFromProcessEnv()
 }
 
 function makeProvider(

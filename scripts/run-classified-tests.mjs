@@ -2,9 +2,10 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { listGroup, validateCatalog } from './test-catalog.ts'
 
-const group = process.argv[2]
-if (!group) {
-  console.error('Usage: node scripts/run-classified-tests.mjs <local-evidence|python-native>')
+const groups = ['portable', 'local-evidence', 'python-native']
+const group = process.argv[2] ?? 'portable'
+if (!groups.includes(group)) {
+  console.error(`Usage: node scripts/run-classified-tests.mjs [${groups.join('|')}]`)
   process.exit(2)
 }
 

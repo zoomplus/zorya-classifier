@@ -56,6 +56,7 @@ const sourceFiles = [
   './seedunboundedprompt.ts',
   './protocol.ts',
   './recording.ts',
+  '../credentials.ts',
   './presentationpilot.ts',
   '../../src/app/create-classifier.ts',
   '../../src/processes/whole-object.ts',

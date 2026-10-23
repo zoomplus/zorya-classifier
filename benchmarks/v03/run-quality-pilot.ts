@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { parseArgs, parseEnv } from 'node:util'
+import { parseArgs } from 'node:util'
 import { pathToFileURL } from 'node:url'
 import type { DecisionPort, PixelRect } from '../../src/entities/contracts.js'
 import { ClassifierError } from '../../src/entities/errors.js'
@@ -17,6 +17,7 @@ import {
   assertRecorderHealthy,
   regionSeededProducerSourceManifest,
 } from '../v02/region-seeded-runner.js'
+import { readOpenRouterKeyFromEnvFile, readOpenRouterKeyFromProcessEnv } from '../credentials.js'
 import { loadV03PilotCorpus } from './pilot-manifest.js'
 import { locateWithZoom } from './zoom-locator.js'
 
@@ -194,7 +195,7 @@ async function main(args: string[]): Promise<void> {
         type: 'string',
         default: '/root/work/zorya-classifier-worktrees/v02/corpus',
       },
-      'env-file': { type: 'string', default: '/root/work/element/.env.local' },
+      'env-file': { type: 'string' },
       out: { type: 'string', default: '.run/v03/zoom-pilot' },
     },
   })
@@ -229,9 +230,9 @@ async function main(args: string[]): Promise<void> {
     })
     console.log(JSON.stringify({ runId, directory, paid: values['allow-paid'] }))
     if (!values['allow-paid']) return
-    const env = parseEnv(await readFile(resolve(values['env-file']), 'utf8'))
-    const credential = env.OPENROUTER_API_KEY
-    if (!credential) throw new TypeError('Explicit environment file has no OpenRouter key')
+    const credential = values['env-file']
+      ? await readOpenRouterKeyFromEnvFile(resolve(values['env-file']))
+      : readOpenRouterKeyFromProcessEnv()
     const budget = new RunBudget(
       policy.maxPhysicalCalls,
       policy.maxCostUsd,

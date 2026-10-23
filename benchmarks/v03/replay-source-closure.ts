@@ -5,6 +5,7 @@ import { join, relative, resolve } from 'node:path'
 
 export const H5_REPLAY_SOURCE_FILES = [
   'benchmarks/v03/h5-proposal-composer.ts',
+  'benchmarks/v03/integrity-receipts.ts',
   'benchmarks/v03/run-h5b-paid-replay.ts',
   'benchmarks/v03/replay-source-closure.ts',
   'benchmarks/v02/recording.ts',

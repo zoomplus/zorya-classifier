@@ -370,6 +370,7 @@ export async function regionSeededProducerSourceManifest(): Promise<Record<strin
     './recording.ts',
     './budget.ts',
     './protocol.ts',
+    '../credentials.ts',
     './native-categorical-presence-port.ts',
     './categorical-presence-port.ts',
     './region-seeded-runner.md',
