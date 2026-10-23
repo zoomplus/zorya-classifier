@@ -149,6 +149,26 @@ await test('renders an ordered singleton subset as a source-sized mask overlay w
   )
 })
 
+await test('copies source bytes before reading proposals when proposals is a getter', async () => {
+  const source = image()
+  const corner = pixel(source.data, source.width, 0, 0)
+  const opposite = pixel(source.data, source.width, 11, 11)
+  const proposal = proposalSet(source.width, source.height)[0]!
+  const renderInput = {
+    image: source,
+    seedRegion: rect,
+    get proposals() {
+      source.data.fill(0)
+      return [proposal] as PresentedObjectProposal[]
+    },
+    signal: new AbortController().signal,
+  }
+  const output = await presenter.render(renderInput)
+  const decoded = await raw(output[0]!)
+  assert.deepEqual(pixel(decoded.data, decoded.info.width, 0, 0), corner)
+  assert.deepEqual(pixel(decoded.data, decoded.info.width, 11, 11), opposite)
+})
+
 await test('snapshots caller-owned source and packed masks before asynchronous encoding', async () => {
   const source = image()
   const originalSourcePixel = [...source.data.subarray(0, 4)]

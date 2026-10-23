@@ -1,58 +1,29 @@
-import { z } from 'zod'
-
-import type { PixelRect, RasterImage, RasterPort } from '../entities/contracts.js'
+import type { RasterImage, RasterPort } from '../entities/contracts.js'
 import type { CutoutRasterPort } from '../entities/cutout-raster.js'
 import { parse } from '../entities/contracts.js'
 import { containsNonEmptyRect, intersectsRect } from '../entities/geometry.js'
-import { segmentationMetadataSchema } from '../entities/segmentation-metadata.js'
 import type {
   ExtractionResult,
-  SegmentationMetadata,
   SegmentationInput,
   SegmentationPort,
-  SegmentationResult,
 } from '../entities/segmentation.js'
-import type { RgbaRaster } from '../entities/representation.js'
 import { ClassifierError, assertActive } from '../entities/errors.js'
 import type {
   WholeObjectLocateInput,
   WholeObjectLocalizationResult,
 } from '../entities/whole-object.js'
 import { wholeObjectSchema } from '../entities/whole-object.js'
-import { cropMask, maskedRgba, validateMask } from '../features/segmentation/mask.js'
-
-const binaryMaskSchema = z
-  .object({
-    data: z.instanceof(Uint8Array),
-    width: z.number().int().positive(),
-    height: z.number().int().positive(),
-    format: z.literal('binary-u8'),
-  })
-  .strict()
-const rgbaSchema = z
-  .object({
-    data: z.instanceof(Uint8Array),
-    width: z.number().int().positive().max(16384),
-    height: z.number().int().positive().max(16384),
-    format: z.literal('rgba8'),
-  })
-  .strict()
-const segmentationResultSchema = z.discriminatedUnion('status', [
-  z
-    .object({
-      status: z.literal('segmented'),
-      mask: binaryMaskSchema,
-      metadata: segmentationMetadataSchema,
-    })
-    .strict(),
-  z
-    .object({
-      status: z.literal('unknown'),
-      reason: z.string().min(1).max(500),
-      metadata: segmentationMetadataSchema,
-    })
-    .strict(),
-])
+import { cropMask, maskedRgba } from '../features/segmentation/mask.js'
+import {
+  clearTransparentForeground,
+  validateSourceMask,
+} from '../features/segmentation/source-mask.js'
+import {
+  assertRasterImage,
+  validateAndSnapshotPng,
+  validateAndSnapshotRgba,
+  validateSegmentationResult,
+} from '../features/segmentation/validation.js'
 
 type WholeObjectLocator = (
   image: RasterImage,
@@ -112,9 +83,15 @@ export async function extractObject(
   const image = validateAndSnapshotRgba(rawImage, source.width, source.height)
   const roi = parsed.roi ?? { left: 0, top: 0, width: image.width, height: image.height }
   if (
-    !contains({ left: 0, top: 0, width: image.width, height: image.height }, location.region) ||
-    !contains(roi, location.region) ||
-    !contains({ left: 0, top: 0, width: image.width, height: image.height }, location.seedRegion) ||
+    !containsNonEmptyRect(
+      { left: 0, top: 0, width: image.width, height: image.height },
+      location.region,
+    ) ||
+    !containsNonEmptyRect(roi, location.region) ||
+    !containsNonEmptyRect(
+      { left: 0, top: 0, width: image.width, height: image.height },
+      location.seedRegion,
+    ) ||
     !intersectsRect(location.region, location.seedRegion) ||
     !intersectsRect(roi, location.seedRegion)
   )
@@ -150,12 +127,7 @@ export async function extractObject(
       segmentation: result.metadata,
     }
 
-  let box: PixelRect | undefined
-  try {
-    box = validateMask(result.mask, image, roi, location.seedRegion)
-  } catch {
-    throw new ClassifierError('INVALID_RESPONSE', 'Segmenter mask failed binary/source validation')
-  }
+  const box = validateSourceMask(result.mask, image, roi, location.seedRegion)
   if (!box)
     return {
       status: 'unknown',
@@ -163,8 +135,7 @@ export async function extractObject(
       location,
       segmentation: result.metadata,
     }
-  for (let index = 0; index < result.mask.data.length; index++)
-    if (image.data[index * 4 + 3] === 0) result.mask.data[index] = 0
+  clearTransparentForeground(result.mask, image)
   const croppedMask = cropMask(result.mask, box)
   const rgba = maskedRgba(image, result.mask, box)
   let rawPng: unknown
@@ -178,13 +149,7 @@ export async function extractObject(
     throw new ClassifierError('PROVIDER', 'Cutout raster PNG encoder failed')
   }
   assertActive(signal)
-  if (
-    !(rawPng instanceof Uint8Array) ||
-    rawPng.byteLength < 8 ||
-    ![137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => rawPng[index] === byte)
-  )
-    throw new ClassifierError('INVALID_RESPONSE', 'Cutout raster port returned invalid PNG bytes')
-  const png = new Uint8Array(rawPng)
+  const png = validateAndSnapshotPng(rawPng)
   return {
     status: 'extracted',
     location,
@@ -194,83 +159,5 @@ export async function extractObject(
     center: { x: box.left + box.width / 2, y: box.top + box.height / 2 },
     offset: { x: box.left, y: box.top },
     segmentation: result.metadata,
-  }
-}
-
-/** Validates and owns a segmenter's result before any subsequent asynchronous work. */
-export function validateSegmentationResult(
-  value: unknown,
-  width: number,
-  height: number,
-): SegmentationResult {
-  const validation = segmentationResultSchema.safeParse(value)
-  if (!validation.success)
-    throw new ClassifierError('INVALID_RESPONSE', 'Segmenter returned an invalid result', {
-      paths: validation.error.issues.map((issue) => issue.path.join('.')),
-    })
-  if (
-    validation.data.metadata.input.width !== width ||
-    validation.data.metadata.input.height !== height
-  )
-    throw new ClassifierError(
-      'INVALID_RESPONSE',
-      'Segmenter metadata dimensions do not match the source image',
-    )
-  return validation.data.status === 'segmented'
-    ? {
-        status: 'segmented',
-        mask: { ...validation.data.mask, data: new Uint8Array(validation.data.mask.data) },
-        metadata: snapshotMetadata(validation.data.metadata),
-      }
-    : {
-        ...validation.data,
-        metadata: snapshotMetadata(validation.data.metadata),
-      }
-}
-
-export function assertRasterImage(image: RasterImage): void {
-  if (
-    !Number.isSafeInteger(image.width) ||
-    !Number.isSafeInteger(image.height) ||
-    image.width < 1 ||
-    image.height < 1 ||
-    image.width * image.height > 16_777_216 ||
-    image.bytes.byteLength < 1
-  )
-    throw new ClassifierError(
-      'INVALID_RESPONSE',
-      'Raster normalizer returned invalid source dimensions',
-    )
-}
-
-export function validateAndSnapshotRgba(value: unknown, width: number, height: number): RgbaRaster {
-  const image = parse(rgbaSchema, value, 'INVALID_RESPONSE')
-  if (
-    image.format !== 'rgba8' ||
-    image.width !== width ||
-    image.height !== height ||
-    !(image.data instanceof Uint8Array) ||
-    image.data.length !== width * height * 4
-  )
-    throw new ClassifierError(
-      'INVALID_RESPONSE',
-      'Cutout raster port returned invalid RGBA dimensions',
-    )
-  return { data: new Uint8Array(image.data), width, height, format: 'rgba8' }
-}
-
-export function contains(outer: PixelRect, inner: PixelRect): boolean {
-  return containsNonEmptyRect(outer, inner)
-}
-
-function snapshotMetadata(
-  metadata: z.infer<typeof segmentationMetadataSchema>,
-): SegmentationMetadata {
-  return {
-    method: metadata.method,
-    backend: metadata.backend,
-    durationMs: metadata.durationMs,
-    input: { ...metadata.input },
-    ...(metadata.qualityScore !== undefined ? { qualityScore: metadata.qualityScore } : {}),
   }
 }

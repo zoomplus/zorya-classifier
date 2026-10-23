@@ -34,13 +34,20 @@
 - Публичный `dist/index.d.ts` совпадает с baseline manifest; `entities/contracts.d.ts` — re-export facade (доп. leaf `.d.ts` в dist). Evidence: `/root/.codex/artifacts/zorya-classifier-refactor-20261023/wave3-*`; post-review-fixes — `wave3-review-fixes-*`.
 - **Checkpoint Linux22 (root, measured):** commit `0a5095fcf5d2b4eec31ab920b17086c81be4cff6` на `work/classifier-refactor-20261023`; `npm run check` **764/764** pass, 0 fail, 0 skip (secrets staged/worktree, typecheck, lint, boundaries, knip, build, format); root `pack:check` — 383 archive files, 126 runtime dist files, 207 consumer declarations, 0 provider HTTP calls. Receipts: `/root/.codex/artifacts/zorya-classifier-refactor-20261023/wave3-root-checkpoint.log`, `wave3-root-pack.log`.
 
-## Волна 4 — app factory / lifecycle (ACTIVE)
+## Волна 4 — app factory / lifecycle (DONE)
 
 - Разделение `create-classifier.ts` на `classifier-contracts`, `classifier-config`, `classifier-runtime`, `classifier-spatial`, `classifier-representation`; публичные export names и поведение без изменений.
+- **Checkpoint Linux22 (root):** commit `1515f15c1ff7c11cc0fcb6240619f57115d5cf2c`; `npm run check` **764/764**; pack 393/136/208 — receipts `wave4-root-pack.log` (не перезаписывать).
 
-## Волны 5–9 (ожидают)
+## Волна 5 — extraction / proposals / presentation (ACTIVE)
 
-5. Extraction / raster
+- Shared segmentation validation: `src/features/segmentation/validation.ts`, `source-mask.ts`, `region-result.ts`; processes `extract.ts`, `extract-from-region.ts` — orchestration only.
+- Proposal validation/presentation: `src/features/proposals/validation.ts`, `presentation.ts`; process `proposal-location.ts`.
+- Infrastructure split: `proposal-presentation-input.ts`, `proposal-presentation-pixels.ts` из `proposal-presentation.ts`.
+- Публичные entrypoints и семантика v0.2 region flow без изменений; `contains()` wrapper удалён — прямой `containsNonEmptyRect`.
+
+## Волны 6–9 (ожидают)
+
 6. Transports / native
 7. Research / npm dist + dead-code (полный Knip по benchmarks)
 8. Русская документация / provenance (расширение)
