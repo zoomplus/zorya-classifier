@@ -38,6 +38,25 @@ function base64Schema(maxLength: number) {
     .refine((value) => value.length <= maxLength && isCanonicalBase64(value))
 }
 
+const segmentationPixelLimit = 16_777_216
+
+function refineSegmentationImageAndRegions(
+  value: {
+    width: number
+    height: number
+    seedRegion: z.infer<typeof pixelRectSchema>
+    wholeRegion: z.infer<typeof pixelRectSchema>
+    roi: z.infer<typeof pixelRectSchema>
+  },
+  context: z.RefinementCtx,
+): void {
+  if (value.width * value.height > segmentationPixelLimit)
+    context.addIssue({ code: 'custom', message: 'Image exceeds segmentation pixel limit' })
+  for (const region of [value.seedRegion, value.wholeRegion, value.roi])
+    if (region.left + region.width > value.width || region.top + region.height > value.height)
+      context.addIssue({ code: 'custom', message: 'Segmentation region is outside the source' })
+}
+
 const modelOptionsSchema = z
   .object({
     encoderPath: z.string().min(1).max(4096),
@@ -77,13 +96,7 @@ const mobileSamRequestSchema = z
     options: modelOptionsSchema,
   })
   .strict()
-  .superRefine((value, context) => {
-    if (value.width * value.height > 16_777_216)
-      context.addIssue({ code: 'custom', message: 'Image exceeds segmentation pixel limit' })
-    for (const region of [value.seedRegion, value.wholeRegion, value.roi])
-      if (region.left + region.width > value.width || region.top + region.height > value.height)
-        context.addIssue({ code: 'custom', message: 'Segmentation region is outside the source' })
-  })
+  .superRefine(refineSegmentationImageAndRegions)
 
 const mobileSamExpandRequestSchema = z
   .object({
@@ -153,13 +166,7 @@ const grabCutRequestSchema = z
     assetPath: z.string().min(1).max(4096),
   })
   .strict()
-  .superRefine((value, context) => {
-    if (value.width * value.height > 16_777_216)
-      context.addIssue({ code: 'custom', message: 'Image exceeds segmentation pixel limit' })
-    for (const region of [value.seedRegion, value.wholeRegion, value.roi])
-      if (region.left + region.width > value.width || region.top + region.height > value.height)
-        context.addIssue({ code: 'custom', message: 'Segmentation region is outside the source' })
-  })
+  .superRefine(refineSegmentationImageAndRegions)
 
 export const nativeSegmentationRequestSchema = z.union([
   mobileSamProbeSchema,

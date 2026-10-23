@@ -142,7 +142,7 @@
       "knownFailures": "h5-replay-local and grounded-mask-replay-local fail with INVALID_INPUT or ENOENT when H5a/H4e trees or python-freeze.txt are absent; H10 minimal manifest test fails when /root/work/zorya-classifier/.run/v03/h10/minimal-inputs.json is missing."
     },
     "python-native": {
-      "summary": "Set H10_PYTHON_EXECUTABLE or H11_PYTHON_EXECUTABLE to an offline Python with pinned CLIPSeg/SA2VA assets.",
+      "summary": "The full python-native group requires both H10_PYTHON_EXECUTABLE and H11_PYTHON_EXECUTABLE on offline Python 3.12.3 with numpy 2.5.2, torch 2.6.0+cpu, torchvision 0.21.0+cpu, transformers 4.57.3, and Pillow 12.3.0. Set HF_HUB_OFFLINE=1 and TRANSFORMERS_OFFLINE=1; no automatic model downloads. H10 needs existing caller-owned pinned CLIPSeg assets; H11 uses synthetic SAM2/model fixtures and does not require actual SA2VA weights. CPU FakeTensors validate loader metadata/placement only and do not validate physical CUDA or qualify real native GPU inference.",
       "knownFailures": "Runner suites throw at import when the required Python executable env var is unset."
     }
   }

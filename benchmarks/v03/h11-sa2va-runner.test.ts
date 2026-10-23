@@ -952,12 +952,34 @@ print("ok")
   assert.match(result.stdout, /ok/)
 })
 
-await test('load_stack uses device_map without to() for H11b and legacy to() without device_map', async () => {
+await test('load_stack uses device_map without to() for H11b and legacy to() without device_map (metadata-only FakeTensor offline)', async () => {
   const python = resolvePython()
   const script = `
 import hashlib, importlib.util, json, os, sys, tempfile, types
 from pathlib import Path
 import torch
+from torch._subclasses.fake_tensor import FakeTensorMode
+
+_REAL_CUDA_IS_AVAILABLE = torch.cuda.is_available
+
+def offline_metadata_tensor(shape, *, device, dtype):
+    # Metadata-only offline: FakeTensor cuda/cpu placement without real CUDA storage.
+    patched = torch.cuda.is_available
+    try:
+        torch.cuda.is_available = _REAL_CUDA_IS_AVAILABLE
+        with FakeTensorMode():
+            return torch.zeros(shape, device=device, dtype=dtype)
+    finally:
+        torch.cuda.is_available = patched
+
+def offline_metadata_parameter(shape, *, device="cuda:0", dtype=torch.bfloat16):
+    patched = torch.cuda.is_available
+    try:
+        torch.cuda.is_available = _REAL_CUDA_IS_AVAILABLE
+        with FakeTensorMode():
+            return torch.nn.Parameter(torch.zeros(shape, device=device, dtype=dtype))
+    finally:
+        torch.cuda.is_available = patched
 
 os.environ["H10_EXPECTED_LAUNCHER_PID"] = str(os.getppid())
 
@@ -1022,8 +1044,8 @@ class Sa2VAChatModelQwen(torch.nn.Module):
         self.hf_device_map = {"": "cuda:0"}
         self._direct = direct
         self._device_storage = torch.device("cpu")
-        self.weight = torch.nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.bfloat16))
-        self.register_buffer("buf", torch.zeros(2, device="cuda:0", dtype=torch.int32))
+        self.weight = offline_metadata_parameter(2)
+        self.register_buffer("buf", offline_metadata_tensor(2, device="cuda:0", dtype=torch.int32))
 
     def eval(self):
         return self
@@ -1098,12 +1120,22 @@ print("ok")
   assert.match(result.stdout, /ok/)
 })
 
-await test('verify_h11b_loader_placement accepts cuda0 and rejects drift meta cpu and dtype', async () => {
+await test('verify_h11b_loader_placement accepts cuda0 and rejects drift meta cpu and dtype (metadata-only FakeTensor offline)', async () => {
   const python = resolvePython()
   const script = `
 import importlib.util, sys, types
 import torch
 from torch import nn
+from torch._subclasses.fake_tensor import FakeTensorMode
+
+def offline_metadata_tensor(shape, *, device, dtype):
+    # Metadata-only offline: FakeTensor placement checks without real CUDA storage.
+    with FakeTensorMode():
+        return torch.zeros(shape, device=device, dtype=dtype)
+
+def offline_metadata_parameter(shape, *, device="cuda:0", dtype=torch.bfloat16):
+    with FakeTensorMode():
+        return nn.Parameter(torch.zeros(shape, device=device, dtype=dtype))
 
 spec = importlib.util.spec_from_file_location("h11c", ${JSON.stringify(COMMON)})
 mod = importlib.util.module_from_spec(spec)
@@ -1126,8 +1158,8 @@ def expect_fail(fn):
 
 good = FakeModel(
     {"": "cuda:0"},
-    nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.bfloat16)),
-    torch.zeros(2, device="cuda:0", dtype=torch.int32),
+    offline_metadata_parameter(2),
+    offline_metadata_tensor(2, device="cuda:0", dtype=torch.int32),
 )
 attestation = mod.verify_h11b_loader_placement(good)
 assert attestation["parameter_count"] == 1
@@ -1135,19 +1167,19 @@ assert attestation["buffer_count"] == 1
 
 int_map = FakeModel(
     {"": 0},
-    nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.bfloat16)),
-    torch.zeros(2, device="cuda:0", dtype=torch.int32),
+    offline_metadata_parameter(2),
+    offline_metadata_tensor(2, device="cuda:0", dtype=torch.int32),
 )
 assert mod.verify_h11b_loader_placement(int_map)["hf_device_map"] == mod.H11B_AUTHORIZED_LOADER_DEVICE_MAP
 
 expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cpu"}, nn.Parameter(torch.zeros(2)), torch.zeros(2))))
-expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"layer": "cuda:0", "": "cuda:0"}, nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.bfloat16)), torch.zeros(2, device="cuda:0"))))
-expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, nn.Parameter(torch.zeros(2, device="cpu", dtype=torch.bfloat16)), torch.zeros(2, device="cuda:0"))))
+expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"layer": "cuda:0", "": "cuda:0"}, offline_metadata_parameter(2), offline_metadata_tensor(2, device="cuda:0", dtype=torch.int32))))
+expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, nn.Parameter(torch.zeros(2, device="cpu", dtype=torch.bfloat16)), offline_metadata_tensor(2, device="cuda:0", dtype=torch.int32))))
 unindexed_cuda = torch.device("cuda")
 assert unindexed_cuda.index is None
 assert not mod._tensor_on_cuda0(types.SimpleNamespace(device=unindexed_cuda))
-expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, nn.Parameter(torch.zeros(2, device="meta", dtype=torch.bfloat16)), torch.zeros(2, device="cuda:0"))))
-expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, nn.Parameter(torch.zeros(2, device="cuda:0", dtype=torch.float32)), torch.zeros(2, device="cuda:0"))))
+expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, nn.Parameter(torch.zeros(2, device="meta", dtype=torch.bfloat16)), offline_metadata_tensor(2, device="cuda:0", dtype=torch.int32))))
+expect_fail(lambda: mod.verify_h11b_loader_placement(FakeModel({"": "cuda:0"}, offline_metadata_parameter(2, dtype=torch.float32), offline_metadata_tensor(2, device="cuda:0", dtype=torch.int32))))
 
 class EmptyModel(nn.Module):
     def __init__(self):
