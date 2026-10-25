@@ -21,24 +21,24 @@ export interface ClassifierOptions {
   concurrency?: number
   maxQueue?: number
   maxInputBytes?: number
-  /** @experimental Optional legacy region refinement; unqualified for general use. */
+  /** Optional legacy region refinement. */
   refinement?: RefinementPort
-  /** Caller-owned; classifier disposal never disposes a shared segmenter. @experimental Unqualified segmentation adapter. */
+  /** Caller-owned; classifier disposal never disposes a shared segmenter. Segmentation adapter; structural checks do not establish semantic mask quality. */
   segmentation?: SegmentationPort
-  /** Optional caller-owned containment checker; by default reuses the injected decision port. @experimental Unqualified box-check override. */
+  /** Optional caller-owned containment checker; by default reuses the injected decision port. Box-check override; verdicts are not universal spatial guarantees. */
   segmentationBoxCheck?: SegmentationBoxCheckPort
-  /** Explicit, caller-owned pixel-mask proposal strategy for whole-object operations. @experimental Unqualified proposal path. */
+  /** Explicit, caller-owned pixel-mask proposal strategy for whole-object operations. */
   objectProposals?: ObjectProposalPort
 }
 export interface Classifier {
   classify(input: ClassifyInput): Promise<ClassificationResult>
-  /** @experimental Unqualified spatial localization; see {@link LocateInput} and {@link WholeObjectLocateInput}. */
+  /** Spatial localization; see {@link LocateInput} and {@link WholeObjectLocateInput}. */
   locate(input: WholeObjectLocateInput): Promise<WholeObjectLocalizationResult>
-  /** @experimental Unqualified coarse region search; returns a hypothesized grid cell. */
+  /** Coarse region search; returns a hypothesized grid cell, not whole-object geometry. */
   locate(input: LocateInput): Promise<LocalizationResult>
-  /** @experimental Unqualified spatial localization. */
+  /** Spatial localization. */
   locate(input: AnyLocateInput): Promise<LocalizationResult | WholeObjectLocalizationResult>
-  /** @experimental Region-seeded extraction; unqualified for general mask or object accuracy. */
+  /** Region-seeded extraction; mask and box checks measure different things than semantic object accuracy. */
   extract(input: ExtractInput): Promise<ExtractionResult>
   dispose(): Promise<void>
 }

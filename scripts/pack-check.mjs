@@ -66,8 +66,8 @@ import { isAbsolute, join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { createClassifier, type DecisionPort, type DecisionResult } from 'zorya-classifier'
-import { createOpenRouterDecisions, type OpenRouterDecisionsOptions, createOpenRouterVision, type OpenRouterVisionOptions } from 'zorya-classifier/openrouter'
-import { createOpenAICompatibleVision, type OpenAICompatibleVisionOptions } from 'zorya-classifier/openai-compatible'
+import { createOpenRouterDecisions, type OpenRouterDecisionsOptions, createOpenRouterVision, type OpenRouterVisionOptions, createOpenRouterText, type OpenRouterTextOptions } from 'zorya-classifier/openrouter'
+import { createOpenAICompatibleVision, type OpenAICompatibleVisionOptions, createOpenAICompatibleText, type OpenAICompatibleTextOptions } from 'zorya-classifier/openai-compatible'
 import { createMobileSamSegmenter, createMobileSamObjectProposals, createGrabCutSegmenter, packBinaryMask, unpackBinaryMask } from 'zorya-classifier/segmentation'
 const native: (options: OpenRouterDecisionsOptions) => DecisionPort = createOpenRouterDecisions
 assert.equal(typeof native, 'function')
@@ -197,6 +197,34 @@ try{
  console.log(JSON.stringify({pixelMaskProposals:'passed',proposalExtract:'passed',optionalOnnxAbsent:true,providerHttpCalls:0}))
 }finally{await proposals.dispose()}
 assert.equal(proposalDisposals,0)
+const retired = { type: 'experimental-text', profile: 'text-image-v1' } as const
+let retiredProbeCalls = 0
+const retiredProbe = createClassifier({decision:{async decide(){retiredProbeCalls++;return {answers:{selection:{type:'choice',choice:'yes',probabilities:{yes:1,no:0}}},metadata:{model:null,provider:null,requestId:null,durationMs:0,costUsd:null,attempts:1}}}}})
+try {
+  await assert.rejects(retiredProbe.classify({input:{image},classes:[{id:'yes',description:'Rectangle'},{id:'no',description:'No rectangle'}],
+    // @ts-expect-error retired public image-as-text selector
+    representation: retired}),{code:'INVALID_INPUT'})
+  assert.equal(retiredProbeCalls,0)
+  console.log(JSON.stringify({retiredTextImageSelector:'rejected-before-decision',retiredProbeCalls,providerHttpCalls:0}))
+} finally { await retiredProbe.dispose() }
+const openAiText: (options: OpenAICompatibleTextOptions) => DecisionPort = createOpenAICompatibleText
+const openRouterText: (options: OpenRouterTextOptions) => DecisionPort = createOpenRouterText
+assert.equal(typeof openAiText,'function')
+assert.equal(typeof openRouterText,'function')
+let ordinaryTextCalls = 0
+const textOnly = openAiText({endpoint:'http://127.0.0.1:9/v1/chat/completions',model:'fixture/text',fetch:async (_url,init)=>{
+  ordinaryTextCalls++
+  const body = String(init?.body)
+  assert.ok(!body.includes('image_url'))
+  return new Response(JSON.stringify({model:'fixture/text',choices:[{index:0,finish_reason:'stop',message:{content:JSON.stringify({answers:{selection:{ranking:['yes']}}})}}]}))
+}})
+const textClassifier = createClassifier({decision:textOnly})
+try {
+  const answer = await textClassifier.classify({input:'Synthetic rectangle',classes:[{id:'yes',description:'Rectangle'},{id:'no',description:'No rectangle'}]})
+  assert.equal(answer.choice,'yes')
+  assert.equal(ordinaryTextCalls,1)
+  console.log(JSON.stringify({ordinaryTextAdapter:'passed',ordinaryTextCalls,providerHttpCalls:0}))
+} finally { await textClassifier.dispose() }
 `
 
 run(['run', 'build'])
@@ -240,12 +268,26 @@ try {
     const secretFindings = [...secretPathRules(f.path), ...scanSecretText(f.path, data)]
     if (secretFindings.length) throw new Error(`Potential credential in package file: ${f.path}`)
     packagePins.set(f.path, createHash('sha256').update(bytes).digest('hex'))
-    if (f.path.startsWith('dist/'))
+    if (f.path.startsWith('dist/')) {
+      if (/\.(js|d\.ts)$/.test(f.path)) {
+        for (const token of [
+          'experimental-text',
+          'text-image-v1',
+          'preparedTextSchema',
+          'createClassifierRepresentation',
+        ]) {
+          if (data.includes(token))
+            throw new Error(
+              `Retired text-image runtime must not ship in archive: ${f.path} (${token})`,
+            )
+        }
+      }
       distPins.push({
         path: f.path,
         bytes: bytes.length,
         sha256: createHash('sha256').update(bytes).digest('hex'),
       })
+    }
   }
   const archive = join(dir, packed.filename)
   const dev = JSON.parse(await readFile(resolve('package.json'), 'utf8')).devDependencies
@@ -265,8 +307,22 @@ try {
     const bytes = await readFile(join(dir, 'node_modules', 'zorya-classifier', path))
     if (createHash('sha256').update(bytes).digest('hex') !== sha256)
       throw new Error(`Archive differs from scanned source: ${path}`)
-    if (secretPathRules(path).length || scanSecretText(path, bytes.toString('utf8')).length)
+    const installedText = bytes.toString('utf8')
+    if (secretPathRules(path).length || scanSecretText(path, installedText).length)
       throw new Error(`Potential credential in installed archive: ${path}`)
+    if (/^dist\/.*\.(js|d\.ts)$/.test(path)) {
+      for (const token of [
+        'experimental-text',
+        'text-image-v1',
+        'preparedTextSchema',
+        'createClassifierRepresentation',
+      ]) {
+        if (installedText.includes(token))
+          throw new Error(
+            `Installed archive must not contain retired text-image runtime: ${path} (${token})`,
+          )
+      }
+    }
   }
   await writeFile(join(dir, 'probe.ts'), consumerProbe)
   await writeFile(

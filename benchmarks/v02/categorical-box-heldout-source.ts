@@ -30,6 +30,7 @@ const includedBenchmarkFiles = [
   '../experiments/ascii-contours-v1.ts',
   '../experiments/ascii-svg-layered-v1.ts',
   '../experiments/text-representation.ts',
+  '../experiments/research-representation-contract.ts',
   '../experiments/boundary-view.ts',
   '../experiments/create-research-classifier.ts',
   '../../package.json',

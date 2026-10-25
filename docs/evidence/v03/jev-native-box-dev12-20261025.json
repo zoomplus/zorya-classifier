@@ -1,0 +1,76 @@
+{
+  "schema": "v03-jev-native-box-dev12-result-v1",
+  "status": "scoped-verified-dev",
+  "profileId": "jev-native-box-dev12-v1",
+  "phase": "dev-exposed-pilot",
+  "productionPromotion": false,
+  "libraryDefaultChanged": false,
+  "cohort": {
+    "positiveDenominator": 9,
+    "negativeDenominator": 3,
+    "tasksRetained": 12
+  },
+  "metrics": {
+    "jevStrictPositiveBoxGate": { "passes": 3, "denominator": 9 },
+    "h8aStrictPositiveBoxGate": { "passes": 7, "denominator": 9 },
+    "jevPositiveIoUOnlyDiagnostic": {
+      "passes": 8,
+      "denominator": 9,
+      "note": "Not the advancement gate; IoU>=0.5 without coverage requirement."
+    },
+    "h8aPositiveIoUOnlyDiagnostic": {
+      "passes": 7,
+      "denominator": 9,
+      "note": "Secondary diagnostic only; IoU>=0.5 without coverage requirement."
+    },
+    "byStratumStrict": {
+      "photo": { "jev": "3/3", "h8a": "3/3" },
+      "ui": { "jev": "0/3", "h8a": "3/3" },
+      "map": { "jev": "0/3", "h8a": "1/3" }
+    },
+    "jevNegativeSummary": {
+      "negativeDenominator": 3,
+      "presentFalseOutput": 1,
+      "absentCorrect": 2,
+      "falseOutputCaseIds": ["pilot-v03-map-04"]
+    },
+    "h8aFalseOutputs": {
+      "count": 2,
+      "caseIds": ["pilot-v03-photo-04", "pilot-v03-ui-04"]
+    },
+    "h8aBirdMaskIoU": 0.9020429943588961,
+    "h8aBirdMaskCaseId": "pilot-v03-photo-02"
+  },
+  "physical": {
+    "calls": 12,
+    "resolved": 12,
+    "retries": 0,
+    "knownCostUsd": 0.00140553,
+    "unknownCostUsd": 0,
+    "unknownCostCalls": 0
+  },
+  "frozenIdentities": {
+    "freezePath": "/root/.codex/artifacts/zorya-classifier-jev-native-box-20261025/offline-pipeline-v2/freeze/freeze.json",
+    "freezeFileSha256": "ed73aa7cb0cc683e8a36353fecd3e556a132dab7ddb083c4a2a50fd2d244ddb7",
+    "freezeContentSha256": "ce9de928ffc22ff593046a9e42e17352ec4492479bae0d833a739e4e036e7b6d",
+    "runManifestPath": "/root/.codex/artifacts/zorya-classifier-jev-native-box-20261025/live-run-20261025T173530/run-manifest.json",
+    "runManifestSha256": "75d5a7932ac7c8c4244404f89e7e5f91886120843a742d3dcfddfc8ad3c6324b",
+    "evaluationPath": "/root/.codex/artifacts/zorya-classifier-jev-native-box-20261025/live-evaluation-20261025T173530/evaluation.json",
+    "evaluationSha256": "7c147472a4aefdd5309a71753f1affa73a185e7f19c2ea6619dc29356185f52a",
+    "truthPath": "benchmarks/v03/evaluator-data/pilot-truth.json",
+    "truthSha256": "af5bf46d19c7c7dd418f6da0b2d26b7708bf7e4ca659ea378641c424e2f3a1dd",
+    "h8aRunPath": "/root/projects/Zorya/.migration/20261022-r1/classifier/aux/runs/v03/h8a-luna-chat-8633fe55-47af-441b-9265-a159d3e4efc8/run.json",
+    "h8aRunSha256": "1def8b64894f520e6e3ddd9c432212e1333684ae5db1e7c5747485c185cbb98a",
+    "h8aEvaluationPath": "docs/evidence/v03/h8a-ordinary-vision-independent-evaluation.json",
+    "h8aEvaluationSha256": "1a6850b69d4f5ce52d0531594ede845ba0aeb3698b844f5946c33da46c3fbab2",
+    "rootLiveAuditPath": "/root/.codex/artifacts/zorya-classifier-jev-native-box-20261025/root-live-independent-audit.json"
+  },
+  "reportArtifacts": {
+    "researchResultsDoc": "docs/research/v03-jev-native-box-results.ru.md",
+    "finalHtmlPath": "/root/.codex/artifacts/zorya-classifier-jev-native-box-20261025/final-report/comparison-final.html",
+    "finalOutputManifestPath": "/root/.codex/artifacts/zorya-classifier-jev-native-box-20261025/final-report/output-manifest.json",
+    "finalOutputManifestSha256": "9da113e8934d39d5a7d5359b5d86097e3ce432f7e5e43b80687e6fd6878fd2be",
+    "generatorScript": "/root/.codex/artifacts/zorya-classifier-jev-native-box-20261025/make-final-report.mjs"
+  },
+  "note": "Single DEV12 exposed pilot vs historical H8a; no heldout qualification; Jev outputs boxes not masks; observed cost is run-specific."
+}

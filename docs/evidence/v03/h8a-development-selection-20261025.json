@@ -1,0 +1,105 @@
+{
+  "schema": "v03-h8a-development-selection-v1",
+  "selection": {
+    "selectedForDevelopment": true,
+    "primaryDevelopmentDirection": "h8a-openai-luna-chat",
+    "selectedBy": "owner",
+    "role": "owner",
+    "date": "2026-10-25",
+    "sourceCommit": "167e6e2c50465e79649a4d1dca59cbf6b878c071",
+    "productionPromotion": false,
+    "libraryDefaultChanged": false,
+    "implementationChanged": false,
+    "newInferenceCalls": 0,
+    "note": "Records owner direction only; does not implement, tune, qualify, or promote H8a."
+  },
+  "arm": {
+    "id": "h8a-openai-luna-chat",
+    "status": "complete",
+    "route": {
+      "model": "openai/gpt-6-luna",
+      "provider": "openai",
+      "providerName": "OpenAI",
+      "apiEndpoint": "/api/v1/chat/completions",
+      "responseFormat": "json-schema",
+      "reasoningEffort": "medium",
+      "maxOutputTokens": 4096,
+      "allowFallbacks": false,
+      "retries": false
+    },
+    "routeNote": "Historical explicit benchmark route from frozen run; not a library or provider default and not a claim about current price or capability."
+  },
+  "frozenIdentities": {
+    "runPath": "/root/projects/Zorya/.migration/20261022-r1/classifier/aux/runs/v03/h8a-luna-chat-8633fe55-47af-441b-9265-a159d3e4efc8/run.json",
+    "runSha256": "1def8b64894f520e6e3ddd9c432212e1333684ae5db1e7c5747485c185cbb98a",
+    "freezeSha256": "d371f64a76effb8b96951709c03a4801e1751f8f8032d363623ba1903b33ed27",
+    "independentEvaluationPath": "docs/evidence/v03/h8a-ordinary-vision-independent-evaluation.json",
+    "independentEvaluationSha256": "1a6850b69d4f5ce52d0531594ede845ba0aeb3698b844f5946c33da46c3fbab2",
+    "independentAuditPath": "docs/evidence/v03/h8a-ordinary-vision-independent-audit.md",
+    "independentAuditSha256": "707c47f7f5efffc94ee6375cbfa795df1689ee26e3481bffe1795ac815da5fca",
+    "externalArtifactAuditPath": "/root/.codex/artifacts/zorya-classifier-method-comparison-20261025/root-h8a-audit.json",
+    "externalArtifactAuditSha256": "90bf5f53ba01523ad3e410d48b8dd1a54cf11770bad81a8b62353ecab8a61179"
+  },
+  "implementationReference": "benchmarks/v03/run-h8-ordinary-vision.ts",
+  "stageDescription": "Separate present/absent/uncertain decision; nominate up to four candidates per D/U family; one final mask selection; geometry from selected-mask foreground pixels only.",
+  "cohort": {
+    "name": "DEV12-pilot-v03",
+    "positiveDenominator": 9,
+    "negativeDenominator": 3,
+    "strata": ["photo", "ui", "map"]
+  },
+  "metrics": {
+    "positiveSameMaskBoxGatePass": 7,
+    "positiveSameMaskBoxGateDenominator": 9,
+    "positiveByStratum": {
+      "photo": { "successes": 3, "denominator": 3 },
+      "ui": { "successes": 3, "denominator": 3 },
+      "map": { "successes": 1, "denominator": 3 }
+    },
+    "unionAvailable": 8,
+    "nominatedAvailable": 8,
+    "stageLosses": {
+      "generationLoss": ["pilot-v03-map-02"],
+      "finalSelectionLoss": ["pilot-v03-map-03"]
+    },
+    "negativeFalseOutputs": 2,
+    "negativeFalseOutputDenominator": 3,
+    "falseOutputCaseIds": ["pilot-v03-photo-04", "pilot-v03-ui-04"],
+    "correctAbsentCaseIds": ["pilot-v03-map-04"],
+    "advancementGatePass": false,
+    "measuredPixelMaskIoU": [
+      {
+        "caseId": "pilot-v03-photo-02",
+        "maskIoU": 0.9020429943588961,
+        "note": "Only case with reference pixel mask truth in independent audit."
+      }
+    ]
+  },
+  "historicalRunBudget": {
+    "physicalCalls": 41,
+    "knownCostUsd": 0.0359093,
+    "unknownCostCalls": 0
+  },
+  "documentation": {
+    "researchBaselineRu": "docs/research/v03-h8a-development-baseline.ru.md",
+    "qualityPlan": "docs/0.3.0-quality-plan.md",
+    "h8Plan": "docs/research/v03-h8-ordinary-vision-comparison-plan.md"
+  },
+  "nextWorkStatus": {
+    "sequence": [
+      "diagnose stage losses on frozen receipts",
+      "separate primary-source research and freeze new presence hypothesis before implementation",
+      "compare paired gains and positive losses on new DEV data not these 12 cases",
+      "preserve H9 2/9 and 0/3 false outputs as historical control",
+      "retain 120-case qualification cohort and thresholds in docs/0.3.0-quality-plan.md",
+      "public integration only after all existing gates pass"
+    ],
+    "authorizesPaidOrLiveInference": false,
+    "guaranteesImprovement": false
+  },
+  "preservedHistoricalRecords": {
+    "h8bArmUnchanged": true,
+    "h9Result": "2/9 positive same-mask, 0/3 negative false outputs",
+    "methodComparisonDoc": "docs/research/v03-method-comparison.ru.md"
+  }
+}

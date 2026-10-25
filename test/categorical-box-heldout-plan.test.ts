@@ -534,8 +534,8 @@ await test('new source closures include the dedicated plan, CLI, and its transit
       .sort(),
     runtimePaths,
   )
-  assert.equal(Object.keys(candidate).length, runtimePaths.length + 33)
-  assert.equal(Object.keys(noImage).length, runtimePaths.length + 33)
+  assert.equal(Object.keys(candidate).length, runtimePaths.length + 34)
+  assert.equal(Object.keys(noImage).length, runtimePaths.length + 34)
   assert.ok(Object.hasOwn(candidate, 'src/processes/extract-from-region.ts'))
   for (const sources of [candidate, noImage]) {
     assert.ok(Object.hasOwn(sources, './categorical-box-heldout-plan.ts'))
@@ -547,6 +547,7 @@ await test('new source closures include the dedicated plan, CLI, and its transit
     assert.ok(Object.hasOwn(sources, '../experiments/text-representation.ts'))
     assert.ok(Object.hasOwn(sources, '../experiments/boundary-view.ts'))
     assert.ok(Object.hasOwn(sources, '../experiments/create-research-classifier.ts'))
+    assert.ok(Object.hasOwn(sources, '../experiments/research-representation-contract.ts'))
   }
   assert.deepEqual(Object.keys(candidate).sort(), Object.keys(noImage).sort())
   assert.equal(

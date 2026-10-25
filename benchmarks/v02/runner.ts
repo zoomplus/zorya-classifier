@@ -186,35 +186,44 @@ async function classify(
 ): Promise<{ stage: StageRecord; calls: PhysicalCallRecord[] }> {
   const recorder = decision as DecisionPort & { __recorder: Recorder }
   const start = performance.now()
-  const classifier = imageRepresentation
-    ? createResearchClassifier({ decision }, imageRepresentation)
-    : createClassifier({ decision })
+  const classes = [
+    {
+      id: 'present',
+      description: 'At least one visible physical instance of the named target is present.',
+    },
+    {
+      id: 'absent',
+      description: 'No visible physical instance of the named target is present.',
+    },
+  ] as const
+  const instructions = 'Choose exactly one closed class. Do not infer from external context.'
+  const input = {
+    image: bytes,
+    text: `Does this image contain a visible physical instance of ${target}?`,
+  }
   try {
-    const result = await classifier.classify({
-      input: {
-        image: bytes,
-        text: `Does this image contain a visible physical instance of ${target}?`,
-      },
-      classes: [
-        {
-          id: 'present',
-          description: 'At least one visible physical instance of the named target is present.',
-        },
-        {
-          id: 'absent',
-          description: 'No visible physical instance of the named target is present.',
-        },
-      ],
-      instructions: 'Choose exactly one closed class. Do not infer from external context.',
-      ...(imageRepresentation
-        ? {
-            representation: {
-              type: 'experimental-text' as const,
-              profile: 'text-image-v1' as const,
-            },
+    const result = imageRepresentation
+      ? await (async () => {
+          const classifier = createResearchClassifier({ decision }, imageRepresentation)
+          try {
+            return await classifier.classify({
+              input,
+              classes: [...classes],
+              instructions,
+              representation: { type: 'experimental-text', profile: 'text-image-v1' },
+            })
+          } finally {
+            await classifier.dispose()
           }
-        : {}),
-    })
+        })()
+      : await (async () => {
+          const classifier = createClassifier({ decision })
+          try {
+            return await classifier.classify({ input, classes: [...classes], instructions })
+          } finally {
+            await classifier.dispose()
+          }
+        })()
     return {
       stage: {
         status: 'ok',
@@ -234,8 +243,6 @@ async function classify(
       },
       calls: recorder.__recorder.calls,
     }
-  } finally {
-    await classifier.dispose()
   }
 }
 
@@ -247,25 +254,37 @@ async function locate(
 ): Promise<{ stage: StageRecord; calls: PhysicalCallRecord[] }> {
   const recorder = decision as DecisionPort & { __recorder: Recorder }
   const start = performance.now()
-  const classifier = imageRepresentation
-    ? createResearchClassifier({ decision, concurrency: 1, maxQueue: 0 }, imageRepresentation)
-    : createClassifier({ decision, concurrency: 1, maxQueue: 0 })
+  const locateOptions = {
+    image: bytes,
+    target,
+    mode: 'whole-object' as const,
+    boxTolerancePx: 8,
+    maxExtentPasses: 3,
+  }
   try {
-    const result = (await classifier.locate({
-      image: bytes,
-      target,
-      mode: 'whole-object',
-      boxTolerancePx: 8,
-      maxExtentPasses: 3,
-      ...(imageRepresentation
-        ? {
-            representation: {
-              type: 'experimental-text' as const,
-              profile: 'text-image-v1' as const,
-            },
+    const result = imageRepresentation
+      ? await (async () => {
+          const classifier = createResearchClassifier(
+            { decision, concurrency: 1, maxQueue: 0 },
+            imageRepresentation,
+          )
+          try {
+            return await classifier.locate({
+              ...locateOptions,
+              representation: { type: 'experimental-text', profile: 'text-image-v1' },
+            })
+          } finally {
+            await classifier.dispose()
           }
-        : {}),
-    })) as WholeObjectLocalizationResult
+        })()
+      : await (async () => {
+          const classifier = createClassifier({ decision, concurrency: 1, maxQueue: 0 })
+          try {
+            return await classifier.locate(locateOptions)
+          } finally {
+            await classifier.dispose()
+          }
+        })()
     return {
       stage: {
         status: result.status === 'located' ? 'ok' : result.status,
@@ -293,8 +312,6 @@ async function locate(
       },
       calls: recorder.__recorder.calls,
     }
-  } finally {
-    await classifier.dispose()
   }
 }
 

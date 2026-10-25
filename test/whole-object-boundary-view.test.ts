@@ -371,7 +371,6 @@ await test('text representation ignores boundary renderer and keeps extent reque
   const result = await locateWholeObjectInput(
     {
       ...baseInput(),
-      representation: { type: 'experimental-text', profile: 'text-image-v1' },
       boxTolerancePx: 64,
       maxExtentPasses: 1,
     },

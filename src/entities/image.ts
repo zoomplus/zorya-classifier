@@ -18,10 +18,7 @@ export const imageSchema = z
     'Expected 1..16MiB image bytes',
   )
 
-export const representationSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('vision') }).strict(),
-  z.object({ type: z.literal('experimental-text'), profile: z.literal('text-image-v1') }).strict(),
-])
+export const representationSchema = z.object({ type: z.literal('vision') }).strict()
 export type Representation = z.infer<typeof representationSchema>
 
 export interface RasterImage {

@@ -1,7 +1,7 @@
 {
   "name": "zorya-classifier",
-  "version": "0.2.2",
-  "description": "Provider-independent classification with experimental localization and object extraction for Node.js",
+  "version": "0.2.3",
+  "description": "Provider-independent Node.js classification, spatial localization, and caller-owned mask-based object extraction",
   "type": "module",
   "license": "MIT",
   "engines": {

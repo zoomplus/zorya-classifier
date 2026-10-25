@@ -336,9 +336,10 @@ await test('experimental text representation is not promoted by the proposal ada
     await assert.rejects(
       classifier.locate({
         ...input(await fixturePng()),
+        // @ts-expect-error retired public image-as-text selector
         representation: { type: 'experimental-text', profile: 'text-image-v1' },
       }),
-      { code: 'UNSUPPORTED' },
+      { code: 'INVALID_INPUT' },
     )
     assert.equal(calls, 0)
     assert.equal(port.proposed, 0)

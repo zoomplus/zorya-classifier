@@ -169,7 +169,7 @@ await test('research boundary presentation stays opt-in and never adds extent ca
   }
 })
 
-await test('unqualified public image profile rejects before dispatch while text-only classification stays usable', async () => {
+await test('retired public image-as-text selector rejects before dispatch while text-only classification stays usable', async () => {
   let calls = 0
   const decision: DecisionPort = {
     async decide(request) {
@@ -180,18 +180,25 @@ await test('unqualified public image profile rejects before dispatch while text-
   const classifier = createClassifier({ decision })
   try {
     await assert.rejects(
-      classifier.classify({ input: { image: new Uint8Array([1]) }, classes, representation }),
-      { code: 'UNSUPPORTED' },
+      classifier.classify({
+        input: { image: new Uint8Array([1]) },
+        classes,
+        // @ts-expect-error retired public image-as-text selector
+        representation,
+      }),
+      { code: 'INVALID_INPUT' },
     )
     await assert.rejects(
-      classifier.locate({ image: new Uint8Array([1]), target: 'object', representation }),
-      { code: 'UNSUPPORTED' },
+      classifier.locate({
+        image: new Uint8Array([1]),
+        target: 'object',
+        // @ts-expect-error retired public image-as-text selector
+        representation,
+      }),
+      { code: 'INVALID_INPUT' },
     )
     assert.equal(calls, 0)
-    assert.equal(
-      (await classifier.classify({ input: 'object', classes, representation })).choice,
-      'present',
-    )
+    assert.equal((await classifier.classify({ input: 'object', classes })).choice, 'present')
     assert.equal(calls, 1)
   } finally {
     await classifier.dispose()
@@ -405,5 +412,78 @@ await test('cancelled extract retains its physical slot and byte reservation unt
     await classifier.dispose()
     await rejected
     await segmenter.port.dispose()
+  }
+})
+
+await test('public classifier rejects retired image-as-text selector before dispatch', async () => {
+  const image = await sharp({
+    create: { width: 32, height: 32, channels: 3, background: '#112233' },
+  })
+    .png()
+    .toBuffer()
+  let calls = 0
+  const decision: DecisionPort = {
+    async decide(request) {
+      calls++
+      return fixtureAnswer(request)
+    },
+  }
+  const classifier = createClassifier({ decision })
+  const experimental = { type: 'experimental-text', profile: 'text-image-v1' } as const
+  try {
+    await assert.rejects(
+      classifier.classify({
+        input: 'plain text only',
+        classes,
+        // @ts-expect-error retired public image-as-text selector
+        representation: experimental,
+      }),
+      { code: 'INVALID_INPUT' },
+    )
+    await assert.rejects(
+      classifier.classify({
+        input: { image },
+        classes,
+        // @ts-expect-error retired public image-as-text selector
+        representation: experimental,
+      }),
+      { code: 'INVALID_INPUT' },
+    )
+    await assert.rejects(
+      classifier.locate({
+        image,
+        target: 'fixture object',
+        // @ts-expect-error retired public image-as-text selector
+        representation: experimental,
+      }),
+      { code: 'INVALID_INPUT' },
+    )
+    await assert.rejects(
+      classifier.locate({
+        image,
+        target: 'fixture object',
+        mode: 'whole-object',
+        // @ts-expect-error retired public image-as-text selector
+        representation: experimental,
+      }),
+      { code: 'INVALID_INPUT' },
+    )
+    await assert.rejects(
+      classifier.extract({
+        image,
+        target: 'fixture object',
+        // @ts-expect-error retired public image-as-text selector
+        representation: experimental,
+      }),
+      { code: 'INVALID_INPUT' },
+    )
+    assert.equal(calls, 0)
+    const classified = await classifier.classify({ input: 'hello fixture', classes })
+    assert.equal(classified.choice, 'present')
+    const vision = await classifier.classify({ input: { image }, classes })
+    assert.equal(vision.choice, 'present')
+    assert.equal(calls, 2)
+  } finally {
+    await classifier.dispose()
   }
 })

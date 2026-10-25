@@ -10,7 +10,7 @@ export type { SegmentationMetadata } from './segmentation-metadata.js'
 export const extractSchema = wholeObjectSchema.extend({
   mode: z.literal('whole-object').optional(),
 })
-/** @experimental Region-seeded extraction input; unqualified for general object or mask accuracy. */
+/** Region-seeded extraction input; structural success does not guarantee semantic object or mask quality. */
 export type ExtractInput = z.input<typeof extractSchema> & { signal?: AbortSignal }
 
 export interface BinaryMask {
@@ -37,7 +37,7 @@ export type SegmentationResult =
   | { status: 'unknown'; reason: string; metadata: SegmentationMetadata }
 /**
  * Caller-owned. settle joins physical work; dispose closes this adapter only.
- * @experimental Caller-owned segmentation; structural validation does not establish semantic object or mask quality.
+ * Structural validation does not establish semantic object or mask quality.
  */
 export interface SegmentationPort {
   segment(input: SegmentationInput): Promise<SegmentationResult>
@@ -46,7 +46,7 @@ export interface SegmentationPort {
   settle(): Promise<void>
   dispose(): Promise<void>
 }
-/** @experimental Extraction outcome; `extracted` reflects validation, not guaranteed semantic correctness. */
+/** Extraction outcome; `extracted` reflects validation, not guaranteed semantic correctness. */
 export type ExtractionResult =
   | {
       status: 'extracted'

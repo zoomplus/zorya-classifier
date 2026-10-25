@@ -1,4 +1,4 @@
-import type { LocalizationResult, LocateInput } from '../entities/contracts.js'
+import type { LocalizationResult, LocateInput, Representation } from '../entities/contracts.js'
 import { classifySchema, locateSchema, parse } from '../entities/contracts.js'
 import { ClassifierError } from '../entities/errors.js'
 import { createSharpRaster } from '../infrastructure/raster.js'
@@ -20,23 +20,42 @@ import { createSegmentationBoxCheck } from '../features/segmentation/box-check.j
 import { createSharpSegmentationBoxPresentation } from '../infrastructure/segmentation/box-presentation.js'
 import type { Classifier, ClassifierOptions } from './classifier-contracts.js'
 import { validateClassifierOptions } from './classifier-config.js'
-import { createClassifierRepresentation } from './classifier-representation.js'
 import { createClassifierRuntime, parseOperationSignal } from './classifier-runtime.js'
 import { createClassifierSpatial } from './classifier-spatial.js'
+import type { ComposedClassifier, WithRepresentationField } from './composed-classifier.js'
 
 export type { Classifier, ClassifierOptions } from './classifier-contracts.js'
+
+interface ResearchRepresentationHook {
+  representationPort: ImageRepresentationPort
+  acceptsRepresentation(raw: unknown): boolean
+}
+
+type OperationBody = { representation?: unknown }
+
+function prepareResearchOperationInput(
+  rest: OperationBody & Record<string, unknown>,
+  research: ResearchRepresentationHook | undefined,
+): { rest: OperationBody & Record<string, unknown>; port: ImageRepresentationPort | undefined } {
+  if (!research || rest.representation === undefined) return { rest, port: undefined }
+  if (!research.acceptsRepresentation(rest.representation)) return { rest, port: undefined }
+  return {
+    rest: { ...rest, representation: { type: 'vision' } satisfies Representation },
+    port: research.representationPort,
+  }
+}
 
 export function createClassifier(options: ClassifierOptions): Classifier {
   return composeClassifier(options)
 }
 
 /** Internal composition seam for benchmark helpers; not re-exported from public entry points. */
-export function composeClassifier(
+export function composeClassifier<R = Representation>(
   options: ClassifierOptions,
-  experimental?: ImageRepresentationPort,
+  research?: ResearchRepresentationHook,
   boundaryView?: BoundaryViewPort,
   intervalPolicy?: WholeObjectIntervalPolicy,
-): Classifier {
+): ComposedClassifier<R> {
   const { config, ports } = validateClassifierOptions(options)
   const { segmenter, objectProposals } = ports
   const runtime = createClassifierRuntime(config)
@@ -59,7 +78,6 @@ export function composeClassifier(
         presentation: createSharpObjectProposalPresentation(),
       }
     : undefined
-  const { representationFor } = createClassifierRepresentation(experimental)
   const spatial = createClassifierSpatial({
     getDecision: () => options.decision,
     raster,
@@ -71,37 +89,37 @@ export function composeClassifier(
     intervalPolicy,
   })
 
-  function locate(input: WholeObjectLocateInput): Promise<WholeObjectLocalizationResult>
-  function locate(input: LocateInput): Promise<LocalizationResult>
   function locate(
-    input: AnyLocateInput,
+    input: WithRepresentationField<WholeObjectLocateInput, R>,
+  ): Promise<WholeObjectLocalizationResult>
+  function locate(input: WithRepresentationField<LocateInput, R>): Promise<LocalizationResult>
+  function locate(
+    input: WithRepresentationField<AnyLocateInput, R>,
   ): Promise<LocalizationResult | WholeObjectLocalizationResult>
   async function locate(
-    input: AnyLocateInput,
+    input: WithRepresentationField<AnyLocateInput, R>,
   ): Promise<LocalizationResult | WholeObjectLocalizationResult> {
     runtime.assertAcceptingOperations()
     if (!input || typeof input !== 'object')
       throw new ClassifierError('INVALID_INPUT', 'Expected locate input object')
     const { signal, ...rest } = input
     const parent = parseOperationSignal(signal)
-    if (rest.mode === 'whole-object') {
-      const parsed = parse(wholeObjectSchema, rest)
-      const representation = representationFor(parsed.representation)
+    const { rest: rewritten, port } = prepareResearchOperationInput(rest, research)
+    if (rewritten.mode === 'whole-object') {
+      const parsed = parse(wholeObjectSchema, rewritten)
       return runtime.withOwnedInput(
         parsed.image.byteLength,
         parent,
         () => ({ ...parsed, image: new Uint8Array(parsed.image) }),
-        (snapshot, s) => spatial.locateWhole(snapshot, s, representation),
+        (snapshot, s) => spatial.locateWhole(snapshot, s, port),
       )
     }
-    const parsed = parse(locateSchema, rest)
-    const representation = representationFor(parsed.representation)
+    const parsed = parse(locateSchema, rewritten)
     return runtime.withOwnedInput(
       parsed.image.byteLength,
       parent,
       () => ({ ...parsed, image: new Uint8Array(parsed.image) }),
-      (snapshot, s) =>
-        locateInput(snapshot, options.decision, raster, s, options.refinement, representation),
+      (snapshot, s) => locateInput(snapshot, options.decision, raster, s, options.refinement, port),
     )
   }
 
@@ -112,9 +130,10 @@ export function composeClassifier(
         throw new ClassifierError('INVALID_INPUT', 'Expected classify input object')
       const { signal, ...rest } = input
       const parent = parseOperationSignal(signal)
-      const parsed = parse(classifySchema, rest)
+      const { rest: rewritten, port } = prepareResearchOperationInput(rest, research)
+      const parsed = parse(classifySchema, rewritten)
       const hasImage = typeof parsed.input !== 'string' && parsed.input.image !== undefined
-      const representation = hasImage ? representationFor(parsed.representation) : undefined
+      const representation = hasImage ? port : undefined
       const byteCount =
         typeof parsed.input === 'string'
           ? Buffer.byteLength(parsed.input)
@@ -143,20 +162,20 @@ export function composeClassifier(
         throw new ClassifierError('INVALID_INPUT', 'Expected extract input object')
       const { signal, ...rest } = input
       const parent = parseOperationSignal(signal)
-      const parsed = parse(extractSchema, rest)
+      const { rest: rewritten, port } = prepareResearchOperationInput(rest, research)
+      const parsed = parse(extractSchema, rewritten)
       if (!segmenter && !proposalDependencies)
         throw new ClassifierError(
           'UNSUPPORTED',
           'extract requires an explicit SegmentationPort or ObjectProposalPort',
         )
-      const representation = representationFor(parsed.representation)
       return runtime.withOwnedInput(
         parsed.image.byteLength,
         parent,
         () => ({ ...parsed, image: new Uint8Array(parsed.image) }),
         (snapshot, s) => {
-          if (segmenter) return spatial.extractRegion(snapshot, s, representation)
-          return spatial.extractWithProposals(snapshot, s, representation)
+          if (segmenter) return spatial.extractRegion(snapshot, s, port)
+          return spatial.extractWithProposals(snapshot, s, port)
         },
       )
     },

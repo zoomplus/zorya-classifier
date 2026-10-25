@@ -6,12 +6,12 @@
 
 Zorya Classifier — MIT-библиотека для Node.js 22.12+. **Поддерживается** закрытая классификация текста и изображений: приложение передаёт явно настроенный `DecisionPort` или собирает адаптер самостоятельно. Библиотека не выбирает модель, провайдера или конечную точку API.
 
-**Экспериментальные и не квалифицированные** сценарии (в API помечены `@experimental`):
+**Реализованные пространственные API** (модель, провайдер и нативные ресурсы — на стороне вызывающего; ячейка сетки ≠ рамка целого объекта):
 
 - сеточный `locate`, режим «целый объект» (`whole-object`), `RefinementPort`;
 - `extract` с сегментатором на стороне вызывающего, проверка рамки и связанная композиция;
 - `ObjectProposalPort` и явные нативные фабрики сегментации;
-- профиль `representation: { type: 'experimental-text', … }` — отклонён (`UNSUPPORTED`), пока профиль не пройдёт независимый отбор.
+- селектор IMAGE-AS-TEXT (`experimental-text`) удалён из публичного runtime; запросы с ним дают `INVALID_INPUT`. Кодеки — только `benchmarks/experiments/`.
 
 Исследовательский код в `benchmarks/experiments/` и текстовые эксперименты без частей изображения **не входят** в дистрибутив npm. Отдельные скрипты в каталогах `benchmarks/v02/`, `benchmarks/v03/` и в корне `benchmarks/`: они используют вспомогательные модули из `experiments/`, но не сводятся к одной папке. Метрики в `docs/evidence/**` исторические; универсальное качество или «продвижение» стратегии из них не следует.
 
@@ -23,14 +23,14 @@ Zorya Classifier — MIT-библиотека для Node.js 22.12+. **Подд�
 
 Правило зависимостей проверяет `npm run boundaries`: слои `entities` и `shared` не импортируют `infrastructure`; процессы не импортируют адаптеры напрямую — только контракты портов.
 
-| Слой             | Роль                                             | Примеры путей                                                                                                                                                                            |
-| ---------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app`            | Сборка классификатора, CLI, конфигурация         | `create-classifier.ts`, `classifier-contracts.ts`, `classifier-config.ts`, `classifier-runtime.ts`, `classifier-spatial.ts`, `classifier-representation.ts`, `cli-route.ts` в `src/app/` |
-| `processes`      | Оркестрация операций                             | `classify.ts`, `locate.ts`, `extract.ts`, `extract-from-region.ts`, `whole-object.ts`, `proposal-location.ts`, `boundary-state.ts` в `src/processes/`                                    |
-| `features`       | Чистая логика: Choice, сетка, промпты, маски     | `choice.ts`, `uniform-grid.ts`, `choice-beam-layout.ts`, `prompts.ts`, `src/features/segmentation/*`, `src/features/proposals/*`                                                         |
-| `entities`       | Контракты, Zod, геометрия                        | `contracts.ts`, `classification.ts`, `decision.ts`, `geometry.ts`, `image.ts`, `localization.ts`, `validation.ts`, `segmentation-metadata.ts` в `src/entities/`                          |
-| `infrastructure` | Реализации портов: HTTP, растр, фоновые процессы | `decision-transport/*`, `vision-chat/*`, `openrouter.ts`, `raster.ts`, `segmentation/mobile-sam/*`, `segmentation/grabcut/*` в `src/infrastructure/`                                     |
-| `shared`         | Утилиты без слоя `infrastructure`                | `gate.ts`, `scope.ts`, `input-budget.ts`, `choice-mass.ts` в `src/shared/`                                                                                                               |
+| Слой             | Роль                                             | Примеры путей                                                                                                                                                   |
+| ---------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app`            | Сборка классификатора, CLI, конфигурация         | `create-classifier.ts`, `classifier-contracts.ts`, `classifier-config.ts`, `classifier-runtime.ts`, `classifier-spatial.ts`, `cli-route.ts` в `src/app/`        |
+| `processes`      | Оркестрация операций                             | `classify.ts`, `locate.ts`, `extract.ts`, `extract-from-region.ts`, `whole-object.ts`, `proposal-location.ts`, `boundary-state.ts` в `src/processes/`           |
+| `features`       | Чистая логика: Choice, сетка, промпты, маски     | `choice.ts`, `uniform-grid.ts`, `choice-beam-layout.ts`, `prompts.ts`, `src/features/segmentation/*`, `src/features/proposals/*`                                |
+| `entities`       | Контракты, Zod, геометрия                        | `contracts.ts`, `classification.ts`, `decision.ts`, `geometry.ts`, `image.ts`, `localization.ts`, `validation.ts`, `segmentation-metadata.ts` в `src/entities/` |
+| `infrastructure` | Реализации портов: HTTP, растр, фоновые процессы | `decision-transport/*`, `vision-chat/*`, `openrouter.ts`, `raster.ts`, `segmentation/mobile-sam/*`, `segmentation/grabcut/*` в `src/infrastructure/`            |
+| `shared`         | Утилиты без слоя `infrastructure`                | `gate.ts`, `scope.ts`, `input-budget.ts`, `choice-mass.ts` в `src/shared/`                                                                                      |
 
 **Порт** — контракт (интерфейс и схемы), через который процесс вызывает внешнюю работу. **Кто владеет ресурсом:** вызывающее приложение **настраивает** `DecisionPort` (у порта **нет** контракта `dispose`); при завершении работы вызывающий вызывает `dispose()` классификатора и сам освобождает переданные `SegmentationPort` / `ObjectProposalPort`. Фабрика `createClassifier` владеет очередью операций и встроенным `RasterPort` на базе Sharp, переданным в процессы. Явно созданный нативный адаптер **владеет** своим дочерним процессом и закрывает его при `dispose` адаптера. Пакеты среды выполнения (ONNX и т. п.) и файлы моделей — **предварительные условия вызывающего**; библиотека их не скачивает и не освобождает автоматически.
 

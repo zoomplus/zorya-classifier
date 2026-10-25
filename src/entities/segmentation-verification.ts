@@ -20,7 +20,7 @@ export interface SegmentationBoxCheckResult {
   metadata: DecisionMetadata
 }
 
-/** @experimental Closed box containment check; verdicts are unqualified for general spatial accuracy. */
+/** Closed box containment check; verdicts are not universal spatial accuracy guarantees. */
 export interface SegmentationBoxCheckPort {
   check(input: SegmentationBoxCheckInput): Promise<SegmentationBoxCheckResult>
 }

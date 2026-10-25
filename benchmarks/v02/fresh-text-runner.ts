@@ -286,6 +286,7 @@ const sourceFiles = [
   '../experiments/ascii-contours-v1.ts',
   '../experiments/ascii-svg-layered-v1.ts',
   '../experiments/text-representation.ts',
+  '../experiments/research-representation-contract.ts',
   '../experiments/create-research-classifier.ts',
   '../experiments/encoder-common.ts',
   '../../package.json',
@@ -388,7 +389,7 @@ function providerFor(
   )
 }
 
-function composeTextClassifier(
+function textBenchmarkClassifierOptions(
   decision: DecisionPort,
   encoder: TextRepresentationEncoder | undefined,
   noImage: boolean,
@@ -403,14 +404,15 @@ function composeTextClassifier(
       return decision.decide({ ...prompted, state }, signal)
     },
   }
-  const options = {
-    decision: preparedDecision,
-    timeoutMs: policy.timeoutMs,
-    concurrency: policy.concurrency,
-    maxQueue: policy.maxQueue,
+  return {
+    options: {
+      decision: preparedDecision,
+      timeoutMs: policy.timeoutMs,
+      concurrency: policy.concurrency,
+      maxQueue: policy.maxQueue,
+    },
+    research: encoder === undefined ? undefined : createTextRepresentation(encoder),
   }
-  if (encoder) return createResearchClassifier(options, createTextRepresentation(encoder))
-  return createClassifier(options)
 }
 
 function wholeStage(
@@ -458,7 +460,7 @@ async function persistCase(
       recorders.push({ stage: 'classify', recorder: classifyRecorder })
       recordersByCase.set(item.caseId, recorders)
     }
-    const classifyClassifier = composeTextClassifier(
+    const classifySetup = textBenchmarkClassifierOptions(
       classifyRecorder.port,
       encoder,
       noImage,
@@ -466,24 +468,40 @@ async function persistCase(
     )
     const classifyStarted = performance.now()
     const classifyLogicalStart = classifyRecorder.logicalCalls.length
+    const classifyInput = {
+      input: { image: bytes, text: task.question },
+      signal,
+      classes: [
+        { id: 'present', description: 'The target is visibly present in this image.' },
+        { id: 'absent', description: 'The target is visibly absent from this image.' },
+      ],
+      instructions: 'Use only the supplied image representation. Choose one closed class.',
+    }
     try {
-      const c = await classifyClassifier.classify({
-        input: { image: bytes, text: task.question },
-        signal,
-        classes: [
-          { id: 'present', description: 'The target is visibly present in this image.' },
-          { id: 'absent', description: 'The target is visibly absent from this image.' },
-        ],
-        instructions: 'Use only the supplied image representation. Choose one closed class.',
-        ...(encoder
-          ? {
-              representation: {
-                type: 'experimental-text' as const,
-                profile: 'text-image-v1' as const,
-              },
-            }
-          : {}),
-      })
+      const c =
+        classifySetup.research === undefined
+          ? await (async () => {
+              const classifier = createClassifier(classifySetup.options)
+              try {
+                return await classifier.classify(classifyInput)
+              } finally {
+                await classifier.dispose()
+              }
+            })()
+          : await (async () => {
+              const classifier = createResearchClassifier(
+                classifySetup.options,
+                classifySetup.research,
+              )
+              try {
+                return await classifier.classify({
+                  ...classifyInput,
+                  representation: { type: 'experimental-text', profile: 'text-image-v1' },
+                })
+              } finally {
+                await classifier.dispose()
+              }
+            })()
       classify = {
         status: 'ok',
         value: c.choice as 'present' | 'absent',
@@ -500,7 +518,6 @@ async function persistCase(
         errorCode: safeErrorCode(error),
       }
     } finally {
-      await classifyClassifier.dispose()
       await options.testHooks?.afterClassifierDispose?.()
     }
 
@@ -518,27 +535,48 @@ async function persistCase(
         recorders.push({ stage: 'locate', recorder: locateRecorder })
         recordersByCase.set(item.caseId, recorders)
       }
-      const locateClassifier = composeTextClassifier(locateRecorder.port, encoder, noImage, policy)
+      const locateSetup = textBenchmarkClassifierOptions(
+        locateRecorder.port,
+        encoder,
+        noImage,
+        policy,
+      )
       const locateStarted = performance.now()
       const locateLogicalStart = locateRecorder.logicalCalls.length
+      const target = task.instruction ? `${task.target}\n${task.instruction}` : task.target
+      const locateInput = {
+        image: bytes,
+        target,
+        mode: 'whole-object' as const,
+        boxTolerancePx: policy.boxTolerancePx,
+        maxExtentPasses: policy.maxExtentPasses,
+        signal,
+      }
       try {
-        const target = task.instruction ? `${task.target}\n${task.instruction}` : task.target
-        const l = await locateClassifier.locate({
-          image: bytes,
-          target,
-          mode: 'whole-object',
-          boxTolerancePx: policy.boxTolerancePx,
-          maxExtentPasses: policy.maxExtentPasses,
-          signal,
-          ...(encoder
-            ? {
-                representation: {
-                  type: 'experimental-text' as const,
-                  profile: 'text-image-v1' as const,
-                },
-              }
-            : {}),
-        })
+        const l =
+          locateSetup.research === undefined
+            ? await (async () => {
+                const classifier = createClassifier(locateSetup.options)
+                try {
+                  return await classifier.locate(locateInput)
+                } finally {
+                  await classifier.dispose()
+                }
+              })()
+            : await (async () => {
+                const classifier = createResearchClassifier(
+                  locateSetup.options,
+                  locateSetup.research,
+                )
+                try {
+                  return await classifier.locate({
+                    ...locateInput,
+                    representation: { type: 'experimental-text', profile: 'text-image-v1' },
+                  })
+                } finally {
+                  await classifier.dispose()
+                }
+              })()
         const stage = wholeStage(l)
         locate = {
           ...stage,
@@ -555,7 +593,6 @@ async function persistCase(
           errorCode: safeErrorCode(error),
         }
       } finally {
-        await locateClassifier.dispose()
         await options.testHooks?.afterClassifierDispose?.()
       }
       calls.push(...locateRecorder.calls)

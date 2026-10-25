@@ -29,7 +29,7 @@ interface SerializedProposalTask
 
 /**
  * Explicit CPU-only proposals: historical 3x3/36 default or opt-in seed-center/four.
- * @experimental Native proposal adapter; unqualified for general spatial or mask accuracy.
+ * Native proposal adapter; no general spatial or mask quality is implied.
  */
 export async function createMobileSamObjectProposals(
   options: MobileSamObjectProposalsOptions,

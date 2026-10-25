@@ -41,7 +41,7 @@ export interface ObjectProposalBatch {
 
 /**
  * Caller-owned. propose settles only after physical work closes; no model calls here.
- * @experimental Mask proposal strategy with no general quality qualification.
+ * Mask proposal strategy; no general quality qualification is implied.
  */
 export interface ObjectProposalPort {
   propose(input: ObjectProposalInput): Promise<ObjectProposalBatch>

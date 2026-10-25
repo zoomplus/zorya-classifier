@@ -21,9 +21,12 @@
       "test/categorical-presence-port.test.ts",
       "test/classifier.test.ts",
       "test/cli-arguments.test.ts",
+      "test/color-normalization.test.ts",
       "test/decisions.test.ts",
       "test/grabcut-mask-memory.test.ts",
       "test/image-dimensions.test.ts",
+      "test/jev-native-box.test.ts",
+      "test/jev-native-box-evaluator.test.ts",
       "test/input-budget.test.ts",
       "test/lint.test.ts",
       "test/locator.test.ts",
@@ -47,6 +50,7 @@
       "test/region-seeded-freeze-audit.test.ts",
       "test/region-seeded-producer-evaluator.test.ts",
       "test/region-seeded-runner.test.ts",
+      "test/research-classifier-typing.test.ts",
       "test/run-categorical-box-confirmation-dev.test.ts",
       "test/run-categorical-presence-fresh.test.ts",
       "test/secrets.test.ts",
@@ -129,7 +133,8 @@
     "local-evidence": [
       "benchmarks/v03/h5-replay-local.test.ts",
       "benchmarks/v03/grounded-mask-replay-local.test.ts",
-      "benchmarks/v03/evaluate-h10-clipseg-local-evidence.test.ts"
+      "benchmarks/v03/evaluate-h10-clipseg-local-evidence.test.ts",
+      "test/jev-native-box-local-evidence.test.ts"
     ],
     "python-native": [
       "benchmarks/v03/h10-clipseg-runner.test.ts",

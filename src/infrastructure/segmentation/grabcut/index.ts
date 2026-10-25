@@ -15,7 +15,7 @@ import { probeBackend } from '../probe-backend.js'
 import { grabcutOpenCvArtifact } from './model-asset.js'
 
 const optionsSchema = z.object({ assetPath: z.string().min(1).max(4096) }).strict()
-/** @experimental Options for the unqualified GrabCut segmentation factory. */
+/** Options for the GrabCut segmentation factory (caller-supplied pinned assets). */
 export type GrabCutSegmenterOptions = z.input<typeof optionsSchema>
 interface SerializedTask {
   kind: 'grabcut'
@@ -31,7 +31,7 @@ interface SerializedTask {
 
 /**
  * Explicit pinned OpenCV GrabCut adapter. The supplied native asset is never downloaded.
- * @experimental Native segmentation adapter; unqualified for general mask or object accuracy.
+ * Structural validation does not establish semantic mask or object quality.
  */
 export async function createGrabCutSegmenter(
   options: GrabCutSegmenterOptions,

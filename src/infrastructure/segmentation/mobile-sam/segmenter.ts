@@ -31,7 +31,7 @@ type SerializedTask =
 
 /**
  * Explicit pinned MobileSAM inference in a separately owned Node child process.
- * @experimental Native segmentation adapter; unqualified for general mask or object accuracy.
+ * Structural validation does not establish semantic mask or object quality.
  */
 export async function createMobileSamSegmenter(
   options: MobileSamSegmenterOptions,

@@ -7,7 +7,7 @@ import type {
   RepresentationMetadata,
   RepresentationView,
 } from '../../src/entities/representation.js'
-import { representationLimits } from '../../src/entities/representation.js'
+import { representationLimits } from './research-representation-contract.js'
 import { containsRect } from '../../src/entities/geometry.js'
 import { readCanonicalPixels } from '../../src/infrastructure/raster.js'
 

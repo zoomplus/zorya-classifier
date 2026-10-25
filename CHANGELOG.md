@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3 — 2026-10-25
+
+- On one exposed DEV12 pilot (12 tasks across 9 unique images), the existing candidate-mask **H8a** route—using explicitly configured OpenAI **gpt-6-luna**, without fine-tuning—passed the strict box criterion on **7/9** tasks with an object. One native **Jev 1.14** Box+Noul run passed on **3/9**. Secondary IoU-only results were **7/9 vs 8/9**; false outputs on the three absent-object tasks were **2/3 vs 1/3**. This is one development comparison, not heldout qualification or a general accuracy claim. H8a remains a research recipe, not the default `locate`/`extract` path or an npm-shipped strategy. [Report](https://github.com/zoomplus/zorya-classifier/blob/v0.2.3/docs/research/v03-jev-native-box-results.ru.md) · [Evidence](https://github.com/zoomplus/zorya-classifier/blob/v0.2.3/docs/evidence/v03/jev-native-box-dev12-20261025.json).
+- Documentation, CLI help and public JSDoc no longer label existing spatial APIs “experimental” or “unqualified”. Their behavior and TypeScript signatures are unchanged: a grid cell is not a whole-object box, box validation does not establish mask quality, and models/providers/assets remain caller-supplied.
+- Retire the public IMAGE-AS-TEXT representation selector. Requests using it now fail strict input validation; ordinary text classification remains supported, while the experimental encoders remain benchmark-only. See the [migration note](docs/migrations/experimental-text-image-removal.ru.md).
+
 ## 0.2.0 — 2026-10-21
 
 - Keep the original three-Choice region locator. With an explicitly supplied segmenter, use its selected region as a prompt on the full oriented image, then derive the cutout, bounding rectangle and centre from foreground mask pixels. A closed post-mask decision checks visible box containment on the full source with a seed anchor; one enclosing-mask correction and one recheck are allowed. No model-generated coordinates or extent search is added.

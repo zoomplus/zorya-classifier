@@ -1,6 +1,6 @@
 # Region-seeded masks and extraction (0.2)
 
-Everything in this guide—default region `locate`, `locate({ mode: 'whole-object' })`, `extract`, optional `RefinementPort`, `SegmentationPort`, box-check composition, `objectProposals`, and exported native factories—is **experimental and unqualified** for general use. Passing structural or lifecycle checks does not establish semantic object accuracy or mask quality. Further accuracy experiments on these paths are stopped; no spatial or extraction strategy is promoted. Historical metrics in `docs/evidence/**` are unchanged.
+Everything in this guide—default region `locate`, `locate({ mode: 'whole-object' })`, `extract`, optional `RefinementPort`, `SegmentationPort`, box-check composition, `objectProposals`, and exported native factories—is implemented and caller-configured. Passing structural or lifecycle checks does not establish semantic object accuracy or mask quality. The [H8a vs Jev DEV12 comparison](research/v03-jev-native-box-results.ru.md) documents one research box recipe; it is not default locate/extract. Historical metrics in `docs/evidence/**` are unchanged.
 
 The [accepted plan](0.2.0-plan.md) and [acceptance status](acceptance.md) distinguish implementation, offline checks, live quality and platform qualification. The frozen caller recipe passed admission with only 8/60 complete positive object boxes; 19/30 mask references had no prediction. Configure and test the model and segmenter for your own data. No text-image encoder qualified.
 
@@ -8,12 +8,12 @@ The library does not select or connect a model. Supply a `DecisionPort` to `crea
 
 ## Choose the operation
 
-| Operation                                               | Status       | Result                                                                       | Model requests                                 |
-| ------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------- | ---------------------------------------------- |
-| `classify`                                              | Supported    | One supplied class                                                           | One                                            |
-| `locate` (default / `mode: 'region'`)                   | Experimental | A grid cell that may contain an object fragment                              | Up to three                                    |
-| `locate` with `mode: 'whole-object'` and `segmentation` | Experimental | Visible bounds and center derived from a mask                                | Up to five, plus local segmentation/correction |
-| `extract` with `segmentation`                           | Experimental | Mask-derived bounds, center, transparent PNG, cropped mask and source offset | Up to five, plus local segmentation/correction |
+| Operation                                               | Status    | Result                                                                       | Model requests                                 |
+| ------------------------------------------------------- | --------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| `classify`                                              | Supported | One supplied class                                                           | One                                            |
+| `locate` (default / `mode: 'region'`)                   | Available | A grid cell that may contain an object fragment                              | Up to three                                    |
+| `locate` with `mode: 'whole-object'` and `segmentation` | Available | Visible bounds and center derived from a mask                                | Up to five, plus local segmentation/correction |
+| `extract` with `segmentation`                           | Available | Mask-derived bounds, center, transparent PNG, cropped mask and source offset | Up to five, plus local segmentation/correction |
 
 The primary object workflow is the unchanged region locator followed by an explicitly configured segmenter. Segmentation receives the locator's seed prompt on the full EXIF-oriented source image; it does not receive a seed crop or treat the seed as an object box. Bounds and center come from actual foreground mask pixels. After the initial mask, a closed decision checks the original image with the actual mask box and original seed anchor: `complete`, `needs-expansion`, or `unknown`. It reuses the caller-supplied `DecisionPort`. An incomplete box permits one actual enclosing-mask correction and one final check; there is no separate extent search or generated model geometry. Default `locate` behavior remains compatible.
 
@@ -157,7 +157,7 @@ Successful extraction writes `<prefix>.png`, `<prefix>.mask.u8` and `<prefix>.js
 
 ## Experimental text-only images
 
-The reserved selector is `representation: { type: 'experimental-text', profile: 'text-image-v1' }`. Public composition currently rejects image operations with `UNSUPPORTED` before dispatch because no encoder is qualified. Ordinary text classification remains usable.
+The former experimental selector `representation: { type: 'experimental-text', profile: 'text-image-v1' }` was removed from the public runtime. Requests that include it fail strict validation with `INVALID_INPUT` before any `DecisionPort` call. Text-image encoders remain under `benchmarks/experiments/` only and are not pending public qualification. Ordinary string/`{ text }` classification and vision inputs (`{ type: 'vision' }` or omitted) remain supported. See [migration note (RU)](migrations/experimental-text-image-removal.ru.md).
 
 Research candidates compare normalized luma ASCII, color palette grids, SVG color runs, strict pixel RLE, binary/edge ASCII, and layered ASCII + SVG. No OCR, semantic helper or hidden vision call supplies object facts. Text adapters reject image parts rather than silently dropping them. Complete encoded views and metadata have a 64 KiB UTF-8 budget, allocated before encoding; output is never truncated to fit. Indistinguishable geometry returns a named unknown.
 

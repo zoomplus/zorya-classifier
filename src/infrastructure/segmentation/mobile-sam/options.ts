@@ -9,7 +9,7 @@ export const optionsSchema = z
     threads: z.number().int().min(1).max(8).default(2),
   })
   .strict()
-/** @experimental Options for the unqualified MobileSAM segmentation factory. */
+/** Options for the MobileSAM segmentation factory (caller-supplied pinned assets). */
 export type MobileSamSegmenterOptions = z.input<typeof optionsSchema>
 
 export const proposalOptionsSchema = z
@@ -21,5 +21,5 @@ export const proposalOptionsSchema = z
     sampling: z.enum(['seed-grid', 'seed-center']).default('seed-grid'),
   })
   .strict()
-/** @experimental Options for the unqualified MobileSAM object-proposal factory. */
+/** Options for the MobileSAM object-proposal factory (caller-supplied pinned assets). */
 export type MobileSamObjectProposalsOptions = z.input<typeof proposalOptionsSchema>
