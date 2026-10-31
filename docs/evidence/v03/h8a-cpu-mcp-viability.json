@@ -1,0 +1,138 @@
+{
+  "aggregate": {
+    "D_masks": 84,
+    "U_masks": 288,
+    "all_cases_complete": true,
+    "max_rss_bytes": 3282006016,
+    "nearest_rank_p50_seconds": 18.10632027219981,
+    "nearest_rank_p95_seconds": 19.77638231217861,
+    "total_masks": 372
+  },
+  "cases": [
+    {
+      "D": 8,
+      "U": 36,
+      "case_id": "pilot-v03-map-01",
+      "masks": 44,
+      "peak_rss_bytes": 3282006016,
+      "wall_seconds": 17.86931464727968
+    },
+    {
+      "D": 12,
+      "U": 36,
+      "case_id": "pilot-v03-map-02",
+      "masks": 48,
+      "peak_rss_bytes": 2771046400,
+      "wall_seconds": 18.10632027219981
+    },
+    {
+      "D": 9,
+      "U": 36,
+      "case_id": "pilot-v03-map-03",
+      "masks": 45,
+      "peak_rss_bytes": 2973937664,
+      "wall_seconds": 17.597171046305448
+    },
+    {
+      "D": 7,
+      "U": 36,
+      "case_id": "pilot-v03-map-04",
+      "masks": 43,
+      "peak_rss_bytes": 2753536000,
+      "wall_seconds": 17.468505715951324
+    },
+    {
+      "D": 3,
+      "U": 0,
+      "case_id": "pilot-v03-photo-01",
+      "masks": 3,
+      "peak_rss_bytes": 3018952704,
+      "wall_seconds": 16.83795541431755
+    },
+    {
+      "D": 1,
+      "U": 0,
+      "case_id": "pilot-v03-photo-02",
+      "masks": 1,
+      "peak_rss_bytes": 2655510528,
+      "wall_seconds": 19.77638231217861
+    },
+    {
+      "D": 7,
+      "U": 0,
+      "case_id": "pilot-v03-photo-03",
+      "masks": 7,
+      "peak_rss_bytes": 3272757248,
+      "wall_seconds": 18.636795042082667
+    },
+    {
+      "D": 4,
+      "U": 0,
+      "case_id": "pilot-v03-photo-04",
+      "masks": 4,
+      "peak_rss_bytes": 3026616320,
+      "wall_seconds": 17.04876450402662
+    },
+    {
+      "D": 8,
+      "U": 36,
+      "case_id": "pilot-v03-ui-01",
+      "masks": 44,
+      "peak_rss_bytes": 2882732032,
+      "wall_seconds": 18.782292305026203
+    },
+    {
+      "D": 8,
+      "U": 36,
+      "case_id": "pilot-v03-ui-02",
+      "masks": 44,
+      "peak_rss_bytes": 2731585536,
+      "wall_seconds": 19.383975877892226
+    },
+    {
+      "D": 8,
+      "U": 36,
+      "case_id": "pilot-v03-ui-03",
+      "masks": 44,
+      "peak_rss_bytes": 2652790784,
+      "wall_seconds": 19.167328721378
+    },
+    {
+      "D": 9,
+      "U": 36,
+      "case_id": "pilot-v03-ui-04",
+      "masks": 45,
+      "peak_rss_bytes": 2765869056,
+      "wall_seconds": 18.655019943136722
+    }
+  ],
+  "execution": {
+    "case_count": 12,
+    "fresh_child_per_case": true,
+    "max_candidates_per_family": 36,
+    "max_candidates_total": 72,
+    "max_packed_masks_bytes_per_case": 19922944,
+    "max_rss_bytes": 17179869184,
+    "measurement_scope": "native proposal and mask generation only; no VLM or semantic selection",
+    "os_page_cache": "warm",
+    "per_case_deadline_seconds": 240
+  },
+  "independent_audit": {
+    "audit_sha256": "eca19899228aae3fcc0bc35167a27320a753c9475b3d16119b71d32fb6ad2dbd",
+    "byte_padding_bounds_errors": 0,
+    "closure_error": null,
+    "live_probe_pids": [],
+    "mask_records_checked": 372,
+    "resource_errors": 0,
+    "status": "pass"
+  },
+  "paid_cost_usd": 0,
+  "provider_calls": 0,
+  "quality_measured": false,
+  "recipe_id": "h8a-cpu-fp32-availability-v1",
+  "run_id": "cpu-dev12-run-01",
+  "run_sha256": "80a67f7e7f796e7e8e03d1530070c7bc001fe54c18790b80b1b33ddaabe353e7",
+  "run_status": "complete",
+  "schema": "zorya-classifier-h8a-cpu-mcp-viability-v1",
+  "semantic_decision_executed": false
+}
