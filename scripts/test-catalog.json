@@ -5,6 +5,7 @@
       "benchmarks/v03/evaluate-h10-clipseg.test.ts",
       "benchmarks/v03/evaluate-h11-sa2va.test.ts",
       "benchmarks/v03/evaluate-h8-ordinary-vision.test.ts",
+      "benchmarks/v03/h8a-full/h8a-full-portable.test.ts",
       "test/benchmark-credentials.test.ts",
       "test/benchmark-budget.test.ts",
       "test/benchmark-evidence.test.ts",
@@ -138,7 +139,8 @@
     ],
     "python-native": [
       "benchmarks/v03/h10-clipseg-runner.test.ts",
-      "benchmarks/v03/h11-sa2va-runner.test.ts"
+      "benchmarks/v03/h11-sa2va-runner.test.ts",
+      "benchmarks/v03/h8a-full/h8a-full-runtime.test.ts"
     ]
   },
   "prerequisites": {
@@ -147,8 +149,8 @@
       "knownFailures": "h5-replay-local and grounded-mask-replay-local fail with INVALID_INPUT or ENOENT when H5a/H4e trees or python-freeze.txt are absent; H10 minimal manifest test fails when /root/work/zorya-classifier/.run/v03/h10/minimal-inputs.json is missing."
     },
     "python-native": {
-      "summary": "The full python-native group requires both H10_PYTHON_EXECUTABLE and H11_PYTHON_EXECUTABLE on offline Python 3.12.3 with numpy 2.5.2, torch 2.6.0+cpu, torchvision 0.21.0+cpu, transformers 4.57.3, and Pillow 12.3.0. Set HF_HUB_OFFLINE=1 and TRANSFORMERS_OFFLINE=1; no automatic model downloads. H10 needs existing caller-owned pinned CLIPSeg assets; H11 uses synthetic SAM2/model fixtures and does not require actual SA2VA weights. CPU FakeTensors validate loader metadata/placement only and do not validate physical CUDA or qualify real native GPU inference.",
-      "knownFailures": "Runner suites throw at import when the required Python executable env var is unset."
+      "summary": "The Python-native group requires explicitly supplied Python executables. H10 and H11 require offline Python 3.12.3 with numpy 2.5.2, torch 2.6.0+cpu, torchvision 0.21.0+cpu, transformers 4.57.3, and Pillow 12.3.0; set HF_HUB_OFFLINE=1 and TRANSFORMERS_OFFLINE=1. H10 needs caller-owned pinned CLIPSeg assets; H11 uses synthetic SAM2/model fixtures and does not require SA2VA weights. H8a requires H8A_PYTHON_EXECUTABLE for its pinned Python/Pillow unit and owned-child fixtures; it does not download weights or run real native inference. CPU FakeTensors validate loader metadata/placement only and do not qualify real native GPU inference.",
+      "knownFailures": "H10, H11, and H8a Python-native runner suites fail before tests when their required executable environment variable is unset."
     }
   }
 }

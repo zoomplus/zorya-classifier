@@ -1,0 +1,16 @@
+export const H8A_FULL_RECIPE_ID = 'h8a-cpu-raw-target-v1' as const
+export const H8A_FULL_NATIVE_REQUEST_SCHEMA = 'h8a-full-native-request-v1' as const
+export const H8A_FULL_NATIVE_RESPONSE_SCHEMA = 'h8a-full-native-response-v1' as const
+export const H8A_FULL_CASE_DEADLINE_MS = 240_000 as const
+export const H8A_FULL_MAX_ENCODED_BYTES = 24 * 1024 * 1024
+export const H8A_FULL_MAX_ORIENTED_PIXELS = 2_097_152
+export const H8A_FULL_MAX_EXCLUSIONS = 16 as const
+export const H8A_FULL_MAX_AUTHORED_TARGET_CHARS = 2000 as const
+export const H8A_FULL_FAMILY_CANDIDATES = 36 as const
+export const H8A_FULL_TOTAL_CANDIDATES = 72 as const
+export const H8A_FULL_MAX_PACKED_MASK_BYTES = 19 * 1024 * 1024
+export const H8A_FULL_MAX_NATIVE_ACTIVE = 1 as const
+export const H8A_FULL_MAX_NATIVE_WAITING = 2 as const
+export const H8A_FULL_MAX_STDOUT_BYTES = 1_048_576 as const
+export const H8A_FULL_MAX_STDERR_BYTES = 8_388_608 as const
+export const H8A_FULL_MAX_CHILD_RSS_BYTES = 16 * 1024 ** 3
