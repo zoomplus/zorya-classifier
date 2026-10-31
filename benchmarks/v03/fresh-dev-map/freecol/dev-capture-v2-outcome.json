@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "status": "finite-dev-roster-not-qualified",
+  "summary": {
+    "planned": {
+      "positive": 4,
+      "negative": 1
+    },
+    "acceptedPositive": 0,
+    "admissibleNegativeReference": 1,
+    "rejectedPositive": 4,
+    "modelCalls": 0,
+    "corpusCasesCreated": 0,
+    "additionalFreeColScenes": 0
+  },
+  "pinnedInputs": {
+    "freecolJarSha256": "aa39d79091e4b5fdac3bddcc8f052509034a40184a179ab0b0ed5eb268b2a64c",
+    "observerSourceClosureSha256": "d510d2a6a5dae96e95d11dcbca6935a407a3ef955361d7398256c6da3d21e0b2",
+    "merchantmanResource": {
+      "path": "/usr/share/games/freecol/default/resources/images/units/ship/merchantman.png",
+      "sha256": "b73d6a9e230febe26909eec5908d3845a96179a95c1c1f277688d17dd0b32e6c",
+      "license": "GPL-2+"
+    },
+    "v1LineupManifestSha256": "69a105a822a12f1bda88af265557cc2833646c23e267c1f314d1ac35061dab22",
+    "v2CaptureGateSha256": "2f47ea37c97e71ccad2f4c01aeb9fcc125dbab623e6849944179e72601796d4e"
+  },
+  "v1GateFailures": {
+    "runCount": 5,
+    "status": "capture-veto-incomplete-or-blocked-state",
+    "screenshotsCreated": 0,
+    "cause": "generic visibleFreeColPanelCount rejected the sole persistent map InfoPanel"
+  },
+  "v2Capture": {
+    "runCount": 5,
+    "capturedCount": 5,
+    "allFrozenSignaturesMatched": true,
+    "allSaveBeforeAfterHashesMatched": true,
+    "mapCellsScanned": 4000,
+    "mapCellCount": 4000,
+    "visibleFrontInventoryComplete": true,
+    "visibleComponentInventoryComplete": true,
+    "persistentHudClassAllowed": "net.sf.freecol.client.gui.panel.InfoPanel",
+    "uiWasModified": false
+  },
+  "cases": [
+    {
+      "caseId": "fc-dev-case-01",
+      "label": "positive",
+      "target": "unit:5856 / model.unit.merchantman",
+      "tile": [32, 59],
+      "pngSha256": "027bb1ee8ba065ca44d49ca60f9fe40a71310cca71a3da4cc437436a880a1c61",
+      "decision": "rejected-positive-chip-occlusion"
+    },
+    {
+      "caseId": "fc-dev-case-02",
+      "label": "positive",
+      "target": "unit:5780 / model.unit.merchantman",
+      "tile": [34, 82],
+      "pngSha256": "e6b873f17fbb1decd37575a4f3a8852b43d9eb9170e4257e1cfe6bb92f3e00f0",
+      "decision": "rejected-positive-chip-occlusion"
+    },
+    {
+      "caseId": "fc-dev-case-03",
+      "label": "positive",
+      "target": "unit:5903 / model.unit.merchantman",
+      "tile": [30, 13],
+      "pngSha256": "d28f0f52bbf36984c06d3356ae931dabae3acb4b62e17de12449949bfc828a48",
+      "decision": "rejected-positive-chip-occlusion"
+    },
+    {
+      "caseId": "fc-dev-case-04",
+      "label": "positive",
+      "target": "unit:5762 / model.unit.merchantman",
+      "tile": [33, 82],
+      "pngSha256": "25dc0efe17418078efbad886b5be6c161b27fe583eee7ac1448fd0a700ba7373",
+      "decision": "rejected-positive-chip-occlusion",
+      "sceneGroup": "same-map-tile-state-as-case-05"
+    },
+    {
+      "caseId": "fc-dev-case-05",
+      "label": "negative",
+      "targetType": "model.unit.flyingDutchman",
+      "pngSha256": "24cfa98a2e0ddaa4555d1e56a7aff3502b359d1283147330e42927118615c69a",
+      "serverDynamicUnitCount": 178,
+      "serverMalformedDynamicUnitCount": 0,
+      "serverTypeCount": 0,
+      "clientAllMapTileCount": 0,
+      "viewportFrontCount": 0,
+      "decision": "one-admissible-negative-reference",
+      "sceneGroup": "same-map-tile-state-as-case-04"
+    }
+  ],
+  "positiveLimit": {
+    "predictedOpaqueChipOverlapPixelsPerCase": 221,
+    "mainManualReview": "all four screenshots show occupation chip painted over target ship",
+    "bytecodeEvidence": {
+      "class": "net.sf.freecol.client.gui.MapViewer",
+      "method": "displayUnit",
+      "source": "/root/.codex/artifacts/zorya-classifier-mcp-20261031/fresh-map/main-freecol-mapviewer-bytecode-v2.txt",
+      "lines": "2275-2337",
+      "drawOrder": "sprite then occupation chip"
+    },
+    "pixelExactExtentAdmitted": false,
+    "renderedRgbDiffersOutsideChipAsWell": true
+  },
+  "nearSceneComparison": {
+    "cases": ["fc-dev-case-04", "fc-dev-case-05"],
+    "sameMapTileStateSha256": "cd679de5e368d30e0b187d6adef310fbca861f2be2ba35423bc68421a3b6eec5",
+    "pngRgbChangedPixels": 35084,
+    "totalRgbPixels": 786432,
+    "changedFraction": 0.044611612955729164,
+    "independentScenesClaimed": false
+  },
+  "claimsExcluded": [
+    "accuracy or model quality",
+    "exact visible-object mask or pixel-exact bbox",
+    "five independent visual scenes",
+    "MCP promotion or corpus admission"
+  ],
+  "externalEvidence": {
+    "root": "/root/.codex/artifacts/zorya-classifier-mcp-20261031/fresh-map",
+    "captureResultsReceipt": "freecol-dev-capture-results-v2.json",
+    "captureResultsReceiptSha256": "2fbbee396bbb6f909b4518b5858247b5dd12de2d8125631755bde0a81e77ba70",
+    "screenshotsAndSavesCopiedIntoRepository": false
+  }
+}

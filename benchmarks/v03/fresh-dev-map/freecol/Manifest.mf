@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Premain-Class: zorya.mapprobe.FreeColProbe
+Can-Redefine-Classes: false
+Can-Retransform-Classes: false
+
