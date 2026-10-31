@@ -104,7 +104,12 @@ export function serializeVisionRequest(
     ...(options.provider === undefined
       ? {}
       : {
-          provider: { only: [options.provider], allow_fallbacks: false, require_parameters: true },
+          provider: {
+            only: [options.provider],
+            allow_fallbacks: false,
+            require_parameters: true,
+            ...(options.providerSort === undefined ? {} : { sort: options.providerSort }),
+          },
         }),
     messages: [
       { role: 'system', content: instructions },

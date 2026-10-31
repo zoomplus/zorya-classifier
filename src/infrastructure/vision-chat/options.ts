@@ -37,6 +37,7 @@ export const visionOptionsSchema = z
       .optional(),
     model: name,
     provider: name.optional(),
+    providerSort: z.enum(['latency', 'throughput']).optional(),
     providerName: z.string().min(1).max(256).optional(),
     responseModelIds: z.array(name).max(8).optional(),
     responseFormat: z.enum(['prompt', 'json-object', 'json-schema']).default('prompt'),
@@ -53,6 +54,7 @@ export interface VisionChatOptions {
   apiKey?: string
   model: string
   provider?: string
+  providerSort?: 'latency' | 'throughput'
   /** Expected display name when it differs from the pinned provider slug. */
   providerName?: string
   /** Explicit additional response snapshot identities; never a routing fallback. */

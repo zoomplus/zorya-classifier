@@ -8,6 +8,8 @@ export interface OpenRouterVisionOptions
   extends Omit<VisionChatOptions, 'endpoint' | 'headers' | 'apiKey' | 'provider'> {
   apiKey: string
   provider: string
+  /** Предпочтение порядка узлов OpenRouter; не меняет модель и не гарантирует ускорение. */
+  providerSort?: 'latency' | 'throughput'
 }
 const schema = visionOptionsSchema
   .omit({ endpoint: true, headers: true })

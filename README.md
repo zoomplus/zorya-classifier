@@ -95,6 +95,8 @@ Use the same `createClassifier` with `createOpenRouterVision` from `zorya-classi
 
 Ordinary chat models return a closed ranking, **not manufactured probabilities**. `choice` is its first ID, `ranking` contains the returned ordered IDs, and `probabilities` / `nativeChoice` are `null`. Invalid IDs, duplicates, missing answers, refusals, truncation and malformed JSON fail validation. A valid structured answer is still not proof of factual correctness. Classification/final selection request one ranked ID; spatial beam stages request four. These rank-only results remain distinct from native probability-valued results.
 
+Настройка OpenRouter и выбор узла провайдера по скорости описаны в [руководстве](docs/openrouter.ru.md).
+
 ## Direct providers and local servers
 
 There is no OpenRouter account requirement for this entry point:
