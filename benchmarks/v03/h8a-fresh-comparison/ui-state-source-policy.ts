@@ -342,6 +342,7 @@ export interface UiSourcePixelIdentity {
   stratum: 'photo' | 'ui' | 'map'
   encodedSha256: string
   decodedRgbSha256: string
+  sharpRuntimeDecodedRgbSha256: string
   perceptualHash64: string
   visibleStateFingerprintSha256?: string
 }
@@ -362,6 +363,13 @@ function hamming64(left: string, right: string): number {
   return distance
 }
 
+export function assertSharpRuntimeRgbMatches(actualSha256: string, expectedSha256: string): void {
+  if (actualSha256 !== expectedSha256)
+    throw new RangeError(
+      'Runtime Sharp RGB hash differs from its separately pinned runtime identity',
+    )
+}
+
 export function validateUiStateSourcePixelPolicy(
   rows: readonly UiSourcePixelIdentity[],
   historicalRows: readonly HistoricalPixelIdentity[],
@@ -369,6 +377,7 @@ export function validateUiStateSourcePixelPolicy(
   const ids = new Set<string>()
   const encoded = new Set(historicalRows.map((row) => row.encodedSha256))
   const decodedRgb = new Set(historicalRows.map((row) => row.decodedRgbSha256))
+  const sharpRuntimeDecodedRgb = new Set<string>()
   const fingerprints = new Set<string>()
   for (const row of rows) {
     if (ids.has(row.opaqueCaseId)) throw new RangeError('Duplicate source case identity')
@@ -377,8 +386,11 @@ export function validateUiStateSourcePixelPolicy(
       throw new RangeError(`Exact encoded source duplicate for ${row.opaqueCaseId}`)
     if (decodedRgb.has(row.decodedRgbSha256))
       throw new RangeError(`Exact decoded RGB source duplicate for ${row.opaqueCaseId}`)
+    if (sharpRuntimeDecodedRgb.has(row.sharpRuntimeDecodedRgbSha256))
+      throw new RangeError(`Duplicate runtime Sharp RGB source identity for ${row.opaqueCaseId}`)
     encoded.add(row.encodedSha256)
     decodedRgb.add(row.decodedRgbSha256)
+    sharpRuntimeDecodedRgb.add(row.sharpRuntimeDecodedRgbSha256)
     if (row.stratum === 'ui') {
       if (!row.visibleStateFingerprintSha256)
         throw new RangeError(`Missing native visible-state proof for ${row.opaqueCaseId}`)

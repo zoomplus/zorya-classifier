@@ -29,6 +29,7 @@ import { validateConservativeCostProof, validateProfileIdentities } from './free
 import { validateSourceGroupSplitSeparation } from './source-group-validation.js'
 import { computeSourceGroupStratumCommitmentSha256 } from './source-group-validation.js'
 import {
+  assertSharpRuntimeRgbMatches,
   computeUiVisibleStateFingerprint,
   uiNativeStateProofRowsSchema,
   uiCaptureStatusSchema,
@@ -432,6 +433,9 @@ const independentSourceUnionAuditSchema = z
     schema: z.literal('h8a-ui-state-dev40-source-union-audit-v1'),
     parentRegistrationSha256: z.literal(INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256),
     historicalPixelsSha256: z.literal(INDEPENDENT_DEV40_HISTORICAL_PIXELS_SHA256),
+    decodedRgbContract: z.literal(
+      'pillow-rgb-canonical-identity-and-sharp-srgb-runtime-decoder-v1',
+    ),
     algorithm: z.string().min(1),
     sha256Implementation: sha256,
     nearestHammingContract: z.literal(
@@ -445,6 +449,7 @@ const independentSourceUnionAuditSchema = z
             stratum: z.enum(STRATUMS),
             encodedSha256: sha256,
             decodedRgbSha256: sha256,
+            sharpRuntimeDecodedRgbSha256: sha256,
             perceptualHash64: z.string().regex(/^[a-f0-9]{16}$/u),
             nearestHamming: z.number().int().min(0).max(64),
           })
@@ -1338,11 +1343,11 @@ async function verifyCaseInputs(
 ): Promise<{
   producerCases: PhaseFreeze['producerCases']
   sourceBytesByCaseId: Map<string, Buffer>
-  decodedRgbSha256ByCaseId: Map<string, string>
+  sharpRuntimeDecodedRgbSha256ByCaseId: Map<string, string>
 }> {
   const producerCases: PhaseFreeze['producerCases'] = []
   const sourceBytesByCaseId = new Map<string, Buffer>()
-  const decodedRgbSha256ByCaseId = new Map<string, string>()
+  const sharpRuntimeDecodedRgbSha256ByCaseId = new Map<string, string>()
   const seen = new Set<string>()
   for (const { fragment, reviewRow } of rows) {
     const id = reviewRow.opaqueCaseId
@@ -1412,7 +1417,7 @@ async function verifyCaseInputs(
       decoded.info.height !== image.height
     )
       throw new RangeError(`Source RGB decoding differs from its registered canvas for ${id}`)
-    decodedRgbSha256ByCaseId.set(id, digestBytes(decoded.data))
+    sharpRuntimeDecodedRgbSha256ByCaseId.set(id, digestBytes(decoded.data))
     assertReferenceBoxesWithinCanvas(annotation, image.width, image.height)
     assertReferenceMaskDeclaration(annotation, image.width, image.height)
     for (const mask of annotation.referenceMasks) {
@@ -1433,7 +1438,7 @@ async function verifyCaseInputs(
   return {
     producerCases,
     sourceBytesByCaseId,
-    decodedRgbSha256ByCaseId,
+    sharpRuntimeDecodedRgbSha256ByCaseId,
   }
 }
 
@@ -2461,10 +2466,8 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     const item = reviewById.get(id)!
     return { fragment: item.fragment, reviewRow: item.row }
   })
-  const { producerCases, sourceBytesByCaseId, decodedRgbSha256ByCaseId } = await verifyCaseInputs(
-    artifactRoot,
-    orderedRows,
-  )
+  const { producerCases, sourceBytesByCaseId, sharpRuntimeDecodedRgbSha256ByCaseId } =
+    await verifyCaseInputs(artifactRoot, orderedRows)
   if (new Set(producerCases.map((row) => row.sourceBytesSha256)).size !== producerCases.length)
     throw new RangeError('Reviewed cases must have distinct encoded source bytes')
   if (independentRows && independentUnionAudit) {
@@ -2472,18 +2475,23 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     for (const producer of producerCases) {
       const source = sourceBytesByCaseId.get(producer.opaqueCaseId)
       const expected = unionById.get(producer.opaqueCaseId)
-      const decodedRgbSha256 = decodedRgbSha256ByCaseId.get(producer.opaqueCaseId)
+      const sharpRuntimeDecodedRgbSha256 = sharpRuntimeDecodedRgbSha256ByCaseId.get(
+        producer.opaqueCaseId,
+      )
       if (
         !source ||
         !expected ||
-        !decodedRgbSha256 ||
+        !sharpRuntimeDecodedRgbSha256 ||
         digestBytes(source) !== expected.encodedSha256 ||
-        expected.encodedSha256 !== producer.sourceBytesSha256 ||
-        decodedRgbSha256 !== expected.decodedRgbSha256
+        expected.encodedSha256 !== producer.sourceBytesSha256
       )
         throw new RangeError(
           `Independent source bytes or decoded RGB do not match the pinned union audit for ${producer.opaqueCaseId}`,
         )
+      assertSharpRuntimeRgbMatches(
+        sharpRuntimeDecodedRgbSha256,
+        expected.sharpRuntimeDecodedRgbSha256,
+      )
     }
     if (!independentPixels || !independentStateProof || !independentSourceStateProofSha256)
       throw new RangeError('Independent DEV40 pixel or native UI state proof is missing')
@@ -2508,6 +2516,7 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
         proofRow.targetOracle.expectedPresence !== rosterRow.expectedPresence ||
         proofRow.capture.pngSha256 !== producer.sourceBytesSha256 ||
         proofRow.capture.decodedRgbSha256 !== union.decodedRgbSha256 ||
+        union.sharpRuntimeDecodedRgbSha256 !== union.decodedRgbSha256 ||
         computeUiVisibleStateFingerprint(proofRow.normalizedNativeStateDocument) !==
           proofRow.nativeStateFingerprintSha256
       )
@@ -2517,8 +2526,9 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
       const sourcePath = resolve(artifactRoot, proofRow.capture.path)
       const indexedPath = resolve(reviewed.fragment.controllerPathIndex[proofRow.opaqueCaseId]!)
       if (
-        !isWithin(resolve(artifactRoot), sourcePath) ||
-        relative(artifactRoot, sourcePath) !== proofRow.capture.path ||
+        !isAbsolute(proofRow.capture.path) ||
+        sourcePath !== proofRow.capture.path ||
+        !isWithin(resolve(UI_STATE_DEV40_ROOT), sourcePath) ||
         sourcePath !== indexedPath
       )
         throw new RangeError(
@@ -2526,10 +2536,32 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
         )
       const captureLogPath = resolve(artifactRoot, proofRow.captureLog.path)
       if (
-        !isWithin(resolve(artifactRoot), captureLogPath) ||
-        relative(artifactRoot, captureLogPath) !== proofRow.captureLog.path
+        !isAbsolute(proofRow.captureLog.path) ||
+        captureLogPath !== proofRow.captureLog.path ||
+        !isWithin(resolve(UI_STATE_DEV40_ROOT), captureLogPath)
       )
         throw new RangeError('Native UI state capture log escapes the trusted artifact root')
+      const captureStderrPath = resolve(artifactRoot, proofRow.captureLog.stderrPath)
+      if (
+        !isAbsolute(proofRow.captureLog.stderrPath) ||
+        captureStderrPath !== proofRow.captureLog.stderrPath ||
+        !isWithin(resolve(UI_STATE_DEV40_ROOT), captureStderrPath)
+      )
+        throw new RangeError('Native UI state capture stderr escapes the registered study root')
+      const captureLogRef = artifactRefFromAbsolutePath(
+        artifactRoot,
+        proofRow.captureLog.path,
+        proofRow.captureLog.sha256,
+      )
+      const captureStderrRef = artifactRefFromAbsolutePath(
+        artifactRoot,
+        proofRow.captureLog.stderrPath,
+        proofRow.captureLog.stderrSha256,
+      )
+      await Promise.all([
+        readPinnedBytes(artifactRoot, captureLogRef),
+        readPinnedBytes(artifactRoot, captureStderrRef),
+      ])
       fingerprintById.set(proofRow.opaqueCaseId, proofRow.nativeStateFingerprintSha256)
     }
     if (proofById.size !== 10)
@@ -2542,7 +2574,10 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
           opaqueCaseId: producer.opaqueCaseId,
           stratum: row.stratum,
           encodedSha256: producer.sourceBytesSha256,
-          decodedRgbSha256: decodedRgbSha256ByCaseId.get(producer.opaqueCaseId)!,
+          decodedRgbSha256: unionById.get(producer.opaqueCaseId)!.decodedRgbSha256,
+          sharpRuntimeDecodedRgbSha256: sharpRuntimeDecodedRgbSha256ByCaseId.get(
+            producer.opaqueCaseId,
+          )!,
           perceptualHash64: union.perceptualHash64,
           ...(row.stratum === 'ui'
             ? { visibleStateFingerprintSha256: fingerprintById.get(producer.opaqueCaseId)! }

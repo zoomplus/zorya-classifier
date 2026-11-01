@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  assertSharpRuntimeRgbMatches,
   computeUiVisibleStateFingerprint,
   uiTargetOracleSchema,
   validateUiStateSourcePixelPolicy,
@@ -32,6 +33,7 @@ function source(
     stratum: 'ui',
     encodedSha256: opaqueCaseId.padStart(64, '0'),
     decodedRgbSha256: opaqueCaseId.padStart(64, '1'),
+    sharpRuntimeDecodedRgbSha256: opaqueCaseId.padStart(64, '2'),
     perceptualHash64: '0000000000000000',
     visibleStateFingerprintSha256: computeUiVisibleStateFingerprint(uiState(opaqueCaseId)),
     ...overrides,
@@ -67,6 +69,65 @@ await test('same decoded RGB pixels are rejected even when the PNG encodings dif
         [],
       ),
     /Exact decoded RGB source duplicate/u,
+  )
+})
+
+await test('Pillow identity and Sharp runtime hashes remain separate decoder namespaces', () => {
+  const first = source('first', {
+    decodedRgbSha256: 'a'.repeat(64),
+    sharpRuntimeDecodedRgbSha256: 'b'.repeat(64),
+  })
+  const second = source('second', {
+    decodedRgbSha256: 'c'.repeat(64),
+    sharpRuntimeDecodedRgbSha256: 'd'.repeat(64),
+  })
+  const historicalRows = [
+    {
+      encodedSha256: 'e'.repeat(64),
+      decodedRgbSha256: 'b'.repeat(64),
+      perceptualHash64: '0000000000000000',
+    },
+  ]
+  assert.doesNotThrow(() => validateUiStateSourcePixelPolicy([first, second], historicalRows))
+  assert.doesNotThrow(() => assertSharpRuntimeRgbMatches('b'.repeat(64), 'b'.repeat(64)))
+  assert.throws(
+    () => assertSharpRuntimeRgbMatches('a'.repeat(64), 'b'.repeat(64)),
+    /separately pinned runtime identity/u,
+  )
+})
+
+await test('duplicate canonical Pillow identity rejects even when Sharp hashes differ', () => {
+  const canonicalSha256 = 'a'.repeat(64)
+  assert.throws(
+    () =>
+      validateUiStateSourcePixelPolicy(
+        [
+          source('one', {
+            decodedRgbSha256: canonicalSha256,
+            sharpRuntimeDecodedRgbSha256: 'b'.repeat(64),
+          }),
+          source('two', {
+            decodedRgbSha256: canonicalSha256,
+            sharpRuntimeDecodedRgbSha256: 'c'.repeat(64),
+          }),
+        ],
+        [],
+      ),
+    /Exact decoded RGB source duplicate/u,
+  )
+})
+
+await test('duplicate Sharp runtime RGB identity rejects across current sources', () => {
+  assert.throws(
+    () =>
+      validateUiStateSourcePixelPolicy(
+        [
+          source('one', { sharpRuntimeDecodedRgbSha256: 'a'.repeat(64) }),
+          source('two', { sharpRuntimeDecodedRgbSha256: 'a'.repeat(64) }),
+        ],
+        [],
+      ),
+    /Duplicate runtime Sharp RGB source identity/u,
   )
 })
 
