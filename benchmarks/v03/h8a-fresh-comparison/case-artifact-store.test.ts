@@ -1,13 +1,15 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 import sharp from 'sharp'
+import { z } from 'zod'
 import { ImmutableCaseArtifactStore } from './case-artifact-store.js'
 import type { CaseArtifactIdentity } from './case-artifact-store.js'
-import { PROFILE_CANDIDATE_ID } from './constants.js'
+import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
+import { hashIdentity } from './hash-identity.js'
 import type { CaseExecutionPortResult } from './paired-runner.js'
 
 function digest(bytes: Uint8Array): string {
@@ -17,7 +19,8 @@ function digest(bytes: Uint8Array): string {
 function identity(
   profileId:
     | typeof PROFILE_CANDIDATE_ID
-    | 'v02-final-v3-fresh-cohort-replay-v1' = PROFILE_CANDIDATE_ID,
+    | typeof PROFILE_FLAT_CANDIDATE_ID
+    | typeof PROFILE_CONTROL_ID = PROFILE_CANDIDATE_ID,
 ): CaseArtifactIdentity {
   const hash = 'a'.repeat(64)
   return {
@@ -41,7 +44,8 @@ function result(
   maskBytes?: Uint8Array,
   profileId:
     | typeof PROFILE_CANDIDATE_ID
-    | 'v02-final-v3-fresh-cohort-replay-v1' = PROFILE_CANDIDATE_ID,
+    | typeof PROFILE_FLAT_CANDIDATE_ID
+    | typeof PROFILE_CONTROL_ID = PROFILE_CANDIDATE_ID,
 ): CaseExecutionPortResult {
   const maskSha = maskBytes ? digest(maskBytes) : null
   const outputRow = {
@@ -76,9 +80,9 @@ function result(
               opaqueCaseId: 'opaque-1',
               profileId,
               kind:
-                profileId === PROFILE_CANDIDATE_ID
-                  ? ('candidate-cutout-rgba' as const)
-                  : ('control-cutout-png' as const),
+                profileId === PROFILE_CONTROL_ID
+                  ? ('control-cutout-png' as const)
+                  : ('candidate-cutout-rgba' as const),
               sha256: digest(cutoutBytes),
               byteLength: cutoutBytes.byteLength,
               width: 2,
@@ -141,6 +145,118 @@ await test('completed cutout is reopened byte-for-byte and missing/corrupt bytes
     const blobPath = complete.artifactPaths.find((path) => path.endsWith(digest(bytes)))!
     await writeFile(blobPath, new Uint8Array([0]))
     await assert.rejects(() => store.begin(id, new Date().toISOString()), /missing or corrupt/u)
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('flat-v2 candidate RGBA cutout is persisted and reopened with its identity', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-case-flat-cutout-'))
+  try {
+    const store = new ImmutableCaseArtifactStore(root)
+    const id = identity(PROFILE_FLAT_CANDIDATE_ID)
+    const opened = await store.begin(id, new Date().toISOString())
+    const bytes = new Uint8Array(16)
+    for (let index = 0; index < bytes.length; index += 4) {
+      bytes[index] = 42
+      bytes[index + 1] = 84
+      bytes[index + 2] = 126
+    }
+    for (let index = 3; index < bytes.length; index += 4) bytes[index] = 255
+    const mask = new Uint8Array(8)
+    for (const pixel of [9, 10, 17, 18]) mask[Math.floor(pixel / 8)]! |= 1 << pixel % 8
+    const cutoutResult = result(bytes, mask, PROFILE_FLAT_CANDIDATE_ID)
+    const complete = await store.complete({
+      identitySha256: opened.identitySha256,
+      identity: opened.identity,
+      result: cutoutResult,
+      durationMs: 3.5,
+      startedAtIso: new Date().toISOString(),
+      completedAtIso: new Date().toISOString(),
+      knownCostUsd: 0,
+      unknownDispatchCount: 0,
+      blobs: new Map([
+        [digest(bytes), bytes],
+        [digest(mask), mask],
+      ]),
+    })
+    const reopened = await store.load(complete.identitySha256)
+    assert.ok(reopened)
+    assert.equal(reopened.result.outputRow.profileId, PROFILE_FLAT_CANDIDATE_ID)
+    assert.deepEqual(reopened.blobsBySha256.get(digest(bytes)), bytes)
+    assert.equal(reopened.result.caseArtifactSidecars?.[0]?.kind, 'candidate-cutout-rgba')
+
+    const recordPath = join(
+      root,
+      'case-artifacts',
+      opened.identitySha256.slice(0, 2),
+      `${opened.identitySha256}.json`,
+    )
+    const recordSchema = z
+      .object({
+        recordSha256: z.string(),
+        result: z
+          .object({
+            caseArtifactSidecars: z.array(
+              z
+                .object({ kind: z.enum(['candidate-cutout-rgba', 'control-cutout-png']) })
+                .passthrough(),
+            ),
+          })
+          .passthrough(),
+      })
+      .passthrough()
+    const originalRecord = z
+      .record(z.unknown())
+      .parse(JSON.parse(await readFile(recordPath, 'utf8')) as unknown)
+    recordSchema.parse(originalRecord)
+    const storedResult = z.record(z.unknown()).parse(originalRecord.result)
+    const sidecars = z.array(z.record(z.unknown())).parse(storedResult.caseArtifactSidecars)
+    sidecars[0]!.kind = 'control-cutout-png'
+    storedResult.caseArtifactSidecars = sidecars
+    originalRecord.result = storedResult
+    delete originalRecord.recordSha256
+    const recordSha256 = hashIdentity(originalRecord)
+    await writeFile(recordPath, JSON.stringify({ ...originalRecord, recordSha256 }), 'utf8')
+    await assert.rejects(
+      () => store.load(opened.identitySha256),
+      /kind differs from its frozen profile/u,
+    )
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('flat-v2 candidates and controls reject sidecars with the other profile role kind', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-case-sidecar-role-'))
+  try {
+    const store = new ImmutableCaseArtifactStore(root)
+    const bytes = new Uint8Array(16)
+    const mask = new Uint8Array(8)
+    for (const [profileId, wrongKind] of [
+      [PROFILE_FLAT_CANDIDATE_ID, 'control-cutout-png'],
+      [PROFILE_CONTROL_ID, 'candidate-cutout-rgba'],
+    ] as const) {
+      const id = identity(profileId)
+      const opened = await store.begin(id, new Date().toISOString())
+      const wrongKindResult = result(bytes, mask, profileId)
+      wrongKindResult.caseArtifactSidecars![0]!.kind = wrongKind
+      await assert.rejects(
+        () =>
+          store.complete({
+            identitySha256: opened.identitySha256,
+            identity: opened.identity,
+            result: wrongKindResult,
+            durationMs: 1,
+            startedAtIso: new Date().toISOString(),
+            completedAtIso: new Date().toISOString(),
+            knownCostUsd: 0,
+            unknownDispatchCount: 0,
+            blobs: new Map(),
+          }),
+        /kind differs from its frozen profile/u,
+      )
+    }
   } finally {
     await rm(root, { recursive: true, force: true })
   }

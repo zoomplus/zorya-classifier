@@ -182,6 +182,11 @@ function safeFailureCode(error: unknown): string {
     : 'EXECUTION_FAILED'
 }
 
+type ExecutedStoredCaseArtifact = StoredCaseArtifact & {
+  completionFailureCode?: string
+  completionRecovery?: 'receipt-only'
+}
+
 function percentileNearestRank(values: readonly number[], p: number): number | null {
   if (!values.length) return null
   const sorted = [...values].sort((a, b) => a - b)
@@ -277,7 +282,7 @@ async function runArm(input: {
   phaseDeadline: PhaseDeadlineScope
   now: () => string
   clockNow: () => number
-}): Promise<StoredCaseArtifact> {
+}): Promise<ExecutedStoredCaseArtifact> {
   const identity = buildCaseArtifactIdentity(
     input.freeze,
     input.selection,
@@ -336,18 +341,42 @@ async function runArm(input: {
   const unknownDispatchCount = result.physicalReceipts.filter(
     (item) => item.chargeState === 'unknown',
   ).length
-  const stored = await input.store.complete({
-    identitySha256: opened.identitySha256,
-    identity: opened.identity,
-    result,
-    durationMs: elapsed,
-    startedAtIso,
-    completedAtIso,
-    knownCostUsd,
-    unknownDispatchCount,
-    blobs: artifactsForResult(result, input.artifacts),
-  })
-  return stored
+  try {
+    return await input.store.complete({
+      identitySha256: opened.identitySha256,
+      identity: opened.identity,
+      result,
+      durationMs: elapsed,
+      startedAtIso,
+      completedAtIso,
+      knownCostUsd,
+      unknownDispatchCount,
+      blobs: artifactsForResult(result, input.artifacts),
+    })
+  } catch (error) {
+    const failureCode = safeFailureCode(error)
+    try {
+      const recovered = await input.store.loadOrRecover(identity)
+      if (
+        recovered?.result.caseError !== 'RECOVERED_AFTER_DISPATCH_WITHOUT_OUTPUT' ||
+        recovered.result.outputRow.executionValidity !== 'invalid' ||
+        recovered.result.outputRow.caseState !== 'unknown' ||
+        recovered.result.physicalReceipts.length === 0
+      )
+        throw new Error('RECOVERY_DID_NOT_PRODUCE_RECEIPT_ONLY_UNKNOWN')
+      return {
+        ...recovered,
+        completionFailureCode: failureCode,
+        completionRecovery: 'receipt-only',
+      }
+    } catch (recoveryError) {
+      const coded = new Error('Case artifact completion recovery failed')
+      Object.defineProperty(coded, 'code', {
+        value: `ARTIFACT_COMPLETION_FAILED:${failureCode}:RECOVERY_FAILED:${safeFailureCode(recoveryError)}`,
+      })
+      throw coded
+    }
+  }
 }
 
 function blockReason(result: CaseExecutionPortResult): string | null {
@@ -367,6 +396,18 @@ function blockReason(result: CaseExecutionPortResult): string | null {
   )
     return `unresolved-physical-receipt:${row.opaqueCaseId}:${row.profileId}`
   return null
+}
+
+function isSemanticallyObserved(result: CaseExecutionPortResult): boolean {
+  const row = result.outputRow
+  if (
+    row.executionValidity !== 'valid' ||
+    !['success', 'negative_clean', 'not_found', 'unknown'].includes(row.caseState)
+  )
+    return false
+  return !result.physicalReceipts.some(
+    (receipt) => receipt.dispatchState === 'uncertain' || !receipt.settled,
+  )
 }
 
 async function assertPriorScreenAdvance(
@@ -758,6 +799,11 @@ async function executeDevScreenWithinDeadline(
             (receipt) => receipt.dispatchState === 'confirmed',
           ).length
         }
+        if (stored.completionFailureCode && stored.completionRecovery === 'receipt-only') {
+          hardBlockers.push(
+            `artifact-complete-failed:${schedule.opaqueCaseId}:${profileId}:${stored.completionFailureCode}:recovered-receipt-only`,
+          )
+        }
         const bound = freeze.conservativeCostProof.profileDispatchUpperBounds.find(
           (item) => item.profileId === profileId,
         )!.maxUsdPerPhysicalDispatch
@@ -784,8 +830,9 @@ async function executeDevScreenWithinDeadline(
     const candidate = byProfile.get(candidateId)
     const control = byProfile.get(PROFILE_CONTROL_ID)
     if (candidate && control) {
-      completedPairs++
       storedByCase.set(schedule.opaqueCaseId, { candidate, control })
+      if (isSemanticallyObserved(candidate.result) && isSemanticallyObserved(control.result))
+        completedPairs++
       if (
         truth.expectedPresence === 'absent' &&
         scoreNegativeFalseOutputRow(candidate.result.outputRow)
@@ -821,8 +868,13 @@ async function executeDevScreenWithinDeadline(
       if (!arms) continue
       const truth = truthById.get(id)!
       const producer = producerById.get(id)!
+      const candidateObserved =
+        arms[candidateId] !== undefined && isSemanticallyObserved(arms[candidateId].result)
+      const controlObserved =
+        arms[PROFILE_CONTROL_ID] !== undefined &&
+        isSemanticallyObserved(arms[PROFILE_CONTROL_ID].result)
       if (truth.expectedPresence === 'present') {
-        if (arms[candidateId]) {
+        if (candidateObserved && arms[candidateId]) {
           observedCandidatePositiveRows++
           if (
             scorePositiveOutputRow(
@@ -836,7 +888,7 @@ async function executeDevScreenWithinDeadline(
           )
             candidatePositiveSuccesses++
         }
-        if (arms[PROFILE_CONTROL_ID]) {
+        if (controlObserved && arms[PROFILE_CONTROL_ID]) {
           observedControlPositiveRows++
           if (
             scorePositiveOutputRow(
@@ -850,19 +902,19 @@ async function executeDevScreenWithinDeadline(
           )
             controlPositiveSuccesses++
         }
-        if (arms[candidateId] && arms[PROFILE_CONTROL_ID]) observedPositivePairs++
+        if (candidateObserved && controlObserved) observedPositivePairs++
       } else {
         if (arms[candidateId]) {
-          observedCandidateNegativeRows++
+          if (candidateObserved) observedCandidateNegativeRows++
           if (scoreNegativeFalseOutputRow(arms[candidateId].result.outputRow))
             candidateNegativeFalse++
         }
         if (arms[PROFILE_CONTROL_ID]) {
-          observedControlNegativeRows++
+          if (controlObserved) observedControlNegativeRows++
           if (scoreNegativeFalseOutputRow(arms[PROFILE_CONTROL_ID].result.outputRow))
             controlNegativeFalse++
         }
-        if (arms[candidateId] && arms[PROFILE_CONTROL_ID]) observedNegativePairs++
+        if (candidateObserved && controlObserved) observedNegativePairs++
       }
     }
     const quota =
@@ -1056,6 +1108,7 @@ async function executeDevScreenWithinDeadline(
         controlCaseState: control?.result.outputRow.caseState ?? 'unstarted',
         candidatePositiveSuccess: Boolean(
           candidate &&
+            isSemanticallyObserved(candidate.result) &&
             truth.expectedPresence === 'present' &&
             scorePositiveOutputRow(
               candidate.result.outputRow,
@@ -1068,6 +1121,7 @@ async function executeDevScreenWithinDeadline(
         ),
         controlPositiveSuccess: Boolean(
           control &&
+            isSemanticallyObserved(control.result) &&
             truth.expectedPresence === 'present' &&
             scorePositiveOutputRow(
               control.result.outputRow,

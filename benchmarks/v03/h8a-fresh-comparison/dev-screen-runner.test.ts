@@ -1,12 +1,16 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 import { CampaignLedger } from './campaign-ledger.js'
 import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PHASE_DEV40_ID } from './constants.js'
-import { executeDevScreen, sealDevScreenReview } from './dev-screen-runner.js'
+import {
+  buildCaseArtifactIdentity,
+  executeDevScreen,
+  sealDevScreenReview,
+} from './dev-screen-runner.js'
 import { devScreenReportSchema } from './dev-screen-runner.js'
 import type { CaseExecutionPort } from './paired-runner.js'
 import { buildDevScreenSelection } from './dev-screen-sampling.js'
@@ -15,6 +19,7 @@ import { assembleDev40Closeouts } from './dev-closeout-assembly.js'
 import { buildSyntheticAnnotationBundle, buildSyntheticPhaseFreeze } from './test-fixtures.js'
 import type { FreshRuntimeArtifacts } from './runtime-ports.js'
 import { hashIdentity } from './hash-identity.js'
+import { createCampaignFetchBoundary } from './campaign-fetch-boundary.js'
 
 function sha256(value: string): string {
   return createHash('sha256').update(value).digest('hex')
@@ -443,6 +448,364 @@ await test('raw exception text never enters case evidence or screen reports', as
     assert.ok(report.hardBlockers.length > 0)
     const persisted = await readFile(join(artifactRoot, 'reports', 'dev8-report.json'), 'utf8')
     assert.doesNotMatch(persisted, /private-sentinel|\/private\/path|Authorization Bearer/u)
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('invalid second-arm completion reports durable paid dispatches and blocks pairing', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-dev-completion-recovery-'))
+  try {
+    const base = fixture()
+    const firstSelectedCaseId = base.freeze.pairedSchedule.find((row) =>
+      base.selection.dev8CaseIds.includes(row.opaqueCaseId),
+    )!.opaqueCaseId
+    const reorderedFreeze = {
+      ...base.freeze,
+      pairedSchedule: base.freeze.pairedSchedule.map((row) =>
+        row.opaqueCaseId === firstSelectedCaseId ? { ...row, candidateArmFirst: false } : row,
+      ),
+    }
+    const annotations = buildSyntheticAnnotationBundle(
+      reorderedFreeze.phaseId,
+      reorderedFreeze.freezeId,
+      reorderedFreeze.producerCases,
+      reorderedFreeze.pairedSchedule,
+    )
+    const freeze = {
+      ...reorderedFreeze,
+      evaluatorAnnotationsSha256: computeEvaluatorAnnotationsSha256(annotations),
+    }
+    const sourceBytesByCaseId = base.sourceBytesByCaseId
+    const selection = buildDevScreenSelection(freeze, annotations)
+    const artifactRoot = join(root, 'artifacts')
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    let sends = 0
+    let currentCall = 0
+    const candidatePort: CaseExecutionPort = {
+      async execute(input, context) {
+        const caseExecutionIdentitySha256 = context.caseExecutionIdentitySha256
+        assert.ok(caseExecutionIdentitySha256)
+        const body = JSON.stringify({ model: 'offline-boundary-fixture' })
+        const bodySha = sha256(body)
+        const boundary = createCampaignFetchBoundary({
+          ledger: context.ledger,
+          reservedUsd: context.reservedUsdPerFetch,
+          profileId: context.profileId,
+          opaqueCaseId: input.opaqueCaseId,
+          caseExecutionIdentitySha256,
+          endpoint: '/api/v1/chat/completions',
+          journalDirectory: join(artifactRoot, 'dispatch-journal'),
+          baseFetch: async () => {
+            sends++
+            return new Response(JSON.stringify({ usage: { cost: 0.01 } }), {
+              headers: { 'Content-Type': 'application/json' },
+            })
+          },
+          readCurrentProviderCall: () => {
+            currentCall++
+            return {
+              physicalId: currentCall,
+              logicalId: 1,
+              requestSha256: sha256(`logical-request-${currentCall}`),
+              requestBodySha256: bodySha,
+            }
+          },
+        })
+        for (let index = 0; index < 4; index++)
+          await boundary.fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            body,
+          })
+        const physicalReceipts = boundary.entries.map((entry) => ({
+          receiptId: entry.reservationId,
+          physicalId: entry.physicalId,
+          logicalId: 1,
+          dispatchState: entry.dispatchState,
+          settled: entry.settled,
+          costUsd: entry.costUsd,
+          chargeState:
+            entry.settled && entry.costUsd !== null ? ('known' as const) : ('unknown' as const),
+        }))
+        return {
+          outputRow: {
+            schema: 'h8a-fresh-output-row-v1',
+            opaqueCaseId: input.opaqueCaseId,
+            profileId: context.profileId,
+            executionValidity: 'valid',
+            caseState: 'success',
+            box: { left: 1, top: 1, width: 1, height: 1 },
+            cutoutPresent: true,
+            maskPackedSha256: null,
+            logicalReceiptIds: [1],
+            physicalReceiptIds: physicalReceipts.map((receipt) => receipt.receiptId),
+          },
+          logicalReceipts: [
+            {
+              logicalId: 1,
+              opaqueCaseId: input.opaqueCaseId,
+              profileId: context.profileId,
+              requestSha256: sha256(`logical-request-${currentCall}`),
+              physicalIds: physicalReceipts.map((receipt) => receipt.receiptId),
+              outcome: 'resolved',
+            },
+          ],
+          physicalReceipts,
+          caseArtifactSidecars: [
+            {
+              opaqueCaseId: input.opaqueCaseId,
+              profileId: context.profileId,
+              kind: 'control-cutout-png' as const,
+              sha256: sha256('bad-control-cutout-kind'),
+              byteLength: 3,
+              width: 1,
+              height: 1,
+              sourceCanvasWidth: freeze.producerCases[0]!.sourceCanvasWidth,
+              sourceCanvasHeight: freeze.producerCases[0]!.sourceCanvasHeight,
+              sourceRegion: { left: 1, top: 1, width: 1, height: 1 },
+              sourceOffset: { x: 1, y: 1 },
+            },
+          ],
+        }
+      },
+    }
+    const controlPort: CaseExecutionPort = {
+      async execute(input) {
+        return {
+          outputRow: {
+            schema: 'h8a-fresh-output-row-v1',
+            opaqueCaseId: input.opaqueCaseId,
+            profileId: PROFILE_CONTROL_ID,
+            executionValidity: 'valid',
+            caseState: 'negative_clean',
+            box: null,
+            cutoutPresent: false,
+            maskPackedSha256: null,
+            logicalReceiptIds: [1],
+            physicalReceiptIds: [],
+          },
+          logicalReceipts: [
+            {
+              logicalId: 1,
+              opaqueCaseId: input.opaqueCaseId,
+              profileId: PROFILE_CONTROL_ID,
+              requestSha256: sha256(input.opaqueCaseId),
+              physicalIds: [],
+              outcome: 'resolved',
+            },
+          ],
+          physicalReceipts: [],
+        }
+      },
+    }
+    const report = await executeDevScreen({
+      freeze,
+      annotations,
+      sourceBytesByCaseId,
+      selection,
+      screen: 'dev8',
+      selectionPath: join(root, 'selection.json'),
+      artifactRoot,
+      ledger,
+      candidatePort,
+      controlPort,
+      runtimeArtifacts: {
+        masksBySha256: new Map(),
+        cutoutsBySha256: new Map(),
+        cutoutsByProfileAndCase: new Map(),
+      },
+    })
+
+    assert.equal(sends, 4)
+    assert.equal(ledger.snapshot().physicalDispatchCount, 4)
+    assert.equal(report.candidate.confirmedPhysicalCalls, 4)
+    assert.ok(Math.abs(report.candidate.knownCostUsd - 0.04) < 1e-12)
+    assert.equal(report.candidate.logicalAttempts, 1)
+    assert.equal(report.completedPairs, 0)
+    assert.equal(
+      report.perCell.reduce(
+        (sum, cell) => sum + cell.observedPositivePairs + cell.observedNegativePairs,
+        0,
+      ),
+      report.completedPairs,
+    )
+    assert.equal(
+      report.perCell.reduce(
+        (sum, cell) =>
+          sum + cell.observedCandidatePositiveRows + cell.observedCandidateNegativeRows,
+        0,
+      ),
+      0,
+    )
+    assert.equal(
+      report.perCell.reduce(
+        (sum, cell) => sum + cell.observedControlPositiveRows + cell.observedControlNegativeRows,
+        0,
+      ),
+      1,
+    )
+    assert.ok(
+      report.hardBlockers.some(
+        (item) =>
+          item.includes('artifact-complete-failed:') && item.endsWith('recovered-receipt-only'),
+      ),
+    )
+    const recoveredOutput = report.outputs.find((item) => item.candidateCaseState === 'unknown')
+    assert.ok(recoveredOutput)
+    assert.equal(recoveredOutput.controlCaseState, 'negative_clean')
+    const recoveredProducer = freeze.producerCases.find(
+      (item) => item.opaqueCaseId === recoveredOutput.opaqueCaseId,
+    )
+    assert.ok(recoveredProducer)
+    const recoveredIdentity = buildCaseArtifactIdentity(
+      freeze,
+      selection,
+      recoveredProducer,
+      PROFILE_CANDIDATE_ID,
+    )
+    const recoveredDigest = hashIdentity(recoveredIdentity)
+    const recoveredRecord = JSON.parse(
+      await readFile(
+        join(
+          artifactRoot,
+          'case-artifacts',
+          recoveredDigest.slice(0, 2),
+          `${recoveredDigest}.json`,
+        ),
+        'utf8',
+      ),
+    ) as {
+      result: {
+        caseError: string
+        outputRow: { executionValidity: string; caseState: string }
+        physicalReceipts: unknown[]
+      }
+      durationMs: number | null
+    }
+    assert.equal(recoveredRecord.result.caseError, 'RECOVERED_AFTER_DISPATCH_WITHOUT_OUTPUT')
+    assert.equal(recoveredRecord.result.outputRow.executionValidity, 'invalid')
+    assert.equal(recoveredRecord.result.outputRow.caseState, 'unknown')
+    assert.equal(recoveredRecord.result.physicalReceipts.length, 4)
+    assert.equal(recoveredRecord.durationMs, null)
+
+    const noFetchRoot = join(root, 'no-fetch-artifacts')
+    const noFetchLedger = await CampaignLedger.open(join(root, 'no-fetch-ledger.json'))
+    const noFetchReport = await executeDevScreen({
+      freeze,
+      annotations,
+      sourceBytesByCaseId,
+      selection,
+      screen: 'dev8',
+      selectionPath: join(root, 'no-fetch-selection.json'),
+      artifactRoot: noFetchRoot,
+      ledger: noFetchLedger,
+      candidatePort: {
+        async execute() {
+          throw new Error('offline prefetch failure')
+        },
+      },
+      controlPort,
+      runtimeArtifacts: {
+        masksBySha256: new Map(),
+        cutoutsBySha256: new Map(),
+        cutoutsByProfileAndCase: new Map(),
+      },
+    })
+    assert.equal(noFetchLedger.snapshot().physicalDispatchCount, 0)
+    assert.equal(noFetchReport.candidate.confirmedPhysicalCalls, 0)
+    assert.equal(noFetchReport.knownCostUsd, 0)
+    await assert.rejects(readdir(join(noFetchRoot, 'dispatch-journal')))
+    const noFetchOutput = noFetchReport.outputs.find((item) => item.candidateCaseState === 'error')
+    assert.ok(noFetchOutput)
+    const noFetchProducer = freeze.producerCases.find(
+      (item) => item.opaqueCaseId === noFetchOutput.opaqueCaseId,
+    )
+    assert.ok(noFetchProducer)
+    const noFetchIdentity = buildCaseArtifactIdentity(
+      freeze,
+      selection,
+      noFetchProducer,
+      PROFILE_CANDIDATE_ID,
+    )
+    const noFetchDigest = hashIdentity(noFetchIdentity)
+    const noFetchRecord = JSON.parse(
+      await readFile(
+        join(noFetchRoot, 'case-artifacts', noFetchDigest.slice(0, 2), `${noFetchDigest}.json`),
+        'utf8',
+      ),
+    ) as { result: { physicalReceipts: unknown[]; outputRow: { physicalReceiptIds: number[] } } }
+    assert.equal(noFetchRecord.result.physicalReceipts.length, 0)
+    assert.equal(noFetchRecord.result.outputRow.physicalReceiptIds.length, 0)
+
+    const zeroJournalRoot = join(root, 'zero-journal-artifacts')
+    const zeroJournalLedger = await CampaignLedger.open(join(root, 'zero-journal-ledger.json'))
+    const zeroJournalReport = await executeDevScreen({
+      freeze,
+      annotations,
+      sourceBytesByCaseId,
+      selection,
+      screen: 'dev8',
+      selectionPath: join(root, 'zero-journal-selection.json'),
+      artifactRoot: zeroJournalRoot,
+      ledger: zeroJournalLedger,
+      candidatePort: {
+        async execute(input) {
+          return {
+            outputRow: {
+              schema: 'h8a-fresh-output-row-v1',
+              opaqueCaseId: input.opaqueCaseId,
+              profileId: PROFILE_CANDIDATE_ID,
+              executionValidity: 'valid',
+              caseState: 'success',
+              box: { left: 1, top: 1, width: 1, height: 1 },
+              cutoutPresent: true,
+              maskPackedSha256: null,
+              logicalReceiptIds: [1],
+              physicalReceiptIds: [],
+            },
+            logicalReceipts: [
+              {
+                logicalId: 1,
+                opaqueCaseId: input.opaqueCaseId,
+                profileId: PROFILE_CANDIDATE_ID,
+                requestSha256: sha256(input.opaqueCaseId),
+                physicalIds: [],
+                outcome: 'resolved',
+              },
+            ],
+            physicalReceipts: [],
+            caseArtifactSidecars: [
+              {
+                opaqueCaseId: input.opaqueCaseId,
+                profileId: PROFILE_CANDIDATE_ID,
+                kind: 'control-cutout-png' as const,
+                sha256: sha256('zero-journal-invalid-kind'),
+                byteLength: 3,
+                width: 1,
+                height: 1,
+                sourceCanvasWidth: freeze.producerCases[0]!.sourceCanvasWidth,
+                sourceCanvasHeight: freeze.producerCases[0]!.sourceCanvasHeight,
+                sourceRegion: { left: 1, top: 1, width: 1, height: 1 },
+                sourceOffset: { x: 1, y: 1 },
+              },
+            ],
+          }
+        },
+      },
+      controlPort,
+      runtimeArtifacts: {
+        masksBySha256: new Map(),
+        cutoutsBySha256: new Map(),
+        cutoutsByProfileAndCase: new Map(),
+      },
+    })
+    assert.equal(zeroJournalLedger.snapshot().physicalDispatchCount, 0)
+    assert.equal(zeroJournalReport.candidate.confirmedPhysicalCalls, 0)
+    assert.equal(zeroJournalReport.knownCostUsd, 0)
+    assert.ok(
+      zeroJournalReport.hardBlockers.some((item) => item.includes('ARTIFACT_COMPLETION_FAILED')),
+    )
+    assert.ok(zeroJournalReport.outputs.some((item) => item.candidateCaseState === 'unstarted'))
   } finally {
     await rm(root, { recursive: true, force: true })
   }

@@ -84,6 +84,10 @@ function artifactPath(root: string, digest: string): string {
   return join(root, 'case-blobs', digest.slice(0, 2), digest)
 }
 
+function isCandidateProfile(profileId: CaseArtifactIdentity['profileId']): boolean {
+  return profileId === PROFILE_CANDIDATE_ID || profileId === PROFILE_FLAT_CANDIDATE_ID
+}
+
 async function readOptional(path: string): Promise<string | null> {
   try {
     return await readFile(path, 'utf8')
@@ -143,7 +147,7 @@ function validateResultIdentity(
   for (const sidecar of sidecars) {
     if (sidecar.opaqueCaseId !== identity.opaqueCaseId || sidecar.profileId !== identity.profileId)
       throw new RangeError('Cutout sidecar case/profile differs from its arm identity')
-    const candidate = identity.profileId === 'h8a-cpu-raw-target-v1'
+    const candidate = isCandidateProfile(identity.profileId)
     if (
       (candidate && sidecar.kind !== 'candidate-cutout-rgba') ||
       (!candidate && sidecar.kind !== 'control-cutout-png')
@@ -276,8 +280,9 @@ async function validateSidecarBytes(
       throw new RangeError('Cutout alpha cannot be checked without a source-aligned packed mask')
     if (sidecar.width * sidecar.height > 24 * 1024 * 1024)
       throw new RangeError('Cutout exceeds bounded decode pixel count')
+    const candidate = isCandidateProfile(identity.profileId)
     const decoded = await (
-      sidecar.kind === 'candidate-cutout-rgba'
+      candidate
         ? sharp(bytes, {
             raw: { width: sidecar.width, height: sidecar.height, channels: 4 },
             failOn: 'error',
@@ -294,10 +299,7 @@ async function validateSidecarBytes(
       decoded.info.channels !== 4
     )
       throw new RangeError('Decoded cutout dimensions/channels differ from sidecar geometry')
-    if (
-      sidecar.kind === 'candidate-cutout-rgba' &&
-      bytes.byteLength !== sidecar.width * sidecar.height * 4
-    )
+    if (candidate && bytes.byteLength !== sidecar.width * sidecar.height * 4)
       throw new RangeError('Candidate RGBA sidecar byte length differs from geometry')
     for (let y = 0; y < sidecar.height; y++) {
       for (let x = 0; x < sidecar.width; x++) {
@@ -341,6 +343,7 @@ export class ImmutableCaseArtifactStore {
       hashIdentity(intent.identity) !== identitySha256
     )
       throw new RangeError('Case intent identity commitment mismatch')
+    const validationIdentity = expected ?? intent.identity
     if (expected && hashIdentity(expected) !== hashIdentity(intent.identity))
       throw new RangeError('Persisted case intent differs from requested identity')
     const path = recordPath(this.root, identitySha256)
@@ -376,7 +379,7 @@ export class ImmutableCaseArtifactStore {
       throw new RangeError('Case artifact record digest mismatch')
     const result = resultSchema.parse(parsed.result) as CaseExecutionPortResult
     validateReceiptReferences(result)
-    if (expected) validateResultIdentity(result, expected)
+    validateResultIdentity(result, validationIdentity)
     const artifactPaths: string[] = []
     const blobsBySha256 = new Map<string, Uint8Array>()
     for (const blob of parsed.blobs) {
@@ -394,8 +397,8 @@ export class ImmutableCaseArtifactStore {
       if (!matching)
         throw new RangeError('Case cutout sidecar is not committed by the artifact record')
     }
-    if (expected) validateArtifactMap(result, blobsBySha256, expected)
-    if (expected) await validateSidecarBytes(result, blobsBySha256, expected)
+    validateArtifactMap(result, blobsBySha256, validationIdentity)
+    await validateSidecarBytes(result, blobsBySha256, validationIdentity)
     if (
       result.outputRow.maskPackedSha256 !== null &&
       !parsed.blobs.some((item) => item.sha256 === result.outputRow.maskPackedSha256)
