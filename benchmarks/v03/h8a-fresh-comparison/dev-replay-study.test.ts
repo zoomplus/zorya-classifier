@@ -146,6 +146,7 @@ await test('closed replay registry separates scope authority and inherited count
   assert.deepEqual(Object.keys(REPLAY_STUDY_REGISTRY), [
     LEGACY_REPLAY_STUDY_ID,
     AUTHORED_SCOPE_STUDY_ID,
+    'native-presence-flat-dev40-v1',
   ])
   const legacy = replayStudyPolicy(LEGACY_REPLAY_STUDY_ID)
   const scoped = replayStudyPolicy(AUTHORED_SCOPE_STUDY_ID)
@@ -799,10 +800,11 @@ await test('shared pin reader verifies bytes, bounds, symlinks, and digest befor
   }
 })
 
-await test('legacy and authored-scope CLI entry files stay inert on import and sanitize invalid commands', () => {
+await test('closed replay CLI entry files stay inert on import and sanitize invalid commands', () => {
   const entries = [
     'benchmarks/v03/h8a-fresh-comparison/provider-refusal-replay-cli.ts',
     'benchmarks/v03/h8a-fresh-comparison/authored-scope-replay-cli.ts',
+    'benchmarks/v03/h8a-fresh-comparison/native-presence-replay-cli.ts',
   ]
   for (const entry of entries) {
     const imported = spawnSync(

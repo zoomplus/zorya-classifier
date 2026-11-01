@@ -5,8 +5,11 @@ import {
   PHASE_QUAL120_ID,
   PHASE_SCOPE_DEV40_ID,
   PHASE_SCOPE_QUAL120_ID,
+  PHASE_NATIVE_PRESENCE_DEV40_ID,
+  PHASE_NATIVE_PRESENCE_QUAL120_ID,
   PROFILE_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
 } from './constants.js'
 import { computeEvaluatorAnnotationsSha256 } from './annotation-digest.js'
@@ -18,6 +21,7 @@ import {
   validateImmutableCloseouts,
 } from './evaluator.js'
 import { phaseFreezeSchema } from './schemas.js'
+import type { OutputRow } from './schemas.js'
 import { boxIoUAndReferenceCoverage, binaryMaskIoU } from './geometry-metrics.js'
 import { packBinaryLsb0V1, sha256PackedBytes } from './packed-binary-lsb0.js'
 import {
@@ -170,6 +174,38 @@ await test('authored-scope DEV and QUAL phases dispatch to their unchanged evalu
     assert.equal(qualGate.independentMaskDenominator, 30)
     assert.equal(qualGate.candidatePositiveSuccesses, 90)
   }
+})
+
+await test('native-presence DEV requires mask-derived boxes for candidate and control arms', () => {
+  const { freeze } = buildSyntheticPhaseFreeze(PHASE_NATIVE_PRESENCE_DEV40_ID)
+  const annotations = buildDev40Annotations(freeze)
+  const positiveIds = new Set(
+    annotations.cases
+      .filter((item) => item.expectedPresence === 'present')
+      .map((item) => item.opaqueCaseId),
+  )
+  const boxOnly = freeze.producerCases.map((row) =>
+    buildOutputRow(row.opaqueCaseId, PROFILE_NATIVE_PRESENCE_CANDIDATE_ID, {
+      caseState: 'success',
+      box: { left: 1, top: 1, width: 4, height: 4 },
+    }),
+  )
+  const controlBoxOnly = freeze.producerCases.map((row) =>
+    buildOutputRow(row.opaqueCaseId, PROFILE_CONTROL_ID, {
+      caseState: 'success',
+      box: { left: 1, top: 1, width: 4, height: 4 },
+    }),
+  )
+  const joined = joinCloseoutsWithPrivateAnnotations({
+    freeze,
+    candidateCloseout: buildCloseout(freeze, PROFILE_NATIVE_PRESENCE_CANDIDATE_ID, boxOnly),
+    controlCloseout: buildCloseout(freeze, PROFILE_CONTROL_ID, controlBoxOnly),
+    annotations,
+    packedMasksBySha256: new Map(),
+  })
+  const positives = joined.filter((row) => positiveIds.has(row.opaqueCaseId))
+  assert.equal(positives.length, 30)
+  assert.ok(positives.every((row) => !row.candidatePositiveSuccess && !row.controlPositiveSuccess))
 })
 
 await test('authored-scope positive boxes require actual mask pixels for both paired profiles', () => {
@@ -442,4 +478,211 @@ await test('evaluator rejects truth leakage in closeout rows', () => {
       packedMasksBySha256: new Map(),
     }),
   )
+})
+
+await test('native-presence QUAL keeps mask-derived box gating and scores actual packed masks', () => {
+  const { freeze: baseFreeze } = buildSyntheticPhaseFreeze(PHASE_NATIVE_PRESENCE_QUAL120_ID)
+  const annotationBase = buildSyntheticAnnotationBundle(
+    PHASE_NATIVE_PRESENCE_QUAL120_ID,
+    baseFreeze.freezeId,
+    baseFreeze.producerCases,
+    baseFreeze.pairedSchedule,
+  )
+  const pixels = new Uint8Array(SYNTHETIC_SOURCE_CANVAS_WIDTH * SYNTHETIC_SOURCE_CANVAS_HEIGHT)
+  for (let y = 1; y < 5; y++) {
+    for (let x = 1; x < 5; x++) pixels[y * SYNTHETIC_SOURCE_CANVAS_WIDTH + x] = 1
+  }
+  const packed = packBinaryLsb0V1(
+    SYNTHETIC_SOURCE_CANVAS_WIDTH,
+    SYNTHETIC_SOURCE_CANVAS_HEIGHT,
+    pixels,
+  )
+  const maskSha = sha256PackedBytes(packed)
+  const annotations = {
+    ...annotationBase,
+    cases: annotationBase.cases.map((item) => ({
+      ...item,
+      referenceMasks: item.exactOriginalCanvasMaskRef
+        ? [
+            {
+              width: SYNTHETIC_SOURCE_CANVAS_WIDTH,
+              height: SYNTHETIC_SOURCE_CANVAS_HEIGHT,
+              packedBinarySha256: maskSha,
+            },
+          ]
+        : [],
+    })),
+  }
+  const freeze = phaseFreezeSchema.parse({
+    ...baseFreeze,
+    evaluatorAnnotationsSha256: computeEvaluatorAnnotationsSha256(annotations),
+  })
+  const outputRows = (
+    profileId: typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+    masklessId?: string,
+  ) =>
+    freeze.producerCases.map((producer) => {
+      const truth = annotations.cases.find((item) => item.opaqueCaseId === producer.opaqueCaseId)!
+      if (truth.expectedPresence === 'absent')
+        return buildOutputRow(producer.opaqueCaseId, profileId)
+      return buildOutputRow(producer.opaqueCaseId, profileId, {
+        caseState: 'success',
+        box: { left: 1, top: 1, width: 4, height: 4 },
+        ...(producer.opaqueCaseId === masklessId ? {} : { maskPackedSha256: maskSha }),
+      })
+    })
+  const makeJoined = (masklessCandidateId?: string) =>
+    joinCloseoutsWithPrivateAnnotations({
+      freeze,
+      candidateCloseout: buildCloseout(
+        freeze,
+        PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+        outputRows(PROFILE_NATIVE_PRESENCE_CANDIDATE_ID, masklessCandidateId),
+      ),
+      controlCloseout: buildCloseout(freeze, PROFILE_CONTROL_ID, outputRows(PROFILE_CONTROL_ID)),
+      annotations,
+      packedMasksBySha256: new Map([[maskSha, packed]]),
+    })
+  const valid = makeJoined()
+  const positives = valid.filter((row) => row.expectedPresence === 'present')
+  assert.equal(positives.length, 90)
+  assert.ok(positives.every((row) => row.candidatePositiveSuccess && row.controlPositiveSuccess))
+  const target = positives[0]!
+  const maskless = makeJoined(target.opaqueCaseId).find(
+    (row) => row.opaqueCaseId === target.opaqueCaseId,
+  )!
+  assert.equal(maskless.candidatePositiveSuccess, false)
+  assert.equal(maskless.controlPositiveSuccess, true)
+})
+
+await test('native-presence DEV rejects every malformed mask-derived box on both arms', () => {
+  const { freeze } = buildSyntheticPhaseFreeze(PHASE_NATIVE_PRESENCE_DEV40_ID)
+  const annotations = buildDev40Annotations(freeze)
+  const targetId = annotations.cases.find(
+    (item) => item.expectedPresence === 'present',
+  )!.opaqueCaseId
+  const pixels = new Uint8Array(SYNTHETIC_SOURCE_CANVAS_WIDTH * SYNTHETIC_SOURCE_CANVAS_HEIGHT)
+  for (let y = 1; y < 5; y++) {
+    for (let x = 1; x < 5; x++) pixels[y * SYNTHETIC_SOURCE_CANVAS_WIDTH + x] = 1
+  }
+  const packed = packBinaryLsb0V1(
+    SYNTHETIC_SOURCE_CANVAS_WIDTH,
+    SYNTHETIC_SOURCE_CANVAS_HEIGHT,
+    pixels,
+  )
+  const maskSha = sha256PackedBytes(packed)
+  type Arm = 'candidate' | 'control'
+  const evaluate = (
+    arm: Arm | null,
+    override: { maskSha: string | null; box: OutputRow['box'] } | null,
+    masks: ReadonlyMap<string, Uint8Array>,
+  ) => {
+    const makeRows = (
+      profileId: typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+    ) =>
+      freeze.producerCases.map((producer) => {
+        if (producer.opaqueCaseId !== targetId)
+          return buildOutputRow(producer.opaqueCaseId, profileId)
+        const selected =
+          (arm === 'candidate' && profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID) ||
+          (arm === 'control' && profileId === PROFILE_CONTROL_ID)
+        const value = selected
+          ? override
+          : { maskSha, box: { left: 1, top: 1, width: 4, height: 4 } }
+        return buildOutputRow(producer.opaqueCaseId, profileId, {
+          caseState: 'success',
+          box: value?.box ?? null,
+          maskPackedSha256: value?.maskSha ?? null,
+        })
+      })
+    const joined = joinCloseoutsWithPrivateAnnotations({
+      freeze,
+      candidateCloseout: buildCloseout(
+        freeze,
+        PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+        makeRows(PROFILE_NATIVE_PRESENCE_CANDIDATE_ID),
+      ),
+      controlCloseout: buildCloseout(freeze, PROFILE_CONTROL_ID, makeRows(PROFILE_CONTROL_ID)),
+      annotations,
+      packedMasksBySha256: masks,
+    })
+    return joined.find((row) => row.opaqueCaseId === targetId)!
+  }
+  const validMasks = new Map([[maskSha, packed]])
+  const valid = evaluate(null, null, validMasks)
+  assert.equal(valid.candidatePositiveSuccess, true)
+  assert.equal(valid.controlPositiveSuccess, true)
+
+  for (const arm of ['candidate', 'control'] as const) {
+    const missing = evaluate(
+      arm,
+      { maskSha: null, box: { left: 1, top: 1, width: 4, height: 4 } },
+      validMasks,
+    )
+    assert.equal(
+      arm === 'candidate' ? missing.candidatePositiveSuccess : missing.controlPositiveSuccess,
+      false,
+    )
+
+    const mismatchedBox = evaluate(
+      arm,
+      { maskSha, box: { left: 0, top: 0, width: 5, height: 5 } },
+      validMasks,
+    )
+    assert.equal(
+      arm === 'candidate'
+        ? mismatchedBox.candidatePositiveSuccess
+        : mismatchedBox.controlPositiveSuccess,
+      false,
+    )
+
+    const altered = new Uint8Array(packed)
+    altered[0] = altered[0]! ^ 1
+    const wrongHashBytes = evaluate(
+      arm,
+      { maskSha, box: { left: 1, top: 1, width: 4, height: 4 } },
+      new Map([[maskSha, altered]]),
+    )
+    assert.equal(
+      arm === 'candidate'
+        ? wrongHashBytes.candidatePositiveSuccess
+        : wrongHashBytes.controlPositiveSuccess,
+      false,
+    )
+
+    const wrongCanvasPixels = new Uint8Array(7 * SYNTHETIC_SOURCE_CANVAS_HEIGHT)
+    for (let y = 1; y < 5; y++) wrongCanvasPixels.fill(1, y * 7 + 1, y * 7 + 5)
+    const wrongCanvas = packBinaryLsb0V1(7, SYNTHETIC_SOURCE_CANVAS_HEIGHT, wrongCanvasPixels)
+    const wrongCanvasSha = sha256PackedBytes(wrongCanvas)
+    const wrongGeometry = evaluate(
+      arm,
+      { maskSha: wrongCanvasSha, box: { left: 1, top: 1, width: 4, height: 4 } },
+      new Map([[wrongCanvasSha, wrongCanvas]]),
+    )
+    assert.equal(
+      arm === 'candidate'
+        ? wrongGeometry.candidatePositiveSuccess
+        : wrongGeometry.controlPositiveSuccess,
+      false,
+    )
+
+    const emptyPixels = new Uint8Array(
+      SYNTHETIC_SOURCE_CANVAS_WIDTH * SYNTHETIC_SOURCE_CANVAS_HEIGHT,
+    )
+    const emptyPacked = packBinaryLsb0V1(
+      SYNTHETIC_SOURCE_CANVAS_WIDTH,
+      SYNTHETIC_SOURCE_CANVAS_HEIGHT,
+      emptyPixels,
+    )
+    const emptySha = sha256PackedBytes(emptyPacked)
+    const empty = evaluate(
+      arm,
+      { maskSha: emptySha, box: { left: 1, top: 1, width: 4, height: 4 } },
+      new Map([[emptySha, emptyPacked]]),
+    )
+    assert.equal(
+      arm === 'candidate' ? empty.candidatePositiveSuccess : empty.controlPositiveSuccess,
+      false,
+    )
+  }
 })

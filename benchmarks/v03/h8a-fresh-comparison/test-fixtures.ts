@@ -9,6 +9,7 @@ import {
   PROFILE_CANDIDATE_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
   isDevPhase,
   isQualificationPhase,
   candidateIdForPhase,
@@ -26,6 +27,7 @@ import {
   H8A_CANDIDATE_PROFILE,
   H8A_FLAT_CANDIDATE_PROFILE,
   H8A_SCOPE_CANDIDATE_PROFILE,
+  H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE,
   V02_CONTROL_PROFILE,
 } from './profiles.js'
 import type {
@@ -48,6 +50,7 @@ function recipeIdentity(
     | typeof PROFILE_CANDIDATE_ID
     | typeof PROFILE_FLAT_CANDIDATE_ID
     | typeof PROFILE_SCOPE_CANDIDATE_ID
+    | typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID,
 ): string {
   const profile =
@@ -57,7 +60,9 @@ function recipeIdentity(
         ? H8A_FLAT_CANDIDATE_PROFILE
         : profileId === PROFILE_SCOPE_CANDIDATE_ID
           ? H8A_SCOPE_CANDIDATE_PROFILE
-          : V02_CONTROL_PROFILE
+          : profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+            ? H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE
+            : V02_CONTROL_PROFILE
   return hashIdentity({
     profileId: profile.profileId,
     recipeKind: profile.recipeKind,
@@ -74,6 +79,7 @@ export function buildConservativeCostProof(
       | typeof PROFILE_CANDIDATE_ID
       | typeof PROFILE_FLAT_CANDIDATE_ID
       | typeof PROFILE_SCOPE_CANDIDATE_ID
+      | typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
   },
 ): PhaseFreeze['conservativeCostProof'] {
   const candidateMax =
@@ -257,7 +263,9 @@ export function buildSyntheticPhaseFreeze(phaseId: H8aFreshPhaseId): {
             ? H8A_CANDIDATE_PROFILE.requestPolicyIdentitySha256
             : candidateIdForPhase(phaseId) === PROFILE_FLAT_CANDIDATE_ID
               ? H8A_FLAT_CANDIDATE_PROFILE.requestPolicyIdentitySha256
-              : H8A_SCOPE_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
+              : candidateIdForPhase(phaseId) === PROFILE_SCOPE_CANDIDATE_ID
+                ? H8A_SCOPE_CANDIDATE_PROFILE.requestPolicyIdentitySha256
+                : H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
       },
       {
         profileId: PROFILE_CONTROL_ID,
@@ -287,9 +295,16 @@ export function buildSyntheticPhaseFreeze(phaseId: H8aFreshPhaseId): {
     },
     outputRowSchemaId: 'h8a-fresh-output-row-v1' as const,
     evaluatorVersion: 'h8a-fresh-evaluator-v1' as const,
-    conservativeCostProof: buildConservativeCostProof(0.005, {
-      candidateProfileId: candidateIdForPhase(phaseId),
-    }),
+    conservativeCostProof:
+      candidateIdForPhase(phaseId) === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+        ? buildConservativeCostProof(0.55, {
+            candidateMaxUsdPerPhysicalDispatch: 0.55,
+            controlMaxUsdPerPhysicalDispatch: 0.12,
+            candidateProfileId: PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+          })
+        : buildConservativeCostProof(0.005, {
+            candidateProfileId: candidateIdForPhase(phaseId),
+          }),
     enforceQualificationSourceGroupSeparation: isQualificationPhase(phaseId),
     evaluatorAnnotationsSha256,
   }
@@ -309,6 +324,7 @@ export function buildOutputRow(
     | typeof PROFILE_CANDIDATE_ID
     | typeof PROFILE_FLAT_CANDIDATE_ID
     | typeof PROFILE_SCOPE_CANDIDATE_ID
+    | typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID,
   overrides?: Partial<OutputRow>,
 ): OutputRow {
@@ -333,6 +349,7 @@ export function buildCloseout(
     | typeof PROFILE_CANDIDATE_ID
     | typeof PROFILE_FLAT_CANDIDATE_ID
     | typeof PROFILE_SCOPE_CANDIDATE_ID
+    | typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID,
   rows: OutputRow[],
 ): ImmutableCloseout {

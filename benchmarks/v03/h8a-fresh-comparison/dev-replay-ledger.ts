@@ -17,13 +17,10 @@ import {
   PROFILE_CONTROL_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
 } from './constants.js'
 import type { H8aFreshProfileId } from './profiles.js'
-import {
-  AUTHORED_SCOPE_STUDY_ID,
-  LEGACY_REPLAY_ROOT,
-  replayStudyPolicy,
-} from './dev-replay-study-policy.js'
+import { AUTHORED_SCOPE_STUDY_ID, replayStudyPolicy } from './dev-replay-study-policy.js'
 import type { ReplayStudyId, ReplayStudyPolicy } from './dev-replay-study-policy.js'
 import { parseReplayJson, readPinnedReplayFile } from './dev-replay-files.js'
 
@@ -35,6 +32,7 @@ export const REPLAY_CONTROL_MAX_USD = LEGACY_REPLAY_POLICY.controlUsdPerDispatch
 const profileSchema = z.union([
   z.literal(PROFILE_FLAT_CANDIDATE_ID),
   z.literal(PROFILE_SCOPE_CANDIDATE_ID),
+  z.literal(PROFILE_NATIVE_PRESENCE_CANDIDATE_ID),
   z.literal(PROFILE_CONTROL_ID),
 ])
 const digest = z.string().regex(/^[a-f0-9]{64}$/u)
@@ -59,18 +57,27 @@ const legacyParentSchema = z
     maxPhysicalCalls: z.literal(REPLAY_GLOBAL_MAX_PHYSICAL_CALLS),
   })
   .passthrough()
-const authoredScopeParentSchema = z
+const linkedReplayParentSchema = z
   .object({
-    schema: z.literal('h8a-provider-refusal-replay-ledger-v1'),
+    schema: z.enum([
+      'h8a-provider-refusal-replay-ledger-v1',
+      'h8a-authored-scope-replay-ledger-v1',
+    ]),
     ...parentFields,
     registrationSha256: digest,
   })
   .passthrough()
-const authoredScopeParentRegistrationSchema = z
+const linkedReplayParentRegistrationSchema = z
   .object({
-    schema: z.literal('h8a-provider-refusal-replay-registration-v1'),
-    studyId: z.literal('provider-refusal-dev40-replay-v1'),
-    freezeId: z.literal('h8a-provider-refusal-dev40-replay-20261101-v1'),
+    schema: z.enum([
+      'h8a-provider-refusal-replay-registration-v1',
+      'h8a-authored-scope-replay-registration-v1',
+    ]),
+    studyId: z.enum(['provider-refusal-dev40-replay-v1', 'authored-scope-dev40-v1']),
+    freezeId: z.enum([
+      'h8a-provider-refusal-dev40-replay-20261101-v1',
+      'h8a-authored-scope-dev40-20261101-v1',
+    ]),
     protocolSha256: digest,
     parentAuditSha256: digest,
     parentLedgerSha256: digest,
@@ -109,11 +116,17 @@ const registrationSchema = z
     schema: z.enum([
       'h8a-provider-refusal-replay-registration-v1',
       'h8a-authored-scope-replay-registration-v1',
+      'h8a-native-presence-replay-registration-v1',
     ]),
-    studyId: z.enum(['provider-refusal-dev40-replay-v1', 'authored-scope-dev40-v1']),
+    studyId: z.enum([
+      'provider-refusal-dev40-replay-v1',
+      'authored-scope-dev40-v1',
+      'native-presence-flat-dev40-v1',
+    ]),
     freezeId: z.enum([
       'h8a-provider-refusal-dev40-replay-20261101-v1',
       'h8a-authored-scope-dev40-20261101-v1',
+      'h8a-native-presence-flat-dev40-20261101-v1',
     ]),
     protocolSha256: digest,
     parentAuditSha256: digest,
@@ -156,6 +169,7 @@ const stateSchema = z
     schema: z.enum([
       'h8a-provider-refusal-replay-ledger-v1',
       'h8a-authored-scope-replay-ledger-v1',
+      'h8a-native-presence-replay-ledger-v1',
     ]),
     ledgerVersion: z.number().int().nonnegative(),
     registrationSha256: digest,
@@ -220,6 +234,7 @@ function supportedProfile(
 ):
   | typeof PROFILE_FLAT_CANDIDATE_ID
   | typeof PROFILE_SCOPE_CANDIDATE_ID
+  | typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
   | typeof PROFILE_CONTROL_ID
   | undefined {
   return profile === policy.candidateProfileId || profile === policy.controlProfileId
@@ -403,26 +418,27 @@ function verifyAuthoredScopeParentPair(
   registrationValue: unknown,
   policy: ReplayStudyPolicy,
 ): VerifiedParentBaseline {
-  const parent = authoredScopeParentSchema.parse(parentValue)
+  const parent = linkedReplayParentSchema.parse(parentValue)
   const rawRegistration = z.record(z.unknown()).parse(registrationValue)
-  const registration = authoredScopeParentRegistrationSchema.parse(registrationValue)
-  if (policy.studyId !== 'authored-scope-dev40-v1')
+  const registration = linkedReplayParentRegistrationSchema.parse(registrationValue)
+  if (!policy.parentRegistrationStudyId || !policy.parentRegistrationPath)
     throw new ProviderRefusalReplayLedgerError('Parent registration wire pair is not registered')
+  const parentPolicy = replayStudyPolicy(policy.parentRegistrationStudyId)
   if (
     parent.schema !== policy.parentLedgerSchema ||
     registration.schema !== policy.parentRegistrationSchema ||
     registration.studyId !== policy.parentRegistrationStudyId ||
     registration.freezeId !== policy.parentRegistrationFreezeId ||
-    registration.canonicalRoot !== join(LEGACY_REPLAY_ROOT, 'admission', 'successor-campaign') ||
-    registration.parentAuditSha256 !== LEGACY_REPLAY_POLICY.parentAuditSha256 ||
-    registration.parentLedgerSha256 !== LEGACY_REPLAY_POLICY.parentLedgerSha256 ||
-    registration.parentLedgerVersion !== LEGACY_REPLAY_POLICY.parentLedgerVersion ||
+    registration.canonicalRoot !== dirname(policy.parentRegistrationPath) ||
+    registration.parentAuditSha256 !== parentPolicy.parentAuditSha256 ||
+    registration.parentLedgerSha256 !== parentPolicy.parentLedgerSha256 ||
+    registration.parentLedgerVersion !== parentPolicy.parentLedgerVersion ||
     new Set(registration.caseIds).size !== registration.caseIds.length ||
     registration.maxPhysicalCalls !== REPLAY_GLOBAL_MAX_PHYSICAL_CALLS ||
-    registration.dev40MaxPhysicalCalls !== LEGACY_REPLAY_POLICY.incrementalCallLimit ||
-    registration.dev40MaxIncrementalUsd !== LEGACY_REPLAY_POLICY.incrementalExposureUsd ||
-    registration.candidateMaxUsdPerDispatch !== LEGACY_REPLAY_POLICY.candidateUsdPerDispatch ||
-    registration.controlMaxUsdPerDispatch !== LEGACY_REPLAY_POLICY.controlUsdPerDispatch ||
+    registration.dev40MaxPhysicalCalls !== parentPolicy.incrementalCallLimit ||
+    registration.dev40MaxIncrementalUsd !== parentPolicy.incrementalExposureUsd ||
+    registration.candidateMaxUsdPerDispatch !== parentPolicy.candidateUsdPerDispatch ||
+    registration.controlMaxUsdPerDispatch !== parentPolicy.controlUsdPerDispatch ||
     parent.registrationSha256 !== registration.registrationSha256 ||
     parent.registrationSha256 !== parentRegistrationDigest(rawRegistration) ||
     Object.hasOwn(parent, 'maxPhysicalCalls')
@@ -464,7 +480,7 @@ export function validateAuthoredScopeReplayParentPair(
   nextReservationId: number
 }> {
   const policy = replayStudyPolicy(studyId)
-  if (studyId !== 'authored-scope-dev40-v1')
+  if (studyId !== 'authored-scope-dev40-v1' && studyId !== 'native-presence-flat-dev40-v1')
     throw new ProviderRefusalReplayLedgerError('Parent registration wire pair is not registered')
   const parent = verifyAuthoredScopeParentPair(parentValue, registrationValue, policy)
   return Object.freeze({
@@ -488,7 +504,7 @@ async function readParentLedger(
       schema:
         policy.studyId === LEGACY_REPLAY_POLICY.studyId
           ? 'h8a-ui-state-dev40-successor-ledger-v1'
-          : 'h8a-provider-refusal-replay-ledger-v1',
+          : policy.parentLedgerSchema,
       ...(policy.studyId === LEGACY_REPLAY_POLICY.studyId
         ? { maxPhysicalCalls: REPLAY_GLOBAL_MAX_PHYSICAL_CALLS }
         : {}),
@@ -514,21 +530,24 @@ async function readParentLedger(
       assertParentBaseline(verified, policy)
       return verified
     }
+    if (!policy.parentRegistrationStudyId || !policy.parentRegistrationPath)
+      throw new ProviderRefusalReplayLedgerError('Parent registration wire pair is not registered')
+    const parentPolicy = replayStudyPolicy(policy.parentRegistrationStudyId)
     const parentRegistrationBody = {
-      schema: 'h8a-provider-refusal-replay-registration-v1',
-      studyId: 'provider-refusal-dev40-replay-v1',
-      freezeId: 'h8a-provider-refusal-dev40-replay-20261101-v1',
+      schema: parentPolicy.registrationSchema,
+      studyId: parentPolicy.studyId,
+      freezeId: parentPolicy.freezeId,
       protocolSha256: '0'.repeat(64),
-      parentAuditSha256: LEGACY_REPLAY_POLICY.parentAuditSha256,
-      parentLedgerSha256: LEGACY_REPLAY_POLICY.parentLedgerSha256,
-      parentLedgerVersion: LEGACY_REPLAY_POLICY.parentLedgerVersion,
-      canonicalRoot: join(LEGACY_REPLAY_ROOT, 'admission', 'successor-campaign'),
+      parentAuditSha256: parentPolicy.parentAuditSha256,
+      parentLedgerSha256: parentPolicy.parentLedgerSha256,
+      parentLedgerVersion: parentPolicy.parentLedgerVersion,
+      canonicalRoot: dirname(policy.parentRegistrationPath),
       caseIds: Array.from({ length: 40 }, (_, index) => `offline-case-${index}`),
       maxPhysicalCalls: REPLAY_GLOBAL_MAX_PHYSICAL_CALLS,
-      dev40MaxPhysicalCalls: LEGACY_REPLAY_POLICY.incrementalCallLimit,
-      dev40MaxIncrementalUsd: LEGACY_REPLAY_POLICY.incrementalExposureUsd,
-      candidateMaxUsdPerDispatch: LEGACY_REPLAY_POLICY.candidateUsdPerDispatch,
-      controlMaxUsdPerDispatch: LEGACY_REPLAY_POLICY.controlUsdPerDispatch,
+      dev40MaxPhysicalCalls: parentPolicy.incrementalCallLimit,
+      dev40MaxIncrementalUsd: parentPolicy.incrementalExposureUsd,
+      candidateMaxUsdPerDispatch: parentPolicy.candidateUsdPerDispatch,
+      controlMaxUsdPerDispatch: parentPolicy.controlUsdPerDispatch,
       ownerDollarCeilingUsd: null,
       retries: 0,
     }
@@ -541,20 +560,42 @@ async function readParentLedger(
   }
   const auditBytes = await readPinnedReplayFile(policy.parentAuditPath, policy.parentAuditSha256)
   const audit = z
-    .object({ references: z.array(z.object({ path: z.string(), sha256: digest }).strict()) })
+    .object({
+      references:
+        policy.studyId === 'native-presence-flat-dev40-v1'
+          ? z
+              .array(
+                z
+                  .object({
+                    path: z.string().min(1),
+                    sha256: digest,
+                    bytes: z.number().int().positive(),
+                  })
+                  .strict(),
+              )
+              .length(15)
+          : z.array(z.object({ path: z.string(), sha256: digest }).strict()),
+    })
     .passthrough()
     .parse(parseReplayJson(auditBytes))
   const ref = audit.references.find((row) => row.path === policy.parentLedgerPath)
   if (!ref || ref.sha256 !== policy.parentLedgerSha256)
     throw new ProviderRefusalReplayLedgerError('Pinned parent ledger reference is missing')
   const bytes = await readPinnedReplayFile(ref.path, ref.sha256, 4 * 1024 * 1024)
+  if ('bytes' in ref && bytes.byteLength !== ref.bytes)
+    throw new ProviderRefusalReplayLedgerError(
+      'Pinned parent ledger byte length differs from audit',
+    )
   if (policy.studyId === LEGACY_REPLAY_POLICY.studyId) {
     const parent = legacyParentSchema.parse(parseReplayJson(bytes))
     const verified: VerifiedParentBaseline = { ...parent, inFlightReservations: [] }
     assertParentBaseline(verified, policy)
     return verified
   }
-  if (policy.studyId !== AUTHORED_SCOPE_STUDY_ID)
+  if (
+    policy.studyId !== AUTHORED_SCOPE_STUDY_ID &&
+    policy.studyId !== 'native-presence-flat-dev40-v1'
+  )
     throw new ProviderRefusalReplayLedgerError('Parent registration wire pair is not registered')
   const registrationRef = audit.references.find((row) => row.path === policy.parentRegistrationPath)
   if (!registrationRef || registrationRef.sha256 !== policy.parentRegistrationSha256)
@@ -564,6 +605,10 @@ async function readParentLedger(
     registrationRef.sha256,
     64 * 1024,
   )
+  if ('bytes' in registrationRef && registrationBytes.byteLength !== registrationRef.bytes)
+    throw new ProviderRefusalReplayLedgerError(
+      'Pinned parent registration byte length differs from audit',
+    )
   return verifyAuthoredScopeParentPair(
     parseReplayJson(bytes),
     parseReplayJson(registrationBytes),

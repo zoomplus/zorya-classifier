@@ -24,6 +24,7 @@ import { UI_STATE_DEV40_RUNTIME_ENVIRONMENT_SHA256 } from './ui-state-dev40-poli
 import { parseReplayProtocolForStudy, verifyDevReplayAdmission } from './dev-replay-admission.js'
 import type {
   VerifiedAuthoredScopeReplayAdmission,
+  VerifiedNativePresenceReplayAdmission,
   VerifiedProviderRefusalReplayAdmission,
 } from './dev-replay-admission.js'
 import { DevReplayLedger } from './dev-replay-ledger.js'
@@ -32,6 +33,8 @@ import { readPinnedReplayFile } from './dev-replay-files.js'
 import {
   AUTHORED_SCOPE_ROOT,
   AUTHORED_SCOPE_STUDY_ID,
+  NATIVE_PRESENCE_ROOT,
+  NATIVE_PRESENCE_STUDY_ID,
   LEGACY_REPLAY_ROOT,
   LEGACY_REPLAY_STUDY_ID,
   replayStudyPolicy,
@@ -49,11 +52,14 @@ interface ProviderRefusalReplayCliOptions {
   reason?: string
 }
 
-type ReplayAdmission = VerifiedProviderRefusalReplayAdmission | VerifiedAuthoredScopeReplayAdmission
+type ReplayAdmission =
+  | VerifiedProviderRefusalReplayAdmission
+  | VerifiedAuthoredScopeReplayAdmission
+  | VerifiedNativePresenceReplayAdmission
 
-function isAuthoredScopeAdmission(
+function isQueryPolicyReplayAdmission(
   admission: ReplayAdmission,
-): admission is VerifiedAuthoredScopeReplayAdmission {
+): admission is VerifiedAuthoredScopeReplayAdmission | VerifiedNativePresenceReplayAdmission {
   return 'queryPolicy' in admission.protocol
 }
 
@@ -96,7 +102,11 @@ export interface DevReplayOfflineCliHooks {
 
 function testNamespaceRoot(studyId: ReplayStudyId, hooks?: DevReplayOfflineCliHooks): string {
   const policy = replayStudyPolicy(studyId)
-  const productionRoots = new Set([resolve(LEGACY_REPLAY_ROOT), resolve(AUTHORED_SCOPE_ROOT)])
+  const productionRoots = new Set([
+    resolve(LEGACY_REPLAY_ROOT),
+    resolve(AUTHORED_SCOPE_ROOT),
+    resolve(NATIVE_PRESENCE_ROOT),
+  ])
   if (!hooks) return resolve(policy.canonicalRoot)
   const root = resolve(hooks.namespaceRoot)
   const relativeToTemp = relative(resolve(tmpdir()), root)
@@ -195,11 +205,17 @@ const bindingBodySchema = z
     schema: z.enum([
       'h8a-provider-refusal-replay-study-binding-v1',
       'h8a-authored-scope-replay-study-binding-v1',
+      'h8a-native-presence-replay-study-binding-v1',
     ]),
-    studyId: z.enum(['provider-refusal-dev40-replay-v1', 'authored-scope-dev40-v1']),
+    studyId: z.enum([
+      'provider-refusal-dev40-replay-v1',
+      'authored-scope-dev40-v1',
+      'native-presence-flat-dev40-v1',
+    ]),
     freezeId: z.enum([
       'h8a-provider-refusal-dev40-replay-20261101-v1',
       'h8a-authored-scope-dev40-20261101-v1',
+      'h8a-native-presence-flat-dev40-20261101-v1',
     ]),
     protocolSha256: DIGEST,
     parentAuditSha256: DIGEST,
@@ -210,6 +226,15 @@ const bindingBodySchema = z
     runtimeProofSha256: DIGEST,
     runtimeEnvironmentSha256: DIGEST,
     policySha256: DIGEST,
+    runtimeBinding: z
+      .object({
+        candidateProfileId: z.literal('h8a-cpu-native-presence-flat-v4'),
+        recipeId: z.literal('h8a-cpu-flat-target-v2'),
+        queryPolicyId: z.literal('strict-authored-scope-v1'),
+        presencePolicyId: z.literal('control-binary-v1'),
+      })
+      .strict()
+      .optional(),
     deadlineIso: z.string().datetime({ offset: true }),
     freezeCommitmentSha256: DIGEST,
   })
@@ -245,9 +270,23 @@ export const REQUIRED_REPLAY_CLOSURE_PATHS = Object.freeze([
   'benchmarks/v03/h8a-fresh-comparison/campaign-ledger-port.ts',
   'benchmarks/v03/h8a-fresh-comparison/atomic-json-ledger.ts',
 ] as const)
-export function assertRequiredReplayClosure(paths: readonly string[]): void {
+export function assertRequiredReplayClosure(
+  paths: readonly string[],
+  studyId?: ReplayStudyId,
+): void {
   const pathSet = new Set(paths)
-  if (REQUIRED_REPLAY_CLOSURE_PATHS.some((path) => !pathSet.has(path)))
+  const nativeRequired = [
+    'benchmarks/v03/h8a-fresh-comparison/native-presence-replay-cli.ts',
+    'benchmarks/v03/h8a-fresh-comparison/dev-replay-retarget.ts',
+    'benchmarks/v03/h8a-fresh-comparison/runtime-recording.ts',
+    'benchmarks/v03/h8a-fresh-comparison/native-presence-evidence.ts',
+    'benchmarks/v03/h6-presence-policy.ts',
+    'docs/research/v03-native-presence-hypothesis.ru.md',
+  ]
+  if (
+    REQUIRED_REPLAY_CLOSURE_PATHS.some((path) => !pathSet.has(path)) ||
+    (studyId === NATIVE_PRESENCE_STUDY_ID && nativeRequired.some((path) => !pathSet.has(path)))
+  )
     throw new RangeError('Replay producer closure omits a shared runner or evaluation dependency')
 }
 const launchSchema = z
@@ -255,6 +294,7 @@ const launchSchema = z
     schema: z.enum([
       'h8a-provider-refusal-replay-launch-intent-v1',
       'h8a-authored-scope-replay-launch-intent-v1',
+      'h8a-native-presence-replay-launch-intent-v1',
     ]),
     stage: screenSchema,
     protocolSha256: DIGEST,
@@ -267,6 +307,7 @@ const terminalSchema = z
     schema: z.enum([
       'h8a-provider-refusal-replay-terminal-stop-v1',
       'h8a-authored-scope-replay-terminal-stop-v1',
+      'h8a-native-presence-replay-terminal-stop-v1',
     ]),
     stage: screenSchema,
     protocolSha256: DIGEST,
@@ -288,7 +329,7 @@ function sha256(bytes: Uint8Array | string): string {
 }
 function replaySchemaName(studyId: ReplayStudyId, suffix: string): string {
   const name = replayStudyPolicy(studyId).ledgerSchema.replace(/ledger-v1$/u, `${suffix}-v1`)
-  if (!/^h8a-(?:provider-refusal|authored-scope)-replay-[a-z0-9-]+-v1$/u.test(name))
+  if (!/^h8a-(?:provider-refusal|authored-scope|native-presence)-replay-[a-z0-9-]+-v1$/u.test(name))
     throw new RangeError('Replay schema family is outside the closed registry')
   return name
 }
@@ -299,6 +340,13 @@ export function safeReplayErrorCode(error: unknown): string {
 }
 export function replayRuntimeBinding(studyId: ReplayStudyId) {
   const policy = replayStudyPolicy(studyId)
+  if (studyId === NATIVE_PRESENCE_STUDY_ID)
+    return {
+      candidateProfileId: policy.candidateProfileId,
+      recipeId: PROFILE_FLAT_CANDIDATE_ID,
+      queryPolicyId: 'strict-authored-scope-v1',
+      presencePolicyId: 'control-binary-v1',
+    } as const
   if (studyId === AUTHORED_SCOPE_STUDY_ID)
     return {
       candidateProfileId: policy.candidateProfileId,
@@ -411,7 +459,7 @@ async function verifyClosure(admission: ReplayAdmission, repositoryRoot: string)
   if (files.length === 0 || new Set(paths).size !== paths.length)
     throw new RangeError('Replay producer closure is empty or repeats a source path')
   assertLiveRunnerClosure(paths)
-  assertRequiredReplayClosure(paths)
+  assertRequiredReplayClosure(paths, admission.protocol.studyId)
   const repository = resolve(repositoryRoot)
   if ((await realpath(repository)) !== repository)
     throw new RangeError('Replay source root is symlinked or aliased')
@@ -468,6 +516,9 @@ async function writeRegistration(
     runtimeProofSha256: admission.protocol.runtimeProof.sha256,
     runtimeEnvironmentSha256: admission.protocol.runtimeEnvironment.sha256,
     policySha256: admission.protocol.executionPolicy,
+    ...(admission.protocol.studyId === NATIVE_PRESENCE_STUDY_ID
+      ? { runtimeBinding: replayRuntimeBinding(NATIVE_PRESENCE_STUDY_ID) }
+      : {}),
     deadlineIso: admission.protocol.deadlineIso,
     freezeCommitmentSha256: admission.freezeCommitmentSha256,
   }
@@ -507,6 +558,11 @@ async function readRegisteredBinding(root: string, admission: ReplayAdmission): 
     binding.freezeId !== admission.protocol.freezeId ||
     binding.schema !== replaySchemaName(admission.protocol.studyId, 'study-binding') ||
     binding.protocolSha256 !== admission.protocolSha256 ||
+    (admission.protocol.studyId === NATIVE_PRESENCE_STUDY_ID &&
+      JSON.stringify(binding.runtimeBinding) !==
+        JSON.stringify(replayRuntimeBinding(NATIVE_PRESENCE_STUDY_ID))) ||
+    (admission.protocol.studyId !== NATIVE_PRESENCE_STUDY_ID &&
+      binding.runtimeBinding !== undefined) ||
     sha256(JSON.stringify(body)) !== bindingSha256
   )
     throw new RangeError('Replay namespace binding does not match the supplied protocol')
@@ -800,6 +856,9 @@ async function runStage(
         nativeRuntime: {
           recipeId: runtimeBinding.recipeId,
           queryPolicyId: runtimeBinding.queryPolicyId,
+          ...('presencePolicyId' in runtimeBinding
+            ? { presencePolicyId: runtimeBinding.presencePolicyId }
+            : {}),
           pythonExecutable: verifiedRuntime.pythonExecutable,
           assetRoot: verifiedRuntime.candidateAssetsRoot,
         },
@@ -1088,14 +1147,14 @@ export async function runProviderRefusalReplayCli(
     admission: admissionSnapshot,
     getApiKey,
     executeScreen: (admission, stage) => {
-      if (isAuthoredScopeAdmission(admission))
+      if (isQueryPolicyReplayAdmission(admission))
         throw new RangeError('Legacy replay hook received a foreign admission')
       return executeScreen(admission, stage)
     },
     ...(beforeRunnerLock
       ? {
           beforeRunnerLock: async (namespaceRoot, _ledger, admission, stage) => {
-            if (isAuthoredScopeAdmission(admission))
+            if (isQueryPolicyReplayAdmission(admission))
               throw new RangeError('Legacy replay hook received a foreign admission')
             const ledger = await ProviderRefusalReplayLedger.register({
               root: join(namespaceRoot, 'admission', 'successor-campaign'),

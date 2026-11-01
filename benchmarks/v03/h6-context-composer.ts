@@ -21,6 +21,12 @@ import {
   resolveH6QueryPolicyId,
   type H6QueryPolicyId,
 } from './h6-query-policy.js'
+import {
+  H6_PRESENCE_CRITERIA,
+  H6_PRESENCE_POLICY_INSTRUCTIONS,
+  resolveH6PresencePolicyId,
+  type H6PresencePolicyId,
+} from './h6-presence-policy.js'
 
 const H6_FAMILIES = ['D', 'U'] as const
 export type H6Family = (typeof H6_FAMILIES)[number]
@@ -95,10 +101,12 @@ export interface H6DecisionBudgetRecordPort {
 
 interface H6ComposerOptions {
   decision: DecisionPort
+  presenceDecision?: DecisionPort
   imageState: RasterPort['imageState']
   presentation: H6PresentationPort
   budgetRecord: H6DecisionBudgetRecordPort
   queryPolicyId?: H6QueryPolicyId
+  presencePolicyId?: H6PresencePolicyId
 }
 
 export interface H6PresenceEvidence {
@@ -345,6 +353,26 @@ function imageCount(state: DecisionState): number {
   return state.filter((part) => typeof part !== 'string').length
 }
 
+function copyPreparedDecisionState(value: DecisionState): DecisionState {
+  if (!Array.isArray(value))
+    throw new ClassifierError('INVALID_RESPONSE', 'H6 imageState must return an array')
+  return value.map((part) => {
+    if (typeof part === 'string') return part
+    if (
+      !part ||
+      part.type !== 'image_url' ||
+      typeof part.image_url?.url !== 'string' ||
+      part.image_url.detail !== 'high'
+    )
+      throw new ClassifierError('INVALID_RESPONSE', 'H6 imageState returned a malformed part')
+    try {
+      return structuredClone(part)
+    } catch {
+      throw new ClassifierError('INVALID_RESPONSE', 'H6 imageState returned an uncloneable part')
+    }
+  })
+}
+
 function requestSha256(request: DecisionRequest): string {
   return createHash('sha256').update(JSON.stringify(request)).digest('hex')
 }
@@ -390,6 +418,50 @@ function presenceRequest(
       },
     },
   }
+}
+
+function binaryPresenceRequest(
+  target: string,
+  exclusions: readonly string[],
+  state: DecisionState,
+): DecisionRequest {
+  const template =
+    exclusions.length === 0
+      ? H6_PRESENCE_POLICY_INSTRUCTIONS.emptyExclusions
+      : H6_PRESENCE_POLICY_INSTRUCTIONS.authoredExclusions
+  const instructions = template.replace(
+    /\$\{targetTaskText\}|\$\{JSON\.stringify\(authoredExclusions\)\}/gu,
+    (token) => (token === '${targetTaskText}' ? target : JSON.stringify(exclusions)),
+  )
+  return {
+    state,
+    questions: {
+      selection: {
+        type: 'choice',
+        rankingSize: 1,
+        instructions,
+        criteria: { ...H6_PRESENCE_CRITERIA },
+      },
+    },
+  }
+}
+
+function validateBinaryPresenceRequest(request: DecisionRequest): void {
+  const question = request.questions.selection
+  const textValues = [
+    ...request.state.filter((part): part is string => typeof part === 'string'),
+    ...(question?.type === 'choice'
+      ? [question.instructions, ...Object.values(question.criteria)]
+      : []),
+  ]
+  if (
+    request.state.length < 1 ||
+    request.state.length > 64 ||
+    textValues.some((text) => text.length === 0 || text.length > 64_000)
+  )
+    throw invalid('H6 binary presence request exceeds public text or state limits')
+  if (Buffer.byteLength(JSON.stringify(request), 'utf8') > limits.bodyBytes)
+    throw new ClassifierError('RESOURCE_LIMIT', 'H6 binary presence request exceeds 32 MiB')
 }
 
 function nominationRequest(
@@ -575,12 +647,18 @@ async function prepareImages(
       } finally {
         owned.bytes.fill(0)
       }
-      if (!Array.isArray(state) || imageCount(state) !== 1)
+      if (!Array.isArray(state))
         throw new ClassifierError(
           'INVALID_RESPONSE',
           'H6 imageState must return one image per view',
         )
-      prepared.push(...state)
+      const ownedState = copyPreparedDecisionState(state)
+      if (imageCount(ownedState) !== 1)
+        throw new ClassifierError(
+          'INVALID_RESPONSE',
+          'H6 imageState must return one image per view',
+        )
+      prepared.push(...ownedState)
     }
     if (imageCount(prepared) > limits.maxImages)
       throw new ClassifierError('RESOURCE_LIMIT', 'H6 request exceeds its image-part cap')
@@ -594,6 +672,9 @@ async function prepareImages(
 
 export function createH6ContextComposer(options: H6ComposerOptions) {
   const queryPolicyId = resolveH6QueryPolicyId(options?.queryPolicyId)
+  const presencePolicyId = resolveH6PresencePolicyId(options?.presencePolicyId)
+  const configuredPresenceDecision = options?.presenceDecision
+  const configuredPresenceDecide = configuredPresenceDecision?.decide
   if (
     !options ||
     typeof options.decision?.decide !== 'function' ||
@@ -607,6 +688,24 @@ export function createH6ContextComposer(options: H6ComposerOptions) {
     throw invalid(
       'H6 composer requires caller-owned decision, presentation, image, and budget ports',
     )
+
+  if (
+    (presencePolicyId === 'control-binary-v1' && typeof configuredPresenceDecide !== 'function') ||
+    (presencePolicyId === 'legacy-three-way-v1' && configuredPresenceDecision !== undefined)
+  )
+    throw invalid('H6 binary presence policy requires its explicit caller-owned decision port')
+
+  const decision = options.decision.decide.bind(options.decision)
+  const presenceDecision =
+    configuredPresenceDecision && typeof configuredPresenceDecide === 'function'
+      ? configuredPresenceDecide.bind(configuredPresenceDecision)
+      : undefined
+  const imageState = options.imageState.bind(options)
+  const renderPresence = options.presentation.renderPresence.bind(options.presentation)
+  const renderNomination = options.presentation.renderNomination.bind(options.presentation)
+  const renderFinal = options.presentation.renderFinal.bind(options.presentation)
+  const budgetAdmit = options.budgetRecord.admit.bind(options.budgetRecord)
+  const budgetSettle = options.budgetRecord.settle.bind(options.budgetRecord)
 
   return {
     async compose(value: H6ComposerInput): Promise<H6ComposerResult> {
@@ -628,13 +727,17 @@ export function createH6ContextComposer(options: H6ComposerOptions) {
       let presenceEvidence: H6PresenceEvidence | null = null
       let callOrdinal = 0
       try {
-        const invoke = async (stage: H6DecisionStage, request: DecisionRequest) => {
+        const invoke = async (
+          stage: H6DecisionStage,
+          request: DecisionRequest,
+          route: typeof decision = decision,
+        ) => {
           assertActive(signal)
           if (callOrdinal >= 4)
             throw new ClassifierError('RESOURCE_LIMIT', 'H6 per-case decision cap is four')
           callOrdinal++
           const requestHash = requestSha256(request)
-          await options.budgetRecord.admit({
+          await budgetAdmit({
             stage,
             callOrdinal,
             requestSha256: requestHash,
@@ -643,9 +746,9 @@ export function createH6ContextComposer(options: H6ComposerOptions) {
           let raw: DecisionResult
           try {
             assertActive(signal)
-            raw = await options.decision.decide(structuredClone(request), signal)
+            raw = await route(structuredClone(request), signal)
           } catch (error) {
-            await options.budgetRecord.settle({
+            await budgetSettle({
               stage,
               requestSha256: requestHash,
               outcome: 'failed',
@@ -653,7 +756,7 @@ export function createH6ContextComposer(options: H6ComposerOptions) {
             })
             throw error
           }
-          await options.budgetRecord.settle({
+          await budgetSettle({
             stage,
             requestSha256: requestHash,
             outcome: 'resolved',
@@ -670,24 +773,24 @@ export function createH6ContextComposer(options: H6ComposerOptions) {
         }
         let presenceViews: readonly RasterImage[]
         try {
-          presenceViews = await options.presentation.renderPresence(presenceInput)
+          presenceViews = await renderPresence(presenceInput)
         } finally {
           presenceInput.image.data.fill(0)
         }
-        const presenceState = await prepareImages(presenceViews, options.imageState, signal, 1)
-        const presenceRequestValue = presenceRequest(
-          owned.target,
-          owned.exclusions,
-          presenceState,
-          queryPolicyId,
-        )
-        const presenceResult = await invoke('presence', presenceRequestValue)
-        const presenceSelection = selection(
-          presenceResult,
-          ['present', 'absent', 'uncertain'],
-          1,
-          'presence',
-        )
+        const presenceState = await prepareImages(presenceViews, imageState, signal, 1)
+        const binaryPresence = presencePolicyId === 'control-binary-v1'
+        const presenceRequestValue = binaryPresence
+          ? binaryPresenceRequest(owned.target, owned.exclusions, presenceState)
+          : presenceRequest(owned.target, owned.exclusions, presenceState, queryPolicyId)
+        if (binaryPresence) validateBinaryPresenceRequest(presenceRequestValue)
+        let presenceResult: DecisionResult
+        if (binaryPresence) {
+          if (!presenceDecision) throw invalid('H6 binary presence decision port is unavailable')
+          presenceResult = await invoke('presence', presenceRequestValue, presenceDecision)
+        } else presenceResult = await invoke('presence', presenceRequestValue)
+        const presenceSelection = binaryPresence
+          ? selection(presenceResult, ['present', 'absent'], 1, 'selection')
+          : selection(presenceResult, ['present', 'absent', 'uncertain'], 1, 'presence')
         const presenceMetadata = { ...presenceResult.metadata }
         presenceEvidence = { selection: presenceSelection, metadata: presenceMetadata }
         if (presenceSelection.choice === 'absent')
@@ -720,13 +823,13 @@ export function createH6ContextComposer(options: H6ComposerOptions) {
           }
           let views: readonly RasterImage[]
           try {
-            views = await options.presentation.renderNomination(presentationInput)
+            views = await renderNomination(presentationInput)
           } finally {
             presentationInput.image.data.fill(0)
             for (const candidate of presentationInput.candidates) candidate.mask.data.fill(0)
           }
           const expected = 1 + Math.ceil(candidates.length / H6_LIMITS.candidatesPerAtlasPage)
-          const state = await prepareImages(views, options.imageState, signal, expected)
+          const state = await prepareImages(views, imageState, signal, expected)
           if (expected > 5)
             throw new ClassifierError('RESOURCE_LIMIT', 'H6 nomination exceeds five image parts')
           const request = nominationRequest(
@@ -776,17 +879,12 @@ export function createH6ContextComposer(options: H6ComposerOptions) {
         }
         let finalViews: readonly RasterImage[]
         try {
-          finalViews = await options.presentation.renderFinal(finalInput)
+          finalViews = await renderFinal(finalInput)
         } finally {
           finalInput.image.data.fill(0)
           for (const candidate of finalInput.candidates) candidate.mask.data.fill(0)
         }
-        const finalState = await prepareImages(
-          finalViews,
-          options.imageState,
-          signal,
-          1 + nominees.length,
-        )
+        const finalState = await prepareImages(finalViews, imageState, signal, 1 + nominees.length)
         if (finalState.filter((part) => typeof part !== 'string').length > 9)
           throw new ClassifierError('RESOURCE_LIMIT', 'H6 final request exceeds nine image parts')
         const finalRequestValue = finalRequest(

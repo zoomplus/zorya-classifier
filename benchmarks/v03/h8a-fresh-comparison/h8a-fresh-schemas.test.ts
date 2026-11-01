@@ -5,6 +5,7 @@ import {
   H8A_CANDIDATE_PROFILE,
   H8A_FLAT_CANDIDATE_PROFILE,
   H8A_SCOPE_CANDIDATE_PROFILE,
+  H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE,
   V02_CONTROL_PROFILE,
 } from './profiles.js'
 import { phaseFreezeSchema, type PhaseFreeze } from './schemas.js'
@@ -23,8 +24,11 @@ import {
   PHASE_FLAT_DEV40_ID,
   PHASE_SCOPE_DEV40_ID,
   PHASE_SCOPE_QUAL120_ID,
+  PHASE_NATIVE_PRESENCE_DEV40_ID,
+  PHASE_NATIVE_PRESENCE_QUAL120_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
   PROFILE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
   candidateIdForPhase,
@@ -140,6 +144,7 @@ await test('shared freeze admission passes only recognized candidate identities 
   for (const [phaseId, candidateProfileId] of [
     [PHASE_FLAT_DEV40_ID, PROFILE_FLAT_CANDIDATE_ID],
     [PHASE_SCOPE_DEV40_ID, PROFILE_SCOPE_CANDIDATE_ID],
+    [PHASE_NATIVE_PRESENCE_DEV40_ID, PROFILE_NATIVE_PRESENCE_CANDIDATE_ID],
   ] as const) {
     const { freeze } = buildSyntheticPhaseFreeze(phaseId)
     await assertFreezeAdmissionAsync(freeze, ledger)
@@ -149,10 +154,7 @@ await test('shared freeze admission passes only recognized candidate identities 
     )
   }
   const { freeze: rawFreeze } = buildSyntheticPhaseFreeze(PHASE_DEV40_ID)
-  await assert.rejects(
-    assertFreezeAdmissionAsync(rawFreeze, ledger),
-    /registered flat or authored-scope profile/u,
-  )
+  await assert.rejects(assertFreezeAdmissionAsync(rawFreeze, ledger), /registered .* profile/u)
 })
 
 await test('wrong recipe identity fails independent profile validation', () => {
@@ -253,4 +255,47 @@ await test('authored-scope profile has a separate policy identity and accepts bo
     validateConservativeCostProof(freeze)
   }
   assert.throws(() => Reflect.apply(candidateIdForPhase, undefined, ['unknown-phase']))
+})
+
+await test('native-presence profile is closed, separately bound and carries the two fixed route caps', () => {
+  assert.equal(
+    H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.profileId,
+    PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+  )
+  assert.equal(
+    H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativeRecipeId,
+    PROFILE_FLAT_CANDIDATE_ID,
+  )
+  assert.equal(
+    H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.apiEndpoint,
+    '/api/alpha/decisions',
+  )
+  assert.equal(
+    H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.maxPhysicalCallsPerCase,
+    1,
+  )
+  assert.equal(
+    H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.route.apiEndpoint,
+    '/api/v1/chat/completions',
+  )
+  assert.equal(
+    H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.maxVisionChatPhysicalCallsPerCase,
+    3,
+  )
+  for (const phaseId of [PHASE_NATIVE_PRESENCE_DEV40_ID, PHASE_NATIVE_PRESENCE_QUAL120_ID]) {
+    const { freeze } = buildSyntheticPhaseFreeze(phaseId)
+    assert.equal(freeze.profileBindings[0]?.profileId, PROFILE_NATIVE_PRESENCE_CANDIDATE_ID)
+    assert.equal(freeze.conservativeCostProof.maxUsdPerPhysicalDispatch, 0.55)
+    assert.equal(
+      freeze.conservativeCostProof.profileDispatchUpperBounds[0].maxUsdPerPhysicalDispatch,
+      0.55,
+    )
+    assert.equal(
+      freeze.conservativeCostProof.profileDispatchUpperBounds[1].maxUsdPerPhysicalDispatch,
+      0.12,
+    )
+    assert.doesNotThrow(() => phaseFreezeSchema.parse(freeze))
+    validateProfileIdentities(freeze)
+    validateConservativeCostProof(freeze)
+  }
 })

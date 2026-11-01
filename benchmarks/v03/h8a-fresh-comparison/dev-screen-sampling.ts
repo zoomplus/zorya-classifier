@@ -7,9 +7,11 @@ import {
   PHASE_DEV40_ID,
   PHASE_FLAT_DEV40_ID,
   PHASE_SCOPE_DEV40_ID,
+  PHASE_NATIVE_PRESENCE_DEV40_ID,
   PROFILE_CANDIDATE_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
   STRATUMS,
 } from './constants.js'
@@ -40,6 +42,7 @@ const profileBindingSchema = z
       PROFILE_CANDIDATE_ID,
       PROFILE_FLAT_CANDIDATE_ID,
       PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
       PROFILE_CONTROL_ID,
     ]),
     recipeIdentitySha256: z.string().regex(/^[a-f0-9]{64}$/u),
@@ -145,7 +148,8 @@ export function buildDevScreenSelection(
   if (
     (freeze.phaseId !== PHASE_DEV40_ID &&
       freeze.phaseId !== PHASE_FLAT_DEV40_ID &&
-      freeze.phaseId !== PHASE_SCOPE_DEV40_ID) ||
+      freeze.phaseId !== PHASE_SCOPE_DEV40_ID &&
+      freeze.phaseId !== PHASE_NATIVE_PRESENCE_DEV40_ID) ||
     annotations.phaseId !== freeze.phaseId
   )
     throw new RangeError('DEV screens require the matching frozen DEV40 cohort')

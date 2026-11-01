@@ -25,6 +25,7 @@ import { runBoundedNativeChild, buildNativeChildEnv } from './native-bounded-chi
 import { H8A_FULL_NATIVE_REQUEST_SCHEMA, H8A_FULL_RECIPE_ID } from './constants.js'
 import { H6_QUERY_POLICY_INSTRUCTIONS } from '../h6-query-policy.js'
 import type { H6QueryPolicyId } from '../h6-query-policy.js'
+import type { H6PresencePolicyId } from '../h6-presence-policy.js'
 import type { SegmentationPort } from '../../../src/entities/segmentation.js'
 import { createClassifier } from '../../../src/app/create-classifier.js'
 import { createOpenRouterDecisions } from '../../../src/openrouter.js'
@@ -504,8 +505,16 @@ await test('fresh authored-scope binding reaches the real factory and four offli
   }
 })
 
-for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
-  await test(`full runtime locates with fake native worker and respects four decision calls (${queryPolicyId ?? 'default legacy'})`, async () => {
+for (const { queryPolicyId, presencePolicyId, label } of [
+  { queryPolicyId: undefined, presencePolicyId: undefined, label: 'default legacy' },
+  {
+    queryPolicyId: 'strict-authored-scope-v1',
+    presencePolicyId: undefined,
+    label: 'strict query',
+  },
+  { queryPolicyId: undefined, presencePolicyId: 'control-binary-v1', label: 'binary presence' },
+] as const) {
+  await test(`full runtime locates with fake native worker and respects four decision calls (${label})`, async () => {
     const { createH8aFullRuntime } = await import('./factory.js')
     const artifactRoot = await mkdtemp(join(tmpdir(), 'h8af-artifacts-'))
     const runtimeConfig: {
@@ -515,6 +524,7 @@ for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
       workerScriptPath: string
       recipeId: 'h8a-cpu-flat-target-v2'
       queryPolicyId?: H6QueryPolicyId
+      presencePolicyId?: H6PresencePolicyId
     } = {
       pythonExecutable,
       assetRoot: join(tmpdir(), 'h8af-assets-unused'),
@@ -522,10 +532,13 @@ for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
       workerScriptPath: fakeWorkerScriptPath(),
       recipeId: 'h8a-cpu-flat-target-v2' as const,
       ...(queryPolicyId === undefined ? {} : { queryPolicyId }),
+      ...(presencePolicyId === undefined ? {} : { presencePolicyId }),
     }
     const runtime = createH8aFullRuntime(runtimeConfig)
     runtimeConfig.queryPolicyId =
       queryPolicyId === undefined ? 'strict-authored-scope-v1' : 'legacy-v1'
+    if (presencePolicyId === undefined) runtimeConfig.presencePolicyId = 'control-binary-v1'
+    else delete runtimeConfig.presencePolicyId
     const stages: string[] = []
     const capturedRequests: DecisionRequest[] = []
     const rawWidth = 96
@@ -569,27 +582,35 @@ for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
       costUsd: 0,
       attempts: 1,
     }
+    const recordRequest = async (request: DecisionRequest) => {
+      capturedRequests.push(structuredClone(request))
+      const { readdir } = await import('node:fs/promises')
+      const nativeTaskEntries = await readdir(join(artifactRoot, 'h8a-full-tasks'), {
+        withFileTypes: true,
+      })
+      assert.deepEqual(
+        nativeTaskEntries.filter((entry) => entry.isDirectory()),
+        [],
+      )
+      const stateText = request.state.filter((part): part is string => typeof part === 'string')
+      const question = request.questions.presence ?? request.questions.selection
+      const binaryPresence =
+        !request.questions.presence &&
+        question?.type === 'choice' &&
+        Object.keys(question.criteria).join(',') === 'present,absent'
+      stages.push(
+        request.questions.presence || binaryPresence
+          ? 'presence'
+          : stateText.some((part) => part.includes('from family D'))
+            ? 'nominate-D'
+            : stateText.some((part) => part.includes('from family U'))
+              ? 'nominate-U'
+              : 'final-select',
+      )
+    }
     const decision = {
       async decide(request: DecisionRequest): Promise<DecisionResult> {
-        capturedRequests.push(structuredClone(request))
-        const { readdir } = await import('node:fs/promises')
-        const nativeTaskEntries = await readdir(join(artifactRoot, 'h8a-full-tasks'), {
-          withFileTypes: true,
-        })
-        assert.deepEqual(
-          nativeTaskEntries.filter((entry) => entry.isDirectory()),
-          [],
-        )
-        const stateText = request.state.filter((part): part is string => typeof part === 'string')
-        stages.push(
-          request.questions.presence
-            ? 'presence'
-            : stateText.some((part) => part.includes('from family D'))
-              ? 'nominate-D'
-              : stateText.some((part) => part.includes('from family U'))
-                ? 'nominate-U'
-                : 'final-select',
-        )
+        await recordRequest(request)
         const question = request.questions.presence ?? request.questions.selection
         assert.ok(question?.type === 'choice')
         const keys = Object.keys(question.criteria)
@@ -612,6 +633,20 @@ for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
         )
         return {
           answers: { selection: { type: 'ranked-choice', ranking } },
+          metadata,
+        }
+      },
+    }
+    const presencePort = {
+      async decide(request: DecisionRequest): Promise<DecisionResult> {
+        await recordRequest(request)
+        const question = request.questions.selection
+        assert.ok(question?.type === 'choice')
+        assert.deepEqual(Object.keys(question.criteria), ['present', 'absent'])
+        return {
+          answers: {
+            selection: { type: 'ranked-choice', ranking: ['present'] },
+          },
           metadata,
         }
       },
@@ -655,6 +690,7 @@ for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
         ]
       },
     }
+    let preparedPresenceTransform: string | undefined
     const imageState = async (image: RasterImage) => {
       imageStateCalls++
       const decoded = await sharp(image.bytes)
@@ -664,7 +700,7 @@ for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
       assert.equal(decoded.info.width, expectedWidth)
       assert.equal(decoded.info.height, expectedHeight)
       assert.deepEqual(decoded.data, expectedRgba)
-      return [
+      const state = [
         {
           type: 'image_url' as const,
           image_url: {
@@ -673,6 +709,17 @@ for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
           },
         },
       ]
+      if (presencePolicyId !== 'control-binary-v1') return state
+      preparedPresenceTransform = JSON.stringify({
+        sourceImageTransform: {
+          source: { width: image.width, height: image.height },
+          output: { width: image.width, height: image.height },
+          content: { left: 0, top: 0, width: image.width, height: image.height },
+          scaleX: 1,
+          scaleY: 1,
+        },
+      })
+      return [...state, preparedPresenceTransform]
     }
     try {
       const runExclusions: string[] = []
@@ -683,10 +730,15 @@ for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
         includeCutout: true,
         signal: new AbortController().signal,
         decision,
+        ...(presencePolicyId === 'control-binary-v1' ? { presenceDecision: presencePort } : {}),
         imageState,
         presentation,
       }
       const running = runtime.run(runInput)
+      if (presencePolicyId === 'control-binary-v1')
+        presencePort.decide = async () => {
+          throw new Error('late presence port mutation')
+        }
       runInput.encodedImage.fill(0)
       runInput.authoredTarget = 'mutated target after admission'
       runExclusions.push('mutated exclusion after admission')
@@ -710,12 +762,17 @@ for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
       assert.ok(capturedPresence && capturedD && capturedU && capturedFinal)
       const firstText = (request: DecisionRequest) =>
         request.state.find((part): part is string => typeof part === 'string')
-      const policyFields = [
-        [firstText(capturedPresence), H6_QUERY_POLICY_INSTRUCTIONS.presenceState],
-        [
-          capturedPresence.questions.presence?.instructions,
-          H6_QUERY_POLICY_INSTRUCTIONS.presenceQuestion,
-        ],
+      const policyFields: Array<[string | undefined, string]> = []
+      if (presencePolicyId !== 'control-binary-v1') {
+        policyFields.push(
+          [firstText(capturedPresence), H6_QUERY_POLICY_INSTRUCTIONS.presenceState],
+          [
+            capturedPresence.questions.presence?.instructions,
+            H6_QUERY_POLICY_INSTRUCTIONS.presenceQuestion,
+          ],
+        )
+      }
+      policyFields.push(
         [firstText(capturedD), H6_QUERY_POLICY_INSTRUCTIONS.nominationState],
         [
           capturedD.questions.selection?.instructions,
@@ -731,7 +788,7 @@ for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
           capturedFinal.questions.selection?.instructions,
           H6_QUERY_POLICY_INSTRUCTIONS.finalQuestion,
         ],
-      ] as const
+      )
       for (const [field, suffix] of policyFields) {
         assert.ok(field)
         assert.equal(
@@ -739,6 +796,17 @@ for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
           queryPolicyId === 'strict-authored-scope-v1',
           `unexpected policy composition in ${suffix.slice(0, 24)}`,
         )
+      }
+      if (presencePolicyId === 'control-binary-v1') {
+        const question = capturedPresence.questions.selection
+        assert.ok(question?.type === 'choice')
+        assert.equal(question.rankingSize, 1)
+        assert.deepEqual(Object.keys(question.criteria), ['present', 'absent'])
+        assert.equal(
+          question.instructions,
+          'Does this image contain small amber marker beside the road?\n\nUse only the supplied image. Choose exactly one closed label.',
+        )
+        assert.equal(capturedPresence.state[1], preparedPresenceTransform)
       }
       if (result.status !== 'located') assert.fail('full runtime should locate fixture mask')
       assert.ok(result.cutout)

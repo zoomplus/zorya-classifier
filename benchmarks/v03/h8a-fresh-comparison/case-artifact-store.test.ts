@@ -13,6 +13,7 @@ import {
   PROFILE_CONTROL_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
 } from './constants.js'
 import { hashIdentity } from './hash-identity.js'
 import type { CaseExecutionPortResult } from './paired-runner.js'
@@ -26,6 +27,7 @@ function identity(
     | typeof PROFILE_CANDIDATE_ID
     | typeof PROFILE_FLAT_CANDIDATE_ID
     | typeof PROFILE_SCOPE_CANDIDATE_ID
+    | typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID = PROFILE_CANDIDATE_ID,
 ): CaseArtifactIdentity {
   const hash = 'a'.repeat(64)
@@ -52,6 +54,7 @@ function result(
     | typeof PROFILE_CANDIDATE_ID
     | typeof PROFILE_FLAT_CANDIDATE_ID
     | typeof PROFILE_SCOPE_CANDIDATE_ID
+    | typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID = PROFILE_CANDIDATE_ID,
 ): CaseExecutionPortResult {
   const maskSha = maskBytes ? digest(maskBytes) : null
@@ -422,5 +425,192 @@ await test('control PNG sidecar is fully decoded and its alpha is checked agains
     )
   } finally {
     await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('native-presence v4 identity and candidate cutout survive immutable storage', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-case-native-presence-'))
+  try {
+    const store = new ImmutableCaseArtifactStore(root)
+    const id = identity(PROFILE_NATIVE_PRESENCE_CANDIDATE_ID)
+    const opened = await store.begin(id, new Date().toISOString())
+    const bytes = new Uint8Array(16)
+    for (let index = 0; index < bytes.length; index += 4) {
+      bytes[index] = 42
+      bytes[index + 1] = 84
+      bytes[index + 2] = 126
+      bytes[index + 3] = 255
+    }
+    const mask = new Uint8Array(8)
+    for (const pixel of [9, 10, 17, 18]) mask[Math.floor(pixel / 8)]! |= 1 << pixel % 8
+    const complete = await store.complete({
+      identitySha256: opened.identitySha256,
+      identity: opened.identity,
+      result: result(bytes, mask, PROFILE_NATIVE_PRESENCE_CANDIDATE_ID),
+      durationMs: 2,
+      startedAtIso: new Date().toISOString(),
+      completedAtIso: new Date().toISOString(),
+      knownCostUsd: 0.02,
+      unknownDispatchCount: 0,
+      blobs: new Map([
+        [digest(bytes), bytes],
+        [digest(mask), mask],
+      ]),
+    })
+    const reopened = await store.load(opened.identitySha256, id)
+    assert.equal(reopened?.result.outputRow.profileId, PROFILE_NATIVE_PRESENCE_CANDIDATE_ID)
+    assert.equal(reopened?.result.caseArtifactSidecars?.[0]?.kind, 'candidate-cutout-rgba')
+    assert.deepEqual(reopened?.blobsBySha256.get(digest(bytes)), bytes)
+    const wrongSidecar = result(bytes, mask, PROFILE_NATIVE_PRESENCE_CANDIDATE_ID)
+    wrongSidecar.outputRow.opaqueCaseId = 'opaque-wrong-sidecar'
+    wrongSidecar.logicalReceipts[0]!.opaqueCaseId = 'opaque-wrong-sidecar'
+    wrongSidecar.caseArtifactSidecars![0]!.opaqueCaseId = 'opaque-wrong-sidecar'
+    wrongSidecar.caseArtifactSidecars![0]!.profileId = PROFILE_CONTROL_ID
+    const second = await store.begin(
+      { ...id, opaqueCaseId: 'opaque-wrong-sidecar' },
+      new Date().toISOString(),
+    )
+    await assert.rejects(
+      () =>
+        store.complete({
+          identitySha256: second.identitySha256,
+          identity: second.identity,
+          result: wrongSidecar,
+          durationMs: 1,
+          startedAtIso: new Date().toISOString(),
+          completedAtIso: new Date().toISOString(),
+          knownCostUsd: 0,
+          unknownDispatchCount: 0,
+          blobs: new Map([
+            [digest(bytes), bytes],
+            [digest(mask), mask],
+          ]),
+        }),
+      /sidecar case\/profile/u,
+    )
+    assert.ok(complete.identitySha256)
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('native-presence recovery keeps colliding route-local IDs in separate evidence records', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-case-native-recovery-'))
+  try {
+    const store = new ImmutableCaseArtifactStore(root)
+    const id = identity(PROFILE_NATIVE_PRESENCE_CANDIDATE_ID)
+    const opened = await store.begin(id, new Date().toISOString())
+    const journalDirectory = join(root, 'dispatch-journal')
+    await mkdir(journalDirectory, { recursive: true })
+    const entries = [
+      {
+        reservationId: 41,
+        physicalId: 8,
+        profileId: PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+        opaqueCaseId: id.opaqueCaseId,
+        caseExecutionIdentitySha256: opened.identitySha256,
+        logicalId: 1,
+        recorderPhysicalId: 1,
+        requestSha256: '4'.repeat(64),
+        requestBodySha256: '5'.repeat(64),
+        endpoint: '/api/alpha/decisions',
+        dispatchState: 'confirmed',
+        settled: true,
+        costUsd: 0.01,
+        httpStatus: 200,
+      },
+      {
+        reservationId: 42,
+        physicalId: 9,
+        profileId: PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+        opaqueCaseId: id.opaqueCaseId,
+        caseExecutionIdentitySha256: opened.identitySha256,
+        logicalId: 1,
+        recorderPhysicalId: 1,
+        requestSha256: '6'.repeat(64),
+        requestBodySha256: '7'.repeat(64),
+        endpoint: '/api/v1/chat/completions',
+        dispatchState: 'confirmed',
+        settled: true,
+        costUsd: 0.02,
+        httpStatus: 200,
+      },
+    ] as const
+    const journalBytes = new Map<string, string>()
+    for (const entry of entries) {
+      const name = `dispatch-${entry.reservationId}.json`
+      const bytes = `${JSON.stringify(entry)}\n`
+      journalBytes.set(name, bytes)
+      await writeFile(join(journalDirectory, name), bytes, {
+        encoding: 'utf8',
+        mode: 0o600,
+        flag: 'wx',
+      })
+    }
+    const recovered = await store.loadOrRecover(id)
+    assert.ok(recovered)
+    assert.deepEqual(
+      recovered!.result.logicalReceipts.map((receipt) => [
+        receipt.logicalId,
+        receipt.requestSha256,
+      ]),
+      [
+        [1, '4'.repeat(64)],
+        [2, '6'.repeat(64)],
+      ],
+    )
+    assert.deepEqual(
+      recovered!.result.physicalReceipts.map((receipt) => [
+        receipt.receiptId,
+        receipt.physicalId,
+        receipt.logicalId,
+      ]),
+      [
+        [41, 8, 1],
+        [42, 9, 2],
+      ],
+    )
+    for (const [name, bytes] of journalBytes)
+      assert.equal(await readFile(join(journalDirectory, name), 'utf8'), bytes)
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('native-presence recovery refuses unrelated profile and route journal entries', async () => {
+  for (const mutation of ['profile', 'endpoint'] as const) {
+    const root = await mkdtemp(join(tmpdir(), `h8a-case-native-recovery-${mutation}-`))
+    try {
+      const store = new ImmutableCaseArtifactStore(root)
+      const id = identity(PROFILE_NATIVE_PRESENCE_CANDIDATE_ID)
+      const opened = await store.begin(id, new Date().toISOString())
+      const entry = {
+        reservationId: 41,
+        physicalId: 8,
+        profileId:
+          mutation === 'profile' ? PROFILE_CONTROL_ID : PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+        opaqueCaseId: id.opaqueCaseId,
+        caseExecutionIdentitySha256: opened.identitySha256,
+        logicalId: 1,
+        recorderPhysicalId: 1,
+        requestSha256: '4'.repeat(64),
+        requestBodySha256: '5'.repeat(64),
+        endpoint: mutation === 'endpoint' ? '/api/unregistered' : '/api/alpha/decisions',
+        dispatchState: 'confirmed',
+        settled: true,
+        costUsd: 0.01,
+        httpStatus: 200,
+      }
+      const journalDirectory = join(root, 'dispatch-journal')
+      await mkdir(journalDirectory, { recursive: true })
+      await writeFile(join(journalDirectory, 'dispatch-41.json'), `${JSON.stringify(entry)}\n`, {
+        encoding: 'utf8',
+        mode: 0o600,
+        flag: 'wx',
+      })
+      await assert.rejects(() => store.loadOrRecover(id))
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
   }
 })

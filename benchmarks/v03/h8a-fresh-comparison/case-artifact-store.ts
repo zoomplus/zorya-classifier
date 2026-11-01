@@ -11,6 +11,7 @@ import {
   PROFILE_CANDIDATE_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
 } from './constants.js'
 import { assertProviderRefusalReplayEvidence } from './provider-refusal-replay.js'
@@ -29,6 +30,7 @@ const identitySchema = z.object({
     PROFILE_CANDIDATE_ID,
     PROFILE_FLAT_CANDIDATE_ID,
     PROFILE_SCOPE_CANDIDATE_ID,
+    PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
     PROFILE_CONTROL_ID,
   ]),
   sourceBytesSha256: z.string().regex(/^[a-f0-9]{64}$/u),
@@ -105,7 +107,8 @@ function isCandidateProfile(profileId: CaseArtifactIdentity['profileId']): boole
   return (
     profileId === PROFILE_CANDIDATE_ID ||
     profileId === PROFILE_FLAT_CANDIDATE_ID ||
-    profileId === PROFILE_SCOPE_CANDIDATE_ID
+    profileId === PROFILE_SCOPE_CANDIDATE_ID ||
+    profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
   )
 }
 
@@ -134,6 +137,7 @@ const dispatchBaseSchema = z.object({
     PROFILE_CANDIDATE_ID,
     PROFILE_FLAT_CANDIDATE_ID,
     PROFILE_SCOPE_CANDIDATE_ID,
+    PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
     PROFILE_CONTROL_ID,
   ]),
   opaqueCaseId: z.string().min(1),
@@ -501,9 +505,11 @@ export class ImmutableCaseArtifactStore {
         parsed.profileId === PROFILE_CANDIDATE_ID ||
         parsed.profileId === PROFILE_FLAT_CANDIDATE_ID ||
         parsed.profileId === PROFILE_SCOPE_CANDIDATE_ID
-          ? '/api/v1/chat/completions'
-          : '/api/alpha/decisions'
-      if (data.endpoint !== expectedEndpoint)
+          ? ['/api/v1/chat/completions']
+          : parsed.profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+            ? ['/api/alpha/decisions', '/api/v1/chat/completions']
+            : ['/api/alpha/decisions']
+      if (!expectedEndpoint.includes(data.endpoint))
         throw new RangeError('Dispatch journal endpoint differs from frozen profile route')
       entries.push(data)
     }
@@ -511,20 +517,34 @@ export class ImmutableCaseArtifactStore {
       throw new RangeError(
         'Pending case has no correlated physical dispatch evidence; refusing recovery',
       )
-    entries.sort((a, b) => a.reservationId - b.reservationId)
+    entries.sort((a, b) => {
+      if (parsed.profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID) {
+        const sourceOrder = (endpoint: typeof a.endpoint) =>
+          endpoint === '/api/alpha/decisions' ? 0 : 1
+        const bySource = sourceOrder(a.endpoint) - sourceOrder(b.endpoint)
+        if (bySource !== 0) return bySource
+      }
+      return a.reservationId - b.reservationId
+    })
     if (new Set(entries.map((entry) => entry.reservationId)).size !== entries.length)
       throw new RangeError('Pending dispatch journal contains duplicate reservation IDs')
-    const localByRecorderLogicalId = new Map<number, number>()
-    for (const entry of entries)
-      if (!localByRecorderLogicalId.has(entry.logicalId))
-        localByRecorderLogicalId.set(entry.logicalId, localByRecorderLogicalId.size + 1)
+    const sourceLogicalKey = (entry: (typeof entries)[number]) =>
+      parsed.profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+        ? `${entry.endpoint}:${entry.logicalId}`
+        : `single:${entry.logicalId}`
+    const localByRecorderLogicalId = new Map<string, number>()
+    for (const entry of entries) {
+      const key = sourceLogicalKey(entry)
+      if (!localByRecorderLogicalId.has(key))
+        localByRecorderLogicalId.set(key, localByRecorderLogicalId.size + 1)
+    }
     const physicalReceipts = entries.map((entry) => {
       const completed = completedDispatchSchema.safeParse(entry)
       const final = completed.success ? completed.data : null
       return {
         receiptId: entry.reservationId,
         physicalId: final?.dispatchState === 'confirmed' ? final.physicalId : null,
-        logicalId: localByRecorderLogicalId.get(entry.logicalId)!,
+        logicalId: localByRecorderLogicalId.get(sourceLogicalKey(entry))!,
         dispatchState:
           final?.dispatchState === 'confirmed' && final.settled
             ? ('confirmed' as const)
@@ -536,8 +556,8 @@ export class ImmutableCaseArtifactStore {
       }
     })
     const logicalReceipts = [...localByRecorderLogicalId.entries()].map(
-      ([recorderLogicalId, logicalId]) => {
-        const related = entries.filter((entry) => entry.logicalId === recorderLogicalId)
+      ([recorderLogicalKey, logicalId]) => {
+        const related = entries.filter((entry) => sourceLogicalKey(entry) === recorderLogicalKey)
         return {
           logicalId,
           opaqueCaseId: parsed.opaqueCaseId,

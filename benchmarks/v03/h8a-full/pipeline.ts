@@ -6,6 +6,7 @@ import { ClassifierError, assertActive } from '../../../src/entities/errors.js'
 import { createH6ContextComposer, createSharpH6Presentation } from '../h6-context-composer.js'
 import type { H6DecisionBudgetRecordPort } from '../h6-context-composer.js'
 import { resolveH6QueryPolicyId, type H6QueryPolicyId } from '../h6-query-policy.js'
+import { resolveH6PresencePolicyId, type H6PresencePolicyId } from '../h6-presence-policy.js'
 import {
   H8A_FULL_CASE_DEADLINE_MS,
   H8A_FULL_MAX_ENCODED_BYTES,
@@ -40,10 +41,12 @@ export interface H8aFullPipelineInput {
 
 export interface H8aFullPipelineDependencies {
   decision: DecisionPort
+  presenceDecision?: DecisionPort
   imageState: RasterPort['imageState']
   native: Pick<H8aFullNativePort, 'generate'>
   artifactRoot: string
   queryPolicyId?: H6QueryPolicyId
+  presencePolicyId?: H6PresencePolicyId
   presentation?: ReturnType<typeof createSharpH6Presentation>
   budgetRecord?: H6DecisionBudgetRecordPort
 }
@@ -72,6 +75,7 @@ export function captureH8aFullRun(
   dependencies: H8aFullPipelineDependencies,
 ): H8aFullRunCapture {
   const queryPolicyId = resolveH6QueryPolicyId(dependencies?.queryPolicyId)
+  const presencePolicyId = resolveH6PresencePolicyId(dependencies?.presencePolicyId)
   if (!input || typeof input !== 'object') throw invalidInput('H8a input must be an object')
   const encodedImageSource = input.encodedImage
   if (!(encodedImageSource instanceof Uint8Array))
@@ -112,6 +116,17 @@ export function captureH8aFullRun(
         typeof dependencies.budgetRecord.settle !== 'function'))
   )
     throw invalidInput('H8a runtime requires explicit valid injected ports and artifact root')
+  const configuredPresenceDecision = dependencies.presenceDecision
+  const configuredPresenceDecide = configuredPresenceDecision?.decide
+  if (
+    (presencePolicyId === 'control-binary-v1' && typeof configuredPresenceDecide !== 'function') ||
+    (presencePolicyId === 'legacy-three-way-v1' && configuredPresenceDecision !== undefined)
+  )
+    throw invalidInput('H8a binary presence policy requires its explicit decision port')
+  const presenceDecision =
+    configuredPresenceDecision && typeof configuredPresenceDecide === 'function'
+      ? { decide: configuredPresenceDecide.bind(configuredPresenceDecision) }
+      : undefined
   return {
     encodedImageSource,
     authoredTarget,
@@ -120,9 +135,11 @@ export function captureH8aFullRun(
     callerSignal: input.signal,
     dependencies: {
       decision: dependencies.decision,
+      ...(presenceDecision ? { presenceDecision } : {}),
       imageState: dependencies.imageState,
       native: dependencies.native,
       queryPolicyId,
+      presencePolicyId,
       ...(dependencies.presentation ? { presentation: dependencies.presentation } : {}),
       ...(dependencies.budgetRecord ? { budgetRecord: dependencies.budgetRecord } : {}),
     },
@@ -154,6 +171,18 @@ export async function runH8aFullPipelineSnapshot(
   signal: AbortSignal,
 ): Promise<H8aFullSuccess> {
   const queryPolicyId = resolveH6QueryPolicyId(dependencies?.queryPolicyId)
+  const presencePolicyId = resolveH6PresencePolicyId(dependencies?.presencePolicyId)
+  const configuredPresenceDecision = dependencies?.presenceDecision
+  const configuredPresenceDecide = configuredPresenceDecision?.decide
+  if (
+    (presencePolicyId === 'control-binary-v1' && typeof configuredPresenceDecide !== 'function') ||
+    (presencePolicyId === 'legacy-three-way-v1' && configuredPresenceDecision !== undefined)
+  )
+    throw invalidInput('H8a binary presence policy requires its explicit decision port')
+  const presenceDecision =
+    configuredPresenceDecision && typeof configuredPresenceDecide === 'function'
+      ? { decide: configuredPresenceDecide.bind(configuredPresenceDecision) }
+      : undefined
   let source: OwnedOrientedSource | undefined
   let orientedPng: OwnedOrientedPng | undefined
   let nativeResult: H8aNativeGenerationOutput | undefined
@@ -198,10 +227,12 @@ export async function runH8aFullPipelineSnapshot(
       } satisfies H6DecisionBudgetRecordPort)
     const composer = createH6ContextComposer({
       decision: dependencies.decision,
+      ...(presenceDecision ? { presenceDecision } : {}),
       imageState: dependencies.imageState,
       presentation: dependencies.presentation ?? createSharpH6Presentation(),
       budgetRecord,
       queryPolicyId,
+      presencePolicyId,
     })
     const composition = await composer.compose({
       image: source.raster,

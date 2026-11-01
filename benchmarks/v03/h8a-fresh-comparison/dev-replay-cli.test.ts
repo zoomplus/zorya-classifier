@@ -6,16 +6,22 @@ import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import {
   AUTHORED_SCOPE_FREEZE_ID,
-  AUTHORED_SCOPE_QUERY_POLICY,
   AUTHORED_SCOPE_STUDY_ID,
+  NATIVE_PRESENCE_FREEZE_ID,
+  NATIVE_PRESENCE_STUDY_ID,
+  NATIVE_PRESENCE_POLICY,
+  NATIVE_PRESENCE_ROOT,
   replayStudyPolicy,
 } from './dev-replay-study-policy.js'
 import {
   authoredScopeReplayProtocolSchema,
+  nativePresenceReplayProtocolSchema,
   parseReplayProtocolForStudy,
   type VerifiedAuthoredScopeReplayAdmission,
+  type VerifiedNativePresenceReplayAdmission,
 } from './dev-replay-admission.js'
 import { runAuthoredScopeReplayCli } from './authored-scope-replay-cli.js'
+import { runNativePresenceReplayCli } from './native-presence-replay-cli.js'
 import {
   assertRequiredReplayClosure,
   REQUIRED_REPLAY_CLOSURE_PATHS,
@@ -28,8 +34,10 @@ import {
 import { buildSyntheticAnnotationBundle, buildSyntheticPhaseFreeze } from './test-fixtures.js'
 import {
   PHASE_SCOPE_DEV40_ID,
+  PHASE_NATIVE_PRESENCE_DEV40_ID,
   PROFILE_CONTROL_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
 } from './constants.js'
 import { PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY } from './provider-refusal-replay.js'
 import {
@@ -112,6 +120,17 @@ function assertScopeAdmission(
     throw new RangeError('Scope fixture received a foreign admission')
 }
 
+type QueryReplayAdmission =
+  | VerifiedAuthoredScopeReplayAdmission
+  | VerifiedNativePresenceReplayAdmission
+
+function assertQueryReplayAdmission(
+  admission: Parameters<DevReplayOfflineCliHooks['executeScreen']>[0],
+): asserts admission is QueryReplayAdmission {
+  if (!('queryPolicy' in admission.protocol))
+    throw new RangeError('Query replay fixture received a provider-refusal admission')
+}
+
 test.beforeEach((context) => {
   if ('mock' in context)
     context.mock.timers.enable({ apis: ['Date'], now: new Date('2026-11-01T00:00:00.000Z') })
@@ -120,12 +139,22 @@ test.afterEach((context) => {
   if ('mock' in context) context.mock.timers.reset()
 })
 
-async function makeScopeFixture(directory: string, materializeArtifactRows = false) {
-  const namespaceRoot = join(directory, 'authored-scope-dev40-v1')
-  const base = buildSyntheticPhaseFreeze(PHASE_SCOPE_DEV40_ID)
+async function makeScopeFixture(
+  directory: string,
+  materializeArtifactRows = false,
+  studyId:
+    | typeof AUTHORED_SCOPE_STUDY_ID
+    | typeof NATIVE_PRESENCE_STUDY_ID = AUTHORED_SCOPE_STUDY_ID,
+) {
+  const isNative = studyId === NATIVE_PRESENCE_STUDY_ID
+  const phaseId = isNative ? PHASE_NATIVE_PRESENCE_DEV40_ID : PHASE_SCOPE_DEV40_ID
+  const freezeId = isNative ? NATIVE_PRESENCE_FREEZE_ID : AUTHORED_SCOPE_FREEZE_ID
+  const policy = replayStudyPolicy(studyId)
+  const namespaceRoot = join(directory, studyId)
+  const base = buildSyntheticPhaseFreeze(phaseId)
   const annotations = buildSyntheticAnnotationBundle(
-    PHASE_SCOPE_DEV40_ID,
-    AUTHORED_SCOPE_FREEZE_ID,
+    phaseId,
+    freezeId,
     base.freeze.producerCases,
     base.freeze.pairedSchedule,
   )
@@ -136,7 +165,7 @@ async function makeScopeFixture(directory: string, materializeArtifactRows = fal
   const closureSha256 = sha256(closureBytes)
   const freeze = phaseFreezeSchema.parse({
     ...base.freeze,
-    freezeId: AUTHORED_SCOPE_FREEZE_ID,
+    freezeId,
     deadlineIso,
     producerClosureSha256: closureSha256,
     evaluatorAnnotationsSha256: computeEvaluatorAnnotationsSha256(annotations),
@@ -156,11 +185,12 @@ async function makeScopeFixture(directory: string, materializeArtifactRows = fal
     writeFile(selectionPath, selectionBytes),
     writeFile(closurePath, closureBytes),
   ])
-  const policy = replayStudyPolicy(AUTHORED_SCOPE_STUDY_ID)
-  const protocol = authoredScopeReplayProtocolSchema.parse({
-    schema: 'h8a-authored-scope-replay-protocol-v1',
-    studyId: AUTHORED_SCOPE_STUDY_ID,
-    freezeId: AUTHORED_SCOPE_FREEZE_ID,
+  const protocolBody = {
+    schema: isNative
+      ? 'h8a-native-presence-replay-protocol-v1'
+      : 'h8a-authored-scope-replay-protocol-v1',
+    studyId,
+    freezeId,
     deadlineIso,
     parentAudit: { path: policy.parentAuditPath, sha256: policy.parentAuditSha256 },
     sourceAudit: {
@@ -191,7 +221,8 @@ async function makeScopeFixture(directory: string, materializeArtifactRows = fal
       packedBinarySha256: sha256(`scope-mask-packed-${index}`),
     })),
     executionPolicy: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY.policySha256,
-    queryPolicy: AUTHORED_SCOPE_QUERY_POLICY,
+    queryPolicy: policy.queryPolicy,
+    ...(isNative ? { presencePolicy: NATIVE_PRESENCE_POLICY } : {}),
     budget: {
       globalPhysicalCallLimit: 2_000,
       dev40PhysicalCallLimit: 400,
@@ -203,40 +234,56 @@ async function makeScopeFixture(directory: string, materializeArtifactRows = fal
     },
     noRetryOrFallback: true,
     physicalCallsAt: 'fetch',
-  })
+  }
+  const protocol =
+    studyId === NATIVE_PRESENCE_STUDY_ID
+      ? nativePresenceReplayProtocolSchema.parse(protocolBody)
+      : authoredScopeReplayProtocolSchema.parse(protocolBody)
   const protocolBytes = Buffer.from(JSON.stringify(protocol))
   const protocolPath = join(directory, 'protocol.json')
   await writeFile(protocolPath, protocolBytes)
   const sourceBytes = new Map(base.sourceBytesByCaseId)
-  const admission: VerifiedAuthoredScopeReplayAdmission = {
-    protocol,
-    protocolSha256: sha256(protocolBytes),
-    freeze,
-    annotations,
-    selection,
-    sourceBytes,
-    referenceMaskBytes: new Map(),
-    freezeCommitmentSha256: computePhaseFreezeCommitmentSha256(freeze),
-  }
+  const admission: QueryReplayAdmission =
+    studyId === NATIVE_PRESENCE_STUDY_ID
+      ? {
+          protocol: nativePresenceReplayProtocolSchema.parse(protocol),
+          protocolSha256: sha256(protocolBytes),
+          freeze,
+          annotations,
+          selection,
+          sourceBytes,
+          referenceMaskBytes: new Map(),
+          freezeCommitmentSha256: computePhaseFreezeCommitmentSha256(freeze),
+        }
+      : {
+          protocol: authoredScopeReplayProtocolSchema.parse(protocol),
+          protocolSha256: sha256(protocolBytes),
+          freeze,
+          annotations,
+          selection,
+          sourceBytes,
+          referenceMaskBytes: new Map(),
+          freezeCommitmentSha256: computePhaseFreezeCommitmentSha256(freeze),
+        }
   const hooks: DevReplayOfflineCliHooks = {
     offlineTestOnly: true,
-    studyId: AUTHORED_SCOPE_STUDY_ID,
+    studyId,
     namespaceRoot,
     admission,
     getApiKey: () => 'test-only-marker',
     executeScreen: async (activeAdmission, stage) => {
-      assertScopeAdmission(activeAdmission)
+      assertQueryReplayAdmission(activeAdmission)
       if (materializeArtifactRows && stage === 'dev8') {
         const ledger = await DevReplayLedger.register({
           root: join(namespaceRoot, 'admission', 'successor-campaign'),
           offlineTestOnly: true,
-          studyId: AUTHORED_SCOPE_STUDY_ID,
+          studyId,
           protocolSha256: activeAdmission.protocolSha256,
           caseIds: activeAdmission.freeze.producerCases.map((row) => row.opaqueCaseId),
         })
         const store = new ImmutableCaseArtifactStore(join(namespaceRoot, 'execution'))
         for (const producer of activeAdmission.freeze.producerCases) {
-          for (const profileId of [PROFILE_SCOPE_CANDIDATE_ID, PROFILE_CONTROL_ID] as const) {
+          for (const profileId of [policy.candidateProfileId, PROFILE_CONTROL_ID] as const) {
             await ledger.recordLogicalAttempt({ profileId, opaqueCaseId: producer.opaqueCaseId })
             const identity = buildCaseArtifactIdentity(
               activeAdmission.freeze,
@@ -294,10 +341,8 @@ async function makeScopeFixture(directory: string, materializeArtifactRows = fal
   }
 }
 
-function makeReport(
-  admission: VerifiedAuthoredScopeReplayAdmission,
-  stage: 'dev8' | 'dev12' | 'dev40',
-) {
+function makeReport(admission: QueryReplayAdmission, stage: 'dev8' | 'dev12' | 'dev40') {
+  const candidateProfileId = replayStudyPolicy(admission.protocol.studyId).candidateProfileId
   const perCell = (['photo', 'ui', 'map'] as const).flatMap((stratum) =>
     (['present', 'absent'] as const).map((expectedPresence) => ({
       stratum,
@@ -354,7 +399,7 @@ function makeReport(
           admission.freeze,
           admission.selection,
           producer,
-          PROFILE_SCOPE_CANDIDATE_ID,
+          candidateProfileId,
         ),
       ),
       controlIdentitySha256: hashIdentity(
@@ -527,6 +572,250 @@ await test('scope CLI registers and completes the ordered DEV lifecycle with has
     assert.equal(closeout.studyId, AUTHORED_SCOPE_STUDY_ID)
     assert.equal(closeout.missingPredictionRows, 80)
     assert.equal(closeout.qualEligible, false)
+  } finally {
+    await rm(directory, { recursive: true, force: false })
+  }
+})
+
+await test('native presence CLI binds the four-field runtime and completes DEV8/12/40 offline hooks', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'native-presence-cli-lifecycle-'))
+  try {
+    const fixture = await makeScopeFixture(directory, true, NATIVE_PRESENCE_STUDY_ID)
+    let executeCount = 0
+    const originalExecuteScreen = fixture.hooks.executeScreen
+    fixture.hooks.executeScreen = async (admission, stage) => {
+      executeCount++
+      return originalExecuteScreen(admission, stage)
+    }
+    await assert.rejects(
+      runNativePresenceReplayCli(
+        cliArgs('register', fixture.protocolPath, fixture.protocolSha256),
+        directory,
+        { ...fixture.hooks, namespaceRoot: NATIVE_PRESENCE_ROOT },
+      ),
+      /temporary namespace/u,
+    )
+    const incorrectPin = `${fixture.protocolSha256[0] === '0' ? '1' : '0'}${fixture.protocolSha256.slice(1)}`
+    await assert.rejects(
+      runNativePresenceReplayCli(
+        cliArgs('register', fixture.protocolPath, incorrectPin),
+        directory,
+        fixture.hooks,
+      ),
+      /protocol pin|digest/u,
+    )
+    await runNativePresenceReplayCli(
+      cliArgs('register', fixture.protocolPath, fixture.protocolSha256),
+      directory,
+      fixture.hooks,
+    )
+    const binding = z
+      .object({
+        studyId: z.literal(NATIVE_PRESENCE_STUDY_ID),
+        runtimeBinding: z
+          .object({
+            candidateProfileId: z.literal(PROFILE_NATIVE_PRESENCE_CANDIDATE_ID),
+            recipeId: z.literal('h8a-cpu-flat-target-v2'),
+            queryPolicyId: z.literal('strict-authored-scope-v1'),
+            presencePolicyId: z.literal('control-binary-v1'),
+          })
+          .strict(),
+      })
+      .passthrough()
+      .parse(
+        JSON.parse(
+          await readFile(join(fixture.namespaceRoot, 'admission/study-binding.json'), 'utf8'),
+        ) as unknown,
+      )
+    assert.deepEqual(binding.runtimeBinding, replayRuntimeBinding(NATIVE_PRESENCE_STUDY_ID))
+    for (const stage of ['dev8', 'dev12', 'dev40'] as const) {
+      await assert.rejects(
+        runNativePresenceReplayCli(
+          [
+            'run',
+            stage,
+            '--protocol',
+            fixture.protocolPath,
+            '--protocol-sha256',
+            fixture.protocolSha256,
+          ],
+          directory,
+          fixture.hooks,
+        ),
+        /allow-paid/u,
+      )
+      await runNativePresenceReplayCli(
+        cliArgs('run', fixture.protocolPath, fixture.protocolSha256, stage),
+        directory,
+        fixture.hooks,
+      )
+      await runNativePresenceReplayCli(
+        [
+          'review',
+          stage,
+          '--judgement',
+          'advance',
+          '--reason',
+          'synthetic offline lifecycle fixture',
+          '--protocol',
+          fixture.protocolPath,
+          '--protocol-sha256',
+          fixture.protocolSha256,
+        ],
+        directory,
+        fixture.hooks,
+      )
+    }
+    await runNativePresenceReplayCli(
+      cliArgs('closeout', fixture.protocolPath, fixture.protocolSha256),
+      directory,
+      fixture.hooks,
+    )
+    const closeout = z
+      .object({
+        studyId: z.literal(NATIVE_PRESENCE_STUDY_ID),
+        missingPredictionRows: z.number(),
+        allStageReviewsAdvance: z.boolean(),
+        qualEligible: z.boolean(),
+      })
+      .passthrough()
+      .parse(
+        JSON.parse(
+          await readFile(
+            join(fixture.namespaceRoot, 'execution/closeout/dev40-closeout.json'),
+            'utf8',
+          ),
+        ) as unknown,
+      )
+    assert.equal(closeout.missingPredictionRows, 0)
+    assert.equal(closeout.allStageReviewsAdvance, true)
+    // Offline hook lifecycle validates orchestration and identity only, not candidate quality.
+    assert.equal(closeout.qualEligible, true)
+    assert.equal(executeCount, 3)
+  } finally {
+    await rm(directory, { recursive: true, force: false })
+  }
+})
+
+await test('native presence DEV stop remains terminal and only permits read-only closeout', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'native-presence-cli-stop-'))
+  try {
+    const fixture = await makeScopeFixture(directory, false, NATIVE_PRESENCE_STUDY_ID)
+    await runNativePresenceReplayCli(
+      cliArgs('register', fixture.protocolPath, fixture.protocolSha256),
+      directory,
+      fixture.hooks,
+    )
+    await runNativePresenceReplayCli(
+      cliArgs('run', fixture.protocolPath, fixture.protocolSha256, 'dev8'),
+      directory,
+      fixture.hooks,
+    )
+    await runNativePresenceReplayCli(
+      [
+        'review',
+        'dev8',
+        '--judgement',
+        'stop',
+        '--reason',
+        'synthetic stop lifecycle fixture',
+        '--protocol',
+        fixture.protocolPath,
+        '--protocol-sha256',
+        fixture.protocolSha256,
+      ],
+      directory,
+      fixture.hooks,
+    )
+    await assert.rejects(
+      runNativePresenceReplayCli(
+        cliArgs('run', fixture.protocolPath, fixture.protocolSha256, 'dev12'),
+        directory,
+        fixture.hooks,
+      ),
+      /reviewed advancement/u,
+    )
+    await runNativePresenceReplayCli(
+      cliArgs('closeout', fixture.protocolPath, fixture.protocolSha256),
+      directory,
+      fixture.hooks,
+    )
+    const closeout = z
+      .object({
+        studyId: z.literal(NATIVE_PRESENCE_STUDY_ID),
+        terminalStop: z.null(),
+        allStageReviewsAdvance: z.literal(false),
+        qualEligible: z.literal(false),
+      })
+      .passthrough()
+      .parse(
+        JSON.parse(
+          await readFile(
+            join(fixture.namespaceRoot, 'execution/closeout/dev40-closeout.json'),
+            'utf8',
+          ),
+        ) as unknown,
+      )
+    assert.equal(closeout.studyId, NATIVE_PRESENCE_STUDY_ID)
+  } finally {
+    await rm(directory, { recursive: true, force: false })
+  }
+})
+
+await test('native replay failure seals the native terminal family and blocks every later launch', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'native-presence-cli-terminal-'))
+  try {
+    const fixture = await makeScopeFixture(directory, false, NATIVE_PRESENCE_STUDY_ID)
+    let executionCount = 0
+    fixture.hooks.executeScreen = async () => {
+      executionCount++
+      throw Object.assign(new Error('synthetic offline terminal fixture'), {
+        code: 'SYNTHETIC_STOP',
+      })
+    }
+    await runNativePresenceReplayCli(
+      cliArgs('register', fixture.protocolPath, fixture.protocolSha256),
+      directory,
+      fixture.hooks,
+    )
+    await assert.rejects(
+      runNativePresenceReplayCli(
+        cliArgs('run', fixture.protocolPath, fixture.protocolSha256, 'dev8'),
+        directory,
+        fixture.hooks,
+      ),
+      /synthetic offline terminal fixture/u,
+    )
+    await runNativePresenceReplayCli(
+      cliArgs('closeout', fixture.protocolPath, fixture.protocolSha256),
+      directory,
+      fixture.hooks,
+    )
+    const terminal = z
+      .object({
+        schema: z.literal('h8a-native-presence-replay-terminal-stop-v1'),
+        stage: z.literal('dev8'),
+        protocolSha256: z.string().regex(/^[a-f0-9]{64}$/u),
+        physicalDispatchCount: z.number().int().nonnegative(),
+        runtimeDisposed: z.boolean(),
+      })
+      .passthrough()
+      .parse(
+        JSON.parse(
+          await readFile(join(fixture.namespaceRoot, 'execution/terminal-stop.json'), 'utf8'),
+        ) as unknown,
+      )
+    assert.equal(terminal.protocolSha256, fixture.protocolSha256)
+    assert.equal(terminal.physicalDispatchCount, 276)
+    await assert.rejects(
+      runNativePresenceReplayCli(
+        cliArgs('run', fixture.protocolPath, fixture.protocolSha256, 'dev8'),
+        directory,
+        fixture.hooks,
+      ),
+      /terminal replay stop/u,
+    )
+    assert.equal(executionCount, 1)
   } finally {
     await rm(directory, { recursive: true, force: false })
   }

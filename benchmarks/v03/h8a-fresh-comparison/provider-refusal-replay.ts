@@ -14,6 +14,7 @@ import {
   PROFILE_CONTROL_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
 } from './constants.js'
 
 const PROVIDER_REFUSAL_REPLAY_POLICY_ID = 'h8a-provider-reported-refusal-replay-v1'
@@ -77,6 +78,7 @@ const refusalEvidenceBaseSchema = z
       PROFILE_CANDIDATE_ID,
       PROFILE_FLAT_CANDIDATE_ID,
       PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
       PROFILE_CONTROL_ID,
     ]),
     caseExecutionIdentitySha256: digestSchema,
@@ -198,6 +200,25 @@ function matchingRoute(
       allowFallbacks: false,
     } as const
     return sameRoute(route, expected) ? expected : undefined
+  }
+  if (profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID) {
+    const expectedRoutes = [
+      {
+        model: 'openai/gpt-6-luna-decisions',
+        provider: 'openai',
+        providerName: 'OpenAI',
+        apiEndpoint: '/api/alpha/decisions',
+        allowFallbacks: false,
+      },
+      {
+        model: 'openai/gpt-6-luna',
+        provider: 'openai',
+        providerName: 'OpenAI',
+        apiEndpoint: '/api/v1/chat/completions',
+        allowFallbacks: false,
+      },
+    ] as const
+    return expectedRoutes.find((expected) => sameRoute(route, expected))
   }
   if (profileId === PROFILE_CONTROL_ID) {
     const expected = {

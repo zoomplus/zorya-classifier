@@ -11,6 +11,7 @@ import { createH8aFullRuntime } from '../h8a-full/factory.js'
 import type { H8aFullSuccess } from '../h8a-full/contracts.js'
 import type { H8aFullRecipeId } from '../h8a-full/constants.js'
 import type { H6QueryPolicyId } from '../h6-query-policy.js'
+import type { H6PresencePolicyId } from '../h6-presence-policy.js'
 import { orientedDimensionsFromHeader } from '../h8a-full/image-source.js'
 import { freshCaseSchema } from '../../v02/fresh-corpus.js'
 import type { FreshCase } from '../../v02/fresh-corpus.js'
@@ -19,14 +20,13 @@ import type {
   processRegionSeededCase,
 } from '../../v02/region-seeded-runner.js'
 import type { RegionSeededCaseResult } from '../../v02/region-seeded-runner.js'
-import { recordProvider } from '../../v02/recording.js'
 import type { Recorder } from '../../v02/recording.js'
-import { RunBudget } from '../../v02/budget.js'
 import {
   assertIndependentProfilePolicies,
   H8A_CANDIDATE_PROFILE,
   H8A_FLAT_CANDIDATE_PROFILE,
   H8A_SCOPE_CANDIDATE_PROFILE,
+  H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE,
   V02_CONTROL_PROFILE,
 } from './profiles.js'
 import type { H8aFreshProfileId } from './profiles.js'
@@ -38,6 +38,7 @@ import {
   PROFILE_CONTROL_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
 } from './constants.js'
 import type { H8aFreshCandidateId } from './constants.js'
 import { assertNoForbiddenEvaluatorFields } from './forbidden-leakage.js'
@@ -54,8 +55,13 @@ import {
   unpackBinaryLsb0V1,
 } from './packed-binary-lsb0.js'
 import { outputRowSchema } from './schemas.js'
-import { buildProviderRefusalReplayEvidence } from './provider-refusal-replay.js'
+import {
+  buildProviderRefusalReplayEvidence,
+  remapProviderRefusalReplayEvidence,
+} from './provider-refusal-replay.js'
 import type { ProviderRefusalReplayEvidence } from './provider-refusal-replay.js'
+import { createFixedRouteRecorder } from './runtime-recording.js'
+import { assembleNativePresenceEvidence } from './native-presence-evidence.js'
 
 const MAX_OWNED_SOURCE_BYTES = 24 * 1024 * 1024
 const CANDIDATE_CASE_MAX_CALLS = 4
@@ -91,6 +97,7 @@ export interface CandidateRuntimePort {
     includeCutout: true
     signal: AbortSignal
     decision: DecisionPort
+    presenceDecision?: DecisionPort
     imageState: ReturnType<typeof createSharpRaster>['imageState']
   }): Promise<H8aFullSuccess>
   dispose(): Promise<void>
@@ -100,6 +107,7 @@ export interface CandidateRuntimeBinding {
   candidateProfileId: H8aFreshCandidateId
   recipeId: H8aFullRecipeId
   queryPolicyId: H6QueryPolicyId
+  presencePolicyId?: H6PresencePolicyId
 }
 
 type HistoricalCaseKernel = typeof processRegionSeededCase
@@ -238,14 +246,18 @@ function recorderCallForBoundary(
 function candidateProfile(profileId: H8aFreshCandidateId) {
   if (profileId === PROFILE_CANDIDATE_ID) return H8A_CANDIDATE_PROFILE
   if (profileId === PROFILE_FLAT_CANDIDATE_ID) return H8A_FLAT_CANDIDATE_PROFILE
-  return H8A_SCOPE_CANDIDATE_PROFILE
+  if (profileId === PROFILE_SCOPE_CANDIDATE_ID) return H8A_SCOPE_CANDIDATE_PROFILE
+  if (profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID)
+    return H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE
+  throw new RangeError('Unknown candidate profile identity')
 }
 
 function isCandidateProfileId(profileId: H8aFreshProfileId): profileId is H8aFreshCandidateId {
   return (
     profileId === PROFILE_CANDIDATE_ID ||
     profileId === PROFILE_FLAT_CANDIDATE_ID ||
-    profileId === PROFILE_SCOPE_CANDIDATE_ID
+    profileId === PROFILE_SCOPE_CANDIDATE_ID ||
+    profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
   )
 }
 
@@ -271,6 +283,7 @@ function createRecordedDecision(
   apiKey: string,
   receiptDirectory: string,
   controlEngine: H8FreshControlEngine,
+  source: 'vision' | 'native-presence' | 'control',
 ): Recorder {
   const boundary = createCampaignFetchBoundary({
     ledger: context.ledger,
@@ -289,13 +302,24 @@ function createRecordedDecision(
   const isCandidate = isCandidateProfileId(profileId)
   const selectedCandidateProfile = isCandidate ? candidateProfile(profileId) : undefined
   const route = selectedCandidateProfile
-    ? {
-        model: selectedCandidateProfile.requestPolicy.route.model,
-        provider: selectedCandidateProfile.requestPolicy.route.provider,
-        providerName: selectedCandidateProfile.requestPolicy.route.providerName,
-        apiEndpoint: selectedCandidateProfile.requestPolicy.route.apiEndpoint,
-        allowFallbacks: false as const,
-      }
+    ? source === 'native-presence'
+      ? {
+          model: H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.model,
+          provider:
+            H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.provider,
+          providerName:
+            H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.providerName,
+          apiEndpoint:
+            H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.apiEndpoint,
+          allowFallbacks: false as const,
+        }
+      : {
+          model: selectedCandidateProfile.requestPolicy.route.model,
+          provider: selectedCandidateProfile.requestPolicy.route.provider,
+          providerName: selectedCandidateProfile.requestPolicy.route.providerName,
+          apiEndpoint: selectedCandidateProfile.requestPolicy.route.apiEndpoint,
+          allowFallbacks: false as const,
+        }
     : {
         model: V02_CONTROL_PROFILE.requestPolicy.model,
         provider: V02_CONTROL_PROFILE.requestPolicy.provider,
@@ -303,40 +327,47 @@ function createRecordedDecision(
         apiEndpoint: V02_CONTROL_PROFILE.requestPolicy.apiEndpoint,
         allowFallbacks: false as const,
       }
-  const maximumCalls = isCandidate ? CANDIDATE_CASE_MAX_CALLS : CONTROL_CASE_MAX_CALLS
-  const caseBudget = new RunBudget(
-    maximumCalls,
-    context.reservedUsd * maximumCalls,
-    context.reservedUsd,
-  )
-  const recorder = recordProvider(
-    (fetcher) => {
-      if (selectedCandidateProfile)
-        return createOpenRouterVision({
-          apiKey,
-          model: selectedCandidateProfile.requestPolicy.route.model,
-          provider: selectedCandidateProfile.requestPolicy.route.provider,
-          providerName: selectedCandidateProfile.requestPolicy.route.providerName,
-          responseFormat: 'prompt',
-          reasoningEffort: 'medium',
-          maxOutputTokens: 4096,
-          fetch: fetcher,
-        })
-      return controlEngine.createNativeCategoricalPresencePort(
-        controlEngine.createOpenRouterDecisions({
-          apiKey,
-          model: V02_CONTROL_PROFILE.requestPolicy.model,
-          provider: V02_CONTROL_PROFILE.requestPolicy.provider,
-          providerName: V02_CONTROL_PROFILE.requestPolicy.providerName,
-          fetch: fetcher,
-        }),
-      )
-    },
-    caseBudget,
+  const maximumCalls =
+    source === 'native-presence'
+      ? profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+        ? H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute
+            .maxPhysicalCallsPerCase
+        : 0
+      : source === 'vision' && profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+        ? H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.maxVisionChatPhysicalCallsPerCase
+        : isCandidate
+          ? CANDIDATE_CASE_MAX_CALLS
+          : CONTROL_CASE_MAX_CALLS
+  if (maximumCalls < 1) throw new RangeError('Selected recorder route is not configured')
+  const recorder = createFixedRouteRecorder({
+    maxPhysicalCalls: maximumCalls,
+    reservedUsdPerPhysicalCall: context.reservedUsd,
     receiptDirectory,
     route,
-    boundary.fetch,
-  )
+    dispatchFetch: boundary.fetch,
+    createPort: (fetcher) => {
+      if (source === 'native-presence' || !selectedCandidateProfile)
+        return controlEngine.createNativeCategoricalPresencePort(
+          controlEngine.createOpenRouterDecisions({
+            apiKey,
+            model: route.model,
+            provider: route.provider,
+            providerName: route.providerName,
+            fetch: fetcher,
+          }),
+        )
+      return createOpenRouterVision({
+        apiKey,
+        model: selectedCandidateProfile.requestPolicy.route.model,
+        provider: selectedCandidateProfile.requestPolicy.route.provider,
+        providerName: selectedCandidateProfile.requestPolicy.route.providerName,
+        responseFormat: 'prompt',
+        reasoningEffort: 'medium',
+        maxOutputTokens: 4096,
+        fetch: fetcher,
+      })
+    },
+  })
   context.recorder = recorder
   return recorder
 }
@@ -605,9 +636,14 @@ function makeCaseExecutionResult(
   dispatchJournal?: { lastPartialResult: CaseExecutionPortResult | null },
   caseArtifactSidecars?: NonNullable<CaseExecutionPortResult['caseArtifactSidecars']>,
   caseError?: string,
+  assembled?: ReturnType<typeof assembleNativePresenceEvidence>,
 ): CaseExecutionPortResult {
-  const logicalReceipts = mapJournalToLogical(recorder, journal, input.opaqueCaseId, profileId)
-  const physicalReceipts = makePhysicalReceipts(recorder, logicalReceipts, journal, profileId)
+  const logicalReceipts =
+    assembled?.logicalReceipts ??
+    mapJournalToLogical(recorder, journal, input.opaqueCaseId, profileId)
+  const physicalReceipts =
+    assembled?.physicalReceipts ??
+    makePhysicalReceipts(recorder, logicalReceipts, journal, profileId)
   const result = {
     outputRow: ownOutputRow(input, profileId, execution, logicalReceipts, physicalReceipts),
     logicalReceipts,
@@ -661,6 +697,10 @@ function buildCandidatePort(
       const onAbort = () => signalController.abort(context.signal?.reason)
       if (context.signal?.aborted) onAbort()
       else context.signal?.addEventListener('abort', onAbort, { once: true })
+      const releaseExecutionInputs = () => {
+        context.signal?.removeEventListener('abort', onAbort)
+        sourceBytes.fill(0)
+      }
       const dispatchContext: DispatchEvidenceContext = {
         recorder: undefined,
         journal: [],
@@ -674,12 +714,41 @@ function buildCandidatePort(
         baseFetch: options.fetch ?? globalThis.fetch,
         signal: signalController.signal,
       }
-      const recorder = createRecordedDecision(
-        dispatchContext,
-        options.apiKey,
-        join(options.artifactRoot, 'provider-receipts', randomUUID()),
-        options.controlEngine,
-      )
+      let recorder: Recorder
+      let nativePresenceContext: DispatchEvidenceContext | undefined
+      let nativePresenceRecorder: Recorder | undefined
+      try {
+        recorder = createRecordedDecision(
+          dispatchContext,
+          options.apiKey,
+          join(options.artifactRoot, 'provider-receipts', randomUUID()),
+          options.controlEngine,
+          'vision',
+        )
+        nativePresenceContext =
+          profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+            ? {
+                ...dispatchContext,
+                recorder: undefined,
+                journal: [] as CampaignFetchJournalEntry[],
+                endpoint:
+                  H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute
+                    .apiEndpoint,
+              }
+            : undefined
+        nativePresenceRecorder = nativePresenceContext
+          ? createRecordedDecision(
+              nativePresenceContext,
+              options.apiKey,
+              join(options.artifactRoot, 'provider-receipts', randomUUID()),
+              options.controlEngine,
+              'native-presence',
+            )
+          : undefined
+      } catch (error) {
+        releaseExecutionInputs()
+        throw error
+      }
       let result: H8aFullSuccess | undefined
       let caught: unknown
       let caseError: string | undefined
@@ -690,6 +759,7 @@ function buildCandidatePort(
           includeCutout: true,
           signal: signalController.signal,
           decision: recorder.port,
+          ...(nativePresenceRecorder ? { presenceDecision: nativePresenceRecorder.port } : {}),
           imageState: raster.imageState,
         })
         assertCandidateResultRecipe(result, selectedRecipeId)
@@ -701,47 +771,96 @@ function buildCandidatePort(
           result.cutout?.data.fill(0)
         }
       } finally {
-        context.signal?.removeEventListener('abort', onAbort)
-        sourceBytes.fill(0)
+        releaseExecutionInputs()
       }
       let recorderHealthy = true
-      try {
-        options.controlEngine.assertRecorderHealthy(recorder)
-      } catch (error) {
-        recorderHealthy = false
-        caught ??= error
-        caseError ??= safeCaseError(error)
+      const recorderSources = [
+        ...(nativePresenceRecorder && nativePresenceContext
+          ? [
+              {
+                sourceId: 'native-presence' as const,
+                recorder: nativePresenceRecorder,
+                context: nativePresenceContext,
+              },
+            ]
+          : []),
+        { sourceId: 'vision' as const, recorder, context: dispatchContext },
+      ]
+      for (const source of recorderSources) {
+        try {
+          options.controlEngine.assertRecorderHealthy(source.recorder)
+        } catch (error) {
+          recorderHealthy = false
+          caught ??= error
+          caseError ??= safeCaseError(error)
+        }
+        recorderHealthy = recorderHealthy && source.recorder.persistenceFailures?.length === 0
       }
-      recorderHealthy = recorderHealthy && recorder.persistenceFailures?.length === 0
+      if (nativePresenceContext) sharedJournal.push(...nativePresenceContext.journal)
       sharedJournal.push(...dispatchContext.journal)
       const failureCode = caught === undefined ? undefined : safeCaseError(caught)
-      const refusalLogicalReceipts = mapJournalToLogical(
-        recorder,
-        dispatchContext.journal,
-        input.opaqueCaseId,
-        profileId,
-      )
-      const refusalPhysicalReceipts = makePhysicalReceipts(
-        recorder,
-        refusalLogicalReceipts,
-        dispatchContext.journal,
-        profileId,
-      )
-      const providerRefusalEvidence =
-        recorderHealthy && caught !== undefined && context.executionPolicy
-          ? buildProviderRefusalReplayEvidence({
-              executionPolicy: context.executionPolicy,
-              errorCode: failureCode,
-              profileId,
-              opaqueCaseId: input.opaqueCaseId,
-              caseExecutionIdentitySha256,
-              recorder,
-              journal: dispatchContext.journal,
-              logicalReceipts: refusalLogicalReceipts,
-              physicalReceipts: refusalPhysicalReceipts,
-              signal: context.signal ?? signalController.signal,
-            })
+      const sourceEvidence = recorderSources.map((source) => {
+        const logicalReceipts = mapJournalToLogical(
+          source.recorder,
+          source.context.journal,
+          input.opaqueCaseId,
+          profileId,
+        )
+        return {
+          ...source,
+          logicalReceipts,
+          physicalReceipts: makePhysicalReceipts(
+            source.recorder,
+            logicalReceipts,
+            source.context.journal,
+            profileId,
+          ),
+        }
+      })
+      const assembledEvidence =
+        nativePresenceRecorder && nativePresenceContext
+          ? assembleNativePresenceEvidence(
+              sourceEvidence.map((source) => ({
+                sourceId: source.sourceId,
+                logicalReceipts: source.logicalReceipts,
+                physicalReceipts: source.physicalReceipts,
+              })),
+            )
           : undefined
+      let providerRefusalEvidence: ProviderRefusalReplayEvidence | undefined
+      if (recorderHealthy && caught !== undefined && context.executionPolicy) {
+        for (const source of sourceEvidence) {
+          const localEvidence = buildProviderRefusalReplayEvidence({
+            executionPolicy: context.executionPolicy,
+            errorCode: failureCode,
+            profileId,
+            opaqueCaseId: input.opaqueCaseId,
+            caseExecutionIdentitySha256,
+            recorder: source.recorder,
+            journal: source.context.journal,
+            logicalReceipts: source.logicalReceipts,
+            physicalReceipts: source.physicalReceipts,
+            signal: context.signal ?? signalController.signal,
+          })
+          if (!localEvidence) continue
+          if (assembledEvidence) {
+            const mapping = assembledEvidence.mappings.find(
+              (item) =>
+                item.sourceId === source.sourceId &&
+                item.localLogicalId === localEvidence.logicalReceiptId,
+            )
+            if (!mapping) throw new RangeError('Provider refusal evidence has no route mapping')
+            providerRefusalEvidence = remapProviderRefusalReplayEvidence(
+              localEvidence,
+              new Map([[localEvidence.logicalReceiptId, mapping.combinedLogicalId]]),
+              new Map(),
+            )
+          } else {
+            providerRefusalEvidence = localEvidence
+          }
+          break
+        }
+      }
       let execution: Parameters<typeof ownOutputRow>[2]
       let cutoutSidecar:
         | NonNullable<CaseExecutionPortResult['caseArtifactSidecars']>[number]
@@ -839,6 +958,7 @@ function buildCandidatePort(
         context.dispatchJournal,
         cutoutSidecar ? [cutoutSidecar] : [],
         caseError,
+        assembledEvidence,
       )
     },
   }
@@ -983,6 +1103,7 @@ function buildControlPort(
           options.apiKey,
           join(options.artifactRoot, 'provider-receipts', randomUUID()),
           options.controlEngine,
+          'control',
         )
         let caseResult: Awaited<ReturnType<typeof processRegionSeededCase>> | undefined
         let caught: unknown
@@ -1260,7 +1381,8 @@ async function createH8FreshRuntimePortsInternal(
     runtimeProfileId !== undefined &&
     runtimeProfileId !== PROFILE_CANDIDATE_ID &&
     runtimeProfileId !== PROFILE_FLAT_CANDIDATE_ID &&
-    runtimeProfileId !== PROFILE_SCOPE_CANDIDATE_ID
+    runtimeProfileId !== PROFILE_SCOPE_CANDIDATE_ID &&
+    runtimeProfileId !== PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
   )
     throw new RangeError('Unknown candidate profile identity')
   const requestedRecipeId: unknown = options.nativeRuntime.recipeId ?? PROFILE_CANDIDATE_ID
@@ -1274,6 +1396,14 @@ async function createH8FreshRuntimePortsInternal(
   )
     throw new RangeError('Unknown H6 query policy identity')
   const selectedQueryPolicyId = requestedQueryPolicyId
+  const requestedPresencePolicyId: unknown =
+    options.nativeRuntime.presencePolicyId ?? 'legacy-three-way-v1'
+  if (
+    requestedPresencePolicyId !== 'legacy-three-way-v1' &&
+    requestedPresencePolicyId !== 'control-binary-v1'
+  )
+    throw new RangeError('Unknown H6 presence policy identity')
+  const selectedPresencePolicyId = requestedPresencePolicyId
   const selectedProfileId: H8aFreshCandidateId =
     runtimeProfileId === undefined
       ? selectedRecipeId === PROFILE_FLAT_CANDIDATE_ID
@@ -1283,7 +1413,8 @@ async function createH8FreshRuntimePortsInternal(
   if (
     (selectedProfileId === PROFILE_CANDIDATE_ID && selectedRecipeId !== PROFILE_CANDIDATE_ID) ||
     ((selectedProfileId === PROFILE_FLAT_CANDIDATE_ID ||
-      selectedProfileId === PROFILE_SCOPE_CANDIDATE_ID) &&
+      selectedProfileId === PROFILE_SCOPE_CANDIDATE_ID ||
+      selectedProfileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID) &&
       selectedRecipeId !== PROFILE_FLAT_CANDIDATE_ID)
   )
     throw new RangeError('Candidate profile is incompatible with the selected native recipe')
@@ -1294,12 +1425,34 @@ async function createH8FreshRuntimePortsInternal(
     throw new RangeError(
       'Authored-scope profile requires explicit flat recipe and strict query policy',
     )
-  if (selectedProfileId !== PROFILE_SCOPE_CANDIDATE_ID && selectedQueryPolicyId !== 'legacy-v1')
+  if (
+    selectedProfileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID &&
+    (runtimeProfileId !== PROFILE_NATIVE_PRESENCE_CANDIDATE_ID ||
+      selectedRecipeId !== PROFILE_FLAT_CANDIDATE_ID ||
+      selectedQueryPolicyId !== 'strict-authored-scope-v1' ||
+      selectedPresencePolicyId !== 'control-binary-v1')
+  )
+    throw new RangeError(
+      'Native-presence profile requires explicit flat recipe and strict binary policies',
+    )
+  if (
+    selectedProfileId !== PROFILE_SCOPE_CANDIDATE_ID &&
+    selectedProfileId !== PROFILE_NATIVE_PRESENCE_CANDIDATE_ID &&
+    selectedQueryPolicyId !== 'legacy-v1'
+  )
     throw new RangeError('Strict authored-scope query policy requires the authored-scope profile')
+  if (
+    selectedProfileId !== PROFILE_NATIVE_PRESENCE_CANDIDATE_ID &&
+    selectedPresencePolicyId !== 'legacy-three-way-v1'
+  )
+    throw new RangeError('Binary presence policy requires the native-presence profile')
   const selectedBinding: CandidateRuntimeBinding = Object.freeze({
     candidateProfileId: selectedProfileId,
     recipeId: selectedRecipeId,
     queryPolicyId: selectedQueryPolicyId,
+    ...(selectedProfileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+      ? { presencePolicyId: selectedPresencePolicyId }
+      : {}),
   })
   const ownedCanvasEntries = [...options.sourceCanvasByOpaqueCaseId].map(([opaqueId, canvas]) => {
     if (
@@ -1327,6 +1480,7 @@ async function createH8FreshRuntimePortsInternal(
       ...options.nativeRuntime,
       recipeId: selectedRecipeId,
       queryPolicyId: selectedQueryPolicyId,
+      presencePolicyId: selectedPresencePolicyId,
     },
     mobileSam: { ...options.mobileSam },
     sourceCanvasByOpaqueCaseId: new Map(ownedCanvasEntries),
@@ -1340,6 +1494,7 @@ async function createH8FreshRuntimePortsInternal(
         ...ownedOptions.nativeRuntime,
         recipeId: selectedRecipeId,
         queryPolicyId: selectedQueryPolicyId,
+        presencePolicyId: selectedPresencePolicyId,
         artifactRoot: ownedOptions.artifactRoot,
       })
   let segmenter: SegmentationPort | undefined

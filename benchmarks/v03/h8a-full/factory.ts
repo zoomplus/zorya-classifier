@@ -4,6 +4,7 @@ import type { DecisionPort, RasterPort } from '../../../src/entities/contracts.j
 import type { createSharpH6Presentation } from '../h6-context-composer.js'
 import type { H6DecisionBudgetRecordPort } from '../h6-context-composer.js'
 import { resolveH6QueryPolicyId, type H6QueryPolicyId } from '../h6-query-policy.js'
+import { resolveH6PresencePolicyId, type H6PresencePolicyId } from '../h6-presence-policy.js'
 import type { H8aFullSuccess } from './contracts.js'
 import {
   H8A_FULL_CASE_DEADLINE_MS,
@@ -27,6 +28,7 @@ import {
 
 type H8aRuntimeRunInput = H8aFullPipelineInput & {
   decision: DecisionPort
+  presenceDecision?: DecisionPort
   imageState: RasterPort['imageState']
   presentation?: ReturnType<typeof createSharpH6Presentation>
   budgetRecord?: H6DecisionBudgetRecordPort
@@ -39,6 +41,7 @@ interface H8aFullRuntimeFactoryConfig {
   workerScriptPath?: string
   recipeId?: H8aFullRecipeId
   queryPolicyId?: H6QueryPolicyId
+  presencePolicyId?: H6PresencePolicyId
 }
 
 interface H8aFullRuntime {
@@ -63,6 +66,7 @@ interface FullRunJob {
 
 export function createH8aFullRuntime(config: H8aFullRuntimeFactoryConfig): H8aFullRuntime {
   const queryPolicyId = resolveH6QueryPolicyId(config?.queryPolicyId)
+  const presencePolicyId = resolveH6PresencePolicyId(config?.presencePolicyId)
   if (!config.pythonExecutable || !config.assetRoot || !config.artifactRoot)
     throw new ClassifierError('INVALID_INPUT', 'H8a runtime factory requires explicit paths')
   const artifactRoot = config.artifactRoot
@@ -147,10 +151,12 @@ export function createH8aFullRuntime(config: H8aFullRuntimeFactoryConfig): H8aFu
       try {
         const dependencies: H8aFullPipelineDependencies = {
           decision: input.decision,
+          ...(input.presenceDecision ? { presenceDecision: input.presenceDecision } : {}),
           imageState: input.imageState,
           native,
           artifactRoot,
           queryPolicyId,
+          presencePolicyId,
           ...(input.presentation ? { presentation: input.presentation } : {}),
           ...(input.budgetRecord ? { budgetRecord: input.budgetRecord } : {}),
         }

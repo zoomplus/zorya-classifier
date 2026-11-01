@@ -26,7 +26,11 @@ import {
 import { buildNativeChildEnv } from './native-bounded-child.js'
 import { removeOwnedEmptyDirectory, smokeErrorReceipt } from './native-smoke.js'
 import { createH8aFullRuntime } from './factory.js'
-import { runH8aFullPipelineSnapshot, type H8aFullRunSnapshot } from './pipeline.js'
+import {
+  captureH8aFullRun,
+  runH8aFullPipelineSnapshot,
+  type H8aFullRunSnapshot,
+} from './pipeline.js'
 import type { H8aNativeGenerationInput, H8aNativeGenerationOutput } from './native-port.js'
 import { H6_QUERY_POLICY_INSTRUCTIONS } from '../h6-query-policy.js'
 import type { H6QueryPolicyId } from '../h6-query-policy.js'
@@ -371,4 +375,79 @@ await test('direct pipeline snapshots policy before asynchronous native generati
     releaseNative()
     await rm(artifactRoot, { recursive: true, force: true })
   }
+})
+
+await test('binary presence port is validated and method-snapshotted at H8a admission', async () => {
+  const original = async (): Promise<DecisionResult> => ({
+    answers: {},
+    metadata: {
+      model: 'fixture-model',
+      provider: 'fixture-provider',
+      requestId: 'fixture-request',
+      durationMs: 1,
+      costUsd: 0,
+      attempts: 1,
+    },
+  })
+  const replacement = async (): Promise<DecisionResult> => {
+    throw new Error('mutated port used')
+  }
+  const presenceDecision = { decide: original }
+  let presencePortReads = 0
+  const signal = new AbortController().signal
+  const dependencies = {
+    decision: {
+      async decide(): Promise<DecisionResult> {
+        return {
+          answers: {},
+          metadata: {
+            model: 'fixture-model',
+            provider: 'fixture-provider',
+            requestId: 'fixture-request',
+            durationMs: 1,
+            costUsd: 0,
+            attempts: 1,
+          },
+        }
+      },
+    },
+    get presenceDecision() {
+      presencePortReads++
+      return presenceDecision
+    },
+    presencePolicyId: 'control-binary-v1' as const,
+    imageState: async () => [],
+    native: {
+      async generate(): Promise<H8aNativeGenerationOutput> {
+        throw new Error('unused')
+      },
+    },
+    artifactRoot: tmpdir(),
+  }
+  const captured = captureH8aFullRun(
+    {
+      encodedImage: new Uint8Array([1]),
+      authoredTarget: 'fixture visible target',
+      signal,
+    },
+    dependencies,
+  )
+  assert.equal(presencePortReads, 1)
+  presenceDecision.decide = replacement
+  assert.equal(captured.dependencies.presencePolicyId, 'control-binary-v1')
+  assert.ok(captured.dependencies.presenceDecision)
+  assert.deepEqual(
+    await captured.dependencies.presenceDecision.decide({ state: [], questions: {} }, signal),
+    {
+      answers: {},
+      metadata: {
+        model: 'fixture-model',
+        provider: 'fixture-provider',
+        requestId: 'fixture-request',
+        durationMs: 1,
+        costUsd: 0,
+        attempts: 1,
+      },
+    },
+  )
 })

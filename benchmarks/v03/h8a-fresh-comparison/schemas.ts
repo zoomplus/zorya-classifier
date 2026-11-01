@@ -13,10 +13,13 @@ import {
   PHASE_FLAT_QUAL120_ID,
   PHASE_SCOPE_DEV40_ID,
   PHASE_SCOPE_QUAL120_ID,
+  PHASE_NATIVE_PRESENCE_DEV40_ID,
+  PHASE_NATIVE_PRESENCE_QUAL120_ID,
   PHASE_QUAL120_ID,
   PROFILE_CANDIDATE_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
   QUAL120_CASE_COUNT,
   QUAL120_NEGATIVE_COUNT,
@@ -36,6 +39,7 @@ const profileDispatchUpperBoundSchema = z
       PROFILE_CANDIDATE_ID,
       PROFILE_FLAT_CANDIDATE_ID,
       PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
       PROFILE_CONTROL_ID,
     ]),
     maxUsdPerPhysicalDispatch: z.number().finite().positive(),
@@ -54,6 +58,9 @@ const conservativeCostProofSchema = z
         profileDispatchUpperBoundSchema.extend({
           profileId: z.literal(PROFILE_SCOPE_CANDIDATE_ID),
         }),
+        profileDispatchUpperBoundSchema.extend({
+          profileId: z.literal(PROFILE_NATIVE_PRESENCE_CANDIDATE_ID),
+        }),
       ]),
       profileDispatchUpperBoundSchema.extend({ profileId: z.literal(PROFILE_CONTROL_ID) }),
     ]),
@@ -68,6 +75,7 @@ const profileBindingSchema = z
       PROFILE_CANDIDATE_ID,
       PROFILE_FLAT_CANDIDATE_ID,
       PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
       PROFILE_CONTROL_ID,
     ]),
     recipeIdentitySha256: sha256Hex,
@@ -137,6 +145,8 @@ export const phaseFreezeSchema = z
       PHASE_FLAT_QUAL120_ID,
       PHASE_SCOPE_DEV40_ID,
       PHASE_SCOPE_QUAL120_ID,
+      PHASE_NATIVE_PRESENCE_DEV40_ID,
+      PHASE_NATIVE_PRESENCE_QUAL120_ID,
     ]),
     phaseCounts: phaseCountsSchema,
     cohortCommitmentSha256: sha256Hex,
@@ -148,6 +158,7 @@ export const phaseFreezeSchema = z
         profileBindingSchema.extend({ profileId: z.literal(PROFILE_CANDIDATE_ID) }),
         profileBindingSchema.extend({ profileId: z.literal(PROFILE_FLAT_CANDIDATE_ID) }),
         profileBindingSchema.extend({ profileId: z.literal(PROFILE_SCOPE_CANDIDATE_ID) }),
+        profileBindingSchema.extend({ profileId: z.literal(PROFILE_NATIVE_PRESENCE_CANDIDATE_ID) }),
       ]),
       profileBindingSchema.extend({ profileId: z.literal(PROFILE_CONTROL_ID) }),
     ]),
@@ -176,7 +187,8 @@ export const phaseFreezeSchema = z
     const expectedStratumCounts =
       freeze.phaseId === PHASE_DEV40_ID ||
       freeze.phaseId === PHASE_FLAT_DEV40_ID ||
-      freeze.phaseId === PHASE_SCOPE_DEV40_ID
+      freeze.phaseId === PHASE_SCOPE_DEV40_ID ||
+      freeze.phaseId === PHASE_NATIVE_PRESENCE_DEV40_ID
         ? {
             photo: DEV40_STRATUM_QUOTAS.photo.total,
             ui: DEV40_STRATUM_QUOTAS.ui.total,
@@ -203,7 +215,8 @@ export const phaseFreezeSchema = z
     if (
       freeze.phaseId === PHASE_DEV40_ID ||
       freeze.phaseId === PHASE_FLAT_DEV40_ID ||
-      freeze.phaseId === PHASE_SCOPE_DEV40_ID
+      freeze.phaseId === PHASE_SCOPE_DEV40_ID ||
+      freeze.phaseId === PHASE_NATIVE_PRESENCE_DEV40_ID
     ) {
       if (freeze.phaseCounts.totalCases !== DEV40_CASE_COUNT)
         context.addIssue({ code: z.ZodIssueCode.custom, message: 'DEV40 case count mismatch' })
@@ -225,7 +238,8 @@ export const phaseFreezeSchema = z
     if (
       freeze.phaseId === PHASE_QUAL120_ID ||
       freeze.phaseId === PHASE_FLAT_QUAL120_ID ||
-      freeze.phaseId === PHASE_SCOPE_QUAL120_ID
+      freeze.phaseId === PHASE_SCOPE_QUAL120_ID ||
+      freeze.phaseId === PHASE_NATIVE_PRESENCE_QUAL120_ID
     ) {
       if (freeze.phaseCounts.totalCases !== QUAL120_CASE_COUNT)
         context.addIssue({ code: z.ZodIssueCode.custom, message: 'QUAL120 case count mismatch' })
@@ -301,6 +315,7 @@ export const logicalReceiptSchema = z
       PROFILE_CANDIDATE_ID,
       PROFILE_FLAT_CANDIDATE_ID,
       PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
       PROFILE_CONTROL_ID,
     ]),
     requestSha256: sha256Hex,
@@ -330,6 +345,7 @@ export const outputRowSchema = z
       PROFILE_CANDIDATE_ID,
       PROFILE_FLAT_CANDIDATE_ID,
       PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
       PROFILE_CONTROL_ID,
     ]),
     executionValidity: z.enum(['valid', 'invalid']),
@@ -374,11 +390,14 @@ export const immutableCloseoutSchema = z
       PHASE_FLAT_QUAL120_ID,
       PHASE_SCOPE_DEV40_ID,
       PHASE_SCOPE_QUAL120_ID,
+      PHASE_NATIVE_PRESENCE_DEV40_ID,
+      PHASE_NATIVE_PRESENCE_QUAL120_ID,
     ]),
     profileId: z.enum([
       PROFILE_CANDIDATE_ID,
       PROFILE_FLAT_CANDIDATE_ID,
       PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
       PROFILE_CONTROL_ID,
     ]),
     closedAtIso: z.string().min(1),
@@ -435,6 +454,8 @@ export const evaluatorPrivateAnnotationBundleSchema = z
       PHASE_FLAT_QUAL120_ID,
       PHASE_SCOPE_DEV40_ID,
       PHASE_SCOPE_QUAL120_ID,
+      PHASE_NATIVE_PRESENCE_DEV40_ID,
+      PHASE_NATIVE_PRESENCE_QUAL120_ID,
     ]),
     freezeId: z.string().min(1),
     independentMaskCaseIds: z.array(z.string().min(1)),

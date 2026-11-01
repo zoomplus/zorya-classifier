@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
+import { getEventListeners } from 'node:events'
 import { mkdtemp, readFile, rm, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -20,6 +21,7 @@ import {
   PROFILE_CONTROL_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
 } from './constants.js'
 import type { CandidateRuntimeBinding } from './runtime-ports.js'
 import type {
@@ -157,6 +159,22 @@ function fixtureOptions(
   }
 }
 
+function nativePresenceFixtureOptions(
+  root: string,
+  fetch: typeof globalThis.fetch,
+  candidateRuntime: CandidateRuntimePort,
+  segmenter: SegmentationPort,
+  opaqueCaseId: string,
+): OfflineFixtureRuntimePortOptions {
+  const options = fixtureOptions(root, fetch, candidateRuntime, segmenter)
+  options.sourceCanvasByOpaqueCaseId = new Map([[opaqueCaseId, { width: 64, height: 48 }]])
+  options.candidateProfileId = PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+  options.nativeRuntime.recipeId = PROFILE_FLAT_CANDIDATE_ID
+  options.nativeRuntime.queryPolicyId = 'strict-authored-scope-v1'
+  options.nativeRuntime.presencePolicyId = 'control-binary-v1'
+  return options
+}
+
 await test('campaign fetch boundary admits only the actual fetch and settles observed usage cost', async () => {
   await withFixtureRoot(async (root) => {
     const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
@@ -277,6 +295,27 @@ await test('candidate profile, recipe, and query policy mismatches fail before f
       (options) => {
         options.candidateProfileId = PROFILE_SCOPE_CANDIDATE_ID
         options.nativeRuntime.queryPolicyId = 'strict-authored-scope-v1'
+      },
+      (options) => {
+        options.candidateProfileId = PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+        options.nativeRuntime.recipeId = PROFILE_FLAT_CANDIDATE_ID
+        options.nativeRuntime.queryPolicyId = 'strict-authored-scope-v1'
+      },
+      (options) => {
+        options.candidateProfileId = PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+        options.nativeRuntime.recipeId = PROFILE_CANDIDATE_ID
+        options.nativeRuntime.queryPolicyId = 'strict-authored-scope-v1'
+        options.nativeRuntime.presencePolicyId = 'control-binary-v1'
+      },
+      (options) => {
+        options.candidateProfileId = PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+        options.nativeRuntime.recipeId = PROFILE_FLAT_CANDIDATE_ID
+        options.nativeRuntime.presencePolicyId = 'control-binary-v1'
+      },
+      (options) => {
+        options.candidateProfileId = PROFILE_SCOPE_CANDIDATE_ID
+        options.nativeRuntime.queryPolicyId = 'strict-authored-scope-v1'
+        options.nativeRuntime.presencePolicyId = 'control-binary-v1'
       },
     ]
     for (const [index, mutate] of mutations.entries()) {
@@ -571,6 +610,7 @@ await test('candidate port uses ordinary Luna vision route and retains its origi
           row: result.outputRow,
           logical: result.logicalReceipts,
           physical: result.physicalReceipts,
+          caseError: result.caseError,
         }),
       )
       assert.equal(result.outputRow.cutoutPresent, true)
@@ -864,7 +904,7 @@ await test('authored-scope runtime snapshots and stamps the exact candidate bind
         { profileId: PROFILE_SCOPE_CANDIDATE_ID, reservedUsdPerFetch: 0.55, ledger },
       )
       assert.equal(result.outputRow.profileId, PROFILE_SCOPE_CANDIDATE_ID)
-      assert.equal(result.outputRow.caseState, 'success')
+      assert.equal(result.outputRow.caseState, 'success', result.caseError)
       assert.equal(result.caseArtifactSidecars?.[0]?.profileId, PROFILE_SCOPE_CANDIDATE_ID)
       assert.equal(
         runtimePorts.artifacts.cutoutsByProfileAndCase.has(
@@ -1796,6 +1836,657 @@ await test('cleanup failure after successful control artifacts clears sidecars a
       assert.ok(result.physicalReceipts.every((receipt) => receipt.settled))
       assert.match(result.caseError ?? '', /controlled cleanup fault/u)
     } finally {
+      await runtimePorts.dispose()
+    }
+  })
+})
+
+await test('native-presence v4 records fixed native and vision routes with composite receipts', async () => {
+  await withFixtureRoot(async (root, source) => {
+    const calls: Array<{ url: string; body: string }> = []
+    const fetch = async (url: RequestInfo | URL, init?: RequestInit) => {
+      const entry = { url: String(url), body: String(init?.body ?? '') }
+      calls.push(entry)
+      return entry.url.endsWith('/api/alpha/decisions')
+        ? alphaReply(JSON.parse(entry.body) as unknown, 0.01)
+        : visionReply('openai/gpt-6-luna', 0.02)
+    }
+    const candidateRuntime: CandidateRuntimePort = {
+      async run(input) {
+        const state = await input.imageState(
+          { bytes: input.encodedImage, width: 64, height: 48 },
+          input.signal,
+        )
+        const presence = await input.presenceDecision?.decide(
+          {
+            state,
+            questions: {
+              presence: {
+                type: 'choice',
+                rankingSize: 1,
+                instructions: 'Choose whether the target is present.',
+                criteria: {
+                  present: 'The target is visible.',
+                  absent: 'The target is not visible.',
+                },
+              },
+            },
+          },
+          input.signal,
+        )
+        assert.equal(presence?.answers.presence?.type, 'choice')
+        await assert.rejects(
+          () =>
+            input.presenceDecision!.decide(
+              {
+                state,
+                questions: {
+                  presence: {
+                    type: 'choice',
+                    rankingSize: 1,
+                    instructions: 'Choose whether the target is present.',
+                    criteria: {
+                      present: 'The target is visible.',
+                      absent: 'The target is not visible.',
+                    },
+                  },
+                },
+              },
+              input.signal,
+            ),
+          (error: unknown) => error instanceof Error,
+        )
+        for (let index = 0; index < 3; index++) {
+          await input.decision.decide(
+            {
+              state,
+              questions: {
+                selection: {
+                  type: 'choice',
+                  rankingSize: 1,
+                  instructions: 'Choose a visible result.',
+                  criteria: {
+                    visible: 'The target is visible.',
+                    absent: 'The target is absent.',
+                  },
+                },
+              },
+            },
+            input.signal,
+          )
+        }
+        await assert.rejects(
+          () =>
+            input.decision.decide(
+              {
+                state,
+                questions: {
+                  selection: {
+                    type: 'choice',
+                    rankingSize: 1,
+                    instructions: 'Choose a visible result.',
+                    criteria: {
+                      visible: 'The target is visible.',
+                      absent: 'The target is absent.',
+                    },
+                  },
+                },
+              },
+              input.signal,
+            ),
+          (error: unknown) => error instanceof Error,
+        )
+        const pixels = maskBytes(64, 48, { left: 10, top: 8, width: 6, height: 5 })
+        return {
+          recipeId: PROFILE_FLAT_CANDIDATE_ID,
+          status: 'located' as const,
+          family: 'D' as const,
+          alias: 'D00',
+          sourceAlias: 'D00',
+          originalEncodedSha256: digest(input.encodedImage),
+          sourceFrame: { sha256: digest('oriented-frame'), width: 64, height: 48 },
+          mask: {
+            format: 'binary-lsb0' as const,
+            width: 64,
+            height: 48,
+            data: new Uint8Array(packBinaryLsb0V1(64, 48, pixels)),
+          },
+          region: { left: 10, top: 8, width: 6, height: 5 },
+          center: { x: 13, y: 10.5 },
+          cutout: {
+            data: new Uint8Array(6 * 5 * 4).fill(255),
+            width: 6,
+            height: 5,
+            format: 'rgba8' as const,
+          },
+        }
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment() {
+        return {
+          status: 'unknown',
+          reason: 'unused',
+          metadata: {
+            method: 'fixture',
+            backend: 'fixture',
+            durationMs: 0,
+            input: { width: 1, height: 1 },
+          },
+        }
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const options = fixtureOptions(root, fetch, candidateRuntime, segmenter)
+    options.sourceCanvasByOpaqueCaseId = new Map([
+      ['opaque-native-presence-case', { width: 64, height: 48 }],
+    ])
+    options.candidateProfileId = PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+    options.nativeRuntime.recipeId = PROFILE_FLAT_CANDIDATE_ID
+    options.nativeRuntime.queryPolicyId = 'strict-authored-scope-v1'
+    options.nativeRuntime.presencePolicyId = 'control-binary-v1'
+    options.createCandidateRuntime = (recipeId, binding) => {
+      assert.equal(recipeId, PROFILE_FLAT_CANDIDATE_ID)
+      assert.deepEqual(binding, {
+        candidateProfileId: PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+        recipeId: PROFILE_FLAT_CANDIDATE_ID,
+        queryPolicyId: 'strict-authored-scope-v1',
+        presencePolicyId: 'control-binary-v1',
+      })
+      return candidateRuntime
+    }
+    const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(options)
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    try {
+      const result = await runtimePorts.candidatePort.execute(
+        {
+          opaqueCaseId: 'opaque-native-presence-case',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        {
+          profileId: PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+          reservedUsdPerFetch: 0.55,
+          ledger,
+        },
+      )
+      assert.equal(result.outputRow.caseState, 'success', result.caseError)
+      assert.deepEqual(
+        result.logicalReceipts.map((receipt) => receipt.logicalId),
+        [1, 2, 3, 4, 5, 6],
+      )
+      assert.deepEqual(
+        result.physicalReceipts.map((receipt) => receipt.logicalId),
+        [1, 3, 4, 5],
+      )
+      assert.equal(result.logicalReceipts[1]?.outcome, 'preflight_failed')
+      assert.deepEqual(result.logicalReceipts[1]?.physicalIds, [])
+      assert.equal(result.logicalReceipts[5]?.outcome, 'preflight_failed')
+      assert.deepEqual(result.logicalReceipts[5]?.physicalIds, [])
+      assert.equal(new Set(result.physicalReceipts.map((receipt) => receipt.receiptId)).size, 4)
+      assert.deepEqual(
+        calls.map((call) => call.url),
+        [
+          'https://openrouter.ai/api/alpha/decisions',
+          'https://openrouter.ai/api/v1/chat/completions',
+          'https://openrouter.ai/api/v1/chat/completions',
+          'https://openrouter.ai/api/v1/chat/completions',
+        ],
+      )
+      assert.deepEqual(
+        calls.map((call) => (JSON.parse(call.body) as { model: string }).model),
+        [
+          'openai/gpt-6-luna-decisions',
+          'openai/gpt-6-luna',
+          'openai/gpt-6-luna',
+          'openai/gpt-6-luna',
+        ],
+      )
+      assert.ok(calls.every((call) => call.body.includes('sourceImageTransform')))
+      assert.deepEqual(
+        runtimePorts.fetchJournal.map((entry) => [
+          entry.endpoint,
+          entry.logicalId,
+          entry.recorderPhysicalId,
+          entry.requestBodySha256,
+        ]),
+        [
+          ['/api/alpha/decisions', 1, 1, digest(calls[0]!.body)],
+          ['/api/v1/chat/completions', 1, 1, digest(calls[1]!.body)],
+          ['/api/v1/chat/completions', 2, 2, digest(calls[2]!.body)],
+          ['/api/v1/chat/completions', 3, 3, digest(calls[3]!.body)],
+        ],
+      )
+      assert.deepEqual(
+        runtimePorts.fetchJournal.map((entry) => entry.reservationId),
+        [1, 2, 3, 4],
+      )
+      assert.equal(ledger.snapshot().physicalDispatchCount, 4)
+    } finally {
+      await runtimePorts.dispose()
+    }
+  })
+})
+
+await test('native-presence absence ends with one native call and no vision dispatch', async () => {
+  await withFixtureRoot(async (root, source) => {
+    const calls: string[] = []
+    const fetch = async (url: RequestInfo | URL, init?: RequestInit) => {
+      calls.push(String(url))
+      return alphaReply(JSON.parse(String(init?.body)) as unknown, 0.01)
+    }
+    const candidateRuntime: CandidateRuntimePort = {
+      async run(input) {
+        const state = await input.imageState(
+          { bytes: input.encodedImage, width: 64, height: 48 },
+          input.signal,
+        )
+        const presence = await input.presenceDecision!.decide(
+          {
+            state,
+            questions: {
+              presence: {
+                type: 'choice',
+                rankingSize: 1,
+                instructions: 'Choose whether the target is present.',
+                criteria: {
+                  absent: 'The target is not visible.',
+                  present: 'The target is visible.',
+                },
+              },
+            },
+          },
+          input.signal,
+        )
+        const answer = presence.answers.presence
+        assert.ok(answer?.type === 'choice')
+        assert.equal(answer.choice, 'absent')
+        return {
+          recipeId: PROFILE_FLAT_CANDIDATE_ID,
+          status: 'unknown' as const,
+          reason: 'target-absent',
+        }
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment() {
+        return {
+          status: 'unknown',
+          reason: 'unused',
+          metadata: {
+            method: 'fixture',
+            backend: 'fixture',
+            durationMs: 0,
+            input: { width: 1, height: 1 },
+          },
+        }
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const options = nativePresenceFixtureOptions(
+      root,
+      fetch,
+      candidateRuntime,
+      segmenter,
+      'opaque-native-absent-case',
+    )
+    const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(options)
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    try {
+      const result = await runtimePorts.candidatePort.execute(
+        {
+          opaqueCaseId: 'opaque-native-absent-case',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        {
+          profileId: PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+          reservedUsdPerFetch: 0.55,
+          ledger,
+        },
+      )
+      assert.equal(result.outputRow.caseState, 'not_found', result.caseError)
+      assert.equal(result.outputRow.box, null)
+      assert.equal(result.outputRow.cutoutPresent, false)
+      assert.deepEqual(calls, ['https://openrouter.ai/api/alpha/decisions'])
+      assert.equal(result.logicalReceipts.length, 1)
+      assert.equal(result.physicalReceipts.length, 1)
+      assert.equal(ledger.snapshot().physicalDispatchCount, 1)
+    } finally {
+      await runtimePorts.dispose()
+    }
+  })
+})
+
+await test('native recorder construction failure releases the abort listener and owned source copy', async () => {
+  await withFixtureRoot(async (root, source) => {
+    let providerCalls = 0
+    let decisionFactoryCalls = 0
+    const fetch = async () => {
+      providerCalls++
+      return alphaReply({})
+    }
+    const candidateRuntime: CandidateRuntimePort = {
+      async run() {
+        return {
+          recipeId: PROFILE_FLAT_CANDIDATE_ID,
+          status: 'unknown' as const,
+          reason: 'unused',
+        }
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment() {
+        return {
+          status: 'unknown',
+          reason: 'unused',
+          metadata: {
+            method: 'fixture',
+            backend: 'fixture',
+            durationMs: 0,
+            input: { width: 1, height: 1 },
+          },
+        }
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const options = nativePresenceFixtureOptions(
+      root,
+      fetch,
+      candidateRuntime,
+      segmenter,
+      'opaque-recorder-construction-failure',
+    )
+    const engine = options.controlEngine
+    if (engine.kind !== 'offline-fixture-only')
+      throw new TypeError('Expected an explicit offline control fixture')
+    options.controlEngine = {
+      ...engine,
+      createOpenRouterDecisions(decisionOptions) {
+        decisionFactoryCalls++
+        if (decisionFactoryCalls === 1) throw new Error('injected native decision factory failure')
+        return engine.createOpenRouterDecisions(decisionOptions)
+      },
+    }
+    const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(options)
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    const callerBytes = Buffer.from(source)
+    const callerBytesBefore = Buffer.from(callerBytes)
+    const controller = new AbortController()
+    const listenerCountBefore = getEventListeners(controller.signal, 'abort').length
+    let caught: unknown
+    try {
+      try {
+        await runtimePorts.candidatePort.execute(
+          {
+            opaqueCaseId: 'opaque-recorder-construction-failure',
+            sourceBytes: callerBytes,
+            targetTaskText: 'the authored visible sign',
+          },
+          {
+            profileId: PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+            reservedUsdPerFetch: 0.55,
+            ledger,
+            signal: controller.signal,
+          },
+        )
+      } catch (error) {
+        caught = error
+      }
+      assert.equal(decisionFactoryCalls, 1)
+      assert.match(String(caught), /injected native decision factory failure/u)
+      assert.equal(providerCalls, 0)
+      assert.deepEqual(callerBytes, callerBytesBefore)
+      assert.equal(getEventListeners(controller.signal, 'abort').length, listenerCountBefore)
+    } finally {
+      await runtimePorts.dispose()
+    }
+  })
+})
+
+await test('native and vision provider refusals retain route-specific bound evidence and remapped IDs', async () => {
+  for (const refusedRoute of ['native-presence', 'vision', 'generic-vision-502'] as const) {
+    await withFixtureRoot(async (root, source) => {
+      const calls: string[] = []
+      const fetch = async (url: RequestInfo | URL, init?: RequestInit) => {
+        const endpoint = new URL(String(url)).pathname
+        calls.push(endpoint)
+        if (endpoint === '/api/alpha/decisions' && refusedRoute === 'native-presence') {
+          const body = z
+            .object({ questions: z.record(z.unknown()) })
+            .passthrough()
+            .parse(JSON.parse(String(init?.body)) as unknown)
+          const questionId = Object.keys(body.questions)[0]
+          assert.ok(questionId)
+          return new Response(
+            JSON.stringify({
+              error: { code: 502, message: `OpenAI refused to answer question "${questionId}"` },
+            }),
+            { status: 502, headers: { 'Content-Type': 'application/json' } },
+          )
+        }
+        if (endpoint === '/api/alpha/decisions')
+          return alphaReply(JSON.parse(String(init?.body)) as unknown, 0.01)
+        if (refusedRoute === 'generic-vision-502')
+          return new Response(JSON.stringify({ error: { message: 'Bad gateway' } }), {
+            status: 502,
+            headers: { 'Content-Type': 'application/json' },
+          })
+        return response({
+          id: 'offline-v4-chat-refusal',
+          model: 'openai/gpt-6-luna',
+          provider: 'OpenAI',
+          choices: [{ index: 0, finish_reason: 'stop', message: { refusal: 'fixture refusal' } }],
+        })
+      }
+      const candidateRuntime: CandidateRuntimePort = {
+        async run(input) {
+          await input.presenceDecision!.decide(
+            {
+              state: ['caller target only'],
+              questions: {
+                presence: {
+                  type: 'choice',
+                  rankingSize: 1,
+                  instructions: 'Choose presence.',
+                  criteria: { present: 'Visible.', absent: 'Absent.' },
+                },
+              },
+            },
+            input.signal,
+          )
+          if (refusedRoute !== 'native-presence')
+            await input.decision.decide(
+              {
+                state: ['caller target only'],
+                questions: {
+                  selection: {
+                    type: 'choice',
+                    rankingSize: 1,
+                    instructions: 'Choose one result.',
+                    criteria: { visible: 'Visible.', absent: 'Absent.' },
+                  },
+                },
+              },
+              input.signal,
+            )
+          throw new Error('Expected request-bound refusal was not returned')
+        },
+        async dispose() {},
+      }
+      const segmenter: SegmentationPort = {
+        async segment() {
+          return {
+            status: 'unknown',
+            reason: 'unused',
+            metadata: {
+              method: 'fixture',
+              backend: 'fixture',
+              durationMs: 0,
+              input: { width: 1, height: 1 },
+            },
+          }
+        },
+        async settle() {},
+        async dispose() {},
+      }
+      const options = nativePresenceFixtureOptions(
+        root,
+        fetch,
+        candidateRuntime,
+        segmenter,
+        `opaque-refusal-${refusedRoute}`,
+      )
+      const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(options)
+      const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+      try {
+        const result = await runtimePorts.candidatePort.execute(
+          {
+            opaqueCaseId: `opaque-refusal-${refusedRoute}`,
+            sourceBytes: source,
+            targetTaskText: 'the authored visible sign',
+          },
+          {
+            profileId: PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+            reservedUsdPerFetch: 0.55,
+            ledger,
+            executionPolicy: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY,
+          },
+        )
+        if (refusedRoute === 'generic-vision-502') {
+          assert.equal(result.outputRow.caseState, 'error')
+          assert.equal(result.outputRow.providerRefusalEvidence, undefined)
+          assert.deepEqual(calls, ['/api/alpha/decisions', '/api/v1/chat/completions'])
+          return
+        }
+        assert.equal(result.outputRow.caseState, 'unknown')
+        const evidence = result.outputRow.providerRefusalEvidence
+        assert.ok(evidence)
+        assert.equal(
+          evidence.protocol,
+          refusedRoute === 'native-presence'
+            ? 'openrouter-native-named-refusal-v1'
+            : 'openrouter-chat-message-refusal-v1',
+        )
+        const refusedLogicalId = refusedRoute === 'native-presence' ? 1 : 2
+        assert.equal(evidence.logicalReceiptId, refusedLogicalId)
+        assert.equal(evidence.recorderLogicalId, 1)
+        assert.equal(evidence.physicalReceiptId, refusedRoute === 'native-presence' ? 1 : 2)
+        assert.equal(result.logicalReceipts.length, refusedRoute === 'native-presence' ? 1 : 2)
+        assert.equal(result.physicalReceipts.length, refusedRoute === 'native-presence' ? 1 : 2)
+        assert.deepEqual(
+          calls,
+          refusedRoute === 'native-presence'
+            ? ['/api/alpha/decisions']
+            : ['/api/alpha/decisions', '/api/v1/chat/completions'],
+        )
+      } finally {
+        await runtimePorts.dispose()
+      }
+    })
+  }
+})
+
+await test('native route cancellation stays pending until the actual fetch settles', async () => {
+  await withFixtureRoot(async (root, source) => {
+    let fetchStartedResolve!: () => void
+    const fetchStarted = new Promise<void>((resolve) => {
+      fetchStartedResolve = resolve
+    })
+    let releaseFetch!: (value: Response) => void
+    const pendingFetch = new Promise<Response>((resolve) => {
+      releaseFetch = resolve
+    })
+    let requestBody = ''
+    const fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
+      requestBody = String(init?.body ?? '')
+      fetchStartedResolve()
+      return pendingFetch
+    }
+    const candidateRuntime: CandidateRuntimePort = {
+      async run(input) {
+        await input.presenceDecision!.decide(
+          {
+            state: ['caller target only'],
+            questions: {
+              presence: {
+                type: 'choice',
+                rankingSize: 1,
+                instructions: 'Choose presence.',
+                criteria: { present: 'Visible.', absent: 'Absent.' },
+              },
+            },
+          },
+          input.signal,
+        )
+        throw new Error('Expected cancellation before a candidate result')
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment() {
+        return {
+          status: 'unknown',
+          reason: 'unused',
+          metadata: {
+            method: 'fixture',
+            backend: 'fixture',
+            durationMs: 0,
+            input: { width: 1, height: 1 },
+          },
+        }
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const options = nativePresenceFixtureOptions(
+      root,
+      fetch,
+      candidateRuntime,
+      segmenter,
+      'opaque-native-cancel',
+    )
+    const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(options)
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    const controller = new AbortController()
+    let settled = false
+    try {
+      const executing = runtimePorts.candidatePort
+        .execute(
+          {
+            opaqueCaseId: 'opaque-native-cancel',
+            sourceBytes: source,
+            targetTaskText: 'the authored visible sign',
+          },
+          {
+            profileId: PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+            reservedUsdPerFetch: 0.55,
+            ledger,
+            signal: controller.signal,
+          },
+        )
+        .then((value) => {
+          settled = true
+          return value
+        })
+      await fetchStarted
+      controller.abort(new Error('native cancellation fixture'))
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      assert.equal(settled, false)
+      assert.equal(ledger.snapshot().inFlightReservations.length, 1)
+      releaseFetch(alphaReply(JSON.parse(requestBody) as unknown, 0.01))
+      const result = await executing
+      assert.equal(result.outputRow.caseState, 'cancelled')
+      assert.equal(ledger.snapshot().physicalDispatchCount, 1)
+      assert.equal(ledger.snapshot().inFlightReservations.length, 0)
+    } finally {
+      releaseFetch(response({}))
       await runtimePorts.dispose()
     }
   })
