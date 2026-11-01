@@ -48,7 +48,18 @@ const PINNED_V1_CANDIDATE_CLOSEOUT_SHA256 =
   '48e2bb88b7f08a26b0aada1537191eaed6b7218c79f6573b174692851fe279cb'
 const PINNED_V1_CONTROL_CLOSEOUT_SHA256 =
   '470ba940432cf5a5a823f5c70b1eccff6878d77cd15f2b0cbcd67bed201a113f'
+const PINNED_V2_BINDING_SHA256 = 'a6d8945a52bb6e6054dbba1dcbba6425ce8efc4cb6d9ede242c71f40081aefa0'
+const PINNED_V2_DEV8_REPORT_SHA256 =
+  '8f5d28f43edc23ba96ead729ecc854ad47f6390da67e4b1848f7efb6ab2de8d3'
+const PINNED_V2_DEV8_REVIEW_SHA256 =
+  'd84e18b5e3dff393b35fd45467f4dd521e96e86e8defa9c33d287108da496e9a'
+const PINNED_V2_CANDIDATE_CLOSEOUT_SHA256 =
+  'cc13f0674248c7920f6ed16557f89d6608bf46b8a09eba14f6b84e7039be5c27'
+const PINNED_V2_CONTROL_CLOSEOUT_SHA256 =
+  '52a63701820c055e984cc5e085d0ab6e752eb07f7e40686363afff8c6ef74322'
+const DISJOINT_FREEZE_ID = 'h8a-flat-disjoint-dev40-20261101-v1'
 const FLAT_EXPERIMENT_DIRECTORY = join('experiments', 'h8a-flat-dev40-v1')
+const DISJOINT_EXPERIMENT_DIRECTORY = join('experiments', 'flat-disjoint-replication-v1')
 const RUN_ROOT_MARKER = '.h8a-shared-campaign.json'
 const RUN_ROOT_LOCK = '.h8a-native-runner.lock'
 const JSON_LIMIT = 4 * 1024 * 1024
@@ -793,6 +804,116 @@ async function verifyPriorV1StopEvidence(campaignRoot: string): Promise<number> 
   return priorKnownCostUsd
 }
 
+async function verifyPriorDisjointStopEvidence(campaignRoot: string): Promise<number> {
+  await verifyPriorV1StopEvidence(campaignRoot)
+  const priorFlatRoot = resolve(campaignRoot, FLAT_EXPERIMENT_DIRECTORY)
+  const priorFlatBinding = await assertPinnedFileDigest(
+    join(priorFlatRoot, 'phase-binding.json'),
+    PINNED_V2_BINDING_SHA256,
+  )
+  const flatBinding = devPhaseBindingSchema.parse(
+    JSON.parse(priorFlatBinding.toString('utf8')) as unknown,
+  )
+  if (
+    flatBinding.phaseId !== PHASE_FLAT_DEV40_ID ||
+    flatBinding.freezeId !== 'h8a-flat-dev40-20261101-v1'
+  )
+    throw new RangeError('Existing flat V2 binding differs from the fixed historical freeze')
+
+  const reportBytes = await assertPinnedFileDigest(
+    join(priorFlatRoot, 'reports', 'dev8-report.json'),
+    PINNED_V2_DEV8_REPORT_SHA256,
+  )
+  const reviewBytes = await assertPinnedFileDigest(
+    join(priorFlatRoot, 'reviews', 'dev8-review.json'),
+    PINNED_V2_DEV8_REVIEW_SHA256,
+  )
+  const runner = await import('./dev-screen-runner.js')
+  const report = runner.devScreenReportSchema.parse(JSON.parse(reportBytes.toString('utf8')))
+  const review = screenReviewSchema.parse(JSON.parse(reviewBytes.toString('utf8')) as unknown)
+  const { reportSha256, ...reportBody } = report
+  const { reviewSha256, ...reviewBody } = review
+  if (
+    report.screen !== 'dev8' ||
+    hashIdentity(reportBody) !== reportSha256 ||
+    report.completedPairs >= report.expectedPairs ||
+    report.hardBlockers.length === 0 ||
+    review.judgement !== 'stop' ||
+    review.screenReportSha256 !== reportSha256 ||
+    hashIdentity(reviewBody) !== reviewSha256
+  )
+    throw new RangeError('Prior flat V2 DEV8 stop report or review is invalid')
+
+  const closeouts = await Promise.all([
+    assertPinnedFileDigest(
+      join(campaignRoot, 'closeouts', 'dev40-candidate-closeout.json'),
+      PINNED_V1_CANDIDATE_CLOSEOUT_SHA256,
+    ),
+    assertPinnedFileDigest(
+      join(campaignRoot, 'closeouts', 'dev40-control-closeout.json'),
+      PINNED_V1_CONTROL_CLOSEOUT_SHA256,
+    ),
+    assertPinnedFileDigest(
+      join(priorFlatRoot, 'closeouts', 'dev40-candidate-closeout.json'),
+      PINNED_V2_CANDIDATE_CLOSEOUT_SHA256,
+    ),
+    assertPinnedFileDigest(
+      join(priorFlatRoot, 'closeouts', 'dev40-control-closeout.json'),
+      PINNED_V2_CONTROL_CLOSEOUT_SHA256,
+    ),
+  ])
+  const expected = [
+    {
+      phaseId: 'h8a-fresh-paired-dev40-v1',
+      freezeId: 'h8a-fresh-dev40-20261101-v1',
+      profileId: 'h8a-cpu-raw-target-v1',
+    },
+    {
+      phaseId: 'h8a-fresh-paired-dev40-v1',
+      freezeId: 'h8a-fresh-dev40-20261101-v1',
+      profileId: 'v02-final-v3-fresh-cohort-replay-v1',
+    },
+    {
+      phaseId: PHASE_FLAT_DEV40_ID,
+      freezeId: 'h8a-flat-dev40-20261101-v1',
+      profileId: PROFILE_FLAT_CANDIDATE_ID,
+    },
+    {
+      phaseId: PHASE_FLAT_DEV40_ID,
+      freezeId: 'h8a-flat-dev40-20261101-v1',
+      profileId: 'v02-final-v3-fresh-cohort-replay-v1',
+    },
+  ] as const
+  const receiptIds = new Set<number>()
+  let knownCostUsd = 0
+  for (const [index, bytes] of closeouts.entries()) {
+    const closeout = immutableCloseoutSchema.parse(JSON.parse(bytes.toString('utf8')) as unknown)
+    validateReceiptGraph(closeout)
+    const binding = expected[index]!
+    if (
+      closeout.phaseId !== binding.phaseId ||
+      closeout.freezeId !== binding.freezeId ||
+      closeout.profileId !== binding.profileId
+    )
+      throw new RangeError('Historical V1/V2 closeout differs from its pinned phase or profile')
+    for (const receipt of closeout.physicalReceipts) {
+      if (
+        !receipt.settled ||
+        receipt.chargeState !== 'known' ||
+        receipt.costUsd === null ||
+        receipt.physicalId === null ||
+        receiptIds.has(receipt.receiptId)
+      )
+        throw new RangeError('Historical physical receipts are not unique, settled, and known')
+      receiptIds.add(receipt.receiptId)
+      knownCostUsd += receipt.costUsd
+    }
+  }
+  if (receiptIds.size !== 14 || Math.abs(knownCostUsd - 0.009603065) > 1e-12)
+    throw new RangeError('Historical V1/V2 evidence does not prove 14 distinct settled charges')
+  return knownCostUsd
+}
+
 interface FlatRegistration {
   schema: 'h8a-flat-dev40-registration-v1'
   authoritySha256: string
@@ -821,6 +942,33 @@ const flatRegistrationSchema = z
   })
   .strict()
 
+const disjointRegistrationSchema = z
+  .object({
+    schema: z.literal('h8a-disjoint-dev40-registration-v1'),
+    studyId: z.literal('flat-disjoint-replication-v1'),
+    authoritySha256: digestSchema,
+    freezeId: z.literal(DISJOINT_FREEZE_ID),
+    phaseId: z.literal(PHASE_FLAT_DEV40_ID),
+    freezeCommitmentSha256: digestSchema,
+    parentRegistrationSha256: z.literal(
+      '5c63045a648928c9aefe12aad99464e8394b3bc42c133b39821036eb74f3bff0',
+    ),
+    acceptedHistorySha256: z.literal(
+      '8743d618233e84025463dbfd6f51c580388e9e053a716fbed0ff76afb9c215f4',
+    ),
+    priorV1BindingSha256: z.literal(PINNED_V1_BINDING_SHA256),
+    priorV1StopReportSha256: z.literal(PINNED_V1_DEV8_REPORT_SHA256),
+    priorV1StopReviewSha256: z.literal(PINNED_V1_DEV8_REVIEW_SHA256),
+    priorV1CandidateCloseoutSha256: z.literal(PINNED_V1_CANDIDATE_CLOSEOUT_SHA256),
+    priorV1ControlCloseoutSha256: z.literal(PINNED_V1_CONTROL_CLOSEOUT_SHA256),
+    priorV2BindingSha256: z.literal(PINNED_V2_BINDING_SHA256),
+    priorV2StopReportSha256: z.literal(PINNED_V2_DEV8_REPORT_SHA256),
+    priorV2StopReviewSha256: z.literal(PINNED_V2_DEV8_REVIEW_SHA256),
+    priorV2CandidateCloseoutSha256: z.literal(PINNED_V2_CANDIDATE_CLOSEOUT_SHA256),
+    priorV2ControlCloseoutSha256: z.literal(PINNED_V2_CONTROL_CLOSEOUT_SHA256),
+  })
+  .strict()
+
 async function writeExclusiveOrVerifyExact(path: string, expected: Buffer): Promise<void> {
   try {
     await writeFile(path, expected, { flag: 'wx', mode: 0o600 })
@@ -831,6 +979,40 @@ async function writeExclusiveOrVerifyExact(path: string, expected: Buffer): Prom
   const existing = await readVerifiedRegularFile(path, undefined, dirname(path), JSON_LIMIT)
   if (!existing.equals(expected))
     throw new RangeError('Existing flat registration file conflicts with frozen bytes')
+}
+
+async function writeImmutableRegistrationFiles(
+  artifactRoot: string,
+  binding: z.infer<typeof devPhaseBindingSchema>,
+  registration: Buffer,
+  label: 'flat' | 'disjoint',
+): Promise<void> {
+  await ensureRealDirectory(artifactRoot)
+  const registrationFiles = new Map([
+    ['phase-binding.json', Buffer.from(`${JSON.stringify(binding)}\n`)],
+    ['registration.json', registration],
+  ])
+  const existing = await readdir(artifactRoot)
+  if (existing.some((name) => !registrationFiles.has(name)))
+    throw new RangeError(`${label} namespace contains stale artifacts before registration`)
+  for (const name of existing) {
+    const bytes = await readVerifiedRegularFile(
+      join(artifactRoot, name),
+      undefined,
+      artifactRoot,
+      JSON_LIMIT,
+    )
+    if (!bytes.equals(registrationFiles.get(name)!))
+      throw new RangeError(`Existing ${label} registration conflicts with frozen bytes`)
+  }
+  await writeExclusiveOrVerifyExact(
+    join(artifactRoot, 'phase-binding.json'),
+    registrationFiles.get('phase-binding.json')!,
+  )
+  await writeExclusiveOrVerifyExact(
+    join(artifactRoot, 'registration.json'),
+    registrationFiles.get('registration.json')!,
+  )
 }
 
 async function ensureRealDirectory(path: string): Promise<void> {
@@ -844,13 +1026,42 @@ async function ensureRealDirectory(path: string): Promise<void> {
     throw new RangeError('Flat campaign path component must be a real directory')
 }
 
+async function withCampaignRegistrationLock<T>(
+  root: string,
+  acquireLock: ScreenRunDependencies['acquireLock'],
+  operation: () => Promise<T>,
+): Promise<T> {
+  const release = await acquireLock(root)
+  try {
+    return await operation()
+  } finally {
+    await release()
+  }
+}
+
+async function readCampaignRegistrationLedger(
+  root: string,
+  openLedger: ScreenRunDependencies['openLedger'],
+) {
+  const ledger = await openLedger(join(root, 'campaign-ledger.json'))
+  ledger.assertResumeAllowed()
+  return ledger.snapshot()
+}
+
+function hasCampaignBudgetCaps(snapshot: ReturnType<CampaignLedger['snapshot']>): boolean {
+  return (
+    snapshot.maxCostUsd === CAMPAIGN_MAX_COST_USD &&
+    snapshot.maxPhysicalCalls === CAMPAIGN_MAX_PHYSICAL_CALLS
+  )
+}
+
 export async function verifyFlatDevRegistration(
   campaignRoot: string,
   authoritySha256: string,
   freeze: Awaited<ReturnType<typeof verifyFreeze>>['freeze'],
   verifyPriorEvidence: (root: string) => Promise<number> = verifyPriorV1StopEvidence,
 ): Promise<string> {
-  if (freeze.phaseId !== PHASE_FLAT_DEV40_ID)
+  if (freeze.phaseId !== PHASE_FLAT_DEV40_ID || freeze.freezeId !== 'h8a-flat-dev40-20261101-v1')
     throw new RangeError('Flat registration requires the flat DEV40 profile freeze')
   if (
     candidateIdForPhase(freeze.phaseId) !== PROFILE_FLAT_CANDIDATE_ID ||
@@ -895,6 +1106,66 @@ export async function verifyFlatDevRegistration(
   return artifactRoot
 }
 
+function disjointExperimentRoot(campaignRoot: string): string {
+  const path = resolve(campaignRoot, DISJOINT_EXPERIMENT_DIRECTORY)
+  if (!within(resolve(campaignRoot), path) || path === resolve(campaignRoot))
+    throw new RangeError('Disjoint experiment namespace escapes the registered campaign root')
+  return path
+}
+
+export async function verifyDisjointDevRegistration(
+  campaignRoot: string,
+  authoritySha256: string,
+  freeze: Awaited<ReturnType<typeof verifyFreeze>>['freeze'],
+  verifyPriorEvidence: (root: string) => Promise<number> = verifyPriorDisjointStopEvidence,
+): Promise<string> {
+  if (
+    freeze.phaseId !== PHASE_FLAT_DEV40_ID ||
+    freeze.freezeId !== DISJOINT_FREEZE_ID ||
+    candidateIdForPhase(freeze.phaseId) !== PROFILE_FLAT_CANDIDATE_ID ||
+    freeze.profileBindings[0]?.profileId !== PROFILE_FLAT_CANDIDATE_ID
+  )
+    throw new RangeError('Disjoint registration requires its exact frozen flat DEV40 profile')
+  await verifyPriorEvidence(campaignRoot)
+  const artifactRoot = disjointExperimentRoot(campaignRoot)
+  const rootStat = await lstat(artifactRoot)
+  if (
+    !rootStat.isDirectory() ||
+    rootStat.isSymbolicLink() ||
+    (await realpath(artifactRoot)) !== artifactRoot
+  )
+    throw new RangeError('Disjoint experiment namespace must be an existing real directory')
+  const [registrationBytes, bindingBytes] = await Promise.all([
+    readVerifiedRegularFile(
+      join(artifactRoot, 'registration.json'),
+      undefined,
+      artifactRoot,
+      JSON_LIMIT,
+    ),
+    readVerifiedRegularFile(
+      join(artifactRoot, 'phase-binding.json'),
+      undefined,
+      artifactRoot,
+      JSON_LIMIT,
+    ),
+  ])
+  const registration = disjointRegistrationSchema.parse(
+    JSON.parse(registrationBytes.toString('utf8')) as unknown,
+  )
+  const binding = devPhaseBindingSchema.parse(JSON.parse(bindingBytes.toString('utf8')) as unknown)
+  if (
+    registration.authoritySha256 !== authoritySha256 ||
+    registration.freezeId !== freeze.freezeId ||
+    registration.freezeCommitmentSha256 !== freeze.cohortCommitmentSha256 ||
+    binding.phaseId !== PHASE_FLAT_DEV40_ID ||
+    binding.authoritySha256 !== authoritySha256 ||
+    binding.freezeId !== freeze.freezeId ||
+    binding.freezeCommitmentSha256 !== freeze.cohortCommitmentSha256
+  )
+    throw new RangeError('Disjoint namespace is bound to different authority or freeze bytes')
+  return artifactRoot
+}
+
 export async function registerFlatDevComparison(
   options: Pick<CliOptions, 'authoritySha256'>,
   verified: VerifiedScreenInputs,
@@ -906,22 +1177,21 @@ export async function registerFlatDevComparison(
     openLedger: (path) => CampaignLedger.open(path),
   },
 ): Promise<void> {
-  if (verified.freeze.phaseId !== PHASE_FLAT_DEV40_ID)
+  if (
+    verified.freeze.phaseId !== PHASE_FLAT_DEV40_ID ||
+    verified.freeze.freezeId !== 'h8a-flat-dev40-20261101-v1'
+  )
     throw new RangeError('register only accepts the separately frozen flat DEV40 profile')
   const root = config.canonicalRoot
   const verifyPriorEvidence = dependencies.verifyPriorV1Evidence ?? verifyPriorV1StopEvidence
   await validateRunRootForFlat(config)
   await verifyPriorEvidence(root)
-  const release = await dependencies.acquireLock(root)
-  try {
+  await withCampaignRegistrationLock(root, dependencies.acquireLock, async () => {
     await validateRunRootForFlat(config)
     const minimumPriorSpend = await verifyPriorEvidence(root)
-    const ledger = await dependencies.openLedger(join(root, 'campaign-ledger.json'))
-    ledger.assertResumeAllowed()
-    const snapshot = ledger.snapshot()
+    const snapshot = await readCampaignRegistrationLedger(root, dependencies.openLedger)
     if (
-      snapshot.maxCostUsd !== CAMPAIGN_MAX_COST_USD ||
-      snapshot.maxPhysicalCalls !== CAMPAIGN_MAX_PHYSICAL_CALLS ||
+      !hasCampaignBudgetCaps(snapshot) ||
       snapshot.logicalAttemptCount < 3 ||
       snapshot.physicalDispatchCount < 7 ||
       (snapshot.nextReservationId ?? 0) < 8 ||
@@ -950,34 +1220,88 @@ export async function registerFlatDevComparison(
       priorV1CandidateCloseoutSha256: PINNED_V1_CANDIDATE_CLOSEOUT_SHA256,
       priorV1ControlCloseoutSha256: PINNED_V1_CONTROL_CLOSEOUT_SHA256,
     })
-    const registrationFiles = new Map([
-      ['phase-binding.json', Buffer.from(`${JSON.stringify(binding)}\n`)],
-      ['registration.json', Buffer.from(`${JSON.stringify(registration)}\n`)],
-    ])
-    const existing = await readdir(artifactRoot)
-    if (existing.some((name) => !registrationFiles.has(name)))
-      throw new RangeError('Flat namespace contains stale artifacts before registration')
-    for (const name of existing) {
-      const bytes = await readVerifiedRegularFile(
-        join(artifactRoot, name),
-        undefined,
-        artifactRoot,
-        JSON_LIMIT,
-      )
-      if (!bytes.equals(registrationFiles.get(name)!))
-        throw new RangeError('Existing flat registration file conflicts with frozen bytes')
-    }
-    await writeExclusiveOrVerifyExact(
-      join(artifactRoot, 'phase-binding.json'),
-      registrationFiles.get('phase-binding.json')!,
+    await writeImmutableRegistrationFiles(
+      artifactRoot,
+      binding,
+      Buffer.from(`${JSON.stringify(registration)}\n`),
+      'flat',
     )
-    await writeExclusiveOrVerifyExact(
-      join(artifactRoot, 'registration.json'),
-      registrationFiles.get('registration.json')!,
+  })
+}
+
+export async function registerDisjointDevComparison(
+  options: Pick<CliOptions, 'authoritySha256'>,
+  verified: VerifiedScreenInputs,
+  config: VerifiedCampaignConfig,
+  dependencies: Pick<ScreenRunDependencies, 'acquireLock' | 'openLedger'> & {
+    verifyPriorEvidence?: (root: string) => Promise<number>
+  } = {
+    acquireLock: acquireRunnerLock,
+    openLedger: (path) => CampaignLedger.open(path),
+  },
+): Promise<void> {
+  if (
+    verified.freeze.phaseId !== PHASE_FLAT_DEV40_ID ||
+    verified.freeze.freezeId !== DISJOINT_FREEZE_ID ||
+    verified.freeze.profileBindings[0]?.profileId !== PROFILE_FLAT_CANDIDATE_ID
+  )
+    throw new RangeError('register only accepts the pinned disjoint flat DEV40 profile')
+  const root = config.canonicalRoot
+  const verifyPriorEvidence = dependencies.verifyPriorEvidence ?? verifyPriorDisjointStopEvidence
+  await validateRunRootForFlat(config)
+  const minimumPriorSpend = await verifyPriorEvidence(root)
+  await withCampaignRegistrationLock(root, dependencies.acquireLock, async () => {
+    await validateRunRootForFlat(config)
+    const confirmedPriorSpend = await verifyPriorEvidence(root)
+    const snapshot = await readCampaignRegistrationLedger(root, dependencies.openLedger)
+    if (
+      !hasCampaignBudgetCaps(snapshot) ||
+      snapshot.logicalAttemptCount !== 5 ||
+      snapshot.physicalDispatchCount !== 14 ||
+      snapshot.nextReservationId !== 15 ||
+      snapshot.inFlightReservations.length !== 0 ||
+      snapshot.unknownReserveUsd !== 0 ||
+      snapshot.knownCostUsd + 1e-12 < confirmedPriorSpend ||
+      confirmedPriorSpend !== minimumPriorSpend
     )
-  } finally {
-    await release()
-  }
+      throw new RangeError('Shared campaign ledger does not contain the settled V1/V2 budget floor')
+    const artifactRoot = disjointExperimentRoot(root)
+    await ensureRealDirectory(join(root, 'experiments'))
+    await ensureRealDirectory(artifactRoot)
+    const binding = devPhaseBindingSchema.parse({
+      schema: 'h8a-phase-campaign-binding-v1',
+      phaseId: PHASE_FLAT_DEV40_ID,
+      authoritySha256: options.authoritySha256,
+      freezeId: verified.freeze.freezeId,
+      freezeCommitmentSha256: verified.freeze.cohortCommitmentSha256,
+    })
+    const registration = disjointRegistrationSchema.parse({
+      schema: 'h8a-disjoint-dev40-registration-v1',
+      studyId: 'flat-disjoint-replication-v1',
+      authoritySha256: options.authoritySha256,
+      freezeId: verified.freeze.freezeId,
+      phaseId: PHASE_FLAT_DEV40_ID,
+      freezeCommitmentSha256: verified.freeze.cohortCommitmentSha256,
+      parentRegistrationSha256: '5c63045a648928c9aefe12aad99464e8394b3bc42c133b39821036eb74f3bff0',
+      acceptedHistorySha256: '8743d618233e84025463dbfd6f51c580388e9e053a716fbed0ff76afb9c215f4',
+      priorV1BindingSha256: PINNED_V1_BINDING_SHA256,
+      priorV1StopReportSha256: PINNED_V1_DEV8_REPORT_SHA256,
+      priorV1StopReviewSha256: PINNED_V1_DEV8_REVIEW_SHA256,
+      priorV1CandidateCloseoutSha256: PINNED_V1_CANDIDATE_CLOSEOUT_SHA256,
+      priorV1ControlCloseoutSha256: PINNED_V1_CONTROL_CLOSEOUT_SHA256,
+      priorV2BindingSha256: PINNED_V2_BINDING_SHA256,
+      priorV2StopReportSha256: PINNED_V2_DEV8_REPORT_SHA256,
+      priorV2StopReviewSha256: PINNED_V2_DEV8_REVIEW_SHA256,
+      priorV2CandidateCloseoutSha256: PINNED_V2_CANDIDATE_CLOSEOUT_SHA256,
+      priorV2ControlCloseoutSha256: PINNED_V2_CONTROL_CLOSEOUT_SHA256,
+    })
+    await writeImmutableRegistrationFiles(
+      artifactRoot,
+      binding,
+      Buffer.from(`${JSON.stringify(registration)}\n`),
+      'disjoint',
+    )
+  })
 }
 
 async function validateRunRootForFlat(config: VerifiedCampaignConfig): Promise<void> {
@@ -1125,6 +1449,7 @@ interface ScreenRunDependencies {
   execute(input: Parameters<typeof executeDevScreen>[0]): ReturnType<typeof executeDevScreen>
   writeReport(message: string): void
   verifyPriorV1Evidence?(root: string): Promise<number>
+  verifyPriorDisjointEvidence?(root: string): Promise<number>
 }
 
 const productionScreenDependencies: ScreenRunDependencies = {
@@ -1201,19 +1526,33 @@ export async function runVerifiedDevScreen(
 ): Promise<void> {
   // This is called only after the complete frozen inputs and runtime proof have passed.
   const flat = verified.freeze.phaseId === PHASE_FLAT_DEV40_ID
+  const disjoint = verified.freeze.freezeId === DISJOINT_FREEZE_ID
+  const verifyDisjointEvidence =
+    dependencies.verifyPriorDisjointEvidence ?? verifyPriorDisjointStopEvidence
   if (flat) await validateRunRootForFlat(config)
   else await validateRunRoot(config, options.authoritySha256, verified.freeze)
-  const artifactRoot = flat
-    ? await verifyFlatDevRegistration(
+  const artifactRoot = disjoint
+    ? await verifyDisjointDevRegistration(
         config.canonicalRoot,
         options.authoritySha256,
         verified.freeze,
-        dependencies.verifyPriorV1Evidence,
+        verifyDisjointEvidence,
       )
-    : config.canonicalRoot
-  const minimumPriorSpend = flat
-    ? await (dependencies.verifyPriorV1Evidence ?? verifyPriorV1StopEvidence)(config.canonicalRoot)
-    : 0
+    : flat
+      ? await verifyFlatDevRegistration(
+          config.canonicalRoot,
+          options.authoritySha256,
+          verified.freeze,
+          dependencies.verifyPriorV1Evidence,
+        )
+      : config.canonicalRoot
+  const minimumPriorSpend = disjoint
+    ? await verifyDisjointEvidence(config.canonicalRoot)
+    : flat
+      ? await (dependencies.verifyPriorV1Evidence ?? verifyPriorV1StopEvidence)(
+          config.canonicalRoot,
+        )
+      : 0
   await verifyPriorStageFiles(artifactRoot, options.screen)
 
   const apiKey = dependencies.getApiKey()
@@ -1233,12 +1572,20 @@ export async function runVerifiedDevScreen(
   try {
     if (flat) {
       await validateRunRootForFlat(config)
-      await verifyFlatDevRegistration(
-        config.canonicalRoot,
-        options.authoritySha256,
-        verified.freeze,
-        dependencies.verifyPriorV1Evidence,
-      )
+      if (disjoint)
+        await verifyDisjointDevRegistration(
+          config.canonicalRoot,
+          options.authoritySha256,
+          verified.freeze,
+          verifyDisjointEvidence,
+        )
+      else
+        await verifyFlatDevRegistration(
+          config.canonicalRoot,
+          options.authoritySha256,
+          verified.freeze,
+          dependencies.verifyPriorV1Evidence,
+        )
     } else await validateRunRoot(config, options.authoritySha256, verified.freeze)
     const ledgerPath = join(config.canonicalRoot, 'campaign-ledger.json')
     const ledger = await dependencies.openLedger(ledgerPath)
@@ -1248,9 +1595,10 @@ export async function runVerifiedDevScreen(
       ledgerSnapshot.maxCostUsd !== CAMPAIGN_MAX_COST_USD ||
       ledgerSnapshot.maxPhysicalCalls !== CAMPAIGN_MAX_PHYSICAL_CALLS ||
       (flat &&
-        (ledgerSnapshot.logicalAttemptCount < 3 ||
-          ledgerSnapshot.physicalDispatchCount < 7 ||
-          (ledgerSnapshot.nextReservationId ?? 0) < 8 ||
+        (ledgerSnapshot.logicalAttemptCount < (disjoint ? 5 : 3) ||
+          ledgerSnapshot.physicalDispatchCount < (disjoint ? 14 : 7) ||
+          (ledgerSnapshot.nextReservationId ?? 0) < (disjoint ? 15 : 8) ||
+          (disjoint && ledgerSnapshot.inFlightReservations.length !== 0) ||
           ledgerSnapshot.knownCostUsd + ledgerSnapshot.unknownReserveUsd + 1e-12 <
             minimumPriorSpend))
     )
@@ -1332,8 +1680,15 @@ async function main(): Promise<void> {
   if (parsed.command === 'register') {
     if (verified.freeze.phaseId !== PHASE_FLAT_DEV40_ID)
       throw new RangeError('register only accepts the separately frozen flat DEV40 profile')
-    await registerFlatDevComparison(parsed.options, verified, config)
-    process.stdout.write(`Registered flat DEV comparison in ${FLAT_EXPERIMENT_DIRECTORY}\n`)
+    if (verified.freeze.freezeId === DISJOINT_FREEZE_ID) {
+      await registerDisjointDevComparison(parsed.options, verified, config)
+      process.stdout.write(
+        `Registered disjoint DEV comparison in ${DISJOINT_EXPERIMENT_DIRECTORY}\n`,
+      )
+    } else {
+      await registerFlatDevComparison(parsed.options, verified, config)
+      process.stdout.write(`Registered flat DEV comparison in ${FLAT_EXPERIMENT_DIRECTORY}\n`)
+    }
     return
   }
   await runVerifiedDevScreen(parsed.options, verified, runtime, config)

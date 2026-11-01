@@ -11,6 +11,7 @@ import {
   DEV40_CASE_COUNT,
   DEV40_NEGATIVE_COUNT,
   DEV40_POSITIVE_COUNT,
+  DEV40_STRATUM_QUOTAS,
   DEV40_WORST_CASE_PHYSICAL_CALLS,
   H8A_FRESH_SCHEMA,
   PHASE_DEV40_ID,
@@ -80,6 +81,29 @@ const flatPreparationAuthoritySchema = preparationAuthoritySchema.extend({
   freezeId: z.literal('h8a-flat-dev40-20261101-v1'),
   priorDevAuthority: artifactRefSchema,
 })
+const DISJOINT_FREEZE_ID = 'h8a-flat-disjoint-dev40-20261101-v1'
+const PINNED_PARENT_REGISTRATION_SHA256 =
+  '5c63045a648928c9aefe12aad99464e8394b3bc42c133b39821036eb74f3bff0'
+const PINNED_ACCEPTED_HISTORY_SHA256 =
+  '8743d618233e84025463dbfd6f51c580388e9e053a716fbed0ff76afb9c215f4'
+interface DisjointLineagePins {
+  parentRegistrationSha256: string
+  acceptedHistorySha256: string
+}
+
+function createDisjointPreparationAuthoritySchema(pins: DisjointLineagePins) {
+  return preparationAuthoritySchema.extend({
+    schema: z.literal('h8a-disjoint-dev-freeze-preparation-v1'),
+    freezeId: z.literal(DISJOINT_FREEZE_ID),
+    parentRegistration: artifactRefSchema.extend({
+      sha256: z.literal(pins.parentRegistrationSha256),
+    }),
+    acceptedHistory: artifactRefSchema.extend({
+      sha256: z.literal(pins.acceptedHistorySha256),
+    }),
+    registeredSources: artifactRefSchema,
+  })
+}
 const PINNED_PRIOR_DEV_AUTHORITY_SHA256 =
   '0d5cc47d1759d2e276cdc3e0c44b7ef231c61cc49aa75a7cc62e9bec24bfafd2'
 
@@ -427,7 +451,7 @@ function verifyRuntimeEnvironment(
     throw new RangeError('Runtime input manifest contains duplicate model assets')
   const closureByPath = new Map(closure.files.map((file) => [file.path, file]))
   const nativeRecipePath =
-    variant === 'flat-v2'
+    variant !== 'v1'
       ? 'benchmarks/v03/h8a-full/native-recipe-flat-target-v2.json'
       : 'benchmarks/v03/h8a-full/native-recipe.json'
   const nativeRecipe = closureByPath.get(nativeRecipePath)
@@ -657,13 +681,20 @@ interface DevFreezeAssemblyOptions {
   authoritySha256: string
   sourceRoot: string
   outputDirectory: string
+  testOnlyDisjointLineagePins?: DisjointLineagePins
 }
 
-type FreezeVariant = 'v1' | 'flat-v2'
+type FreezeVariant = 'v1' | 'flat-v2' | 'flat-disjoint-v1'
+
+type FreezeAuthority =
+  | z.infer<typeof preparationAuthoritySchema>
+  | z.infer<typeof flatPreparationAuthoritySchema>
+  | z.infer<ReturnType<typeof createDisjointPreparationAuthoritySchema>>
 
 const getAuthorityVariant = (schema: unknown): FreezeVariant => {
   if (schema === 'h8a-dev-freeze-preparation-v1') return 'v1'
   if (schema === 'h8a-flat-dev-freeze-preparation-v1') return 'flat-v2'
+  if (schema === 'h8a-disjoint-dev-freeze-preparation-v1') return 'flat-disjoint-v1'
   throw new RangeError('Unsupported DEV freeze preparation authority schema')
 }
 
@@ -678,6 +709,80 @@ const sourceGroupSplitDigestSchema = z
     exclusionCommitmentSha256: sha256,
   })
   .strict()
+
+function createDisjointSourceRegistrationSchema(parentRegistrationSha256: string) {
+  return z
+    .object({
+      schema: z.literal('h8a-disjoint-source-registration-v1'),
+      parentRegistrationSha256: z.literal(parentRegistrationSha256),
+      orderProtocolSha256: sha256,
+      mapRosterSha256: sha256,
+      sourceGroupSplitSha256: sha256,
+      sourceEvidence: z.array(artifactRefSchema).min(1),
+      rows: z
+        .array(
+          z
+            .object({
+              opaqueCaseId: z.string().min(1),
+              stratum: z.enum(STRATUMS),
+              sourceGroup: z.string().min(1),
+              expectedPresence: z.enum(['present', 'absent']),
+              sourceSha256: sha256,
+            })
+            .strict(),
+        )
+        .length(DEV40_CASE_COUNT),
+    })
+    .strict()
+}
+
+const disjointParentRegistrationSchema = z
+  .object({
+    schema: z.literal('prospective-disjoint-dev40-design-v1'),
+    freezeId: z.literal(DISJOINT_FREEZE_ID),
+    studyId: z.literal('flat-disjoint-replication-v1'),
+    baseCommit: z.literal('c3c43084bb3ad663bb7390be7717effd33788046'),
+    sourceSelectionSeed: z.literal('h8a-independent-dev40-20261101-r1'),
+    candidate: z.literal(PROFILE_FLAT_CANDIDATE_ID),
+    strata: z
+      .object({
+        photo: z.tuple([z.literal(16), z.literal(4)]),
+        ui: z
+          .object({
+            gnumeric: z.tuple([z.literal(4), z.literal(1)]),
+            evince: z.tuple([z.literal(3), z.literal(2)]),
+          })
+          .strict(),
+        map: z
+          .object({
+            xsok: z.tuple([z.literal(4), z.literal(1)]),
+            gnurobbo: z.tuple([z.literal(3), z.literal(2)]),
+          })
+          .strict(),
+      })
+      .strict(),
+  })
+  .passthrough()
+
+function createAcceptedHistorySchema(parentRegistrationSha256: string) {
+  return z
+    .object({
+      schema: z.literal('h8a-closed-development-lineage-v1'),
+      parentRegistrationFileSha256: z.literal(parentRegistrationSha256),
+      priorIds: z.array(z.string().min(1)).length(40),
+      priorEncodedSha256: z.array(sha256).length(40),
+      allExcludedSourceGroups: z.array(z.string().min(1)).min(382),
+      campaignLedgerBeforeRegistration: sha256,
+      priorCashUsd: z.literal(0.009603065),
+      priorKnownConfirmed: z.literal(14),
+      priorNextReservationId: z.literal(15),
+      priorLogicalAttempts: z.literal(5),
+      openInFlightBefore: z.literal(0),
+      previousExperimentNamespace: z.literal('experiments/h8a-flat-dev40-v1'),
+      newExperimentNamespace: z.literal('experiments/flat-disjoint-replication-v1'),
+    })
+    .passthrough()
+}
 
 async function loadFragment(
   artifactRoot: string,
@@ -876,10 +981,24 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
   const authorityUnknown: unknown = JSON.parse(authorityBytes.toString('utf8'))
   const authorityRecord = z.record(z.string(), z.unknown()).parse(authorityUnknown)
   const variant = getAuthorityVariant(authorityRecord.schema)
+  const disjointLineagePins = z
+    .object({ parentRegistrationSha256: sha256, acceptedHistorySha256: sha256 })
+    .strict()
+    .parse(
+      options.testOnlyDisjointLineagePins ?? {
+        parentRegistrationSha256: PINNED_PARENT_REGISTRATION_SHA256,
+        acceptedHistorySha256: PINNED_ACCEPTED_HISTORY_SHA256,
+      },
+    )
   const flatAuthority =
     variant === 'flat-v2' ? flatPreparationAuthoritySchema.parse(authorityUnknown) : undefined
-  const authority = flatAuthority ?? preparationAuthoritySchema.parse(authorityUnknown)
-  const phaseId = variant === 'flat-v2' ? PHASE_FLAT_DEV40_ID : PHASE_DEV40_ID
+  const disjointAuthority =
+    variant === 'flat-disjoint-v1'
+      ? createDisjointPreparationAuthoritySchema(disjointLineagePins).parse(authorityUnknown)
+      : undefined
+  const authority: FreezeAuthority =
+    disjointAuthority ?? flatAuthority ?? preparationAuthoritySchema.parse(authorityUnknown)
+  const phaseId = variant === 'v1' ? PHASE_DEV40_ID : PHASE_FLAT_DEV40_ID
   const candidateProfileId = candidateIdForPhase(phaseId)
   const candidateProfile =
     candidateProfileId === PROFILE_FLAT_CANDIDATE_ID
@@ -904,6 +1023,74 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     readPinnedJson(artifactRoot, authority.priceProof, priceProofSchema),
     readPinnedJson(artifactRoot, authority.runtimeEnvironment, runtimeEnvironmentSchema),
   ])
+  let parentRegistrationSha256: string | undefined
+  let acceptedHistorySha256: string | undefined
+  let registeredSourcesSha256: string | undefined
+  let acceptedHistory: z.infer<ReturnType<typeof createAcceptedHistorySchema>> | undefined
+  let registeredSources:
+    | z.infer<ReturnType<typeof createDisjointSourceRegistrationSchema>>
+    | undefined
+  if (disjointAuthority) {
+    const [parentRef, historyRef, sourceRegistryRef] = await Promise.all([
+      readPinnedJson(
+        artifactRoot,
+        disjointAuthority.parentRegistration,
+        disjointParentRegistrationSchema,
+      ),
+      readPinnedJson(
+        artifactRoot,
+        disjointAuthority.acceptedHistory,
+        createAcceptedHistorySchema(disjointLineagePins.parentRegistrationSha256),
+      ),
+      readPinnedJson(
+        artifactRoot,
+        disjointAuthority.registeredSources,
+        createDisjointSourceRegistrationSchema(disjointLineagePins.parentRegistrationSha256),
+      ),
+    ])
+    parentRegistrationSha256 = digestBytes(parentRef.raw)
+    acceptedHistorySha256 = digestBytes(historyRef.raw)
+    registeredSourcesSha256 = digestBytes(sourceRegistryRef.raw)
+    acceptedHistory = historyRef.value
+    registeredSources = sourceRegistryRef.value
+    if (
+      parentRegistrationSha256 !== disjointLineagePins.parentRegistrationSha256 ||
+      acceptedHistorySha256 !== disjointLineagePins.acceptedHistorySha256 ||
+      acceptedHistory.parentRegistrationFileSha256 !== parentRegistrationSha256 ||
+      new Set(acceptedHistory.priorIds).size !== acceptedHistory.priorIds.length ||
+      new Set(acceptedHistory.priorEncodedSha256).size !==
+        acceptedHistory.priorEncodedSha256.length ||
+      new Set(acceptedHistory.allExcludedSourceGroups.map(normalizeSourceGroup)).size !==
+        acceptedHistory.allExcludedSourceGroups.length ||
+      registeredSources.parentRegistrationSha256 !== parentRegistrationSha256 ||
+      registeredSources.orderProtocolSha256 !== authority.orderProtocol.sha256 ||
+      registeredSources.mapRosterSha256 !== authority.mapRoster.sha256 ||
+      registeredSources.sourceGroupSplitSha256 !== authority.sourceGroupSplit.sha256
+    )
+      throw new RangeError(
+        'Disjoint source lineage or registration pins do not match the authority',
+      )
+    const requiredEvidence = [
+      disjointAuthority.parentRegistration,
+      disjointAuthority.acceptedHistory,
+      authority.orderProtocol,
+      authority.mapRoster,
+      authority.sourceGroupSplit,
+      ...authority.fragments.map(({ path, sha256 }) => ({ path, sha256 })),
+    ]
+    const evidencePins = new Set(
+      registeredSources.sourceEvidence.map((ref) => `${ref.path}\0${ref.sha256}`),
+    )
+    if (
+      new Set(registeredSources.sourceEvidence.map((ref) => ref.path)).size !==
+        registeredSources.sourceEvidence.length ||
+      requiredEvidence.some((ref) => !evidencePins.has(`${ref.path}\0${ref.sha256}`))
+    )
+      throw new RangeError('Disjoint source evidence omits or duplicates a pinned source input')
+    await Promise.all(
+      registeredSources.sourceEvidence.map((ref) => readPinnedBytes(artifactRoot, ref)),
+    )
+  }
   if (variant === 'flat-v2') {
     if (
       !flatAuthority ||
@@ -937,14 +1124,22 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     groupCommitment(split.exclusionSourceGroupIds) !== split.exclusionCommitmentSha256
   )
     throw new RangeError('Source-group split/exclusion commitment mismatch')
+  if (
+    disjointAuthority &&
+    (!acceptedHistory ||
+      split.devSourceGroupIds.length !== 24 ||
+      split.exclusionSourceGroupIds.length !== 396 ||
+      split.qualificationSourceGroupIds.length !== 0 ||
+      acceptedHistory.allExcludedSourceGroups.some(
+        (group) => !split.exclusionSourceGroupIds.includes(normalizeSourceGroup(group)),
+      ))
+  )
+    throw new RangeError(
+      'Disjoint source split omits historical groups or changes the committed counts',
+    )
   const [fragments, conservativeCostProof] = await Promise.all([
     Promise.all(authority.fragments.map((item) => loadFragment(artifactRoot, item))),
-    validatePriceProof(
-      artifactRoot,
-      priceRef.value,
-      digestBytes(priceRef.raw),
-      variant === 'flat-v2',
-    ),
+    validatePriceProof(artifactRoot, priceRef.value, digestBytes(priceRef.raw), variant !== 'v1'),
   ])
   const reviewById = new Map(
     fragments.flatMap((fragment) =>
@@ -983,6 +1178,12 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     'UTF-8 bytes, components separated by a single NUL byte, no trailing NUL; lower-case hexadecimal digest'
   )
     throw new RangeError('Map roster hash input contract is unsupported')
+  if (
+    disjointAuthority &&
+    (orderRoster.sourceGroupByFamily.xsok !== 'game:xsok' ||
+      orderRoster.sourceGroupByFamily.gnurobbo !== 'game:gnurobbo')
+  )
+    throw new RangeError('Disjoint map roster must bind the named XSok and GNU Robbo source groups')
   const mapIds = new Set(
     orderRoster.rows.map((row) => {
       if (
@@ -1020,6 +1221,91 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     .map((item) => item.row.opaqueCaseId)
   if (mapReviewIds.some((id) => !mapIds.has(id)))
     throw new RangeError('Accepted map rows contain an unregistered slot')
+  if (disjointAuthority && registeredSources && acceptedHistory) {
+    const registeredRows = registeredSources.rows
+    const registeredById = new Map(registeredRows.map((row) => [row.opaqueCaseId, row]))
+    if (
+      registeredById.size !== DEV40_CASE_COUNT ||
+      registeredById.size !== reviewById.size ||
+      [...reviewById.keys()].some((id) => !registeredById.has(id))
+    )
+      throw new RangeError('Disjoint source registry must match the complete reviewed DEV40 ID set')
+    const priorIds = new Set(acceptedHistory.priorIds)
+    const priorEncoded = new Set(acceptedHistory.priorEncodedSha256)
+    const priorGroups = new Set(acceptedHistory.allExcludedSourceGroups.map(normalizeSourceGroup))
+    for (const [id, { fragment, row: reviewRow }] of reviewById) {
+      const registered = registeredById.get(id)!
+      const annotation = fragment.annotations.find((item) => item.opaqueCaseId === id)!
+      const producer = fragment.producerRows.find((item) => item.opaqueCaseId === id)!
+      if (
+        priorIds.has(id) ||
+        priorEncoded.has(producer.sourceBytesSha256) ||
+        priorGroups.has(normalizeSourceGroup(annotation.sourceGroup)) ||
+        registered.stratum !== annotation.stratum ||
+        registered.expectedPresence !== annotation.expectedPresence ||
+        normalizeSourceGroup(registered.sourceGroup) !==
+          normalizeSourceGroup(annotation.sourceGroup) ||
+        registered.sourceSha256 !== producer.sourceBytesSha256 ||
+        registered.sourceSha256 !== reviewRow.sourceSha256
+      )
+        throw new RangeError(`Disjoint source registry conflicts with or reuses source row ${id}`)
+    }
+    for (const stratum of STRATUMS) {
+      const rows = registeredRows.filter((row) => row.stratum === stratum)
+      const expected = DEV40_STRATUM_QUOTAS[stratum]
+      if (
+        rows.filter((row) => row.expectedPresence === 'present').length !== expected.present ||
+        rows.filter((row) => row.expectedPresence === 'absent').length !== expected.absent
+      )
+        throw new RangeError(`Disjoint registered ${stratum} presence quotas are invalid`)
+    }
+    const photoRows = registeredRows.filter((row) => row.stratum === 'photo')
+    if (new Set(photoRows.map((row) => normalizeSourceGroup(row.sourceGroup))).size !== 20)
+      throw new RangeError('Disjoint photo rows must use twenty distinct author source groups')
+    if (new Set(registeredRows.map((row) => normalizeSourceGroup(row.sourceGroup))).size !== 24)
+      throw new RangeError(
+        'Disjoint cohort must use separate groups for every registered source lane',
+      )
+    for (const stratum of ['ui', 'map'] as const) {
+      const quotas =
+        stratum === 'ui'
+          ? [
+              { sourceGroup: 'gnumeric', present: 4, absent: 1 },
+              { sourceGroup: 'evince', present: 3, absent: 2 },
+            ]
+          : [
+              { sourceGroup: 'game:xsok', present: 4, absent: 1 },
+              { sourceGroup: 'game:gnurobbo', present: 3, absent: 2 },
+            ]
+      for (const quota of quotas) {
+        const rows = registeredRows.filter(
+          (row) =>
+            row.stratum === stratum && normalizeSourceGroup(row.sourceGroup) === quota.sourceGroup,
+        )
+        if (
+          rows.length !== 5 ||
+          rows.filter((row) => row.expectedPresence === 'present').length !== quota.present ||
+          rows.filter((row) => row.expectedPresence === 'absent').length !== quota.absent
+        )
+          throw new RangeError(
+            `Disjoint ${stratum} group ${quota.sourceGroup} does not meet its registered quota`,
+          )
+      }
+    }
+    const photoAnnotationRows = [...reviewById.values()].flatMap(({ fragment, row }) => {
+      const annotation = fragment.annotations.find(
+        (item) => item.opaqueCaseId === row.opaqueCaseId,
+      )!
+      return annotation.stratum === 'photo' ? [annotation] : []
+    })
+    if (
+      photoAnnotationRows.filter(
+        (row) => row.expectedPresence === 'present' && row.exactOriginalCanvasMaskRef,
+      ).length !== 16 ||
+      photoAnnotationRows.reduce((count, row) => count + row.referenceMasks.length, 0) !== 16
+    )
+      throw new RangeError('Disjoint photo cohort must contain exactly sixteen positive masks')
+  }
   const orderedIds = [...reviewById.keys()].sort((left, right) => {
     const leftHash = protocolHash(['76303308', 'case-order-v1', left])
     const rightHash = protocolHash(['76303308', 'case-order-v1', right])
@@ -1130,6 +1416,13 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     producerClosureSha256,
     sourceBytesManifestSha256,
     evaluatorAnnotationsSha256,
+    ...(disjointAuthority
+      ? {
+          parentRegistrationSha256,
+          acceptedHistorySha256,
+          registeredSourcesSha256,
+        }
+      : {}),
   })
   const freeze = phaseFreezeSchema.parse({
     schema: H8A_FRESH_SCHEMA,

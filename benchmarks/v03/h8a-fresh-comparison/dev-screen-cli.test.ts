@@ -17,6 +17,8 @@ import {
   assertLiveRunnerClosure,
   runVerifiedDevScreen,
   registerFlatDevComparison,
+  registerDisjointDevComparison,
+  verifyDisjointDevRegistration,
   verifyFlatDevRegistration,
   verifyCampaignConfig,
   verifyDevPhaseBinding,
@@ -575,6 +577,130 @@ await test('flat registration refuses a reset global budget even when historical
       /global budget/u,
     )
     await assert.rejects(access(join(campaignRoot, 'experiments')))
+  } finally {
+    await rm(root, { recursive: true, force: false })
+  }
+})
+
+await test('disjoint registration uses its own freeze and namespace with the settled V1/V2 ledger floor', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-disjoint-screen-'))
+  const campaignRoot = join(root, 'campaign')
+  const canonicalConfig = {
+    campaignId: 'offline-test-campaign',
+    canonicalRoot: campaignRoot,
+    sha256: registeredCampaignConfigSha256,
+  }
+  try {
+    await prepareFlatCampaignFixture(campaignRoot)
+    const ledgerPath = join(campaignRoot, 'campaign-ledger.json')
+    const ledger = JSON.parse(await readFile(ledgerPath, 'utf8')) as Record<string, unknown>
+    ledger.nextReservationId = 15
+    ledger.physicalDispatchCount = 14
+    ledger.logicalAttemptCount = 5
+    ledger.knownCostUsd = 0.009603065
+    await writeFile(ledgerPath, `${JSON.stringify(ledger)}\n`)
+    const verified = {
+      ...fixture(PHASE_FLAT_DEV40_ID, 'h8a-flat-disjoint-dev40-20261101-v1'),
+      runtimeEnvironmentSha256: 'd'.repeat(64),
+    }
+    const verifyPriorEvidence = async (): Promise<number> => 0.009603065
+    const dependencies = {
+      acquireLock: acquireRunnerLock,
+      openLedger: (path: string) => CampaignLedger.open(path),
+      verifyPriorEvidence,
+    }
+    await assert.rejects(
+      registerDisjointDevComparison(
+        { authoritySha256 },
+        { ...verified, freeze: { ...verified.freeze, freezeId: 'h8a-flat-dev40-20261101-v1' } },
+        canonicalConfig,
+        dependencies,
+      ),
+      /pinned disjoint flat DEV40 profile/u,
+    )
+    await assert.rejects(access(join(campaignRoot, 'experiments')))
+
+    const before = (await CampaignLedger.open(ledgerPath)).snapshot()
+    assert.equal(before.physicalDispatchCount, 14)
+    assert.equal(before.logicalAttemptCount, 5)
+    await assert.rejects(
+      registerDisjointDevComparison({ authoritySha256 }, verified, canonicalConfig, {
+        ...dependencies,
+        verifyPriorEvidence: async () => 0.01,
+      }),
+      /settled V1\/V2 budget floor/u,
+    )
+    await assert.rejects(access(join(campaignRoot, 'experiments')))
+    await registerDisjointDevComparison(
+      { authoritySha256 },
+      verified,
+      canonicalConfig,
+      dependencies,
+    )
+    const namespace = join(campaignRoot, 'experiments', 'flat-disjoint-replication-v1')
+    const registration = JSON.parse(await readFile(join(namespace, 'registration.json'), 'utf8'))
+    assert.equal(registration.freezeId, 'h8a-flat-disjoint-dev40-20261101-v1')
+    assert.equal(registration.studyId, 'flat-disjoint-replication-v1')
+    assert.equal(registration.priorV1BindingSha256.length, 64)
+    assert.equal(registration.priorV2BindingSha256.length, 64)
+    await verifyDisjointDevRegistration(
+      campaignRoot,
+      authoritySha256,
+      verified.freeze,
+      verifyPriorEvidence,
+    )
+    let keyReads = 0
+    let setupCalls = 0
+    await assert.rejects(
+      runVerifiedDevScreen(
+        { authoritySha256, screen: 'dev8', apiKeyEnv: 'TEST_KEY' },
+        verified,
+        {
+          proof: { historicalSourceRoot: campaignRoot },
+          candidateAssetsRoot: campaignRoot,
+          mobileSamEncoderPath: join(campaignRoot, 'encoder.onnx'),
+          mobileSamDecoderPath: join(campaignRoot, 'decoder.onnx'),
+          pythonExecutable: join(campaignRoot, 'python'),
+        },
+        canonicalConfig,
+        {
+          getApiKey: () => {
+            keyReads += 1
+            return undefined
+          },
+          acquireLock: async () => {
+            throw new Error('runner lock must not be acquired')
+          },
+          openLedger: async () => {
+            throw new Error('ledger must not be opened')
+          },
+          createRuntime: async () => {
+            setupCalls += 1
+            throw new Error('runtime must not be initialized')
+          },
+          execute: async () => {
+            throw new Error('screen must not be executed')
+          },
+          writeReport: () => undefined,
+          verifyPriorDisjointEvidence: async () => {
+            throw new Error('pinned historical evidence is invalid')
+          },
+        },
+      ),
+      /pinned historical evidence is invalid/u,
+    )
+    assert.equal(keyReads, 0)
+    assert.equal(setupCalls, 0)
+    await assert.rejects(access(join(campaignRoot, 'experiments', 'h8a-flat-dev40-v1')))
+
+    const after = (await CampaignLedger.open(ledgerPath)).snapshot()
+    assert.equal(after.physicalDispatchCount, before.physicalDispatchCount)
+    assert.equal(after.knownCostUsd, before.knownCostUsd)
+    await writeFile(join(namespace, 'reports-stale.json'), '{}\n')
+    await assert.rejects(
+      registerDisjointDevComparison({ authoritySha256 }, verified, canonicalConfig, dependencies),
+      /stale artifacts before registration/u,
+    )
   } finally {
     await rm(root, { recursive: true, force: false })
   }

@@ -37,6 +37,11 @@ function protocolHash(parts: readonly string[]): string {
 async function makeCompleteDiskInputs(
   root: string,
   fixtureOptions: {
+    disjoint?: boolean
+    wrongNamedGroupQuota?: boolean
+    wrongMapFamily?: boolean
+    reuseHistoricalSourceGroup?: boolean
+    omitOnePhotoMask?: boolean
     duplicateFirstTwoSources?: boolean
     invalidFirstPositiveBox?: boolean
     missingPositiveMaskMetadata?: boolean
@@ -48,6 +53,10 @@ async function makeCompleteDiskInputs(
     authoritySha256: string
     sourceRoot: string
     outputDirectory: string
+    testOnlyDisjointLineagePins?: {
+      parentRegistrationSha256: string
+      acceptedHistorySha256: string
+    }
   }
   sourcePath: string
   fragmentReviewPath: string
@@ -57,8 +66,25 @@ async function makeCompleteDiskInputs(
   const sourceRoot = join(root, 'source')
   await mkdir(artifactRoot, { recursive: true })
   await mkdir(sourceRoot, { recursive: true })
-  const orderProtocolBytes = await readFile(
-    '/root/.codex/artifacts/zorya-classifier-mcp-20261031/fresh-comparison/main-paired-order-protocol-v1.json',
+  const orderProtocolBytes = Buffer.from(
+    `${JSON.stringify({
+      schema: 'h8a-fresh-paired-order-protocol-v1',
+      seedHex: '76303308',
+      hashAlgorithm: 'SHA-256',
+      hashInput: 'UTF-8 bytes joined by NUL, no trailing NUL',
+      caseOrdering: {
+        primary: 'ascending hash(seedHex, case-order-v1, opaqueCaseId)',
+        tie: 'ascending opaqueCaseId',
+        include: 'all 40 producer rows; derive pairedSchedule in same order',
+      },
+      armFirst: {
+        firstBit:
+          'integer value of final hex digit of hash(seedHex, first-arm-v1, stratum) modulo 2',
+        forCase:
+          'candidate first iff (zero-based rank within stratum + firstBit) modulo 2 equals zero',
+        groupBy: 'stratum only, no expected presence or outcome',
+      },
+    })}\n`,
   )
   const orderProtocolPath = join(artifactRoot, 'registry/order-protocol.json')
   await mkdir(join(artifactRoot, 'registry'), { recursive: true })
@@ -75,8 +101,16 @@ async function makeCompleteDiskInputs(
   assert.equal(mapRows.length, 10)
   const mapIdToFamily = new Map<string, string>()
   const rosterRows = mapRows.map((_, index) => {
-    const familySlug = index < 5 ? 'freecol' : 'crimson'
-    const predeclaredStateId = `synthetic-state-${String(index + 1).padStart(2, '0')}`
+    const familySlug = fixtureOptions.disjoint
+      ? index < 5
+        ? 'xsok'
+        : 'gnurobbo'
+      : index < 5
+        ? 'freecol'
+        : 'crimson'
+    const predeclaredStateId = fixtureOptions.disjoint
+      ? `${familySlug}:synthetic-state-${String(index + 1).padStart(2, '0')}`
+      : `synthetic-state-${String(index + 1).padStart(2, '0')}`
     const opaqueCaseId = protocolHash([
       '76303308',
       'map-id-v1',
@@ -120,9 +154,63 @@ async function makeCompleteDiskInputs(
     fixture.producerCases,
     fixture.pairedSchedule,
   )
+  let uiRowIndex = 0
+  const mapGroupIndex = new Map<string, number>()
+  let photoRowIndex = 0
   const annotations = generatedBundle.cases.map((row) => {
     const opaqueCaseId = idReplacement.get(row.opaqueCaseId) ?? row.opaqueCaseId
     const family = mapIdToFamily.get(opaqueCaseId)
+    if (fixtureOptions.disjoint && row.stratum === 'ui') {
+      const groupIndex = uiRowIndex++
+      const gnumeric = groupIndex < 5
+      const positiveCount = gnumeric === (fixtureOptions.wrongNamedGroupQuota === true) ? 3 : 4
+      const expectedPresence =
+        groupIndex % 5 < positiveCount ? ('present' as const) : ('absent' as const)
+      return {
+        ...row,
+        opaqueCaseId,
+        sourceGroup: gnumeric ? 'gnumeric' : 'evince',
+        expectedPresence,
+        referenceBoxes:
+          expectedPresence === 'present'
+            ? row.referenceBoxes.length > 0
+              ? row.referenceBoxes
+              : [{ left: 1, top: 1, width: 2, height: 2 }]
+            : [],
+      }
+    }
+    if (fixtureOptions.disjoint && row.stratum === 'map') {
+      const sourceFamily = family!
+      const groupIndex = mapGroupIndex.get(sourceFamily) ?? 0
+      mapGroupIndex.set(sourceFamily, groupIndex + 1)
+      const xsok = sourceFamily === 'xsok'
+      const positiveCount = xsok === (fixtureOptions.wrongNamedGroupQuota === true) ? 3 : 4
+      const expectedPresence =
+        groupIndex < positiveCount ? ('present' as const) : ('absent' as const)
+      return {
+        ...row,
+        opaqueCaseId,
+        sourceGroup: xsok ? 'game:xsok' : 'game:gnurobbo',
+        expectedPresence,
+        referenceBoxes:
+          expectedPresence === 'present'
+            ? row.referenceBoxes.length > 0
+              ? row.referenceBoxes
+              : [{ left: 1, top: 1, width: 2, height: 2 }]
+            : [],
+      }
+    }
+    if (fixtureOptions.disjoint && row.stratum === 'photo') {
+      const groupIndex = ++photoRowIndex
+      return {
+        ...row,
+        opaqueCaseId,
+        sourceGroup:
+          fixtureOptions.reuseHistoricalSourceGroup && groupIndex === 1
+            ? 'historical-source-group-1'
+            : `photo:synthetic-author-${groupIndex}`,
+      }
+    }
     return {
       ...row,
       opaqueCaseId,
@@ -134,6 +222,28 @@ async function makeCompleteDiskInputs(
             : row.sourceGroup,
     }
   })
+  const maskRefs: { path: string; sha256: string }[] = []
+  if (fixtureOptions.disjoint) {
+    let positiveIndex = 0
+    for (const annotation of annotations) {
+      if (annotation.stratum !== 'photo' || annotation.expectedPresence !== 'present') continue
+      if (fixtureOptions.omitOnePhotoMask && positiveIndex === 0) {
+        positiveIndex += 1
+        continue
+      }
+      const packed = Buffer.alloc(8)
+      packed[positiveIndex % packed.length] = 1 << Math.floor(positiveIndex / packed.length)
+      const digest = sha256(packed)
+      const maskPath = `masks/${digest}.binary-lsb0`
+      await mkdir(join(artifactRoot, 'masks'), { recursive: true })
+      await writeFile(join(artifactRoot, maskPath), packed)
+      annotation.referenceMasks = [{ width: 8, height: 8, packedBinarySha256: digest }]
+      annotation.exactOriginalCanvasMaskRef = true
+      maskRefs.push({ path: maskPath, sha256: digest })
+      positiveIndex += 1
+    }
+    assert.equal(positiveIndex, 16)
+  }
   if (fixtureOptions.invalidFirstPositiveBox) {
     const positive = annotations.find((row) => row.expectedPresence === 'present')!
     positive.referenceBoxes[0]!.left = 7
@@ -185,13 +295,19 @@ async function makeCompleteDiskInputs(
     hashInput:
       'UTF-8 bytes, components separated by a single NUL byte, no trailing NUL; lower-case hexadecimal digest',
     parentProtocolSha256: orderProtocolRef.sha256,
-    sourceGroupByFamily: { freecol: 'synthetic-map-freecol', crimson: 'synthetic-map-crimson' },
-    rows: rosterRows,
+    sourceGroupByFamily: fixtureOptions.disjoint
+      ? { xsok: 'game:xsok', gnurobbo: 'game:gnurobbo' }
+      : { freecol: 'synthetic-map-freecol', crimson: 'synthetic-map-crimson' },
+    rows: fixtureOptions.wrongMapFamily
+      ? rosterRows.map((row, index) => (index === 0 ? { ...row, familySlug: 'gnurobbo' } : row))
+      : rosterRows,
   })
   const sourceGroupIds = [
     ...new Set(annotations.map((row) => row.sourceGroup.replace(/\/+$/u, ''))),
   ].sort()
-  const exclusionGroups = ['synthetic-excluded-group']
+  const exclusionGroups = fixtureOptions.disjoint
+    ? Array.from({ length: 396 }, (_, index) => `historical-source-group-${index + 1}`).sort()
+    : ['synthetic-excluded-group']
   const splitRef = await writeJson(artifactRoot, 'registry/source-group-split.json', {
     schema: 'h8a-dev-source-group-split-v1',
     devSourceGroupIds: sourceGroupIds,
@@ -233,7 +349,7 @@ async function makeCompleteDiskInputs(
     maxPhysicalCalls: 2000,
     entries: [
       {
-        profileId: 'h8a-cpu-raw-target-v1',
+        profileId: fixtureOptions.disjoint ? 'h8a-cpu-flat-target-v2' : 'h8a-cpu-raw-target-v1',
         model: catalogRefs[0]!.model,
         rawCatalog: catalogRefs[0]!.rawCatalog,
         inputTokenBound: 1000,
@@ -256,11 +372,15 @@ async function makeCompleteDiskInputs(
       },
     ],
   })
+  const nativeRecipePath = fixtureOptions.disjoint
+    ? 'benchmarks/v03/h8a-full/native-recipe-flat-target-v2.json'
+    : 'benchmarks/v03/h8a-full/native-recipe.json'
   const requiredClosurePaths = [
     'package-lock.json',
     'benchmarks/v03/h8a-full/factory.ts',
     'benchmarks/v03/h8a-full/native-port.ts',
     'benchmarks/v03/h8a-full/native-recipe.json',
+    ...(fixtureOptions.disjoint ? [nativeRecipePath] : []),
     'benchmarks/v03/h8a-full/native-worker.py',
     'benchmarks/v03/h8a-fresh-comparison/dev-screen-runner.ts',
     'benchmarks/v03/h8a-fresh-comparison/paired-runner.ts',
@@ -285,9 +405,7 @@ async function makeCompleteDiskInputs(
       }),
   )
   const packageLockBytes = await readFile(join(sourceRoot, 'package-lock.json'))
-  const nativeRecipeBytes = await readFile(
-    join(sourceRoot, 'benchmarks', 'v03', 'h8a-full', 'native-recipe.json'),
-  )
+  const nativeRecipeBytes = await readFile(join(sourceRoot, ...nativeRecipePath.split('/')))
   const sourceClosureRef = await writeJson(artifactRoot, 'registry/source-closure.json', {
     schema: 'h8a-producer-closure-files-v1',
     sourceCommit: 'synthetic-commit',
@@ -315,7 +433,6 @@ async function makeCompleteDiskInputs(
       sha256: 'a'.repeat(64),
     })),
   })
-  const maskRefs: { path: string; sha256: string }[] = []
   const review = {
     schema: 'h8a-dev-reviewed-fragment-v1',
     fragmentId: 'synthetic-complete-dev40',
@@ -334,9 +451,18 @@ async function makeCompleteDiskInputs(
   await mkdir(join(artifactRoot, 'reviews'), { recursive: true })
   const reviewBytes = Buffer.from(`${JSON.stringify(review)}\n`)
   await writeFile(reviewPath, reviewBytes)
-  const authority = {
-    schema: 'h8a-dev-freeze-preparation-v1',
-    freezeId: 'synthetic-complete-dev40-freeze',
+  const fragmentRef = {
+    fragmentId: review.fragmentId,
+    path: relative(artifactRoot, reviewPath),
+    sha256: sha256(reviewBytes),
+  }
+  let authority: Record<string, unknown> = {
+    schema: fixtureOptions.disjoint
+      ? 'h8a-disjoint-dev-freeze-preparation-v1'
+      : 'h8a-dev-freeze-preparation-v1',
+    freezeId: fixtureOptions.disjoint
+      ? 'h8a-flat-disjoint-dev40-20261101-v1'
+      : 'synthetic-complete-dev40-freeze',
     deadlineIso: '2030-01-01T00:00:00.000Z',
     trustedRoot: artifactRoot,
     orderProtocol: orderProtocolRef,
@@ -345,13 +471,104 @@ async function makeCompleteDiskInputs(
     sourceGroupSplit: splitRef,
     priceProof: priceRef,
     runtimeEnvironment: runtimeEnvironmentRef,
-    fragments: [
-      {
-        fragmentId: review.fragmentId,
-        path: relative(artifactRoot, reviewPath),
-        sha256: sha256(reviewBytes),
-      },
-    ],
+    fragments: [fragmentRef],
+  }
+  let testOnlyDisjointLineagePins:
+    | { parentRegistrationSha256: string; acceptedHistorySha256: string }
+    | undefined
+  if (fixtureOptions.disjoint) {
+    const parentBytes = Buffer.from(
+      `${JSON.stringify({
+        schema: 'prospective-disjoint-dev40-design-v1',
+        freezeId: 'h8a-flat-disjoint-dev40-20261101-v1',
+        studyId: 'flat-disjoint-replication-v1',
+        baseCommit: 'c3c43084bb3ad663bb7390be7717effd33788046',
+        sourceSelectionSeed: 'h8a-independent-dev40-20261101-r1',
+        candidate: 'h8a-cpu-flat-target-v2',
+        strata: {
+          photo: [16, 4],
+          ui: { gnumeric: [4, 1], evince: [3, 2] },
+          map: { xsok: [4, 1], gnurobbo: [3, 2] },
+        },
+      })}\n`,
+    )
+    const parentRegistrationSha256 = sha256(parentBytes)
+    const historyBytes = Buffer.from(
+      `${JSON.stringify({
+        schema: 'h8a-closed-development-lineage-v1',
+        parentRegistrationFileSha256: parentRegistrationSha256,
+        historicalBindings: {},
+        priorIds: Array.from({ length: 40 }, (_, index) => `prior-case-${index + 1}`),
+        priorEncodedSha256: Array.from({ length: 40 }, (_, index) =>
+          sha256(Buffer.from(`prior-image-${index + 1}`)),
+        ),
+        allExcludedSourceGroups: exclusionGroups.slice(0, 382),
+        campaignLedgerBeforeRegistration: sha256(Buffer.from('test-ledger-before-registration')),
+        priorCashUsd: 0.009603065,
+        priorKnownConfirmed: 14,
+        priorNextReservationId: 15,
+        priorLogicalAttempts: 5,
+        openInFlightBefore: 0,
+        previousExperimentNamespace: 'experiments/h8a-flat-dev40-v1',
+        newExperimentNamespace: 'experiments/flat-disjoint-replication-v1',
+      })}\n`,
+    )
+    testOnlyDisjointLineagePins = {
+      parentRegistrationSha256,
+      acceptedHistorySha256: sha256(historyBytes),
+    }
+    const parentRegistrationPath = 'registry/parent-registration.json'
+    const acceptedHistoryPath = 'registry/accepted-history.json'
+    await writeFile(join(artifactRoot, parentRegistrationPath), parentBytes)
+    await writeFile(join(artifactRoot, acceptedHistoryPath), historyBytes)
+    const parentRegistration = {
+      path: parentRegistrationPath,
+      sha256: sha256(parentBytes),
+    }
+    const acceptedHistory = { path: acceptedHistoryPath, sha256: sha256(historyBytes) }
+    assert.equal(parentRegistration.sha256, parentRegistrationSha256)
+    assert.equal(acceptedHistory.sha256, sha256(historyBytes))
+    const sourceEvidence = [
+      parentRegistration,
+      acceptedHistory,
+      orderProtocolRef,
+      rosterRef,
+      splitRef,
+      { path: fragmentRef.path, sha256: fragmentRef.sha256 },
+      await writeJson(artifactRoot, 'registry/photo-source-preregistration.json', {
+        schema: 'synthetic-photo-preregistration-v1',
+      }),
+      await writeJson(artifactRoot, 'registry/ui-source-preregistration.json', {
+        schema: 'synthetic-ui-preregistration-v1',
+      }),
+      await writeJson(artifactRoot, 'registry/robbo-source-amendment.json', {
+        schema: 'synthetic-robbo-amendment-v1',
+      }),
+    ]
+    const registeredSources = await writeJson(artifactRoot, 'registry/registered-sources.json', {
+      schema: 'h8a-disjoint-source-registration-v1',
+      parentRegistrationSha256: parentRegistration.sha256,
+      orderProtocolSha256: orderProtocolRef.sha256,
+      mapRosterSha256: rosterRef.sha256,
+      sourceGroupSplitSha256: splitRef.sha256,
+      sourceEvidence,
+      rows: producerRows.map((producer) => {
+        const annotation = annotationById.get(producer.opaqueCaseId)!
+        return {
+          opaqueCaseId: producer.opaqueCaseId,
+          stratum: annotation.stratum,
+          sourceGroup: annotation.sourceGroup,
+          expectedPresence: annotation.expectedPresence,
+          sourceSha256: producer.sourceBytesSha256,
+        }
+      }),
+    })
+    authority = {
+      ...authority,
+      parentRegistration: parentRegistration,
+      acceptedHistory,
+      registeredSources,
+    }
   }
   const authorityPath = join(artifactRoot, 'registry/preparation-authority.json')
   const authorityRef = await writeJson(
@@ -366,6 +583,7 @@ async function makeCompleteDiskInputs(
       authoritySha256: authorityRef.sha256,
       sourceRoot,
       outputDirectory: join(root, 'freeze-output'),
+      ...(testOnlyDisjointLineagePins ? { testOnlyDisjointLineagePins } : {}),
     },
     sourcePath,
     fragmentReviewPath: reviewPath,
@@ -529,5 +747,72 @@ await test('offline DEV freeze assembly verifies complete inputs, stable draw, a
     })
   } finally {
     await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('disjoint DEV freeze pins lineage, all source rows, named group quotas, and photo masks', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-disjoint-dev-freeze-'))
+  try {
+    const valid = await makeCompleteDiskInputs(join(root, 'valid'), { disjoint: true })
+    const assembled = await assembleDevFreezeFromDisk(valid.options)
+    assert.equal(assembled.freeze.freezeId, 'h8a-flat-disjoint-dev40-20261101-v1')
+    assert.equal(assembled.freeze.phaseId, 'h8a-flat-paired-dev40-v1')
+    assert.equal(assembled.freeze.producerCases.length, 40)
+    assert.equal(
+      assembled.annotations.cases.filter(
+        (row) => row.stratum === 'photo' && row.exactOriginalCanvasMaskRef,
+      ).length,
+      16,
+    )
+    assert.equal(assembled.freeze.profileBindings[0]?.profileId, 'h8a-cpu-flat-target-v2')
+    const productionPinsRequired = { ...valid.options }
+    delete productionPinsRequired.testOnlyDisjointLineagePins
+    await assert.rejects(assembleDevFreezeFromDisk(productionPinsRequired))
+    await assert.rejects(
+      assembleDevFreezeFromDisk({
+        ...valid.options,
+        testOnlyDisjointLineagePins: {
+          parentRegistrationSha256: 'f'.repeat(64),
+          acceptedHistorySha256: valid.options.testOnlyDisjointLineagePins!.acceptedHistorySha256,
+        },
+      }),
+    )
+
+    const swappedGroups = await makeCompleteDiskInputs(join(root, 'swapped-groups'), {
+      disjoint: true,
+      wrongNamedGroupQuota: true,
+    })
+    await assert.rejects(
+      assembleDevFreezeFromDisk(swappedGroups.options),
+      /group gnumeric does not meet its registered quota/u,
+    )
+    await assert.rejects(access(swappedGroups.options.outputDirectory), { code: 'ENOENT' })
+
+    const wrongFamily = await makeCompleteDiskInputs(join(root, 'wrong-map-family'), {
+      disjoint: true,
+      wrongMapFamily: true,
+    })
+    await assert.rejects(
+      assembleDevFreezeFromDisk(wrongFamily.options),
+      /opaque ID that does not match its registered inputs/u,
+    )
+    const reusedGroup = await makeCompleteDiskInputs(join(root, 'reused-history-group'), {
+      disjoint: true,
+      reuseHistoricalSourceGroup: true,
+    })
+    await assert.rejects(
+      assembleDevFreezeFromDisk(reusedGroup.options),
+      /conflicts with or reuses source row/u,
+    )
+    const missingPhotoMask = await makeCompleteDiskInputs(join(root, 'missing-photo-mask'), {
+      disjoint: true,
+      omitOnePhotoMask: true,
+    })
+    await assert.rejects(
+      assembleDevFreezeFromDisk(missingPhotoMask.options),
+      /exactly sixteen positive masks/u,
+    )
+  } finally {
+    await rm(root, { recursive: true, force: false })
   }
 })
