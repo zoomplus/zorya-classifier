@@ -21,7 +21,34 @@ from preflight_runtime import BoundedLogWriter, bounded_tail, stop_owned_group
 
 EXPECTED_ROOT = Path("/root/.codex/artifacts/zorya-classifier-mcp-20261031/fresh-map")
 CARAVEL_EVIDENCE_ROOT = Path("/root/.codex/artifacts/zorya-classifier-mcp-20261101/freecol-caravel")
-ALLOWED_EVIDENCE_ROOTS = (EXPECTED_ROOT, CARAVEL_EVIDENCE_ROOT)
+CLEAR_OCEAN_EVIDENCE_ROOT = CARAVEL_EVIDENCE_ROOT / "clear-ocean-v1"
+ALLOWED_EVIDENCE_ROOTS = (EXPECTED_ROOT, CARAVEL_EVIDENCE_ROOT, CLEAR_OCEAN_EVIDENCE_ROOT)
+CLEAR_OCEAN_PARENT_CASES = {
+    2026110101: {
+        "save": CARAVEL_EVIDENCE_ROOT / "metadata-v2-new-2026110101/official-state.fsg",
+        "saveSha256": "b18d9f9d3b48f5a682c3cfbe6329299b65f579a3df73aedce1616f9a9bc00ef4",
+        "stateSignatureSha256": "56f30a642f205ba83be6c89a15f2c61585c59e59750ba9fec975fe533c61cd6e",
+        "unitId": "unit:5880", "start": (33, 59), "final": (30, 59),
+    },
+    2026110102: {
+        "save": CARAVEL_EVIDENCE_ROOT / "metadata-v2-new-2026110102/official-state.fsg",
+        "saveSha256": "8d6e5cfd7505998b983230b210edc1bc73626284c8ed97db4b7f334cdcb81aa7",
+        "stateSignatureSha256": "feb74e8a96b679b48081aa65a08f083a1d8a80fb38a6dbbbc1cbde33d9d05cf4",
+        "unitId": "unit:5859", "start": (30, 13), "final": (27, 13),
+    },
+    2026110103: {
+        "save": CARAVEL_EVIDENCE_ROOT / "metadata-v2-new-2026110103/official-state.fsg",
+        "saveSha256": "8d11f64ac38ec1fd6ed9ff457e425d633c6ebcbfb6aace4961a1723f14b47125",
+        "stateSignatureSha256": "3d4f1b11290fdc6925997c0b7de4546c1a53ffa6d7c344c951e15cb12fee7765",
+        "unitId": "unit:6113", "start": (38, 36), "final": (35, 36),
+    },
+    2026110104: {
+        "save": CARAVEL_EVIDENCE_ROOT / "metadata-v2-new-2026110104/official-state.fsg",
+        "saveSha256": "c8f7c9420555d72061baf40fb8cdffa51669f6d0249125ca46276dd35b144033",
+        "stateSignatureSha256": "9d04f5c9b324259635c831b9950002cdb882914cd58c35f486bec47813a23517",
+        "unitId": "unit:5873", "start": (34, 59), "final": (31, 59),
+    },
+}
 JAR = Path("/usr/share/java/FreeCol-1.1.0.jar")
 RESOURCE_MAPPING = Path("/usr/share/games/freecol/default/resources.properties")
 PACKAGE_COPYRIGHT = Path("/usr/share/doc/freecol/copyright")
@@ -76,6 +103,66 @@ def build_agent_arguments(output: Path, timeout_ms: int, save_path: Path | None,
         validate_nation_selection(nation_id, nation_type_id)
         parts.extend((nation_id, nation_type_id or ""))
     return ",".join(parts)
+
+
+def build_west_move_agent_arguments(output: Path, timeout_ms: int, save_path: Path,
+                                    unit_id: str, expected_state_signature: str,
+                                    start_tile: tuple[int, int], final_tile: tuple[int, int]) -> str:
+    if not re.fullmatch(r"unit:[A-Za-z0-9._-]{1,96}", unit_id):
+        raise ValueError("west movement requires one safe dynamic unit ID")
+    if not re.fullmatch(r"[0-9a-f]{64}", expected_state_signature):
+        raise ValueError("west movement requires the exact initial state signature")
+    coordinates = (*start_tile, *final_tile)
+    if any(not isinstance(value, int) or value < 0 or value > 100_000 for value in coordinates):
+        raise ValueError("west movement coordinates must be bounded non-negative integers")
+    return ",".join((str(output), str(timeout_ms), "MOVE-WWW-CLEAR-OCEAN", str(save_path), unit_id,
+                     expected_state_signature, *(str(value) for value in coordinates)))
+
+
+def build_clear_ocean_evidence_arguments(output: Path, timeout_ms: int, unit_id: str,
+                                         expected_state_signature: str) -> str:
+    if not re.fullmatch(r"unit:[A-Za-z0-9._-]{1,96}", unit_id):
+        raise ValueError("clear-ocean evidence requires one safe dynamic unit ID")
+    if not re.fullmatch(r"[0-9a-f]{64}", expected_state_signature):
+        raise ValueError("clear-ocean evidence requires an exact state signature")
+    return ",".join((str(output), str(timeout_ms), "CLEAR-OCEAN-EVIDENCE", unit_id, expected_state_signature))
+
+
+def build_clear_ocean_capture_arguments(output: Path, timeout_ms: int,
+                                        capture_fields: tuple[str, ...], unit_id: str,
+                                        save_path: Path | None = None) -> str:
+    if len(capture_fields) != 5 or capture_fields[2] != unit_id or capture_fields[3] != "-":
+        raise ValueError("clear-ocean capture requires its selected positive target and exact five fields")
+    if not re.fullmatch(r"unit:[A-Za-z0-9._-]{1,96}", unit_id):
+        raise ValueError("clear-ocean capture requires one safe dynamic unit ID")
+    parts = [str(output), str(timeout_ms), "CLEAR-OCEAN-CAPTURE", *capture_fields, unit_id]
+    if save_path is not None:
+        parts.append(str(save_path))
+    return ",".join(parts)
+
+
+def loaded_state_signature_matches(expected: str, observed_final: object,
+                                   movement: dict[str, object] | None = None) -> bool:
+    observed = movement.get("initialStateSignatureSha256") if movement is not None else observed_final
+    return isinstance(observed, str) and observed == expected
+
+
+def selected_clear_ocean_evidence(live_state: dict[str, object], unit_id: str) -> dict[str, object] | None:
+    rows = live_state.get("units")
+    if not isinstance(rows, list):
+        return None
+    matches = [row for row in rows if isinstance(row, dict) and row.get("id") == unit_id]
+    if len(matches) != 1:
+        return None
+    evidence = matches[0].get("aboveTileFootprintEvidence")
+    return evidence if isinstance(evidence, dict) else None
+
+
+def canonical_reload_state_signature(movement: object) -> str | None:
+    if not isinstance(movement, dict):
+        return None
+    signature = movement.get("canonicalReloadStateSignatureSha256")
+    return signature if isinstance(signature, str) and re.fullmatch(r"[0-9a-f]{64}", signature) else None
 
 
 def sha256(path: Path) -> str:
@@ -167,6 +254,22 @@ def write_json(path: Path, value: object) -> None:
     temporary = path.with_name(path.name + ".part")
     temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     temporary.replace(path)
+
+
+def physical_screenshot_created(live_data: dict[str, object]) -> bool:
+    capture = live_data.get("actualScreenCapture")
+    if not isinstance(capture, dict) or capture.get("status") != "captured" or capture.get("screenshotCreated") is not True:
+        return False
+    screenshot = capture.get("screenshot")
+    return bool(
+        isinstance(screenshot, dict)
+        and isinstance(screenshot.get("path"), str)
+        and bool(screenshot["path"])
+        and isinstance(screenshot.get("sha256"), str)
+        and re.fullmatch(r"[0-9a-f]{64}", screenshot["sha256"]) is not None
+        and isinstance(screenshot.get("bytes"), int)
+        and screenshot["bytes"] > 0
+    )
 
 
 def snapshot_source_closure(source_dir: Path, run_dir: Path) -> tuple[Path, dict[str, object]]:
@@ -266,13 +369,61 @@ def main() -> int:
     operations.add_argument("--load-savegame", type=Path, help="load a previously frozen owned FreeCol save")
     parser.add_argument("--expected-save-sha256")
     parser.add_argument("--expected-loaded-state-signature-sha256")
+    parser.add_argument("--move-west-unit-id", help="opt-in: request exactly three normal west moves for this active front unit")
+    parser.add_argument("--move-west-start", nargs=2, type=int, metavar=("X", "Y"))
+    parser.add_argument("--move-west-final", nargs=2, type=int, metavar=("X", "Y"))
+    parser.add_argument("--clear-ocean-evidence-unit-id", help="opt-in: inspect full above-tile alpha evidence for exactly one selected unit")
     args = parser.parse_args()
     if not 30 <= args.timeout_seconds <= MAX_RUN_SECONDS:
         parser.error(f"--timeout-seconds must be between 30 and {MAX_RUN_SECONDS}")
     if args.seed < 0 or args.seed > 2**31 - 1:
         parser.error("--seed must be a non-negative 32-bit integer")
     capture_targets = sum((args.capture_target_unit_id is not None, args.capture_absent_unit_type_id is not None))
-    capture_requested = capture_targets > 0 or args.expected_state_signature_sha256 is not None
+    move_requested = args.move_west_unit_id is not None or args.move_west_start is not None or args.move_west_final is not None
+    clear_ocean_evidence_requested = args.clear_ocean_evidence_unit_id is not None
+    evidence_only_requested = clear_ocean_evidence_requested and not move_requested and capture_targets == 0
+    if clear_ocean_evidence_requested and re.fullmatch(r"unit:[A-Za-z0-9._-]{1,96}", args.clear_ocean_evidence_unit_id or "") is None:
+        parser.error("clear-ocean evidence requires one safe dynamic unit ID")
+    if clear_ocean_evidence_requested and (
+        args.load_savegame is None or args.expected_state_signature_sha256 is None
+        or args.expected_loaded_state_signature_sha256 != args.expected_state_signature_sha256
+        or args.save_state or args.nation_id is not None or args.nation_type_id is not None
+    ):
+        parser.error("clear-ocean evidence requires a pinned loaded save and matching state signatures")
+    if clear_ocean_evidence_requested and capture_targets and (
+        capture_targets != 1 or args.capture_target_unit_id != args.clear_ocean_evidence_unit_id
+        or args.capture_absent_unit_type_id is not None
+    ):
+        parser.error("clear-ocean screenshot evidence requires the same selected positive unit ID")
+    if move_requested and (args.move_west_unit_id is None or args.move_west_start is None or args.move_west_final is None):
+        parser.error("west movement requires --move-west-unit-id, --move-west-start and --move-west-final")
+    if move_requested and (args.load_savegame is None or args.expected_state_signature_sha256 is None
+                           or args.expected_loaded_state_signature_sha256 is None
+                           or args.expected_loaded_state_signature_sha256 != args.expected_state_signature_sha256):
+        parser.error("west movement requires one pinned loaded save and matching initial state signatures")
+    if move_requested and (args.move_west_unit_id is None
+                           or re.fullmatch(r"unit:[A-Za-z0-9._-]{1,96}", args.move_west_unit_id) is None):
+        parser.error("west movement requires one safe dynamic unit ID")
+    if move_requested and (not clear_ocean_evidence_requested
+                           or args.clear_ocean_evidence_unit_id != args.move_west_unit_id):
+        parser.error("west movement requires explicit clear-ocean evidence for the same unit")
+    if move_requested and (args.save_state or capture_targets or args.nation_id is not None or args.nation_type_id is not None):
+        parser.error("west movement cannot be combined with fresh-save, screenshot, or nation-selection options")
+    if move_requested and (any(value < 0 or value > 100_000 for value in (*args.move_west_start, *args.move_west_final))):
+        parser.error("west movement coordinates must be bounded non-negative integers")
+    if move_requested:
+        pinned = CLEAR_OCEAN_PARENT_CASES.get(args.seed)
+        if (Path(args.evidence_root) != CLEAR_OCEAN_EVIDENCE_ROOT or pinned is None
+                or args.load_savegame != pinned["save"]
+                or args.expected_save_sha256 != pinned["saveSha256"]
+                or args.expected_state_signature_sha256 != pinned["stateSignatureSha256"]
+                or args.expected_loaded_state_signature_sha256 != pinned["stateSignatureSha256"]
+                or args.move_west_unit_id != pinned["unitId"]
+                or tuple(args.move_west_start or ()) != pinned["start"]
+                or tuple(args.move_west_final or ()) != pinned["final"]):
+            parser.error("west movement inputs must exactly match the frozen source row")
+    capture_requested = capture_targets > 0 or (
+        args.expected_state_signature_sha256 is not None and not move_requested and not evidence_only_requested)
     try:
         validate_nation_selection(args.nation_id, args.nation_type_id, capture_requested)
     except ValueError as error:
@@ -297,9 +448,13 @@ def main() -> int:
             parser.error("--load-savegame must name an existing regular, non-symlink save file")
         try:
             resolved_save = args.load_savegame.resolve(strict=True)
-            resolved_save.relative_to(Path(args.evidence_root).resolve())
+            try:
+                resolved_save.relative_to(Path(args.evidence_root).resolve())
+            except ValueError:
+                if not move_requested or resolved_save != CLEAR_OCEAN_PARENT_CASES[args.seed]["save"].resolve(strict=True):
+                    raise
         except (OSError, ValueError):
-            parser.error("--load-savegame must be inside the task-owned external evidence root")
+            parser.error("--load-savegame must be inside the evidence root or be the exact pinned movement input")
         load_save_sha256 = sha256(resolved_save)
         try:
             loaded_world_inventory = inspect_official_savegame(resolved_save)
@@ -355,7 +510,7 @@ def main() -> int:
         receipt_path = run_dir / "live-state.json"
         agent_timeout_ms = min(args.timeout_seconds * 1000 - 20_000, 580_000)
         capture_fields: tuple[str, ...] | None = None
-        save_path: Path | None = run_dir / "official-state.fsg" if args.save_state else None
+        save_path: Path | None = run_dir / "official-state.fsg" if args.save_state or move_requested else None
         capture_mode: str | None = None
         if capture_requested:
             capture_dir = run_dir / "capture"
@@ -370,8 +525,26 @@ def main() -> int:
                 args.capture_absent_unit_type_id or "-",
                 args.expected_state_signature_sha256 or "-",
             )
-        agent_args = build_agent_arguments(receipt_path, agent_timeout_ms, save_path, capture_fields,
-                                          args.nation_id, args.nation_type_id)
+        if move_requested:
+            assert save_path is not None and args.move_west_unit_id is not None
+            assert args.expected_state_signature_sha256 is not None
+            assert args.move_west_start is not None and args.move_west_final is not None
+            agent_args = build_west_move_agent_arguments(
+                receipt_path, agent_timeout_ms, save_path, args.move_west_unit_id,
+                args.expected_state_signature_sha256, tuple(args.move_west_start), tuple(args.move_west_final))
+        elif clear_ocean_evidence_requested and capture_fields is not None:
+            assert args.clear_ocean_evidence_unit_id is not None
+            agent_args = build_clear_ocean_capture_arguments(
+                receipt_path, agent_timeout_ms, capture_fields, args.clear_ocean_evidence_unit_id, save_path)
+        elif evidence_only_requested:
+            assert args.clear_ocean_evidence_unit_id is not None
+            assert args.expected_loaded_state_signature_sha256 is not None
+            agent_args = build_clear_ocean_evidence_arguments(
+                receipt_path, agent_timeout_ms, args.clear_ocean_evidence_unit_id,
+                args.expected_loaded_state_signature_sha256)
+        else:
+            agent_args = build_agent_arguments(receipt_path, agent_timeout_ms, save_path, capture_fields,
+                                              args.nation_id, args.nation_type_id)
         env = {
             "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games",
             "LANG": "C.UTF-8",
@@ -511,9 +684,28 @@ def main() -> int:
             status = "official-save-client-inventory-crosscheck-failed"
         if resolved_save is not None and sha256(resolved_save) != load_save_sha256:
             status = "frozen-save-changed-during-load"
+        movement = live_data.get("normalWestMovement") if isinstance(live_data.get("normalWestMovement"), dict) else None
+        clear_ocean_evidence = selected_clear_ocean_evidence(live_data, args.clear_ocean_evidence_unit_id) if clear_ocean_evidence_requested else None
         if args.expected_loaded_state_signature_sha256 is not None:
-            if live_data.get("stateSignatureSha256") != args.expected_loaded_state_signature_sha256:
+            if not loaded_state_signature_matches(args.expected_loaded_state_signature_sha256,
+                                                  live_data.get("stateSignatureSha256"), movement if move_requested else None):
                 status = "loaded-state-signature-mismatch"
+        if clear_ocean_evidence_requested and (
+            clear_ocean_evidence is None or clear_ocean_evidence.get("complete") is not True
+        ):
+            status = "clear-ocean-native-evidence-incomplete"
+        if move_requested and (
+            movement is None or movement.get("requested") != 3 or movement.get("requests") != 3
+            or movement.get("confirmed") != 3 or movement.get("failure") is not None
+            or movement.get("initialStateSignatureSha256") != args.expected_loaded_state_signature_sha256
+            or movement.get("finalStateSignatureSha256") != live_data.get("stateSignatureSha256")
+            or movement.get("expectedFinalTile") != {"x": args.move_west_final[0], "y": args.move_west_final[1]}
+            or not isinstance(official_save, dict) or official_save.get("status") != "saved"
+        ):
+            status = "normal-west-movement-not-fully-confirmed"
+        canonical_reload_signature = canonical_reload_state_signature(movement)
+        if move_requested and canonical_reload_signature is None:
+            status = "canonical-reload-state-signature-unavailable"
         if capture_requested and args.capture_absent_unit_type_id is not None:
             valid_types = live_data.get("validGameUnitTypeIds")
             if not isinstance(valid_types, list) or args.capture_absent_unit_type_id not in valid_types:
@@ -571,7 +763,17 @@ def main() -> int:
             "timeoutSeconds": args.timeout_seconds,
             "captureRequested": capture_requested,
             "captureMode": capture_mode,
-            "stateOperation": "load-savegame" if resolved_save is not None else ("official-save" if save_path is not None else "fresh-seed"),
+            "stateOperation": "load-savegame-and-three-normal-west-moves" if move_requested else ("load-savegame" if resolved_save is not None else ("official-save" if save_path is not None else "fresh-seed")),
+            "normalWestMovementRequest": None if not move_requested else {
+                "direction": "W", "requestCount": 3, "expectedStartTile": args.move_west_start,
+                "expectedFinalTile": args.move_west_final, "unitId": args.move_west_unit_id,
+            },
+            "normalWestMovementResult": movement,
+            "canonicalReloadStateSignatureSha256": canonical_reload_signature,
+            "clearOceanEvidenceRequested": clear_ocean_evidence_requested,
+            "clearOceanEvidenceUnitId": args.clear_ocean_evidence_unit_id,
+            "clearOceanAboveTileEvidence": clear_ocean_evidence,
+            "finalStateSignatureSha256": live_data.get("stateSignatureSha256"),
             "loadedSavePath": None if resolved_save is None else str(resolved_save),
             "loadedSaveSha256Before": load_save_sha256,
             "loadedSaveSha256After": None if resolved_save is None else sha256(resolved_save),
@@ -599,7 +801,7 @@ def main() -> int:
                 "stderrBytes": bounded_file_bytes(stderr_path),
             },
             "ownedProcessGroupClosure": owned_close,
-            "screenshotCreated": False,
+            "screenshotCreated": physical_screenshot_created(live_data),
             "corpusCaseStateCaptured": False,
             "privateProfileRoot": str(private_root),
             "privateProfileRemoved": private_profile_removed,
@@ -629,6 +831,10 @@ def main() -> int:
             and namespace_children_reaped
             and not (namespace_receipt and namespace_receipt.get("sessionWorkerOutputTruncated"))
             and (not capture_requested or capture_status == "captured")
+            and (not move_requested or (movement is not None and movement.get("requests") == 3
+                                        and movement.get("confirmed") == 3 and movement.get("failure") is None))
+            and (not clear_ocean_evidence_requested or (clear_ocean_evidence is not None
+                                                       and clear_ocean_evidence.get("complete") is True))
             and private_profile_removed
             and not sink.overflowed
         ) else 1

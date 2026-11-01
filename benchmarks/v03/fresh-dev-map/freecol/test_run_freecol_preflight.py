@@ -26,6 +26,34 @@ SPEC.loader.exec_module(probe)
 
 
 class RunDirectoryTests(unittest.TestCase):
+    def test_physical_screenshot_receipt_tracks_native_capture_witness_only(self):
+        captured = {
+            "actualScreenCapture": {
+                "status": "captured",
+                "screenshotCreated": True,
+                "screenshot": {"path": "/evidence/full-screen.png", "sha256": "a" * 64, "bytes": 1234},
+            },
+        }
+        metadata_only = {"status": "live-map-observed", "screenshotCreated": False}
+        vetoed = {
+            "actualScreenCapture": {
+                "status": "capture-vetoed",
+                "screenshotCreated": False,
+                "screenshot": None,
+            },
+        }
+        malformed_capture = {
+            "actualScreenCapture": {
+                "status": "captured",
+                "screenshotCreated": True,
+                "screenshot": {"path": "/evidence/full-screen.png", "sha256": "bad", "bytes": 1234},
+            },
+        }
+        self.assertTrue(probe.physical_screenshot_created(captured))
+        self.assertFalse(probe.physical_screenshot_created(metadata_only))
+        self.assertFalse(probe.physical_screenshot_created(vetoed))
+        self.assertFalse(probe.physical_screenshot_created(malformed_capture))
+
     def test_capture_ui_gate_fixture_allows_only_safe_persistent_hud(self):
         source_dir = Path(__file__).with_name("src") / "zorya" / "mapprobe"
         sources = [source_dir / "FreeColProbe.java", source_dir / "FreeColCaptureUiGateFixture.java"]
@@ -42,7 +70,16 @@ class RunDirectoryTests(unittest.TestCase):
             )
             self.assertEqual(compile_result.returncode, 0, compile_result.stdout.decode("utf-8", errors="replace"))
             run_result = subprocess.run(
-                [str(JAVA), "-classpath", f"{build}:{JAR}", "zorya.mapprobe.FreeColCaptureUiGateFixture"],
+                [str(JAVA), "-classpath", f"{build}:{JAR}", "zorya.mapprobe.FreeColCaptureUiGateFixture",
+                 probe.build_clear_ocean_evidence_arguments(Path(temporary) / "probe-receipt.json", 180_000,
+                                                            "unit:5880", "a" * 64),
+                 probe.build_west_move_agent_arguments(Path(temporary) / "move-receipt.json", 180_000,
+                                                       Path("/tmp/official-state.fsg"), "unit:5859", "a" * 64,
+                                                       (30, 13), (27, 13)),
+                 probe.build_clear_ocean_capture_arguments(
+                     Path(temporary) / "capture-receipt.json", 180_000,
+                     (str(Path(temporary) / "screen.png"), str(Path(temporary) / "sprite.png"),
+                      "unit:5859", "-", "a" * 64), "unit:5859", Path("/tmp/official-state.fsg"))],
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -50,7 +87,8 @@ class RunDirectoryTests(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(run_result.returncode, 0, run_result.stdout.decode("utf-8", errors="replace"))
-            self.assertIn(b"capture-ui-gate-fixtures: 7 passed", run_result.stdout)
+            self.assertIn(b"capture-ui-gate-fixtures: 13 passed; native-overlay-contract-fixtures: 20 passed; canonical-focus-signature-fixtures: 2 passed; movement-snapshot-order-fixtures: 2 passed", run_result.stdout)
+            self.assertIn(b"launcher-dispatch-fixture: evidence=CLEAR_OCEAN_EVIDENCE, movement=MOVE_WEST, capture=CLEAR_OCEAN_CAPTURE, legacy=MAP, observerStarted=true", run_result.stdout)
 
     def test_nation_selection_gate_waits_for_attempt_and_matching_player_confirmation(self):
         source_dir = Path(__file__).with_name("src") / "zorya" / "mapprobe"
@@ -110,12 +148,70 @@ class RunDirectoryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             probe.build_agent_arguments(output, 1000, save, capture, nation, nation_type)
 
-    def test_evidence_root_is_an_exact_two_path_allowlist_with_legacy_default(self):
+    def test_opt_in_clear_ocean_builder_has_exact_three_west_fields(self):
+        output = Path("/tmp/live-state.json")
+        save = Path("/tmp/moved-state.fsg")
+        signature = "a" * 64
+        arguments = probe.build_west_move_agent_arguments(
+            output, 1000, save, "unit:5880", signature, (33, 59), (30, 59)).split(",")
+        self.assertEqual(arguments, [str(output), "1000", "MOVE-WWW-CLEAR-OCEAN", str(save), "unit:5880",
+                                     signature, "33", "59", "30", "59"])
+        for unit_id, digest, start, final in (
+            ("unit:1,other", signature, (0, 0), (1, 0)),
+            ("unit:1", "not-a-hash", (0, 0), (1, 0)),
+            ("unit:1", signature, (-1, 0), (1, 0)),
+            ("unit:1", signature, (0, 0), (100001, 0)),
+        ):
+            with self.subTest(unit_id=unit_id, digest=digest, start=start, final=final), self.assertRaises(ValueError):
+                probe.build_west_move_agent_arguments(output, 1000, save, unit_id, digest, start, final)
+
+    def test_named_clear_ocean_evidence_protocol_is_explicit_and_unit_scoped(self):
+        output = Path("/tmp/live-state.json")
+        signature = "a" * 64
+        self.assertEqual(probe.build_clear_ocean_evidence_arguments(output, 1000, "unit:5880", signature).split(","),
+                         [str(output), "1000", "CLEAR-OCEAN-EVIDENCE", "unit:5880", signature])
+        fields = ("/tmp/screen.png", "/tmp/sprite.png", "unit:5880", "-", signature)
+        self.assertEqual(probe.build_clear_ocean_capture_arguments(output, 1000, fields, "unit:5880").split(","),
+                         [str(output), "1000", "CLEAR-OCEAN-CAPTURE", *fields, "unit:5880"])
+        with self.assertRaises(ValueError):
+            probe.build_clear_ocean_capture_arguments(output, 1000, fields, "unit:5859")
+
+    def test_clear_ocean_evidence_extraction_requires_one_selected_target_record(self):
+        row = {"id": "unit:5880", "aboveTileFootprintEvidence": {"status": "complete-clear", "complete": True, "clear": True}}
+        self.assertEqual(probe.selected_clear_ocean_evidence({"units": [row]}, "unit:5880"), row["aboveTileFootprintEvidence"])
+        self.assertIsNone(probe.selected_clear_ocean_evidence({"units": [row, row]}, "unit:5880"))
+        self.assertIsNone(probe.selected_clear_ocean_evidence({"units": [{"id": "unit:5880"}]}, "unit:5880"))
+
+    def test_movement_load_signature_is_separate_from_final_state_signature(self):
+        initial = "a" * 64
+        final = "b" * 64
+        self.assertTrue(probe.loaded_state_signature_matches(initial, final, {
+            "initialStateSignatureSha256": initial,
+            "finalStateSignatureSha256": final,
+        }))
+        self.assertFalse(probe.loaded_state_signature_matches(initial, final, {
+            "initialStateSignatureSha256": "c" * 64,
+            "finalStateSignatureSha256": final,
+        }))
+        self.assertFalse(probe.loaded_state_signature_matches(initial, final, None))
+        self.assertTrue(probe.loaded_state_signature_matches(initial, initial))
+        self.assertFalse(probe.loaded_state_signature_matches(initial, final))
+
+    def test_canonical_reload_signature_requires_a_full_sha256(self):
+        expected = "d" * 64
+        self.assertEqual(probe.canonical_reload_state_signature({"canonicalReloadStateSignatureSha256": expected}), expected)
+        self.assertIsNone(probe.canonical_reload_state_signature({"canonicalReloadStateSignatureSha256": "d" * 63}))
+        self.assertIsNone(probe.canonical_reload_state_signature({"canonicalReloadStateSignatureSha256": None}))
+        self.assertIsNone(probe.canonical_reload_state_signature(None))
+
+    def test_evidence_root_allowlist_preserves_legacy_paths_and_adds_named_ocean_root(self):
         self.assertEqual(probe.EXPECTED_ROOT, Path("/root/.codex/artifacts/zorya-classifier-mcp-20261031/fresh-map"))
         self.assertEqual(probe.ALLOWED_EVIDENCE_ROOTS, (
             Path("/root/.codex/artifacts/zorya-classifier-mcp-20261031/fresh-map"),
             Path("/root/.codex/artifacts/zorya-classifier-mcp-20261101/freecol-caravel"),
+            Path("/root/.codex/artifacts/zorya-classifier-mcp-20261101/freecol-caravel/clear-ocean-v1"),
         ))
+        self.assertEqual(probe.EXPECTED_ROOT, probe.ALLOWED_EVIDENCE_ROOTS[0])
 
     def test_official_save_inventory_counts_only_complete_dynamic_units(self):
         with tempfile.TemporaryDirectory(prefix="freecol-savegame-test-") as temporary:

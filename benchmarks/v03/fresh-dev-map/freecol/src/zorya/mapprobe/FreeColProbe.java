@@ -29,6 +29,7 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -38,15 +39,34 @@ import javax.swing.SwingUtilities;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.imageio.ImageIO;
+import net.sf.freecol.client.FreeColClient;
+import net.sf.freecol.common.model.Direction;
+import net.sf.freecol.common.model.Unit;
 
 /** Read-only, one-shot observer for an explicitly launched FreeCol diagnostic. */
 public final class FreeColProbe {
+    @FunctionalInterface
+    interface ConfirmedMovementSnapshotSupplier {
+        ConfirmedMovementSnapshot capture() throws Exception;
+    }
+
+    record ConfirmedMovementSnapshot(String liveStateJson, String stateSignatureSha256,
+                                      String canonicalReloadStateSignatureSha256, int unitX, int unitY) {}
+
+    enum AgentMode { MAP, LOAD, NATION_SELECTION, CLEAR_OCEAN_EVIDENCE, MOVE_WEST, CAPTURE, CLEAR_OCEAN_CAPTURE }
+    static record AgentOptions(AgentMode mode, Path output, long timeoutMillis, String officialSavePath,
+                               String expectedStateSignature, String targetUnitId, String clearOceanUnitId,
+                               String captureScreenPath, String captureSpritePath, String captureAbsentUnitTypeId,
+                               int moveStartX, int moveStartY, int moveFinalX, int moveFinalY,
+                               String nationId, String nationTypeId) {}
     static record UiPanelFact(String className, Rectangle screenBounds, boolean showing, boolean boundsAvailable) {}
     private record UnitResourceEvidence(String json, boolean returnedPixelsMatchBaseImage) {}
     private record OverlayEvidence(String json, boolean geometryAvailable, boolean bboxUnchangedAfterKnownChip,
                                    boolean otherOverlayIntersectsSprite, Point chipOriginInTile, BufferedImage chipImage) {}
     private record VisibleSpriteBounds(Rectangle bounds, int fullyOccludedOpaquePixels) {}
     private record UiOverlapEvidence(String json, boolean intersectsTarget) {}
+    private record ClearOceanEvidence(String json, boolean complete, boolean clear) {}
+    private record ForegroundLayerEvidence(String json, boolean complete, boolean clear) {}
     private record CaptureUiEvidence(String json, boolean componentInventoryComplete, int externalShowingWindowCount,
                                      List<UiPanelFact> visibleFreeColPanels, int visibleComponentCount) {}
 
@@ -66,12 +86,32 @@ public final class FreeColProbe {
     private static final List<String> INFORMATION_PANEL_ACTION_OBSERVATIONS = new ArrayList<>();
     private static String lastUiState = "{\"visiblePanels\":[],\"visibleButtons\":[]}";
     private static String latestStateSignature;
+    private static String latestCanonicalReloadStateSignature;
     private static String captureScreenPath;
     private static String captureSpritePath;
     private static String captureTargetUnitId;
     private static String captureAbsentUnitTypeId;
     private static String expectedCaptureStateSignature;
     private static String officialSavePath;
+    private static String moveWestUnitId;
+    private static String moveWestExpectedStateSignature;
+    private static String clearOceanEvidenceUnitId;
+    private static boolean clearOceanEvidenceMode;
+    private static String moveWestInitialStateSignature;
+    private static int moveWestStartX;
+    private static int moveWestStartY;
+    private static int moveWestExpectedFinalX;
+    private static int moveWestExpectedFinalY;
+    private static int moveWestRequests;
+    private static int moveWestConfirmed;
+    private static String moveWestFailure;
+    private static int moveWestPendingX = Integer.MIN_VALUE;
+    private static int moveWestPendingY = Integer.MIN_VALUE;
+    private static int moveWestCurrentX = Integer.MIN_VALUE;
+    private static int moveWestCurrentY = Integer.MIN_VALUE;
+    private static final List<String> moveWestReceipts = new ArrayList<>();
+    private static Map<String, Object> latestFrontUnits = new LinkedHashMap<>();
+    private static Map<String, Point> latestFrontUnitTiles = new LinkedHashMap<>();
     private static String requestedNationId;
     private static String requestedNationTypeId;
     private static boolean nationSelectionAttempted;
@@ -98,6 +138,7 @@ public final class FreeColProbe {
     private static Map<String, BufferedImage> latestTargetChips = new LinkedHashMap<>();
     private static Map<String, Boolean> latestTargetOverlaySafe = new LinkedHashMap<>();
     private static Map<String, Boolean> latestTargetBboxUnchanged = new LinkedHashMap<>();
+    private static Map<String, ClearOceanEvidence> latestTargetAboveTileEvidence = new LinkedHashMap<>();
     private static Rectangle latestScreenViewport;
     private static Rectangle latestFrameBounds;
     private static boolean latestVisibleFrontInventoryComplete;
@@ -105,49 +146,50 @@ public final class FreeColProbe {
     private static String latestCaptureUiGateJson = "{\"status\":\"not-observed\"}";
     private static boolean latestCaptureUiGateSafe;
     private static Point latestFrameOrigin = new Point(0, 0);
+    static volatile AgentOptions lastStartedAgentOptions;
+    static volatile Thread lastStartedObserver;
 
     private FreeColProbe() {}
 
     public static void premain(String arguments, Instrumentation instrumentation) {
         String[] parts = arguments == null ? new String[0] : arguments.split(",", -1);
-        if (!validAgentArgumentCount(parts.length)) return;
-        Path output = Path.of(parts[0]);
-        long timeoutMillis;
-        try {
-            timeoutMillis = Math.max(1_000L, Math.min(600_000L, Long.parseLong(parts[1])));
-        } catch (NumberFormatException exception) {
-            return;
-        }
-        if (parts.length == 3) {
-            officialSavePath = dashToNull(parts[2]);
-            if (officialSavePath == null) return;
-        } else if (parts.length == 4 || parts.length == 5) {
-            int selectionStart = nationSelectionStartIndex(parts);
-            if (selectionStart < 0) return;
-            requestedNationId = dashToNull(parts[selectionStart]);
-            requestedNationTypeId = dashToNull(parts[selectionStart + 1]);
-            if (parts.length == 5) {
-                int saveIndex = selectionStart == 2 ? 4 : 2;
-                officialSavePath = dashToNull(parts[saveIndex]);
-                if (officialSavePath == null) return;
-            }
-        } else if (parts.length == 7 || parts.length == 8) {
-            captureScreenPath = dashToNull(parts[2]);
-            captureSpritePath = dashToNull(parts[3]);
-            captureTargetUnitId = dashToNull(parts[4]);
-            captureAbsentUnitTypeId = dashToNull(parts[5]);
-            expectedCaptureStateSignature = dashToNull(parts[6]);
-            if (captureScreenPath == null || expectedCaptureStateSignature == null
-                    || ((captureTargetUnitId == null) == (captureAbsentUnitTypeId == null))) return;
-            if ((captureTargetUnitId == null) != (captureSpritePath == null)) return;
-            if (parts.length == 8) {
-                officialSavePath = dashToNull(parts[7]);
-                if (officialSavePath == null) return;
-            }
-        }
-        Thread observer = new Thread(() -> observe(output, timeoutMillis), "freecol-state-preflight");
+        AgentOptions options = parseAgentArguments(parts);
+        if (options == null) return;
+        startObserver(options, options.timeoutMillis());
+    }
+
+    private static Thread startObserver(AgentOptions options, long timeoutMillis) {
+        applyAgentOptions(options);
+        Thread observer = new Thread(() -> observe(options.output(), timeoutMillis), "freecol-state-preflight");
         observer.setDaemon(true);
+        lastStartedAgentOptions = options;
+        lastStartedObserver = observer;
         observer.start();
+        return observer;
+    }
+
+    static Thread startObserverForFixture(AgentOptions options) {
+        return startObserver(options, 1_000L);
+    }
+
+    private static void applyAgentOptions(AgentOptions options) {
+        officialSavePath = options.officialSavePath();
+        captureScreenPath = options.captureScreenPath();
+        captureSpritePath = options.captureSpritePath();
+        captureTargetUnitId = options.targetUnitId();
+        captureAbsentUnitTypeId = options.captureAbsentUnitTypeId();
+        clearOceanEvidenceUnitId = options.clearOceanUnitId();
+        clearOceanEvidenceMode = options.mode() == AgentMode.CLEAR_OCEAN_EVIDENCE
+                || options.mode() == AgentMode.MOVE_WEST || options.mode() == AgentMode.CLEAR_OCEAN_CAPTURE;
+        moveWestUnitId = options.mode() == AgentMode.MOVE_WEST ? options.targetUnitId() : null;
+        moveWestExpectedStateSignature = options.expectedStateSignature();
+        moveWestStartX = options.moveStartX();
+        moveWestStartY = options.moveStartY();
+        moveWestExpectedFinalX = options.moveFinalX();
+        moveWestExpectedFinalY = options.moveFinalY();
+        expectedCaptureStateSignature = options.expectedStateSignature();
+        requestedNationId = options.nationId();
+        requestedNationTypeId = options.nationTypeId();
     }
 
     private static String dashToNull(String value) {
@@ -168,7 +210,118 @@ public final class FreeColProbe {
 
     static boolean validAgentArgumentCount(int argumentCount) {
         return argumentCount == 2 || argumentCount == 3 || argumentCount == 4 || argumentCount == 5
-                || argumentCount == 7 || argumentCount == 8;
+                || argumentCount == 7 || argumentCount == 8 || argumentCount == 10;
+    }
+
+    static boolean validAgentArguments(String[] arguments) {
+        return parseAgentArguments(arguments) != null;
+    }
+
+    static AgentOptions parseAgentArguments(String[] arguments) {
+        if (arguments == null || arguments.length < 2) return null;
+        try {
+            Path output = Path.of(arguments[0]);
+            long timeoutMillis = Math.max(1_000L, Math.min(600_000L, Long.parseLong(arguments[1])));
+            String savePath = null;
+            String signature = null;
+            String target = null;
+            String clearTarget = null;
+            String screenPath = null;
+            String spritePath = null;
+            String absentType = null;
+            int startX = 0, startY = 0, finalX = 0, finalY = 0;
+            String nationId = null;
+            String nationTypeId = null;
+            AgentMode mode;
+
+            if (arguments.length == 5 && "CLEAR-OCEAN-EVIDENCE".equals(arguments[2])) {
+                mode = AgentMode.CLEAR_OCEAN_EVIDENCE;
+                clearTarget = dashToNull(arguments[3]);
+                signature = dashToNull(arguments[4]);
+                if (!validClearOceanTarget(clearTarget) || !validSignature(signature)) return null;
+            } else if (arguments.length == 10 && "MOVE-WWW-CLEAR-OCEAN".equals(arguments[2])) {
+                mode = AgentMode.MOVE_WEST;
+                savePath = dashToNull(arguments[3]);
+                target = dashToNull(arguments[4]);
+                clearTarget = target;
+                signature = dashToNull(arguments[5]);
+                if (savePath == null || !validClearOceanTarget(target) || !validSignature(signature)) return null;
+                startX = boundedCoordinate(arguments[6]);
+                startY = boundedCoordinate(arguments[7]);
+                finalX = boundedCoordinate(arguments[8]);
+                finalY = boundedCoordinate(arguments[9]);
+            } else if ((arguments.length == 9 || arguments.length == 10)
+                    && "CLEAR-OCEAN-CAPTURE".equals(arguments[2])) {
+                mode = AgentMode.CLEAR_OCEAN_CAPTURE;
+                screenPath = dashToNull(arguments[3]);
+                spritePath = dashToNull(arguments[4]);
+                target = dashToNull(arguments[5]);
+                absentType = dashToNull(arguments[6]);
+                signature = dashToNull(arguments[7]);
+                clearTarget = dashToNull(arguments[8]);
+                if (arguments.length == 10) savePath = dashToNull(arguments[9]);
+                if (screenPath == null || spritePath == null || !validClearOceanTarget(target)
+                        || !target.equals(clearTarget) || !"-".equals(arguments[6])
+                        || !validSignature(signature) || (arguments.length == 10 && savePath == null)) return null;
+            } else if (arguments.length == 2) {
+                mode = AgentMode.MAP;
+            } else if (arguments.length == 3) {
+                mode = AgentMode.LOAD;
+                savePath = dashToNull(arguments[2]);
+                if (savePath == null) return null;
+            } else if (arguments.length == 4 || arguments.length == 5) {
+                int selectionStart = nationSelectionStartIndex(arguments);
+                if (selectionStart < 0) return null;
+                mode = AgentMode.NATION_SELECTION;
+                nationId = dashToNull(arguments[selectionStart]);
+                nationTypeId = dashToNull(arguments[selectionStart + 1]);
+                if (arguments.length == 5) {
+                    int saveIndex = selectionStart == 2 ? 4 : 2;
+                    savePath = dashToNull(arguments[saveIndex]);
+                    if (savePath == null) return null;
+                }
+            } else if (arguments.length == 7 || arguments.length == 8) {
+                mode = AgentMode.CAPTURE;
+                screenPath = dashToNull(arguments[2]);
+                spritePath = dashToNull(arguments[3]);
+                target = dashToNull(arguments[4]);
+                absentType = dashToNull(arguments[5]);
+                signature = dashToNull(arguments[6]);
+                if (arguments.length == 8) savePath = dashToNull(arguments[7]);
+                if (screenPath == null || !validSignature(signature)
+                        || ((target == null) == (absentType == null))
+                        || ((target == null) != (spritePath == null))
+                        || (arguments.length == 8 && savePath == null)) return null;
+            } else {
+                return null;
+            }
+            return new AgentOptions(mode, output, timeoutMillis, savePath, signature, target, clearTarget,
+                    screenPath, spritePath, absentType, startX, startY, finalX, finalY, nationId, nationTypeId);
+        } catch (IllegalArgumentException exception) {
+            return null;
+        }
+    }
+
+    private static boolean validSignature(String signature) {
+        return signature != null && signature.matches("[0-9a-f]{64}");
+    }
+
+    private static int boundedCoordinate(String value) {
+        int coordinate = Integer.parseInt(value);
+        if (coordinate < 0 || coordinate > 100_000) throw new IllegalArgumentException("coordinate outside bounds");
+        return coordinate;
+    }
+
+    static boolean validClearOceanTarget(String unitId) {
+        return unitId != null && unitId.matches("unit:[A-Za-z0-9._-]{1,96}");
+    }
+
+    static boolean shouldCollectAboveTileEvidence(boolean enabled, String selectedUnitId, String currentUnitId) {
+        return enabled && selectedUnitId != null && selectedUnitId.equals(currentUnitId);
+    }
+
+    static boolean cursorMayBeVisible(boolean active, boolean blinkTimerRunning) {
+        return active || blinkTimerRunning;
     }
 
     private static void observe(Path output, long timeoutMillis) {
@@ -195,6 +348,86 @@ public final class FreeColProbe {
                         stableObservationCount = 1;
                     }
                     if (stableObservationCount >= 3) {
+                        if (moveWestUnitId != null) {
+                            if (moveWestRequests == 0 && !moveWestExpectedStateSignature.equals(latestStateSignature)) {
+                                moveWestFailure = "initial-state-signature-mismatch";
+                                writeAtomically(output, withMoves(json) + "\n");
+                                return;
+                            }
+                            if (moveWestRequests == 0) moveWestInitialStateSignature = latestStateSignature;
+                            if (moveWestRequests > moveWestConfirmed) {
+                                Point actual = latestFrontUnitTiles.get(moveWestUnitId);
+                                if (actual == null || actual.x != moveWestPendingX || actual.y != moveWestPendingY) {
+                                    moveWestFailure = "move-request-not-confirmed-at-expected-tile";
+                                    writeAtomically(output, withMoves(json) + "\n");
+                                    return;
+                                }
+                                moveWestCurrentX = actual.x;
+                                moveWestCurrentY = actual.y;
+                                moveWestConfirmed++;
+                                moveWestReceipts.add("{\"step\":" + moveWestConfirmed + ",\"status\":\"confirmed\",\"tile\":{\"x\":"
+                                        + actual.x + ",\"y\":" + actual.y + "}}");
+                            }
+                            if (moveWestConfirmed < 3) {
+                                AtomicReference<String> request = new AtomicReference<>();
+                                AtomicReference<Exception> requestFailure = new AtomicReference<>();
+                                SwingUtilities.invokeAndWait(() -> {
+                                    try {
+                                        request.set(requestNextWestMove());
+                                    } catch (Exception exception) {
+                                        requestFailure.set(exception);
+                                    }
+                                });
+                                if (requestFailure.get() != null) throw requestFailure.get();
+                                moveWestReceipts.add(request.get());
+                                lastStableSignature = null;
+                                stableObservationCount = 0;
+                                continue;
+                            }
+                            if (moveWestCurrentX != moveWestExpectedFinalX || moveWestCurrentY != moveWestExpectedFinalY) {
+                                moveWestFailure = "final-tile-mismatch";
+                                writeAtomically(output, withMoves(json) + "\n");
+                                return;
+                            }
+                            AtomicReference<ConfirmedMovementSnapshot> confirmedSnapshot = new AtomicReference<>();
+                            AtomicReference<Exception> snapshotFailure = new AtomicReference<>();
+                            SwingUtilities.invokeAndWait(() -> {
+                                try {
+                                    confirmedSnapshot.set(snapshotAfterConfirmedMovement(moveWestRequests, moveWestConfirmed,
+                                            moveWestExpectedFinalX, moveWestExpectedFinalY, () -> {
+                                                String refreshedJson = snapshot();
+                                                Point refreshedTile = latestFrontUnitTiles.get(moveWestUnitId);
+                                                return new ConfirmedMovementSnapshot(refreshedJson, latestStateSignature,
+                                                        latestCanonicalReloadStateSignature,
+                                                        refreshedTile == null ? -1 : refreshedTile.x,
+                                                        refreshedTile == null ? -1 : refreshedTile.y);
+                                            }));
+                                } catch (Exception exception) {
+                                    snapshotFailure.set(exception);
+                                }
+                            });
+                            if (snapshotFailure.get() != null) throw snapshotFailure.get();
+                            ConfirmedMovementSnapshot finalSnapshot = confirmedSnapshot.get();
+                            if (finalSnapshot == null || finalSnapshot.liveStateJson() == null
+                                    || !Objects.equals(finalSnapshot.stateSignatureSha256(), latestStateSignature)) {
+                                throw new IllegalStateException("fresh post-confirmation movement snapshot is unavailable");
+                            }
+                            json = finalSnapshot.liveStateJson();
+                            AtomicReference<String> saveReceipt = new AtomicReference<>();
+                            AtomicReference<Exception> saveFailure = new AtomicReference<>();
+                            SwingUtilities.invokeAndWait(() -> {
+                                try {
+                                    saveReceipt.set(saveOfficialGame(Path.of(officialSavePath)));
+                                } catch (Exception exception) {
+                                    saveFailure.set(exception);
+                                }
+                            });
+                            if (saveFailure.get() != null) throw saveFailure.get();
+                            json = withOfficialSave(json, saveReceipt.get());
+                            json = withMoves(json);
+                            writeAtomically(output, json + "\n");
+                            return;
+                        }
                         if (captureScreenPath != null && !expectedCaptureStateSignature.equals(latestStateSignature)) {
                             writeAtomically(output, withCapture(json, "{\"status\":\"state-signature-mismatch\",\"observedStateSignatureSha256\":"
                                     + quote(latestStateSignature) + ",\"expectedStateSignatureSha256\":" + quote(expectedCaptureStateSignature) + "}") + "\n");
@@ -239,7 +472,9 @@ public final class FreeColProbe {
                 try {
                     String message = exception.getMessage() == null ? "" : exception.getMessage();
                     if (message.length() > 400) message = message.substring(0, 400);
-                    writeAtomically(output, "{\"schemaVersion\":1,\"status\":\"probe-error\",\"errorType\":" + quote(exception.getClass().getSimpleName()) + ",\"errorMessage\":" + quote(message) + ",\"errorStack\":[" + errorStackJson(exception) + "]}\n");
+                    writeAtomically(output, "{\"schemaVersion\":1,\"status\":\"probe-error\",\"errorType\":" + quote(exception.getClass().getName())
+                            + ",\"errorMessage\":" + quote(message) + ",\"errorContext\":" + probeFailureContext(exception)
+                            + ",\"errorStack\":[" + errorStackJson(exception) + "]}\n");
                 } catch (IOException ignored) {
                     // The owner observes the absent receipt and bounded JVM log.
                 }
@@ -257,6 +492,76 @@ public final class FreeColProbe {
 
     private static String withOfficialSave(String json, String saveReceipt) {
         return json.substring(0, json.length() - 1) + ",\"officialSave\":" + saveReceipt + "}";
+    }
+
+    private static String withMoves(String json) {
+        String value = json.substring(0, json.length() - 1);
+        String failure = moveWestFailure == null ? "null" : quote(moveWestFailure);
+        return value + ",\"normalWestMovement\":{\"requested\":3,\"requests\":" + moveWestRequests
+                + ",\"confirmed\":" + moveWestConfirmed + ",\"failure\":" + failure
+                + ",\"initialStateSignatureSha256\":" + (moveWestInitialStateSignature == null ? "null" : quote(moveWestInitialStateSignature))
+                + ",\"finalStateSignatureSha256\":" + quote(latestStateSignature == null ? "" : latestStateSignature)
+                + ",\"canonicalReloadStateSignatureSha256\":"
+                + (latestCanonicalReloadStateSignature == null ? "null" : quote(latestCanonicalReloadStateSignature))
+                + ",\"startTile\":{\"x\":" + moveWestStartX + ",\"y\":" + moveWestStartY + "}"
+                + ",\"expectedFinalTile\":{\"x\":" + moveWestExpectedFinalX + ",\"y\":" + moveWestExpectedFinalY + "}"
+                + ",\"actions\":[" + String.join(",", moveWestReceipts) + "]}}";
+    }
+
+    static ConfirmedMovementSnapshot snapshotAfterConfirmedMovement(int requests, int confirmed,
+                                                                      int expectedFinalX, int expectedFinalY,
+                                                                      ConfirmedMovementSnapshotSupplier supplier) throws Exception {
+        if (requests != 3 || confirmed != 3) {
+            throw new IllegalStateException("fresh movement snapshot requires all three requests to be confirmed");
+        }
+        ConfirmedMovementSnapshot snapshot = supplier.capture();
+        if (snapshot == null || snapshot.liveStateJson() == null
+                || snapshot.unitX() != expectedFinalX || snapshot.unitY() != expectedFinalY) {
+            throw new IllegalStateException("fresh movement snapshot does not show the confirmed final unit tile");
+        }
+        return snapshot;
+    }
+
+    private static String requestNextWestMove() throws Exception {
+        Window frame = null;
+        for (Window window : Window.getWindows()) {
+            if (window.isShowing() && window.getClass().getName().equals(FRAME)) {
+                frame = window;
+                break;
+            }
+        }
+        if (frame == null) throw new IllegalStateException("FreeCol frame disappeared before west move");
+        Object clientValue = field(frame, "freeColClient");
+        if (!(clientValue instanceof FreeColClient client)) throw new IllegalStateException("FreeCol frame has no typed client instance");
+        Unit unit = latestFrontUnits.get(moveWestUnitId) instanceof Unit frontUnit ? frontUnit : null;
+        if (unit == null || client.getGUI().getActiveUnit() != unit || !moveWestUnitId.equals(unit.getId())) {
+            throw new IllegalStateException("requested west-move unit is not the active front unit");
+        }
+        if (unit.getOwner() != client.getMyPlayer()) throw new IllegalStateException("west-move unit is not owned by the active player");
+        if (unit.getMovesLeft() <= 0) throw new IllegalStateException("west-move unit has no move points; turn advancement is forbidden");
+        Point current = latestFrontUnitTiles.get(moveWestUnitId);
+        if (current == null || current.x != (moveWestRequests == 0 ? moveWestStartX : moveWestCurrentX)
+                || current.y != (moveWestRequests == 0 ? moveWestStartY : moveWestCurrentY)) {
+            throw new IllegalStateException("west-move unit tile differs from the confirmed source tile");
+        }
+        var map = client.getGame().getMap();
+        var tile = unit.getTile();
+        var destination = map.getAdjacentTile(tile, Direction.W);
+        if (destination == null) throw new IllegalStateException("west destination tile is missing");
+        int destinationX = destination.getX();
+        int destinationY = destination.getY();
+        if (!"model.tile.ocean".equals(destination.getType().getId())) {
+            throw new IllegalStateException("west destination is not the preverified normal-ocean tile");
+        }
+        if (moveWestRequests == 2 && (destinationX != moveWestExpectedFinalX || destinationY != moveWestExpectedFinalY)) {
+            throw new IllegalStateException("third west destination differs from the preverified metadata tile");
+        }
+        moveWestRequests++;
+        client.getInGameController().moveUnit(unit, Direction.W);
+        moveWestPendingX = destinationX;
+        moveWestPendingY = destinationY;
+        return "{\"step\":" + moveWestRequests + ",\"status\":\"requested-once\",\"direction\":\"W\",\"from\":{\"x\":"
+                + current.x + ",\"y\":" + current.y + "},\"to\":{\"x\":" + destinationX + ",\"y\":" + destinationY + "}}";
     }
 
     private static String saveOfficialGame(Path target) throws Exception {
@@ -338,6 +643,10 @@ public final class FreeColProbe {
         latestTargetChips.clear();
         latestTargetOverlaySafe.clear();
         latestTargetBboxUnchanged.clear();
+        latestTargetAboveTileEvidence.clear();
+        latestCanonicalReloadStateSignature = null;
+        latestFrontUnits.clear();
+        latestFrontUnitTiles.clear();
         Class<?> unitClass = Class.forName("net.sf.freecol.common.model.Unit");
         Class<?> tileClass = Class.forName("net.sf.freecol.common.model.Tile");
         Method getTile = map.getClass().getMethod("getTile", int.class, int.class);
@@ -428,6 +737,10 @@ public final class FreeColProbe {
                 Object unit = findUnitInFront.invoke(state, tile);
                 if (unit == null) continue;
                 if (!tileUnits.contains(unit)) throw new IllegalStateException("front unit is absent from its tile unit list");
+                String frontUnitId = String.valueOf(invoke(unit, "getId"));
+                latestFrontUnits.put(frontUnitId, unit);
+                latestFrontUnitTiles.put(frontUnitId, new Point(
+                        ((Number) invoke(tile, "getX")).intValue(), ((Number) invoke(tile, "getY")).intValue()));
                 frontUnitCount++;
                 boolean outForAnimation = (Boolean) isOutForAnimation.invoke(animator, unit);
                 boolean playerCanSee = myPlayer != null && (Boolean) canSee.invoke(myPlayer, tile);
@@ -460,6 +773,13 @@ public final class FreeColProbe {
                 latestTargetScreenBounds.put(unitId, screenSprite);
                 latestTargetSpriteOrigins.put(unitId, new Point(origin.x + tilePoint.x + imageOffset.x,
                         origin.y + tilePoint.y + imageOffset.y));
+                ClearOceanEvidence aboveTileEvidence = null;
+                if (shouldCollectAboveTileEvidence(clearOceanEvidenceMode, clearOceanEvidenceUnitId, unitId)) {
+                    aboveTileEvidence = inspectAboveTileFootprint(map, mapWidth, mapHeight, bounds,
+                            imageLibrary, sprite, latestTargetSpriteOrigins.get(unitId), origin, tileSizeValue,
+                            viewer, state, client, viewport);
+                    latestTargetAboveTileEvidence.put(unitId, aboveTileEvidence);
+                }
                 if (overlayEvidence.chipOriginInTile() != null && overlayEvidence.chipImage() != null) {
                     latestTargetChipOrigins.put(unitId, new Point(origin.x + tilePoint.x + overlayEvidence.chipOriginInTile().x,
                             origin.y + tilePoint.y + overlayEvidence.chipOriginInTile().y));
@@ -468,6 +788,8 @@ public final class FreeColProbe {
                 latestTargetOverlaySafe.put(unitId, overlayEvidence.geometryAvailable()
                         && overlayEvidence.bboxUnchangedAfterKnownChip()
                         && !overlayEvidence.otherOverlayIntersectsSprite() && !uiOverlap.intersectsTarget()
+                        && (!clearOceanEvidenceMode || (aboveTileEvidence != null && aboveTileEvidence.complete()
+                        && aboveTileEvidence.clear()))
                         && captureUiPanelsAllowed(captureUiEvidence.visibleFreeColPanels(),
                         captureUiEvidence.externalShowingWindowCount(), captureUiEvidence.componentInventoryComplete(), screenSprite));
                 latestTargetBboxUnchanged.put(unitId, overlayEvidence.bboxUnchangedAfterKnownChip());
@@ -488,10 +810,24 @@ public final class FreeColProbe {
                         + ",\"renderOverlayEvidence\":" + overlayEvidence.json()
                         + ",\"visibleUiComponentOverlap\":" + uiOverlap.intersectsTarget()
                         + ",\"visibleUiComponentOverlapDetails\":" + uiOverlap.json()
+                        + (aboveTileEvidence == null ? "" : ",\"aboveTileFootprintEvidence\":" + aboveTileEvidence.json())
                         + ",\"engineFrontUnitIdAtTile\":" + quote(String.valueOf(invoke(unit, "getId"))) + "}");
             }
         }
         latestStateSignature = stateSignature(mapWidth, mapHeight, mapTileLines, mapUnitLines, origin, viewport, scaleFactor, focus, lastUiState);
+        if (moveWestUnitId != null && moveWestRequests == 3 && moveWestConfirmed == 3 && moveWestFailure == null) {
+            Object movedUnit = latestFrontUnits.get(moveWestUnitId);
+            Object movedTile = movedUnit == null ? null : invoke(movedUnit, "getTile");
+            if (movedTile != null) {
+                int movedX = ((Number) invoke(movedTile, "getX")).intValue();
+                int movedY = ((Number) invoke(movedTile, "getY")).intValue();
+                if (movedX == moveWestExpectedFinalX && movedY == moveWestExpectedFinalY) {
+                    latestCanonicalReloadStateSignature = stateSignatureAtFocus(mapWidth, mapHeight, mapTileLines,
+                            mapUnitLines, origin, viewport, scaleFactor, movedX, movedY,
+                            latestVisibleFreeColPanelCount, lastUiState);
+                }
+            }
+        }
         boolean mapUnitInventoryComplete = !mapCellInventoryTruncated && scannedMapCells == mapCellCount && mapUnitInventoryConsistent;
         latestMapUnitInventoryComplete = mapUnitInventoryComplete;
         latestMapUnitTypeCounts = new TreeMap<>(mapUnitTypeCounts);
@@ -539,6 +875,8 @@ public final class FreeColProbe {
                 + ",\"validGameUnitTypeIds\":[" + quotedList(validGameUnitTypeIds) + "]"
                 + ",\"mapTileStateSha256\":" + quote(mapTileStateSha256)
                 + ",\"stateSignatureSha256\":" + quote(latestStateSignature)
+                + ",\"canonicalReloadStateSignatureSha256\":"
+                + (latestCanonicalReloadStateSignature == null ? "null" : quote(latestCanonicalReloadStateSignature))
                 + ",\"captureUiGate\":" + latestCaptureUiGateJson
                 + ",\"units\":[" + String.join(",", rows) + "]"
                 + ",\"visibilityVerdict\":\"not-established\",\"completeVisibleNegativeInventory\":false"
@@ -814,14 +1152,18 @@ public final class FreeColProbe {
         if (captureTargetUnitId != null) {
             targetSprite = latestTargetSprites.get(captureTargetUnitId);
             targetBounds = latestTargetScreenBounds.get(captureTargetUnitId);
+            ClearOceanEvidence aboveTileEvidence = latestTargetAboveTileEvidence.get(captureTargetUnitId);
             if (targetSprite == null || targetBounds == null || !Boolean.TRUE.equals(latestTargetResourceVerified.get(captureTargetUnitId))
                     || !Boolean.TRUE.equals(latestTargetOverlaySafe.get(captureTargetUnitId))
-                    || !Boolean.TRUE.equals(latestTargetBboxUnchanged.get(captureTargetUnitId))) {
+                    || !Boolean.TRUE.equals(latestTargetBboxUnchanged.get(captureTargetUnitId))
+                    || (clearOceanEvidenceMode && (aboveTileEvidence == null || !aboveTileEvidence.complete() || !aboveTileEvidence.clear()))) {
                 return "{\"status\":\"capture-veto-target-ambiguous\",\"screenshotCreated\":false"
                         + ",\"targetUnitId\":" + quote(captureTargetUnitId)
                         + ",\"resourcePixelsVerified\":" + Boolean.TRUE.equals(latestTargetResourceVerified.get(captureTargetUnitId))
                         + ",\"bboxUnchangedAfterKnownChip\":" + Boolean.TRUE.equals(latestTargetBboxUnchanged.get(captureTargetUnitId))
-                        + ",\"rendererAndUiOverlaysClear\":" + Boolean.TRUE.equals(latestTargetOverlaySafe.get(captureTargetUnitId)) + "}";
+                        + ",\"rendererAndUiOverlaysClear\":" + Boolean.TRUE.equals(latestTargetOverlaySafe.get(captureTargetUnitId))
+                        + (clearOceanEvidenceMode ? ",\"aboveTileFootprintEvidence\":"
+                        + (aboveTileEvidence == null ? "{\"status\":\"unknown\"}" : aboveTileEvidence.json()) : "") + "}";
             }
             for (Map.Entry<String, Rectangle> entry : latestTargetScreenBounds.entrySet()) {
                 if (!entry.getKey().equals(captureTargetUnitId) && targetBounds.intersects(entry.getValue())) {
@@ -833,7 +1175,8 @@ public final class FreeColProbe {
                     + ",\"estimatedAlphaScreenBounds\":" + rectangleJson(targetBounds)
                     + ",\"sourceSpritePixelSha256\":" + quote(pixelSha256(targetSprite))
                     + ",\"resourcePixelIdentityVerified\":true,\"boxOnlyGeometryGatePassed\":true"
-                    + ",\"alphaBoundsUnchangedAfterKnownChip\":true,\"pixelUnoccludedStatus\":\"pending-exact-screen-comparison\"}";
+                    + ",\"alphaBoundsUnchangedAfterKnownChip\":true,\"pixelUnoccludedStatus\":\"pending-exact-screen-comparison\""
+                    + (clearOceanEvidenceMode ? ",\"aboveTileFootprintEvidence\":" + aboveTileEvidence.json() : "") + "}";
         } else {
             if (!latestValidUnitTypeIds.contains(captureAbsentUnitTypeId)) {
                 return "{\"status\":\"capture-veto-unknown-unit-type\",\"screenshotCreated\":false,\"unitTypeId\":"
@@ -894,14 +1237,23 @@ public final class FreeColProbe {
                 + ",\"frameScreenOrigin\":{" + "\"x\":" + latestFrameOrigin.x + ",\"y\":" + latestFrameOrigin.y + "}}";
     }
 
-    private record CapturePixelEvidence(String json) {}
+    static record CapturePixelEvidence(String json, int opaquePixels, int matchedPixels, int mismatchedPixels,
+                                       boolean matchedOpaqueExtentEqualsSourceAlphaBounds,
+                                       boolean matchedOpaqueExtentEqualsSourceOpaqueBounds,
+                                       boolean unoccludedPositiveAdmission) {
+        CapturePixelEvidence(String json) {
+            this(json, 0, 0, 0, false, false, false);
+        }
+    }
 
-    private static CapturePixelEvidence compareOpaqueSpritePixels(BufferedImage screen, BufferedImage sprite,
-                                                                  Point spriteOrigin, BufferedImage chip,
-                                                                  Point chipOrigin) {
+    static CapturePixelEvidence compareOpaqueSpritePixels(BufferedImage screen, BufferedImage sprite,
+                                                          Point spriteOrigin, BufferedImage chip,
+                                                          Point chipOrigin) {
         if (spriteOrigin == null) return new CapturePixelEvidence("{\"status\":\"unavailable-sprite-origin\"}");
         Rectangle alphaBounds = alphaBounds(sprite);
         if (alphaBounds == null) return new CapturePixelEvidence("{\"status\":\"empty-source-alpha\"}");
+        Rectangle sourceOpaqueBounds = opaqueBounds(sprite);
+        if (sourceOpaqueBounds == null) return new CapturePixelEvidence("{\"status\":\"empty-source-opaque\"}");
         int opaquePixels = 0;
         int matchedPixels = 0;
         int mismatchedPixels = 0;
@@ -942,9 +1294,12 @@ public final class FreeColProbe {
                 }
             }
         }
-        boolean matchedExtent = minMatchedX == alphaBounds.x && minMatchedY == alphaBounds.y
+        boolean matchedAlphaExtent = minMatchedX == alphaBounds.x && minMatchedY == alphaBounds.y
                 && maxMatchedX == alphaBounds.x + alphaBounds.width - 1
                 && maxMatchedY == alphaBounds.y + alphaBounds.height - 1;
+        boolean matchedOpaqueExtent = minMatchedX == sourceOpaqueBounds.x && minMatchedY == sourceOpaqueBounds.y
+                && maxMatchedX == sourceOpaqueBounds.x + sourceOpaqueBounds.width - 1
+                && maxMatchedY == sourceOpaqueBounds.y + sourceOpaqueBounds.height - 1;
         boolean chipOcclusionConfirmed = chipOverlapPixels > 0
                 && chipOverlapScreenshotMatchesChip == chipOverlapPixels
                 && chipOverlapScreenshotDiffersFromSprite == chipOverlapPixels;
@@ -952,14 +1307,299 @@ public final class FreeColProbe {
         return new CapturePixelEvidence("{\"status\":\"compared\",\"opaqueSpritePixels\":" + opaquePixels
                 + ",\"screenshotMatchesOpaqueSpritePixels\":" + matchedPixels
                 + ",\"screenshotDiffersFromOpaqueSpritePixels\":" + mismatchedPixels
-                + ",\"matchedOpaqueExtentEqualsSourceAlphaBounds\":" + matchedExtent
+                + ",\"matchedOpaqueExtentEqualsSourceAlphaBounds\":" + matchedAlphaExtent
+                + ",\"matchedOpaqueExtentEqualsSourceOpaqueBounds\":" + matchedOpaqueExtent
                 + ",\"matchedOpaqueSourceBounds\":" + (maxMatchedX < 0 ? "null" : rectangleJson(new Rectangle(minMatchedX, minMatchedY, maxMatchedX - minMatchedX + 1, maxMatchedY - minMatchedY + 1)))
                 + ",\"sourceAlphaBounds\":" + rectangleJson(alphaBounds)
+                + ",\"sourceOpaqueBounds\":" + rectangleJson(sourceOpaqueBounds)
                 + ",\"chipOverlapOpaquePixels\":" + chipOverlapPixels
                 + ",\"chipOverlapScreenshotMatchesChipPixels\":" + chipOverlapScreenshotMatchesChip
                 + ",\"chipOverlapScreenshotDiffersFromSpritePixels\":" + chipOverlapScreenshotDiffersFromSprite
                 + ",\"chipOcclusionConfirmedByScreenshotPixels\":" + chipOcclusionConfirmed
-                + ",\"unoccludedPositiveAdmission\":" + unoccluded + "}");
+                + ",\"unoccludedPositiveAdmission\":" + unoccluded + "}", opaquePixels, matchedPixels,
+                mismatchedPixels, matchedAlphaExtent, matchedOpaqueExtent, unoccluded);
+    }
+
+    private static ClearOceanEvidence inspectAboveTileFootprint(Object map, int mapWidth, int mapHeight, Object bounds,
+                                                                Object imageLibrary, BufferedImage sprite, Point spriteOrigin,
+                                                                Point canvasOrigin, Object tileSizeValue, Object viewer,
+                                                                Object viewerState, Object client, java.awt.Dimension viewport) throws Exception {
+        if (!(tileSizeValue instanceof java.awt.Dimension tileSize) || spriteOrigin == null || canvasOrigin == null) {
+            return new ClearOceanEvidence("{\"status\":\"unknown\",\"reason\":\"missing-render-geometry\"}", false, false);
+        }
+        int cellCount = Math.multiplyExact(mapWidth, mapHeight);
+        if (cellCount <= 0 || cellCount > MAX_MAP_CELLS) {
+            return new ClearOceanEvidence("{\"status\":\"unknown\",\"reason\":\"map-cell-limit\",\"mapCellCount\":" + cellCount + "}", false, false);
+        }
+        Class<?> tileClass = Class.forName("net.sf.freecol.common.model.Tile");
+        Method getTile = map.getClass().getMethod("getTile", int.class, int.class);
+        Method getAboveTile = imageLibrary.getClass().getMethod("getScaledAboveTileImage", tileClass);
+        Method tileToPoint = findDeclaredMethod(bounds.getClass(), "tileToPoint", tileClass);
+        tileToPoint.setAccessible(true);
+        int scanned = 0;
+        int layerImages = 0;
+        int overlappingTiles = 0;
+        long overlappingPixels = 0;
+        List<String> overlapIds = new ArrayList<>();
+        for (int y = 0; y < mapHeight; y++) {
+            for (int x = 0; x < mapWidth; x++) {
+                scanned++;
+                Object tile = getTile.invoke(map, x, y);
+                if (tile == null) return new ClearOceanEvidence(
+                        "{\"status\":\"unknown\",\"reason\":\"null-map-tile\",\"scannedTiles\":" + scanned + "}", false, false);
+                if (!(Boolean) invoke(tile, "isExplored")) continue;
+                BufferedImage above = (BufferedImage) getAboveTile.invoke(imageLibrary, tile);
+                if (above == null) continue;
+                layerImages++;
+                Point tilePoint = (Point) tileToPoint.invoke(bounds, tile);
+                if (tilePoint == null) return new ClearOceanEvidence(
+                        "{\"status\":\"unknown\",\"reason\":\"missing-tile-screen-position\",\"tile\":[" + x + "," + y + "]}", false, false);
+                int layerX = canvasOrigin.x + tilePoint.x + (tileSize.width - above.getWidth()) / 2;
+                int layerY = canvasOrigin.y + tilePoint.y + (tileSize.height - above.getHeight()) / 2;
+                long intersections = alphaIntersectionPixels(sprite, spriteOrigin, above, new Point(layerX, layerY));
+                if (intersections > 0) {
+                    overlappingTiles++;
+                    overlappingPixels += intersections;
+                    if (overlapIds.size() < 64) overlapIds.add(quote(String.valueOf(invoke(tile, "getId"))));
+                }
+            }
+        }
+        String status = overlappingPixels == 0 ? "complete-clear" : "overlap-found";
+        boolean aboveComplete = scanned == cellCount;
+        boolean aboveClear = overlappingPixels == 0;
+        String aboveJson = "{\"status\":" + quote(status) + ",\"complete\":" + aboveComplete
+                + ",\"clear\":" + aboveClear
+                + ",\"method\":\"native getScaledAboveTileImage alpha pixels at centered MapViewer tile positions\""
+                + ",\"mapCellCount\":" + cellCount + ",\"scannedTiles\":" + scanned
+                + ",\"exploredAboveTileImageCount\":" + layerImages + ",\"overlappingTileCount\":" + overlappingTiles
+                + ",\"overlappingNonzeroAlphaPixelPairs\":" + overlappingPixels
+                + ",\"overlappingTileIds\":[" + String.join(",", overlapIds) + "]}";
+        ForegroundLayerEvidence later = inspectLaterMapDraws(map, mapWidth, mapHeight, bounds, imageLibrary, sprite,
+                spriteOrigin, canvasOrigin, tileSize, viewer, viewerState, client, viewport);
+        boolean complete = aboveComplete && later.complete();
+        boolean clear = aboveClear && later.clear();
+        String resultStatus = !complete ? "unknown" : clear ? "complete-clear" : "overlap-found";
+        String json = "{\"status\":" + quote(resultStatus) + ",\"complete\":" + complete + ",\"clear\":" + clear
+                + ",\"aboveTileLayers\":" + aboveJson + ",\"laterDrawLayers\":" + later.json() + "}";
+        return new ClearOceanEvidence(json, complete, clear);
+    }
+
+    private static ForegroundLayerEvidence inspectLaterMapDraws(Object map, int mapWidth, int mapHeight,
+                                                                  Object bounds, Object imageLibrary,
+                                                                  BufferedImage sprite, Point spriteOrigin,
+                                                                  Point canvasOrigin, java.awt.Dimension tileSize,
+                                                                  Object viewer, Object viewerState, Object client,
+                                                                  java.awt.Dimension viewport) throws Exception {
+        int cellCount = Math.multiplyExact(mapWidth, mapHeight);
+        if (cellCount <= 0 || cellCount > MAX_MAP_CELLS || viewport.width <= 0 || viewport.height <= 0) {
+            return new ForegroundLayerEvidence("{\"status\":\"unknown\",\"reason\":\"foreground-scan-bounds\"}", false, false);
+        }
+        Class<?> tileClass = Class.forName("net.sf.freecol.common.model.Tile");
+        Class<?> settlementClass = Class.forName("net.sf.freecol.common.model.Settlement");
+        Class<?> playerClass = Class.forName("net.sf.freecol.common.model.Player");
+        Class<?> optionsClass = Class.forName("net.sf.freecol.client.ClientOptions");
+        Method getTile = map.getClass().getMethod("getTile", int.class, int.class);
+        Method tileToPoint = findDeclaredMethod(bounds.getClass(), "tileToPoint", tileClass);
+        tileToPoint.setAccessible(true);
+        Object player = invoke(client, "getMyPlayer");
+        Object options = invoke(client, "getClientOptions");
+        int colonyLabelMode = ((Number) invoke(options, "getInteger", new Class<?>[]{String.class}, "model.option.displayColonyLabels")).intValue();
+        int settlementCount = 0;
+        int overlappingSettlementCount = 0;
+        long settlementAlphaIntersections = 0;
+        List<String> overlappingSettlementIds = new ArrayList<>();
+        List<Object> settlements = new ArrayList<>();
+        List<Point> settlementPoints = new ArrayList<>();
+        List<java.awt.image.RescaleOp> settlementRescales = new ArrayList<>();
+        if (colonyLabelMode != 0) {
+            Method displayLabels = viewer.getClass().getDeclaredMethod("displaySettlementLabels", Graphics2D.class,
+                    settlementClass, playerClass, int.class, java.awt.image.RescaleOp.class);
+            displayLabels.setAccessible(true);
+            Method canSee = player == null ? null : player.getClass().getMethod("canSee", tileClass);
+            Method fogCheck = viewer.getClass().getDeclaredMethod("shouldFogOfWarBeDisplayed", playerClass, optionsClass);
+            fogCheck.setAccessible(true);
+            boolean fogLabels = (Boolean) fogCheck.invoke(viewer, player, options);
+            java.awt.image.RescaleOp fogRescale = fogLabels
+                    ? new java.awt.image.RescaleOp(new float[]{0.8f, 0.8f, 0.8f, 1.0f},
+                    new float[]{0.0f, 0.0f, 0.0f, 0.0f}, null) : null;
+            BufferedImage labelLayer = new BufferedImage(viewport.width, viewport.height, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D graphics = labelLayer.createGraphics();
+            try {
+                graphics.setClip(0, 0, viewport.width, viewport.height);
+                graphics.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+                        java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+                for (int y = 0; y < mapHeight; y++) {
+                    for (int x = 0; x < mapWidth; x++) {
+                        Object tile = getTile.invoke(map, x, y);
+                        if (tile == null) return new ForegroundLayerEvidence(
+                                "{\"status\":\"unknown\",\"reason\":\"null-tile-during-label-scan\"}", false, false);
+                        Object settlement = invoke(tile, "getSettlement");
+                        if (settlement == null) continue;
+                        Point tilePoint = (Point) tileToPoint.invoke(bounds, tile);
+                        if (tilePoint == null) return new ForegroundLayerEvidence(
+                                "{\"status\":\"unknown\",\"reason\":\"missing-settlement-tile-position\"}", false, false);
+                        settlementCount++;
+                        settlements.add(settlement);
+                        settlementPoints.add(tilePoint);
+                        java.awt.image.RescaleOp rescale = player != null && canSee != null
+                                && (Boolean) canSee.invoke(player, tile) ? null : fogRescale;
+                        settlementRescales.add(rescale);
+                        graphics.translate(tilePoint.x, tilePoint.y);
+                        displayLabels.invoke(viewer, graphics, settlement, player, colonyLabelMode, rescale);
+                        graphics.translate(-tilePoint.x, -tilePoint.y);
+                    }
+                }
+                settlementAlphaIntersections = alphaIntersectionPixels(sprite, spriteOrigin, labelLayer, canvasOrigin);
+                if (settlementAlphaIntersections > 0) {
+                    for (int index = 0; index < settlements.size(); index++) {
+                        graphics.setComposite(java.awt.AlphaComposite.Clear);
+                        graphics.fillRect(0, 0, viewport.width, viewport.height);
+                        graphics.setComposite(java.awt.AlphaComposite.SrcOver);
+                        Point tilePoint = settlementPoints.get(index);
+                        graphics.translate(tilePoint.x, tilePoint.y);
+                        displayLabels.invoke(viewer, graphics, settlements.get(index), player,
+                                colonyLabelMode, settlementRescales.get(index));
+                        graphics.translate(-tilePoint.x, -tilePoint.y);
+                        long intersections = alphaIntersectionPixels(sprite, spriteOrigin, labelLayer, canvasOrigin);
+                        if (intersections > 0) {
+                            overlappingSettlementCount++;
+                            if (overlappingSettlementIds.size() < 64) {
+                                overlappingSettlementIds.add(quote(String.valueOf(invoke(settlements.get(index), "getId"))));
+                            }
+                        }
+                    }
+                }
+            } finally {
+                graphics.dispose();
+            }
+        }
+        ForegroundLayerEvidence settlementLabels = new ForegroundLayerEvidence(
+                "{\"status\":\"complete\",\"drawStage\":\"MapViewer.displaySettlementLabels after above-tile pass\""
+                        + ",\"displayColonyLabelsOption\":" + colonyLabelMode + ",\"settlementCount\":" + settlementCount
+                        + ",\"overlappingSettlementCount\":" + overlappingSettlementCount
+                        + ",\"overlappingNonzeroAlphaPixelPairs\":" + settlementAlphaIntersections
+                        + ",\"overlappingSettlementIds\":[" + String.join(",", overlappingSettlementIds) + "]}",
+                true, settlementAlphaIntersections == 0);
+
+        Method unitPathMethod = viewerState.getClass().getDeclaredMethod("getUnitPath");
+        unitPathMethod.setAccessible(true);
+        Object unitPath = unitPathMethod.invoke(viewerState);
+        Object gotoPath = invoke(viewerState, "getGotoPath");
+        Object renderedPath = unitPath != null ? unitPath : gotoPath;
+        long routeIntersections = 0;
+        if (renderedPath != null) {
+            Method displayPath = viewer.getClass().getDeclaredMethod("displayPath", Graphics2D.class,
+                    Class.forName("net.sf.freecol.common.model.PathNode"));
+            displayPath.setAccessible(true);
+            BufferedImage pathLayer = new BufferedImage(viewport.width, viewport.height, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D graphics = pathLayer.createGraphics();
+            try {
+                graphics.setClip(0, 0, viewport.width, viewport.height);
+                graphics.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+                        java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+                displayPath.invoke(viewer, graphics, renderedPath);
+            } finally {
+                graphics.dispose();
+            }
+            routeIntersections = alphaIntersectionPixels(sprite, spriteOrigin, pathLayer, canvasOrigin);
+        }
+        ForegroundLayerEvidence paths = new ForegroundLayerEvidence(
+                "{\"status\":\"complete\",\"drawStage\":\"MapViewer.displayMap after map buffer\""
+                        + ",\"unitPathPresent\":" + (unitPath != null) + ",\"gotoPathPresent\":" + (gotoPath != null)
+                        + ",\"drawnPath\":" + quote(unitPath != null ? "unitPath" : gotoPath != null ? "gotoPath" : "none")
+                        + ",\"overlappingNonzeroAlphaPixelPairs\":" + routeIntersections + "}",
+                true, routeIntersections == 0);
+
+        boolean rangedAttackMode = (Boolean) invoke(viewerState, "isRangedAttackMode");
+        ForegroundLayerEvidence ranged = new ForegroundLayerEvidence(
+                "{\"status\":" + quote(rangedAttackMode ? "unknown-active-ranged-overlay" : "complete-clear")
+                        + ",\"rangedAttackMode\":" + rangedAttackMode + ",\"overlap\":\"not-rendered-when-mode-inactive\"}",
+                !rangedAttackMode, !rangedAttackMode);
+        ForegroundLayerEvidence cursor = inspectCursorOverlay(viewer, viewerState, bounds, imageLibrary,
+                sprite, spriteOrigin, canvasOrigin);
+        boolean complete = settlementLabels.complete() && paths.complete() && ranged.complete() && cursor.complete();
+        boolean clear = settlementLabels.clear() && paths.clear() && ranged.clear() && cursor.clear();
+        String status = !complete ? "unknown" : clear ? "complete-clear" : "overlap-found";
+        String json = "{\"status\":" + quote(status) + ",\"complete\":" + complete + ",\"clear\":" + clear
+                + ",\"settlementLabels\":" + settlementLabels.json() + ",\"routes\":" + paths.json()
+                + ",\"rangedCrosshair\":" + ranged.json() + ",\"cursorHighlight\":" + cursor.json() + "}";
+        return new ForegroundLayerEvidence(json, complete, clear);
+    }
+
+    private static ForegroundLayerEvidence inspectCursorOverlay(Object viewer, Object viewerState, Object bounds,
+                                                                  Object imageLibrary, BufferedImage sprite,
+                                                                  Point spriteOrigin, Point canvasOrigin) throws Exception {
+        Method getCursor = viewerState.getClass().getDeclaredMethod("getCursor");
+        getCursor.setAccessible(true);
+        Object cursor = getCursor.invoke(viewerState);
+        Method isActive = findDeclaredMethod(cursor.getClass(), "isActive");
+        isActive.setAccessible(true);
+        boolean active = (Boolean) isActive.invoke(cursor);
+        Object blinkTimer = field(cursor, "blinkTimer");
+        boolean blinkRunning = (Boolean) invoke(blinkTimer, "isRunning");
+        if (!cursorMayBeVisible(active, blinkRunning)) return new ForegroundLayerEvidence(
+                "{\"status\":\"complete-clear\",\"active\":false,\"blinkTimerRunning\":false,\"overlappingNonzeroAlphaPixelPairs\":0}", true, true);
+        Method getVisibleCursorTile = viewer.getClass().getDeclaredMethod("getVisibleCursorTile");
+        getVisibleCursorTile.setAccessible(true);
+        Object tile = getVisibleCursorTile.invoke(viewer);
+        if (tile == null) return new ForegroundLayerEvidence(
+                "{\"status\":\"unknown\",\"active\":true,\"reason\":\"active-cursor-without-visible-tile\"}", false, false);
+        Object viewMode = invoke(viewerState, "getViewMode");
+        boolean moveUnitsView = viewMode instanceof Enum<?> mode && "MOVE_UNITS".equals(mode.name());
+        String assetKey = moveUnitsView ? "image.tile.unitSelect" : "image.tile.tileSelect";
+        BufferedImage image = (BufferedImage) invoke(imageLibrary, "getScaledImage", new Class<?>[]{String.class}, assetKey);
+        Object tileBounds = invoke(viewer, "getTileBounds");
+        Method getTileWidth = findDeclaredMethod(tileBounds.getClass(), "getWidth");
+        Method getTileHeight = findDeclaredMethod(tileBounds.getClass(), "getHeight");
+        getTileWidth.setAccessible(true);
+        getTileHeight.setAccessible(true);
+        int exactTileWidth = ((Number) getTileWidth.invoke(tileBounds)).intValue();
+        int exactTileHeight = ((Number) getTileHeight.invoke(tileBounds)).intValue();
+        Method calculateTilePosition = bounds.getClass().getMethod("calculateTilePosition",
+                Class.forName("net.sf.freecol.common.model.Tile"), boolean.class);
+        Point point = (Point) calculateTilePosition.invoke(bounds, tile, false);
+        if (image == null || point == null || exactTileWidth <= 0 || exactTileHeight <= 0) return new ForegroundLayerEvidence(
+                "{\"status\":\"unknown\",\"active\":true,\"reason\":\"missing-cursor-image-or-position\"}", false, false);
+        Point imageOrigin = new Point(canvasOrigin.x + point.x - (image.getWidth() - exactTileWidth) / 2,
+                canvasOrigin.y + point.y - (image.getHeight() - exactTileHeight) / 2);
+        long intersections = alphaIntersectionPixels(sprite, spriteOrigin, image, imageOrigin);
+        return new ForegroundLayerEvidence(
+                "{\"status\":\"complete\",\"active\":" + active + ",\"blinkTimerRunning\":" + blinkRunning
+                        + ",\"visibilityAssessment\":" + quote(blinkRunning ? "conservative-union-of-both-blink-phases" : "current-active-phase")
+                        + ",\"tileId\":" + quote(String.valueOf(invoke(tile, "getId")))
+                        + ",\"assetKey\":" + quote(assetKey) + ",\"assetPixelSha256\":" + quote(pixelSha256(image))
+                        + ",\"nativeTileBounds\":{\"width\":" + exactTileWidth + ",\"height\":" + exactTileHeight + "}"
+                        + ",\"overlappingNonzeroAlphaPixelPairs\":" + intersections + "}",
+                true, intersections == 0);
+    }
+
+    static long alphaIntersectionPixels(BufferedImage first, Point firstOrigin,
+                                        BufferedImage second, Point secondOrigin) {
+        Rectangle overlap = new Rectangle(firstOrigin.x, firstOrigin.y, first.getWidth(), first.getHeight())
+                .intersection(new Rectangle(secondOrigin.x, secondOrigin.y, second.getWidth(), second.getHeight()));
+        if (overlap.isEmpty()) return 0;
+        long count = 0;
+        for (int y = overlap.y; y < overlap.y + overlap.height; y++) {
+            for (int x = overlap.x; x < overlap.x + overlap.width; x++) {
+                if ((first.getRGB(x - firstOrigin.x, y - firstOrigin.y) >>> 24) != 0
+                        && (second.getRGB(x - secondOrigin.x, y - secondOrigin.y) >>> 24) != 0) count++;
+            }
+        }
+        return count;
+    }
+
+    static Rectangle opaqueBounds(BufferedImage image) {
+        int minX = image.getWidth(), minY = image.getHeight(), maxX = -1, maxY = -1;
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                if ((image.getRGB(x, y) >>> 24) != 255) continue;
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x);
+                maxY = Math.max(maxY, y);
+            }
+        }
+        return maxX < 0 ? null : new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 
     private static void writePngAtomically(Path target, BufferedImage image) throws IOException {
@@ -1382,10 +2022,20 @@ public final class FreeColProbe {
     private static String stateSignature(int mapWidth, int mapHeight, Iterable<String> tileLines,
                                          Iterable<String> unitLines, Point origin, java.awt.Dimension viewport,
                                          float scaleFactor, Object focus, String uiState) throws Exception {
+        int focusX = ((Number) invoke(focus, "getX")).intValue();
+        int focusY = ((Number) invoke(focus, "getY")).intValue();
+        return stateSignatureAtFocus(mapWidth, mapHeight, tileLines, unitLines, origin, viewport, scaleFactor,
+                focusX, focusY, latestVisibleFreeColPanelCount, uiState);
+    }
+
+    static String stateSignatureAtFocus(int mapWidth, int mapHeight, Iterable<String> tileLines,
+                                        Iterable<String> unitLines, Point origin, java.awt.Dimension viewport,
+                                        float scaleFactor, int focusX, int focusY, int visiblePanelCount,
+                                        String uiState) throws Exception {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        digest.update((mapWidth + "x" + mapHeight + "|" + invoke(focus, "getX") + "," + invoke(focus, "getY")
+        digest.update((mapWidth + "x" + mapHeight + "|" + focusX + "," + focusY
                 + "|" + origin.x + "," + origin.y + "|" + viewport.width + "x" + viewport.height + "|" + scaleFactor
-                + "|panels=" + latestVisibleFreeColPanelCount + "|ui=" + uiState + "\n")
+                + "|panels=" + visiblePanelCount + "|ui=" + uiState + "\n")
                 .getBytes(StandardCharsets.UTF_8));
         for (String line : tileLines) {
             digest.update(line.getBytes(StandardCharsets.UTF_8));
@@ -1412,7 +2062,7 @@ public final class FreeColProbe {
         return String.join(",", quoted);
     }
 
-    private static Rectangle alphaBounds(BufferedImage image) {
+    static Rectangle alphaBounds(BufferedImage image) {
         if (image == null) return null;
         int minX = image.getWidth(), minY = image.getHeight(), maxX = -1, maxY = -1;
         for (int y = 0; y < image.getHeight(); y++) {
@@ -1496,6 +2146,23 @@ public final class FreeColProbe {
             frames.add(quote(element.getClassName() + "." + element.getMethodName() + ":" + element.getLineNumber()));
         }
         return String.join(",", frames);
+    }
+
+    private static String probeFailureContext(Throwable error) {
+        Throwable actual = error;
+        int causeDepth = 0;
+        while (actual.getCause() != null && actual.getCause() != actual && causeDepth < 4) {
+            actual = actual.getCause();
+            causeDepth++;
+        }
+        StackTraceElement frame = actual.getStackTrace().length == 0 ? null : actual.getStackTrace()[0];
+        String safeMessage = actual.getMessage() == null ? "" : actual.getMessage().replace('\n', ' ').replace('\r', ' ');
+        if (safeMessage.length() > 240) safeMessage = safeMessage.substring(0, 240);
+        return "{\"actualCauseClass\":" + quote(actual.getClass().getName())
+                + ",\"actualCauseMessage\":" + quote(safeMessage)
+                + ",\"methodClass\":" + (frame == null ? "null" : quote(frame.getClassName()))
+                + ",\"methodName\":" + (frame == null ? "null" : quote(frame.getMethodName()))
+                + ",\"causeDepth\":" + causeDepth + "}";
     }
 
     private static String sha256(Path file) throws Exception {
