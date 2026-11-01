@@ -9,14 +9,17 @@ import {
   DEV40_POSITIVE_COUNT,
   DEV40_STRATUM_QUOTAS,
   PHASE_DEV40_ID,
+  PHASE_FLAT_DEV40_ID,
   PROFILE_CANDIDATE_ID,
+  candidateIdForPhase,
   PROFILE_CONTROL_ID,
+  QUAL120_CASE_COUNT,
   QUAL120_NEGATIVE_COUNT,
   QUAL120_POSITIVE_COUNT,
   QUAL120_STRATUM_COUNT,
   STRATUMS,
 } from './constants.js'
-import type { PHASE_QUAL120_ID } from './constants.js'
+import type { H8aFreshPhaseId, H8aFreshCandidateId } from './constants.js'
 import { clusteredSourceGroupBootstrap } from './clustered-bootstrap.js'
 import {
   boxIoUAndReferenceCoverage,
@@ -128,7 +131,7 @@ export function validateImmutableCloseouts(context: ReceiptValidationContext): v
     context.controlCloseout.cohortCommitmentSha256
   )
     throw new RangeError('Paired closeouts must share cohort commitment')
-  if (context.candidateCloseout.profileId !== PROFILE_CANDIDATE_ID)
+  if (context.candidateCloseout.profileId !== candidateIdForPhase(context.freeze.phaseId))
     throw new RangeError('Candidate closeout profile mismatch')
   if (context.controlCloseout.profileId !== PROFILE_CONTROL_ID)
     throw new RangeError('Control closeout profile mismatch')
@@ -511,7 +514,7 @@ function assertAnnotationBundleMatchesFreeze(
 
   const positives = annotations.cases.filter((item) => item.expectedPresence === 'present')
   const negatives = annotations.cases.filter((item) => item.expectedPresence === 'absent')
-  if (freeze.phaseId === PHASE_DEV40_ID) {
+  if (freeze.phaseId === PHASE_DEV40_ID || freeze.phaseId === PHASE_FLAT_DEV40_ID) {
     if (annotations.independentMaskCaseIds.length !== 0)
       throw new RangeError('DEV40 cannot contain qualification independent-mask IDs')
     if (positives.length !== DEV40_POSITIVE_COUNT || negatives.length !== DEV40_NEGATIVE_COUNT)
@@ -676,7 +679,10 @@ interface Dev40GateResult {
   >
 }
 
-export function evaluateDev40Gate(rows: readonly CaseQualityRow[]): Dev40GateResult {
+export function evaluateDev40Gate(
+  rows: readonly CaseQualityRow[],
+  candidateId: H8aFreshCandidateId = PROFILE_CANDIDATE_ID,
+): Dev40GateResult {
   if (rows.length !== DEV40_CASE_COUNT)
     throw new RangeError('DEV40 gate requires all 40 frozen cases')
   const caseIds = new Set<string>()
@@ -688,7 +694,7 @@ export function evaluateDev40Gate(rows: readonly CaseQualityRow[]): Dev40GateRes
     if (
       row.candidate.opaqueCaseId !== row.opaqueCaseId ||
       row.control.opaqueCaseId !== row.opaqueCaseId ||
-      row.candidate.profileId !== PROFILE_CANDIDATE_ID ||
+      row.candidate.profileId !== candidateId ||
       row.control.profileId !== PROFILE_CONTROL_ID
     )
       throw new RangeError(
@@ -783,7 +789,10 @@ interface Qual120GateResult {
   bootstrapLower95: number
 }
 
-export function evaluateQual120Gate(rows: readonly CaseQualityRow[]): Qual120GateResult {
+export function evaluateQual120Gate(
+  rows: readonly CaseQualityRow[],
+  candidateId: H8aFreshCandidateId = PROFILE_CANDIDATE_ID,
+): Qual120GateResult {
   const positives = rows.filter((item) => item.expectedPresence === 'present')
   const negatives = rows.filter((item) => item.expectedPresence === 'absent')
   if (positives.length !== QUAL120_POSITIVE_COUNT || negatives.length !== QUAL120_NEGATIVE_COUNT)
@@ -832,10 +841,32 @@ export function evaluateQual120Gate(rows: readonly CaseQualityRow[]): Qual120Gat
     })),
   )
 
-  const executionValid = rows.every(
-    (item) =>
-      item.candidate.executionValidity === 'valid' && item.control.executionValidity === 'valid',
-  )
+  const caseIds = new Set<string>()
+  const stratumCounts = new Map(STRATUMS.map((stratum) => [stratum, 0]))
+  const completeSemanticPairs =
+    rows.length === QUAL120_CASE_COUNT &&
+    rows.every((item) => {
+      if (!item.opaqueCaseId || caseIds.has(item.opaqueCaseId)) return false
+      caseIds.add(item.opaqueCaseId)
+      const stratumCount = stratumCounts.get(item.stratum)
+      if (stratumCount === undefined) return false
+      stratumCounts.set(item.stratum, stratumCount + 1)
+      return (
+        item.candidate.opaqueCaseId === item.opaqueCaseId &&
+        item.control.opaqueCaseId === item.opaqueCaseId &&
+        item.candidate.profileId === candidateId &&
+        item.control.profileId === PROFILE_CONTROL_ID &&
+        isCompletedSemanticOutcome(item.candidate) &&
+        isCompletedSemanticOutcome(item.control)
+      )
+    }) &&
+    STRATUMS.every((stratum) => stratumCounts.get(stratum) === QUAL120_CASE_COUNT / STRATUMS.length)
+  const executionValid =
+    completeSemanticPairs &&
+    rows.every(
+      (item) =>
+        item.candidate.executionValidity === 'valid' && item.control.executionValidity === 'valid',
+    )
   const qualityPass =
     executionValid &&
     candidatePositiveSuccesses >= 54 &&
@@ -863,9 +894,11 @@ export function evaluateQual120Gate(rows: readonly CaseQualityRow[]): Qual120Gat
 }
 
 export function evaluatePhaseGate(
-  phaseId: typeof PHASE_DEV40_ID | typeof PHASE_QUAL120_ID,
+  phaseId: H8aFreshPhaseId,
   rows: readonly CaseQualityRow[],
 ): Dev40GateResult | Qual120GateResult {
-  if (phaseId === PHASE_DEV40_ID) return evaluateDev40Gate(rows)
-  return evaluateQual120Gate(rows)
+  const candidateId = candidateIdForPhase(phaseId)
+  if (phaseId === PHASE_DEV40_ID || phaseId === PHASE_FLAT_DEV40_ID)
+    return evaluateDev40Gate(rows, candidateId)
+  return evaluateQual120Gate(rows, candidateId)
 }

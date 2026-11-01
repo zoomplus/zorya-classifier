@@ -5,7 +5,9 @@ import { computeEvaluatorAnnotationsSha256 } from './annotation-digest.js'
 import {
   DEV40_STRATUM_QUOTAS,
   PHASE_DEV40_ID,
+  PHASE_FLAT_DEV40_ID,
   PROFILE_CANDIDATE_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
   STRATUMS,
 } from './constants.js'
@@ -32,7 +34,7 @@ const SCREEN_SIZES = {
 
 const profileBindingSchema = z
   .object({
-    profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+    profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
     recipeIdentitySha256: z.string().regex(/^[a-f0-9]{64}$/u),
     requestPolicyIdentitySha256: z.string().regex(/^[a-f0-9]{64}$/u),
   })
@@ -133,8 +135,11 @@ export function buildDevScreenSelection(
 ): DevScreenSelection {
   const freeze = phaseFreezeSchema.parse(rawFreeze)
   const annotations = evaluatorPrivateAnnotationBundleSchema.parse(rawAnnotations)
-  if (freeze.phaseId !== PHASE_DEV40_ID || annotations.phaseId !== PHASE_DEV40_ID)
-    throw new RangeError('DEV screens require the frozen DEV40 cohort')
+  if (
+    (freeze.phaseId !== PHASE_DEV40_ID && freeze.phaseId !== PHASE_FLAT_DEV40_ID) ||
+    annotations.phaseId !== freeze.phaseId
+  )
+    throw new RangeError('DEV screens require the matching frozen DEV40 cohort')
   if (annotations.freezeId !== freeze.freezeId)
     throw new RangeError('DEV screen annotations belong to a different freeze')
   const annotationsSha256 = computeEvaluatorAnnotationsSha256(annotations)

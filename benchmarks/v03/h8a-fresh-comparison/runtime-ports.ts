@@ -9,6 +9,7 @@ import { createOpenRouterVision } from '../../../src/openrouter.js'
 import { createSharpRaster } from '../../../src/infrastructure/raster.js'
 import { createH8aFullRuntime } from '../h8a-full/factory.js'
 import type { H8aFullSuccess } from '../h8a-full/contracts.js'
+import type { H8aFullRecipeId } from '../h8a-full/constants.js'
 import { orientedDimensionsFromHeader } from '../h8a-full/image-source.js'
 import { freshCaseSchema } from '../../v02/fresh-corpus.js'
 import type { FreshCase } from '../../v02/fresh-corpus.js'
@@ -23,13 +24,15 @@ import { RunBudget } from '../../v02/budget.js'
 import {
   assertIndependentProfilePolicies,
   H8A_CANDIDATE_PROFILE,
+  H8A_FLAT_CANDIDATE_PROFILE,
   V02_CONTROL_PROFILE,
 } from './profiles.js'
 import type { H8aFreshProfileId } from './profiles.js'
 import { createCampaignFetchBoundary } from './campaign-fetch-boundary.js'
 import type { CampaignFetchJournalEntry, RecordedProviderCall } from './campaign-fetch-boundary.js'
 import type { CampaignLedger } from './campaign-ledger.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID } from './constants.js'
+import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
+import type { H8aFreshCandidateId } from './constants.js'
 import { assertNoForbiddenEvaluatorFields } from './forbidden-leakage.js'
 import type {
   ProducerExecutionInput,
@@ -138,7 +141,9 @@ interface H8FreshRuntimePortOptionsBase {
   mobileSam: { encoderPath: string; decoderPath: string }
   sourceCanvasByOpaqueCaseId: ReadonlyMap<string, { width: number; height: number }>
   fetch?: typeof globalThis.fetch
-  createCandidateRuntime?: () => CandidateRuntimePort | Promise<CandidateRuntimePort>
+  createCandidateRuntime?: (
+    recipeId: H8aFullRecipeId,
+  ) => CandidateRuntimePort | Promise<CandidateRuntimePort>
 }
 
 export type H8FreshRuntimePortOptions = H8FreshRuntimePortOptionsBase & {
@@ -211,6 +216,33 @@ function recorderCallForBoundary(
   }
 }
 
+function candidateProfile(profileId: H8aFreshCandidateId) {
+  return profileId === PROFILE_FLAT_CANDIDATE_ID
+    ? H8A_FLAT_CANDIDATE_PROFILE
+    : H8A_CANDIDATE_PROFILE
+}
+
+function isCandidateProfileId(profileId: H8aFreshProfileId): profileId is H8aFreshCandidateId {
+  return profileId === PROFILE_CANDIDATE_ID || profileId === PROFILE_FLAT_CANDIDATE_ID
+}
+
+function candidateRecipeId(profileId: H8aFreshCandidateId): H8aFullRecipeId {
+  return profileId === PROFILE_FLAT_CANDIDATE_ID ? PROFILE_FLAT_CANDIDATE_ID : PROFILE_CANDIDATE_ID
+}
+
+function assertCandidateResultRecipe(
+  result: H8aFullSuccess,
+  selectedRecipeId: H8aFullRecipeId,
+): void {
+  if (selectedRecipeId === PROFILE_FLAT_CANDIDATE_ID) {
+    if (result.recipeId !== PROFILE_FLAT_CANDIDATE_ID)
+      throw new RangeError('Candidate result recipe identity does not match the flat profile')
+    return
+  }
+  if (result.recipeId !== undefined)
+    throw new RangeError('V1 candidate result unexpectedly declares a different recipe identity')
+}
+
 function createRecordedDecision(
   context: DispatchEvidenceContext,
   apiKey: string,
@@ -230,51 +262,53 @@ function createRecordedDecision(
     journalEntries: context.journal,
     ...(context.signal ? { signal: context.signal } : {}),
   })
-  const route =
-    context.profileId === PROFILE_CANDIDATE_ID
-      ? {
-          model: H8A_CANDIDATE_PROFILE.requestPolicy.route.model,
-          provider: H8A_CANDIDATE_PROFILE.requestPolicy.route.provider,
-          providerName: H8A_CANDIDATE_PROFILE.requestPolicy.route.providerName,
-          apiEndpoint: H8A_CANDIDATE_PROFILE.requestPolicy.route.apiEndpoint,
-          allowFallbacks: false as const,
-        }
-      : {
-          model: V02_CONTROL_PROFILE.requestPolicy.model,
-          provider: V02_CONTROL_PROFILE.requestPolicy.provider,
-          providerName: V02_CONTROL_PROFILE.requestPolicy.providerName,
-          apiEndpoint: V02_CONTROL_PROFILE.requestPolicy.apiEndpoint,
-          allowFallbacks: false as const,
-        }
-  const maximumCalls =
-    context.profileId === PROFILE_CANDIDATE_ID ? CANDIDATE_CASE_MAX_CALLS : CONTROL_CASE_MAX_CALLS
+  const profileId = context.profileId
+  const isCandidate = isCandidateProfileId(profileId)
+  const selectedCandidateProfile = isCandidate ? candidateProfile(profileId) : undefined
+  const route = selectedCandidateProfile
+    ? {
+        model: selectedCandidateProfile.requestPolicy.route.model,
+        provider: selectedCandidateProfile.requestPolicy.route.provider,
+        providerName: selectedCandidateProfile.requestPolicy.route.providerName,
+        apiEndpoint: selectedCandidateProfile.requestPolicy.route.apiEndpoint,
+        allowFallbacks: false as const,
+      }
+    : {
+        model: V02_CONTROL_PROFILE.requestPolicy.model,
+        provider: V02_CONTROL_PROFILE.requestPolicy.provider,
+        providerName: V02_CONTROL_PROFILE.requestPolicy.providerName,
+        apiEndpoint: V02_CONTROL_PROFILE.requestPolicy.apiEndpoint,
+        allowFallbacks: false as const,
+      }
+  const maximumCalls = isCandidate ? CANDIDATE_CASE_MAX_CALLS : CONTROL_CASE_MAX_CALLS
   const caseBudget = new RunBudget(
     maximumCalls,
     context.reservedUsd * maximumCalls,
     context.reservedUsd,
   )
   const recorder = recordProvider(
-    (fetcher) =>
-      context.profileId === PROFILE_CANDIDATE_ID
-        ? createOpenRouterVision({
-            apiKey,
-            model: H8A_CANDIDATE_PROFILE.requestPolicy.route.model,
-            provider: H8A_CANDIDATE_PROFILE.requestPolicy.route.provider,
-            providerName: H8A_CANDIDATE_PROFILE.requestPolicy.route.providerName,
-            responseFormat: 'prompt',
-            reasoningEffort: 'medium',
-            maxOutputTokens: 4096,
-            fetch: fetcher,
-          })
-        : controlEngine.createNativeCategoricalPresencePort(
-            controlEngine.createOpenRouterDecisions({
-              apiKey,
-              model: V02_CONTROL_PROFILE.requestPolicy.model,
-              provider: V02_CONTROL_PROFILE.requestPolicy.provider,
-              providerName: V02_CONTROL_PROFILE.requestPolicy.providerName,
-              fetch: fetcher,
-            }),
-          ),
+    (fetcher) => {
+      if (selectedCandidateProfile)
+        return createOpenRouterVision({
+          apiKey,
+          model: selectedCandidateProfile.requestPolicy.route.model,
+          provider: selectedCandidateProfile.requestPolicy.route.provider,
+          providerName: selectedCandidateProfile.requestPolicy.route.providerName,
+          responseFormat: 'prompt',
+          reasoningEffort: 'medium',
+          maxOutputTokens: 4096,
+          fetch: fetcher,
+        })
+      return controlEngine.createNativeCategoricalPresencePort(
+        controlEngine.createOpenRouterDecisions({
+          apiKey,
+          model: V02_CONTROL_PROFILE.requestPolicy.model,
+          provider: V02_CONTROL_PROFILE.requestPolicy.provider,
+          providerName: V02_CONTROL_PROFILE.requestPolicy.providerName,
+          fetch: fetcher,
+        }),
+      )
+    },
     caseBudget,
     receiptDirectory,
     route,
@@ -560,6 +594,7 @@ function makeCaseExecutionResult(
 
 function buildCandidatePort(
   runtime: CandidateRuntimePort,
+  selectedRecipeId: H8aFullRecipeId,
   options: AnyFreshRuntimePortOptions,
   raster: ReturnType<typeof createSharpRaster>,
   artifacts: FreshRuntimeArtifacts,
@@ -568,8 +603,11 @@ function buildCandidatePort(
   return {
     async execute(input, context) {
       assertNoForbiddenEvaluatorFields(input, 'Candidate runtime producer input')
-      if (context.profileId !== PROFILE_CANDIDATE_ID)
+      const profileId = context.profileId
+      if (!isCandidateProfileId(profileId))
         throw new RangeError('Candidate port received a control profile')
+      if (candidateRecipeId(profileId) !== selectedRecipeId)
+        throw new RangeError('Selected native recipe does not match the candidate profile')
       const expectedCanvas = options.sourceCanvasByOpaqueCaseId.get(input.opaqueCaseId)
       if (!expectedCanvas) throw new RangeError('Candidate input has no frozen source canvas')
       const sourceBytes = copyBytes(input.sourceBytes)
@@ -596,10 +634,10 @@ function buildCandidatePort(
         journal: [],
         ledger: context.ledger,
         reservedUsd: context.reservedUsdPerFetch,
-        profileId: PROFILE_CANDIDATE_ID,
+        profileId,
         opaqueCaseId: input.opaqueCaseId,
         caseExecutionIdentitySha256,
-        endpoint: H8A_CANDIDATE_PROFILE.requestPolicy.route.apiEndpoint,
+        endpoint: candidateProfile(profileId).requestPolicy.route.apiEndpoint,
         artifactRoot: options.artifactRoot,
         baseFetch: options.fetch ?? globalThis.fetch,
         signal: signalController.signal,
@@ -622,9 +660,14 @@ function buildCandidatePort(
           decision: recorder.port,
           imageState: raster.imageState,
         })
+        assertCandidateResultRecipe(result, selectedRecipeId)
       } catch (error) {
         caught = error
         caseError = safeCaseError(error)
+        if (result?.status === 'located') {
+          result.mask.data.fill(0)
+          result.cutout?.data.fill(0)
+        }
       } finally {
         context.signal?.removeEventListener('abort', onAbort)
         sourceBytes.fill(0)
@@ -685,11 +728,11 @@ function buildCandidatePort(
               result.cutout.data,
               artifacts,
               input.opaqueCaseId,
-              PROFILE_CANDIDATE_ID,
+              profileId,
             )
             cutoutSidecar = {
               opaqueCaseId: input.opaqueCaseId,
-              profileId: PROFILE_CANDIDATE_ID,
+              profileId,
               kind: 'candidate-cutout-rgba',
               sha256: artifact.sha256,
               byteLength: artifact.bytes.byteLength,
@@ -723,7 +766,7 @@ function buildCandidatePort(
       }
       return makeCaseExecutionResult(
         input,
-        PROFILE_CANDIDATE_ID,
+        profileId,
         recorder,
         dispatchContext.journal,
         execution,
@@ -1088,9 +1131,14 @@ async function createH8FreshRuntimePortsInternal(
   await mkdir(options.artifactRoot, { recursive: true, mode: 0o700 })
   await mkdir(options.temporaryRoot, { recursive: true, mode: 0o700 })
   const raster = createSharpRaster()
+  const selectedRecipeId = options.nativeRuntime.recipeId ?? PROFILE_CANDIDATE_ID
   const candidateRuntime = options.createCandidateRuntime
-    ? await options.createCandidateRuntime()
-    : createH8aFullRuntime({ ...options.nativeRuntime, artifactRoot: options.artifactRoot })
+    ? await options.createCandidateRuntime(selectedRecipeId)
+    : createH8aFullRuntime({
+        ...options.nativeRuntime,
+        recipeId: selectedRecipeId,
+        artifactRoot: options.artifactRoot,
+      })
   let segmenter: SegmentationPort | undefined
   try {
     segmenter =
@@ -1114,6 +1162,7 @@ async function createH8FreshRuntimePortsInternal(
   const fetchJournal: CampaignFetchJournalEntry[] = []
   const candidatePort = buildCandidatePort(
     candidateRuntime,
+    selectedRecipeId,
     ownedOptions,
     raster,
     artifacts,

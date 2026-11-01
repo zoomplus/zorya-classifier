@@ -1,15 +1,23 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { access, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { access, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 import { CampaignLedger } from './campaign-ledger.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PHASE_DEV40_ID } from './constants.js'
+import {
+  PROFILE_CANDIDATE_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_CONTROL_ID,
+  PHASE_DEV40_ID,
+  PHASE_FLAT_DEV40_ID,
+} from './constants.js'
 import {
   acquireRunnerLock,
   assertLiveRunnerClosure,
   runVerifiedDevScreen,
+  registerFlatDevComparison,
+  verifyFlatDevRegistration,
   verifyCampaignConfig,
   verifyDevPhaseBinding,
   verifyPriorStageFiles,
@@ -56,16 +64,20 @@ function hash(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex')
 }
 
-function fixture() {
-  const { freeze: base, sourceBytesByCaseId } = buildSyntheticPhaseFreeze(PHASE_DEV40_ID)
+function fixture(
+  phaseId: typeof PHASE_DEV40_ID | typeof PHASE_FLAT_DEV40_ID = PHASE_DEV40_ID,
+  freezeId = `${phaseId}-test`,
+) {
+  const { freeze: base, sourceBytesByCaseId } = buildSyntheticPhaseFreeze(phaseId)
   const annotations = buildSyntheticAnnotationBundle(
-    base.phaseId,
-    base.freezeId,
+    phaseId,
+    freezeId,
     base.producerCases,
     base.pairedSchedule,
   )
   const freeze = {
     ...base,
+    freezeId,
     evaluatorAnnotationsSha256: computeEvaluatorAnnotationsSha256(annotations),
   }
   return {
@@ -80,7 +92,10 @@ function fixture() {
 }
 
 function makePort(
-  profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+  profileId:
+    | typeof PROFILE_CANDIDATE_ID
+    | typeof PROFILE_FLAT_CANDIDATE_ID
+    | typeof PROFILE_CONTROL_ID,
   annotations: EvaluatorPrivateAnnotationBundle,
 ): CaseExecutionPort {
   const truthById = new Map(annotations.cases.map((item) => [item.opaqueCaseId, item]))
@@ -114,6 +129,40 @@ function makePort(
       }
     },
   }
+}
+
+async function prepareFlatCampaignFixture(root: string): Promise<void> {
+  await mkdir(root, { recursive: true })
+  const ledger = {
+    schema: 'h8a-fresh-campaign-ledger-v1',
+    ledgerVersion: 7,
+    maxPhysicalCalls: 2000,
+    maxCostUsd: 10,
+    nextReservationId: 8,
+    physicalDispatchCount: 7,
+    logicalAttemptCount: 3,
+    knownCostUsd: 0.00599665,
+    unknownReserveUsd: 0,
+    inFlightReservations: [],
+    resumeBlocked: false,
+    crashRecoveryLatched: false,
+  }
+  await writeFile(join(root, 'campaign-ledger.json'), `${JSON.stringify(ledger)}\n`, {
+    flag: 'wx',
+    mode: 0o600,
+  })
+  const marker = {
+    schema: 'h8a-shared-campaign-root-v1',
+    campaignId: 'offline-test-campaign',
+    canonicalRoot: root,
+    campaignConfigSha256: registeredCampaignConfigSha256,
+    maxCostUsd: 10,
+    maxPhysicalCalls: 2000,
+  }
+  await writeFile(join(root, '.h8a-shared-campaign.json'), `${JSON.stringify(marker)}\n`, {
+    flag: 'wx',
+    mode: 0o600,
+  })
 }
 
 async function prepareCampaign(root: string, freeze: PhaseFreeze): Promise<void> {
@@ -345,6 +394,187 @@ await test('offline run wiring uses verified bytes, one selection, shared ledger
     const dev12Report = devScreenReportSchema.parse(dev12ReportUnknown)
     await sealDevScreenReview(root, dev12Report, 'advance', 'Offline synthetic fixture review.')
     await verifyPriorStageFiles(root, 'dev40')
+  } finally {
+    await rm(root, { recursive: true, force: false })
+  }
+})
+
+await test('flat registration and screens share the campaign ledger while isolating all case artifacts', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-flat-screen-'))
+  const campaignRoot = join(root, 'campaign')
+  try {
+    await prepareFlatCampaignFixture(campaignRoot)
+    const registered = fixture(PHASE_FLAT_DEV40_ID, 'h8a-flat-dev40-20261101-v1')
+    const verified = { ...registered, runtimeEnvironmentSha256: 'c'.repeat(64) }
+    const campaign = {
+      campaignId: 'offline-test-campaign',
+      canonicalRoot: campaignRoot,
+      sha256: registeredCampaignConfigSha256,
+    }
+    const verifyPriorEvidence = async (): Promise<number> => 0.00599665
+    const before = (
+      await CampaignLedger.open(join(campaignRoot, 'campaign-ledger.json'))
+    ).snapshot()
+    assert.equal(before.logicalAttemptCount, 3)
+    assert.equal(before.physicalDispatchCount, 7)
+    await registerFlatDevComparison({ authoritySha256 }, verified, campaign, {
+      acquireLock: acquireRunnerLock,
+      openLedger: (path) => CampaignLedger.open(path),
+      verifyPriorV1Evidence: verifyPriorEvidence,
+    })
+    const artifactRoot = join(campaignRoot, 'experiments', 'h8a-flat-dev40-v1')
+    await verifyFlatDevRegistration(
+      campaignRoot,
+      authoritySha256,
+      verified.freeze,
+      verifyPriorEvidence,
+    )
+    await assert.rejects(
+      verifyFlatDevRegistration(campaignRoot, authoritySha256, fixture().freeze),
+      /flat DEV40 profile freeze/u,
+    )
+
+    const artifacts: FreshRuntimeArtifacts = {
+      masksBySha256: new Map(),
+      cutoutsBySha256: new Map(),
+      cutoutsByProfileAndCase: new Map(),
+    }
+    const runtime = {
+      proof: { historicalSourceRoot: campaignRoot },
+      candidateAssetsRoot: campaignRoot,
+      mobileSamEncoderPath: join(campaignRoot, 'encoder.onnx'),
+      mobileSamDecoderPath: join(campaignRoot, 'decoder.onnx'),
+      pythonExecutable: join(campaignRoot, 'python-venv'),
+    }
+    const run = async (screen: 'dev8' | 'dev12'): Promise<void> =>
+      await runVerifiedDevScreen(
+        { authoritySha256, screen, apiKeyEnv: 'TEST_KEY' },
+        verified,
+        runtime,
+        campaign,
+        {
+          getApiKey: () => 'offline-only',
+          acquireLock: acquireRunnerLock,
+          openLedger: (path) => CampaignLedger.open(path),
+          createRuntime: async ({ root: runtimeRoot }) => {
+            assert.equal(runtimeRoot, artifactRoot)
+            return {
+              candidatePort: makePort(PROFILE_FLAT_CANDIDATE_ID, verified.annotations),
+              controlPort: makePort(PROFILE_CONTROL_ID, verified.annotations),
+              artifacts,
+              async dispose() {},
+            }
+          },
+          execute: async (input) => await executeDevScreen(input),
+          writeReport: () => undefined,
+          verifyPriorV1Evidence: verifyPriorEvidence,
+        },
+      )
+
+    await run('dev8')
+    const dev8 = devScreenReportSchema.parse(
+      JSON.parse(await readFile(join(artifactRoot, 'reports/dev8-report.json'), 'utf8')),
+    )
+    assert.equal(dev8.completedPairs, 8)
+    await sealDevScreenReview(
+      artifactRoot,
+      dev8,
+      'advance',
+      'Offline synthetic profile-isolation fixture.',
+    )
+    await run('dev12')
+
+    const after = (await CampaignLedger.open(join(campaignRoot, 'campaign-ledger.json'))).snapshot()
+    assert.equal(after.logicalAttemptCount, before.logicalAttemptCount + 24)
+    assert.equal(after.physicalDispatchCount, before.physicalDispatchCount)
+    assert.ok(after.knownCostUsd >= before.knownCostUsd)
+    await access(join(artifactRoot, 'reports/dev12-report.json'))
+    await access(join(artifactRoot, 'case-artifacts'))
+    await access(join(artifactRoot, 'case-intents'))
+    await assert.rejects(access(join(campaignRoot, 'case-artifacts')))
+    await assert.rejects(
+      registerFlatDevComparison({ authoritySha256 }, verified, campaign, {
+        acquireLock: acquireRunnerLock,
+        openLedger: (path) => CampaignLedger.open(path),
+        verifyPriorV1Evidence: verifyPriorEvidence,
+      }),
+      /stale artifacts before registration/u,
+    )
+  } finally {
+    await rm(root, { recursive: true, force: false })
+  }
+})
+
+await test('flat registration refuses a symlinked experiment root before writing outside the campaign', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-flat-hostile-root-'))
+  const campaignRoot = join(root, 'campaign')
+  const outside = join(root, 'outside')
+  try {
+    await prepareFlatCampaignFixture(campaignRoot)
+    await mkdir(outside)
+    await symlink(outside, join(campaignRoot, 'experiments'))
+    const originalLedger = await readFile(join(campaignRoot, 'campaign-ledger.json'))
+    const verified = {
+      ...fixture(PHASE_FLAT_DEV40_ID, 'h8a-flat-dev40-20261101-v1'),
+      runtimeEnvironmentSha256: 'c'.repeat(64),
+    }
+    await assert.rejects(
+      registerFlatDevComparison(
+        { authoritySha256 },
+        verified,
+        {
+          campaignId: 'offline-test-campaign',
+          canonicalRoot: campaignRoot,
+          sha256: registeredCampaignConfigSha256,
+        },
+        {
+          acquireLock: acquireRunnerLock,
+          openLedger: (path) => CampaignLedger.open(path),
+          verifyPriorV1Evidence: async () => 0.00599665,
+        },
+      ),
+      /real directory/u,
+    )
+    assert.deepEqual(await readdir(outside), [])
+    assert.deepEqual(await readFile(join(campaignRoot, 'campaign-ledger.json')), originalLedger)
+  } finally {
+    await rm(root, { recursive: true, force: false })
+  }
+})
+
+await test('flat registration refuses a reset global budget even when historical call counters remain', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-flat-reset-ledger-'))
+  const campaignRoot = join(root, 'campaign')
+  try {
+    await prepareFlatCampaignFixture(campaignRoot)
+    const ledgerPath = join(campaignRoot, 'campaign-ledger.json')
+    const ledger: unknown = JSON.parse(await readFile(ledgerPath, 'utf8'))
+    assert.ok(ledger !== null && typeof ledger === 'object')
+    Reflect.set(ledger, 'knownCostUsd', 0)
+    Reflect.set(ledger, 'unknownReserveUsd', 0)
+    await writeFile(ledgerPath, `${JSON.stringify(ledger)}\n`)
+    const verified = {
+      ...fixture(PHASE_FLAT_DEV40_ID, 'h8a-flat-dev40-20261101-v1'),
+      runtimeEnvironmentSha256: 'c'.repeat(64),
+    }
+    await assert.rejects(
+      registerFlatDevComparison(
+        { authoritySha256 },
+        verified,
+        {
+          campaignId: 'offline-test-campaign',
+          canonicalRoot: campaignRoot,
+          sha256: registeredCampaignConfigSha256,
+        },
+        {
+          acquireLock: acquireRunnerLock,
+          openLedger: (path) => CampaignLedger.open(path),
+          verifyPriorV1Evidence: async () => 0.00599665,
+        },
+      ),
+      /global budget/u,
+    )
+    await assert.rejects(access(join(campaignRoot, 'experiments')))
   } finally {
     await rm(root, { recursive: true, force: false })
   }

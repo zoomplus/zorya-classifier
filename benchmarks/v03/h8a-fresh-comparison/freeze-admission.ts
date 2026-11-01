@@ -2,14 +2,16 @@ import {
   CAMPAIGN_MAX_COST_USD,
   DEV40_WORST_CASE_PHYSICAL_CALLS,
   PHASE_DEV40_ID,
+  PHASE_FLAT_DEV40_ID,
+  PHASE_FLAT_QUAL120_ID,
   PHASE_QUAL120_ID,
-  PROFILE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
   QUAL120_WORST_CASE_PHYSICAL_CALLS,
+  candidateIdForPhase,
 } from './constants.js'
 import type { CampaignLedger } from './campaign-ledger.js'
 import { hashIdentity } from './hash-identity.js'
-import { H8A_CANDIDATE_PROFILE, V02_CONTROL_PROFILE, profileById } from './profiles.js'
+import { V02_CONTROL_PROFILE, profileById, type H8aFreshProfileId } from './profiles.js'
 import type { PhaseFreeze } from './schemas.js'
 
 export function validateProfileIdentities(freeze: PhaseFreeze): void {
@@ -29,7 +31,7 @@ export function validateProfileIdentities(freeze: PhaseFreeze): void {
 
 export function reservedUsdUpperBoundForProfile(
   freeze: PhaseFreeze,
-  profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+  profileId: H8aFreshProfileId,
 ): number {
   const entry = freeze.conservativeCostProof.profileDispatchUpperBounds.find(
     (item) => item.profileId === profileId,
@@ -41,7 +43,7 @@ export function reservedUsdUpperBoundForProfile(
 function maxPairedCaseReservedUsd(freeze: PhaseFreeze): number {
   return (
     freeze.callLimits.candidateMaxPhysicalCallsPerCase *
-      reservedUsdUpperBoundForProfile(freeze, PROFILE_CANDIDATE_ID) +
+      reservedUsdUpperBoundForProfile(freeze, candidateIdForPhase(freeze.phaseId)) +
     freeze.callLimits.controlMaxPhysicalCallsPerCase *
       reservedUsdUpperBoundForProfile(freeze, PROFILE_CONTROL_ID)
   )
@@ -58,7 +60,10 @@ export function validateConservativeCostProof(freeze: PhaseFreeze): void {
   })
   if (recomputed !== proof.proofSha256)
     throw new RangeError('Conservative cost proof hash mismatch')
-  const candidateBound = reservedUsdUpperBoundForProfile(freeze, PROFILE_CANDIDATE_ID)
+  const candidateBound = reservedUsdUpperBoundForProfile(
+    freeze,
+    candidateIdForPhase(freeze.phaseId),
+  )
   const controlBound = reservedUsdUpperBoundForProfile(freeze, PROFILE_CONTROL_ID)
   const aggregateMax = Math.max(candidateBound, controlBound)
   if (Math.abs(proof.maxUsdPerPhysicalDispatch - aggregateMax) > 1e-12)
@@ -70,14 +75,15 @@ function validateProfileDispatchUpperBoundBinding(freeze: PhaseFreeze): void {
     reservedUsdUpperBoundForProfile(freeze, binding.profileId)
   }
   if (
-    freeze.profileBindings[0]!.profileId !== H8A_CANDIDATE_PROFILE.profileId ||
+    freeze.profileBindings[0]!.profileId !== candidateIdForPhase(freeze.phaseId) ||
     freeze.profileBindings[1]!.profileId !== V02_CONTROL_PROFILE.profileId
   )
     throw new RangeError('Profile binding order must be candidate then control')
 }
 
 function phaseWorstCasePhysicalCalls(phaseId: PhaseFreeze['phaseId']): number {
-  if (phaseId === PHASE_DEV40_ID) return DEV40_WORST_CASE_PHYSICAL_CALLS
+  if (phaseId === PHASE_DEV40_ID || phaseId === PHASE_FLAT_DEV40_ID)
+    return DEV40_WORST_CASE_PHYSICAL_CALLS
   return QUAL120_WORST_CASE_PHYSICAL_CALLS
 }
 
@@ -85,7 +91,7 @@ export function validateQualificationSourceGroupSeparation(
   freeze: PhaseFreeze,
   groupIds: readonly string[],
 ): void {
-  if (freeze.phaseId !== PHASE_QUAL120_ID) return
+  if (freeze.phaseId !== PHASE_QUAL120_ID && freeze.phaseId !== PHASE_FLAT_QUAL120_ID) return
   if (!freeze.enforceQualificationSourceGroupSeparation)
     throw new RangeError('Qualification freeze must declare source-group separation')
   if (groupIds.length === 0) throw new RangeError('Qualification source groups required')
@@ -109,7 +115,7 @@ export async function assertFreezeAdmissionAsync(
   validateFreezeAdmissionProofs(freeze)
   const pairedCaseReserve = maxPairedCaseReservedUsd(freeze)
   const highestSingleFetch = Math.max(
-    reservedUsdUpperBoundForProfile(freeze, PROFILE_CANDIDATE_ID),
+    reservedUsdUpperBoundForProfile(freeze, candidateIdForPhase(freeze.phaseId)),
     reservedUsdUpperBoundForProfile(freeze, PROFILE_CONTROL_ID),
   )
   await ledger.assertCanAdmitPhysicalReservedUsd(highestSingleFetch)

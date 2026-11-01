@@ -14,9 +14,12 @@ import {
   DEV40_WORST_CASE_PHYSICAL_CALLS,
   H8A_FRESH_SCHEMA,
   PHASE_DEV40_ID,
+  PHASE_FLAT_DEV40_ID,
   PROFILE_CANDIDATE_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
   STRATUMS,
+  candidateIdForPhase,
 } from './constants.js'
 import { buildDevScreenSelection, validateDevScreenSelection } from './dev-screen-sampling.js'
 import { assertReferenceBoxesWithinCanvas, assertReferenceMaskDeclaration } from './evaluator.js'
@@ -24,7 +27,11 @@ import { hashIdentity } from './hash-identity.js'
 import { validateConservativeCostProof, validateProfileIdentities } from './freeze-admission.js'
 import { validateSourceGroupSplitSeparation } from './source-group-validation.js'
 import { computeSourceGroupStratumCommitmentSha256 } from './source-group-validation.js'
-import { H8A_CANDIDATE_PROFILE, V02_CONTROL_PROFILE } from './profiles.js'
+import {
+  H8A_CANDIDATE_PROFILE,
+  H8A_FLAT_CANDIDATE_PROFILE,
+  V02_CONTROL_PROFILE,
+} from './profiles.js'
 import {
   evaluatorPrivateAnnotationBundleSchema,
   phaseFreezeSchema,
@@ -67,6 +74,14 @@ const preparationAuthoritySchema = z
     ),
   })
   .strict()
+
+const flatPreparationAuthoritySchema = preparationAuthoritySchema.extend({
+  schema: z.literal('h8a-flat-dev-freeze-preparation-v1'),
+  freezeId: z.literal('h8a-flat-dev40-20261101-v1'),
+  priorDevAuthority: artifactRefSchema,
+})
+const PINNED_PRIOR_DEV_AUTHORITY_SHA256 =
+  '0d5cc47d1759d2e276cdc3e0c44b7ef231c61cc49aa75a7cc62e9bec24bfafd2'
 
 const reviewedFragmentSchema = z
   .object({
@@ -112,7 +127,7 @@ const sourceClosureSchema = z
 
 const priceEntrySchema = z
   .object({
-    profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+    profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
     model: z.string().min(1),
     rawCatalog: artifactRefSchema,
     inputTokenBound: z.number().finite().positive(),
@@ -406,11 +421,16 @@ async function verifySourceClosure(
 function verifyRuntimeEnvironment(
   runtime: z.infer<typeof runtimeEnvironmentSchema>,
   closure: z.infer<typeof sourceClosureSchema>,
+  variant: FreezeVariant = 'v1',
 ): void {
   if (new Set(runtime.assets.map((item) => item.relative)).size !== runtime.assets.length)
     throw new RangeError('Runtime input manifest contains duplicate model assets')
   const closureByPath = new Map(closure.files.map((file) => [file.path, file]))
-  const nativeRecipe = closureByPath.get('benchmarks/v03/h8a-full/native-recipe.json')
+  const nativeRecipePath =
+    variant === 'flat-v2'
+      ? 'benchmarks/v03/h8a-full/native-recipe-flat-target-v2.json'
+      : 'benchmarks/v03/h8a-full/native-recipe.json'
+  const nativeRecipe = closureByPath.get(nativeRecipePath)
   const packageLock = closureByPath.get('package-lock.json')
   if (!nativeRecipe || nativeRecipe.sha256 !== runtime.h8NativeRecipeFileSha256)
     throw new RangeError('Runtime H8 native recipe hash does not match the verified code closure')
@@ -561,14 +581,16 @@ async function validatePriceProof(
   artifactRoot: string,
   rawProof: z.infer<typeof priceProofSchema>,
   priceProofSha256: string,
+  flat = false,
 ): Promise<PhaseFreeze['conservativeCostProof']> {
+  const candidateProfileId = flat ? PROFILE_FLAT_CANDIDATE_ID : PROFILE_CANDIDATE_ID
   const expected = [
-    { profileId: PROFILE_CANDIDATE_ID, model: 'openai/gpt-6-luna' },
+    { profileId: candidateProfileId, model: 'openai/gpt-6-luna' },
     { profileId: PROFILE_CONTROL_ID, model: 'openai/gpt-6-luna-decisions' },
   ] as const
   const bounds: PhaseFreeze['conservativeCostProof']['profileDispatchUpperBounds'] = [
     {
-      profileId: PROFILE_CANDIDATE_ID,
+      profileId: candidateProfileId,
       maxUsdPerPhysicalDispatch: rawProof.entries[0].maxUsdPerPhysicalDispatch,
     },
     {
@@ -635,6 +657,14 @@ interface DevFreezeAssemblyOptions {
   authoritySha256: string
   sourceRoot: string
   outputDirectory: string
+}
+
+type FreezeVariant = 'v1' | 'flat-v2'
+
+const getAuthorityVariant = (schema: unknown): FreezeVariant => {
+  if (schema === 'h8a-dev-freeze-preparation-v1') return 'v1'
+  if (schema === 'h8a-flat-dev-freeze-preparation-v1') return 'flat-v2'
+  throw new RangeError('Unsupported DEV freeze preparation authority schema')
 }
 
 const sourceGroupSplitDigestSchema = z
@@ -820,7 +850,10 @@ async function verifyCaseInputs(
 }
 
 function expectedRecipeIdentity(
-  profile: typeof H8A_CANDIDATE_PROFILE | typeof V02_CONTROL_PROFILE,
+  profile:
+    | typeof H8A_CANDIDATE_PROFILE
+    | typeof H8A_FLAT_CANDIDATE_PROFILE
+    | typeof V02_CONTROL_PROFILE,
 ): string {
   return hashIdentity({
     profileId: profile.profileId,
@@ -840,7 +873,18 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
   const authorityBytes = await readBoundedRegularFile(options.authorityPath, JSON_FILE_LIMIT_BYTES)
   if (digestBytes(authorityBytes) !== options.authoritySha256)
     throw new RangeError('Preparation authority SHA-256 does not match the caller-supplied pin')
-  const authority = preparationAuthoritySchema.parse(JSON.parse(authorityBytes.toString('utf8')))
+  const authorityUnknown: unknown = JSON.parse(authorityBytes.toString('utf8'))
+  const authorityRecord = z.record(z.string(), z.unknown()).parse(authorityUnknown)
+  const variant = getAuthorityVariant(authorityRecord.schema)
+  const flatAuthority =
+    variant === 'flat-v2' ? flatPreparationAuthoritySchema.parse(authorityUnknown) : undefined
+  const authority = flatAuthority ?? preparationAuthoritySchema.parse(authorityUnknown)
+  const phaseId = variant === 'flat-v2' ? PHASE_FLAT_DEV40_ID : PHASE_DEV40_ID
+  const candidateProfileId = candidateIdForPhase(phaseId)
+  const candidateProfile =
+    candidateProfileId === PROFILE_FLAT_CANDIDATE_ID
+      ? H8A_FLAT_CANDIDATE_PROFILE
+      : H8A_CANDIDATE_PROFILE
   if (!isAbsolute(authority.trustedRoot)) throw new RangeError('trustedRoot must be absolute')
   const artifactRoot = resolve(authority.trustedRoot)
   if ((await realpath(artifactRoot)) !== artifactRoot)
@@ -860,10 +904,30 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     readPinnedJson(artifactRoot, authority.priceProof, priceProofSchema),
     readPinnedJson(artifactRoot, authority.runtimeEnvironment, runtimeEnvironmentSchema),
   ])
+  if (variant === 'flat-v2') {
+    if (
+      !flatAuthority ||
+      flatAuthority.priorDevAuthority.sha256 !== PINNED_PRIOR_DEV_AUTHORITY_SHA256
+    )
+      throw new RangeError('Flat comparison must name the exact original DEV authority')
+    const priorRef = await readPinnedJson(
+      artifactRoot,
+      flatAuthority.priorDevAuthority,
+      preparationAuthoritySchema,
+    )
+    if (
+      priorRef.value.freezeId !== 'h8a-fresh-dev40-20261101-v1' ||
+      priorRef.value.orderProtocol.sha256 !== authority.orderProtocol.sha256 ||
+      priorRef.value.mapRoster.sha256 !== authority.mapRoster.sha256 ||
+      priorRef.value.sourceGroupSplit.sha256 !== authority.sourceGroupSplit.sha256 ||
+      hashIdentity(priorRef.value.fragments) !== hashIdentity(authority.fragments)
+    )
+      throw new RangeError('Flat DEV authority changed the original DEV40 cohort boundary')
+  }
   verifyOrderProtocol(protocolRef.value)
   await verifySourceClosure(options.sourceRoot, closureRef.value)
   const closureSha256 = digestBytes(closureRef.raw)
-  verifyRuntimeEnvironment(runtimeRef.value, closureRef.value)
+  verifyRuntimeEnvironment(runtimeRef.value, closureRef.value, variant)
   const split = splitRef.value
   const groupCommitment = (ids: readonly string[]): string =>
     hashIdentity([...ids].map(normalizeSourceGroup).sort())
@@ -875,7 +939,12 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     throw new RangeError('Source-group split/exclusion commitment mismatch')
   const [fragments, conservativeCostProof] = await Promise.all([
     Promise.all(authority.fragments.map((item) => loadFragment(artifactRoot, item))),
-    validatePriceProof(artifactRoot, priceRef.value, digestBytes(priceRef.raw)),
+    validatePriceProof(
+      artifactRoot,
+      priceRef.value,
+      digestBytes(priceRef.raw),
+      variant === 'flat-v2',
+    ),
   ])
   const reviewById = new Map(
     fragments.flatMap((fragment) =>
@@ -980,7 +1049,7 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
   const pairedSchedule = scheduleCases(producerCases, strataById)
   const annotationBody = {
     schema: 'h8a-fresh-evaluator-private-v1',
-    phaseId: PHASE_DEV40_ID,
+    phaseId,
     freezeId: authority.freezeId,
     independentMaskCaseIds: [],
     cases: orderedRows.map(({ fragment, reviewRow }) =>
@@ -1038,7 +1107,7 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
       stratum,
       caseCount: sourceGroupIds.length,
       sourceGroupCommitmentSha256: computeSourceGroupStratumCommitmentSha256(
-        PHASE_DEV40_ID,
+        phaseId,
         stratum,
         sourceGroupIds,
       ),
@@ -1049,7 +1118,7 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     producerCases.map((item) => item.sourceBytesSha256),
   )
   const cohortCommitmentSha256 = hashIdentity({
-    phaseId: PHASE_DEV40_ID,
+    phaseId,
     freezeId: authority.freezeId,
     orderProtocolSha256: authority.orderProtocol.sha256,
     mapRosterSha256: authority.mapRoster.sha256,
@@ -1065,7 +1134,7 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
   const freeze = phaseFreezeSchema.parse({
     schema: H8A_FRESH_SCHEMA,
     freezeId: authority.freezeId,
-    phaseId: PHASE_DEV40_ID,
+    phaseId,
     phaseCounts: {
       totalCases: DEV40_CASE_COUNT,
       positiveCases: DEV40_POSITIVE_COUNT,
@@ -1077,9 +1146,9 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     sourceStrataCommitments,
     profileBindings: [
       {
-        profileId: PROFILE_CANDIDATE_ID,
-        recipeIdentitySha256: expectedRecipeIdentity(H8A_CANDIDATE_PROFILE),
-        requestPolicyIdentitySha256: H8A_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
+        profileId: candidateProfileId,
+        recipeIdentitySha256: expectedRecipeIdentity(candidateProfile),
+        requestPolicyIdentitySha256: candidateProfile.requestPolicyIdentitySha256,
       },
       {
         profileId: PROFILE_CONTROL_ID,

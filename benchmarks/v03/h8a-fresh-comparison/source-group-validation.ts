@@ -1,5 +1,5 @@
 import { hashIdentity } from './hash-identity.js'
-import type { H8aFreshStratum, PHASE_DEV40_ID, PHASE_QUAL120_ID } from './constants.js'
+import type { H8aFreshPhaseId, H8aFreshStratum } from './constants.js'
 
 interface SourceGroupSplitCommitments {
   devSourceGroupIds: readonly string[]
@@ -8,7 +8,7 @@ interface SourceGroupSplitCommitments {
 }
 
 export function computeSourceGroupStratumCommitmentSha256(
-  phaseId: typeof PHASE_DEV40_ID | typeof PHASE_QUAL120_ID,
+  phaseId: H8aFreshPhaseId,
   stratum: H8aFreshStratum,
   sourceGroupIds: readonly string[],
 ): string {

@@ -2,7 +2,13 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import type { CampaignLedger } from './campaign-ledger.js'
 import { ImmutableCaseArtifactStore } from './case-artifact-store.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PHASE_DEV40_ID } from './constants.js'
+import {
+  PROFILE_CONTROL_ID,
+  PHASE_DEV40_ID,
+  PHASE_FLAT_DEV40_ID,
+  candidateIdForPhase,
+} from './constants.js'
+import type { H8aFreshProfileId } from './profiles.js'
 import { validateImmutableCloseouts } from './evaluator.js'
 import { computePhaseFreezeCommitmentSha256 } from './freeze-commitment.js'
 import { hashIdentity } from './hash-identity.js'
@@ -41,10 +47,7 @@ function hashCloseout(closeout: Omit<ImmutableCloseout, 'closeoutSha256'>): stri
   })
 }
 
-function emptyRow(
-  caseId: string,
-  profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
-): OutputRow {
+function emptyRow(caseId: string, profileId: H8aFreshProfileId): OutputRow {
   return outputRowSchema.parse({
     schema: 'h8a-fresh-output-row-v1',
     opaqueCaseId: caseId,
@@ -96,7 +99,7 @@ function remapResult(
 
 function buildCloseout(input: {
   freeze: PhaseFreeze
-  profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID
+  profileId: H8aFreshProfileId
   rows: OutputRow[]
   logicalReceipts: CaseExecutionPortResult['logicalReceipts']
   physicalReceipts: CaseExecutionPortResult['physicalReceipts']
@@ -150,24 +153,25 @@ export async function assembleDev40Closeouts(input: {
   closedAtIso?: string
 }): Promise<Dev40CloseoutAssembly> {
   const freeze = phaseFreezeSchema.parse(input.freeze)
+  const candidateId = candidateIdForPhase(freeze.phaseId)
   const annotations = input.annotations
   const selection = validateDevScreenSelection(input.selection, freeze, annotations)
-  if (freeze.phaseId !== PHASE_DEV40_ID)
-    throw new RangeError('Full DEV40 assembly requires the DEV40 freeze')
+  if (freeze.phaseId !== PHASE_DEV40_ID && freeze.phaseId !== PHASE_FLAT_DEV40_ID)
+    throw new RangeError('Full DEV40 assembly requires a DEV40 freeze')
   if (selection.devFreezeCommitmentSha256 !== computePhaseFreezeCommitmentSha256(freeze))
     throw new RangeError('DEV40 assembly selection is bound to a different freeze')
   const snapshot = input.ledger.snapshot()
   const store = new ImmutableCaseArtifactStore(input.artifactRoot)
   const rowsByProfile = new Map([
-    [PROFILE_CANDIDATE_ID, [] as OutputRow[]],
+    [candidateId, [] as OutputRow[]],
     [PROFILE_CONTROL_ID, [] as OutputRow[]],
   ])
   const logicalByProfile = new Map([
-    [PROFILE_CANDIDATE_ID, [] as CaseExecutionPortResult['logicalReceipts']],
+    [candidateId, [] as CaseExecutionPortResult['logicalReceipts']],
     [PROFILE_CONTROL_ID, [] as CaseExecutionPortResult['logicalReceipts']],
   ])
   const physicalByProfile = new Map([
-    [PROFILE_CANDIDATE_ID, [] as CaseExecutionPortResult['physicalReceipts']],
+    [candidateId, [] as CaseExecutionPortResult['physicalReceipts']],
     [PROFILE_CONTROL_ID, [] as CaseExecutionPortResult['physicalReceipts']],
   ])
   const packedMasksBySha256 = new Map<string, Uint8Array>()
@@ -175,7 +179,7 @@ export async function assembleDev40Closeouts(input: {
   let missingPredictionRows = 0
 
   for (const producer of freeze.producerCases) {
-    for (const profileId of [PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID] as const) {
+    for (const profileId of [candidateId, PROFILE_CONTROL_ID] as const) {
       const identity = buildCaseArtifactIdentity(freeze, selection, producer, profileId)
       const stored = await store.loadOrRecover(identity)
       if (!stored) {
@@ -198,10 +202,10 @@ export async function assembleDev40Closeouts(input: {
 
   const candidateCloseout = buildCloseout({
     freeze,
-    profileId: PROFILE_CANDIDATE_ID,
-    rows: rowsByProfile.get(PROFILE_CANDIDATE_ID)!,
-    logicalReceipts: logicalByProfile.get(PROFILE_CANDIDATE_ID)!,
-    physicalReceipts: physicalByProfile.get(PROFILE_CANDIDATE_ID)!,
+    profileId: candidateId,
+    rows: rowsByProfile.get(candidateId)!,
+    logicalReceipts: logicalByProfile.get(candidateId)!,
+    physicalReceipts: physicalByProfile.get(candidateId)!,
     closedAtIso: input.closedAtIso ?? new Date().toISOString(),
   })
   const controlCloseout = buildCloseout({
@@ -247,12 +251,9 @@ export async function assembleDev40Closeouts(input: {
     (sum, receipt) => sum + (receipt.chargeState === 'known' ? (receipt.costUsd ?? 0) : 0),
     0,
   )
-  const profileForReceiptId = new Map<
-    number,
-    typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID
-  >()
+  const profileForReceiptId = new Map<number, H8aFreshProfileId>()
   for (const receipt of candidateCloseout.physicalReceipts)
-    profileForReceiptId.set(receipt.receiptId, PROFILE_CANDIDATE_ID)
+    profileForReceiptId.set(receipt.receiptId, candidateId)
   for (const receipt of controlCloseout.physicalReceipts)
     profileForReceiptId.set(receipt.receiptId, PROFILE_CONTROL_ID)
   const phaseUnknownReserveUsd = allPhysicalReceipts.reduce((sum, receipt) => {

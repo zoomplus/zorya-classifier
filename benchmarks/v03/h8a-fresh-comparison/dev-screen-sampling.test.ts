@@ -10,7 +10,7 @@ import {
   persistDevScreenSelection,
   validateDevScreenSelection,
 } from './dev-screen-sampling.js'
-import { PHASE_DEV40_ID } from './constants.js'
+import { PHASE_DEV40_ID, PHASE_FLAT_DEV40_ID } from './constants.js'
 import { buildSyntheticAnnotationBundle, buildSyntheticPhaseFreeze } from './test-fixtures.js'
 import type { EvaluatorPrivateAnnotationBundle } from './schemas.js'
 
@@ -94,4 +94,43 @@ await test('persisted selection is byte-immutable and retains both draws before 
   } finally {
     await rm(root, { recursive: true, force: true })
   }
+})
+
+await test('flat DEV profile gets a separately committed freeze with the same seeded nested case positions', () => {
+  const makeFlatFixture = () => {
+    const { freeze: baseFreeze } = buildSyntheticPhaseFreeze(PHASE_FLAT_DEV40_ID)
+    const annotations = buildSyntheticAnnotationBundle(
+      baseFreeze.phaseId,
+      baseFreeze.freezeId,
+      baseFreeze.producerCases,
+      baseFreeze.pairedSchedule,
+    )
+    const freeze = {
+      ...baseFreeze,
+      evaluatorAnnotationsSha256: computeEvaluatorAnnotationsSha256(annotations),
+    }
+    return { freeze, annotations }
+  }
+  const legacy = makeFixture()
+  const flat = makeFlatFixture()
+  const legacySelection = buildDevScreenSelection(legacy.freeze, legacy.annotations)
+  const flatSelection = buildDevScreenSelection(flat.freeze, flat.annotations)
+  const positions = (ids: readonly string[], prefix: string) =>
+    ids.map((id) => Number(id.slice(prefix.length).replace('-case-', '')))
+  assert.deepEqual(
+    positions(flatSelection.dev8CaseIds, PHASE_FLAT_DEV40_ID),
+    positions(legacySelection.dev8CaseIds, PHASE_DEV40_ID),
+  )
+  assert.deepEqual(
+    positions(flatSelection.dev12CaseIds, PHASE_FLAT_DEV40_ID),
+    positions(legacySelection.dev12CaseIds, PHASE_DEV40_ID),
+  )
+  assert.notEqual(
+    flatSelection.selectionCommitmentSha256,
+    legacySelection.selectionCommitmentSha256,
+  )
+  assert.deepEqual(
+    validateDevScreenSelection(flatSelection, flat.freeze, flat.annotations),
+    flatSelection,
+  )
 })

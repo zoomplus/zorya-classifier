@@ -7,7 +7,7 @@ import type { CaseExecutionPortResult } from './paired-runner.js'
 import { logicalReceiptSchema, outputRowSchema, physicalReceiptSchema } from './schemas.js'
 import { hashIdentity } from './hash-identity.js'
 import { sha256PackedBytes, unpackBinaryLsb0V1 } from './packed-binary-lsb0.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID } from './constants.js'
+import { PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID } from './constants.js'
 
 const identitySchema = z.object({
   freezeCommitmentSha256: z.string().regex(/^[a-f0-9]{64}$/u),
@@ -17,7 +17,7 @@ const identitySchema = z.object({
   pairedScheduleSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   selectionCommitmentSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   opaqueCaseId: z.string().min(1),
-  profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+  profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
   sourceBytesSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   targetTaskSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   sourceCanvasWidth: z.number().int().positive(),
@@ -105,7 +105,7 @@ const intentSchema = z
 
 const dispatchBaseSchema = z.object({
   reservationId: z.number().int().positive(),
-  profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+  profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
   opaqueCaseId: z.string().min(1),
   caseExecutionIdentitySha256: z.string().regex(/^[a-f0-9]{64}$/u),
   logicalId: z.number().int().positive(),
@@ -455,7 +455,7 @@ export class ImmutableCaseArtifactStore {
       if (data.opaqueCaseId !== parsed.opaqueCaseId || data.profileId !== parsed.profileId)
         throw new RangeError('Dispatch journal case/profile does not match pending identity')
       const expectedEndpoint =
-        parsed.profileId === PROFILE_CANDIDATE_ID
+        parsed.profileId === PROFILE_CANDIDATE_ID || parsed.profileId === PROFILE_FLAT_CANDIDATE_ID
           ? '/api/v1/chat/completions'
           : '/api/alpha/decisions'
       if (data.endpoint !== expectedEndpoint)

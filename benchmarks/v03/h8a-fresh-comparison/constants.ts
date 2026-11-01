@@ -2,9 +2,25 @@ export const H8A_FRESH_SCHEMA = 'h8a-fresh-comparison-v1' as const
 
 export const PHASE_DEV40_ID = 'h8a-fresh-paired-dev40-v1' as const
 export const PHASE_QUAL120_ID = 'h8a-fresh-paired-qual120-v1' as const
+export const PHASE_FLAT_DEV40_ID = 'h8a-flat-paired-dev40-v1' as const
+export const PHASE_FLAT_QUAL120_ID = 'h8a-flat-paired-qual120-v1' as const
 
 export const PROFILE_CANDIDATE_ID = 'h8a-cpu-raw-target-v1' as const
+export const PROFILE_FLAT_CANDIDATE_ID = 'h8a-cpu-flat-target-v2' as const
 export const PROFILE_CONTROL_ID = 'v02-final-v3-fresh-cohort-replay-v1' as const
+
+export type H8aFreshCandidateId = typeof PROFILE_CANDIDATE_ID | typeof PROFILE_FLAT_CANDIDATE_ID
+export type H8aFreshPhaseId =
+  | typeof PHASE_DEV40_ID
+  | typeof PHASE_QUAL120_ID
+  | typeof PHASE_FLAT_DEV40_ID
+  | typeof PHASE_FLAT_QUAL120_ID
+
+export function candidateIdForPhase(phaseId: H8aFreshPhaseId): H8aFreshCandidateId {
+  return phaseId === PHASE_FLAT_DEV40_ID || phaseId === PHASE_FLAT_QUAL120_ID
+    ? PROFILE_FLAT_CANDIDATE_ID
+    : PROFILE_CANDIDATE_ID
+}
 
 export const DEV40_CASE_COUNT = 40 as const
 export const DEV40_POSITIVE_COUNT = 30 as const

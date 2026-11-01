@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { hashIdentity } from './hash-identity.js'
-import { H8A_CANDIDATE_PROFILE, V02_CONTROL_PROFILE } from './profiles.js'
+import {
+  H8A_CANDIDATE_PROFILE,
+  H8A_FLAT_CANDIDATE_PROFILE,
+  V02_CONTROL_PROFILE,
+} from './profiles.js'
 import { phaseFreezeSchema, type PhaseFreeze } from './schemas.js'
 import { assertNoForbiddenEvaluatorFields } from './forbidden-leakage.js'
 import { buildConservativeCostProof, buildSyntheticPhaseFreeze } from './test-fixtures.js'
@@ -11,7 +15,13 @@ import {
   validateQualificationSourceGroupSeparation,
 } from './freeze-admission.js'
 import { validateSourceGroupSplitSeparation } from './source-group-validation.js'
-import { PHASE_DEV40_ID, PHASE_QUAL120_ID } from './constants.js'
+import {
+  PHASE_DEV40_ID,
+  PHASE_QUAL120_ID,
+  PHASE_FLAT_DEV40_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_CANDIDATE_ID,
+} from './constants.js'
 
 await test('phase freeze rejects unknown keys and wrong phase counts', () => {
   const { freeze } = buildSyntheticPhaseFreeze(PHASE_QUAL120_ID)
@@ -131,5 +141,34 @@ await test('source-group overlap across DEV and qualification splits is rejected
 await test('producer payloads reject forbidden evaluator fields', () => {
   assert.throws(() =>
     assertNoForbiddenEvaluatorFields({ opaqueCaseId: 'x', sourceGroup: 'hidden' }, 'producer'),
+  )
+})
+
+await test('flat comparison freeze has a separate phase and recipe identity with V1 candidate policy', () => {
+  const { freeze } = buildSyntheticPhaseFreeze(PHASE_FLAT_DEV40_ID)
+  assert.doesNotThrow(() => phaseFreezeSchema.parse(freeze))
+  validateProfileIdentities(freeze)
+  validateConservativeCostProof(freeze)
+  assert.equal(freeze.profileBindings[0]?.profileId, PROFILE_FLAT_CANDIDATE_ID)
+  assert.equal(
+    H8A_FLAT_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
+    H8A_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
+  )
+  assert.notEqual(
+    freeze.profileBindings[0]?.recipeIdentitySha256,
+    buildSyntheticPhaseFreeze(PHASE_DEV40_ID).freeze.profileBindings[0]?.recipeIdentitySha256,
+  )
+  assert.throws(() =>
+    phaseFreezeSchema.parse({
+      ...freeze,
+      profileBindings: [
+        { ...freeze.profileBindings[0]!, profileId: PROFILE_CANDIDATE_ID },
+        freeze.profileBindings[1],
+      ],
+    }),
+  )
+  const legacyReservation = buildConservativeCostProof(0.005)
+  assert.throws(() =>
+    validateConservativeCostProof({ ...freeze, conservativeCostProof: legacyReservation }),
   )
 })

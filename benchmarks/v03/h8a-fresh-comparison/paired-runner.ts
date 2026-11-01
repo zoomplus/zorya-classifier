@@ -11,7 +11,8 @@ import {
   invokeInjectedWork,
   PhysicalDispatchConfirmFailedError,
 } from './physical-dispatch.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID } from './constants.js'
+import { PROFILE_CONTROL_ID, candidateIdForPhase } from './constants.js'
+import type { H8aFreshProfileId } from './profiles.js'
 import type { ImmutableCloseout, OutputRow, PhaseFreeze } from './schemas.js'
 import {
   immutableCloseoutSchema,
@@ -33,7 +34,7 @@ export interface CaseExecutionPortResult {
   logicalReceipts: Array<{
     logicalId: number
     opaqueCaseId: string
-    profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID
+    profileId: H8aFreshProfileId
     requestSha256: string
     physicalIds: number[]
     outcome: 'resolved' | 'failed' | 'cancelled' | 'timeout' | 'unknown' | 'preflight_failed'
@@ -50,7 +51,7 @@ export interface CaseExecutionPortResult {
   }>
   caseArtifactSidecars?: Array<{
     opaqueCaseId: string
-    profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID
+    profileId: H8aFreshProfileId
     kind: 'candidate-cutout-rgba' | 'control-cutout-png'
     sha256: string
     byteLength: number
@@ -71,7 +72,7 @@ export interface CaseExecutionPort {
   execute(
     input: ProducerExecutionInput,
     context: {
-      profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID
+      profileId: H8aFreshProfileId
       reservedUsdPerFetch: number
       ledger: CampaignLedger
       caseExecutionIdentitySha256?: string
@@ -126,10 +127,7 @@ function validateProducerInput(
     throw new RangeError('Source bytes hash mismatch')
 }
 
-function profileBindingFor(
-  freeze: PhaseFreeze,
-  profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
-) {
+function profileBindingFor(freeze: PhaseFreeze, profileId: H8aFreshProfileId) {
   const binding = freeze.profileBindings.find((item) => item.profileId === profileId)
   if (!binding) throw new RangeError('Missing profile binding')
   return binding
@@ -224,7 +222,7 @@ function countUncertainPhysicalDispatches(
 
 function mergeCloseout(
   freeze: PhaseFreeze,
-  profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+  profileId: H8aFreshProfileId,
   rows: OutputRow[],
   logicalReceipts: CaseExecutionPortResult['logicalReceipts'],
   physicalReceipts: CaseExecutionPortResult['physicalReceipts'],
@@ -274,7 +272,7 @@ function mergeCloseout(
 
 function buildSyntheticCancelledResult(
   input: ProducerExecutionInput,
-  profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+  profileId: H8aFreshProfileId,
   caseState: 'cancelled' | 'unstarted',
   outcome: 'cancelled' | 'unknown',
 ): CaseExecutionPortResult {
@@ -311,7 +309,7 @@ function buildSyntheticCancelledResult(
 
 function buildSyntheticPreflightFailureResult(
   input: ProducerExecutionInput,
-  profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+  profileId: H8aFreshProfileId,
   error: unknown,
 ): CaseExecutionPortResult {
   const message = error instanceof Error ? error.message : 'preflight_failed'
@@ -351,7 +349,7 @@ function buildSyntheticPreflightFailureResult(
 
 function buildSyntheticErrorResult(
   input: ProducerExecutionInput,
-  profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+  profileId: H8aFreshProfileId,
   error: unknown,
 ): CaseExecutionPortResult {
   const message = error instanceof Error ? error.message : 'execution_failed'
@@ -389,7 +387,7 @@ function buildSyntheticErrorResult(
 
 function resolveReservedUsdPerFetch(
   freeze: PhaseFreeze,
-  profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+  profileId: H8aFreshProfileId,
   override: number | undefined,
 ): number {
   const frozenBound = reservedUsdUpperBoundForProfile(freeze, profileId)
@@ -440,6 +438,7 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
     options.freeze,
     options.sourceBytesByCaseId,
   )
+  const candidateId = candidateIdForPhase(freeze.phaseId)
   const phaseDeadline = createPhaseDeadlineScope(freeze.deadlineIso, signal)
   const now =
     nowOverride ?? (closeAtIsoOverride ? () => closeAtIsoOverride : () => new Date().toISOString())
@@ -472,7 +471,7 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
 
     const collectPreflightArm = async (
       executionInput: ProducerExecutionInput,
-      profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+      profileId: H8aFreshProfileId,
       preflightError: unknown,
     ): Promise<void> => {
       await ledger.recordLogicalAttempt()
@@ -485,7 +484,7 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
       nextLogicalId = remapped.nextLogicalId
       nextPhysicalId = remapped.nextPhysicalId
       validateRemappedGraph(remapped.result)
-      if (profileId === PROFILE_CANDIDATE_ID) {
+      if (profileId === candidateId) {
         candidateLogicalAttempts++
         candidateRows.push(remapped.result.outputRow)
         candidateLogical.push(...remapped.result.logicalReceipts)
@@ -515,8 +514,8 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
           targetTaskText: producerRow.targetTaskText,
         }
         const armProfiles = scheduleRow.candidateArmFirst
-          ? [PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID]
-          : [PROFILE_CONTROL_ID, PROFILE_CANDIDATE_ID]
+          ? [candidateId, PROFILE_CONTROL_ID]
+          : [PROFILE_CONTROL_ID, candidateId]
         const firstArm = index === fromIndex ? startArmIndex : 0
         for (let armIndex = firstArm; armIndex < armProfiles.length; armIndex++) {
           await collectPreflightArm(executionInput, armProfiles[armIndex]!, preflightError)
@@ -529,7 +528,7 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
       const closedAtIso = now()
       const candidateCloseout = mergeCloseout(
         freeze,
-        PROFILE_CANDIDATE_ID,
+        candidateId,
         candidateRows,
         candidateLogical,
         candidatePhysical,
@@ -552,7 +551,7 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
 
     const collectSyntheticArm = (
       executionInput: ProducerExecutionInput,
-      profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+      profileId: H8aFreshProfileId,
       caseState: 'cancelled' | 'unstarted',
       outcome: 'cancelled' | 'unknown',
     ): void => {
@@ -561,7 +560,7 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
       nextLogicalId = remapped.nextLogicalId
       nextPhysicalId = remapped.nextPhysicalId
       validateRemappedGraph(remapped.result)
-      if (profileId === PROFILE_CANDIDATE_ID) {
+      if (profileId === candidateId) {
         candidateRows.push(remapped.result.outputRow)
         candidateLogical.push(...remapped.result.logicalReceipts)
       } else {
@@ -590,8 +589,8 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
           targetTaskText: producerRow.targetTaskText,
         }
         const armProfiles = scheduleRow.candidateArmFirst
-          ? [PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID]
-          : [PROFILE_CONTROL_ID, PROFILE_CANDIDATE_ID]
+          ? [candidateId, PROFILE_CONTROL_ID]
+          : [PROFILE_CONTROL_ID, candidateId]
         const firstArm = index === fromIndex ? startArmIndex : 0
         for (let armIndex = firstArm; armIndex < armProfiles.length; armIndex++) {
           collectSyntheticArm(executionInput, armProfiles[armIndex]!, caseState, outcome)
@@ -629,7 +628,7 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
       }
 
       const arms: Array<{
-        profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID
+        profileId: H8aFreshProfileId
         port: CaseExecutionPort
         collectRow: (row: OutputRow) => void
         collectLogical: (rows: CaseExecutionPortResult['logicalReceipts']) => void
@@ -638,7 +637,7 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
       }> = scheduleRow.candidateArmFirst
         ? [
             {
-              profileId: PROFILE_CANDIDATE_ID,
+              profileId: candidateId,
               port: candidatePort,
               collectRow: (row) => candidateRows.push(row),
               collectLogical: (rows) => candidateLogical.push(...rows),
@@ -670,7 +669,7 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
               },
             },
             {
-              profileId: PROFILE_CANDIDATE_ID,
+              profileId: candidateId,
               port: candidatePort,
               collectRow: (row) => candidateRows.push(row),
               collectLogical: (rows) => candidateLogical.push(...rows),
@@ -775,7 +774,7 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
     const closedAtIso = now()
     const candidateCloseout = mergeCloseout(
       freeze,
-      PROFILE_CANDIDATE_ID,
+      candidateId,
       candidateRows,
       candidateLogical,
       candidatePhysical,
@@ -812,7 +811,7 @@ function normalizeInjectedHandlerResult(value: InjectedFetchCaseHandlerReturn): 
 function buildInjectedPortFailureResult(
   input: ProducerExecutionInput,
   context: {
-    profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID
+    profileId: H8aFreshProfileId
   },
   requestSha256: string,
   receiptId: number | null,

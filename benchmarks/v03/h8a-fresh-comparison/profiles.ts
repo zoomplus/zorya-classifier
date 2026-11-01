@@ -1,7 +1,10 @@
 import { hashIdentity } from './hash-identity.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID } from './constants.js'
+import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
 
-export type H8aFreshProfileId = typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID
+export type H8aFreshProfileId =
+  | typeof PROFILE_CANDIDATE_ID
+  | typeof PROFILE_FLAT_CANDIDATE_ID
+  | typeof PROFILE_CONTROL_ID
 
 const h8aCandidateRequestPolicy = {
   allowFallbacks: false,
@@ -48,6 +51,13 @@ export const H8A_CANDIDATE_PROFILE = {
   requestPolicyIdentitySha256: hashIdentity(h8aCandidateRequestPolicy),
 }
 
+export const H8A_FLAT_CANDIDATE_PROFILE = {
+  profileId: PROFILE_FLAT_CANDIDATE_ID,
+  recipeKind: 'h8a-cpu-flat-target-then-h6-composer' as const,
+  requestPolicy: { ...h8aCandidateRequestPolicy },
+  requestPolicyIdentitySha256: hashIdentity(h8aCandidateRequestPolicy),
+}
+
 export const V02_CONTROL_PROFILE = {
   profileId: PROFILE_CONTROL_ID,
   recipeKind: 'v02-final-v3-fresh-cohort-replay' as const,
@@ -57,6 +67,7 @@ export const V02_CONTROL_PROFILE = {
 
 export function profileById(profileId: H8aFreshProfileId) {
   if (profileId === PROFILE_CANDIDATE_ID) return H8A_CANDIDATE_PROFILE
+  if (profileId === PROFILE_FLAT_CANDIDATE_ID) return H8A_FLAT_CANDIDATE_PROFILE
   return V02_CONTROL_PROFILE
 }
 

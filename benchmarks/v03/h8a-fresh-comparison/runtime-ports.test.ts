@@ -14,7 +14,7 @@ import { createNativeCategoricalPresencePort } from '../../v02/native-categorica
 import { assertRecorderHealthy, processRegionSeededCase } from '../../v02/region-seeded-runner.js'
 import { CampaignLedger } from './campaign-ledger.js'
 import { createCampaignFetchBoundary } from './campaign-fetch-boundary.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID } from './constants.js'
+import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
 import type {
   CandidateRuntimePort,
   H8FreshRuntimePortOptions,
@@ -535,6 +535,274 @@ await test('candidate port uses ordinary Luna vision route and retains its origi
       assert.equal(digest(reopenedCutout), cutout?.sha256)
       assert.equal(result.caseArtifactSidecars?.[0]?.kind, 'candidate-cutout-rgba')
       assert.equal(ledger.snapshot().knownCostUsd, 0.002)
+    } finally {
+      await runtimePorts.dispose()
+    }
+  })
+})
+
+await test('flat candidate selects its explicit native recipe and preserves profile receipts', async () => {
+  await withFixtureRoot(async (root, source) => {
+    let selectedRecipeId: string | undefined
+    let fetchCalls = 0
+    let candidateLimitRejected = false
+    let returnUnknown = false
+    let omitV2Recipe = false
+    const candidateRuntime: CandidateRuntimePort = {
+      async run(input) {
+        if (returnUnknown)
+          return {
+            status: 'unknown' as const,
+            ...(omitV2Recipe ? {} : { recipeId: PROFILE_FLAT_CANDIDATE_ID }),
+            reason: 'verified flat unknown result',
+          }
+        for (let index = 0; index < 5; index++) {
+          try {
+            await input.decision.decide(
+              {
+                state: ['offline flat recipe fixture'],
+                questions: {
+                  selection: {
+                    type: 'choice',
+                    rankingSize: 1,
+                    instructions: 'Choose a visible result.',
+                    criteria: {
+                      visible: 'The target is visible.',
+                      absent: 'The target is absent.',
+                    },
+                  },
+                },
+              },
+              input.signal,
+            )
+          } catch {
+            candidateLimitRejected = index === 4
+            if (index !== 4) throw new Error('Flat fixture unexpectedly exhausted before call five')
+          }
+        }
+        const pixels = maskBytes(64, 48, { left: 10, top: 8, width: 6, height: 5 })
+        const packed = packBinaryLsb0V1(64, 48, pixels)
+        const resultMask = new Uint8Array(packed.byteLength)
+        resultMask.set(packed)
+        return {
+          status: 'located' as const,
+          recipeId: PROFILE_FLAT_CANDIDATE_ID,
+          family: 'D' as const,
+          alias: 'D00',
+          sourceAlias: 'D00',
+          originalEncodedSha256: digest(input.encodedImage),
+          sourceFrame: { sha256: digest('flat-frame'), width: 64, height: 48 },
+          mask: { format: 'binary-lsb0' as const, width: 64, height: 48, data: resultMask },
+          region: { left: 10, top: 8, width: 6, height: 5 },
+          center: { x: 13, y: 10.5 },
+          cutout: {
+            data: new Uint8Array(6 * 5 * 4).fill(255),
+            width: 6,
+            height: 5,
+            format: 'rgba8' as const,
+          },
+        }
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment() {
+        return {
+          status: 'unknown',
+          reason: 'unused',
+          metadata: {
+            method: 'fixture',
+            backend: 'fixture',
+            durationMs: 0,
+            input: { width: 1, height: 1 },
+          },
+        }
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const options = fixtureOptions(
+      root,
+      async () => {
+        fetchCalls++
+        return visionReply('openai/gpt-6-luna', 0.002)
+      },
+      candidateRuntime,
+      segmenter,
+    )
+    options.sourceCanvasByOpaqueCaseId = new Map([
+      ['flat-candidate-case', { width: 64, height: 48 }],
+      ['flat-candidate-missing-id', { width: 64, height: 48 }],
+    ])
+    options.nativeRuntime.recipeId = PROFILE_FLAT_CANDIDATE_ID
+    options.createCandidateRuntime = (recipeId) => {
+      selectedRecipeId = recipeId
+      return candidateRuntime
+    }
+    const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(options)
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    try {
+      const result = await runtimePorts.candidatePort.execute(
+        {
+          opaqueCaseId: 'flat-candidate-case',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        {
+          profileId: PROFILE_FLAT_CANDIDATE_ID,
+          reservedUsdPerFetch: 0.55,
+          ledger,
+        },
+      )
+      assert.equal(selectedRecipeId, PROFILE_FLAT_CANDIDATE_ID)
+      assert.equal(result.outputRow.profileId, PROFILE_FLAT_CANDIDATE_ID)
+      assert.equal(
+        result.outputRow.caseState,
+        'success',
+        JSON.stringify({ row: result.outputRow, caseError: result.caseError }),
+      )
+      assert.equal(result.caseArtifactSidecars?.[0]?.profileId, PROFILE_FLAT_CANDIDATE_ID)
+      assert.equal(candidateLimitRejected, true)
+      assert.equal(
+        runtimePorts.artifacts.cutoutsByProfileAndCase.get(
+          `${PROFILE_FLAT_CANDIDATE_ID}:flat-candidate-case`,
+        )?.format,
+        'rgba8',
+      )
+      assert.equal(runtimePorts.fetchJournal[0]?.profileId, PROFILE_FLAT_CANDIDATE_ID)
+      assert.equal(result.physicalReceipts.length, 4)
+      assert.equal(fetchCalls, 4)
+      assert.equal(ledger.snapshot().physicalDispatchCount, 4)
+
+      returnUnknown = true
+      const unknown = await runtimePorts.candidatePort.execute(
+        {
+          opaqueCaseId: 'flat-candidate-case',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        {
+          profileId: PROFILE_FLAT_CANDIDATE_ID,
+          reservedUsdPerFetch: 0.55,
+          ledger,
+        },
+      )
+      assert.equal(unknown.outputRow.profileId, PROFILE_FLAT_CANDIDATE_ID)
+      assert.equal(unknown.outputRow.caseState, 'unknown')
+      assert.equal(fetchCalls, 4)
+
+      omitV2Recipe = true
+      const missingRecipe = await runtimePorts.candidatePort.execute(
+        {
+          opaqueCaseId: 'flat-candidate-missing-id',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        {
+          profileId: PROFILE_FLAT_CANDIDATE_ID,
+          reservedUsdPerFetch: 0.55,
+          ledger,
+        },
+      )
+      assert.equal(missingRecipe.outputRow.caseState, 'error')
+      assert.match(missingRecipe.caseError ?? '', /flat profile/u)
+      assert.equal(fetchCalls, 4)
+    } finally {
+      await runtimePorts.dispose()
+    }
+  })
+})
+
+await test('candidate port refuses selected or returned V1/V2 recipe swaps before paid dispatch', async () => {
+  await withFixtureRoot(async (root, source) => {
+    let fetchCalls = 0
+    let runtimeFactoryCalls = 0
+    let includeUnexpectedV2Recipe = false
+    const candidateRuntime: CandidateRuntimePort = {
+      async run() {
+        return {
+          status: 'unknown',
+          reason: 'wrong recipe result',
+          ...(includeUnexpectedV2Recipe ? { recipeId: PROFILE_FLAT_CANDIDATE_ID } : {}),
+        }
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment() {
+        return {
+          status: 'unknown',
+          reason: 'unused',
+          metadata: {
+            method: 'fixture',
+            backend: 'fixture',
+            durationMs: 0,
+            input: { width: 1, height: 1 },
+          },
+        }
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const options = fixtureOptions(
+      root,
+      async () => {
+        fetchCalls++
+        return visionReply('openai/gpt-6-luna', 0.002)
+      },
+      candidateRuntime,
+      segmenter,
+    )
+    options.sourceCanvasByOpaqueCaseId = new Map([
+      ['flat-candidate-case', { width: 64, height: 48 }],
+      ['opaque-local-route-id', { width: 64, height: 48 }],
+    ])
+    options.createCandidateRuntime = () => {
+      runtimeFactoryCalls++
+      return candidateRuntime
+    }
+    options.nativeRuntime.recipeId = PROFILE_CANDIDATE_ID
+    const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(options)
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    try {
+      await assert.rejects(
+        runtimePorts.candidatePort.execute(
+          {
+            opaqueCaseId: 'flat-candidate-case',
+            sourceBytes: source,
+            targetTaskText: 'the authored visible sign',
+          },
+          {
+            profileId: PROFILE_FLAT_CANDIDATE_ID,
+            reservedUsdPerFetch: 0.55,
+            ledger,
+          },
+        ),
+        /Selected native recipe does not match the candidate profile/u,
+      )
+      assert.equal(runtimeFactoryCalls, 1)
+      assert.equal(fetchCalls, 0)
+      assert.equal(ledger.snapshot().physicalDispatchCount, 0)
+      assert.equal(runtimePorts.fetchJournal.length, 0)
+
+      includeUnexpectedV2Recipe = true
+      const unexpectedV2Identity = await runtimePorts.candidatePort.execute(
+        {
+          opaqueCaseId: 'opaque-local-route-id',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        {
+          profileId: PROFILE_CANDIDATE_ID,
+          reservedUsdPerFetch: 0.55,
+          ledger,
+        },
+      )
+      assert.equal(unexpectedV2Identity.outputRow.caseState, 'error')
+      assert.match(unexpectedV2Identity.caseError ?? '', /V1 candidate result/u)
+      assert.equal(fetchCalls, 0)
+      assert.equal(ledger.snapshot().physicalDispatchCount, 0)
+      assert.equal(runtimePorts.fetchJournal.length, 0)
     } finally {
       await runtimePorts.dispose()
     }

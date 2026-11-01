@@ -22,8 +22,8 @@ import type {
   ProducerExecutionInput,
 } from './paired-runner.js'
 import {
-  PROFILE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
+  candidateIdForPhase,
   DEV40_CASE_COUNT,
   DEV40_POSITIVE_COUNT,
 } from './constants.js'
@@ -377,6 +377,7 @@ async function assertPriorScreenAdvance(
   expectedPairs: number,
   annotations: EvaluatorPrivateAnnotationBundle,
 ): Promise<void> {
+  const candidateId = candidateIdForPhase(freeze.phaseId)
   const report = devScreenReportSchema.parse(
     JSON.parse(
       await readFile(`${artifactRoot}/reports/${priorScreen}-report.json`, 'utf8'),
@@ -419,12 +420,7 @@ async function assertPriorScreenAdvance(
     const truth = truthById.get(id)
     if (!producer || !truth)
       throw new RangeError(`${priorScreen} selection references a missing private row`)
-    const candidateIdentity = buildCaseArtifactIdentity(
-      freeze,
-      selection,
-      producer,
-      PROFILE_CANDIDATE_ID,
-    )
+    const candidateIdentity = buildCaseArtifactIdentity(freeze, selection, producer, candidateId)
     const controlIdentity = buildCaseArtifactIdentity(
       freeze,
       selection,
@@ -582,8 +578,7 @@ async function assertPriorScreenAdvance(
     successField: 'positiveCandidate' | 'positiveControl',
   ) => {
     const rows = ids.map(
-      (id) =>
-        expectedOutputs.get(id)![profileId === PROFILE_CANDIDATE_ID ? 'candidate' : 'control'],
+      (id) => expectedOutputs.get(id)![profileId === candidateId ? 'candidate' : 'control'],
     )
     const bound = freeze.conservativeCostProof.profileDispatchUpperBounds.find(
       (item) => item.profileId === profileId,
@@ -616,7 +611,7 @@ async function assertPriorScreenAdvance(
       successfulPositiveKnownCostUsd: successes > 0 ? knownCostUsd / successes : null,
     }
   }
-  const expectedCandidate = armStats(PROFILE_CANDIDATE_ID, 'positiveCandidate')
+  const expectedCandidate = armStats(candidateId, 'positiveCandidate')
   const expectedControl = armStats(PROFILE_CONTROL_ID, 'positiveControl')
   if (
     hashIdentity(expectedCandidate) !== hashIdentity(report.candidate) ||
@@ -658,6 +653,7 @@ async function executeDevScreenWithinDeadline(
   freeze: PhaseFreeze,
   phaseDeadline: PhaseDeadlineScope,
 ): Promise<DevScreenReport> {
+  const candidateId = candidateIdForPhase(freeze.phaseId)
   const annotations = evaluatorPrivateAnnotationBundleSchema.parse(options.annotations)
   const ownedSources = new Map<string, Uint8Array>()
   for (const producer of freeze.producerCases) {
@@ -720,8 +716,8 @@ async function executeDevScreenWithinDeadline(
     if (!producer || !truth || !sourceBytes)
       throw new RangeError('Selected screen case is incomplete')
     const armOrder: H8aFreshProfileId[] = schedule.candidateArmFirst
-      ? [PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID]
-      : [PROFILE_CONTROL_ID, PROFILE_CANDIDATE_ID]
+      ? [candidateId, PROFILE_CONTROL_ID]
+      : [PROFILE_CONTROL_ID, candidateId]
     const byProfile = new Map<H8aFreshProfileId, StoredCaseArtifact>()
     for (const profileId of armOrder) {
       try {
@@ -732,7 +728,7 @@ async function executeDevScreenWithinDeadline(
           producer,
           bytes: sourceBytes,
           profileId,
-          port: profileId === PROFILE_CANDIDATE_ID ? options.candidatePort : options.controlPort,
+          port: profileId === candidateId ? options.candidatePort : options.controlPort,
           ledger: options.ledger,
           store,
           artifacts: options.runtimeArtifacts,
@@ -744,7 +740,7 @@ async function executeDevScreenWithinDeadline(
         const attempts = storedArmsByCase.get(schedule.opaqueCaseId) ?? {}
         attempts[profileId] = stored
         storedArmsByCase.set(schedule.opaqueCaseId, attempts)
-        const isCandidate = profileId === PROFILE_CANDIDATE_ID
+        const isCandidate = profileId === candidateId
         if (stored.durationMs === null) {
           if (isCandidate) candidateUnknownDurationCount++
           else controlUnknownDurationCount++
@@ -785,7 +781,7 @@ async function executeDevScreenWithinDeadline(
         break
       }
     }
-    const candidate = byProfile.get(PROFILE_CANDIDATE_ID)
+    const candidate = byProfile.get(candidateId)
     const control = byProfile.get(PROFILE_CONTROL_ID)
     if (candidate && control) {
       completedPairs++
@@ -826,16 +822,16 @@ async function executeDevScreenWithinDeadline(
       const truth = truthById.get(id)!
       const producer = producerById.get(id)!
       if (truth.expectedPresence === 'present') {
-        if (arms[PROFILE_CANDIDATE_ID]) {
+        if (arms[candidateId]) {
           observedCandidatePositiveRows++
           if (
             scorePositiveOutputRow(
-              arms[PROFILE_CANDIDATE_ID].result.outputRow,
+              arms[candidateId].result.outputRow,
               truth.referenceBoxes,
               truth,
               producer.sourceCanvasWidth,
               producer.sourceCanvasHeight,
-              arms[PROFILE_CANDIDATE_ID].blobsBySha256,
+              arms[candidateId].blobsBySha256,
             )
           )
             candidatePositiveSuccesses++
@@ -854,11 +850,11 @@ async function executeDevScreenWithinDeadline(
           )
             controlPositiveSuccesses++
         }
-        if (arms[PROFILE_CANDIDATE_ID] && arms[PROFILE_CONTROL_ID]) observedPositivePairs++
+        if (arms[candidateId] && arms[PROFILE_CONTROL_ID]) observedPositivePairs++
       } else {
-        if (arms[PROFILE_CANDIDATE_ID]) {
+        if (arms[candidateId]) {
           observedCandidateNegativeRows++
-          if (scoreNegativeFalseOutputRow(arms[PROFILE_CANDIDATE_ID].result.outputRow))
+          if (scoreNegativeFalseOutputRow(arms[candidateId].result.outputRow))
             candidateNegativeFalse++
         }
         if (arms[PROFILE_CONTROL_ID]) {
@@ -866,7 +862,7 @@ async function executeDevScreenWithinDeadline(
           if (scoreNegativeFalseOutputRow(arms[PROFILE_CONTROL_ID].result.outputRow))
             controlNegativeFalse++
         }
-        if (arms[PROFILE_CANDIDATE_ID] && arms[PROFILE_CONTROL_ID]) observedNegativePairs++
+        if (arms[candidateId] && arms[PROFILE_CONTROL_ID]) observedNegativePairs++
       }
     }
     const quota =
@@ -943,7 +939,7 @@ async function executeDevScreenWithinDeadline(
   if (!weightedEstimateComplete)
     hardBlockers.push(`incomplete-${options.screen}-pairs:${completedPairs}/${expectedPairs}`)
   const candidateSuccessesFromRows = [...storedArmsByCase.values()].filter((arms) => {
-    const stored = arms[PROFILE_CANDIDATE_ID]
+    const stored = arms[candidateId]
     if (!stored) return false
     const row = stored.result.outputRow
     const truth = truthById.get(row.opaqueCaseId)!
@@ -1048,7 +1044,7 @@ async function executeDevScreenWithinDeadline(
     outputs: selectedInOrder.map((scheduled) => {
       const opaqueCaseId = scheduled.opaqueCaseId
       const arms = storedArmsByCase.get(opaqueCaseId) ?? {}
-      const candidate = arms[PROFILE_CANDIDATE_ID]
+      const candidate = arms[candidateId]
       const control = arms[PROFILE_CONTROL_ID]
       const truth = truthById.get(opaqueCaseId)!
       const producer = producerById.get(opaqueCaseId)!
@@ -1094,9 +1090,8 @@ async function executeDevScreenWithinDeadline(
         ),
         candidateIdentitySha256:
           candidate?.identitySha256 ??
-          store.identity(
-            buildCaseArtifactIdentity(freeze, selection, producer, PROFILE_CANDIDATE_ID),
-          ).sha256,
+          store.identity(buildCaseArtifactIdentity(freeze, selection, producer, candidateId))
+            .sha256,
         controlIdentitySha256:
           control?.identitySha256 ??
           store.identity(buildCaseArtifactIdentity(freeze, selection, producer, PROFILE_CONTROL_ID))

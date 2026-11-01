@@ -5,6 +5,8 @@ import {
   DEV40_POSITIVE_COUNT,
   PHASE_DEV40_ID,
   PHASE_QUAL120_ID,
+  PHASE_FLAT_QUAL120_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
 } from './constants.js'
@@ -645,6 +647,90 @@ await test('qualification mask gate uses exactly the frozen photo-positive selec
   assert.equal(gate.independentMaskDenominator, 30)
   assert.equal(gate.independentMaskPassCount, 30)
   assert.equal(gate.qualityPass, true)
+  const unstartedControl = joined.map((item, index) =>
+    index === 0 ? { ...item, control: { ...item.control, caseState: 'unstarted' as const } } : item,
+  )
+  const incompleteControlGate = evaluateQual120Gate(unstartedControl)
+  assert.equal(incompleteControlGate.executionValid, false)
+  assert.equal(incompleteControlGate.qualityPass, false)
+})
+
+await test('flat QUAL gate preserves recipe identity and refuses an incomplete terminal pair', () => {
+  const { freeze: baseFreeze } = buildSyntheticPhaseFreeze(PHASE_FLAT_QUAL120_ID)
+  const annotationsBase = buildSyntheticAnnotationBundle(
+    PHASE_FLAT_QUAL120_ID,
+    baseFreeze.freezeId,
+    baseFreeze.producerCases,
+    baseFreeze.pairedSchedule,
+  )
+  const pixels = new Uint8Array(SYNTHETIC_SOURCE_CANVAS_WIDTH * SYNTHETIC_SOURCE_CANVAS_HEIGHT)
+  pixels[0] = 1
+  const packed = packBinaryLsb0V1(
+    SYNTHETIC_SOURCE_CANVAS_WIDTH,
+    SYNTHETIC_SOURCE_CANVAS_HEIGHT,
+    pixels,
+  )
+  const maskSha = sha256PackedBytes(packed)
+  const annotations = {
+    ...annotationsBase,
+    cases: annotationsBase.cases.map((item) =>
+      item.exactOriginalCanvasMaskRef
+        ? {
+            ...item,
+            referenceBoxes: [{ left: 0, top: 0, width: 1, height: 1 }],
+            referenceMasks: [
+              {
+                width: SYNTHETIC_SOURCE_CANVAS_WIDTH,
+                height: SYNTHETIC_SOURCE_CANVAS_HEIGHT,
+                packedBinarySha256: maskSha,
+              },
+            ],
+          }
+        : item,
+    ),
+  }
+  const freeze = phaseFreezeSchema.parse({
+    ...baseFreeze,
+    evaluatorAnnotationsSha256: computeEvaluatorAnnotationsSha256(annotations),
+  })
+  const independentIds = new Set(freeze.qualificationIndependentMaskCaseIds)
+  const candidateRows = freeze.producerCases.map((producer) => {
+    if (independentIds.has(producer.opaqueCaseId))
+      return buildOutputRow(producer.opaqueCaseId, PROFILE_FLAT_CANDIDATE_ID, {
+        caseState: 'success',
+        box: { left: 0, top: 0, width: 1, height: 1 },
+        maskPackedSha256: maskSha,
+      })
+    const truth = annotations.cases.find((item) => item.opaqueCaseId === producer.opaqueCaseId)!
+    return truth.expectedPresence === 'present'
+      ? buildOutputRow(producer.opaqueCaseId, PROFILE_FLAT_CANDIDATE_ID, {
+          caseState: 'success',
+          box: { left: 1, top: 1, width: 4, height: 4 },
+        })
+      : buildOutputRow(producer.opaqueCaseId, PROFILE_FLAT_CANDIDATE_ID)
+  })
+  const controlRows = freeze.producerCases.map((producer) =>
+    buildOutputRow(producer.opaqueCaseId, PROFILE_CONTROL_ID),
+  )
+  const joined = joinCloseoutsWithPrivateAnnotations({
+    freeze,
+    candidateCloseout: buildCloseout(freeze, PROFILE_FLAT_CANDIDATE_ID, candidateRows),
+    controlCloseout: buildCloseout(freeze, PROFILE_CONTROL_ID, controlRows),
+    annotations,
+    packedMasksBySha256: new Map([[maskSha, packed]]),
+  })
+  const gate = evaluateQual120Gate(joined, PROFILE_FLAT_CANDIDATE_ID)
+  assert.equal(gate.independentMaskDenominator, 30)
+  assert.equal(gate.independentMaskPassCount, 30)
+  assert.equal(gate.qualityPass, true)
+  const oneUnstarted = joined.map((item, index) =>
+    index === 0
+      ? { ...item, candidate: { ...item.candidate, caseState: 'unstarted' as const } }
+      : item,
+  )
+  const incompleteGate = evaluateQual120Gate(oneUnstarted, PROFILE_FLAT_CANDIDATE_ID)
+  assert.equal(incompleteGate.executionValid, false)
+  assert.equal(incompleteGate.qualityPass, false)
 })
 
 await test('uncertain receipt keeps stable receiptId with null observed physicalId', () => {

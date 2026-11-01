@@ -4,7 +4,13 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 import { CampaignLedger } from './campaign-ledger.js'
-import { PHASE_DEV40_ID, PROFILE_CANDIDATE_ID } from './constants.js'
+import {
+  PHASE_DEV40_ID,
+  PHASE_FLAT_DEV40_ID,
+  PROFILE_CANDIDATE_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_CONTROL_ID,
+} from './constants.js'
 import { computePhaseFreezeCommitmentSha256 } from './freeze-commitment.js'
 import {
   runInjectedFetchCasePort,
@@ -12,7 +18,10 @@ import {
   type CaseExecutionPort,
 } from './paired-runner.js'
 import { hashIdentity } from './hash-identity.js'
-import { buildSyntheticPhaseFreeze } from './test-fixtures.js'
+import { buildDev40Annotations, buildSyntheticPhaseFreeze } from './test-fixtures.js'
+import { joinCloseoutsWithPrivateAnnotations, evaluatePhaseGate } from './evaluator.js'
+import { buildDevScreenSelection } from './dev-screen-sampling.js'
+import { computeEvaluatorAnnotationsSha256 } from './annotation-digest.js'
 
 await test('paired runner retains every scheduled case including failures', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'h8a-paired-'))
@@ -462,6 +471,44 @@ await test('missing source bytes retain preflight rows for all remaining arms', 
         .slice(freeze.producerCases.findIndex((row) => row.opaqueCaseId === corruptId))
         .every((row) => row.caseState === 'preflight_failed'),
     )
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('flat phase identity flows through frozen draw, paired runner, closeouts, and evaluator', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'h8a-flat-paired-'))
+  try {
+    const { freeze: baseFreeze, sourceBytesByCaseId } =
+      buildSyntheticPhaseFreeze(PHASE_FLAT_DEV40_ID)
+    const annotations = buildDev40Annotations(baseFreeze)
+    const freeze = {
+      ...baseFreeze,
+      evaluatorAnnotationsSha256: computeEvaluatorAnnotationsSha256(annotations),
+    }
+    const selection = buildDevScreenSelection(freeze, annotations)
+    assert.equal(selection.seed, 0x7630_3308)
+    assert.equal(selection.profileBindings[0]?.profileId, PROFILE_FLAT_CANDIDATE_ID)
+    const ledger = await CampaignLedger.open(join(directory, 'ledger.json'))
+    const port = await runInjectedFetchCasePort(async () => ({ caseState: 'not_found' as const }))
+    const closeouts = await runPairedPhase({
+      freeze,
+      ledger,
+      candidatePort: port,
+      controlPort: port,
+      sourceBytesByCaseId,
+    })
+    assert.equal(closeouts.candidateCloseout.phaseId, PHASE_FLAT_DEV40_ID)
+    assert.equal(closeouts.candidateCloseout.profileId, PROFILE_FLAT_CANDIDATE_ID)
+    assert.equal(closeouts.controlCloseout.profileId, PROFILE_CONTROL_ID)
+    const joined = joinCloseoutsWithPrivateAnnotations({
+      freeze,
+      ...closeouts,
+      annotations,
+      packedMasksBySha256: new Map(),
+    })
+    const gate = evaluatePhaseGate(PHASE_FLAT_DEV40_ID, joined)
+    assert.equal(gate.qualityPass, true)
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

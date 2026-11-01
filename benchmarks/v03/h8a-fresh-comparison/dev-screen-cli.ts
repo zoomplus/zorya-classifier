@@ -1,13 +1,21 @@
 import { randomUUID, createHash } from 'node:crypto'
 import { constants as fsConstants } from 'node:fs'
-import { open, mkdir, lstat, realpath, writeFile, unlink } from 'node:fs/promises'
+import { open, mkdir, lstat, realpath, writeFile, unlink, readdir } from 'node:fs/promises'
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { z } from 'zod'
 import { CampaignLedger } from './campaign-ledger.js'
-import { CAMPAIGN_MAX_COST_USD, CAMPAIGN_MAX_PHYSICAL_CALLS } from './constants.js'
 import { verifyPersistedDevFreeze } from './dev-freeze-assembly.js'
 import { hashIdentity } from './hash-identity.js'
+import { immutableCloseoutSchema } from './schemas.js'
+import { validateReceiptGraph } from './evaluator.js'
+import {
+  CAMPAIGN_MAX_COST_USD,
+  CAMPAIGN_MAX_PHYSICAL_CALLS,
+  candidateIdForPhase,
+  PHASE_FLAT_DEV40_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
+} from './constants.js'
 import type { createH8FreshRuntimePorts } from './runtime-ports.js'
 import type {
   processRegionSeededCase,
@@ -21,12 +29,26 @@ import type { executeDevScreen } from './dev-screen-runner.js'
 
 const PINNED_RUNTIME_PROOF_SHA256 =
   '5a75be16864e3b9560aa21ca79511f74bccf10360804e539040ae8751e402697'
+const PINNED_FLAT_RUNTIME_PROOF_SHA256 =
+  '278015e2d7a9bbd7f308c865c01a9dc2277ec48d89d11852400940ef6e0ec389'
+const PINNED_FLAT_RUNTIME_ENVIRONMENT_SHA256 =
+  '1941f16dfb906f54331cc06c8b58bed15b86b65d86f16f7f708b49bc60680ba6'
 const PINNED_CAMPAIGN_CONFIG_SHA256 =
   '12da3eb42a9f8dae52ff678241686af2775c0592539827df6801996ed48ee076'
 const PINNED_HISTORICAL_RECEIPT_SHA256 =
   '0422a3e62925bb33f4fe41480d6554887ae9c888681125f8b8522d9174361f71'
 const HISTORICAL_CONTROL_CLOSURE_SHA256 =
   'be43090b13951e9a6ffa65daffb9413a6a539d8dae335925dc885733a467fb20'
+const PINNED_V1_BINDING_SHA256 = 'f568d1a1be7d1e84008052a16a4e2698778d2a2684acf93bad2de3c3228effcf'
+const PINNED_V1_DEV8_REPORT_SHA256 =
+  'a1be577f669cb256f0efa476c2f34d85db5305a52858ee612471d5cd05c3dabd'
+const PINNED_V1_DEV8_REVIEW_SHA256 =
+  '278366d5ccb900352ddcb61bc2a2e324726740ae5335cf00b249861732eaf2f6'
+const PINNED_V1_CANDIDATE_CLOSEOUT_SHA256 =
+  '48e2bb88b7f08a26b0aada1537191eaed6b7218c79f6573b174692851fe279cb'
+const PINNED_V1_CONTROL_CLOSEOUT_SHA256 =
+  '470ba940432cf5a5a823f5c70b1eccff6878d77cd15f2b0cbcd67bed201a113f'
+const FLAT_EXPERIMENT_DIRECTORY = join('experiments', 'h8a-flat-dev40-v1')
 const RUN_ROOT_MARKER = '.h8a-shared-campaign.json'
 const RUN_ROOT_LOCK = '.h8a-native-runner.lock'
 const JSON_LIMIT = 4 * 1024 * 1024
@@ -62,7 +84,7 @@ const cliOptionsSchema = z
     freezeDirectory: z.string().min(1),
     sourceRoot: z.string().min(1),
     runtimeFilesPath: z.string().min(1),
-    runtimeFilesSha256: z.literal(PINNED_RUNTIME_PROOF_SHA256),
+    runtimeFilesSha256: digestSchema,
     campaignConfigPath: z.string().min(1),
     campaignConfigSha256: z.literal(PINNED_CAMPAIGN_CONFIG_SHA256),
     runRoot: z.string().min(1),
@@ -152,7 +174,7 @@ const campaignMarkerSchema = z
 const devPhaseBindingSchema = z
   .object({
     schema: z.literal('h8a-phase-campaign-binding-v1'),
-    phaseId: z.literal('h8a-fresh-paired-dev40-v1'),
+    phaseId: z.enum(['h8a-fresh-paired-dev40-v1', PHASE_FLAT_DEV40_ID]),
     authoritySha256: digestSchema,
     freezeId: z.string().min(1),
     freezeCommitmentSha256: digestSchema,
@@ -184,14 +206,15 @@ function within(root: string, candidate: string): boolean {
 
 function parseArguments(argv: readonly string[]):
   | { command: 'init'; options: CliOptions }
+  | { command: 'register'; options: CliOptions }
   | {
       command: 'run'
       options: CliOptions & { screen: NonNullable<CliOptions['screen']>; apiKeyEnv: string }
     } {
   const [command, ...args] = argv
-  if (command !== 'init' && command !== 'run')
+  if (command !== 'init' && command !== 'register' && command !== 'run')
     throw new TypeError(
-      'Usage: dev-screen-cli.ts <init|run> --authority PATH --authority-sha256 HEX --freeze-dir DIR --source-root DIR --runtime-files PATH --runtime-files-sha256 HEX --campaign-config PATH --campaign-config-sha256 HEX --run-root DIR [--screen dev8|dev12|dev40 --api-key-env OPENROUTER_API_KEY]',
+      'Usage: dev-screen-cli.ts <init|register|run> --authority PATH --authority-sha256 HEX --freeze-dir DIR --source-root DIR --runtime-files PATH --runtime-files-sha256 HEX --campaign-config PATH --campaign-config-sha256 HEX --run-root DIR [--screen dev8|dev12|dev40 --api-key-env OPENROUTER_API_KEY]',
     )
   const values = new Map<string, string>()
   for (let index = 0; index < args.length; index += 2) {
@@ -231,6 +254,11 @@ function parseArguments(argv: readonly string[]):
   if (command === 'init') {
     if (parsed.screen || parsed.apiKeyEnv)
       throw new TypeError('init does not accept stage or key options')
+    return { command, options: parsed }
+  }
+  if (command === 'register') {
+    if (parsed.screen || parsed.apiKeyEnv)
+      throw new TypeError('register does not accept stage or key options')
     return { command, options: parsed }
   }
   if (!parsed.screen || !parsed.apiKeyEnv)
@@ -375,7 +403,15 @@ async function verifyRuntimeProof(
   options: CliOptions,
   runtimeEnvironmentSha256: string,
   repositoryRoot: string,
+  flat = false,
 ): Promise<VerifiedRuntimeProof> {
+  const expectedRuntimeProofSha256 = flat
+    ? PINNED_FLAT_RUNTIME_PROOF_SHA256
+    : PINNED_RUNTIME_PROOF_SHA256
+  if (options.runtimeFilesSha256 !== expectedRuntimeProofSha256)
+    throw new RangeError('Runtime files receipt differs from the selected frozen profile')
+  if (flat && runtimeEnvironmentSha256 !== PINNED_FLAT_RUNTIME_ENVIRONMENT_SHA256)
+    throw new RangeError('Flat runtime proof is not bound to the frozen V2 environment digest')
   const proof = await readVerifiedJson(
     options.runtimeFilesPath,
     options.runtimeFilesSha256,
@@ -678,6 +714,300 @@ export async function verifyDevPhaseBinding(
     throw new RangeError('DEV40 run root is bound to a different immutable authority or freeze')
 }
 
+function flatExperimentRoot(campaignRoot: string): string {
+  const path = resolve(campaignRoot, FLAT_EXPERIMENT_DIRECTORY)
+  if (!within(resolve(campaignRoot), path) || path === resolve(campaignRoot))
+    throw new RangeError('Flat experiment namespace escapes the registered campaign root')
+  return path
+}
+
+async function assertPinnedFileDigest(path: string, expectedSha256: string): Promise<Buffer> {
+  const bytes = await readVerifiedRegularFile(path, expectedSha256, undefined, JSON_LIMIT)
+  return bytes
+}
+
+async function verifyPriorV1StopEvidence(campaignRoot: string): Promise<number> {
+  const bindingBytes = await assertPinnedFileDigest(
+    join(campaignRoot, 'phase-bindings', 'dev40-binding.json'),
+    PINNED_V1_BINDING_SHA256,
+  )
+  const binding = devPhaseBindingSchema.parse(JSON.parse(bindingBytes.toString('utf8')) as unknown)
+  if (
+    binding.phaseId !== 'h8a-fresh-paired-dev40-v1' ||
+    binding.freezeId !== 'h8a-fresh-dev40-20261101-v1'
+  )
+    throw new RangeError('Existing V1 campaign registration differs from the fixed prior freeze')
+
+  const reportBytes = await assertPinnedFileDigest(
+    join(campaignRoot, 'reports', 'dev8-report.json'),
+    PINNED_V1_DEV8_REPORT_SHA256,
+  )
+  const reviewBytes = await assertPinnedFileDigest(
+    join(campaignRoot, 'reviews', 'dev8-review.json'),
+    PINNED_V1_DEV8_REVIEW_SHA256,
+  )
+  const runner = await import('./dev-screen-runner.js')
+  const report = runner.devScreenReportSchema.parse(JSON.parse(reportBytes.toString('utf8')))
+  const review = screenReviewSchema.parse(JSON.parse(reviewBytes.toString('utf8')) as unknown)
+  const { reportSha256, ...reportBody } = report
+  const { reviewSha256, ...reviewBody } = review
+  if (
+    report.screen !== 'dev8' ||
+    hashIdentity(reportBody) !== reportSha256 ||
+    report.completedPairs >= report.expectedPairs ||
+    report.hardBlockers.length === 0 ||
+    review.judgement !== 'stop' ||
+    review.screenReportSha256 !== reportSha256 ||
+    hashIdentity(reviewBody) !== reviewSha256
+  )
+    throw new RangeError('Prior V1 DEV8 stop report or review is invalid')
+
+  const candidateBytes = await assertPinnedFileDigest(
+    join(campaignRoot, 'closeouts', 'dev40-candidate-closeout.json'),
+    PINNED_V1_CANDIDATE_CLOSEOUT_SHA256,
+  )
+  const controlBytes = await assertPinnedFileDigest(
+    join(campaignRoot, 'closeouts', 'dev40-control-closeout.json'),
+    PINNED_V1_CONTROL_CLOSEOUT_SHA256,
+  )
+  let priorKnownCostUsd = 0
+  for (const [bytes, profileId] of [
+    [candidateBytes, 'h8a-cpu-raw-target-v1'],
+    [controlBytes, 'v02-final-v3-fresh-cohort-replay-v1'],
+  ] as const) {
+    const closeout = immutableCloseoutSchema.parse(JSON.parse(bytes.toString('utf8')) as unknown)
+    validateReceiptGraph(closeout)
+    if (
+      closeout.phaseId !== 'h8a-fresh-paired-dev40-v1' ||
+      closeout.freezeId !== 'h8a-fresh-dev40-20261101-v1' ||
+      closeout.profileId !== profileId
+    )
+      throw new RangeError('Prior V1 closeout does not match its pinned phase and profile')
+    priorKnownCostUsd += closeout.physicalReceipts.reduce(
+      (sum, receipt) => sum + (receipt.chargeState === 'known' ? (receipt.costUsd ?? 0) : 0),
+      0,
+    )
+  }
+  if (Math.abs(priorKnownCostUsd - 0.00599665) > 1e-12)
+    throw new RangeError('Pinned prior V1 closeouts no longer prove the settled campaign spend')
+  return priorKnownCostUsd
+}
+
+interface FlatRegistration {
+  schema: 'h8a-flat-dev40-registration-v1'
+  authoritySha256: string
+  freezeId: string
+  phaseId: typeof PHASE_FLAT_DEV40_ID
+  freezeCommitmentSha256: string
+  priorV1BindingSha256: string
+  priorV1StopReportSha256: string
+  priorV1StopReviewSha256: string
+  priorV1CandidateCloseoutSha256: string
+  priorV1ControlCloseoutSha256: string
+}
+
+const flatRegistrationSchema = z
+  .object({
+    schema: z.literal('h8a-flat-dev40-registration-v1'),
+    authoritySha256: digestSchema,
+    freezeId: z.literal('h8a-flat-dev40-20261101-v1'),
+    phaseId: z.literal(PHASE_FLAT_DEV40_ID),
+    freezeCommitmentSha256: digestSchema,
+    priorV1BindingSha256: z.literal(PINNED_V1_BINDING_SHA256),
+    priorV1StopReportSha256: z.literal(PINNED_V1_DEV8_REPORT_SHA256),
+    priorV1StopReviewSha256: z.literal(PINNED_V1_DEV8_REVIEW_SHA256),
+    priorV1CandidateCloseoutSha256: z.literal(PINNED_V1_CANDIDATE_CLOSEOUT_SHA256),
+    priorV1ControlCloseoutSha256: z.literal(PINNED_V1_CONTROL_CLOSEOUT_SHA256),
+  })
+  .strict()
+
+async function writeExclusiveOrVerifyExact(path: string, expected: Buffer): Promise<void> {
+  try {
+    await writeFile(path, expected, { flag: 'wx', mode: 0o600 })
+    return
+  } catch (error) {
+    if (!(error instanceof Error && Reflect.get(error, 'code') === 'EEXIST')) throw error
+  }
+  const existing = await readVerifiedRegularFile(path, undefined, dirname(path), JSON_LIMIT)
+  if (!existing.equals(expected))
+    throw new RangeError('Existing flat registration file conflicts with frozen bytes')
+}
+
+async function ensureRealDirectory(path: string): Promise<void> {
+  try {
+    await mkdir(path, { mode: 0o700 })
+  } catch (error) {
+    if (!(error instanceof Error && Reflect.get(error, 'code') === 'EEXIST')) throw error
+  }
+  const info = await lstat(path)
+  if (!info.isDirectory() || info.isSymbolicLink() || (await realpath(path)) !== path)
+    throw new RangeError('Flat campaign path component must be a real directory')
+}
+
+export async function verifyFlatDevRegistration(
+  campaignRoot: string,
+  authoritySha256: string,
+  freeze: Awaited<ReturnType<typeof verifyFreeze>>['freeze'],
+  verifyPriorEvidence: (root: string) => Promise<number> = verifyPriorV1StopEvidence,
+): Promise<string> {
+  if (freeze.phaseId !== PHASE_FLAT_DEV40_ID)
+    throw new RangeError('Flat registration requires the flat DEV40 profile freeze')
+  if (
+    candidateIdForPhase(freeze.phaseId) !== PROFILE_FLAT_CANDIDATE_ID ||
+    freeze.profileBindings[0]?.profileId !== PROFILE_FLAT_CANDIDATE_ID
+  )
+    throw new RangeError('Flat DEV40 freeze does not bind its registered native candidate profile')
+  await verifyPriorEvidence(campaignRoot)
+  const artifactRoot = flatExperimentRoot(campaignRoot)
+  const rootStat = await lstat(artifactRoot)
+  if (
+    !rootStat.isDirectory() ||
+    rootStat.isSymbolicLink() ||
+    (await realpath(artifactRoot)) !== artifactRoot
+  )
+    throw new RangeError('Flat experiment namespace must be an existing real directory')
+  const registrationBytes = await readVerifiedRegularFile(
+    join(artifactRoot, 'registration.json'),
+    undefined,
+    artifactRoot,
+    JSON_LIMIT,
+  )
+  const registration = flatRegistrationSchema.parse(
+    JSON.parse(registrationBytes.toString('utf8')) as unknown,
+  )
+  const bindingBytes = await readVerifiedRegularFile(
+    join(artifactRoot, 'phase-binding.json'),
+    undefined,
+    artifactRoot,
+    JSON_LIMIT,
+  )
+  const binding = devPhaseBindingSchema.parse(JSON.parse(bindingBytes.toString('utf8')) as unknown)
+  if (
+    registration.authoritySha256 !== authoritySha256 ||
+    registration.freezeId !== freeze.freezeId ||
+    registration.freezeCommitmentSha256 !== freeze.cohortCommitmentSha256 ||
+    binding.phaseId !== PHASE_FLAT_DEV40_ID ||
+    binding.authoritySha256 !== authoritySha256 ||
+    binding.freezeId !== freeze.freezeId ||
+    binding.freezeCommitmentSha256 !== freeze.cohortCommitmentSha256
+  )
+    throw new RangeError('Flat campaign namespace is bound to different authority or freeze bytes')
+  return artifactRoot
+}
+
+export async function registerFlatDevComparison(
+  options: Pick<CliOptions, 'authoritySha256'>,
+  verified: VerifiedScreenInputs,
+  config: VerifiedCampaignConfig,
+  dependencies: Pick<ScreenRunDependencies, 'acquireLock' | 'openLedger'> & {
+    verifyPriorV1Evidence?: (root: string) => Promise<number>
+  } = {
+    acquireLock: acquireRunnerLock,
+    openLedger: (path) => CampaignLedger.open(path),
+  },
+): Promise<void> {
+  if (verified.freeze.phaseId !== PHASE_FLAT_DEV40_ID)
+    throw new RangeError('register only accepts the separately frozen flat DEV40 profile')
+  const root = config.canonicalRoot
+  const verifyPriorEvidence = dependencies.verifyPriorV1Evidence ?? verifyPriorV1StopEvidence
+  await validateRunRootForFlat(config)
+  await verifyPriorEvidence(root)
+  const release = await dependencies.acquireLock(root)
+  try {
+    await validateRunRootForFlat(config)
+    const minimumPriorSpend = await verifyPriorEvidence(root)
+    const ledger = await dependencies.openLedger(join(root, 'campaign-ledger.json'))
+    ledger.assertResumeAllowed()
+    const snapshot = ledger.snapshot()
+    if (
+      snapshot.maxCostUsd !== CAMPAIGN_MAX_COST_USD ||
+      snapshot.maxPhysicalCalls !== CAMPAIGN_MAX_PHYSICAL_CALLS ||
+      snapshot.logicalAttemptCount < 3 ||
+      snapshot.physicalDispatchCount < 7 ||
+      (snapshot.nextReservationId ?? 0) < 8 ||
+      snapshot.knownCostUsd + snapshot.unknownReserveUsd + 1e-12 < minimumPriorSpend
+    )
+      throw new RangeError('Shared campaign ledger differs from the existing global budget')
+    const artifactRoot = flatExperimentRoot(root)
+    await ensureRealDirectory(join(root, 'experiments'))
+    await ensureRealDirectory(artifactRoot)
+    const binding = devPhaseBindingSchema.parse({
+      schema: 'h8a-phase-campaign-binding-v1',
+      phaseId: PHASE_FLAT_DEV40_ID,
+      authoritySha256: options.authoritySha256,
+      freezeId: verified.freeze.freezeId,
+      freezeCommitmentSha256: verified.freeze.cohortCommitmentSha256,
+    })
+    const registration: FlatRegistration = flatRegistrationSchema.parse({
+      schema: 'h8a-flat-dev40-registration-v1',
+      authoritySha256: options.authoritySha256,
+      freezeId: verified.freeze.freezeId,
+      phaseId: PHASE_FLAT_DEV40_ID,
+      freezeCommitmentSha256: verified.freeze.cohortCommitmentSha256,
+      priorV1BindingSha256: PINNED_V1_BINDING_SHA256,
+      priorV1StopReportSha256: PINNED_V1_DEV8_REPORT_SHA256,
+      priorV1StopReviewSha256: PINNED_V1_DEV8_REVIEW_SHA256,
+      priorV1CandidateCloseoutSha256: PINNED_V1_CANDIDATE_CLOSEOUT_SHA256,
+      priorV1ControlCloseoutSha256: PINNED_V1_CONTROL_CLOSEOUT_SHA256,
+    })
+    const registrationFiles = new Map([
+      ['phase-binding.json', Buffer.from(`${JSON.stringify(binding)}\n`)],
+      ['registration.json', Buffer.from(`${JSON.stringify(registration)}\n`)],
+    ])
+    const existing = await readdir(artifactRoot)
+    if (existing.some((name) => !registrationFiles.has(name)))
+      throw new RangeError('Flat namespace contains stale artifacts before registration')
+    for (const name of existing) {
+      const bytes = await readVerifiedRegularFile(
+        join(artifactRoot, name),
+        undefined,
+        artifactRoot,
+        JSON_LIMIT,
+      )
+      if (!bytes.equals(registrationFiles.get(name)!))
+        throw new RangeError('Existing flat registration file conflicts with frozen bytes')
+    }
+    await writeExclusiveOrVerifyExact(
+      join(artifactRoot, 'phase-binding.json'),
+      registrationFiles.get('phase-binding.json')!,
+    )
+    await writeExclusiveOrVerifyExact(
+      join(artifactRoot, 'registration.json'),
+      registrationFiles.get('registration.json')!,
+    )
+  } finally {
+    await release()
+  }
+}
+
+async function validateRunRootForFlat(config: VerifiedCampaignConfig): Promise<void> {
+  const root = config.canonicalRoot
+  const rootInfo = await lstat(root)
+  if (!rootInfo.isDirectory() || rootInfo.isSymbolicLink() || (await realpath(root)) !== root)
+    throw new RangeError('Shared campaign root must be an existing real directory')
+  const markerBytes = await readVerifiedRegularFile(
+    join(root, RUN_ROOT_MARKER),
+    undefined,
+    root,
+    JSON_LIMIT,
+  )
+  const marker = campaignMarkerSchema.parse(JSON.parse(markerBytes.toString('utf8')) as unknown)
+  const ledgerInfo = await lstat(join(root, 'campaign-ledger.json'))
+  if (!ledgerInfo.isFile() || ledgerInfo.isSymbolicLink() || ledgerInfo.size > JSON_LIMIT)
+    throw new RangeError('Shared campaign ledger must already exist as a bounded regular file')
+  if (
+    marker.campaignId !== config.campaignId ||
+    marker.canonicalRoot !== root ||
+    marker.campaignConfigSha256 !== config.sha256 ||
+    marker.maxCostUsd !== CAMPAIGN_MAX_COST_USD ||
+    marker.maxPhysicalCalls !== CAMPAIGN_MAX_PHYSICAL_CALLS ||
+    config.sha256 !== PINNED_CAMPAIGN_CONFIG_SHA256
+  )
+    throw new RangeError(
+      'Flat experiment must use the existing registered campaign root and budget',
+    )
+}
+
 export async function verifyPriorStageFiles(
   root: string,
   screen: NonNullable<CliOptions['screen']>,
@@ -794,6 +1124,7 @@ interface ScreenRunDependencies {
   }): Promise<ScreenRuntimePorts>
   execute(input: Parameters<typeof executeDevScreen>[0]): ReturnType<typeof executeDevScreen>
   writeReport(message: string): void
+  verifyPriorV1Evidence?(root: string): Promise<number>
 }
 
 const productionScreenDependencies: ScreenRunDependencies = {
@@ -810,6 +1141,7 @@ const productionScreenDependencies: ScreenRunDependencies = {
       maskArtifactDirectory: join(root, 'masks'),
       cutoutArtifactDirectory: join(root, 'cutouts'),
       nativeRuntime: {
+        recipeId: verified.freeze.profileBindings[0]!.profileId,
         pythonExecutable: runtime.pythonExecutable,
         assetRoot: runtime.candidateAssetsRoot,
       },
@@ -868,8 +1200,21 @@ export async function runVerifiedDevScreen(
   },
 ): Promise<void> {
   // This is called only after the complete frozen inputs and runtime proof have passed.
-  await validateRunRoot(config, options.authoritySha256, verified.freeze)
-  await verifyPriorStageFiles(config.canonicalRoot, options.screen)
+  const flat = verified.freeze.phaseId === PHASE_FLAT_DEV40_ID
+  if (flat) await validateRunRootForFlat(config)
+  else await validateRunRoot(config, options.authoritySha256, verified.freeze)
+  const artifactRoot = flat
+    ? await verifyFlatDevRegistration(
+        config.canonicalRoot,
+        options.authoritySha256,
+        verified.freeze,
+        dependencies.verifyPriorV1Evidence,
+      )
+    : config.canonicalRoot
+  const minimumPriorSpend = flat
+    ? await (dependencies.verifyPriorV1Evidence ?? verifyPriorV1StopEvidence)(config.canonicalRoot)
+    : 0
+  await verifyPriorStageFiles(artifactRoot, options.screen)
 
   const apiKey = dependencies.getApiKey()
   if (!apiKey)
@@ -886,21 +1231,35 @@ export async function runVerifiedDevScreen(
   process.on('SIGINT', abort)
   process.on('SIGTERM', abort)
   try {
-    await validateRunRoot(config, options.authoritySha256, verified.freeze)
+    if (flat) {
+      await validateRunRootForFlat(config)
+      await verifyFlatDevRegistration(
+        config.canonicalRoot,
+        options.authoritySha256,
+        verified.freeze,
+        dependencies.verifyPriorV1Evidence,
+      )
+    } else await validateRunRoot(config, options.authoritySha256, verified.freeze)
     const ledgerPath = join(config.canonicalRoot, 'campaign-ledger.json')
     const ledger = await dependencies.openLedger(ledgerPath)
     ledger.assertResumeAllowed()
     const ledgerSnapshot = ledger.snapshot()
     if (
       ledgerSnapshot.maxCostUsd !== CAMPAIGN_MAX_COST_USD ||
-      ledgerSnapshot.maxPhysicalCalls !== CAMPAIGN_MAX_PHYSICAL_CALLS
+      ledgerSnapshot.maxPhysicalCalls !== CAMPAIGN_MAX_PHYSICAL_CALLS ||
+      (flat &&
+        (ledgerSnapshot.logicalAttemptCount < 3 ||
+          ledgerSnapshot.physicalDispatchCount < 7 ||
+          (ledgerSnapshot.nextReservationId ?? 0) < 8 ||
+          ledgerSnapshot.knownCostUsd + ledgerSnapshot.unknownReserveUsd + 1e-12 <
+            minimumPriorSpend))
     )
       throw new RangeError('Existing shared ledger has unexpected campaign budget caps')
 
     if (controller.signal.aborted) throw new RangeError('Screen setup was interrupted')
     runtimePorts = await dependencies.createRuntime({
       apiKey,
-      root: config.canonicalRoot,
+      root: artifactRoot,
       runtime,
       verified,
     })
@@ -911,8 +1270,8 @@ export async function runVerifiedDevScreen(
       sourceBytesByCaseId: verified.sourceBytesByCaseId,
       selection: verified.selection,
       screen: options.screen,
-      selectionPath: join(config.canonicalRoot, 'dev-screen-selection.json'),
-      artifactRoot: config.canonicalRoot,
+      selectionPath: join(artifactRoot, 'dev-screen-selection.json'),
+      artifactRoot,
       ledger,
       candidatePort: runtimePorts.candidatePort,
       controlPort: runtimePorts.controlPort,
@@ -960,11 +1319,21 @@ async function main(): Promise<void> {
     parsed.options,
     verified.runtimeEnvironmentSha256,
     repositoryRoot,
+    verified.freeze.phaseId === PHASE_FLAT_DEV40_ID,
   )
   const config = await verifyCampaignConfig(parsed.options)
   if (parsed.command === 'init') {
+    if (verified.freeze.phaseId !== 'h8a-fresh-paired-dev40-v1')
+      throw new RangeError('init remains reserved for the existing V1 campaign registration')
     await createCampaignRoot(config, parsed.options.authoritySha256, verified.freeze)
     process.stdout.write(`Initialized shared campaign ${config.campaignId}\n`)
+    return
+  }
+  if (parsed.command === 'register') {
+    if (verified.freeze.phaseId !== PHASE_FLAT_DEV40_ID)
+      throw new RangeError('register only accepts the separately frozen flat DEV40 profile')
+    await registerFlatDevComparison(parsed.options, verified, config)
+    process.stdout.write(`Registered flat DEV comparison in ${FLAT_EXPERIMENT_DIRECTORY}\n`)
     return
   }
   await runVerifiedDevScreen(parsed.options, verified, runtime, config)
