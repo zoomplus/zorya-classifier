@@ -833,6 +833,9 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
   freeze: PhaseFreeze
   annotations: EvaluatorPrivateAnnotationBundle
   selection: ReturnType<typeof buildDevScreenSelection>
+  sourceBytesByCaseId: Map<string, Buffer>
+  sourceClosurePaths: string[]
+  runtimeEnvironmentSha256: string
 }> {
   const authorityBytes = await readBoundedRegularFile(options.authorityPath, JSON_FILE_LIMIT_BYTES)
   if (digestBytes(authorityBytes) !== options.authoritySha256)
@@ -1121,7 +1124,14 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
   validateDevScreenSelection(selection, freeze, annotations)
   if (sourceBytesByCaseId.size !== freeze.producerCases.length)
     throw new RangeError('Complete source byte map required before freeze')
-  return { freeze, annotations, selection }
+  return {
+    freeze,
+    annotations,
+    selection,
+    sourceBytesByCaseId,
+    sourceClosurePaths: closureRef.value.files.map((file) => file.path),
+    runtimeEnvironmentSha256: digestBytes(runtimeRef.raw),
+  }
 }
 
 export async function writeDevFreezeExclusive(
@@ -1172,7 +1182,7 @@ export async function writeDevFreezeExclusive(
 export async function verifyPersistedDevFreeze(
   inputDirectory: string,
   options: Omit<DevFreezeAssemblyOptions, 'outputDirectory'>,
-): Promise<void> {
+): Promise<Awaited<ReturnType<typeof assembleDevFreezeFromDisk>>> {
   const expected = await assembleDevFreezeFromDisk({ ...options, outputDirectory: inputDirectory })
   const root = resolve(inputDirectory)
   if ((await realpath(root)) !== root)
@@ -1201,4 +1211,5 @@ export async function verifyPersistedDevFreeze(
     throw new RangeError('Persisted annotations differ from current pinned inputs')
   if (hashIdentity(selection) !== hashIdentity(expected.selection))
     throw new RangeError('Persisted draw differs from deterministic nested draw')
+  return expected
 }
