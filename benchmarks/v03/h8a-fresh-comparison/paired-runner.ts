@@ -12,6 +12,10 @@ import {
   PhysicalDispatchConfirmFailedError,
 } from './physical-dispatch.js'
 import { PROFILE_CONTROL_ID, candidateIdForPhase } from './constants.js'
+import {
+  remapProviderRefusalReplayEvidence,
+  type ProviderRefusalReplayExecutionPolicy,
+} from './provider-refusal-replay.js'
 import type { H8aFreshProfileId } from './profiles.js'
 import type { ImmutableCloseout, OutputRow, PhaseFreeze } from './schemas.js'
 import {
@@ -76,6 +80,7 @@ export interface CaseExecutionPort {
       reservedUsdPerFetch: number
       ledger: CampaignLedgerPort
       caseExecutionIdentitySha256?: string
+      executionPolicy?: ProviderRefusalReplayExecutionPolicy
       dispatchJournal?: ArmDispatchJournal
       signal?: AbortSignal
     },
@@ -169,6 +174,15 @@ function remapPortResult(
     ...result.outputRow,
     logicalReceiptIds: result.outputRow.logicalReceiptIds.map((id) => logicalIdMap.get(id)!),
     physicalReceiptIds: result.outputRow.physicalReceiptIds.map((id) => receiptIdMap.get(id) ?? id),
+    ...(result.outputRow.providerRefusalEvidence
+      ? {
+          providerRefusalEvidence: remapProviderRefusalReplayEvidence(
+            result.outputRow.providerRefusalEvidence,
+            logicalIdMap,
+            receiptIdMap,
+          ),
+        }
+      : {}),
   }
   return {
     result: {
@@ -716,6 +730,7 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
           ledger,
           dispatchJournal,
           signal: phaseDeadline.signal,
+          ...(freeze.executionPolicy ? { executionPolicy: freeze.executionPolicy } : {}),
         }
 
         let inFlight: Promise<CaseExecutionPortResult> | null = null

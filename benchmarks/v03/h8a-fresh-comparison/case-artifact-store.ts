@@ -8,6 +8,9 @@ import { logicalReceiptSchema, outputRowSchema, physicalReceiptSchema } from './
 import { hashIdentity } from './hash-identity.js'
 import { sha256PackedBytes, unpackBinaryLsb0V1 } from './packed-binary-lsb0.js'
 import { PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID } from './constants.js'
+import { assertProviderRefusalReplayEvidence } from './provider-refusal-replay.js'
+import { PROVIDER_REFUSAL_REPLAY_POLICY_SHA256 } from './provider-refusal-replay.js'
+import { PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY } from './provider-refusal-replay.js'
 
 const identitySchema = z.object({
   freezeCommitmentSha256: z.string().regex(/^[a-f0-9]{64}$/u),
@@ -22,6 +25,10 @@ const identitySchema = z.object({
   targetTaskSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   sourceCanvasWidth: z.number().int().positive(),
   sourceCanvasHeight: z.number().int().positive(),
+  executionPolicySha256: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/u)
+    .optional(),
 })
 
 const resultSchema = z
@@ -177,6 +184,20 @@ function validateResultIdentity(
       throw new RangeError('Cutout sidecar source region differs from output box')
     if (candidate && sidecar.byteLength !== sidecar.width * sidecar.height * 4)
       throw new RangeError('Candidate RGBA cutout byte length differs from its geometry')
+  }
+  if (result.outputRow.providerRefusalEvidence) {
+    if (identity.executionPolicySha256 !== PROVIDER_REFUSAL_REPLAY_POLICY_SHA256)
+      throw new RangeError('Refusal evidence requires its opted-in immutable execution policy')
+    assertProviderRefusalReplayEvidence({
+      evidence: result.outputRow.providerRefusalEvidence,
+      executionPolicy: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY,
+      opaqueCaseId: identity.opaqueCaseId,
+      profileId: identity.profileId,
+      output: result.outputRow,
+      logicalReceipts: result.logicalReceipts,
+      physicalReceipts: result.physicalReceipts,
+      identitySha256: hashIdentity(identity),
+    })
   }
 }
 

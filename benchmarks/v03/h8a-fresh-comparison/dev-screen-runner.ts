@@ -215,6 +215,9 @@ export function buildCaseArtifactIdentity(
     targetTaskSha256: hashIdentity(producer.targetTaskText),
     sourceCanvasWidth: producer.sourceCanvasWidth,
     sourceCanvasHeight: producer.sourceCanvasHeight,
+    ...(freeze.executionPolicy
+      ? { executionPolicySha256: freeze.executionPolicy.policySha256 }
+      : {}),
   }
 }
 
@@ -321,6 +324,7 @@ async function runArm(input: {
       caseExecutionIdentitySha256: opened.identitySha256,
       dispatchJournal,
       signal: input.phaseDeadline.signal,
+      ...(input.freeze.executionPolicy ? { executionPolicy: input.freeze.executionPolicy } : {}),
     }
     input.phaseDeadline.assertOpen()
     result = await input.port.execute(executionInput, context)

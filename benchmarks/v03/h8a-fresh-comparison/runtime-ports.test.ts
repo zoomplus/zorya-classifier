@@ -13,6 +13,7 @@ import { createOpenRouterDecisions } from '../../../src/openrouter.js'
 import { createNativeCategoricalPresencePort } from '../../v02/native-categorical-presence-port.js'
 import { assertRecorderHealthy, processRegionSeededCase } from '../../v02/region-seeded-runner.js'
 import { CampaignLedger } from './campaign-ledger.js'
+import { ImmutableCaseArtifactStore } from './case-artifact-store.js'
 import { createCampaignFetchBoundary } from './campaign-fetch-boundary.js'
 import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
 import type {
@@ -25,6 +26,7 @@ import {
   createH8FreshRuntimePortsForOfflineFixture,
 } from './runtime-ports.js'
 import { packBinaryLsb0V1, unpackBinaryLsb0V1 } from './packed-binary-lsb0.js'
+import { PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY } from './provider-refusal-replay.js'
 
 function digest(bytes: Uint8Array | string): string {
   return createHash('sha256').update(bytes).digest('hex')
@@ -1165,5 +1167,461 @@ await test('decision adapter preflight failure creates no physical ledger call',
     assert.equal(calls, 0)
     assert.equal(ledger.snapshot().physicalDispatchCount, 0)
     assert.equal(boundary.entries.length, 0)
+  })
+})
+
+await test('chat provider refusal becomes geometry-free unknown only with explicit freeze policy', async () => {
+  await withFixtureRoot(async (root, source) => {
+    let fetchCalls = 0
+    const fetch = async () => {
+      fetchCalls++
+      return response({
+        id: 'offline-refusal',
+        model: 'openai/gpt-6-luna',
+        provider: 'OpenAI',
+        choices: [{ index: 0, finish_reason: 'stop', message: { refusal: 'test marker' } }],
+      })
+    }
+    const candidateRuntime: CandidateRuntimePort = {
+      async run(input) {
+        await input.decision.decide(
+          {
+            state: ['controlled request fixture'],
+            questions: {
+              selection: {
+                type: 'choice',
+                rankingSize: 1,
+                instructions: 'Choose one option.',
+                criteria: { visible: 'Visible.', absent: 'Absent.' },
+              },
+            },
+          },
+          input.signal,
+        )
+        throw new Error('Adapter unexpectedly accepted a refusal')
+      },
+      async dispose() {},
+    }
+    const emptySegmenter: SegmentationPort = {
+      async segment() {
+        return {
+          status: 'unknown',
+          reason: 'unused',
+          metadata: {
+            method: 'fixture',
+            backend: 'fixture',
+            durationMs: 0,
+            input: { width: 1, height: 1 },
+          },
+        }
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(
+      fixtureOptions(root, fetch, candidateRuntime, emptySegmenter),
+    )
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    const artifactStore = new ImmutableCaseArtifactStore(join(root, 'case-store'))
+    const identity = {
+      freezeCommitmentSha256: digest('freeze'),
+      sourceManifestSha256: digest('source-manifest'),
+      recipeIdentitySha256: digest('recipe'),
+      requestPolicyIdentitySha256: digest('request-policy'),
+      pairedScheduleSha256: digest('schedule'),
+      selectionCommitmentSha256: digest('selection'),
+      opaqueCaseId: 'opaque-local-route-id',
+      profileId: PROFILE_CANDIDATE_ID,
+      sourceBytesSha256: digest(source),
+      targetTaskSha256: digest('the authored visible sign'),
+      sourceCanvasWidth: 64,
+      sourceCanvasHeight: 48,
+      executionPolicySha256: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY.policySha256,
+    }
+    const identityRecord = artifactStore.identity(identity)
+    const startedAtIso = '2026-11-01T10:00:00.000Z'
+    await artifactStore.begin(identity, startedAtIso)
+    try {
+      const result = await runtimePorts.candidatePort.execute(
+        {
+          opaqueCaseId: 'opaque-local-route-id',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        {
+          profileId: PROFILE_CANDIDATE_ID,
+          reservedUsdPerFetch: 0.55,
+          ledger,
+          caseExecutionIdentitySha256: identityRecord.sha256,
+          executionPolicy: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY,
+        },
+      )
+      assert.equal(fetchCalls, 1)
+      assert.equal(result.outputRow.caseState, 'unknown')
+      assert.equal(result.outputRow.box, null)
+      assert.equal(result.outputRow.cutoutPresent, false)
+      assert.equal(result.outputRow.maskPackedSha256, null)
+      assert.equal(
+        result.outputRow.providerRefusalEvidence?.protocol,
+        'openrouter-chat-message-refusal-v1',
+      )
+      assert.equal(result.logicalReceipts[0]?.outcome, 'failed')
+      assert.equal(result.logicalReceipts[0]?.errorCode, 'INVALID_RESPONSE')
+      assert.equal(result.physicalReceipts[0]?.chargeState, 'unknown')
+      assert.equal(result.physicalReceipts[0]?.settled, true)
+      assert.equal(ledger.snapshot().unknownReserveUsd, 0.55)
+      await artifactStore.complete({
+        identitySha256: identityRecord.sha256,
+        result,
+        durationMs: 1,
+        startedAtIso,
+        completedAtIso: '2026-11-01T10:00:00.001Z',
+        knownCostUsd: 0,
+        unknownDispatchCount: 1,
+        identity,
+        blobs: new Map(),
+      })
+      const reopened = await artifactStore.load(identityRecord.sha256, identity)
+      assert.equal(
+        reopened?.result.outputRow.providerRefusalEvidence?.requestBodySha256,
+        result.outputRow.providerRefusalEvidence?.requestBodySha256,
+      )
+
+      const defaultPorts = await createH8FreshRuntimePortsForOfflineFixture(
+        fixtureOptions(join(root, 'default-run'), fetch, candidateRuntime, emptySegmenter),
+      )
+      const defaultLedger = await CampaignLedger.open(join(root, 'default-ledger.json'))
+      try {
+        const defaultResult = await defaultPorts.candidatePort.execute(
+          {
+            opaqueCaseId: 'opaque-local-route-id',
+            sourceBytes: source,
+            targetTaskText: 'the authored visible sign',
+          },
+          { profileId: PROFILE_CANDIDATE_ID, reservedUsdPerFetch: 0.55, ledger: defaultLedger },
+        )
+        assert.equal(fetchCalls, 2, JSON.stringify(defaultResult))
+        assert.equal(defaultResult.outputRow.caseState, 'error')
+        assert.equal(defaultResult.outputRow.providerRefusalEvidence, undefined)
+        assert.equal(defaultResult.logicalReceipts[0]?.errorCode, 'INVALID_RESPONSE')
+      } finally {
+        await defaultPorts.dispose()
+      }
+    } finally {
+      await runtimePorts.dispose()
+    }
+  })
+})
+
+await test('native named 502 refusal becomes unknown only after bound journal and cleanup', async () => {
+  await withFixtureRoot(async (root, source) => {
+    let fetchCalls = 0
+    const fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
+      fetchCalls++
+      const request = z
+        .object({ questions: z.record(z.unknown()) })
+        .passthrough()
+        .parse(JSON.parse(String(init?.body)) as unknown)
+      if (fetchCalls < 3) return alphaReply(request, 0.001)
+      const questionId = Object.keys(request.questions)[0]
+      assert.ok(questionId)
+      return new Response(
+        JSON.stringify({
+          error: { code: 502, message: `OpenAI refused to answer question "${questionId}"` },
+        }),
+        { status: 502, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
+    const candidateRuntime: CandidateRuntimePort = {
+      async run() {
+        return { status: 'unknown' as const, reason: 'native test does not use candidate' }
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment(input) {
+        const pixels = maskBytes(input.image.width, input.image.height, {
+          left: 0,
+          top: 0,
+          width: input.image.width,
+          height: input.image.height,
+        })
+        return {
+          status: 'segmented' as const,
+          mask: {
+            data: pixels,
+            width: input.image.width,
+            height: input.image.height,
+            format: 'binary-u8' as const,
+          },
+          metadata: {
+            method: 'mobile-sam-seed-region-v1',
+            backend: 'mobile-sam',
+            durationMs: 1,
+            input: { width: input.image.width, height: input.image.height },
+          },
+        }
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(
+      fixtureOptions(root, fetch, candidateRuntime, segmenter),
+    )
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    try {
+      const result = await runtimePorts.controlPort.execute(
+        {
+          opaqueCaseId: 'opaque-control-route-id',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        {
+          profileId: PROFILE_CONTROL_ID,
+          reservedUsdPerFetch: 0.12,
+          ledger,
+          executionPolicy: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY,
+        },
+      )
+      assert.equal(fetchCalls, 3)
+      assert.equal(result.outputRow.caseState, 'unknown')
+      assert.equal(
+        result.outputRow.providerRefusalEvidence?.protocol,
+        'openrouter-native-named-refusal-v1',
+      )
+      assert.equal(result.outputRow.providerRefusalEvidence?.responseStatus, 502)
+      assert.equal(result.logicalReceipts.at(-1)?.outcome, 'failed')
+      assert.equal(result.logicalReceipts.at(-1)?.errorCode, 'PROVIDER')
+      assert.equal(result.physicalReceipts.at(-1)?.settled, true)
+      assert.equal(result.physicalReceipts.at(-1)?.chargeState, 'unknown')
+      assert.equal(result.logicalReceipts.length, 3)
+      assert.deepEqual(
+        result.logicalReceipts.slice(0, 2).map((receipt) => receipt.outcome),
+        ['resolved', 'resolved'],
+      )
+      assert.equal(ledger.snapshot().unknownReserveUsd, 0.12)
+      assert.equal(ledger.snapshot().inFlightReservations.length, 0)
+    } finally {
+      await runtimePorts.dispose()
+    }
+  })
+})
+
+await test('single named native typed refusal at HTTP 200 is bound to its requested question', async () => {
+  await withFixtureRoot(async (root, source) => {
+    let fetchCalls = 0
+    const fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
+      fetchCalls++
+      const request = z
+        .object({ questions: z.record(z.unknown()) })
+        .passthrough()
+        .parse(JSON.parse(String(init?.body)) as unknown)
+      const questionId = Object.keys(request.questions)[0]
+      assert.ok(questionId)
+      return response({
+        model: 'openai/gpt-6-luna-decisions',
+        provider: 'OpenAI',
+        answers: [{ type: 'refusal', name: questionId }],
+      })
+    }
+    const candidateRuntime: CandidateRuntimePort = {
+      async run() {
+        return { status: 'unknown' as const, reason: 'native test does not use candidate' }
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment() {
+        throw new Error('Refusal should stop before segmentation')
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(
+      fixtureOptions(root, fetch, candidateRuntime, segmenter),
+    )
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    try {
+      const result = await runtimePorts.controlPort.execute(
+        {
+          opaqueCaseId: 'opaque-control-route-id',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        {
+          profileId: PROFILE_CONTROL_ID,
+          reservedUsdPerFetch: 0.12,
+          ledger,
+          executionPolicy: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY,
+        },
+      )
+      assert.equal(fetchCalls, 1)
+      assert.equal(result.outputRow.caseState, 'unknown')
+      assert.equal(
+        result.outputRow.providerRefusalEvidence?.protocol,
+        'openrouter-native-named-refusal-v1',
+      )
+      assert.equal(result.outputRow.providerRefusalEvidence?.responseStatus, 200)
+      assert.equal(result.outputRow.providerRefusalEvidence?.scope, 'question')
+      assert.equal(result.logicalReceipts[0]?.outcome, 'failed')
+      assert.equal(result.logicalReceipts[0]?.errorCode, 'INVALID_RESPONSE')
+      assert.equal(result.physicalReceipts[0]?.settled, true)
+    } finally {
+      await runtimePorts.dispose()
+    }
+  })
+})
+
+await test('cleanup failure keeps a captured native refusal technical with receipts intact', async () => {
+  await withFixtureRoot(async (root, source) => {
+    let fetchCalls = 0
+    const fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
+      fetchCalls++
+      const request = z
+        .object({ questions: z.record(z.unknown()) })
+        .passthrough()
+        .parse(JSON.parse(String(init?.body)) as unknown)
+      const questionId = Object.keys(request.questions)[0]
+      assert.ok(questionId)
+      return new Response(
+        JSON.stringify({
+          error: { code: 502, message: `OpenAI refused to answer question "${questionId}"` },
+        }),
+        { status: 502, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
+    const candidateRuntime: CandidateRuntimePort = {
+      async run() {
+        return { status: 'unknown' as const, reason: 'fixture' }
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment() {
+        throw new Error('Refusal should prevent segmentation')
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const options = fixtureOptions(root, fetch, candidateRuntime, segmenter)
+    if (options.controlEngine.kind !== 'offline-fixture-only')
+      throw new TypeError('Expected offline test control engine')
+    const kernel = options.controlEngine.processRegionSeededCase
+    options.controlEngine = {
+      ...options.controlEngine,
+      async processRegionSeededCase(args) {
+        const result = await kernel(args)
+        await rm(args.root, { recursive: true, force: false })
+        return result
+      },
+    }
+    const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(options)
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    try {
+      const result = await runtimePorts.controlPort.execute(
+        {
+          opaqueCaseId: 'opaque-control-route-id',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        {
+          profileId: PROFILE_CONTROL_ID,
+          reservedUsdPerFetch: 0.12,
+          ledger,
+          executionPolicy: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY,
+        },
+      )
+      assert.equal(fetchCalls, 1)
+      assert.equal(result.outputRow.caseState, 'error')
+      assert.equal(result.outputRow.providerRefusalEvidence, undefined)
+      assert.equal(result.logicalReceipts[0]?.outcome, 'failed')
+      assert.equal(result.logicalReceipts[0]?.errorCode, 'PROVIDER')
+      assert.equal(result.physicalReceipts[0]?.dispatchState, 'confirmed')
+      assert.equal(result.physicalReceipts[0]?.settled, true)
+      assert.equal(ledger.snapshot().physicalDispatchCount, 1)
+    } finally {
+      await runtimePorts.dispose()
+    }
+  })
+})
+
+await test('cleanup failure after successful control artifacts clears sidecars and returns technical receipts', async () => {
+  await withFixtureRoot(async (root, source) => {
+    let fetchCalls = 0
+    const fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
+      fetchCalls++
+      return alphaReply(JSON.parse(String(init?.body)) as unknown, 0.001)
+    }
+    const candidateRuntime: CandidateRuntimePort = {
+      async run() {
+        return { status: 'unknown' as const, reason: 'fixture' }
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment(input) {
+        const pixels = maskBytes(input.image.width, input.image.height, {
+          left: 0,
+          top: 0,
+          width: input.image.width,
+          height: input.image.height,
+        })
+        return {
+          status: 'segmented' as const,
+          mask: {
+            data: pixels,
+            width: input.image.width,
+            height: input.image.height,
+            format: 'binary-u8' as const,
+          },
+          metadata: {
+            method: 'mobile-sam-seed-region-v1',
+            backend: 'mobile-sam',
+            durationMs: 1,
+            input: { width: input.image.width, height: input.image.height },
+          },
+        }
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const options = fixtureOptions(root, fetch, candidateRuntime, segmenter)
+    options.removeTemporaryCaseRoot = async () => {
+      throw new Error('controlled cleanup fault')
+    }
+    const runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(options)
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    try {
+      const result = await runtimePorts.controlPort.execute(
+        {
+          opaqueCaseId: 'opaque-control-route-id',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        {
+          profileId: PROFILE_CONTROL_ID,
+          reservedUsdPerFetch: 0.12,
+          ledger,
+          executionPolicy: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY,
+        },
+      )
+      assert.ok(fetchCalls > 0)
+      assert.ok(
+        runtimePorts.artifacts.cutoutsByProfileAndCase.has(
+          `${PROFILE_CONTROL_ID}:opaque-control-route-id`,
+        ),
+      )
+      assert.equal(result.outputRow.caseState, 'error')
+      assert.equal(result.outputRow.box, null)
+      assert.equal(result.outputRow.cutoutPresent, false)
+      assert.equal(result.outputRow.maskPackedSha256, null)
+      assert.equal(result.outputRow.providerRefusalEvidence, undefined)
+      assert.equal(result.caseArtifactSidecars?.length ?? 0, 0)
+      assert.ok(result.physicalReceipts.length > 0)
+      assert.ok(result.physicalReceipts.every((receipt) => receipt.settled))
+      assert.match(result.caseError ?? '', /controlled cleanup fault/u)
+    } finally {
+      await runtimePorts.dispose()
+    }
   })
 })

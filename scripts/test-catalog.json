@@ -21,6 +21,7 @@
       "benchmarks/v03/h8a-fresh-comparison/dev-screen-sampling.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/dev-screen-runner.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/runtime-ports.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/provider-refusal-replay.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/independent-dev40-freeze.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/successor-campaign-ledger.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/ui-state-source-policy.test.ts",

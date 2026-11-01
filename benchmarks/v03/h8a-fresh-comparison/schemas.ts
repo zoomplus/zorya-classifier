@@ -22,6 +22,8 @@ import {
   STRATUMS,
   candidateIdForPhase,
 } from './constants.js'
+import { providerRefusalReplayExecutionPolicySchema } from './provider-refusal-replay.js'
+import { providerRefusalReplayEvidenceSchema } from './provider-refusal-replay.js'
 
 const sha256Hex = z.string().regex(/^[a-f0-9]{64}$/u)
 
@@ -143,6 +145,7 @@ export const phaseFreezeSchema = z
     conservativeCostProof: conservativeCostProofSchema,
     enforceQualificationSourceGroupSeparation: z.boolean(),
     evaluatorAnnotationsSha256: sha256Hex,
+    executionPolicy: providerRefusalReplayExecutionPolicySchema.optional(),
   })
   .strict()
   .superRefine((freeze, context) => {
@@ -311,6 +314,7 @@ export const outputRowSchema = z
     maskPackedSha256: sha256Hex.nullable(),
     logicalReceiptIds: z.array(z.number().int().positive()),
     physicalReceiptIds: z.array(z.number().int().positive()),
+    providerRefusalEvidence: providerRefusalReplayEvidenceSchema.optional(),
   })
   .strict()
 

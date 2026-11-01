@@ -47,6 +47,8 @@ import {
   unpackBinaryLsb0V1,
 } from './packed-binary-lsb0.js'
 import { outputRowSchema } from './schemas.js'
+import { buildProviderRefusalReplayEvidence } from './provider-refusal-replay.js'
+import type { ProviderRefusalReplayEvidence } from './provider-refusal-replay.js'
 
 const MAX_OWNED_SOURCE_BYTES = 24 * 1024 * 1024
 const CANDIDATE_CASE_MAX_CALLS = 4
@@ -153,6 +155,8 @@ export type H8FreshRuntimePortOptions = H8FreshRuntimePortOptionsBase & {
 export type OfflineFixtureRuntimePortOptions = H8FreshRuntimePortOptionsBase & {
   controlEngine: OfflineFixtureControlEngine
   fetch: typeof globalThis.fetch
+  /** Offline-only cleanup fault injection for receipt-preservation tests. */
+  removeTemporaryCaseRoot?: (path: string) => Promise<void>
 }
 
 type AnyFreshRuntimePortOptions = H8FreshRuntimePortOptions | OfflineFixtureRuntimePortOptions
@@ -369,6 +373,7 @@ function ownOutputRow(
     box: { left: number; top: number; width: number; height: number } | null
     cutoutPresent: boolean
     maskPackedSha256: string | null
+    providerRefusalEvidence?: ProviderRefusalReplayEvidence
   },
   logicalReceipts: CaseExecutionPortResult['logicalReceipts'],
   physicalReceipts: CaseExecutionPortResult['physicalReceipts'],
@@ -387,6 +392,9 @@ function ownOutputRow(
     physicalReceiptIds: physicalReceipts
       .filter((receipt) => receipt.dispatchState !== 'prefetch_cancelled')
       .map((receipt) => receipt.receiptId),
+    ...(execution.providerRefusalEvidence
+      ? { providerRefusalEvidence: execution.providerRefusalEvidence }
+      : {}),
   })
 }
 
@@ -672,23 +680,57 @@ function buildCandidatePort(
         context.signal?.removeEventListener('abort', onAbort)
         sourceBytes.fill(0)
       }
+      let recorderHealthy = true
       try {
         options.controlEngine.assertRecorderHealthy(recorder)
       } catch (error) {
+        recorderHealthy = false
         caught ??= error
         caseError ??= safeCaseError(error)
       }
+      recorderHealthy = recorderHealthy && recorder.persistenceFailures?.length === 0
       sharedJournal.push(...dispatchContext.journal)
+      const failureCode = caught === undefined ? undefined : safeCaseError(caught)
+      const refusalLogicalReceipts = mapJournalToLogical(
+        recorder,
+        dispatchContext.journal,
+        input.opaqueCaseId,
+        profileId,
+      )
+      const refusalPhysicalReceipts = makePhysicalReceipts(
+        recorder,
+        refusalLogicalReceipts,
+        dispatchContext.journal,
+        profileId,
+      )
+      const providerRefusalEvidence =
+        recorderHealthy && caught !== undefined && context.executionPolicy
+          ? buildProviderRefusalReplayEvidence({
+              executionPolicy: context.executionPolicy,
+              errorCode: failureCode,
+              profileId,
+              opaqueCaseId: input.opaqueCaseId,
+              caseExecutionIdentitySha256,
+              recorder,
+              journal: dispatchContext.journal,
+              logicalReceipts: refusalLogicalReceipts,
+              physicalReceipts: refusalPhysicalReceipts,
+              signal: context.signal ?? signalController.signal,
+            })
+          : undefined
       let execution: Parameters<typeof ownOutputRow>[2]
       let cutoutSidecar:
         | NonNullable<CaseExecutionPortResult['caseArtifactSidecars']>[number]
         | undefined
       if (caught !== undefined || !result) {
         execution = {
-          caseState: stateForError(caught, signalController.signal),
+          caseState: providerRefusalEvidence
+            ? 'unknown'
+            : stateForError(caught, signalController.signal),
           box: null,
           cutoutPresent: false,
           maskPackedSha256: null,
+          ...(providerRefusalEvidence ? { providerRefusalEvidence } : {}),
         }
       } else if (result.status === 'unknown') {
         execution = {
@@ -875,6 +917,8 @@ function buildControlPort(
         sourceBytes.fill(0)
         throw new Error('Control owned source setup did not complete')
       }
+      let caseRootCleanupAttempted = false
+      let caseRootRemoved = false
       try {
         const caseDirectory = join(caseRoot, 'result')
         const digest = sha256(sourceBytes)
@@ -940,14 +984,37 @@ function buildControlPort(
         } finally {
           context.signal?.removeEventListener('abort', onAbort)
         }
+        let recorderHealthy = true
         try {
           options.controlEngine.assertRecorderHealthy(recorder)
         } catch (error) {
+          recorderHealthy = false
           caught ??= error
           caseError ??= safeCaseError(error)
         }
+        recorderHealthy = recorderHealthy && recorder.persistenceFailures?.length === 0
         sharedJournal.push(...dispatchContext.journal)
 
+        const refusalLogicalReceipts = mapJournalToLogical(
+          recorder,
+          dispatchContext.journal,
+          input.opaqueCaseId,
+          PROFILE_CONTROL_ID,
+        )
+        const refusalPhysicalReceipts = makePhysicalReceipts(
+          recorder,
+          refusalLogicalReceipts,
+          dispatchContext.journal,
+          PROFILE_CONTROL_ID,
+        )
+        const failureCode =
+          caught !== undefined
+            ? safeCaseError(caught)
+            : caseResult?.classify.status === 'failed'
+              ? caseResult.classify.errorCode
+              : caseResult?.extraction.status === 'failed'
+                ? caseResult.extraction.errorCode
+                : undefined
         let execution: Parameters<typeof ownOutputRow>[2]
         let cutoutSidecar:
           | NonNullable<CaseExecutionPortResult['caseArtifactSidecars']>[number]
@@ -983,6 +1050,13 @@ function buildControlPort(
         } else if (caseResult.extraction.status === 'not-found') {
           execution = {
             caseState: 'not_found',
+            box: null,
+            cutoutPresent: false,
+            maskPackedSha256: null,
+          }
+        } else if (caseResult.extraction.status === 'failed') {
+          execution = {
+            caseState: caseResult.extraction.errorCode === 'TIMEOUT' ? 'timeout' : 'error',
             box: null,
             cutoutPresent: false,
             maskPackedSha256: null,
@@ -1052,6 +1126,49 @@ function buildControlPort(
             maskPackedSha256: null,
           }
         }
+        // Keep the historical extraction files available until output masks and cutouts are read.
+        // Cleanup is recorded as a technical error and never hidden by a refusal conversion.
+        let cleanupFailed = false
+        caseRootCleanupAttempted = true
+        try {
+          if ('removeTemporaryCaseRoot' in options && options.removeTemporaryCaseRoot)
+            await options.removeTemporaryCaseRoot(caseRoot)
+          else await rm(caseRoot, { recursive: true, force: false })
+          caseRootRemoved = true
+        } catch (error) {
+          cleanupFailed = true
+          caseError = safeCaseError(error)
+          cutoutSidecar = undefined
+          execution = {
+            caseState: 'error',
+            box: null,
+            cutoutPresent: false,
+            maskPackedSha256: null,
+          }
+        }
+        if (!cleanupFailed && recorderHealthy && failureCode && context.executionPolicy) {
+          const providerRefusalEvidence = buildProviderRefusalReplayEvidence({
+            executionPolicy: context.executionPolicy,
+            errorCode: failureCode,
+            profileId: PROFILE_CONTROL_ID,
+            opaqueCaseId: input.opaqueCaseId,
+            caseExecutionIdentitySha256,
+            recorder,
+            journal: dispatchContext.journal,
+            logicalReceipts: refusalLogicalReceipts,
+            physicalReceipts: refusalPhysicalReceipts,
+            signal: context.signal ?? signalController.signal,
+          })
+          if (providerRefusalEvidence) {
+            execution = {
+              caseState: 'unknown',
+              box: null,
+              cutoutPresent: false,
+              maskPackedSha256: null,
+              providerRefusalEvidence,
+            }
+          }
+        }
         return makeCaseExecutionResult(
           input,
           PROFILE_CONTROL_ID,
@@ -1064,7 +1181,11 @@ function buildControlPort(
         )
       } finally {
         sourceBytes.fill(0)
-        await rm(caseRoot, { recursive: true, force: false })
+        if (!caseRootCleanupAttempted && !caseRootRemoved) {
+          caseRootCleanupAttempted = true
+          await rm(caseRoot, { recursive: true, force: false })
+          caseRootRemoved = true
+        }
       }
     },
   }

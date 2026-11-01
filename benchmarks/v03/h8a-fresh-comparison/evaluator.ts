@@ -40,6 +40,7 @@ import type {
   OutputRow,
   PhaseFreeze,
 } from './schemas.js'
+import { assertProviderRefusalReplayEvidence } from './provider-refusal-replay.js'
 import {
   evaluatorPrivateAnnotationBundleSchema,
   immutableCloseoutSchema,
@@ -151,6 +152,22 @@ export function validateImmutableCloseouts(context: ReceiptValidationContext): v
 
   validateReceiptGraph(context.candidateCloseout)
   validateReceiptGraph(context.controlCloseout)
+  for (const closeout of [context.candidateCloseout, context.controlCloseout]) {
+    for (const output of closeout.outputRows) {
+      if (!output.providerRefusalEvidence) continue
+      if (!context.freeze.executionPolicy)
+        throw new RangeError('Refusal evidence is not declared by the immutable execution policy')
+      assertProviderRefusalReplayEvidence({
+        evidence: output.providerRefusalEvidence,
+        executionPolicy: context.freeze.executionPolicy,
+        opaqueCaseId: output.opaqueCaseId,
+        profileId: output.profileId,
+        output,
+        logicalReceipts: closeout.logicalReceipts,
+        physicalReceipts: closeout.physicalReceipts,
+      })
+    }
+  }
 
   const observedPhysicalIds = [
     ...context.candidateCloseout.physicalReceipts,

@@ -19,6 +19,7 @@ import type { EvaluatorPrivateAnnotationBundle } from './schemas.js'
 import type { CaseExecutionPortResult } from './paired-runner.js'
 import type { ImmutableCloseout, OutputRow, PhaseFreeze } from './schemas.js'
 import { immutableCloseoutSchema, outputRowSchema, phaseFreezeSchema } from './schemas.js'
+import { remapProviderRefusalReplayEvidence } from './provider-refusal-replay.js'
 
 interface Dev40CloseoutAssembly {
   candidateCloseout: ImmutableCloseout
@@ -93,6 +94,15 @@ function remapResult(
     physicalReceiptIds: result.outputRow.physicalReceiptIds.map(
       (id) => physicalReceiptIdMap.get(id) ?? id,
     ),
+    ...(result.outputRow.providerRefusalEvidence
+      ? {
+          providerRefusalEvidence: remapProviderRefusalReplayEvidence(
+            result.outputRow.providerRefusalEvidence,
+            logicalIdMap,
+            physicalReceiptIdMap,
+          ),
+        }
+      : {}),
   })
   return { row, logical, physical, nextLogicalId }
 }

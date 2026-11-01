@@ -7,7 +7,7 @@ const questionIdSchema = z
   .max(256)
   .regex(/^[a-zA-Z0-9][a-zA-Z0-9._:/-]*$/u)
 
-const providerRefusalObservationSchema = z.discriminatedUnion('protocol', [
+export const providerRefusalObservationSchema = z.discriminatedUnion('protocol', [
   z
     .object({
       protocol: z.literal('openrouter-native-named-refusal-v1'),
