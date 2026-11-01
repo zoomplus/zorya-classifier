@@ -1,9 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import fsPromises, { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { syncBuiltinESMExports } from 'node:module'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import {
   providerRefusalReplayProtocolSchema,
   PROVIDER_REFUSAL_REPLAY_DEADLINE_ISO,
@@ -213,47 +214,83 @@ await test('legacy wrapper retains its bound exports and rejects a scope protoco
 })
 
 await test('shared admission rejects unknown selectors before file access and snapshots caller inputs', async () => {
-  await assert.rejects(
-    verifyDevReplayAdmission({
-      studyId: 'caller-selected-study-v1',
-      protocolPath: '/missing/protocol.json',
-      protocolSha256: hash('protocol'),
-      repositoryRoot: process.cwd(),
-    }),
-    /closed registry/u,
+  const expectedProtocolPath = resolve(AUTHORED_SCOPE_ROOT, 'protocol-inputs', 'protocol.json')
+  const observedLstatPaths: string[] = []
+  const mockedLstat = test.mock.method(
+    fsPromises,
+    'lstat',
+    async (path: Parameters<typeof fsPromises.lstat>[0]): Promise<never> => {
+      if (typeof path !== 'string') throw new Error('Unexpected non-string replay file path')
+      const normalizedPath = resolve(path)
+      observedLstatPaths.push(normalizedPath)
+      assert.equal(normalizedPath, expectedProtocolPath, 'unexpected replay filesystem access')
+      throw Object.assign(new Error('Controlled missing protocol fixture'), {
+        code: 'ENOENT',
+        path: normalizedPath,
+      })
+    },
   )
-  const options: {
-    studyId: string
-    protocolPath: string
-    protocolSha256: string
-    repositoryRoot: string
-    allowExpiredReadOnly: boolean
-  } = {
-    studyId: AUTHORED_SCOPE_STUDY_ID,
-    protocolPath: `${AUTHORED_SCOPE_ROOT}/protocol-inputs/protocol.json`,
-    protocolSha256: hash('offline-missing-protocol'),
-    repositoryRoot: process.cwd(),
-    allowExpiredReadOnly: true,
-  }
-  const pending = verifyDevReplayAdmission(options)
-  options.studyId = 'caller-selected-study-v1'
-  options.protocolPath = '/missing/changed-protocol.json'
-  options.allowExpiredReadOnly = false
-  await assert.rejects(
-    pending,
-    (error: unknown) =>
-      error instanceof Error &&
-      Reflect.get(error, 'code') === 'ENOENT' &&
-      Reflect.get(error, 'path') === `${AUTHORED_SCOPE_ROOT}/protocol-inputs/protocol.json`,
-  )
-  await assert.rejects(
-    verifyDevReplayAdmission({
+
+  try {
+    syncBuiltinESMExports()
+    await assert.rejects(
+      verifyDevReplayAdmission({
+        studyId: 'caller-selected-study-v1',
+        protocolPath: resolve(AUTHORED_SCOPE_ROOT, 'protocol-inputs', 'protocol.json'),
+        protocolSha256: hash('protocol'),
+        repositoryRoot: process.cwd(),
+      }),
+      /closed registry/u,
+    )
+    assert.deepEqual(
+      observedLstatPaths,
+      [],
+      'unknown study selector must be rejected before file access',
+    )
+
+    const options: {
+      studyId: string
+      protocolPath: string
+      protocolSha256: string
+      repositoryRoot: string
+      allowExpiredReadOnly: boolean
+    } = {
       studyId: AUTHORED_SCOPE_STUDY_ID,
-      protocolPath: `${AUTHORED_SCOPE_ROOT}/protocol-inputs/protocol.json`,
+      protocolPath: expectedProtocolPath,
       protocolSha256: hash('offline-missing-protocol'),
       repositoryRoot: process.cwd(),
-      allowExpiredReadOnly: 'yes' as unknown as boolean,
-    }),
-    /must be boolean/u,
-  )
+      allowExpiredReadOnly: true,
+    }
+    const pending = verifyDevReplayAdmission(options)
+    options.studyId = 'caller-selected-study-v1'
+    options.protocolPath = resolve(AUTHORED_SCOPE_ROOT, 'protocol-inputs', 'changed-protocol.json')
+    options.allowExpiredReadOnly = false
+    await assert.rejects(
+      pending,
+      (error: unknown) =>
+        error instanceof Error &&
+        Reflect.get(error, 'code') === 'ENOENT' &&
+        Reflect.get(error, 'path') === expectedProtocolPath,
+    )
+    assert.deepEqual(observedLstatPaths, [expectedProtocolPath])
+
+    await assert.rejects(
+      verifyDevReplayAdmission({
+        studyId: AUTHORED_SCOPE_STUDY_ID,
+        protocolPath: expectedProtocolPath,
+        protocolSha256: hash('offline-missing-protocol'),
+        repositoryRoot: process.cwd(),
+        allowExpiredReadOnly: 'yes' as unknown as boolean,
+      }),
+      /must be boolean/u,
+    )
+    assert.deepEqual(
+      observedLstatPaths,
+      [expectedProtocolPath],
+      'invalid allowExpiredReadOnly selector must be rejected before file access',
+    )
+  } finally {
+    mockedLstat.mock.restore()
+    syncBuiltinESMExports()
+  }
 })

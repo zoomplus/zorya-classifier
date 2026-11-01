@@ -631,9 +631,11 @@ await test('closed entrypoints reject foreign-study protocols before creating na
       ),
       /study|schema|protocol/u,
     )
+    const wrongProtocolSha256 = `${fixture.protocolSha256.startsWith('0') ? '1' : '0'}${fixture.protocolSha256.slice(1)}`
+    assert.notEqual(wrongProtocolSha256, fixture.protocolSha256)
     await assert.rejects(
       runAuthoredScopeReplayCli(
-        cliArgs('register', fixture.protocolPath, fixture.protocolSha256.replace(/^./u, '0')),
+        cliArgs('register', fixture.protocolPath, wrongProtocolSha256),
         directory,
       ),
       /changed|digest/u,
