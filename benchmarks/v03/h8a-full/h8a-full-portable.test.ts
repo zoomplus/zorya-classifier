@@ -4,6 +4,12 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import sharp from 'sharp'
 import { test } from 'node:test'
+import type {
+  DecisionRequest,
+  DecisionResult,
+  DecisionState,
+  RasterPort,
+} from '../../../src/entities/contracts.js'
 import { ClassifierError } from '../../../src/entities/errors.js'
 import { buildDinoPrompt } from './contracts.js'
 import {
@@ -19,6 +25,12 @@ import {
 } from './mask-geometry.js'
 import { buildNativeChildEnv } from './native-bounded-child.js'
 import { removeOwnedEmptyDirectory, smokeErrorReceipt } from './native-smoke.js'
+import { createH8aFullRuntime } from './factory.js'
+import { runH8aFullPipelineSnapshot, type H8aFullRunSnapshot } from './pipeline.js'
+import type { H8aNativeGenerationInput, H8aNativeGenerationOutput } from './native-port.js'
+import { H6_QUERY_POLICY_INSTRUCTIONS } from '../h6-query-policy.js'
+import type { H6QueryPolicyId } from '../h6-query-policy.js'
+import { H8A_FULL_RECIPE_ID } from './constants.js'
 
 function mask(
   width: number,
@@ -166,5 +178,197 @@ await test('native child env excludes provider credential keys', () => {
   } finally {
     if (prior === undefined) delete process.env.OPENROUTER_API_KEY
     else process.env.OPENROUTER_API_KEY = prior
+  }
+})
+
+await test('unknown H8a query policy fails before pipeline ports or filesystem work', async () => {
+  let portCalls = 0
+  const taskDirectory = join(tmpdir(), `h8af-invalid-policy-${Date.now()}`)
+  const snapshot: H8aFullRunSnapshot = {
+    encodedImage: new Uint8Array([1]),
+    authoredTarget: 'fixture target',
+    exclusions: [],
+    includeCutout: false,
+    deadlineAt: performance.now() + 10_000,
+    taskDirectory,
+  }
+  await assert.rejects(
+    Reflect.apply(runH8aFullPipelineSnapshot, undefined, [
+      snapshot,
+      {
+        queryPolicyId: 'unrecognized-policy',
+        decision: {
+          async decide(): Promise<DecisionResult> {
+            portCalls++
+            return {
+              answers: {},
+              metadata: {
+                model: 'm',
+                provider: 'p',
+                requestId: 'r',
+                durationMs: 1,
+                costUsd: 0,
+                attempts: 1,
+              },
+            }
+          },
+        },
+        imageState: async (): Promise<DecisionState> => {
+          portCalls++
+          return []
+        },
+        native: {
+          async generate(): Promise<H8aNativeGenerationOutput> {
+            portCalls++
+            throw new Error('native port must not run')
+          },
+        },
+      },
+      new AbortController().signal,
+    ]),
+    (error: unknown) => error instanceof ClassifierError && error.code === 'INVALID_INPUT',
+  )
+  assert.equal(portCalls, 0)
+  await assert.rejects(access(taskDirectory))
+
+  assert.throws(
+    () =>
+      Reflect.apply(createH8aFullRuntime, undefined, [
+        {
+          pythonExecutable: 'python',
+          assetRoot: 'assets',
+          artifactRoot: 'artifacts',
+          queryPolicyId: 'unrecognized-policy',
+        },
+      ]),
+    (error: unknown) => error instanceof ClassifierError && error.code === 'INVALID_INPUT',
+  )
+})
+
+await test('direct pipeline snapshots policy before asynchronous native generation', async () => {
+  const artifactRoot = await mkdtemp(join(tmpdir(), 'h8af-query-policy-snapshot-'))
+  const png = await sharp({
+    create: { width: 32, height: 32, channels: 3, background: { r: 255, g: 255, b: 255 } },
+  })
+    .png()
+    .toBuffer()
+  const metadata = {
+    model: 'fixture-model',
+    provider: 'fixture-provider',
+    requestId: 'fixture-request',
+    durationMs: 1,
+    costUsd: 0,
+    attempts: 1,
+  }
+  const requests: DecisionRequest[] = []
+  let markNativeStarted!: () => void
+  const nativeStarted = new Promise<void>((resolveStarted) => {
+    markNativeStarted = resolveStarted
+  })
+  let releaseNative!: () => void
+  const nativeGate = new Promise<void>((resolveNative) => {
+    releaseNative = resolveNative
+  })
+  const dependencies: {
+    queryPolicyId: H6QueryPolicyId
+    decision: { decide(request: DecisionRequest, signal: AbortSignal): Promise<DecisionResult> }
+    imageState: RasterPort['imageState']
+    native: { generate(input: H8aNativeGenerationInput): Promise<H8aNativeGenerationOutput> }
+  } = {
+    queryPolicyId: 'strict-authored-scope-v1',
+    decision: {
+      async decide(request) {
+        requests.push(structuredClone(request))
+        if (request.questions.presence)
+          return {
+            answers: { presence: { type: 'ranked-choice', ranking: ['present'] } },
+            metadata,
+          }
+        const question = request.questions.selection
+        assert.ok(question?.type === 'choice')
+        const keys = Object.keys(question.criteria)
+        const rankingSize = question.rankingSize
+        const ranking =
+          rankingSize === 4
+            ? keys.slice(0, Math.min(4, keys.length))
+            : [keys.includes('D00') ? 'D00' : (keys[0] ?? 'none')]
+        return { answers: { selection: { type: 'ranked-choice', ranking } }, metadata }
+      },
+    },
+    async imageState(image) {
+      return [
+        {
+          type: 'image_url',
+          image_url: {
+            url: `data:image/png;base64,${Buffer.from(image.bytes).toString('base64')}`,
+            detail: 'high',
+          },
+        },
+      ]
+    },
+    native: {
+      async generate(input) {
+        assert.equal('queryPolicyId' in input, false)
+        markNativeStarted()
+        await nativeGate
+        const candidateMask = mask(input.width, input.height, {
+          left: 4,
+          top: 4,
+          width: 8,
+          height: 8,
+        })
+        const secondMask = mask(input.width, input.height, {
+          left: 18,
+          top: 18,
+          width: 6,
+          height: 6,
+        })
+        return {
+          recipeId: H8A_FULL_RECIPE_ID,
+          families: {
+            D: [{ id: 'native-d0', mask: candidateMask }],
+            U: [{ id: 'native-u0', mask: secondMask }],
+          },
+          detectorPrompt: 'fixture prompt',
+        }
+      },
+    },
+  }
+  const snapshot: H8aFullRunSnapshot = {
+    encodedImage: new Uint8Array(png),
+    authoredTarget: 'fixture visible instance',
+    exclusions: [],
+    includeCutout: false,
+    deadlineAt: performance.now() + 20_000,
+    taskDirectory: join(artifactRoot, 'h8a-full-runs', 'fixture'),
+  }
+  try {
+    const pending = runH8aFullPipelineSnapshot(snapshot, dependencies, new AbortController().signal)
+    await nativeStarted
+    dependencies.queryPolicyId = 'legacy-v1'
+    releaseNative()
+    const result = await pending
+    assert.equal(result.status, 'located')
+    assert.equal(requests.length, 4)
+    const presenceText = requests[0]?.state.find((part): part is string => typeof part === 'string')
+    assert.ok(presenceText?.endsWith(H6_QUERY_POLICY_INSTRUCTIONS.presenceState))
+    assert.ok(
+      requests[0]?.questions.presence?.instructions.endsWith(
+        H6_QUERY_POLICY_INSTRUCTIONS.presenceQuestion,
+      ),
+    )
+    assert.ok(
+      requests[1]?.questions.selection?.instructions.endsWith(
+        H6_QUERY_POLICY_INSTRUCTIONS.nominationQuestion,
+      ),
+    )
+    assert.ok(
+      requests
+        .at(-1)
+        ?.questions.selection?.instructions.endsWith(H6_QUERY_POLICY_INSTRUCTIONS.finalQuestion),
+    )
+  } finally {
+    releaseNative()
+    await rm(artifactRoot, { recursive: true, force: true })
   }
 })

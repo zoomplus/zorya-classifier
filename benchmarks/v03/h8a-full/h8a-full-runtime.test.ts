@@ -22,6 +22,8 @@ import {
 } from './native-port.js'
 import { runBoundedNativeChild, buildNativeChildEnv } from './native-bounded-child.js'
 import { H8A_FULL_NATIVE_REQUEST_SCHEMA, H8A_FULL_RECIPE_ID } from './constants.js'
+import { H6_QUERY_POLICY_INSTRUCTIONS } from '../h6-query-policy.js'
+import type { H6QueryPolicyId } from '../h6-query-policy.js'
 
 function missingPythonExecutable(): never {
   throw new Error('H8A_PYTHON_EXECUTABLE is required for the native test group')
@@ -277,237 +279,290 @@ await test('native port rejects a worker reply carrying the other recipe identit
   }
 })
 
-await test('full runtime locates with fake native worker and respects four decision calls', async () => {
-  const { createH8aFullRuntime } = await import('./factory.js')
-  const artifactRoot = await mkdtemp(join(tmpdir(), 'h8af-artifacts-'))
-  const runtime = createH8aFullRuntime({
-    pythonExecutable,
-    assetRoot: join(tmpdir(), 'h8af-assets-unused'),
-    artifactRoot,
-    workerScriptPath: fakeWorkerScriptPath(),
-    recipeId: 'h8a-cpu-flat-target-v2',
-  })
-  const stages: string[] = []
-  const rawWidth = 96
-  const rawHeight = 64
-  const rawInput = Buffer.alloc(rawWidth * rawHeight * 3)
-  for (let y = 0; y < rawHeight; y++) {
-    for (let x = 0; x < rawWidth; x++) {
-      const offset = (y * rawWidth + x) * 3
-      rawInput[offset] = (x * 7 + y * 3) % 256
-      rawInput[offset + 1] = (x * 2 + y * 11) % 256
-      rawInput[offset + 2] = (x * 5 + y * 13) % 256
+for (const queryPolicyId of [undefined, 'strict-authored-scope-v1'] as const) {
+  await test(`full runtime locates with fake native worker and respects four decision calls (${queryPolicyId ?? 'default legacy'})`, async () => {
+    const { createH8aFullRuntime } = await import('./factory.js')
+    const artifactRoot = await mkdtemp(join(tmpdir(), 'h8af-artifacts-'))
+    const runtimeConfig: {
+      pythonExecutable: string
+      assetRoot: string
+      artifactRoot: string
+      workerScriptPath: string
+      recipeId: 'h8a-cpu-flat-target-v2'
+      queryPolicyId?: H6QueryPolicyId
+    } = {
+      pythonExecutable,
+      assetRoot: join(tmpdir(), 'h8af-assets-unused'),
+      artifactRoot,
+      workerScriptPath: fakeWorkerScriptPath(),
+      recipeId: 'h8a-cpu-flat-target-v2' as const,
+      ...(queryPolicyId === undefined ? {} : { queryPolicyId }),
     }
-  }
-  const jpeg = await sharp(rawInput, { raw: { width: rawWidth, height: rawHeight, channels: 3 } })
-    .jpeg({ quality: 100, chromaSubsampling: '4:4:4' })
-    .withMetadata({ orientation: 6 })
-    .toBuffer()
-  const rawDecoded = await sharp(jpeg).removeAlpha().raw().toBuffer({ resolveWithObject: true })
-  assert.equal(rawDecoded.info.width, rawWidth)
-  assert.equal(rawDecoded.info.height, rawHeight)
-  const expectedWidth = rawHeight
-  const expectedHeight = rawWidth
-  const expectedRgba = Buffer.alloc(expectedWidth * expectedHeight * 4)
-  for (let y = 0; y < rawHeight; y++) {
-    for (let x = 0; x < rawWidth; x++) {
-      const source = (y * rawWidth + x) * 3
-      const rotatedX = rawHeight - 1 - y
-      const rotatedY = x
-      const target = (rotatedY * expectedWidth + rotatedX) * 4
-      expectedRgba[target] = rawDecoded.data[source] ?? 0
-      expectedRgba[target + 1] = rawDecoded.data[source + 1] ?? 0
-      expectedRgba[target + 2] = rawDecoded.data[source + 2] ?? 0
-      expectedRgba[target + 3] = 255
+    const runtime = createH8aFullRuntime(runtimeConfig)
+    runtimeConfig.queryPolicyId =
+      queryPolicyId === undefined ? 'strict-authored-scope-v1' : 'legacy-v1'
+    const stages: string[] = []
+    const capturedRequests: DecisionRequest[] = []
+    const rawWidth = 96
+    const rawHeight = 64
+    const rawInput = Buffer.alloc(rawWidth * rawHeight * 3)
+    for (let y = 0; y < rawHeight; y++) {
+      for (let x = 0; x < rawWidth; x++) {
+        const offset = (y * rawWidth + x) * 3
+        rawInput[offset] = (x * 7 + y * 3) % 256
+        rawInput[offset + 1] = (x * 2 + y * 11) % 256
+        rawInput[offset + 2] = (x * 5 + y * 13) % 256
+      }
     }
-  }
-  const metadata = {
-    model: 'mock-model',
-    provider: 'mock-provider',
-    requestId: 'mock-request',
-    durationMs: 1,
-    costUsd: 0,
-    attempts: 1,
-  }
-  const decision = {
-    async decide(request: DecisionRequest): Promise<DecisionResult> {
-      const { readdir } = await import('node:fs/promises')
-      const nativeTaskEntries = await readdir(join(artifactRoot, 'h8a-full-tasks'), {
-        withFileTypes: true,
-      })
-      assert.deepEqual(
-        nativeTaskEntries.filter((entry) => entry.isDirectory()),
-        [],
-      )
-      const stateText = request.state.filter((part): part is string => typeof part === 'string')
-      stages.push(
-        request.questions.presence
-          ? 'presence'
-          : stateText.some((part) => part.includes('from family D'))
-            ? 'nominate-D'
-            : stateText.some((part) => part.includes('from family U'))
-              ? 'nominate-U'
-              : 'final-select',
-      )
-      const question = request.questions.presence ?? request.questions.selection
-      assert.ok(question?.type === 'choice')
-      const keys = Object.keys(question.criteria)
-      const rankingSize = question.rankingSize ?? 4
-      if (request.questions.presence) {
-        return {
-          answers: {
-            presence: {
-              type: 'ranked-choice',
-              ranking: ['present'],
+    const jpeg = await sharp(rawInput, { raw: { width: rawWidth, height: rawHeight, channels: 3 } })
+      .jpeg({ quality: 100, chromaSubsampling: '4:4:4' })
+      .withMetadata({ orientation: 6 })
+      .toBuffer()
+    const rawDecoded = await sharp(jpeg).removeAlpha().raw().toBuffer({ resolveWithObject: true })
+    assert.equal(rawDecoded.info.width, rawWidth)
+    assert.equal(rawDecoded.info.height, rawHeight)
+    const expectedWidth = rawHeight
+    const expectedHeight = rawWidth
+    const expectedRgba = Buffer.alloc(expectedWidth * expectedHeight * 4)
+    for (let y = 0; y < rawHeight; y++) {
+      for (let x = 0; x < rawWidth; x++) {
+        const source = (y * rawWidth + x) * 3
+        const rotatedX = rawHeight - 1 - y
+        const rotatedY = x
+        const target = (rotatedY * expectedWidth + rotatedX) * 4
+        expectedRgba[target] = rawDecoded.data[source] ?? 0
+        expectedRgba[target + 1] = rawDecoded.data[source + 1] ?? 0
+        expectedRgba[target + 2] = rawDecoded.data[source + 2] ?? 0
+        expectedRgba[target + 3] = 255
+      }
+    }
+    const metadata = {
+      model: 'mock-model',
+      provider: 'mock-provider',
+      requestId: 'mock-request',
+      durationMs: 1,
+      costUsd: 0,
+      attempts: 1,
+    }
+    const decision = {
+      async decide(request: DecisionRequest): Promise<DecisionResult> {
+        capturedRequests.push(structuredClone(request))
+        const { readdir } = await import('node:fs/promises')
+        const nativeTaskEntries = await readdir(join(artifactRoot, 'h8a-full-tasks'), {
+          withFileTypes: true,
+        })
+        assert.deepEqual(
+          nativeTaskEntries.filter((entry) => entry.isDirectory()),
+          [],
+        )
+        const stateText = request.state.filter((part): part is string => typeof part === 'string')
+        stages.push(
+          request.questions.presence
+            ? 'presence'
+            : stateText.some((part) => part.includes('from family D'))
+              ? 'nominate-D'
+              : stateText.some((part) => part.includes('from family U'))
+                ? 'nominate-U'
+                : 'final-select',
+        )
+        const question = request.questions.presence ?? request.questions.selection
+        assert.ok(question?.type === 'choice')
+        const keys = Object.keys(question.criteria)
+        const rankingSize = question.rankingSize ?? 4
+        if (request.questions.presence) {
+          return {
+            answers: {
+              presence: {
+                type: 'ranked-choice',
+                ranking: ['present'],
+              },
             },
-          },
+            metadata,
+          }
+        }
+        const first = keys.includes('D00') ? 'D00' : (keys[0] ?? 'none')
+        const ranking = [first, ...keys.filter((key) => key !== first)].slice(
+          0,
+          Math.min(rankingSize, keys.length),
+        )
+        return {
+          answers: { selection: { type: 'ranked-choice', ranking } },
           metadata,
         }
-      }
-      const first = keys.includes('D00') ? 'D00' : (keys[0] ?? 'none')
-      const ranking = [first, ...keys.filter((key) => key !== first)].slice(
-        0,
-        Math.min(rankingSize, keys.length),
-      )
-      return {
-        answers: { selection: { type: 'ranked-choice', ranking } },
-        metadata,
-      }
-    },
-  }
-  let imageStateCalls = 0
-  const presentationCounts: string[] = []
-  const presentation = {
-    async renderPresence({
-      image,
-    }: {
-      image: { data: Uint8Array; width: number; height: number }
-    }) {
-      presentationCounts.push('presence:1')
-      return [await pngRaster(image)]
-    },
-    async renderNomination({
-      image,
-      candidates,
-    }: {
-      image: { data: Uint8Array; width: number; height: number }
-      candidates: readonly unknown[]
-    }) {
-      const pageCount = Math.ceil(candidates.length / 9)
-      presentationCounts.push(`nomination:${candidates.length}:${1 + pageCount}`)
-      return [
-        await pngRaster(image),
-        ...(await Promise.all(Array.from({ length: pageCount }, () => pngRaster(image)))),
-      ]
-    },
-    async renderFinal({
-      image,
-      candidates,
-    }: {
-      image: { data: Uint8Array; width: number; height: number }
-      candidates: readonly unknown[]
-    }) {
-      presentationCounts.push(`final:${candidates.length}:${1 + candidates.length}`)
-      return [
-        await pngRaster(image),
-        ...(await Promise.all(candidates.map(() => pngRaster(image)))),
-      ]
-    },
-  }
-  const imageState = async (image: RasterImage) => {
-    imageStateCalls++
-    const decoded = await sharp(image.bytes)
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true })
-    assert.equal(decoded.info.width, expectedWidth)
-    assert.equal(decoded.info.height, expectedHeight)
-    assert.deepEqual(decoded.data, expectedRgba)
-    return [
-      {
-        type: 'image_url' as const,
-        image_url: {
-          url: `data:image/png;base64,${Buffer.from(image.bytes).toString('base64')}`,
-          detail: 'high' as const,
-        },
       },
-    ]
-  }
-  try {
-    const runExclusions: string[] = []
-    const runInput = {
-      encodedImage: new Uint8Array(jpeg),
-      authoredTarget: 'small amber marker beside the road',
-      exclusions: runExclusions,
-      includeCutout: true,
-      signal: new AbortController().signal,
-      decision,
-      imageState,
-      presentation,
     }
-    const running = runtime.run(runInput)
-    runInput.encodedImage.fill(0)
-    runInput.authoredTarget = 'mutated target after admission'
-    runExclusions.push('mutated exclusion after admission')
-    runInput.includeCutout = false
-    runInput.signal = new AbortController().signal
-    let result
+    let imageStateCalls = 0
+    const presentationCounts: string[] = []
+    const presentation = {
+      async renderPresence({
+        image,
+      }: {
+        image: { data: Uint8Array; width: number; height: number }
+      }) {
+        presentationCounts.push('presence:1')
+        return [await pngRaster(image)]
+      },
+      async renderNomination({
+        image,
+        candidates,
+      }: {
+        image: { data: Uint8Array; width: number; height: number }
+        candidates: readonly unknown[]
+      }) {
+        const pageCount = Math.ceil(candidates.length / 9)
+        presentationCounts.push(`nomination:${candidates.length}:${1 + pageCount}`)
+        return [
+          await pngRaster(image),
+          ...(await Promise.all(Array.from({ length: pageCount }, () => pngRaster(image)))),
+        ]
+      },
+      async renderFinal({
+        image,
+        candidates,
+      }: {
+        image: { data: Uint8Array; width: number; height: number }
+        candidates: readonly unknown[]
+      }) {
+        presentationCounts.push(`final:${candidates.length}:${1 + candidates.length}`)
+        return [
+          await pngRaster(image),
+          ...(await Promise.all(candidates.map(() => pngRaster(image)))),
+        ]
+      },
+    }
+    const imageState = async (image: RasterImage) => {
+      imageStateCalls++
+      const decoded = await sharp(image.bytes)
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true })
+      assert.equal(decoded.info.width, expectedWidth)
+      assert.equal(decoded.info.height, expectedHeight)
+      assert.deepEqual(decoded.data, expectedRgba)
+      return [
+        {
+          type: 'image_url' as const,
+          image_url: {
+            url: `data:image/png;base64,${Buffer.from(image.bytes).toString('base64')}`,
+            detail: 'high' as const,
+          },
+        },
+      ]
+    }
     try {
-      result = await running
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'runtime fixture failed'
-      assert.fail(`${message}; presentation counts: ${presentationCounts.join(',')}`)
+      const runExclusions: string[] = []
+      const runInput = {
+        encodedImage: new Uint8Array(jpeg),
+        authoredTarget: 'small amber marker beside the road',
+        exclusions: runExclusions,
+        includeCutout: true,
+        signal: new AbortController().signal,
+        decision,
+        imageState,
+        presentation,
+      }
+      const running = runtime.run(runInput)
+      runInput.encodedImage.fill(0)
+      runInput.authoredTarget = 'mutated target after admission'
+      runExclusions.push('mutated exclusion after admission')
+      runInput.includeCutout = false
+      runInput.signal = new AbortController().signal
+      let result
+      try {
+        result = await running
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'runtime fixture failed'
+        assert.fail(`${message}; presentation counts: ${presentationCounts.join(',')}`)
+      }
+      assert.equal(result.status, 'located')
+      assert.equal(result.recipeId, 'h8a-cpu-flat-target-v2')
+      assert.equal(stages.length, 4)
+      assert.equal(capturedRequests.length, 4)
+      const capturedPresence = capturedRequests[0]
+      const capturedD = capturedRequests[1]
+      const capturedU = capturedRequests[2]
+      const capturedFinal = capturedRequests.at(-1)
+      assert.ok(capturedPresence && capturedD && capturedU && capturedFinal)
+      const firstText = (request: DecisionRequest) =>
+        request.state.find((part): part is string => typeof part === 'string')
+      const policyFields = [
+        [firstText(capturedPresence), H6_QUERY_POLICY_INSTRUCTIONS.presenceState],
+        [
+          capturedPresence.questions.presence?.instructions,
+          H6_QUERY_POLICY_INSTRUCTIONS.presenceQuestion,
+        ],
+        [firstText(capturedD), H6_QUERY_POLICY_INSTRUCTIONS.nominationState],
+        [
+          capturedD.questions.selection?.instructions,
+          H6_QUERY_POLICY_INSTRUCTIONS.nominationQuestion,
+        ],
+        [firstText(capturedU), H6_QUERY_POLICY_INSTRUCTIONS.nominationState],
+        [
+          capturedU.questions.selection?.instructions,
+          H6_QUERY_POLICY_INSTRUCTIONS.nominationQuestion,
+        ],
+        [firstText(capturedFinal), H6_QUERY_POLICY_INSTRUCTIONS.finalState],
+        [
+          capturedFinal.questions.selection?.instructions,
+          H6_QUERY_POLICY_INSTRUCTIONS.finalQuestion,
+        ],
+      ] as const
+      for (const [field, suffix] of policyFields) {
+        assert.ok(field)
+        assert.equal(
+          field.endsWith(suffix),
+          queryPolicyId === 'strict-authored-scope-v1',
+          `unexpected policy composition in ${suffix.slice(0, 24)}`,
+        )
+      }
+      if (result.status !== 'located') assert.fail('full runtime should locate fixture mask')
+      assert.ok(result.cutout)
+      assert.equal(result.sourceFrame.width, expectedWidth)
+      assert.equal(result.sourceFrame.height, expectedHeight)
+      assert.equal(result.mask.width, expectedWidth)
+      assert.equal(result.mask.height, expectedHeight)
+      assert.equal(result.mask.format, 'binary-lsb0')
+      assert.match(result.sourceFrame.sha256, /^[a-f0-9]{64}$/u)
+      assert.match(result.originalEncodedSha256, /^[a-f0-9]{64}$/u)
+      assert.equal(result.originalEncodedSha256, createHash('sha256').update(jpeg).digest('hex'))
+      assert.notEqual(result.sourceFrame.sha256, result.originalEncodedSha256)
+      assert.ok(imageStateCalls >= 1)
+      assert.deepEqual(result.region, { left: 2, top: 2, width: 6, height: 6 })
+      const firstMaskIndex = 2 * expectedWidth + 2
+      assert.notEqual((result.mask.data[firstMaskIndex >> 3] ?? 0) & (1 << (firstMaskIndex & 7)), 0)
+      assert.equal(result.cutout?.data.byteLength, 6 * 6 * 4)
+      assert.deepEqual(
+        Buffer.from(result.cutout?.data.subarray(0, 4) ?? []),
+        expectedRgba.subarray((2 * expectedWidth + 2) * 4, (2 * expectedWidth + 2) * 4 + 4),
+      )
+      assert.deepEqual(stages, ['presence', 'nominate-D', 'nominate-U', 'final-select'])
+      assert.deepEqual(presentationCounts, [
+        'presence:1',
+        'nomination:2:2',
+        'nomination:1:2',
+        'final:3:4',
+      ])
+      const { readdir } = await import('node:fs/promises')
+      assert.deepEqual(await readdir(join(artifactRoot, 'h8a-full-runs')), [])
+    } finally {
+      await runtime.dispose()
+      await rm(artifactRoot, { recursive: true, force: true })
     }
-    assert.equal(result.status, 'located')
-    assert.equal(result.recipeId, 'h8a-cpu-flat-target-v2')
-    assert.equal(stages.length, 4)
-    if (result.status !== 'located') assert.fail('full runtime should locate fixture mask')
-    assert.ok(result.cutout)
-    assert.equal(result.sourceFrame.width, expectedWidth)
-    assert.equal(result.sourceFrame.height, expectedHeight)
-    assert.equal(result.mask.width, expectedWidth)
-    assert.equal(result.mask.height, expectedHeight)
-    assert.equal(result.mask.format, 'binary-lsb0')
-    assert.match(result.sourceFrame.sha256, /^[a-f0-9]{64}$/u)
-    assert.match(result.originalEncodedSha256, /^[a-f0-9]{64}$/u)
-    assert.equal(result.originalEncodedSha256, createHash('sha256').update(jpeg).digest('hex'))
-    assert.notEqual(result.sourceFrame.sha256, result.originalEncodedSha256)
-    assert.ok(imageStateCalls >= 1)
-    assert.deepEqual(result.region, { left: 2, top: 2, width: 6, height: 6 })
-    const firstMaskIndex = 2 * expectedWidth + 2
-    assert.notEqual((result.mask.data[firstMaskIndex >> 3] ?? 0) & (1 << (firstMaskIndex & 7)), 0)
-    assert.equal(result.cutout?.data.byteLength, 6 * 6 * 4)
-    assert.deepEqual(
-      Buffer.from(result.cutout?.data.subarray(0, 4) ?? []),
-      expectedRgba.subarray((2 * expectedWidth + 2) * 4, (2 * expectedWidth + 2) * 4 + 4),
-    )
-    assert.deepEqual(stages, ['presence', 'nominate-D', 'nominate-U', 'final-select'])
-    assert.deepEqual(presentationCounts, [
-      'presence:1',
-      'nomination:2:2',
-      'nomination:1:2',
-      'final:3:4',
-    ])
-    const { readdir } = await import('node:fs/promises')
-    assert.deepEqual(await readdir(join(artifactRoot, 'h8a-full-runs')), [])
-  } finally {
-    await runtime.dispose()
-    await rm(artifactRoot, { recursive: true, force: true })
-  }
 
-  async function pngRaster(image: {
-    data: Uint8Array
-    width: number
-    height: number
-  }): Promise<RasterImage> {
-    const bytes = await sharp(image.data, {
-      raw: { width: image.width, height: image.height, channels: 4 },
-    })
-      .png()
-      .toBuffer()
-    return { bytes: new Uint8Array(bytes), width: image.width, height: image.height }
-  }
-})
+    async function pngRaster(image: {
+      data: Uint8Array
+      width: number
+      height: number
+    }): Promise<RasterImage> {
+      const bytes = await sharp(image.data, {
+        raw: { width: image.width, height: image.height, channels: 4 },
+      })
+        .png()
+        .toBuffer()
+      return { bytes: new Uint8Array(bytes), width: image.width, height: image.height }
+    }
+  })
+}
 
 await test('semantic unknown from composer differs from native failure', async () => {
   const { runH8aFullPipeline } = await import('./pipeline.js')

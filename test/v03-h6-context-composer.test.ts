@@ -1,10 +1,17 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import sharp from 'sharp'
 import { test } from 'node:test'
-import type { DecisionRequest, DecisionResult, RasterImage } from '../src/entities/contracts.js'
+import type {
+  DecisionRequest,
+  DecisionResult,
+  RasterImage,
+  RasterPort,
+} from '../src/entities/contracts.js'
 import type { PackedBinaryMask } from '../src/entities/object-proposals.js'
 import type { RgbaRaster } from '../src/entities/representation.js'
 import { ClassifierError } from '../src/entities/errors.js'
+import { createSharpRaster } from '../src/infrastructure/raster.js'
 import {
   createH6ContextComposer,
   createSharpH6Presentation,
@@ -13,6 +20,13 @@ import {
   type H6Family,
   type H6ProposalCandidate,
 } from '../benchmarks/v03/h6-context-composer.js'
+import {
+  H6_QUERY_POLICY,
+  H6_QUERY_POLICY_INSTRUCTIONS,
+  H6_QUERY_POLICY_SHA256,
+  resolveH6QueryPolicyId,
+  type H6QueryPolicyId,
+} from '../benchmarks/v03/h6-query-policy.js'
 
 const target = 'the small amber marker beside the north road'
 const metadata = {
@@ -114,6 +128,43 @@ function preferredAnswer(request: DecisionRequest): DecisionResult {
   return answerChoice(request, 'selection', choice, probabilities)
 }
 
+function rankedAnswer(request: DecisionRequest): DecisionResult {
+  const question = request.questions.presence ?? request.questions.selection
+  assert.ok(question?.type === 'choice')
+  const keys = Object.keys(question.criteria)
+  if (request.questions.presence)
+    return {
+      answers: { presence: { type: 'ranked-choice', ranking: ['present'] } },
+      metadata: { ...metadata },
+    }
+  const ranking =
+    question.rankingSize === 4
+      ? keys.slice(0, Math.min(4, keys.length))
+      : [keys.find((key) => key !== 'none') ?? 'none']
+  return {
+    answers: { selection: { type: 'ranked-choice', ranking } },
+    metadata: { ...metadata },
+  }
+}
+
+function scoredAnswer(request: DecisionRequest): DecisionResult {
+  const question = request.questions.presence ?? request.questions.selection
+  assert.ok(question?.type === 'choice')
+  if (request.questions.presence)
+    return answerChoice(request, 'presence', 'present', {
+      present: 0.8,
+      absent: 0.1,
+      uncertain: 0.1,
+    })
+  const keys = Object.keys(question.criteria)
+  const choice = keys.find((key) => key !== 'none') ?? 'none'
+  const otherScore = keys.length > 1 ? 0.3 / (keys.length - 1) : 0
+  const probabilities = Object.fromEntries(
+    keys.map((key) => [key, key === choice ? 0.7 : otherScore]),
+  )
+  return answerChoice(request, 'selection', choice, probabilities)
+}
+
 function mockImageState(image: RasterImage) {
   return [
     {
@@ -126,10 +177,10 @@ function mockImageState(image: RasterImage) {
   ]
 }
 
-function captureRequest(request: DecisionRequest): void {
+function captureRequest(request: DecisionRequest, authoredTarget = target): void {
   const strings = request.state.filter((part): part is string => typeof part === 'string')
   const text = strings.join('\n')
-  assert.equal(text.split(target).length - 1, 1, 'authored target must occur exactly once')
+  assert.equal(text.split(authoredTarget).length - 1, 1, 'authored target must occur exactly once')
   assert.match(strings.at(-1) ?? '', /Authored target:/u, 'target is the final state item')
   const question = request.questions.presence ?? request.questions.selection
   assert.ok(question?.type === 'choice')
@@ -139,12 +190,25 @@ function captureRequest(request: DecisionRequest): void {
   }
 }
 
+function textAndQuestionsSha256(request: DecisionRequest): string {
+  const textParts = request.state.filter((part): part is string => typeof part === 'string')
+  return createHash('sha256')
+    .update(JSON.stringify({ state: textParts, questions: request.questions }))
+    .digest('hex')
+}
+
 function createHarness(
   inputFamilies: Readonly<Record<H6Family, readonly H6ProposalCandidate[]>>,
   decide: (
     request: DecisionRequest,
     signal: AbortSignal,
   ) => Promise<DecisionResult> | DecisionResult = async (request) => preferredAnswer(request),
+  options?: {
+    queryPolicyId?: H6QueryPolicyId
+    imageState?: RasterPort['imageState']
+    authoredTargetForCapture?: string
+    image?: RgbaRaster
+  },
 ) {
   const stages: H6DecisionStage[] = []
   const requests: DecisionRequest[] = []
@@ -157,7 +221,7 @@ function createHarness(
   const composer = createH6ContextComposer({
     decision: {
       async decide(request, signal) {
-        captureRequest(request)
+        captureRequest(request, options?.authoredTargetForCapture)
         requests.push(structuredClone(request))
         const stateText = request.state.filter((part): part is string => typeof part === 'string')
         stages.push(
@@ -172,8 +236,9 @@ function createHarness(
         return decide(request, signal)
       },
     },
-    imageState: async (image) => mockImageState(image),
+    imageState: options?.imageState ?? (async (image) => mockImageState(image)),
     presentation,
+    ...(options?.queryPolicyId !== undefined ? { queryPolicyId: options.queryPolicyId } : {}),
     budgetRecord: {
       admit({ stage, callOrdinal }) {
         budgetEvents.push({ type: 'admit', stage, ordinal: callOrdinal })
@@ -183,13 +248,220 @@ function createHarness(
       },
     },
   })
-  const image = rgba(64, 48)
+  const image = options?.image ?? rgba(64, 48)
   const families = {
     D: inputFamilies.D,
     U: inputFamilies.U,
   }
   return { composer, image, families, stages, requests, budgetEvents }
 }
+
+await test('legacy query policy preserves all four captured text and question identities', async () => {
+  const authoredTarget = 'the marked item within the described area'
+  const exclusions = ['items outside the described area']
+  const image = rgba(24, 20, [255, 255, 255])
+  const families = {
+    D: [
+      candidate('D', 'native-d0', 24, 20, { left: 1, top: 1, width: 4, height: 4 }),
+      candidate('D', 'native-d1', 24, 20, { left: 8, top: 1, width: 4, height: 4 }),
+      candidate('D', 'native-d2', 24, 20, { left: 15, top: 1, width: 4, height: 4 }),
+    ],
+    U: [
+      candidate('U', 'native-u0', 24, 20, { left: 1, top: 10, width: 4, height: 4 }),
+      candidate('U', 'native-u1', 24, 20, { left: 8, top: 10, width: 4, height: 4 }),
+      candidate('U', 'native-u2', 24, 20, { left: 15, top: 10, width: 4, height: 4 }),
+    ],
+  }
+  const expected = [
+    '79d8d6c6ef2d11197e5b2d92324f1249236fd2bc198b92f3d52cfe7628c3eb4c',
+    '487c87f12676f63d3d9b2fba30692865f5a043ac36935dd807a3a59b49336069',
+    '90f265b42b763b24db450a348716eae829d6f906ae5fc753aff97508a157ea9a',
+    '4a8d321e6f2c1f2ea98bc4a1fa6902d79bfd31d3deda15de7f91b9af3e25e331',
+  ]
+
+  for (const queryPolicyId of [undefined, 'legacy-v1'] as const) {
+    const harness = createHarness(families, rankedAnswer, {
+      ...(queryPolicyId === undefined ? {} : { queryPolicyId }),
+      imageState: createSharpRaster().imageState,
+      image,
+      authoredTargetForCapture: authoredTarget,
+    })
+    await harness.composer.compose({
+      image: harness.image,
+      target: authoredTarget,
+      exclusions,
+      families: harness.families,
+      signal: new AbortController().signal,
+    })
+    assert.deepEqual(harness.requests.map(textAndQuestionsSha256), expected)
+  }
+  assert.equal(resolveH6QueryPolicyId(undefined), 'legacy-v1')
+  assert.equal(resolveH6QueryPolicyId('legacy-v1'), 'legacy-v1')
+})
+
+await test('strict query policy augments all six existing instruction positions only', async () => {
+  const families = {
+    D: [
+      candidate('D', 'native-d0', 64, 48, { left: 1, top: 1, width: 4, height: 4 }),
+      candidate('D', 'native-d1', 64, 48, { left: 8, top: 1, width: 4, height: 4 }),
+    ],
+    U: [candidate('U', 'native-u0', 64, 48, { left: 1, top: 10, width: 4, height: 4 })],
+  }
+  const harness = createHarness(families, scoredAnswer, {
+    queryPolicyId: 'strict-authored-scope-v1',
+  })
+  const result = await harness.composer.compose({
+    image: harness.image,
+    target,
+    exclusions: ['outside the authored scope'],
+    families: harness.families,
+    signal: new AbortController().signal,
+  })
+  assert.equal(result.status, 'located')
+  assert.deepEqual(harness.stages, ['presence', 'nominate-D', 'nominate-U', 'final-select'])
+  const [presence, nominateD, nominateU, final] = harness.requests
+  assert.ok(presence && nominateD && nominateU && final)
+  const presenceQuestion = presence.questions.presence
+  assert.ok(presenceQuestion?.type === 'choice')
+  assert.equal(presenceQuestion.rankingSize, 1)
+  assert.deepEqual(Object.keys(presenceQuestion.criteria), ['present', 'absent', 'uncertain'])
+  const firstString = (request: DecisionRequest) =>
+    request.state.find((part): part is string => typeof part === 'string')
+  assert.equal(
+    firstString(presence),
+    'Determine whether the described visible instance exists anywhere in this unmodified source. Do not judge any candidate mask or its completeness. Choose present, absent, or uncertain. ' +
+      H6_QUERY_POLICY_INSTRUCTIONS.presenceState,
+  )
+  assert.equal(
+    presence.questions.presence?.instructions,
+    'Choose the single best closed status for visible target presence. ' +
+      H6_QUERY_POLICY_INSTRUCTIONS.presenceQuestion,
+  )
+  for (const request of [nominateD, nominateU]) {
+    const question = request.questions.selection
+    assert.ok(question?.type === 'choice')
+    assert.equal(
+      question.instructions,
+      'Rank the strongest shown candidate aliases by semantic identity and relation. ' +
+        H6_QUERY_POLICY_INSTRUCTIONS.nominationQuestion,
+    )
+    assert.equal(question.rankingSize, 4)
+    assert.equal(Object.keys(question.criteria).at(-1), 'none')
+  }
+  const nominateDQuestion = nominateD.questions.selection
+  const nominateUQuestion = nominateU.questions.selection
+  assert.ok(nominateDQuestion?.type === 'choice')
+  assert.ok(nominateUQuestion?.type === 'choice')
+  assert.deepEqual(Object.keys(nominateDQuestion.criteria), ['D00', 'D01', 'none'])
+  assert.deepEqual(Object.keys(nominateUQuestion.criteria), ['U00', 'none'])
+  for (const request of [nominateD, nominateU]) {
+    const stateText = request.state.filter((part): part is string => typeof part === 'string')
+    assert.equal(
+      stateText[0],
+      `Rank up to four candidate aliases from family ${stateText[0]?.includes('family D') ? 'D' : 'U'} by semantic identity and the authored relation. Judge the pictured visible instance; do not demand pixel-perfect contours or infer hidden parts. Use none if this family has no matching instance. ` +
+        H6_QUERY_POLICY_INSTRUCTIONS.nominationState,
+    )
+    assert.match(stateText.at(-1) ?? '', /^Authored target:/u)
+    assert.equal(stateText.filter((part) => part.includes(target)).length, 1)
+  }
+  assert.equal(
+    firstString(final),
+    'Choose the best actual candidate mask for the requested visible instance. Prefer coverage of its whole visible extent and exclude substantial unrelated content. Occlusion gaps and disconnected visible pieces are allowed. Choose none if no candidate fits. ' +
+      H6_QUERY_POLICY_INSTRUCTIONS.finalState,
+  )
+  const finalQuestion = final.questions.selection
+  assert.ok(finalQuestion?.type === 'choice')
+  assert.equal(
+    finalQuestion.instructions,
+    'Choose the best actual mask alias, or none. ' + H6_QUERY_POLICY_INSTRUCTIONS.finalQuestion,
+  )
+  assert.equal(finalQuestion.rankingSize, 1)
+  assert.deepEqual(Object.keys(finalQuestion.criteria), ['D00', 'D01', 'U00', 'none'])
+  assert.equal(
+    final.state
+      .filter((part) => typeof part === 'string')
+      .at(-1)
+      ?.includes(target),
+    true,
+  )
+  assert.equal(H6_QUERY_POLICY.schema, 'h6-query-policy-v1')
+  assert.equal(
+    H6_QUERY_POLICY.hypothesisSha256,
+    'dac1bf0eeecfaa204a70e3a89d5e16d7c64ced576a972923a3a1665287426ab2',
+  )
+  assert.equal(H6_QUERY_POLICY.compositionMode, 'append-to-legacy-instruction-v1')
+  assert.deepEqual(Object.keys(H6_QUERY_POLICY), [
+    'schema',
+    'policyId',
+    'hypothesisSha256',
+    'compositionMode',
+    'instructions',
+  ])
+  assert.ok(Object.isFrozen(H6_QUERY_POLICY))
+  assert.ok(Object.isFrozen(H6_QUERY_POLICY.instructions))
+  assert.deepEqual(Object.keys(H6_QUERY_POLICY.instructions), [
+    'presenceState',
+    'presenceQuestion',
+    'nominationState',
+    'nominationQuestion',
+    'finalState',
+    'finalQuestion',
+  ])
+  assert.equal(
+    H6_QUERY_POLICY_SHA256,
+    createHash('sha256').update(JSON.stringify(H6_QUERY_POLICY)).digest('hex'),
+  )
+  assert.equal(
+    H6_QUERY_POLICY_SHA256,
+    '8146bc76ed3166a1cf8573518d23765266bf53f9172f9794e1e85a3fe793d9bc',
+  )
+})
+
+await test('unknown H6 query policy is rejected synchronously before port work', () => {
+  let portCalls = 0
+  assert.throws(
+    () =>
+      Reflect.apply(createH6ContextComposer, undefined, [
+        {
+          queryPolicyId: 'unrecognized-policy',
+          decision: {
+            async decide() {
+              portCalls++
+              return { answers: {}, metadata: { ...metadata } }
+            },
+          },
+          imageState: async () => {
+            portCalls++
+            return []
+          },
+          presentation: {
+            async renderPresence() {
+              portCalls++
+              return []
+            },
+            async renderNomination() {
+              portCalls++
+              return []
+            },
+            async renderFinal() {
+              portCalls++
+              return []
+            },
+          },
+          budgetRecord: {
+            admit() {
+              portCalls++
+            },
+            settle() {
+              portCalls++
+            },
+          },
+        },
+      ]),
+    (error: unknown) => error instanceof ClassifierError && error.code === 'INVALID_INPUT',
+  )
+  assert.equal(portCalls, 0)
+})
 
 await test('presence uses stable raw Choice maxima and short-circuits absent and uncertain', async () => {
   for (const [nativeChoice, expected, reason] of [

@@ -16,6 +16,11 @@ import type { PackedBinaryMask } from '../../src/entities/object-proposals.js'
 import type { RgbaRaster } from '../../src/entities/representation.js'
 import { selection, validateDecision } from '../../src/features/choice.js'
 import { unpackBinaryMask } from '../../src/features/segmentation/packed-mask.js'
+import {
+  appendH6QueryInstruction,
+  resolveH6QueryPolicyId,
+  type H6QueryPolicyId,
+} from './h6-query-policy.js'
 
 const H6_FAMILIES = ['D', 'U'] as const
 export type H6Family = (typeof H6_FAMILIES)[number]
@@ -93,6 +98,7 @@ interface H6ComposerOptions {
   imageState: RasterPort['imageState']
   presentation: H6PresentationPort
   budgetRecord: H6DecisionBudgetRecordPort
+  queryPolicyId?: H6QueryPolicyId
 }
 
 export interface H6PresenceEvidence {
@@ -355,10 +361,15 @@ function presenceRequest(
   target: string,
   exclusions: readonly string[],
   state: DecisionState,
+  queryPolicyId: H6QueryPolicyId,
 ): DecisionRequest {
   return {
     state: [
-      'Determine whether the described visible instance exists anywhere in this unmodified source. Do not judge any candidate mask or its completeness. Choose present, absent, or uncertain.',
+      appendH6QueryInstruction(
+        queryPolicyId,
+        'presenceState',
+        'Determine whether the described visible instance exists anywhere in this unmodified source. Do not judge any candidate mask or its completeness. Choose present, absent, or uncertain.',
+      ),
       ...state,
       sourceText(target, exclusions),
     ],
@@ -366,7 +377,11 @@ function presenceRequest(
       presence: {
         type: 'choice',
         rankingSize: 1,
-        instructions: 'Choose the single best closed status for visible target presence.',
+        instructions: appendH6QueryInstruction(
+          queryPolicyId,
+          'presenceQuestion',
+          'Choose the single best closed status for visible target presence.',
+        ),
         criteria: {
           present: 'The described visible instance is present in the source.',
           absent: 'The described visible instance is absent from the source.',
@@ -383,6 +398,7 @@ function nominationRequest(
   target: string,
   exclusions: readonly string[],
   state: DecisionState,
+  queryPolicyId: H6QueryPolicyId,
 ): DecisionRequest {
   const criteria: Record<string, string> = {}
   for (const candidate of candidates)
@@ -390,7 +406,11 @@ function nominationRequest(
   criteria.none = 'No shown region depicts the requested visible instance.'
   return {
     state: [
-      `Rank up to four candidate aliases from family ${family} by semantic identity and the authored relation. Judge the pictured visible instance; do not demand pixel-perfect contours or infer hidden parts. Use none if this family has no matching instance.`,
+      appendH6QueryInstruction(
+        queryPolicyId,
+        'nominationState',
+        `Rank up to four candidate aliases from family ${family} by semantic identity and the authored relation. Judge the pictured visible instance; do not demand pixel-perfect contours or infer hidden parts. Use none if this family has no matching instance.`,
+      ),
       ...state,
       sourceText(target, exclusions),
     ],
@@ -398,8 +418,11 @@ function nominationRequest(
       selection: {
         type: 'choice',
         rankingSize: 4,
-        instructions:
+        instructions: appendH6QueryInstruction(
+          queryPolicyId,
+          'nominationQuestion',
           'Rank the strongest shown candidate aliases by semantic identity and relation.',
+        ),
         criteria,
       },
     },
@@ -411,13 +434,18 @@ function finalRequest(
   target: string,
   exclusions: readonly string[],
   state: DecisionState,
+  queryPolicyId: H6QueryPolicyId,
 ): DecisionRequest {
   const criteria: Record<string, string> = {}
   for (const candidate of candidates) criteria[candidate.alias] = `Actual mask ${candidate.alias}.`
   criteria.none = 'None of the shown masks is the requested visible instance with suitable extent.'
   return {
     state: [
-      'Choose the best actual candidate mask for the requested visible instance. Prefer coverage of its whole visible extent and exclude substantial unrelated content. Occlusion gaps and disconnected visible pieces are allowed. Choose none if no candidate fits.',
+      appendH6QueryInstruction(
+        queryPolicyId,
+        'finalState',
+        'Choose the best actual candidate mask for the requested visible instance. Prefer coverage of its whole visible extent and exclude substantial unrelated content. Occlusion gaps and disconnected visible pieces are allowed. Choose none if no candidate fits.',
+      ),
       ...state,
       sourceText(target, exclusions),
     ],
@@ -425,7 +453,11 @@ function finalRequest(
       selection: {
         type: 'choice',
         rankingSize: 1,
-        instructions: 'Choose the best actual mask alias, or none.',
+        instructions: appendH6QueryInstruction(
+          queryPolicyId,
+          'finalQuestion',
+          'Choose the best actual mask alias, or none.',
+        ),
         criteria,
       },
     },
@@ -561,6 +593,7 @@ async function prepareImages(
 }
 
 export function createH6ContextComposer(options: H6ComposerOptions) {
+  const queryPolicyId = resolveH6QueryPolicyId(options?.queryPolicyId)
   if (
     !options ||
     typeof options.decision?.decide !== 'function' ||
@@ -642,7 +675,12 @@ export function createH6ContextComposer(options: H6ComposerOptions) {
           presenceInput.image.data.fill(0)
         }
         const presenceState = await prepareImages(presenceViews, options.imageState, signal, 1)
-        const presenceRequestValue = presenceRequest(owned.target, owned.exclusions, presenceState)
+        const presenceRequestValue = presenceRequest(
+          owned.target,
+          owned.exclusions,
+          presenceState,
+          queryPolicyId,
+        )
         const presenceResult = await invoke('presence', presenceRequestValue)
         const presenceSelection = selection(
           presenceResult,
@@ -697,6 +735,7 @@ export function createH6ContextComposer(options: H6ComposerOptions) {
             owned.target,
             owned.exclusions,
             state,
+            queryPolicyId,
           )
           const result = await invoke(family === 'D' ? 'nominate-D' : 'nominate-U', request)
           const order = orderedTopFour(
@@ -750,7 +789,13 @@ export function createH6ContextComposer(options: H6ComposerOptions) {
         )
         if (finalState.filter((part) => typeof part !== 'string').length > 9)
           throw new ClassifierError('RESOURCE_LIMIT', 'H6 final request exceeds nine image parts')
-        const finalRequestValue = finalRequest(nominees, owned.target, owned.exclusions, finalState)
+        const finalRequestValue = finalRequest(
+          nominees,
+          owned.target,
+          owned.exclusions,
+          finalState,
+          queryPolicyId,
+        )
         const finalResult = await invoke('final-select', finalRequestValue)
         const finalSelection = selection(
           finalResult,

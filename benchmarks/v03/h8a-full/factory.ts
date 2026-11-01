@@ -3,6 +3,7 @@ import { ClassifierError } from '../../../src/entities/errors.js'
 import type { DecisionPort, RasterPort } from '../../../src/entities/contracts.js'
 import type { createSharpH6Presentation } from '../h6-context-composer.js'
 import type { H6DecisionBudgetRecordPort } from '../h6-context-composer.js'
+import { resolveH6QueryPolicyId, type H6QueryPolicyId } from '../h6-query-policy.js'
 import type { H8aFullSuccess } from './contracts.js'
 import {
   H8A_FULL_CASE_DEADLINE_MS,
@@ -37,6 +38,7 @@ interface H8aFullRuntimeFactoryConfig {
   artifactRoot: string
   workerScriptPath?: string
   recipeId?: H8aFullRecipeId
+  queryPolicyId?: H6QueryPolicyId
 }
 
 interface H8aFullRuntime {
@@ -60,6 +62,7 @@ interface FullRunJob {
 }
 
 export function createH8aFullRuntime(config: H8aFullRuntimeFactoryConfig): H8aFullRuntime {
+  const queryPolicyId = resolveH6QueryPolicyId(config?.queryPolicyId)
   if (!config.pythonExecutable || !config.assetRoot || !config.artifactRoot)
     throw new ClassifierError('INVALID_INPUT', 'H8a runtime factory requires explicit paths')
   const artifactRoot = config.artifactRoot
@@ -147,6 +150,7 @@ export function createH8aFullRuntime(config: H8aFullRuntimeFactoryConfig): H8aFu
           imageState: input.imageState,
           native,
           artifactRoot,
+          queryPolicyId,
           ...(input.presentation ? { presentation: input.presentation } : {}),
           ...(input.budgetRecord ? { budgetRecord: input.budgetRecord } : {}),
         }

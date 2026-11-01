@@ -5,6 +5,7 @@ import type { DecisionPort, RasterPort } from '../../../src/entities/contracts.j
 import { ClassifierError, assertActive } from '../../../src/entities/errors.js'
 import { createH6ContextComposer, createSharpH6Presentation } from '../h6-context-composer.js'
 import type { H6DecisionBudgetRecordPort } from '../h6-context-composer.js'
+import { resolveH6QueryPolicyId, type H6QueryPolicyId } from '../h6-query-policy.js'
 import {
   H8A_FULL_CASE_DEADLINE_MS,
   H8A_FULL_MAX_ENCODED_BYTES,
@@ -42,6 +43,7 @@ export interface H8aFullPipelineDependencies {
   imageState: RasterPort['imageState']
   native: Pick<H8aFullNativePort, 'generate'>
   artifactRoot: string
+  queryPolicyId?: H6QueryPolicyId
   presentation?: ReturnType<typeof createSharpH6Presentation>
   budgetRecord?: H6DecisionBudgetRecordPort
 }
@@ -69,6 +71,7 @@ export function captureH8aFullRun(
   input: H8aFullPipelineInput,
   dependencies: H8aFullPipelineDependencies,
 ): H8aFullRunCapture {
+  const queryPolicyId = resolveH6QueryPolicyId(dependencies?.queryPolicyId)
   if (!input || typeof input !== 'object') throw invalidInput('H8a input must be an object')
   const encodedImageSource = input.encodedImage
   if (!(encodedImageSource instanceof Uint8Array))
@@ -119,6 +122,7 @@ export function captureH8aFullRun(
       decision: dependencies.decision,
       imageState: dependencies.imageState,
       native: dependencies.native,
+      queryPolicyId,
       ...(dependencies.presentation ? { presentation: dependencies.presentation } : {}),
       ...(dependencies.budgetRecord ? { budgetRecord: dependencies.budgetRecord } : {}),
     },
@@ -149,6 +153,7 @@ export async function runH8aFullPipelineSnapshot(
   dependencies: Omit<H8aFullPipelineDependencies, 'artifactRoot'>,
   signal: AbortSignal,
 ): Promise<H8aFullSuccess> {
+  const queryPolicyId = resolveH6QueryPolicyId(dependencies?.queryPolicyId)
   let source: OwnedOrientedSource | undefined
   let orientedPng: OwnedOrientedPng | undefined
   let nativeResult: H8aNativeGenerationOutput | undefined
@@ -196,6 +201,7 @@ export async function runH8aFullPipelineSnapshot(
       imageState: dependencies.imageState,
       presentation: dependencies.presentation ?? createSharpH6Presentation(),
       budgetRecord,
+      queryPolicyId,
     })
     const composition = await composer.compose({
       image: source.raster,
