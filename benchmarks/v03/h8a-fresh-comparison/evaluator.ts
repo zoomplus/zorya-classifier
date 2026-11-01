@@ -5,6 +5,7 @@ import { computePhaseFreezeCommitmentSha256 } from './freeze-commitment.js'
 import { computeSourceGroupStratumCommitmentSha256 } from './source-group-validation.js'
 import {
   DEV40_NEGATIVE_COUNT,
+  DEV40_CASE_COUNT,
   DEV40_POSITIVE_COUNT,
   DEV40_STRATUM_QUOTAS,
   PHASE_DEV40_ID,
@@ -657,17 +658,54 @@ export function joinCloseoutsWithPrivateAnnotations(input: {
 
 interface Dev40GateResult {
   executionValid: boolean
+  pairedCoverageComplete: boolean
   qualityPass: boolean
   falseNegativeOutputs: number
   positiveDenominator: number
   positiveSuccesses: number
+  observedNegativeDenominator: number
   byStratum: Record<
     string,
-    { positives: number; positiveSuccesses: number; negatives: number; falseOutputs: number }
+    {
+      positives: number
+      positiveSuccesses: number
+      negatives: number
+      observedNegatives: number
+      falseOutputs: number
+    }
   >
 }
 
 export function evaluateDev40Gate(rows: readonly CaseQualityRow[]): Dev40GateResult {
+  if (rows.length !== DEV40_CASE_COUNT)
+    throw new RangeError('DEV40 gate requires all 40 frozen cases')
+  const caseIds = new Set<string>()
+  const countsByStratum = new Map(STRATUMS.map((stratum) => [stratum, { present: 0, absent: 0 }]))
+  for (const row of rows) {
+    if (!row.opaqueCaseId || caseIds.has(row.opaqueCaseId))
+      throw new RangeError('DEV40 gate requires unique nonempty case IDs')
+    caseIds.add(row.opaqueCaseId)
+    if (
+      row.candidate.opaqueCaseId !== row.opaqueCaseId ||
+      row.control.opaqueCaseId !== row.opaqueCaseId ||
+      row.candidate.profileId !== PROFILE_CANDIDATE_ID ||
+      row.control.profileId !== PROFILE_CONTROL_ID
+    )
+      throw new RangeError(
+        'DEV40 gate requires one correctly bound candidate/control pair per case',
+      )
+    const stratumCounts = countsByStratum.get(row.stratum)
+    if (!stratumCounts) throw new RangeError('DEV40 gate contains an unknown stratum')
+    if (row.expectedPresence === 'present') stratumCounts.present++
+    else if (row.expectedPresence === 'absent') stratumCounts.absent++
+    else throw new RangeError('DEV40 gate contains an unknown expected-presence label')
+  }
+  for (const stratum of STRATUMS) {
+    const counts = countsByStratum.get(stratum)!
+    const expected = DEV40_STRATUM_QUOTAS[stratum]
+    if (counts.present !== expected.present || counts.absent !== expected.absent)
+      throw new RangeError(`DEV40 gate ${stratum} stratum quota mismatch`)
+  }
   const positives = rows.filter((item) => item.expectedPresence === 'present')
   const negatives = rows.filter((item) => item.expectedPresence === 'absent')
   if (positives.length !== DEV40_POSITIVE_COUNT || negatives.length !== DEV40_NEGATIVE_COUNT)
@@ -675,12 +713,16 @@ export function evaluateDev40Gate(rows: readonly CaseQualityRow[]): Dev40GateRes
 
   const falseNegativeOutputs = negatives.filter((item) => item.candidateNegativeFalse).length
   const positiveSuccesses = positives.filter((item) => item.candidatePositiveSuccess).length
+  const observedNegativeDenominator = negatives.filter((item) =>
+    isCompletedSemanticOutcome(item.candidate),
+  ).length
   const byStratum: Dev40GateResult['byStratum'] = {}
   for (const row of rows) {
     const bucket = byStratum[row.stratum] ?? {
       positives: 0,
       positiveSuccesses: 0,
       negatives: 0,
+      observedNegatives: 0,
       falseOutputs: 0,
     }
     if (row.expectedPresence === 'present') {
@@ -688,6 +730,7 @@ export function evaluateDev40Gate(rows: readonly CaseQualityRow[]): Dev40GateRes
       if (row.candidatePositiveSuccess) bucket.positiveSuccesses++
     } else {
       bucket.negatives++
+      if (isCompletedSemanticOutcome(row.candidate)) bucket.observedNegatives++
       if (row.candidateNegativeFalse) bucket.falseOutputs++
     }
     byStratum[row.stratum] = bucket
@@ -696,15 +739,34 @@ export function evaluateDev40Gate(rows: readonly CaseQualityRow[]): Dev40GateRes
     (item) =>
       item.candidate.executionValidity === 'valid' && item.control.executionValidity === 'valid',
   )
-  const qualityPass = executionValid && falseNegativeOutputs === 0
+  const pairedCoverageComplete = rows.every(
+    (item) =>
+      isTerminalCaseState(item.candidate.caseState) && isTerminalCaseState(item.control.caseState),
+  )
+  const qualityPass = executionValid && pairedCoverageComplete && falseNegativeOutputs === 0
   return {
     executionValid,
+    pairedCoverageComplete,
     qualityPass,
     falseNegativeOutputs,
     positiveDenominator: positives.length,
     positiveSuccesses,
+    observedNegativeDenominator,
     byStratum,
   }
+}
+
+function isCompletedSemanticOutcome(row: OutputRow): boolean {
+  return row.executionValidity === 'valid' && isTerminalCaseState(row.caseState)
+}
+
+function isTerminalCaseState(state: OutputRow['caseState']): boolean {
+  return (
+    state === 'success' ||
+    state === 'not_found' ||
+    state === 'negative_clean' ||
+    state === 'unknown'
+  )
 }
 
 interface Qual120GateResult {

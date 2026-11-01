@@ -112,6 +112,7 @@ await test('DEV40 gate counts false box/cutout negatives and full positive denom
   assert.deepEqual(evaluatePhaseGate(PHASE_DEV40_ID, joined), gate)
   assert.equal(gate.positiveDenominator, 30)
   assert.equal(gate.falseNegativeOutputs, 10)
+  assert.equal(gate.observedNegativeDenominator, 10)
   assert.equal(gate.qualityPass, false)
   assert.equal(gate.positiveSuccesses, 30)
 })

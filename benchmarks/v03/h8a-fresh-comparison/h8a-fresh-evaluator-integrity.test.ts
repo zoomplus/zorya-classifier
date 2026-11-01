@@ -736,21 +736,20 @@ await test('paired receipt graph rejects duplicate observed physical IDs across 
 await test('DEV gate does not require all positive successes', () => {
   const { freeze } = buildSyntheticPhaseFreeze(PHASE_DEV40_ID)
   const annotations = buildDev40Annotations(freeze)
-  const presentIds = new Set(
-    annotations.cases
-      .filter((item) => item.expectedPresence === 'present')
-      .map((item) => item.opaqueCaseId),
-  )
-  const candidateRows = freeze.producerCases.map((row, index) => {
-    if (!presentIds.has(row.opaqueCaseId)) {
-      return buildOutputRow(row.opaqueCaseId, PROFILE_CANDIDATE_ID)
-    }
-    if (index === 0) {
+  const positiveIds = annotations.cases
+    .filter((item) => item.expectedPresence === 'present')
+    .map((item) => item.opaqueCaseId)
+  const candidateRows = freeze.producerCases.map((row) => {
+    if (row.opaqueCaseId === positiveIds[0]) {
       return buildOutputRow(row.opaqueCaseId, PROFILE_CANDIDATE_ID, {
-        caseState: 'error',
+        caseState: 'unknown',
         box: null,
       })
     }
+    if (row.opaqueCaseId === positiveIds[1])
+      return buildOutputRow(row.opaqueCaseId, PROFILE_CANDIDATE_ID, { caseState: 'not_found' })
+    if (!positiveIds.includes(row.opaqueCaseId))
+      return buildOutputRow(row.opaqueCaseId, PROFILE_CANDIDATE_ID)
     return buildOutputRow(row.opaqueCaseId, PROFILE_CANDIDATE_ID, {
       caseState: 'success',
       box: { left: 1, top: 1, width: 4, height: 4 },
@@ -768,6 +767,58 @@ await test('DEV gate does not require all positive successes', () => {
   })
   const gate = evaluateDev40Gate(joined)
   assert.equal(gate.positiveDenominator, DEV40_POSITIVE_COUNT)
-  assert.equal(gate.positiveSuccesses, DEV40_POSITIVE_COUNT - 1)
+  assert.equal(gate.positiveSuccesses, DEV40_POSITIVE_COUNT - 2)
+  assert.equal(gate.executionValid, true)
+  assert.equal(gate.pairedCoverageComplete, true)
   assert.equal(gate.qualityPass, true)
+})
+
+await test('DEV40 gate blocks an incomplete paired run without claiming unobserved negative coverage', () => {
+  const { freeze } = buildSyntheticPhaseFreeze(PHASE_DEV40_ID)
+  const annotations = buildDev40Annotations(freeze)
+  const positiveIds = annotations.cases
+    .filter((item) => item.expectedPresence === 'present')
+    .map((item) => item.opaqueCaseId)
+  const successId = positiveIds[0]!
+  const errorId = positiveIds[1]!
+  const candidateRows = freeze.producerCases.map((row) => {
+    if (row.opaqueCaseId === successId)
+      return buildOutputRow(row.opaqueCaseId, PROFILE_CANDIDATE_ID, {
+        caseState: 'success',
+        box: { left: 1, top: 1, width: 1, height: 1 },
+      })
+    if (row.opaqueCaseId === errorId)
+      return buildOutputRow(row.opaqueCaseId, PROFILE_CANDIDATE_ID, { caseState: 'error' })
+    return buildOutputRow(row.opaqueCaseId, PROFILE_CANDIDATE_ID, { caseState: 'unstarted' })
+  })
+  const controlRows = freeze.producerCases.map((row) =>
+    buildOutputRow(
+      row.opaqueCaseId,
+      PROFILE_CONTROL_ID,
+      row.opaqueCaseId === successId ? { caseState: 'unknown' } : { caseState: 'unstarted' },
+    ),
+  )
+  const joined = joinCloseoutsWithPrivateAnnotations({
+    freeze,
+    candidateCloseout: buildCloseout(freeze, PROFILE_CANDIDATE_ID, candidateRows),
+    controlCloseout: buildCloseout(freeze, PROFILE_CONTROL_ID, controlRows),
+    annotations,
+    packedMasksBySha256: new Map(),
+  })
+  const gate = evaluateDev40Gate(joined)
+  assert.equal(candidateRows.filter((row) => row.caseState === 'unstarted').length, 38)
+  assert.equal(candidateRows.filter((row) => row.caseState === 'success').length, 1)
+  assert.equal(candidateRows.filter((row) => row.caseState === 'error').length, 1)
+  assert.equal(controlRows.filter((row) => row.caseState === 'unstarted').length, 39)
+  assert.equal(controlRows.filter((row) => row.caseState === 'unknown').length, 1)
+  assert.equal(gate.executionValid, true)
+  assert.equal(gate.pairedCoverageComplete, false)
+  assert.equal(gate.qualityPass, false)
+  assert.equal(gate.observedNegativeDenominator, 0)
+  assert.equal(gate.falseNegativeOutputs, 0)
+  assert.equal(
+    Object.values(gate.byStratum).reduce((sum, item) => sum + item.observedNegatives, 0),
+    0,
+  )
+  assert.throws(() => evaluateDev40Gate(joined.slice(0, -1)), /all 40 frozen cases/u)
 })
