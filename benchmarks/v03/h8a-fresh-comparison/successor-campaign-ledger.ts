@@ -16,8 +16,15 @@ import type {
   SuccessorCampaignAdmissionPort,
 } from './campaign-ledger-port.js'
 import type { H8aFreshProfileId } from './profiles.js'
+import {
+  UI_STATE_DEV40_PARENT_LEDGER_SHA256,
+  UI_STATE_DEV40_PARENT_REGISTRATION_SHA256,
+  UI_STATE_DEV40_FREEZE_ID,
+  UI_STATE_DEV40_PUBLIC_COST_BOUNDS_SHA256,
+  UI_STATE_DEV40_STUDY_ID,
+} from './ui-state-dev40-policy.js'
 
-const INDEPENDENT_DEV40_STUDY_ID = 'original-h8a-independent-dev40-v2' as const
+const INDEPENDENT_DEV40_STUDY_ID = UI_STATE_DEV40_STUDY_ID
 export const SUCCESSOR_REGISTRATION_RELATIVE_PATH = join('admission', 'successor-campaign-v1')
 export const DEV40_SUCCESSOR_MAX_CALLS = 400 as const
 const SUCCESSOR_GLOBAL_MAX_CALLS = 2_000 as const
@@ -26,11 +33,9 @@ export const CANDIDATE_MAX_USD_PER_DISPATCH = 0.55 as const
 export const CONTROL_MAX_USD_PER_DISPATCH = 0.12 as const
 
 export const INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256 =
-  'f2fc1abae7ca911fd04e94153520dd01d6bc7d3d48fcfee508ef6c05076093b2'
-export const INDEPENDENT_DEV40_PARENT_LEDGER_SHA256 =
-  '839ad2eaa441eafbc85a998e6f89df053ff616d8109fa1d92909cd1cefd99d9a'
-export const INDEPENDENT_DEV40_COST_PROOF_SHA256 =
-  '29af739b4762fe20e0249e5cae66746e293640ef5c473c55416f84cd5e51e107'
+  UI_STATE_DEV40_PARENT_REGISTRATION_SHA256
+export const INDEPENDENT_DEV40_PARENT_LEDGER_SHA256 = UI_STATE_DEV40_PARENT_LEDGER_SHA256
+export const INDEPENDENT_DEV40_COST_PROOF_SHA256 = UI_STATE_DEV40_PUBLIC_COST_BOUNDS_SHA256
 
 const DIGEST = z.string().regex(/^[a-f0-9]{64}$/u)
 const REPOSITORY_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -61,7 +66,7 @@ const parentLedgerSchema = z
 
 const registrationSchema = z
   .object({
-    schema: z.literal('h8a-independent-dev40-successor-registration-v1'),
+    schema: z.literal('h8a-ui-state-dev40-successor-registration-v1'),
     studyId: z.literal(INDEPENDENT_DEV40_STUDY_ID),
     parentRegistrationSha256: z.literal(INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256),
     parentLedgerSha256: z.literal(INDEPENDENT_DEV40_PARENT_LEDGER_SHA256),
@@ -129,7 +134,7 @@ const reservationSchema = z
 
 const stateSchema = z
   .object({
-    schema: z.literal('h8a-independent-dev40-successor-ledger-v1'),
+    schema: z.literal('h8a-ui-state-dev40-successor-ledger-v1'),
     ledgerVersion: z.number().int().nonnegative(),
     registrationSha256: DIGEST,
     maxOwnerCostUsd: z.null(),
@@ -202,7 +207,7 @@ function registrationBody(options: {
   parentLedger: z.infer<typeof parentLedgerSchema>
 }): Omit<SuccessorRegistration, 'registrationSha256'> {
   return {
-    schema: 'h8a-independent-dev40-successor-registration-v1',
+    schema: 'h8a-ui-state-dev40-successor-registration-v1',
     studyId: INDEPENDENT_DEV40_STUDY_ID,
     parentRegistrationSha256: INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256,
     parentLedgerSha256: INDEPENDENT_DEV40_PARENT_LEDGER_SHA256,
@@ -286,7 +291,7 @@ function assertResumeState(state: SuccessorLedgerState): void {
 function initialState(registration: SuccessorRegistration): SuccessorLedgerState {
   const parent = registration.inherited
   return stateSchema.parse({
-    schema: 'h8a-independent-dev40-successor-ledger-v1',
+    schema: 'h8a-ui-state-dev40-successor-ledger-v1',
     ledgerVersion: 0,
     registrationSha256: registration.registrationSha256,
     maxOwnerCostUsd: null,
@@ -496,9 +501,10 @@ async function validateRegistrationInputs(options: SuccessorCampaignLedgerOption
   )
   const parentRegistration = z
     .object({
-      schema: z.literal('original-h8a-independent-dev40-v2-parent'),
+      schema: z.literal('h8a-ui-native-state-dev40-registration-v1'),
       studyId: z.literal(INDEPENDENT_DEV40_STUDY_ID),
-      authorCostCeilingUsd: z.null(),
+      freezeId: z.literal(UI_STATE_DEV40_FREEZE_ID),
+      ownerDollarCeiling: z.null(),
       scientificPolicy: z
         .object({
           boundedCalls: z.object({

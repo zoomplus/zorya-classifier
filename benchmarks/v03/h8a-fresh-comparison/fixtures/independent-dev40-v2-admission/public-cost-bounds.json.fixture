@@ -1,6 +1,6 @@
 {
-  "registeredStudySha256": "f2fc1abae7ca911fd04e94153520dd01d6bc7d3d48fcfee508ef6c05076093b2",
-  "observedUtc": "2026-11-01T07:45:51.084099+00:00",
+  "registeredStudySha256": "456998979e6bdb94d4230755b643498e115ab3380855119af105351e18323cba",
+  "observedUtc": "2026-11-01T12:12:53.219976+00:00",
   "ownerDollarCeiling": null,
   "physicalCallLimit": 2000,
   "perCaseTechnicalExposureUsd": "2.92",
@@ -11,8 +11,8 @@
       "profileId": "h8a-cpu-flat-target-v2",
       "model": "openai/gpt-6-luna",
       "rawCatalog": {
-        "path": "/root/.codex/artifacts/zorya-classifier-mcp-20261101/original-h8a-independent-dev40-v2/main/gpt-6-luna-endpoints.json",
-        "sha256": "755e1b42b371bd6efc8c19b94d77d4744bfaa2cf7b218e06cf0ec208dcf1fa71"
+        "path": "/root/.codex/artifacts/zorya-classifier-mcp-20261101/ui-state-dev40-v1/main/gpt-6-luna-endpoints.json",
+        "sha256": "f9692edbbaa3ab6fbe1d03528f61e7137ce8204ecf2f62e49e3fd8f324e8bd9c"
       },
       "inputTokenBound": 1050000,
       "maxOutputTokens": 4096,
@@ -25,7 +25,7 @@
       "profileId": "v02-final-v3-fresh-cohort-replay-v1",
       "model": "openai/gpt-6-luna-decisions",
       "rawCatalog": {
-        "path": "/root/.codex/artifacts/zorya-classifier-mcp-20261101/original-h8a-independent-dev40-v2/main/gpt-6-luna-decisions-endpoints.json",
+        "path": "/root/.codex/artifacts/zorya-classifier-mcp-20261101/ui-state-dev40-v1/main/gpt-6-luna-decisions-endpoints.json",
         "sha256": "22c20d0d49d68ca4558de06956825973f6075cea44c04bfc6ffb4c0b75877974"
       },
       "inputTokenBound": 1050000,

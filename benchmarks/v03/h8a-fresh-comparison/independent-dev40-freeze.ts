@@ -29,11 +29,19 @@ import { hashIdentity } from './hash-identity.js'
 import { validateDevScreenSelection } from './dev-screen-sampling.js'
 import type { PhaseFreeze } from './schemas.js'
 import { phaseFreezeSchema } from './schemas.js'
+import {
+  UI_STATE_DEV40_FREEZE_ID,
+  UI_STATE_DEV40_PARENT_REGISTRATION_SHA256,
+  UI_STATE_DEV40_PUBLIC_COST_BOUNDS_SHA256,
+  UI_STATE_DEV40_ROOT,
+  UI_STATE_DEV40_SOURCE_ADMISSION_POLICY,
+  UI_STATE_DEV40_STUDY_ID,
+} from './ui-state-dev40-policy.js'
 
 const ARTIFACT_ROOT = '/root/.codex/artifacts'
-const STUDY_ID = 'original-h8a-independent-dev40-v2'
-const FREEZE_ID = 'original-h8a-independent-dev40-v2-20261101'
-const STUDY_ROOT = resolve(ARTIFACT_ROOT, 'zorya-classifier-mcp-20261101', STUDY_ID)
+const STUDY_ID = UI_STATE_DEV40_STUDY_ID
+const FREEZE_ID = UI_STATE_DEV40_FREEZE_ID
+const STUDY_ROOT = UI_STATE_DEV40_ROOT
 const AUTHORITY_PATH = resolve(STUDY_ROOT, 'admission', 'independent-dev40-v2-preparation.json')
 const FREEZE_DIRECTORY = resolve(STUDY_ROOT, 'admission', 'freeze-v2')
 const REPOSITORY_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -52,10 +60,13 @@ const verifiedInputsSchema = z
     schema: z.literal('h8a-independent-dev40-v2-preparation-v1'),
     studyId: z.literal(STUDY_ID),
     freezeId: z.literal(FREEZE_ID),
+    parentRegistrationSha256: z.literal(UI_STATE_DEV40_PARENT_REGISTRATION_SHA256),
+    sourcePolicyId: z.literal(UI_STATE_DEV40_SOURCE_ADMISSION_POLICY),
     deadlineIso: z.string().datetime({ offset: true }),
     trustedRoot: z.literal(ARTIFACT_ROOT),
     sourceClosure: z.object({ path: z.string().min(1), sha256: DIGEST }).strict(),
     priceProof: z.object({ path: z.string().min(1), sha256: DIGEST }).strict(),
+    sourceStateProof: z.object({ path: z.string().min(1), sha256: DIGEST }).strict(),
   })
   .passthrough()
 const sourceClosureSchema = z
@@ -68,6 +79,8 @@ const sourceClosureSchema = z
 type IndependentDev40FreezeOptions = z.infer<typeof optionsSchema>
 interface VerifiedIndependentDev40Authority {
   studyId: typeof STUDY_ID
+  sourceAdmissionPolicy: typeof UI_STATE_DEV40_SOURCE_ADMISSION_POLICY
+  sourceStateProofSha256: string
   authoritySha256: string
   sourceCommit: string
   priceProofSha256: string
@@ -122,17 +135,22 @@ async function verifiedAuthorityFor(
   )
   if (Date.parse(authority.deadlineIso) <= Date.now())
     throw new RangeError('Independent DEV40 preparation deadline has expired')
-  const studyPrefix = resolve(ARTIFACT_ROOT, 'zorya-classifier-mcp-20261101', STUDY_ID)
+  const studyPrefix = STUDY_ROOT
   const closurePath = resolve(ARTIFACT_ROOT, authority.sourceClosure.path)
+  const stateProofPath = resolve(ARTIFACT_ROOT, authority.sourceStateProof.path)
   if (
     !closurePath.startsWith(`${studyPrefix}${sep}`) ||
-    relative(ARTIFACT_ROOT, closurePath) !== authority.sourceClosure.path
+    relative(ARTIFACT_ROOT, closurePath) !== authority.sourceClosure.path ||
+    !stateProofPath.startsWith(`${studyPrefix}${sep}`) ||
+    relative(ARTIFACT_ROOT, stateProofPath) !== authority.sourceStateProof.path
   )
     throw new RangeError('Independent DEV40 source closure escapes its registered study root')
   const closureBytes = await readPinnedRegularFile(closurePath, authority.sourceClosure.sha256)
   const closure = sourceClosureSchema.parse(JSON.parse(closureBytes.toString('utf8')) as unknown)
   return {
     studyId: STUDY_ID,
+    sourceAdmissionPolicy: UI_STATE_DEV40_SOURCE_ADMISSION_POLICY,
+    sourceStateProofSha256: authority.sourceStateProof.sha256,
     authoritySha256: sha256(authorityBytes),
     sourceCommit: closure.sourceCommit,
     priceProofSha256: authority.priceProof.sha256,
@@ -200,7 +218,7 @@ function assertIndependentFreeze(freeze: PhaseFreeze): void {
     freeze.profileBindings[0].profileId !== PROFILE_FLAT_CANDIDATE_ID ||
     freeze.profileBindings[1].profileId !== PROFILE_CONTROL_ID ||
     freeze.conservativeCostProof.derivedFrom !==
-      'pinned-price-proof-sha256:29af739b4762fe20e0249e5cae66746e293640ef5c473c55416f84cd5e51e107'
+      `pinned-price-proof-sha256:${UI_STATE_DEV40_PUBLIC_COST_BOUNDS_SHA256}`
   )
     throw new RangeError('Freeze differs from the registered independent DEV40 recipe and limits')
   validateProfileIdentities(freeze)
@@ -276,6 +294,8 @@ export async function assertSuccessorFreezeAdmission(
   validateDevScreenSelection(verified.selection, freeze, verified.annotations)
   if (
     verified.verifiedAuthority.studyId !== STUDY_ID ||
+    verified.verifiedAuthority.sourceAdmissionPolicy !== UI_STATE_DEV40_SOURCE_ADMISSION_POLICY ||
+    !DIGEST.safeParse(verified.verifiedAuthority.sourceStateProofSha256).success ||
     hashIdentity(verified.verifiedAuthority) !== verifiedAuthorityDigest ||
     !DIGEST.safeParse(verified.verifiedAuthority.authoritySha256).success ||
     !/^[a-f0-9]{40}$/u.test(verified.verifiedAuthority.sourceCommit) ||

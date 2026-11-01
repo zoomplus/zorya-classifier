@@ -1,24 +1,39 @@
 {
-  "schema": "original-h8a-independent-dev40-v2-parent",
-  "studyId": "original-h8a-independent-dev40-v2",
-  "freezeId": "original-h8a-independent-dev40-v2-20261101",
-  "baseCommit": "f9931392b37f669995cfb68dd5a2553a620bbd09",
-  "registeredUtc": "2026-11-01T07:44:54.356203+00:00",
-  "devAbsoluteDeadlineUtc": "2026-11-02T07:44:54.356203+00:00",
-  "sourceSelectionSeed": "original-full-h8a-independent-20261101-r2-alpha",
-  "parentFiles": {
-    "disjoint-dev40-v1/parent-registration.json": "5c63045a648928c9aefe12aad99464e8394b3bc42c133b39821036eb74f3bff0",
-    "main-flat-compare-v2/v1-prior-immutable-file-hashes.json": "8f477ea0f8ad738c0c39c4405c13520f8810b36f637b494163c99826dec2b8a3",
-    "main-flat-compare-v2/final/v2-closed-files-sha256.json": "83f90db2237e4b0462c3b192ff8d514c23ce009e5ef466bd4edfe6bb4d3ad0da",
-    "disjoint-dev40-v1/integration/sealed-disjoint-study-source-digests.json": "c4aa7f8d0ea8a4a3aa368405f2b65a65cfeafd5f42b52eee4a8ecf9a6977ef54",
-    "disjoint-dev40-v1/integration/physical-source-novelty-40.json": "3b23795b5a042872a4944fd90991feed1471b82befe87b4ee386f178b833ea63",
-    "disjoint-dev40-v1/integration/committed-source-group-split.json": "b253588448edec3174d35a6004cf766c2e1f2b5b617518869c5517a4c78e374f",
-    "h8a-tile-availability-pilot-v1/main/source-evaluator-authority.json": "a3718d1e431471d3d667ec574c6bdc662aa2cbfbd8c4b56e94a41d41dabf298f",
-    "h8a-tile-availability-pilot-v1/main/terminal-availability-closeout.json": "031520f51cdbdb2b2bb0fa12ac9f25ff66f14ee59817dad96fb1f2004a45758d",
-    "h8a-fresh-dev-qual-campaign-v1/campaign-ledger.json": "839ad2eaa441eafbc85a998e6f89df053ff616d8109fa1d92909cd1cefd99d9a",
-    "post-stop-dev-admission-audit-v1/official-test-metadata-pins.json": "896d0cdbb590e958c4ae678039f8a386d28fe4c6dabf6f46dcd6604909195d5d",
-    "post-stop-dev-admission-audit-v1/private-header-capacity-observations.jsonl": "f25dfe1a191796a2d3def1b22c3cad468fe938e22f6ff9166e516b144bcf54e4",
-    "post-stop-dev-admission-audit-v1/local-ui-game-package-metadata.json": "1b513afb99fc078f2eea0e93e39b336ad937ef0b0da457e1ecad2cce9c02f91f"
+  "schema": "h8a-ui-native-state-dev40-registration-v1",
+  "studyId": "ui-state-dev40-v1",
+  "freezeId": "h8a-ui-native-state-dev40-20261101-v1",
+  "baseCommit": "f02304b58c211a03b5097c4070632a674e81f0ab",
+  "registeredUtc": "2026-11-01T12:11:51.738058+00:00",
+  "devAbsoluteDeadlineUtc": "2026-11-02T12:11:51.738058+00:00",
+  "ancestorStudyId": "original-h8a-independent-dev40-v2",
+  "sourceExposure": "same-40-previously-captured-zero-model-requests-development-replay",
+  "sourceSubstitutionAllowed": false,
+  "sourceCasesLocked": 40,
+  "sourceStrata": {
+    "photo": [
+      16,
+      4
+    ],
+    "ui": {
+      "gthumb": [
+        4,
+        1
+      ],
+      "file-roller": [
+        3,
+        2
+      ]
+    },
+    "map": {
+      "gnome-chess": [
+        4,
+        1
+      ],
+      "four-in-a-row": [
+        3,
+        2
+      ]
+    }
   },
   "scientificPolicy": {
     "candidate": "h8a-cpu-flat-target-v2",
@@ -43,31 +58,58 @@
     },
     "paidRetries": 0
   },
-  "authorCostCeilingUsd": null,
-  "successorAccounting": "Preserve ancestor counters, costs including unknowns, monotone reservation ids and prior freezes. No paid trial retries.",
-  "sourceRoster": {
-    "photo": "Open Images test; 51 observed long-side-1024 mask-author capacity pool for positives. Full pinned test metadata for negatives. Rank eligible distinct authors by new study seed, freeze 16/4 primary and 16/4 ordered reserves; require verified author/license/geometry, no additional reserves. No QUAL pixels.",
-    "ui": {
-      "primary": [
-        "meld",
-        "file-roller"
-      ],
-      "orderedStructuralBackups": [
-        "gthumb",
-        "ristretto"
-      ]
-    },
-    "map": {
-      "primary": [
-        "gnome-chess",
-        "four-in-a-row"
-      ],
-      "orderedStructuralBackups": [
-        "gnome-mines",
-        "gnome-robots"
-      ]
-    },
-    "localPolicy": "Prior to any state capture register exact unique case and state IDs, targets, actions, ground-truth oracle and license. Five per family, primary1 positive/negative 4/1, primary2 3/2. Backups only if a metadata-only structural failure excludes a primary before any case pixel acquisition; no substitution after capture. Freeze exports on prior 5-field producer contract. Novel to all prior corpus/tiles and peers; no coalescing near duplicates including pHash<=4."
+  "ownerDollarCeiling": null,
+  "physicalCallLimits": {
+    "global": 2000,
+    "dev40WorstCaseBoth": 400,
+    "qual120WorstCaseBoth": 1200,
+    "candidatePerCase": 4,
+    "controlPerCase": 6
   },
-  "phases": "same seeded paired DEV8/12/40 scheduling and each existing numerical qualification gate; 120 fully disjoint only after DEV pass; strict budget, timeout, receipt and source isolation"
+  "sourceAdmissionPolicy": {
+    "id": "native-visible-ui-state-v1",
+    "exactEncodedDuplicates": "reject",
+    "exactDecodedRgbDuplicates": "reject",
+    "photoAndMapNearHashMaxInclusiveRejected": 4,
+    "uiNearHash": "record-diagnostic",
+    "uiStateProofRequired": true,
+    "uiStateFingerprint": "sha256-json-visible-showing-ordered-native-tree-role-name-bounds-states-and-window-stack-v1",
+    "uiExcludeDynamicFingerprintFields": [
+      "pid",
+      "environment",
+      "capturePath",
+      "opaqueCaseId",
+      "targetQuery",
+      "expectedPresence"
+    ],
+    "uiSameVisibleState": "reject",
+    "uiDifferentTaskAlone": "insufficient",
+    "uiRequiredProofs": [
+      "complete-native-inventory",
+      "same-state-pre-and-post-capture",
+      "unique-visible-state-fingerprint",
+      "source-app-version-and-input-shas",
+      "target-role-name-uniqueness-or-complete-absence",
+      "original-screen-transform",
+      "actual-source-pixel-review"
+    ],
+    "uiRecapture": "same-predeclared-ten-states-fixed-content-no-substitution-env-whitelist-repair"
+  },
+  "qualificationPolicy": "new-120-source-disjoint-cases-only-after-complete-dev40-unmodified-quality-gate",
+  "parentFiles": {
+    "original-h8a-independent-dev40-v2/parent-registration.json": "f2fc1abae7ca911fd04e94153520dd01d6bc7d3d48fcfee508ef6c05076093b2",
+    "original-h8a-independent-dev40-v2/main/source-admission-terminal-final.json": "b0d0ebab310e299a4b66ff5681d03a3e802c5cc0872dfd660ad0cd1b669e79e4",
+    "original-h8a-independent-dev40-v2/main/historical-pixels.json": "510cb48fa740721123ce0ae4cc61c607675503f3ae0399bc9d0afb2487f6bb9d",
+    "original-h8a-independent-dev40-v2/main/historical-exclusions-canonical.json": "6f66fd7840b98c566c78b1dffd889bd08470c7e58b291014150ae4bb797eaab9",
+    "original-h8a-independent-dev40-v2/photo/review-fragment-v3/main-review-original-photo-dev40.json": "d3261faeab5a88a771f8636a5cd5648e9030687d84787f52a969791d93107bf8",
+    "original-h8a-independent-dev40-v2/main/reviewed-game-fragment.json": "348bc268b5ddfbc7289a636182edd4fddaca40ba2614e95fc9b2d1d42ff582ab",
+    "original-h8a-independent-dev40-v2/main/normalized-registered-game-order.json": "65b37363e52d868436b909c4ff41533cc801dc81e8ba7925037f38c5de196f19",
+    "original-h8a-independent-dev40-v2/ui/pre-capture-roster-v1.json": "26c1a78dfee2190bbd5ffda46d8dff3b12c516982825c21e392daf1653efc621",
+    "original-h8a-independent-dev40-v2/ui/producer-wording-supplement-v2.json": "e59b6051ad78343bc8cfe53d5e367970eab86910196bfb55d40fd1109d83cb1e",
+    "original-h8a-independent-dev40-v2/ui/capture-view-supplement-v2.json": "21bd1d36493ec2c16ea1e8b31701cbbc9104e14f994a41fae68a75fe3042132d",
+    "original-h8a-independent-dev40-v2/ui/pre-capture-stability-v1.json": "63ed1039f506592f11e5df0ae1a006582066239950d4c4a292ed389e27b3d0ac",
+    "original-h8a-independent-dev40-v2/ui/lane-cleanup-receipt-v2.json": "dedbf85296cd4f0e829467d4b79e7696c4b1992eee9541afac200df079732288",
+    "h8a-fresh-dev-qual-campaign-v1/campaign-ledger.json": "839ad2eaa441eafbc85a998e6f89df053ff616d8109fa1d92909cd1cefd99d9a"
+  },
+  "paidApiCallsAtRegistration": 0
 }

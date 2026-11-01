@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { constants as fsConstants } from 'node:fs'
 import { open, mkdir, rename, rm, writeFile, lstat, realpath } from 'node:fs/promises'
-import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import sharp from 'sharp'
 import { z } from 'zod'
 import { computeEvaluatorAnnotationsSha256 } from './annotation-digest.js'
@@ -28,6 +28,45 @@ import { hashIdentity } from './hash-identity.js'
 import { validateConservativeCostProof, validateProfileIdentities } from './freeze-admission.js'
 import { validateSourceGroupSplitSeparation } from './source-group-validation.js'
 import { computeSourceGroupStratumCommitmentSha256 } from './source-group-validation.js'
+import {
+  computeUiVisibleStateFingerprint,
+  uiNativeStateProofRowsSchema,
+  uiCaptureStatusSchema,
+  uiCaptureLedgerSchema,
+  uiSourcePixelNoveltyAuditSchema,
+  validateUiStateSourcePixelPolicy,
+} from './ui-state-source-policy.js'
+import {
+  UI_STATE_DEV40_ANCESTOR_PARENT_REGISTRATION_SHA256,
+  UI_STATE_DEV40_FREEZE_ID,
+  UI_STATE_DEV40_HISTORICAL_EXCLUSIONS_SHA256,
+  UI_STATE_DEV40_HISTORICAL_PIXELS_SHA256,
+  UI_STATE_DEV40_PARENT_AUDIT_SHA256,
+  UI_STATE_DEV40_PARENT_LEDGER_SHA256,
+  UI_STATE_DEV40_PARENT_REGISTRATION_SHA256,
+  UI_STATE_DEV40_PUBLIC_COST_BOUNDS_SHA256,
+  UI_STATE_DEV40_SOURCE_ADMISSION_POLICY,
+  UI_STATE_DEV40_ORDER_PROTOCOL_SHA256,
+  UI_STATE_DEV40_MAP_ROSTER_SHA256,
+  UI_STATE_DEV40_STUDY_ID,
+  UI_STATE_DEV40_WORDING_SHA256,
+  UI_STATE_DEV40_CAPTURE_VIEW_SHA256,
+  UI_STATE_DEV40_PRECAPTURE_STABILITY_SHA256,
+  UI_STATE_DEV40_RUNTIME_ENVIRONMENT_PATH,
+  UI_STATE_DEV40_RUNTIME_ENVIRONMENT_SHA256,
+  UI_STATE_DEV40_NATIVE_STATE_PROOFS_PATH,
+  UI_STATE_DEV40_NATIVE_STATE_PROOFS_SHA256,
+  UI_STATE_DEV40_CAPTURE_LEDGER_SHA256,
+  UI_STATE_DEV40_PIXEL_NOVELTY_AUDIT_SHA256,
+  UI_STATE_DEV40_BUNDLE_RECEIPT_SHA256,
+  UI_STATE_DEV40_FINGERPRINT_IMPLEMENTATION_SHA256,
+  UI_STATE_DEV40_SOURCE_PROVENANCE_SHA256,
+  UI_STATE_DEV40_PRESERVED_HARNESS_SHA256,
+  UI_STATE_DEV40_CONTACT_SHEET_SHA256,
+  UI_STATE_DEV40_PRECAPTURE_ROSTER_SHA256,
+  UI_STATE_DEV40_PRECAPTURE_ROSTER_PATH,
+  UI_STATE_DEV40_EXTERNAL_INPUT_PINS,
+} from './ui-state-dev40-policy.js'
 import {
   H8A_CANDIDATE_PROFILE,
   H8A_FLAT_CANDIDATE_PROFILE,
@@ -85,8 +124,10 @@ const flatPreparationAuthoritySchema = preparationAuthoritySchema.extend({
 const independentDev40PreparationAuthoritySchema = z
   .object({
     schema: z.literal('h8a-independent-dev40-v2-preparation-v1'),
-    studyId: z.literal('original-h8a-independent-dev40-v2'),
-    freezeId: z.literal('original-h8a-independent-dev40-v2-20261101'),
+    studyId: z.literal(UI_STATE_DEV40_STUDY_ID),
+    freezeId: z.literal(UI_STATE_DEV40_FREEZE_ID),
+    parentRegistrationSha256: z.literal(UI_STATE_DEV40_PARENT_REGISTRATION_SHA256),
+    sourcePolicyId: z.literal(UI_STATE_DEV40_SOURCE_ADMISSION_POLICY),
     deadlineIso: z.string().datetime({ offset: true }),
     trustedRoot: z.string().min(1),
     orderProtocol: artifactRefSchema,
@@ -101,6 +142,18 @@ const independentDev40PreparationAuthoritySchema = z
     historicalExclusions: artifactRefSchema,
     historicalPixels: artifactRefSchema,
     sourceUnionAudit: artifactRefSchema,
+    sourceStateProof: artifactRefSchema,
+    nativeUiEvidence: z
+      .object({
+        captureLedger: artifactRefSchema,
+        pixelNoveltyAudit: artifactRefSchema,
+        bundleReceipt: artifactRefSchema,
+        fingerprintImplementation: artifactRefSchema,
+        sourceProvenance: artifactRefSchema,
+        preservedHarnessAttempts: artifactRefSchema,
+        sourceReviewContactSheet: artifactRefSchema,
+      })
+      .strict(),
     registeredSources: artifactRefSchema,
     fragments: z.array(
       z.object({ fragmentId: z.string().min(1), path: z.string().min(1), sha256 }).strict(),
@@ -132,28 +185,22 @@ function createDisjointPreparationAuthoritySchema(pins: DisjointLineagePins) {
 }
 const PINNED_PRIOR_DEV_AUTHORITY_SHA256 =
   '0d5cc47d1759d2e276cdc3e0c44b7ef231c61cc49aa75a7cc62e9bec24bfafd2'
-const INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256 =
-  'f2fc1abae7ca911fd04e94153520dd01d6bc7d3d48fcfee508ef6c05076093b2'
-const INDEPENDENT_DEV40_PARENT_LEDGER_SHA256 =
-  '839ad2eaa441eafbc85a998e6f89df053ff616d8109fa1d92909cd1cefd99d9a'
-const INDEPENDENT_DEV40_COST_PROOF_SHA256 =
-  '29af739b4762fe20e0249e5cae66746e293640ef5c473c55416f84cd5e51e107'
-const INDEPENDENT_DEV40_PARENT_AUDIT_SHA256 =
-  '01b76fd1c605a0f06b272ca03e64247058bdd55c37e80ca21394386706963a8f'
-const INDEPENDENT_DEV40_HISTORICAL_EXCLUSIONS_SHA256 =
-  '6f66fd7840b98c566c78b1dffd889bd08470c7e58b291014150ae4bb797eaab9'
-const INDEPENDENT_DEV40_HISTORICAL_PIXELS_SHA256 =
-  '510cb48fa740721123ce0ae4cc61c607675503f3ae0399bc9d0afb2487f6bb9d'
-const INDEPENDENT_DEV40_ORDER_PROTOCOL_SHA256 =
-  'a7a430ea7e1acf25caaf2e428cf384b9c657d2f66acd07d9ff0c94d699d67838'
-const INDEPENDENT_DEV40_MAP_ROSTER_SHA256 =
-  '65b37363e52d868436b909c4ff41533cc801dc81e8ba7925037f38c5de196f19'
-const INDEPENDENT_DEV40_STUDY_ID = 'original-h8a-independent-dev40-v2'
+const INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256 = UI_STATE_DEV40_PARENT_REGISTRATION_SHA256
+const INDEPENDENT_DEV40_ANCESTOR_PARENT_REGISTRATION_SHA256 =
+  UI_STATE_DEV40_ANCESTOR_PARENT_REGISTRATION_SHA256
+const INDEPENDENT_DEV40_PARENT_LEDGER_SHA256 = UI_STATE_DEV40_PARENT_LEDGER_SHA256
+const INDEPENDENT_DEV40_COST_PROOF_SHA256 = UI_STATE_DEV40_PUBLIC_COST_BOUNDS_SHA256
+const INDEPENDENT_DEV40_PARENT_AUDIT_SHA256 = UI_STATE_DEV40_PARENT_AUDIT_SHA256
+const INDEPENDENT_DEV40_HISTORICAL_EXCLUSIONS_SHA256 = UI_STATE_DEV40_HISTORICAL_EXCLUSIONS_SHA256
+const INDEPENDENT_DEV40_HISTORICAL_PIXELS_SHA256 = UI_STATE_DEV40_HISTORICAL_PIXELS_SHA256
+const INDEPENDENT_DEV40_ORDER_PROTOCOL_SHA256 = UI_STATE_DEV40_ORDER_PROTOCOL_SHA256
+const INDEPENDENT_DEV40_MAP_ROSTER_SHA256 = UI_STATE_DEV40_MAP_ROSTER_SHA256
+const INDEPENDENT_DEV40_STUDY_ID = UI_STATE_DEV40_STUDY_ID
 
 const independentSourceRosterSchema = z
   .object({
     schema: z.literal('h8a-independent-dev40-source-roster-v1'),
-    studyId: z.literal('original-h8a-independent-dev40-v2'),
+    studyId: z.literal(UI_STATE_DEV40_STUDY_ID),
     rows: z
       .array(
         z
@@ -173,6 +220,90 @@ const independentSourceRosterSchema = z
   })
   .strict()
 
+const independentUiPreCaptureRosterSchema = z
+  .object({
+    schema: z.literal('original-h8a-independent-dev40-v2-ui-preregistered-roster-v1'),
+    parentRegistrationSha256: z.literal(INDEPENDENT_DEV40_ANCESTOR_PARENT_REGISTRATION_SHA256),
+    historicalPixelRegistrySha256: z.literal(INDEPENDENT_DEV40_HISTORICAL_PIXELS_SHA256),
+    rows: z
+      .array(
+        z
+          .object({
+            opaqueCaseId: z.string().min(1),
+            order: z.number().int().min(1).max(10),
+            sourceGroup: z.enum(['gthumb', 'file-roller']),
+            application: z.string().min(1),
+            applicationVersion: z.string().min(1),
+            stateId: z.string().min(1),
+            source: z.union([
+              z
+                .object({
+                  kind: z.literal('directory'),
+                  path: z.string().min(1),
+                  assets: z.record(z.string(), sha256),
+                })
+                .passthrough(),
+              z
+                .object({
+                  kind: z.enum(['image', 'archive']),
+                  path: z.string().min(1),
+                  sha256,
+                })
+                .passthrough(),
+            ]),
+            expectedPresence: z.enum(['present', 'absent']),
+            targetQuery: z.object({ role: z.string(), name: z.string() }).passthrough(),
+            preCaptureOracle: z
+              .object({
+                inventoryComplete: z.literal(true),
+                queryMatchCount: z.number().int().nonnegative(),
+                bounds: z
+                  .object({
+                    x: z.number().int(),
+                    y: z.number().int(),
+                    width: z.number().int().nonnegative(),
+                    height: z.number().int().nonnegative(),
+                  })
+                  .strict()
+                  .nullable(),
+              })
+              .passthrough(),
+          })
+          .passthrough(),
+      )
+      .length(10),
+  })
+  .passthrough()
+
+const independentUiSourceProvenanceSchema = z.record(
+  z.string().min(1),
+  z
+    .object({
+      opaqueCaseId: z.string().min(1),
+      sourceGroup: z.enum(['gthumb', 'file-roller']),
+      sourceStateId: z.string().min(1),
+      sourceContentSha256ByBasename: z.record(z.string(), sha256),
+      application: z.string().min(1),
+      applicationVersion: z.string().min(1),
+      targetRole: z.string().min(1),
+      targetName: z.string(),
+      targetAccessibleMatchCount: z.number().int().nonnegative(),
+      capturePath: z.string().min(1),
+      captureSha256: sha256,
+      captureRgbSha256: sha256,
+      nativeStateFingerprintSha256: sha256,
+      captureView: z.literal(
+        'whole 1280x1024 Xvfb root drawable at original coordinates; no crop/scale/overlay/pointer drawing',
+      ),
+      preCaptureStabilitySha256: z.literal(UI_STATE_DEV40_PRECAPTURE_STABILITY_SHA256),
+      captureLogPath: z.string().min(1),
+      captureLogSha256: sha256,
+      captureStderrPath: z.string().min(1),
+      captureStderrSha256: sha256,
+    })
+    .passthrough(),
+)
+
 export function validateIndependentDev40SourceRoster(
   value: unknown,
 ): z.infer<typeof independentSourceRosterSchema> {
@@ -181,12 +312,13 @@ export function validateIndependentDev40SourceRoster(
 
 const independentRegisteredSourcesSchema = z
   .object({
-    schema: z.literal('h8a-independent-dev40-source-registration-v1'),
+    schema: z.literal('h8a-ui-state-dev40-source-registration-v1'),
     parentRegistrationSha256: z.literal(INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256),
     orderProtocolSha256: z.literal(INDEPENDENT_DEV40_ORDER_PROTOCOL_SHA256),
     mapRosterSha256: z.literal(INDEPENDENT_DEV40_MAP_ROSTER_SHA256),
     sourceRosterSha256: sha256,
     sourceGroupSplitSha256: sha256,
+    sourceStateProofSha256: sha256,
     sourceEvidence: z.array(artifactRefSchema).min(1),
     rows: z
       .array(
@@ -209,10 +341,45 @@ const independentRegisteredSourcesSchema = z
 
 const independentParentRegistrationSchema = z
   .object({
-    schema: z.literal('original-h8a-independent-dev40-v2-parent'),
-    studyId: z.literal('original-h8a-independent-dev40-v2'),
-    freezeId: z.literal('original-h8a-independent-dev40-v2-20261101'),
-    authorCostCeilingUsd: z.null(),
+    schema: z.literal('h8a-ui-native-state-dev40-registration-v1'),
+    studyId: z.literal(UI_STATE_DEV40_STUDY_ID),
+    freezeId: z.literal(UI_STATE_DEV40_FREEZE_ID),
+    ownerDollarCeiling: z.null(),
+    sourceAdmissionPolicy: z
+      .object({
+        id: z.literal(UI_STATE_DEV40_SOURCE_ADMISSION_POLICY),
+        exactEncodedDuplicates: z.literal('reject'),
+        exactDecodedRgbDuplicates: z.literal('reject'),
+        photoAndMapNearHashMaxInclusiveRejected: z.literal(4),
+        uiNearHash: z.literal('record-diagnostic'),
+        uiStateProofRequired: z.literal(true),
+        uiStateFingerprint: z.literal(
+          'sha256-json-visible-showing-ordered-native-tree-role-name-bounds-states-and-window-stack-v1',
+        ),
+        uiExcludeDynamicFingerprintFields: z.tuple([
+          z.literal('pid'),
+          z.literal('environment'),
+          z.literal('capturePath'),
+          z.literal('opaqueCaseId'),
+          z.literal('targetQuery'),
+          z.literal('expectedPresence'),
+        ]),
+        uiSameVisibleState: z.literal('reject'),
+        uiDifferentTaskAlone: z.literal('insufficient'),
+        uiRequiredProofs: z.tuple([
+          z.literal('complete-native-inventory'),
+          z.literal('same-state-pre-and-post-capture'),
+          z.literal('unique-visible-state-fingerprint'),
+          z.literal('source-app-version-and-input-shas'),
+          z.literal('target-role-name-uniqueness-or-complete-absence'),
+          z.literal('original-screen-transform'),
+          z.literal('actual-source-pixel-review'),
+        ]),
+        uiRecapture: z.literal(
+          'same-predeclared-ten-states-fixed-content-no-substitution-env-whitelist-repair',
+        ),
+      })
+      .strict(),
     parentFiles: z.record(z.string(), sha256),
   })
   .passthrough()
@@ -229,7 +396,7 @@ const independentParentAuditSchema = z
 
 const independentHistoricalExclusionsSchema = z
   .object({
-    parentRegistrationSha256: z.literal(INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256),
+    parentRegistrationSha256: z.literal(INDEPENDENT_DEV40_ANCESTOR_PARENT_REGISTRATION_SHA256),
     sources: z.record(z.string(), sha256),
     caseIds: z.array(z.string().min(1)).length(226),
     imageIds: z.array(openImagesImageId).length(423),
@@ -261,23 +428,24 @@ const independentHistoricalPixelsSchema = z
 
 const independentSourceUnionAuditSchema = z
   .object({
-    schema: z.literal('h8a-independent-dev40-source-union-audit-v1'),
+    schema: z.literal('h8a-ui-state-dev40-source-union-audit-v1'),
     parentRegistrationSha256: z.literal(INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256),
     historicalPixelsSha256: z.literal(INDEPENDENT_DEV40_HISTORICAL_PIXELS_SHA256),
     algorithm: z.string().min(1),
     sha256Implementation: sha256,
     nearestHammingContract: z.literal(
-      'minimum Hamming distance to all 348 historical and other 39 study source pHashes',
+      'minimum diagnostic distance to all 348 historical and other 39 study source pHashes; reject at <=4 only for photo/map',
     ),
     rows: z
       .array(
         z
           .object({
             opaqueCaseId: z.string().min(1),
+            stratum: z.enum(STRATUMS),
             encodedSha256: sha256,
             decodedRgbSha256: sha256,
             perceptualHash64: z.string().regex(/^[a-f0-9]{16}$/u),
-            nearestHamming: z.number().int().min(5).max(64),
+            nearestHamming: z.number().int().min(0).max(64),
           })
           .strict(),
       )
@@ -399,6 +567,18 @@ const runtimeEnvironmentSchema = z
 
 const normalizeSourceGroup = (value: string): string => value.replace(/\/+$/u, '')
 
+function sameDigestMap(
+  left: Readonly<Record<string, string>>,
+  right: Readonly<Record<string, string>>,
+): boolean {
+  const leftKeys = Object.keys(left).sort()
+  const rightKeys = Object.keys(right).sort()
+  return (
+    leftKeys.length === rightKeys.length &&
+    leftKeys.every((key, index) => key === rightKeys[index] && left[key] === right[key])
+  )
+}
+
 interface FragmentRows {
   producerRows: z.infer<typeof producerRowsSchema>
   annotations: z.infer<typeof privateAnnotationRowsSchema>
@@ -505,6 +685,26 @@ function resolveArtifact(root: string, path: string): string {
   const full = resolve(base, path)
   if (!isWithin(base, full)) throw new RangeError('Artifact path escapes trustedRoot')
   return full
+}
+
+function artifactRefFromAbsolutePath(
+  root: string,
+  absolutePath: string,
+  sha256Value: string,
+): z.infer<typeof artifactRefSchema> {
+  if (!isAbsolute(absolutePath)) throw new RangeError('Evidence path must be absolute')
+  const full = resolve(absolutePath)
+  const rel = relative(resolve(root), full)
+  if (
+    !isWithin(resolve(root), full) ||
+    rel === '' ||
+    rel === '..' ||
+    rel.startsWith(`..${sep}`) ||
+    isAbsolute(rel) ||
+    resolve(root, rel) !== full
+  )
+    throw new RangeError('Evidence path escapes its pinned artifact root')
+  return artifactRefSchema.parse({ path: rel, sha256: sha256Value })
 }
 
 async function readPinnedJson<T>(
@@ -1141,9 +1341,11 @@ async function verifyCaseInputs(
 ): Promise<{
   producerCases: PhaseFreeze['producerCases']
   sourceBytesByCaseId: Map<string, Buffer>
+  decodedRgbSha256ByCaseId: Map<string, string>
 }> {
   const producerCases: PhaseFreeze['producerCases'] = []
   const sourceBytesByCaseId = new Map<string, Buffer>()
+  const decodedRgbSha256ByCaseId = new Map<string, string>()
   const seen = new Set<string>()
   for (const { fragment, reviewRow } of rows) {
     const id = reviewRow.opaqueCaseId
@@ -1199,6 +1401,21 @@ async function verifyCaseInputs(
       producer.sourceCanvasHeight !== image.height
     )
       throw new RangeError(`Source image canvas mismatch for ${id}`)
+    const decoded = await sharp(sourceBytes, {
+      failOn: 'error',
+      limitInputPixels: SOURCE_PIXEL_LIMIT,
+    })
+      .toColourspace('srgb')
+      .removeAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true })
+    if (
+      decoded.info.channels !== 3 ||
+      decoded.info.width !== image.width ||
+      decoded.info.height !== image.height
+    )
+      throw new RangeError(`Source RGB decoding differs from its registered canvas for ${id}`)
+    decodedRgbSha256ByCaseId.set(id, digestBytes(decoded.data))
     assertReferenceBoxesWithinCanvas(annotation, image.width, image.height)
     assertReferenceMaskDeclaration(annotation, image.width, image.height)
     for (const mask of annotation.referenceMasks) {
@@ -1219,6 +1436,7 @@ async function verifyCaseInputs(
   return {
     producerCases,
     sourceBytesByCaseId,
+    decodedRgbSha256ByCaseId,
   }
 }
 
@@ -1373,6 +1591,8 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
   let independentPixels: z.infer<typeof independentHistoricalPixelsSchema> | undefined
   let independentUnionAudit: z.infer<typeof independentSourceUnionAuditSchema> | undefined
   let independentExclusions: z.infer<typeof independentHistoricalExclusionsSchema> | undefined
+  let independentSourceStateProofSha256: string | undefined
+  let independentStateProof: z.infer<typeof uiNativeStateProofRowsSchema> | undefined
   let independentSourceRosterSha256: string | undefined
   let independentRegisteredSourcesSha256: string | undefined
   if (independentAuthority) {
@@ -1389,23 +1609,35 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
       independentAuthority.historicalExclusions,
       independentAuthority.historicalPixels,
       independentAuthority.sourceUnionAudit,
+      independentAuthority.sourceStateProof,
+      independentAuthority.nativeUiEvidence.captureLedger,
+      independentAuthority.nativeUiEvidence.pixelNoveltyAudit,
+      independentAuthority.nativeUiEvidence.bundleReceipt,
+      independentAuthority.nativeUiEvidence.fingerprintImplementation,
+      independentAuthority.nativeUiEvidence.sourceProvenance,
+      independentAuthority.nativeUiEvidence.preservedHarnessAttempts,
+      independentAuthority.nativeUiEvidence.sourceReviewContactSheet,
       independentAuthority.registeredSources,
       ...independentAuthority.fragments,
     ]
     const artifactPrefix = join('zorya-classifier-mcp-20261101', INDEPENDENT_DEV40_STUDY_ID)
     const artifactPrefixPath = resolve(artifactRoot, artifactPrefix)
+    const externalPinsByPath: ReadonlyMap<string, string> = new Map(
+      Object.values(UI_STATE_DEV40_EXTERNAL_INPUT_PINS).map((pin) => [pin.path, pin.sha256]),
+    )
     if (
       artifactRefs.some((ref) => {
         const fullPath = resolve(artifactRoot, ref.path)
+        const exactExternalPin = externalPinsByPath.get(ref.path) === ref.sha256
         return (
           isAbsolute(ref.path) ||
-          !isWithin(artifactPrefixPath, fullPath) ||
+          (!isWithin(artifactPrefixPath, fullPath) && !exactExternalPin) ||
           relative(artifactRoot, fullPath) !== ref.path
         )
       })
     )
       throw new RangeError(
-        'Independent DEV40 artifact references must remain under the registered study root',
+        'Independent DEV40 artifact references must be in the registered study or an exact pinned external input',
       )
     if (
       independentAuthority.orderProtocol.sha256 !== INDEPENDENT_DEV40_ORDER_PROTOCOL_SHA256 ||
@@ -1416,64 +1648,211 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
       independentAuthority.historicalExclusions.sha256 !==
         INDEPENDENT_DEV40_HISTORICAL_EXCLUSIONS_SHA256 ||
       independentAuthority.historicalPixels.sha256 !== INDEPENDENT_DEV40_HISTORICAL_PIXELS_SHA256 ||
-      independentAuthority.priceProof.sha256 !== INDEPENDENT_DEV40_COST_PROOF_SHA256
+      independentAuthority.priceProof.sha256 !== INDEPENDENT_DEV40_COST_PROOF_SHA256 ||
+      independentAuthority.sourceStateProof.path !== UI_STATE_DEV40_NATIVE_STATE_PROOFS_PATH ||
+      independentAuthority.sourceStateProof.sha256 !== UI_STATE_DEV40_NATIVE_STATE_PROOFS_SHA256 ||
+      independentAuthority.nativeUiEvidence.captureLedger.sha256 !==
+        UI_STATE_DEV40_CAPTURE_LEDGER_SHA256 ||
+      independentAuthority.nativeUiEvidence.pixelNoveltyAudit.sha256 !==
+        UI_STATE_DEV40_PIXEL_NOVELTY_AUDIT_SHA256 ||
+      independentAuthority.nativeUiEvidence.bundleReceipt.sha256 !==
+        UI_STATE_DEV40_BUNDLE_RECEIPT_SHA256 ||
+      independentAuthority.nativeUiEvidence.fingerprintImplementation.sha256 !==
+        UI_STATE_DEV40_FINGERPRINT_IMPLEMENTATION_SHA256 ||
+      independentAuthority.nativeUiEvidence.sourceProvenance.sha256 !==
+        UI_STATE_DEV40_SOURCE_PROVENANCE_SHA256 ||
+      independentAuthority.nativeUiEvidence.preservedHarnessAttempts.sha256 !==
+        UI_STATE_DEV40_PRESERVED_HARNESS_SHA256 ||
+      independentAuthority.nativeUiEvidence.sourceReviewContactSheet.sha256 !==
+        UI_STATE_DEV40_CONTACT_SHEET_SHA256 ||
+      independentAuthority.parentLedgerAudit.path !==
+        'zorya-classifier-mcp-20261101/original-h8a-independent-dev40-v2/main/historical-receipt-audit.json' ||
+      independentAuthority.historicalExclusions.path !==
+        'zorya-classifier-mcp-20261101/original-h8a-independent-dev40-v2/main/historical-exclusions-canonical.json' ||
+      independentAuthority.historicalPixels.path !==
+        'zorya-classifier-mcp-20261101/original-h8a-independent-dev40-v2/main/historical-pixels.json' ||
+      independentAuthority.runtimeEnvironment.path !== UI_STATE_DEV40_RUNTIME_ENVIRONMENT_PATH ||
+      independentAuthority.runtimeEnvironment.sha256 !==
+        UI_STATE_DEV40_RUNTIME_ENVIRONMENT_SHA256 ||
+      independentAuthority.fragments.length !== 3 ||
+      [
+        UI_STATE_DEV40_EXTERNAL_INPUT_PINS.originalPhotoFragment,
+        UI_STATE_DEV40_EXTERNAL_INPUT_PINS.originalMapFragment,
+        {
+          fragmentId: 'ui-native-state-dev40-ten',
+          path: 'zorya-classifier-mcp-20261101/ui-state-dev40-v1/main/reviewed-ui10-fragment.json',
+          sha256: 'c440632b3843430ebaa3f742e9cb9e5f9350e42f01e0709f2f8996e49055bc2d',
+        },
+      ].some(
+        (expected) =>
+          !independentAuthority.fragments.some(
+            (fragment) =>
+              fragment.fragmentId === expected.fragmentId &&
+              fragment.path === expected.path &&
+              fragment.sha256 === expected.sha256,
+          ),
+      ) ||
+      independentAuthority.nativeUiEvidence.captureLedger.path !==
+        'zorya-classifier-mcp-20261101/ui-state-dev40-v1/ui/bundle-v3/capture-ledger.json' ||
+      independentAuthority.nativeUiEvidence.pixelNoveltyAudit.path !==
+        'zorya-classifier-mcp-20261101/ui-state-dev40-v1/ui/bundle-v3/source-pixel-novelty-audit.json' ||
+      independentAuthority.nativeUiEvidence.bundleReceipt.path !==
+        'zorya-classifier-mcp-20261101/ui-state-dev40-v1/ui/bundle-v3/bundle-fragment-receipt.json' ||
+      independentAuthority.nativeUiEvidence.fingerprintImplementation.path !==
+        'zorya-classifier-mcp-20261101/ui-state-dev40-v1/ui/scripts/native_state_fingerprint.py' ||
+      independentAuthority.nativeUiEvidence.sourceProvenance.path !==
+        'zorya-classifier-mcp-20261101/ui-state-dev40-v1/ui/bundle-v3/curator-source-provenance.json' ||
+      independentAuthority.nativeUiEvidence.preservedHarnessAttempts.path !==
+        'zorya-classifier-mcp-20261101/ui-state-dev40-v1/ui/bundle-v3/preserved-harness-attempts.json' ||
+      independentAuthority.nativeUiEvidence.sourceReviewContactSheet.path !==
+        'zorya-classifier-mcp-20261101/ui-state-dev40-v1/ui/probes/source-review-contact-sheet.png' ||
+      independentAuthority.sourcePolicyId !== UI_STATE_DEV40_SOURCE_ADMISSION_POLICY
     )
       throw new RangeError(
         'Independent DEV40 authority changes one or more parent registration pins',
       )
-    const [parent, parentAudit, exclusions, pixels, sourceRoster, unionAudit, registry] =
-      await Promise.all([
-        readPinnedJson(
-          artifactRoot,
-          independentAuthority.parentRegistration,
-          independentParentRegistrationSchema,
-        ),
-        readPinnedJson(
-          artifactRoot,
-          independentAuthority.parentLedgerAudit,
-          independentParentAuditSchema,
-        ),
-        readPinnedJson(
-          artifactRoot,
-          independentAuthority.historicalExclusions,
-          independentHistoricalExclusionsSchema,
-        ),
-        readPinnedJson(
-          artifactRoot,
-          independentAuthority.historicalPixels,
-          independentHistoricalPixelsSchema,
-        ),
-        readPinnedJson(
-          artifactRoot,
-          independentAuthority.sourceRoster,
-          independentSourceRosterSchema,
-        ),
-        readPinnedJson(
-          artifactRoot,
-          independentAuthority.sourceUnionAudit,
-          independentSourceUnionAuditSchema,
-        ),
-        readPinnedJson(
-          artifactRoot,
-          independentAuthority.registeredSources,
-          independentRegisteredSourcesSchema,
-        ),
-      ])
+    const [
+      parent,
+      parentAudit,
+      exclusions,
+      pixels,
+      sourceRoster,
+      uiPreCaptureRoster,
+      unionAudit,
+      stateProof,
+      captureLedgerBytes,
+      pixelNoveltyAuditBytes,
+      bundleReceiptBytes,
+      fingerprintImplementationBytes,
+      sourceProvenanceBytes,
+      preservedHarnessBytes,
+      sourceReviewContactSheetBytes,
+      registry,
+    ] = await Promise.all([
+      readPinnedJson(
+        artifactRoot,
+        independentAuthority.parentRegistration,
+        independentParentRegistrationSchema,
+      ),
+      readPinnedJson(
+        artifactRoot,
+        independentAuthority.parentLedgerAudit,
+        independentParentAuditSchema,
+      ),
+      readPinnedJson(
+        artifactRoot,
+        independentAuthority.historicalExclusions,
+        independentHistoricalExclusionsSchema,
+      ),
+      readPinnedJson(
+        artifactRoot,
+        independentAuthority.historicalPixels,
+        independentHistoricalPixelsSchema,
+      ),
+      readPinnedJson(
+        artifactRoot,
+        independentAuthority.sourceRoster,
+        independentSourceRosterSchema,
+      ),
+      readPinnedJson(
+        artifactRoot,
+        {
+          path: UI_STATE_DEV40_PRECAPTURE_ROSTER_PATH,
+          sha256: UI_STATE_DEV40_PRECAPTURE_ROSTER_SHA256,
+        },
+        independentUiPreCaptureRosterSchema,
+      ),
+      readPinnedJson(
+        artifactRoot,
+        independentAuthority.sourceUnionAudit,
+        independentSourceUnionAuditSchema,
+      ),
+      readPinnedJson(
+        artifactRoot,
+        independentAuthority.sourceStateProof,
+        uiNativeStateProofRowsSchema,
+      ),
+      readPinnedBytes(artifactRoot, independentAuthority.nativeUiEvidence.captureLedger),
+      readPinnedBytes(artifactRoot, independentAuthority.nativeUiEvidence.pixelNoveltyAudit),
+      readPinnedBytes(artifactRoot, independentAuthority.nativeUiEvidence.bundleReceipt),
+      readPinnedBytes(
+        artifactRoot,
+        independentAuthority.nativeUiEvidence.fingerprintImplementation,
+      ),
+      readPinnedBytes(artifactRoot, independentAuthority.nativeUiEvidence.sourceProvenance),
+      readPinnedBytes(artifactRoot, independentAuthority.nativeUiEvidence.preservedHarnessAttempts),
+      readPinnedBytes(artifactRoot, independentAuthority.nativeUiEvidence.sourceReviewContactSheet),
+      readPinnedJson(
+        artifactRoot,
+        independentAuthority.registeredSources,
+        independentRegisteredSourcesSchema,
+      ),
+    ])
+    const nativeCaptureLedger = uiCaptureLedgerSchema.parse(
+      JSON.parse(captureLedgerBytes.toString('utf8')) as unknown,
+    )
+    const nativePixelNoveltyAudit = uiSourcePixelNoveltyAuditSchema.parse(
+      JSON.parse(pixelNoveltyAuditBytes.toString('utf8')) as unknown,
+    )
+    const nativeSourceProvenance = independentUiSourceProvenanceSchema.parse(
+      JSON.parse(sourceProvenanceBytes.toString('utf8')) as unknown,
+    )
     const expectedParentLedgerHash =
       parent.value.parentFiles['h8a-fresh-dev-qual-campaign-v1/campaign-ledger.json']
     if (
+      digestBytes(captureLedgerBytes) !==
+        independentAuthority.nativeUiEvidence.captureLedger.sha256 ||
+      digestBytes(pixelNoveltyAuditBytes) !==
+        independentAuthority.nativeUiEvidence.pixelNoveltyAudit.sha256 ||
+      digestBytes(bundleReceiptBytes) !==
+        independentAuthority.nativeUiEvidence.bundleReceipt.sha256 ||
+      digestBytes(fingerprintImplementationBytes) !==
+        independentAuthority.nativeUiEvidence.fingerprintImplementation.sha256 ||
+      digestBytes(sourceProvenanceBytes) !==
+        independentAuthority.nativeUiEvidence.sourceProvenance.sha256 ||
+      digestBytes(preservedHarnessBytes) !==
+        independentAuthority.nativeUiEvidence.preservedHarnessAttempts.sha256 ||
+      digestBytes(sourceReviewContactSheetBytes) !==
+        independentAuthority.nativeUiEvidence.sourceReviewContactSheet.sha256
+    )
+      throw new RangeError('Native UI source evidence digest changed during admission')
+    if (
       parent.value.studyId !== independentAuthority.studyId ||
+      parent.value.freezeId !== independentAuthority.freezeId ||
+      parent.value.sourceAdmissionPolicy.id !== independentAuthority.sourcePolicyId ||
+      parent.value.parentFiles['original-h8a-independent-dev40-v2/parent-registration.json'] !==
+        INDEPENDENT_DEV40_ANCESTOR_PARENT_REGISTRATION_SHA256 ||
+      parent.value.parentFiles['original-h8a-independent-dev40-v2/main/historical-pixels.json'] !==
+        INDEPENDENT_DEV40_HISTORICAL_PIXELS_SHA256 ||
+      parent.value.parentFiles[
+        'original-h8a-independent-dev40-v2/main/historical-exclusions-canonical.json'
+      ] !== INDEPENDENT_DEV40_HISTORICAL_EXCLUSIONS_SHA256 ||
+      parent.value.parentFiles[
+        'original-h8a-independent-dev40-v2/ui/pre-capture-roster-v1.json'
+      ] !== UI_STATE_DEV40_PRECAPTURE_ROSTER_SHA256 ||
+      parent.value.parentFiles['h8a-fresh-dev-qual-campaign-v1/campaign-ledger.json'] !==
+        INDEPENDENT_DEV40_PARENT_LEDGER_SHA256 ||
       expectedParentLedgerHash !== INDEPENDENT_DEV40_PARENT_LEDGER_SHA256 ||
       parentAudit.value.parentLedgerSha256 !== INDEPENDENT_DEV40_PARENT_LEDGER_SHA256 ||
-      exclusions.value.parentRegistrationSha256 !== digestBytes(parent.raw) ||
+      exclusions.value.parentRegistrationSha256 !==
+        UI_STATE_DEV40_ANCESTOR_PARENT_REGISTRATION_SHA256 ||
       exclusions.value.priorFileSha256 !== digestBytes(pixels.raw) ||
       registry.value.parentRegistrationSha256 !== digestBytes(parent.raw) ||
       registry.value.orderProtocolSha256 !== digestBytes(protocolRef.raw) ||
       registry.value.mapRosterSha256 !== digestBytes(rosterRef.raw) ||
       registry.value.sourceRosterSha256 !== digestBytes(sourceRoster.raw) ||
       registry.value.sourceGroupSplitSha256 !== digestBytes(splitRef.raw) ||
+      registry.value.sourceStateProofSha256 !== digestBytes(stateProof.raw) ||
+      independentAuthority.sourceStateProof.sha256 !== digestBytes(stateProof.raw) ||
       unionAudit.value.parentRegistrationSha256 !== digestBytes(parent.raw) ||
       unionAudit.value.historicalPixelsSha256 !== digestBytes(pixels.raw) ||
+      stateProof.value.registrationSha256 !== digestBytes(parent.raw) ||
+      stateProof.value.sourceRosterSha256 !== UI_STATE_DEV40_PRECAPTURE_ROSTER_SHA256 ||
+      stateProof.value.wordingSha256 !== UI_STATE_DEV40_WORDING_SHA256 ||
+      stateProof.value.captureViewSha256 !== UI_STATE_DEV40_CAPTURE_VIEW_SHA256 ||
+      stateProof.value.preCaptureStabilitySha256 !== UI_STATE_DEV40_PRECAPTURE_STABILITY_SHA256 ||
+      nativePixelNoveltyAudit.historicalRegistrySha256 !==
+        UI_STATE_DEV40_HISTORICAL_PIXELS_SHA256 ||
       unionAudit.value.algorithm !== pixels.value.algorithm ||
       unionAudit.value.sha256Implementation !== pixels.value.sha256Implementation ||
       new Set(exclusions.value.caseIds).size !== exclusions.value.caseIds.length ||
@@ -1492,30 +1871,211 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
       independentAuthority.mapRoster,
       independentAuthority.sourceRoster,
       independentAuthority.sourceGroupSplit,
+      independentAuthority.sourceStateProof,
+      independentAuthority.nativeUiEvidence.captureLedger,
+      independentAuthority.nativeUiEvidence.pixelNoveltyAudit,
+      independentAuthority.nativeUiEvidence.bundleReceipt,
+      independentAuthority.nativeUiEvidence.fingerprintImplementation,
+      independentAuthority.nativeUiEvidence.sourceProvenance,
+      independentAuthority.nativeUiEvidence.preservedHarnessAttempts,
+      independentAuthority.nativeUiEvidence.sourceReviewContactSheet,
       independentAuthority.sourceClosure,
       independentAuthority.priceProof,
       independentAuthority.runtimeEnvironment,
       independentAuthority.sourceUnionAudit,
       ...independentAuthority.fragments.map(({ path, sha256 }) => ({ path, sha256 })),
     ]
+    const evidenceByPath = new Map<string, string>()
+    for (const ref of requiredEvidence) {
+      const previous = evidenceByPath.get(ref.path)
+      if (previous && previous !== ref.sha256)
+        throw new RangeError('Native UI source evidence has conflicting hashes for one path')
+      evidenceByPath.set(ref.path, ref.sha256)
+    }
+    const uniqueRequiredEvidence = [...evidenceByPath].map(([path, sha256]) => ({ path, sha256 }))
     const evidencePins = new Set(
       registry.value.sourceEvidence.map((ref) => `${ref.path}\0${ref.sha256}`),
     )
     if (
-      registry.value.sourceEvidence.length !== requiredEvidence.length ||
+      registry.value.sourceEvidence.length !== uniqueRequiredEvidence.length ||
       new Set(registry.value.sourceEvidence.map((ref) => ref.path)).size !==
         registry.value.sourceEvidence.length ||
-      requiredEvidence.some((ref) => !evidencePins.has(`${ref.path}\0${ref.sha256}`))
+      uniqueRequiredEvidence.some((ref) => !evidencePins.has(`${ref.path}\0${ref.sha256}`))
     )
       throw new RangeError('Independent DEV40 source evidence omits or duplicates a required input')
     await Promise.all(
       registry.value.sourceEvidence.map((ref) => readPinnedBytes(artifactRoot, ref)),
     )
+    const preCaptureById = new Map(
+      uiPreCaptureRoster.value.rows.map((row) => [row.opaqueCaseId, row]),
+    )
+    const registryById = new Map(registry.value.rows.map((row) => [row.opaqueCaseId, row]))
+    const captureLedgerById = new Map(
+      nativeCaptureLedger.rows.map((row) => [row.opaqueCaseId, row]),
+    )
+    const noveltyById = new Map(nativePixelNoveltyAudit.rows.map((row) => [row.opaqueCaseId, row]))
+    const unionById = new Map(unionAudit.value.rows.map((row) => [row.opaqueCaseId, row]))
+    if (
+      stateProof.value.rows.length !== 10 ||
+      preCaptureById.size !== 10 ||
+      registryById.size !== DEV40_CASE_COUNT ||
+      captureLedgerById.size !== 10 ||
+      noveltyById.size !== 10 ||
+      unionById.size !== DEV40_CASE_COUNT
+    )
+      throw new RangeError('Native UI proof or linked source inventories are incomplete')
+    for (const proofRow of stateProof.value.rows) {
+      const id = proofRow.opaqueCaseId
+      const preCapture = preCaptureById.get(id)
+      const source = registryById.get(id)
+      const ledgerRow = captureLedgerById.get(id)
+      const novelty = noveltyById.get(id)
+      const union = unionById.get(id)
+      const provenance = nativeSourceProvenance[id]
+      if (!preCapture || !source || !ledgerRow || !novelty || !union || !provenance)
+        throw new RangeError(`Native UI proof row ${id} lacks a signed source lineage row`)
+      const imageViewerDirectory =
+        preCapture.source.kind === 'image'
+          ? uiPreCaptureRoster.value.rows.find(
+              (candidate) =>
+                candidate.application === preCapture.application &&
+                candidate.source.kind === 'directory' &&
+                candidate.source.path === dirname(preCapture.source.path),
+            )
+          : undefined
+      const sourceContentHashes =
+        preCapture.source.kind === 'directory'
+          ? preCapture.source.assets
+          : { [basename(preCapture.source.path)]: preCapture.source.sha256 }
+      const appInputHashes =
+        preCapture.source.kind === 'image' && imageViewerDirectory?.source.kind === 'directory'
+          ? imageViewerDirectory.source.assets
+          : sourceContentHashes
+      if (
+        proofRow.order !== preCapture.order ||
+        proofRow.sourceGroup !== preCapture.sourceGroup ||
+        proofRow.stateId !== preCapture.stateId ||
+        proofRow.application !== preCapture.application ||
+        proofRow.applicationVersion !== preCapture.applicationVersion ||
+        proofRow.targetOracle.expectedPresence !== preCapture.expectedPresence ||
+        proofRow.targetOracle.role !== preCapture.targetQuery.role ||
+        proofRow.targetOracle.name !== preCapture.targetQuery.name ||
+        proofRow.targetOracle.preMatchCount !== preCapture.preCaptureOracle.queryMatchCount ||
+        (preCapture.source.kind === 'image' &&
+          (!imageViewerDirectory ||
+            imageViewerDirectory.source.kind !== 'directory' ||
+            imageViewerDirectory.source.assets[basename(preCapture.source.path)] !==
+              preCapture.source.sha256)) ||
+        (proofRow.targetOracle.uniqueMatchBounds !== null &&
+          hashIdentity(proofRow.targetOracle.uniqueMatchBounds) !==
+            hashIdentity(preCapture.preCaptureOracle.bounds)) ||
+        !sameDigestMap(proofRow.sourceInputSha256ByBasename, appInputHashes) ||
+        source.stratum !== 'ui' ||
+        source.sourceGroup !== preCapture.sourceGroup ||
+        source.predeclaredStateId !== preCapture.stateId ||
+        source.expectedPresence !== preCapture.expectedPresence ||
+        source.sourceSha256 !== proofRow.capture.pngSha256 ||
+        !sameDigestMap(provenance.sourceContentSha256ByBasename, sourceContentHashes) ||
+        provenance.opaqueCaseId !== id ||
+        provenance.sourceGroup !== proofRow.sourceGroup ||
+        provenance.sourceStateId !== proofRow.stateId ||
+        provenance.application !== proofRow.application ||
+        provenance.applicationVersion !== proofRow.applicationVersion ||
+        provenance.targetRole !== proofRow.targetOracle.role ||
+        provenance.targetName !== proofRow.targetOracle.name ||
+        provenance.capturePath !== proofRow.capture.path ||
+        provenance.captureSha256 !== proofRow.capture.pngSha256 ||
+        provenance.captureRgbSha256 !== proofRow.capture.decodedRgbSha256 ||
+        provenance.nativeStateFingerprintSha256 !== proofRow.nativeStateFingerprintSha256 ||
+        ledgerRow.order !== proofRow.order ||
+        ledgerRow.sourceGroup !== proofRow.sourceGroup ||
+        ledgerRow.stateId !== proofRow.stateId ||
+        ledgerRow.expectedPresence !== proofRow.targetOracle.expectedPresence ||
+        ledgerRow.imagePath !== proofRow.capture.path ||
+        ledgerRow.pngSha256 !== proofRow.capture.pngSha256 ||
+        ledgerRow.decodedRgbSha256 !== proofRow.capture.decodedRgbSha256 ||
+        ledgerRow.inventoryPreSha256 !== proofRow.inventory.preSha256 ||
+        ledgerRow.inventoryPostSha256 !== proofRow.inventory.postSha256 ||
+        ledgerRow.nativeStateFingerprintSha256 !== proofRow.nativeStateFingerprintSha256 ||
+        ledgerRow.captureStatusPath !== proofRow.captureStatus.path ||
+        ledgerRow.captureStatusSha256 !== proofRow.captureStatus.sha256 ||
+        ledgerRow.captureLogPath !== proofRow.captureLog.path ||
+        ledgerRow.captureLogSha256 !== proofRow.captureLog.sha256 ||
+        novelty.order !== proofRow.order ||
+        novelty.sourceBytesSha256 !== proofRow.capture.pngSha256 ||
+        novelty.decodedRgbSha256 !== proofRow.capture.decodedRgbSha256 ||
+        novelty.nativeStateFingerprintSha256 !== proofRow.nativeStateFingerprintSha256 ||
+        union.stratum !== 'ui' ||
+        union.encodedSha256 !== proofRow.capture.pngSha256 ||
+        union.decodedRgbSha256 !== proofRow.capture.decodedRgbSha256 ||
+        union.perceptualHash64 !== ledgerRow.perceptualHash64
+      )
+        throw new RangeError(`Native UI source evidence disagrees for ${id}`)
+      const statusRef = artifactRefFromAbsolutePath(
+        artifactRoot,
+        proofRow.captureStatus.path,
+        proofRow.captureStatus.sha256,
+      )
+      const status = await readPinnedJson(artifactRoot, statusRef, uiCaptureStatusSchema)
+      if (
+        status.value.order !== proofRow.order ||
+        status.value.opaqueCaseId !== id ||
+        status.value.stdoutPath !== proofRow.captureLog.path ||
+        status.value.stdoutSha256 !== proofRow.captureLog.sha256 ||
+        status.value.stderrPath !== proofRow.captureLog.stderrPath ||
+        status.value.stderrSha256 !== proofRow.captureLog.stderrSha256 ||
+        status.value.captureReceipt.caseId !== id ||
+        status.value.captureReceipt.imagePath !== basename(proofRow.capture.path) ||
+        status.value.captureReceipt.pngSha256 !== proofRow.capture.pngSha256 ||
+        status.value.captureReceipt.rgbSha256 !== proofRow.capture.decodedRgbSha256 ||
+        status.value.captureReceipt.preInventorySha256 !== proofRow.inventory.preSha256 ||
+        status.value.captureReceipt.postInventorySha256 !== proofRow.inventory.postSha256 ||
+        status.value.captureReceipt.preNativeVisibleStateSha256 !==
+          proofRow.nativeStateFingerprintSha256 ||
+        status.value.captureReceipt.postNativeVisibleStateSha256 !==
+          proofRow.nativeStateFingerprintSha256 ||
+        status.value.captureReceipt.preQueryMatchCount !== proofRow.targetOracle.preMatchCount ||
+        status.value.captureReceipt.postQueryMatchCount !== proofRow.targetOracle.postMatchCount ||
+        hashIdentity(status.value.captureReceipt.appBoundary.keys) !==
+          hashIdentity(proofRow.appBoundary.environmentKeys) ||
+        status.value.captureReceipt.appBoundary['/opt/capture'] !==
+          proofRow.appBoundary.captureMountAccess ||
+        status.value.captureReceipt.appBoundary['/opt/probe.py'] !==
+          proofRow.appBoundary.fingerprintScriptAccess ||
+        status.value.captureReceipt.appBoundary.driverEnvironment !==
+          proofRow.appBoundary.driverEnvironmentAccess ||
+        computeUiVisibleStateFingerprint(status.value.captureReceipt.preNativeVisibleState) !==
+          proofRow.nativeStateFingerprintSha256 ||
+        computeUiVisibleStateFingerprint(status.value.captureReceipt.postNativeVisibleState) !==
+          proofRow.nativeStateFingerprintSha256
+      )
+        throw new RangeError(`Native UI capture status differs from its state proof for ${id}`)
+    }
+    if (
+      nativePixelNoveltyAudit.rows.some((row) => {
+        const distances = pixels.value.rows.map((historical) =>
+          hamming64(row.perceptualHash64, historical.perceptualHash64),
+        )
+        return Math.min(...distances) !== row.nearestHistoricalPerceptualHashHamming
+      }) ||
+      nativePixelNoveltyAudit.peerPairs.some((pair) => {
+        const left = captureLedgerById.get(pair.leftOpaqueCaseId)
+        const right = captureLedgerById.get(pair.rightOpaqueCaseId)
+        return (
+          !left ||
+          !right ||
+          hamming64(left.perceptualHash64, right.perceptualHash64) !== pair.perceptualHashHamming
+        )
+      })
+    )
+      throw new RangeError('Native UI pHash diagnostics do not match the pinned pixels')
     independentRows = sourceRoster.value.rows
     independentRegisteredRows = registry.value.rows
     independentPixels = pixels.value
     independentUnionAudit = unionAudit.value
     independentExclusions = exclusions.value
+    independentSourceStateProofSha256 = digestBytes(stateProof.raw)
+    independentStateProof = stateProof.value
     independentSourceRosterSha256 = digestBytes(sourceRoster.raw)
     independentRegisteredSourcesSha256 = digestBytes(registry.raw)
   }
@@ -1766,7 +2326,11 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
           .filter((other) => other.opaqueCaseId !== union.opaqueCaseId)
           .map((other) => hamming64(union.perceptualHash64, other.perceptualHash64)),
       )
-      if (nearestUnion !== union.nearestHamming || nearestUnion <= 4)
+      if (
+        union.stratum !== row.stratum ||
+        nearestUnion !== union.nearestHamming ||
+        (row.stratum !== 'ui' && nearestUnion <= 4)
+      )
         throw new RangeError(
           `Independent DEV40 source ${row.opaqueCaseId} fails the pinned source-union pixel-distance gate`,
         )
@@ -1900,7 +2464,10 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     const item = reviewById.get(id)!
     return { fragment: item.fragment, reviewRow: item.row }
   })
-  const { producerCases, sourceBytesByCaseId } = await verifyCaseInputs(artifactRoot, orderedRows)
+  const { producerCases, sourceBytesByCaseId, decodedRgbSha256ByCaseId } = await verifyCaseInputs(
+    artifactRoot,
+    orderedRows,
+  )
   if (new Set(producerCases.map((row) => row.sourceBytesSha256)).size !== producerCases.length)
     throw new RangeError('Reviewed cases must have distinct encoded source bytes')
   if (independentRows && independentUnionAudit) {
@@ -1908,11 +2475,85 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     for (const producer of producerCases) {
       const source = sourceBytesByCaseId.get(producer.opaqueCaseId)
       const expected = unionById.get(producer.opaqueCaseId)
-      if (!source || !expected || digestBytes(source) !== expected.encodedSha256)
+      const decodedRgbSha256 = decodedRgbSha256ByCaseId.get(producer.opaqueCaseId)
+      if (
+        !source ||
+        !expected ||
+        !decodedRgbSha256 ||
+        digestBytes(source) !== expected.encodedSha256 ||
+        expected.encodedSha256 !== producer.sourceBytesSha256 ||
+        decodedRgbSha256 !== expected.decodedRgbSha256
+      )
         throw new RangeError(
-          `Independent source bytes do not match the pinned union audit for ${producer.opaqueCaseId}`,
+          `Independent source bytes or decoded RGB do not match the pinned union audit for ${producer.opaqueCaseId}`,
         )
     }
+    if (!independentPixels || !independentStateProof || !independentSourceStateProofSha256)
+      throw new RangeError('Independent DEV40 pixel or native UI state proof is missing')
+    const rosterById = new Map(independentRows.map((row) => [row.opaqueCaseId, row]))
+    const proofById = new Map(independentStateProof.rows.map((row) => [row.opaqueCaseId, row]))
+    const fingerprintById = new Map<string, string>()
+    for (const proofRow of independentStateProof.rows) {
+      const rosterRow = rosterById.get(proofRow.opaqueCaseId)
+      const producer = producerCases.find((row) => row.opaqueCaseId === proofRow.opaqueCaseId)
+      const reviewed = orderedRows.find(
+        ({ reviewRow }) => reviewRow.opaqueCaseId === proofRow.opaqueCaseId,
+      )
+      const union = unionById.get(proofRow.opaqueCaseId)
+      if (
+        !rosterRow ||
+        rosterRow.stratum !== 'ui' ||
+        !producer ||
+        !reviewed ||
+        !union ||
+        proofRow.sourceGroup !== rosterRow.sourceGroup ||
+        proofRow.stateId !== rosterRow.predeclaredStateId ||
+        proofRow.targetOracle.expectedPresence !== rosterRow.expectedPresence ||
+        proofRow.capture.pngSha256 !== producer.sourceBytesSha256 ||
+        proofRow.capture.decodedRgbSha256 !== union.decodedRgbSha256 ||
+        computeUiVisibleStateFingerprint(proofRow.normalizedNativeStateDocument) !==
+          proofRow.nativeStateFingerprintSha256
+      )
+        throw new RangeError(
+          `Native UI state proof does not match registered source ${proofRow.opaqueCaseId}`,
+        )
+      const sourcePath = resolve(artifactRoot, proofRow.capture.path)
+      const indexedPath = resolve(reviewed.fragment.controllerPathIndex[proofRow.opaqueCaseId]!)
+      if (
+        !isWithin(resolve(artifactRoot), sourcePath) ||
+        relative(artifactRoot, sourcePath) !== proofRow.capture.path ||
+        sourcePath !== indexedPath
+      )
+        throw new RangeError(
+          `Native UI state capture path differs from the reviewed source for ${proofRow.opaqueCaseId}`,
+        )
+      const captureLogPath = resolve(artifactRoot, proofRow.captureLog.path)
+      if (
+        !isWithin(resolve(artifactRoot), captureLogPath) ||
+        relative(artifactRoot, captureLogPath) !== proofRow.captureLog.path
+      )
+        throw new RangeError('Native UI state capture log escapes the trusted artifact root')
+      fingerprintById.set(proofRow.opaqueCaseId, proofRow.nativeStateFingerprintSha256)
+    }
+    if (proofById.size !== 10)
+      throw new RangeError('Exactly ten registered UI rows require native visible-state proofs')
+    validateUiStateSourcePixelPolicy(
+      producerCases.map((producer) => {
+        const row = rosterById.get(producer.opaqueCaseId)!
+        const union = unionById.get(producer.opaqueCaseId)!
+        return {
+          opaqueCaseId: producer.opaqueCaseId,
+          stratum: row.stratum,
+          encodedSha256: producer.sourceBytesSha256,
+          decodedRgbSha256: decodedRgbSha256ByCaseId.get(producer.opaqueCaseId)!,
+          perceptualHash64: union.perceptualHash64,
+          ...(row.stratum === 'ui'
+            ? { visibleStateFingerprintSha256: fingerprintById.get(producer.opaqueCaseId)! }
+            : {}),
+        }
+      }),
+      independentPixels!.rows,
+    )
   }
   if (mapReviewIds.length !== mapIds.size)
     throw new RangeError(
@@ -2020,6 +2661,7 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
           historicalExclusionsSha256: independentAuthority.historicalExclusions.sha256,
           historicalPixelsSha256: independentAuthority.historicalPixels.sha256,
           sourceUnionAuditSha256: independentAuthority.sourceUnionAudit.sha256,
+          sourceStateProofSha256: independentSourceStateProofSha256,
           sourceRosterSha256: independentSourceRosterSha256,
           registeredSourcesSha256: independentRegisteredSourcesSha256,
         }

@@ -36,7 +36,7 @@ interface LedgerFixture {
 async function makeFixture(): Promise<LedgerFixture> {
   const tempRoot = await mkdtemp(join(tmpdir(), 'h8a-successor-ledger-'))
   ownedTemporaryRoots.push(tempRoot)
-  const studyRoot = join(tempRoot, 'original-h8a-independent-dev40-v2')
+  const studyRoot = join(tempRoot, 'ui-state-dev40-v1')
   const parentRoot = join(tempRoot, 'h8a-fresh-dev-qual-campaign-v1')
   const parentLedgerPath = join(parentRoot, 'campaign-ledger.json')
   await Promise.all([

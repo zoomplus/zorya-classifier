@@ -18,12 +18,17 @@ import type { SuccessorCampaignAdmissionPort } from './campaign-ledger-port.js'
 import type { CaseExecutionPort } from './paired-runner.js'
 import type { LedgerPhysicalCallContext } from './campaign-ledger-port.js'
 import type { PhaseFreeze } from './schemas.js'
+import {
+  UI_STATE_DEV40_FREEZE_ID,
+  UI_STATE_DEV40_SOURCE_ADMISSION_POLICY,
+  UI_STATE_DEV40_STUDY_ID,
+} from './ui-state-dev40-policy.js'
 
 const directoryRoots: string[] = []
 
 async function fixture(): Promise<Parameters<typeof runVerifiedSuccessorDevScreen>[0]['verified']> {
   const generated = buildSyntheticPhaseFreeze(PHASE_FLAT_DEV40_ID)
-  const freezeId = 'synthetic-successor-runner-test'
+  const freezeId = UI_STATE_DEV40_FREEZE_ID
   const annotations = buildSyntheticAnnotationBundle(
     PHASE_FLAT_DEV40_ID,
     freezeId,
@@ -37,10 +42,12 @@ async function fixture(): Promise<Parameters<typeof runVerifiedSuccessorDevScree
   }
   const selection = buildDevScreenSelection(freeze, annotations)
   const verifiedAuthority = {
-    studyId: 'original-h8a-independent-dev40-v2' as const,
+    studyId: UI_STATE_DEV40_STUDY_ID,
     authoritySha256: 'a'.repeat(64),
     sourceCommit: 'b'.repeat(40),
     priceProofSha256: 'c'.repeat(64),
+    sourceAdmissionPolicy: UI_STATE_DEV40_SOURCE_ADMISSION_POLICY,
+    sourceStateProofSha256: 'e'.repeat(64),
     freezeCommitmentSha256: hashIdentity(freeze),
   }
   return {
@@ -367,7 +374,13 @@ await test('a launched failed stage is terminal and cannot read the key or execu
   assert.equal(keyReads, 1)
   assert.equal(counters.runtime, 1)
   assert.equal(counters.execute, 0)
-  assert.ok(await readFile(join(root, 'launch-intents', 'dev8-launch.json')))
+  const launch = JSON.parse(
+    await readFile(join(root, 'launch-intents', 'dev8-launch.json'), 'utf8'),
+  ) as Record<string, unknown>
+  assert.equal(launch.studyId, UI_STATE_DEV40_STUDY_ID)
+  assert.equal(launch.freezeId, UI_STATE_DEV40_FREEZE_ID)
+  assert.equal(launch.sourceAdmissionPolicy, UI_STATE_DEV40_SOURCE_ADMISSION_POLICY)
+  assert.equal(launch.sourceStateProofSha256, 'e'.repeat(64))
   const terminalStopBeforeRetry = await readFile(join(root, 'terminal-stop.json'))
   assert.ok(terminalStopBeforeRetry.length > 0)
   await assert.rejects(runVerifiedSuccessorDevScreen(input, options, deps), /terminal stop record/u)

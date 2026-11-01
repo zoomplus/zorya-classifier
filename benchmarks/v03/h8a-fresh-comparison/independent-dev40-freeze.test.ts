@@ -47,7 +47,7 @@ await test('the reviewed 30-row photo and map dry-run cannot satisfy a DEV40 ros
     () =>
       validateIndependentDev40SourceRoster({
         schema: 'h8a-independent-dev40-source-roster-v1',
-        studyId: 'original-h8a-independent-dev40-v2',
+        studyId: 'ui-state-dev40-v1',
         rows,
       }),
     /Array must contain exactly 40 element\(s\)/u,

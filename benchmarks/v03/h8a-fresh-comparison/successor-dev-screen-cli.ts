@@ -35,24 +35,30 @@ import {
 } from './constants.js'
 import { hashIdentity } from './hash-identity.js'
 import { immutableCloseoutSchema } from './schemas.js'
+import {
+  UI_STATE_DEV40_FREEZE_ID,
+  UI_STATE_DEV40_RUNTIME_PROOF_PATH,
+  UI_STATE_DEV40_RUNTIME_PROOF_SHA256,
+  UI_STATE_DEV40_ROOT,
+  UI_STATE_DEV40_STUDY_ID,
+  UI_STATE_DEV40_PARENT_ROOT,
+  UI_STATE_DEV40_SOURCE_ADMISSION_POLICY,
+  UI_STATE_DEV40_SUCCESSOR_ROOT,
+  uiStateDev40Path,
+} from './ui-state-dev40-policy.js'
 
-const STUDY_ROOT =
-  '/root/.codex/artifacts/zorya-classifier-mcp-20261101/original-h8a-independent-dev40-v2'
-const PARENT_ROOT = resolve(dirname(STUDY_ROOT), 'h8a-fresh-dev-qual-campaign-v1')
+const STUDY_ROOT = UI_STATE_DEV40_ROOT
+const PARENT_ROOT = UI_STATE_DEV40_PARENT_ROOT
 const PARENT_LEDGER_PATH = join(PARENT_ROOT, 'campaign-ledger.json')
-const AUTHORITY_PATH = join(STUDY_ROOT, 'admission', 'independent-dev40-v2-preparation.json')
-const FREEZE_DIRECTORY = join(STUDY_ROOT, 'admission', 'freeze-v2')
-const SUCCESSOR_ROOT = join(STUDY_ROOT, 'admission', 'successor-campaign-v1')
-const RUNTIME_PROOF_PATH = resolve(
-  dirname(STUDY_ROOT),
-  'main-flat-compare-v2',
-  'checked-runtime-files-v2.json',
-)
-const RUNTIME_PROOF_SHA256 = '278015e2d7a9bbd7f308c865c01a9dc2277ec48d89d118524940f6e0ec389'
+const AUTHORITY_PATH = uiStateDev40Path('admission', 'independent-dev40-v2-preparation.json')
+const FREEZE_DIRECTORY = uiStateDev40Path('admission', 'freeze-v2')
+const SUCCESSOR_ROOT = UI_STATE_DEV40_SUCCESSOR_ROOT
+const RUNTIME_PROOF_PATH = resolve('/root/.codex/artifacts', UI_STATE_DEV40_RUNTIME_PROOF_PATH)
+const RUNTIME_PROOF_SHA256 = UI_STATE_DEV40_RUNTIME_PROOF_SHA256
 const RUNTIME_ENVIRONMENT_SHA256 =
   '1941f16dfb906f54331cc06c8b58bed15b86b65d86f16f7f708b49bc60680ba6'
 const SOURCE_ROOT = resolve(fileURLToPath(new URL('../../../', import.meta.url)))
-const BINDING_PATH = join(STUDY_ROOT, 'admission', 'successor-study-binding.json')
+const BINDING_PATH = uiStateDev40Path('admission', 'successor-study-binding.json')
 const JSON_LIMIT = 4 * 1024 * 1024
 
 const digestSchema = z.string().regex(/^[a-f0-9]{64}$/u)
@@ -147,6 +153,10 @@ function assertFullFreeze(
 ): void {
   const { freeze, annotations, sourceBytesByCaseId, sourceClosurePaths } = verified
   if (
+    verified.verifiedAuthority.studyId !== UI_STATE_DEV40_STUDY_ID ||
+    verified.verifiedAuthority.sourceAdmissionPolicy !== UI_STATE_DEV40_SOURCE_ADMISSION_POLICY ||
+    !digestSchema.safeParse(verified.verifiedAuthority.sourceStateProofSha256).success ||
+    freeze.freezeId !== UI_STATE_DEV40_FREEZE_ID ||
     freeze.phaseId !== PHASE_FLAT_DEV40_ID ||
     freeze.producerCases.length !== 40 ||
     freeze.pairedSchedule.length !== 40 ||
@@ -217,7 +227,7 @@ async function readBoundedJson(path: string, root: string): Promise<unknown> {
 async function verifyRegisteredBinding(
   verified: VerifiedStudy,
   authoritySha256: string,
-  root = STUDY_ROOT,
+  root: string = STUDY_ROOT,
 ): Promise<void> {
   const raw = await readBoundedJson(
     join(root, 'admission', 'successor-study-binding.json'),
@@ -226,9 +236,9 @@ async function verifyRegisteredBinding(
   const bindingSchema = z
     .object({
       schema: z.literal('h8a-independent-dev40-successor-study-binding-v1'),
-      studyId: z.literal('original-h8a-independent-dev40-v2'),
+      studyId: z.literal(UI_STATE_DEV40_STUDY_ID),
       authoritySha256: digestSchema,
-      freezeId: z.string().min(1),
+      freezeId: z.literal(UI_STATE_DEV40_FREEZE_ID),
       freezeCommitmentSha256: digestSchema,
       producerClosureSha256: digestSchema,
       sourceBytesManifestSha256: digestSchema,
@@ -236,6 +246,8 @@ async function verifyRegisteredBinding(
       sourceClosurePathsSha256: digestSchema,
       sourceCommit: z.string().min(1),
       priceProofSha256: digestSchema,
+      sourceAdmissionPolicy: z.literal(UI_STATE_DEV40_SOURCE_ADMISSION_POLICY),
+      sourceStateProofSha256: digestSchema,
       successorLedgerRegistrationSha256: digestSchema,
       bindingSha256: digestSchema,
     })
@@ -252,7 +264,9 @@ async function verifyRegisteredBinding(
     binding.runtimeEnvironmentSha256 !== verified.runtimeEnvironmentSha256 ||
     binding.sourceClosurePathsSha256 !== hashIdentity(verified.sourceClosurePaths) ||
     binding.sourceCommit !== verified.verifiedAuthority.sourceCommit ||
-    binding.priceProofSha256 !== verified.verifiedAuthority.priceProofSha256
+    binding.priceProofSha256 !== verified.verifiedAuthority.priceProofSha256 ||
+    binding.sourceAdmissionPolicy !== verified.verifiedAuthority.sourceAdmissionPolicy ||
+    binding.sourceStateProofSha256 !== verified.verifiedAuthority.sourceStateProofSha256
   )
     throw new RangeError('Registered successor binding differs from the verified freeze inputs')
   const registrationBytes = await readFile(
@@ -271,7 +285,7 @@ async function writeStudyBinding(
 ): Promise<void> {
   const body = {
     schema: 'h8a-independent-dev40-successor-study-binding-v1' as const,
-    studyId: 'original-h8a-independent-dev40-v2' as const,
+    studyId: UI_STATE_DEV40_STUDY_ID,
     authoritySha256,
     freezeId: verified.freeze.freezeId,
     freezeCommitmentSha256: verified.freeze.cohortCommitmentSha256,
@@ -281,6 +295,8 @@ async function writeStudyBinding(
     sourceClosurePathsSha256: hashIdentity(verified.sourceClosurePaths),
     sourceCommit: verified.verifiedAuthority.sourceCommit,
     priceProofSha256: verified.verifiedAuthority.priceProofSha256,
+    sourceAdmissionPolicy: verified.verifiedAuthority.sourceAdmissionPolicy,
+    sourceStateProofSha256: verified.verifiedAuthority.sourceStateProofSha256,
     successorLedgerRegistrationSha256: registrationSha256,
   }
   await writeImmutableJson(BINDING_PATH, { ...body, bindingSha256: hashIdentity(body) })
@@ -506,14 +522,16 @@ async function verifyLaunchIntent(
     .object({
       schema: z.literal('h8a-independent-dev40-screen-launch-v1'),
       screen: z.enum(['dev8', 'dev12', 'dev40']),
-      studyId: z.literal('original-h8a-independent-dev40-v2'),
+      studyId: z.literal(UI_STATE_DEV40_STUDY_ID),
       authoritySha256: digestSchema,
-      freezeId: z.string().min(1),
+      freezeId: z.literal(UI_STATE_DEV40_FREEZE_ID),
       freezeCommitmentSha256: digestSchema,
       sourceCommit: z.string().regex(/^[a-f0-9]{40}$/u),
       producerClosureSha256: digestSchema,
       sourceBytesManifestSha256: digestSchema,
       priceProofSha256: digestSchema,
+      sourceAdmissionPolicy: z.literal(UI_STATE_DEV40_SOURCE_ADMISSION_POLICY),
+      sourceStateProofSha256: digestSchema,
       runtimeEnvironmentSha256: digestSchema,
       sourceClosurePathsSha256: digestSchema,
       startedAtIso: z.string().datetime({ offset: true }),
@@ -534,6 +552,8 @@ async function verifyLaunchIntent(
     launch.producerClosureSha256 !== verified.freeze.producerClosureSha256 ||
     launch.sourceBytesManifestSha256 !== verified.freeze.sourceBytesManifestSha256 ||
     launch.priceProofSha256 !== verified.verifiedAuthority.priceProofSha256 ||
+    launch.sourceAdmissionPolicy !== verified.verifiedAuthority.sourceAdmissionPolicy ||
+    launch.sourceStateProofSha256 !== verified.verifiedAuthority.sourceStateProofSha256 ||
     launch.runtimeEnvironmentSha256 !== verified.runtimeEnvironmentSha256 ||
     launch.sourceClosurePathsSha256 !== hashIdentity(verified.sourceClosurePaths)
   )
@@ -646,7 +666,7 @@ export async function runVerifiedSuccessorDevScreen(
     const launchBody = {
       schema: 'h8a-independent-dev40-screen-launch-v1' as const,
       screen: input.screen,
-      studyId: 'original-h8a-independent-dev40-v2' as const,
+      studyId: UI_STATE_DEV40_STUDY_ID,
       authoritySha256: input.authoritySha256,
       freezeId: verified.freeze.freezeId,
       freezeCommitmentSha256: verified.freeze.cohortCommitmentSha256,
@@ -654,6 +674,8 @@ export async function runVerifiedSuccessorDevScreen(
       producerClosureSha256: verified.freeze.producerClosureSha256,
       sourceBytesManifestSha256: verified.freeze.sourceBytesManifestSha256,
       priceProofSha256: verified.verifiedAuthority.priceProofSha256,
+      sourceAdmissionPolicy: verified.verifiedAuthority.sourceAdmissionPolicy,
+      sourceStateProofSha256: verified.verifiedAuthority.sourceStateProofSha256,
       runtimeEnvironmentSha256: verified.runtimeEnvironmentSha256,
       sourceClosurePathsSha256: hashIdentity(verified.sourceClosurePaths),
       startedAtIso: new Date().toISOString(),
