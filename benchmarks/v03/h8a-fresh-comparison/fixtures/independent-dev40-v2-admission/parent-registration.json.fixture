@@ -1,0 +1,73 @@
+{
+  "schema": "original-h8a-independent-dev40-v2-parent",
+  "studyId": "original-h8a-independent-dev40-v2",
+  "freezeId": "original-h8a-independent-dev40-v2-20261101",
+  "baseCommit": "f9931392b37f669995cfb68dd5a2553a620bbd09",
+  "registeredUtc": "2026-11-01T07:44:54.356203+00:00",
+  "devAbsoluteDeadlineUtc": "2026-11-02T07:44:54.356203+00:00",
+  "sourceSelectionSeed": "original-full-h8a-independent-20261101-r2-alpha",
+  "parentFiles": {
+    "disjoint-dev40-v1/parent-registration.json": "5c63045a648928c9aefe12aad99464e8394b3bc42c133b39821036eb74f3bff0",
+    "main-flat-compare-v2/v1-prior-immutable-file-hashes.json": "8f477ea0f8ad738c0c39c4405c13520f8810b36f637b494163c99826dec2b8a3",
+    "main-flat-compare-v2/final/v2-closed-files-sha256.json": "83f90db2237e4b0462c3b192ff8d514c23ce009e5ef466bd4edfe6bb4d3ad0da",
+    "disjoint-dev40-v1/integration/sealed-disjoint-study-source-digests.json": "c4aa7f8d0ea8a4a3aa368405f2b65a65cfeafd5f42b52eee4a8ecf9a6977ef54",
+    "disjoint-dev40-v1/integration/physical-source-novelty-40.json": "3b23795b5a042872a4944fd90991feed1471b82befe87b4ee386f178b833ea63",
+    "disjoint-dev40-v1/integration/committed-source-group-split.json": "b253588448edec3174d35a6004cf766c2e1f2b5b617518869c5517a4c78e374f",
+    "h8a-tile-availability-pilot-v1/main/source-evaluator-authority.json": "a3718d1e431471d3d667ec574c6bdc662aa2cbfbd8c4b56e94a41d41dabf298f",
+    "h8a-tile-availability-pilot-v1/main/terminal-availability-closeout.json": "031520f51cdbdb2b2bb0fa12ac9f25ff66f14ee59817dad96fb1f2004a45758d",
+    "h8a-fresh-dev-qual-campaign-v1/campaign-ledger.json": "839ad2eaa441eafbc85a998e6f89df053ff616d8109fa1d92909cd1cefd99d9a",
+    "post-stop-dev-admission-audit-v1/official-test-metadata-pins.json": "896d0cdbb590e958c4ae678039f8a386d28fe4c6dabf6f46dcd6604909195d5d",
+    "post-stop-dev-admission-audit-v1/private-header-capacity-observations.jsonl": "f25dfe1a191796a2d3def1b22c3cad468fe938e22f6ff9166e516b144bcf54e4",
+    "post-stop-dev-admission-audit-v1/local-ui-game-package-metadata.json": "1b513afb99fc078f2eea0e93e39b336ad937ef0b0da457e1ecad2cce9c02f91f"
+  },
+  "scientificPolicy": {
+    "candidate": "h8a-cpu-flat-target-v2",
+    "nativeRecipeSha256": "a3d333cf34959a833f528ca098b239d819a29e626156adf00e429b0f172ee5f6",
+    "control": {
+      "profileId": "v02-final-v3-fresh-cohort-replay-v1",
+      "recipeIdentitySha256": "ad521b3467280fb169f15e2db4e5841724654ef11be31138879f2bb157dea716",
+      "requestPolicyIdentitySha256": "5df06b89a5b4596e16f5d94c3cba116427772028d46d516a406f142aef10ecd4"
+    },
+    "semanticRequestPolicySha256": "0c9a1bff40a1ab4fed251a2b1f9f56b8b47325b8aa79e18875d8fbf549760a5e",
+    "review": [
+      "No advance on technical blocker, incomplete paired screen, candidate false object on any negative, unresolved cost or invalid receipts.",
+      "No advance on a screen with zero strict positive localizations among its five/nine observed positive cases. On a complete clean screen with nonzero strict positive success, review stratified misses, costs and paired results, preserve the review and its report hash.",
+      "All original fixed DEV40 and QUAL120 thresholds apply unchanged; an independent 120-case qualification is mandatory before promotion."
+    ],
+    "boundedCalls": {
+      "global": 2000,
+      "dev40WorstCaseBoth": 400,
+      "qual120WorstCaseBoth": 1200,
+      "candidatePerCase": 4,
+      "controlPerCase": 6
+    },
+    "paidRetries": 0
+  },
+  "authorCostCeilingUsd": null,
+  "successorAccounting": "Preserve ancestor counters, costs including unknowns, monotone reservation ids and prior freezes. No paid trial retries.",
+  "sourceRoster": {
+    "photo": "Open Images test; 51 observed long-side-1024 mask-author capacity pool for positives. Full pinned test metadata for negatives. Rank eligible distinct authors by new study seed, freeze 16/4 primary and 16/4 ordered reserves; require verified author/license/geometry, no additional reserves. No QUAL pixels.",
+    "ui": {
+      "primary": [
+        "meld",
+        "file-roller"
+      ],
+      "orderedStructuralBackups": [
+        "gthumb",
+        "ristretto"
+      ]
+    },
+    "map": {
+      "primary": [
+        "gnome-chess",
+        "four-in-a-row"
+      ],
+      "orderedStructuralBackups": [
+        "gnome-mines",
+        "gnome-robots"
+      ]
+    },
+    "localPolicy": "Prior to any state capture register exact unique case and state IDs, targets, actions, ground-truth oracle and license. Five per family, primary1 positive/negative 4/1, primary2 3/2. Backups only if a metadata-only structural failure excludes a primary before any case pixel acquisition; no substitution after capture. Freeze exports on prior 5-field producer contract. Novel to all prior corpus/tiles and peers; no coalescing near duplicates including pHash<=4."
+  },
+  "phases": "same seeded paired DEV8/12/40 scheduling and each existing numerical qualification gate; 120 fully disjoint only after DEV pass; strict budget, timeout, receipt and source isolation"
+}

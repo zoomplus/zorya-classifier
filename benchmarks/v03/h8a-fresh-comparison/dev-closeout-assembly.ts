@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import type { CampaignLedger } from './campaign-ledger.js'
+import type { CampaignLedgerPort } from './campaign-ledger-port.js'
 import { ImmutableCaseArtifactStore } from './case-artifact-store.js'
 import {
   PROFILE_CONTROL_ID,
@@ -149,7 +149,7 @@ export async function assembleDev40Closeouts(input: {
   annotations: EvaluatorPrivateAnnotationBundle
   selection: DevScreenSelection
   artifactRoot: string
-  ledger: CampaignLedger
+  ledger: CampaignLedgerPort
   closedAtIso?: string
 }): Promise<Dev40CloseoutAssembly> {
   const freeze = phaseFreezeSchema.parse(input.freeze)

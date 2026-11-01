@@ -6,10 +6,11 @@ import {
   PHASE_FLAT_QUAL120_ID,
   PHASE_QUAL120_ID,
   PROFILE_CONTROL_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
   QUAL120_WORST_CASE_PHYSICAL_CALLS,
   candidateIdForPhase,
 } from './constants.js'
-import type { CampaignLedger } from './campaign-ledger.js'
+import type { CampaignLedgerPort, SuccessorCampaignAdmissionPort } from './campaign-ledger-port.js'
 import { hashIdentity } from './hash-identity.js'
 import { V02_CONTROL_PROFILE, profileById, type H8aFreshProfileId } from './profiles.js'
 import type { PhaseFreeze } from './schemas.js'
@@ -108,9 +109,18 @@ function validateFreezeAdmissionProofs(freeze: PhaseFreeze): void {
     throw new RangeError('Current paired-case reserve envelope exceeds campaign cost ceiling')
 }
 
+function supportsStudyScopeAdmission(
+  ledger: CampaignLedgerPort,
+): ledger is SuccessorCampaignAdmissionPort {
+  return (
+    'assertStudyScopeCanAdmitPhysicalReservedUsd' in ledger &&
+    typeof ledger.assertStudyScopeCanAdmitPhysicalReservedUsd === 'function'
+  )
+}
+
 export async function assertFreezeAdmissionAsync(
   freeze: PhaseFreeze,
-  ledger: CampaignLedger,
+  ledger: CampaignLedgerPort,
 ): Promise<void> {
   validateFreezeAdmissionProofs(freeze)
   const pairedCaseReserve = maxPairedCaseReservedUsd(freeze)
@@ -118,6 +128,26 @@ export async function assertFreezeAdmissionAsync(
     reservedUsdUpperBoundForProfile(freeze, candidateIdForPhase(freeze.phaseId)),
     reservedUsdUpperBoundForProfile(freeze, PROFILE_CONTROL_ID),
   )
-  await ledger.assertCanAdmitPhysicalReservedUsd(highestSingleFetch)
+  const candidateBound = reservedUsdUpperBoundForProfile(
+    freeze,
+    candidateIdForPhase(freeze.phaseId),
+  )
+  const controlBound = reservedUsdUpperBoundForProfile(freeze, PROFILE_CONTROL_ID)
+  if (supportsStudyScopeAdmission(ledger)) {
+    if (candidateIdForPhase(freeze.phaseId) !== PROFILE_FLAT_CANDIDATE_ID)
+      throw new RangeError('Successor ledger requires the registered flat candidate profile')
+    await ledger.assertStudyScopeCanAdmitPhysicalReservedUsd(
+      PROFILE_FLAT_CANDIDATE_ID,
+      candidateBound,
+    )
+    await ledger.assertStudyScopeCanAdmitPhysicalReservedUsd(PROFILE_CONTROL_ID, controlBound)
+    await ledger.assertExposureAllowsAdditionalUsd(pairedCaseReserve)
+    return
+  }
+  await ledger.assertCanAdmitPhysicalReservedUsd(highestSingleFetch, {
+    profileId:
+      candidateBound >= controlBound ? candidateIdForPhase(freeze.phaseId) : PROFILE_CONTROL_ID,
+    opaqueCaseId: freeze.producerCases[0]?.opaqueCaseId ?? 'freeze-preflight',
+  })
   await ledger.assertExposureAllowsAdditionalUsd(pairedCaseReserve)
 }

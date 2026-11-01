@@ -1,0 +1,1 @@
+{"schema":"h8a-fresh-campaign-ledger-v1","ledgerVersion":497,"maxPhysicalCalls":2000,"maxCostUsd":10,"nextReservationId":101,"physicalDispatchCount":100,"logicalAttemptCount":32,"knownCostUsd":0.059908515,"unknownReserveUsd":0.12,"inFlightReservations":[],"resumeBlocked":false,"crashRecoveryLatched":false}

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { assertNoForbiddenEvaluatorFields } from './forbidden-leakage.js'
-import type { CampaignLedger } from './campaign-ledger.js'
+import type { CampaignLedgerPort } from './campaign-ledger-port.js'
 import { hashIdentity } from './hash-identity.js'
 import { computePhaseFreezeCommitmentSha256 } from './freeze-commitment.js'
 import { createPhaseDeadlineScope } from './phase-deadline.js'
@@ -74,7 +74,7 @@ export interface CaseExecutionPort {
     context: {
       profileId: H8aFreshProfileId
       reservedUsdPerFetch: number
-      ledger: CampaignLedger
+      ledger: CampaignLedgerPort
       caseExecutionIdentitySha256?: string
       dispatchJournal?: ArmDispatchJournal
       signal?: AbortSignal
@@ -84,7 +84,7 @@ export interface CaseExecutionPort {
 
 interface PairedRunnerOptions {
   freeze: PhaseFreeze
-  ledger: CampaignLedger
+  ledger: CampaignLedgerPort
   candidatePort: CaseExecutionPort
   controlPort: CaseExecutionPort
   sourceBytesByCaseId: ReadonlyMap<string, Uint8Array>
@@ -474,7 +474,10 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
       profileId: H8aFreshProfileId,
       preflightError: unknown,
     ): Promise<void> => {
-      await ledger.recordLogicalAttempt()
+      await ledger.recordLogicalAttempt({
+        profileId,
+        opaqueCaseId: executionInput.opaqueCaseId,
+      })
       const synthetic = buildSyntheticPreflightFailureResult(
         executionInput,
         profileId,
@@ -691,7 +694,10 @@ export async function runPairedPhase(options: PairedRunnerOptions): Promise<{
           break
         }
 
-        await ledger.recordLogicalAttempt()
+        await ledger.recordLogicalAttempt({
+          profileId: arm.profileId,
+          opaqueCaseId: executionInput.opaqueCaseId,
+        })
         arm.onLogicalAttempt()
         const sharedInput: ProducerExecutionInput = {
           opaqueCaseId: executionInput.opaqueCaseId,
@@ -898,7 +904,10 @@ export async function runInjectedFetchCasePort(
         )
       }
 
-      const reservationId = await context.ledger.admitPhysical(context.reservedUsdPerFetch)
+      const reservationId = await context.ledger.admitPhysical(context.reservedUsdPerFetch, {
+        profileId: context.profileId,
+        opaqueCaseId: input.opaqueCaseId,
+      })
       try {
         await context.ledger.recordDispatchIntent(reservationId)
       } catch (intentError) {

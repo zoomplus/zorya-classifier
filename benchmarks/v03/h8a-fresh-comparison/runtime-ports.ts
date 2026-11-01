@@ -30,7 +30,7 @@ import {
 import type { H8aFreshProfileId } from './profiles.js'
 import { createCampaignFetchBoundary } from './campaign-fetch-boundary.js'
 import type { CampaignFetchJournalEntry, RecordedProviderCall } from './campaign-fetch-boundary.js'
-import type { CampaignLedger } from './campaign-ledger.js'
+import type { CampaignLedgerPort } from './campaign-ledger-port.js'
 import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
 import type { H8aFreshCandidateId } from './constants.js'
 import { assertNoForbiddenEvaluatorFields } from './forbidden-leakage.js'
@@ -168,7 +168,7 @@ interface H8FreshRuntimePorts {
 interface DispatchEvidenceContext {
   recorder: Recorder | undefined
   journal: CampaignFetchJournalEntry[]
-  ledger: CampaignLedger
+  ledger: CampaignLedgerPort
   reservedUsd: number
   profileId: H8aFreshProfileId
   opaqueCaseId: string

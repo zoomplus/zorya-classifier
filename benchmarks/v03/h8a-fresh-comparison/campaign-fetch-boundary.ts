@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { mkdir, rename, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { z } from 'zod'
-import type { CampaignLedger } from './campaign-ledger.js'
+import type { CampaignLedgerPort } from './campaign-ledger-port.js'
 import {
   finalizeObservedPhysicalDispatch,
   invokeInjectedWork,
@@ -47,7 +47,7 @@ export interface CampaignFetchJournalEntry {
 }
 
 interface CampaignFetchBoundaryOptions {
-  ledger: CampaignLedger
+  ledger: CampaignLedgerPort
   reservedUsd: number
   profileId: H8aFreshProfileId
   opaqueCaseId: string
@@ -198,7 +198,10 @@ export function createCampaignFetchBoundary(options: CampaignFetchBoundaryOption
       )
         throw new TypeError('Actual fetch has no matching recorder request identity')
 
-      const reservationId = await options.ledger.admitPhysical(options.reservedUsd)
+      const reservationId = await options.ledger.admitPhysical(options.reservedUsd, {
+        profileId: options.profileId,
+        opaqueCaseId: options.opaqueCaseId,
+      })
       if (options.signal?.aborted || init?.signal?.aborted) {
         await options.ledger.cancelBeforeFetch(reservationId)
         throw (

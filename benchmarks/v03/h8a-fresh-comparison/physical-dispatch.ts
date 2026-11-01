@@ -1,4 +1,4 @@
-import type { CampaignLedger } from './campaign-ledger.js'
+import type { CampaignLedgerPort, LedgerPhysicalCallContext } from './campaign-ledger-port.js'
 
 interface PhysicalDispatchResult<T> {
   value: T
@@ -68,7 +68,7 @@ export function invokeInjectedWork<T>(
 }
 
 export async function finalizeObservedPhysicalDispatch<T>(
-  ledger: CampaignLedger,
+  ledger: CampaignLedgerPort,
   reservationId: number,
   workOutcomePromise: Promise<InjectedWorkOutcome<T>>,
   readCostUsd: (value: T) => number | null,
@@ -118,11 +118,12 @@ export async function finalizeObservedPhysicalDispatch<T>(
 }
 
 export async function runInjectedPhysicalFetch<T>(
-  ledger: CampaignLedger,
+  ledger: CampaignLedgerPort,
   reservedUsd: number,
   fetch: InjectedFetch<T>,
+  context?: LedgerPhysicalCallContext,
 ): Promise<PhysicalDispatchResult<T>> {
-  const reservationId = await ledger.admitPhysical(reservedUsd)
+  const reservationId = await ledger.admitPhysical(reservedUsd, context)
   await ledger.recordDispatchIntent(reservationId)
   const workOutcomePromise = invokeInjectedWork(fetch)
   const outcome = await finalizeObservedPhysicalDispatch(
@@ -147,15 +148,16 @@ export async function runInjectedPhysicalFetch<T>(
 }
 
 export async function runPreflightOnlyLogicalAttempt(
-  ledger: CampaignLedger,
+  ledger: CampaignLedgerPort,
   attempt: () => void,
+  context?: LedgerPhysicalCallContext,
 ): Promise<void> {
-  await ledger.recordLogicalAttempt()
+  await ledger.recordLogicalAttempt(context)
   attempt()
 }
 
 export async function cancelUnstartedPhysicalReservation(
-  ledger: CampaignLedger,
+  ledger: CampaignLedgerPort,
   reservationId: number,
 ): Promise<void> {
   await ledger.cancelBeforeFetch(reservationId)

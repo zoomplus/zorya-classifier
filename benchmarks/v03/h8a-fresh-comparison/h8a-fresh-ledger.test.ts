@@ -133,6 +133,22 @@ await test('two ledger instances serialize admissions under shared path', async 
   }
 })
 
+await test('a failed stale-instance transaction restores the latest disk state', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'h8a-ledger-'))
+  const path = join(directory, 'ledger.json')
+  try {
+    const first = await CampaignLedger.open(path)
+    const stale = await CampaignLedger.open(path)
+    await first.recordLogicalAttempt()
+    stale.scheduleSimulatedPersistFailureAfterSuccessfulTransactions()
+    await assert.rejects(stale.recordLogicalAttempt(), CampaignLedgerPersistFailureError)
+    assert.equal(stale.snapshot().logicalAttemptCount, 1)
+    assert.equal((await CampaignLedger.open(path)).snapshot().logicalAttemptCount, 1)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
 await test('competing admissions stay within campaign physical ceiling', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'h8a-ledger-'))
   try {

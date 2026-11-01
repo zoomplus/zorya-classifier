@@ -1,10 +1,12 @@
-import { mkdir, open, readFile, rename, unlink, writeFile } from 'node:fs/promises'
-import type { FileHandle } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { randomBytes } from 'node:crypto'
-import { z } from 'zod'
+import type { z } from 'zod'
 import { CAMPAIGN_MAX_COST_USD, CAMPAIGN_MAX_PHYSICAL_CALLS } from './constants.js'
 import { campaignLedgerSnapshotSchema } from './schemas.js'
+import { AtomicJsonLedgerStore, JsonLedgerStorageError } from './atomic-json-ledger.js'
+import type {
+  CampaignLedgerPort,
+  LedgerLogicalAttemptContext,
+  LedgerPhysicalCallContext,
+} from './campaign-ledger-port.js'
 
 export class CampaignLedgerBlockedError extends Error {
   readonly code = 'H8A_CAMPAIGN_LEDGER_BLOCKED'
@@ -19,14 +21,6 @@ export class CampaignBudgetExhaustedError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'CampaignBudgetExhaustedError'
-  }
-}
-
-class CampaignLedgerLockError extends Error {
-  readonly code = 'H8A_CAMPAIGN_LEDGER_LOCK'
-  constructor(message: string) {
-    super(message)
-    this.name = 'CampaignLedgerLockError'
   }
 }
 
@@ -60,14 +54,6 @@ interface MutableLedgerState {
   resumeBlocked: boolean
   crashRecoveryLatched: boolean
 }
-
-const ledgerLockPayloadSchema = z
-  .object({
-    pid: z.number().int().nonnegative(),
-    ownerToken: z.string().min(1),
-    acquiredAt: z.number().finite(),
-  })
-  .strict()
 
 function initialLedgerState(): MutableLedgerState {
   return {
@@ -127,8 +113,8 @@ function normalizeInFlightReservation(
   }
 }
 
-function parseLedger(raw: string): MutableLedgerState {
-  const parsed = campaignLedgerSnapshotSchema.parse(JSON.parse(raw) as unknown)
+function parseLedger(raw: unknown): MutableLedgerState {
+  const parsed = campaignLedgerSnapshotSchema.parse(raw)
   const state: MutableLedgerState = {
     ...parsed,
     nextReservationId: parsed.nextReservationId ?? 1,
@@ -141,135 +127,31 @@ function parseLedger(raw: string): MutableLedgerState {
   return state
 }
 
-function lockPathFor(ledgerPath: string): string {
-  return `${ledgerPath}.lock`
-}
-
-async function assertNoForeignLock(ledgerPath: string): Promise<void> {
-  try {
-    await readFile(lockPathFor(ledgerPath), 'utf8')
-    throw new CampaignLedgerBlockedError(
-      'Campaign ledger lock file present; ownership is ambiguous',
-    )
-  } catch (error) {
-    if (error instanceof CampaignLedgerBlockedError) throw error
-    const code = error instanceof Error && 'code' in error ? error.code : undefined
-    if (code !== 'ENOENT') throw error
-  }
-}
-
-async function acquireExclusiveLedgerLock(
-  ledgerPath: string,
-): Promise<{ release: () => Promise<void> }> {
-  const lockPath = lockPathFor(ledgerPath)
-  await mkdir(dirname(ledgerPath), { recursive: true })
-  let handle: FileHandle | undefined
-  const maxAttempts = 200
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      handle = await open(lockPath, 'wx')
-      break
-    } catch (error) {
-      const code = error instanceof Error && 'code' in error ? error.code : undefined
-      if (code === 'EEXIST') {
-        await new Promise<void>((resolve) => {
-          setTimeout(resolve, 5 + attempt)
-        })
-        continue
-      }
-      throw error
-    }
-  }
-  if (!handle) throw new CampaignLedgerBlockedError('Campaign ledger lock acquisition timed out')
-  const ownerToken = randomBytes(16).toString('hex')
-  await writeFile(
-    handle,
-    JSON.stringify({ pid: process.pid, ownerToken, acquiredAt: Date.now() }),
-    { encoding: 'utf8' },
-  )
-  return {
-    release: async () => {
-      try {
-        const raw = await readFile(lockPath, 'utf8')
-        const parsed = ledgerLockPayloadSchema.safeParse(JSON.parse(raw) as unknown)
-        if (!parsed.success) {
-          throw new CampaignLedgerLockError('Campaign ledger lock payload failed validation')
-        }
-        if (parsed.data.ownerToken === ownerToken) {
-          await unlink(lockPath)
-        } else {
-          throw new CampaignLedgerLockError('Campaign ledger lock owned by another holder')
-        }
-      } catch (error) {
-        if (error instanceof CampaignLedgerLockError) throw error
-        const code = error instanceof Error && 'code' in error ? error.code : undefined
-        if (code === 'ENOENT') return
-        throw new CampaignLedgerLockError(
-          error instanceof Error ? error.message : 'Campaign ledger lock release failed',
-        )
-      } finally {
-        if (handle) await handle.close()
-      }
-    },
-  }
-}
-
-async function loadLedgerState(ledgerPath: string): Promise<MutableLedgerState | null> {
-  try {
-    const raw = await readFile(ledgerPath, 'utf8')
-    return parseLedger(raw)
-  } catch (error) {
-    const code = error instanceof Error && 'code' in error ? error.code : undefined
-    if (code === 'ENOENT') return null
-    throw error
-  }
-}
-
-async function persistLedger(path: string, state: MutableLedgerState): Promise<void> {
-  syncResumeBarrier(state)
-  state.ledgerVersion++
-  const directory = dirname(path)
-  await mkdir(directory, { recursive: true })
-  const tempPath = join(directory, `.ledger-${process.pid}-${randomBytes(8).toString('hex')}.tmp`)
-  const payload = `${JSON.stringify(state)}\n`
-  await writeFile(tempPath, payload, { encoding: 'utf8', mode: 0o600 })
-  await rename(tempPath, path)
-}
-
-export class CampaignLedger {
+export class CampaignLedger implements CampaignLedgerPort {
   private state: MutableLedgerState
-  private mutex: Promise<void> = Promise.resolve()
   private simulatedPersistFailureAfterSkip = -1
 
   private constructor(
-    private readonly path: string,
     state: MutableLedgerState,
+    private readonly storage: AtomicJsonLedgerStore,
   ) {
     this.state = state
     syncResumeBarrier(this.state)
   }
 
   static async open(path: string): Promise<CampaignLedger> {
-    await assertNoForeignLock(path)
-    const loaded = await loadLedgerState(path)
-    if (loaded) {
-      syncResumeBarrier(loaded)
-      return new CampaignLedger(path, loaded)
-    }
-    const ledger = new CampaignLedger(path, initialLedgerState())
-    const lock = await acquireExclusiveLedgerLock(path)
+    const storage = new AtomicJsonLedgerStore(path)
+    let loaded: MutableLedgerState
     try {
-      const raced = await loadLedgerState(path)
-      if (raced) {
-        syncResumeBarrier(raced)
-        ledger.state = raced
-        return ledger
-      }
-      await persistLedger(path, ledger.state)
-      return ledger
-    } finally {
-      await lock.release()
+      await storage.assertNoLockFile()
+      loaded = await storage.openOrCreate(parseLedger, initialLedgerState())
+    } catch (error) {
+      if (error instanceof JsonLedgerStorageError)
+        throw new CampaignLedgerBlockedError(error.message)
+      throw error
     }
+    syncResumeBarrier(loaded)
+    return new CampaignLedger(loaded, storage)
   }
 
   scheduleSimulatedPersistFailureAfterSuccessfulTransactions(skipSuccessfulTransactions = 0): void {
@@ -280,47 +162,36 @@ export class CampaignLedger {
   }
 
   private async withExclusiveTransaction<T>(operation: () => Promise<T>): Promise<T> {
-    let releaseMutex!: () => void
-    const previous = this.mutex
-    this.mutex = new Promise<void>((resolve) => {
-      releaseMutex = resolve
-    })
-    await previous
-    let lock: { release: () => Promise<void> } | undefined
-    let stateBeforeTransaction: MutableLedgerState | undefined
+    let rollbackState: MutableLedgerState | undefined
     try {
-      lock = await acquireExclusiveLedgerLock(this.path)
-      const latest = await loadLedgerState(this.path)
-      if (!latest) throw new RangeError('Campaign ledger disappeared during transaction')
-      this.state = latest
-      syncResumeBarrier(this.state)
-      stateBeforeTransaction = cloneLedgerState(this.state)
-      const result = await operation()
-      if (this.simulatedPersistFailureAfterSkip >= 0) {
-        if (this.simulatedPersistFailureAfterSkip === 0) {
-          this.simulatedPersistFailureAfterSkip = -1
-          this.state = stateBeforeTransaction
-          throw new CampaignLedgerPersistFailureError('Simulated campaign ledger persist failure')
+      return await this.storage.transact(parseLedger, async (latest) => {
+        this.state = latest
+        syncResumeBarrier(this.state)
+        rollbackState = cloneLedgerState(this.state)
+        try {
+          const result = await operation()
+          if (this.simulatedPersistFailureAfterSkip >= 0) {
+            if (this.simulatedPersistFailureAfterSkip === 0) {
+              this.simulatedPersistFailureAfterSkip = -1
+              throw new CampaignLedgerPersistFailureError(
+                'Simulated campaign ledger persist failure',
+              )
+            }
+            this.simulatedPersistFailureAfterSkip--
+          }
+          syncResumeBarrier(this.state)
+          this.state.ledgerVersion++
+          return { next: this.state, result }
+        } catch (error) {
+          this.state = rollbackState
+          throw error
         }
-        this.simulatedPersistFailureAfterSkip--
-      }
-      try {
-        await persistLedger(this.path, this.state)
-      } catch (persistError) {
-        this.state = stateBeforeTransaction
-        throw persistError
-      }
-      return result
+      })
     } catch (error) {
-      if (stateBeforeTransaction && error instanceof CampaignLedgerPersistFailureError) {
-        this.state = stateBeforeTransaction
-      }
+      if (rollbackState) this.state = rollbackState
+      if (error instanceof JsonLedgerStorageError)
+        throw new CampaignLedgerBlockedError(error.message)
       throw error
-    } finally {
-      if (lock) {
-        await lock.release()
-      }
-      releaseMutex()
     }
   }
 
@@ -339,13 +210,13 @@ export class CampaignLedger {
       )
   }
 
-  async recordLogicalAttempt(): Promise<void> {
+  async recordLogicalAttempt(_context?: LedgerLogicalAttemptContext): Promise<void> {
     return this.withExclusiveTransaction(async () => {
       this.state.logicalAttemptCount++
     })
   }
 
-  async admitPhysical(reservedUsd: number): Promise<number> {
+  async admitPhysical(reservedUsd: number, _context?: LedgerPhysicalCallContext): Promise<number> {
     return this.withExclusiveTransaction(async () => {
       this.assertResumeAllowed()
       if (!Number.isFinite(reservedUsd) || reservedUsd <= 0)
@@ -464,7 +335,10 @@ export class CampaignLedger {
     return exposure(this.state) + additionalReservedUsd <= this.state.maxCostUsd + 1e-12
   }
 
-  async assertCanAdmitPhysicalReservedUsd(reservedUsd: number): Promise<void> {
+  async assertCanAdmitPhysicalReservedUsd(
+    reservedUsd: number,
+    _context?: LedgerPhysicalCallContext,
+  ): Promise<void> {
     return this.withExclusiveTransaction(async () => {
       this.assertResumeAllowed()
       if (!Number.isFinite(reservedUsd) || reservedUsd <= 0)

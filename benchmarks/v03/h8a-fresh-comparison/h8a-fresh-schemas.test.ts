@@ -10,6 +10,7 @@ import { phaseFreezeSchema, type PhaseFreeze } from './schemas.js'
 import { assertNoForbiddenEvaluatorFields } from './forbidden-leakage.js'
 import { buildConservativeCostProof, buildSyntheticPhaseFreeze } from './test-fixtures.js'
 import {
+  assertFreezeAdmissionAsync,
   validateProfileIdentities,
   validateConservativeCostProof,
   validateQualificationSourceGroupSeparation,
@@ -21,6 +22,7 @@ import {
   PHASE_FLAT_DEV40_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_CANDIDATE_ID,
+  PROFILE_CONTROL_ID,
 } from './constants.js'
 
 await test('phase freeze rejects unknown keys and wrong phase counts', () => {
@@ -100,6 +102,41 @@ await test('missing or invalid conservative cost proof rejects paid freeze valid
       ...freeze,
       conservativeCostProof: highPhaseBoundProof,
     }),
+  )
+})
+
+await test('shared freeze admission uses study scope for successor ledgers', async () => {
+  const { freeze } = buildSyntheticPhaseFreeze(PHASE_FLAT_DEV40_ID)
+  const scoped: Array<[string, number]> = []
+  const ledger = {
+    snapshot: () => ({
+      physicalDispatchCount: 0,
+      logicalAttemptCount: 0,
+      knownCostUsd: 0,
+      unknownReserveUsd: 0,
+      inFlightReservations: [],
+      resumeBlocked: false,
+    }),
+    assertResumeAllowed() {},
+    recordLogicalAttempt: async () => undefined,
+    admitPhysical: async () => 1,
+    recordDispatchIntent: async () => undefined,
+    markDispatched: async () => 1,
+    cancelBeforeFetch: async () => undefined,
+    settle: async () => undefined,
+    markCrashWithPendingDispatch: async () => undefined,
+    assertCanAdmitPhysicalReservedUsd: async () => {
+      assert.fail('successor admission must not bind to the first producer case')
+    },
+    assertStudyScopeCanAdmitPhysicalReservedUsd: async (profileId: string, reservedUsd: number) => {
+      scoped.push([profileId, reservedUsd])
+    },
+    assertExposureAllowsAdditionalUsd: async () => undefined,
+  }
+  await assertFreezeAdmissionAsync(freeze, ledger)
+  assert.deepEqual(
+    scoped.map(([profileId]) => profileId),
+    [PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID],
   )
 })
 

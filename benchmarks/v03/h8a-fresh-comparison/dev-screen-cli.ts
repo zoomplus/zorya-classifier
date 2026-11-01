@@ -402,7 +402,7 @@ function resolveInside(root: string, relativePath: string): string {
   return target
 }
 
-interface VerifiedRuntimeProof {
+export interface VerifiedRuntimeProof {
   proof: z.infer<typeof runtimeProofSchema>
   candidateAssetsRoot: string
   mobileSamEncoderPath: string
@@ -410,17 +410,25 @@ interface VerifiedRuntimeProof {
   pythonExecutable: string
 }
 
-async function verifyRuntimeProof(
-  options: CliOptions,
+interface RuntimeProofPins {
+  runtimeFilesSha256: string
+  runtimeEnvironmentSha256: string
+}
+
+export async function verifyRuntimeProof(
+  options: Pick<CliOptions, 'runtimeFilesPath' | 'runtimeFilesSha256'>,
   runtimeEnvironmentSha256: string,
   repositoryRoot: string,
   flat = false,
+  pins?: RuntimeProofPins,
 ): Promise<VerifiedRuntimeProof> {
-  const expectedRuntimeProofSha256 = flat
-    ? PINNED_FLAT_RUNTIME_PROOF_SHA256
-    : PINNED_RUNTIME_PROOF_SHA256
+  const expectedRuntimeProofSha256 =
+    pins?.runtimeFilesSha256 ??
+    (flat ? PINNED_FLAT_RUNTIME_PROOF_SHA256 : PINNED_RUNTIME_PROOF_SHA256)
   if (options.runtimeFilesSha256 !== expectedRuntimeProofSha256)
     throw new RangeError('Runtime files receipt differs from the selected frozen profile')
+  if (pins && runtimeEnvironmentSha256 !== pins.runtimeEnvironmentSha256)
+    throw new RangeError('Runtime environment differs from the caller-supplied trusted proof pins')
   if (flat && runtimeEnvironmentSha256 !== PINNED_FLAT_RUNTIME_ENVIRONMENT_SHA256)
     throw new RangeError('Flat runtime proof is not bound to the frozen V2 environment digest')
   const proof = await readVerifiedJson(
@@ -590,7 +598,7 @@ function parsePinnedExport<T>(moduleValue: unknown, field: string, schema: z.Zod
 const pinnedFunction = <T extends (...args: never[]) => unknown>() =>
   z.custom<T>((value) => typeof value === 'function')
 
-async function loadHistoricalControl(root: string) {
+export async function loadHistoricalControl(root: string) {
   const importPinned = async (path: string): Promise<unknown> =>
     await import(pathToFileURL(join(root, path)).href)
   const [kernelRaw, classifierRaw, decisionsRaw, categoricalRaw, segmentationRaw] =

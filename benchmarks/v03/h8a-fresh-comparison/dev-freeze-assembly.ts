@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { constants as fsConstants } from 'node:fs'
 import { open, mkdir, rename, rm, writeFile, lstat, realpath } from 'node:fs/promises'
-import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import sharp from 'sharp'
 import { z } from 'zod'
 import { computeEvaluatorAnnotationsSha256 } from './annotation-digest.js'
@@ -41,6 +41,7 @@ import {
 } from './schemas.js'
 
 const sha256 = z.string().regex(/^[a-f0-9]{64}$/u)
+const openImagesImageId = z.string().regex(/^[a-f0-9]{16}$/u)
 const artifactRefSchema = z.object({ path: z.string().min(1), sha256 }).strict()
 const JSON_FILE_LIMIT_BYTES = 4 * 1024 * 1024
 const SOURCE_FILE_LIMIT_BYTES = 16 * 1024 * 1024
@@ -81,6 +82,31 @@ const flatPreparationAuthoritySchema = preparationAuthoritySchema.extend({
   freezeId: z.literal('h8a-flat-dev40-20261101-v1'),
   priorDevAuthority: artifactRefSchema,
 })
+const independentDev40PreparationAuthoritySchema = z
+  .object({
+    schema: z.literal('h8a-independent-dev40-v2-preparation-v1'),
+    studyId: z.literal('original-h8a-independent-dev40-v2'),
+    freezeId: z.literal('original-h8a-independent-dev40-v2-20261101'),
+    deadlineIso: z.string().datetime({ offset: true }),
+    trustedRoot: z.string().min(1),
+    orderProtocol: artifactRefSchema,
+    mapRoster: artifactRefSchema,
+    sourceRoster: artifactRefSchema,
+    sourceGroupSplit: artifactRefSchema,
+    sourceClosure: artifactRefSchema,
+    priceProof: artifactRefSchema,
+    runtimeEnvironment: artifactRefSchema,
+    parentRegistration: artifactRefSchema,
+    parentLedgerAudit: artifactRefSchema,
+    historicalExclusions: artifactRefSchema,
+    historicalPixels: artifactRefSchema,
+    sourceUnionAudit: artifactRefSchema,
+    registeredSources: artifactRefSchema,
+    fragments: z.array(
+      z.object({ fragmentId: z.string().min(1), path: z.string().min(1), sha256 }).strict(),
+    ),
+  })
+  .strict()
 const DISJOINT_FREEZE_ID = 'h8a-flat-disjoint-dev40-20261101-v1'
 const PINNED_PARENT_REGISTRATION_SHA256 =
   '5c63045a648928c9aefe12aad99464e8394b3bc42c133b39821036eb74f3bff0'
@@ -106,6 +132,158 @@ function createDisjointPreparationAuthoritySchema(pins: DisjointLineagePins) {
 }
 const PINNED_PRIOR_DEV_AUTHORITY_SHA256 =
   '0d5cc47d1759d2e276cdc3e0c44b7ef231c61cc49aa75a7cc62e9bec24bfafd2'
+const INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256 =
+  'f2fc1abae7ca911fd04e94153520dd01d6bc7d3d48fcfee508ef6c05076093b2'
+const INDEPENDENT_DEV40_PARENT_LEDGER_SHA256 =
+  '839ad2eaa441eafbc85a998e6f89df053ff616d8109fa1d92909cd1cefd99d9a'
+const INDEPENDENT_DEV40_COST_PROOF_SHA256 =
+  '29af739b4762fe20e0249e5cae66746e293640ef5c473c55416f84cd5e51e107'
+const INDEPENDENT_DEV40_PARENT_AUDIT_SHA256 =
+  '01b76fd1c605a0f06b272ca03e64247058bdd55c37e80ca21394386706963a8f'
+const INDEPENDENT_DEV40_HISTORICAL_EXCLUSIONS_SHA256 =
+  '6f66fd7840b98c566c78b1dffd889bd08470c7e58b291014150ae4bb797eaab9'
+const INDEPENDENT_DEV40_HISTORICAL_PIXELS_SHA256 =
+  '510cb48fa740721123ce0ae4cc61c607675503f3ae0399bc9d0afb2487f6bb9d'
+const INDEPENDENT_DEV40_ORDER_PROTOCOL_SHA256 =
+  'a7a430ea7e1acf25caaf2e428cf384b9c657d2f66acd07d9ff0c94d699d67838'
+const INDEPENDENT_DEV40_MAP_ROSTER_SHA256 =
+  '65b37363e52d868436b909c4ff41533cc801dc81e8ba7925037f38c5de196f19'
+const INDEPENDENT_DEV40_STUDY_ID = 'original-h8a-independent-dev40-v2'
+
+const independentSourceRosterSchema = z
+  .object({
+    schema: z.literal('h8a-independent-dev40-source-roster-v1'),
+    studyId: z.literal('original-h8a-independent-dev40-v2'),
+    rows: z
+      .array(
+        z
+          .object({
+            opaqueCaseId: z.string().min(1),
+            familySlug: z.string().min(1),
+            predeclaredStateId: z.string().min(1),
+            stratum: z.enum(STRATUMS),
+            sourceGroup: z.string().min(1),
+            expectedPresence: z.enum(['present', 'absent']),
+            sourceSha256: sha256,
+            targetTaskSha256: sha256,
+          })
+          .strict(),
+      )
+      .length(DEV40_CASE_COUNT),
+  })
+  .strict()
+
+export function validateIndependentDev40SourceRoster(
+  value: unknown,
+): z.infer<typeof independentSourceRosterSchema> {
+  return independentSourceRosterSchema.parse(value)
+}
+
+const independentRegisteredSourcesSchema = z
+  .object({
+    schema: z.literal('h8a-independent-dev40-source-registration-v1'),
+    parentRegistrationSha256: z.literal(INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256),
+    orderProtocolSha256: z.literal(INDEPENDENT_DEV40_ORDER_PROTOCOL_SHA256),
+    mapRosterSha256: z.literal(INDEPENDENT_DEV40_MAP_ROSTER_SHA256),
+    sourceRosterSha256: sha256,
+    sourceGroupSplitSha256: sha256,
+    sourceEvidence: z.array(artifactRefSchema).min(1),
+    rows: z
+      .array(
+        z
+          .object({
+            opaqueCaseId: z.string().min(1),
+            familySlug: z.string().min(1),
+            predeclaredStateId: z.string().min(1),
+            stratum: z.enum(STRATUMS),
+            sourceGroup: z.string().min(1),
+            expectedPresence: z.enum(['present', 'absent']),
+            sourceSha256: sha256,
+            targetTaskSha256: sha256,
+          })
+          .strict(),
+      )
+      .length(DEV40_CASE_COUNT),
+  })
+  .strict()
+
+const independentParentRegistrationSchema = z
+  .object({
+    schema: z.literal('original-h8a-independent-dev40-v2-parent'),
+    studyId: z.literal('original-h8a-independent-dev40-v2'),
+    freezeId: z.literal('original-h8a-independent-dev40-v2-20261101'),
+    authorCostCeilingUsd: z.null(),
+    parentFiles: z.record(z.string(), sha256),
+  })
+  .passthrough()
+
+const independentParentAuditSchema = z
+  .object({
+    immutableFilesVerified: z.literal(739),
+    parentLedgerSha256: z.literal(INDEPENDENT_DEV40_PARENT_LEDGER_SHA256),
+    historicalPixelIdentities: z.literal(348),
+    scopes: z.array(z.unknown()).length(3),
+    priorCharges: z.record(z.string(), z.unknown()),
+  })
+  .strict()
+
+const independentHistoricalExclusionsSchema = z
+  .object({
+    parentRegistrationSha256: z.literal(INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256),
+    sources: z.record(z.string(), sha256),
+    caseIds: z.array(z.string().min(1)).length(226),
+    imageIds: z.array(openImagesImageId).length(423),
+    sourceGroups: z.array(z.string().min(1)).length(440),
+    priorFileSha256: z.literal(INDEPENDENT_DEV40_HISTORICAL_PIXELS_SHA256),
+    unrolledRawLedgerUnionSha256: sha256,
+  })
+  .strict()
+
+const independentHistoricalPixelsSchema = z
+  .object({
+    schema: z.literal('study2-prior-pixel-exclusion-index-v1'),
+    algorithm: z.string().min(1),
+    sha256Implementation: sha256,
+    maximumDistanceRejected: z.literal(4),
+    rows: z
+      .array(
+        z
+          .object({
+            encodedSha256: sha256,
+            decodedRgbSha256: sha256,
+            perceptualHash64: z.string().regex(/^[a-f0-9]{16}$/u),
+          })
+          .strict(),
+      )
+      .length(348),
+  })
+  .strict()
+
+const independentSourceUnionAuditSchema = z
+  .object({
+    schema: z.literal('h8a-independent-dev40-source-union-audit-v1'),
+    parentRegistrationSha256: z.literal(INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256),
+    historicalPixelsSha256: z.literal(INDEPENDENT_DEV40_HISTORICAL_PIXELS_SHA256),
+    algorithm: z.string().min(1),
+    sha256Implementation: sha256,
+    nearestHammingContract: z.literal(
+      'minimum Hamming distance to all 348 historical and other 39 study source pHashes',
+    ),
+    rows: z
+      .array(
+        z
+          .object({
+            opaqueCaseId: z.string().min(1),
+            encodedSha256: sha256,
+            decodedRgbSha256: sha256,
+            perceptualHash64: z.string().regex(/^[a-f0-9]{16}$/u),
+            nearestHamming: z.number().int().min(5).max(64),
+          })
+          .strict(),
+      )
+      .length(DEV40_CASE_COUNT),
+  })
+  .strict()
 
 const reviewedFragmentSchema = z
   .object({
@@ -169,6 +347,19 @@ const priceProofSchema = z
     observedUtc: z.string().datetime({ offset: true }),
     maxCostUsd: z.literal(CAMPAIGN_MAX_COST_USD),
     maxPhysicalCalls: z.literal(CAMPAIGN_MAX_PHYSICAL_CALLS),
+    entries: z.tuple([priceEntrySchema, priceEntrySchema]),
+  })
+  .strict()
+
+const independentPriceProofSchema = z
+  .object({
+    registeredStudySha256: z.literal(INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256),
+    observedUtc: z.string().datetime({ offset: true }),
+    ownerDollarCeiling: z.null(),
+    physicalCallLimit: z.literal(CAMPAIGN_MAX_PHYSICAL_CALLS),
+    perCaseTechnicalExposureUsd: z.literal('2.92'),
+    devMaximumIncrementalExposureUsd: z.literal('116.80'),
+    conditionalQualMaximumIncrementalExposureUsd: z.literal('350.40'),
     entries: z.tuple([priceEntrySchema, priceEntrySchema]),
   })
   .strict()
@@ -662,6 +853,71 @@ async function validatePriceProof(
   return { ...proofBody, proofSha256: hashIdentity(proofBody) }
 }
 
+async function validateIndependentPriceProof(
+  artifactRoot: string,
+  rawUnknown: unknown,
+  priceProofSha256: string,
+): Promise<PhaseFreeze['conservativeCostProof']> {
+  const proof = independentPriceProofSchema.parse(rawUnknown)
+  if (proof.registeredStudySha256 !== INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256)
+    throw new RangeError('Successor public-cost proof belongs to a different study')
+  const entries = proof.entries.map((entry, index) => {
+    const catalogPath = resolve(entry.rawCatalog.path)
+    const relativePath = relative(resolve(artifactRoot), catalogPath)
+    const expectedFilename =
+      index === 0 ? 'gpt-6-luna-endpoints.json' : 'gpt-6-luna-decisions-endpoints.json'
+    if (
+      isAbsolute(relativePath) ||
+      relativePath === '..' ||
+      relativePath.startsWith(`..${sep}`) ||
+      relativePath !==
+        join(
+          'zorya-classifier-mcp-20261101',
+          'original-h8a-independent-dev40-v2',
+          'main',
+          expectedFilename,
+        )
+    )
+      throw new RangeError('Successor public-cost catalog path differs from its pinned study input')
+    return { ...entry, rawCatalog: { path: relativePath, sha256: entry.rawCatalog.sha256 } }
+  })
+  if (
+    entries[0]!.profileId !== PROFILE_FLAT_CANDIDATE_ID ||
+    entries[0]!.model !== 'openai/gpt-6-luna' ||
+    entries[0]!.inputTokenBound !== 1_050_000 ||
+    entries[0]!.maxOutputTokens !== 4_096 ||
+    entries[0]!.inputRateUpperUsd !== 0.0000005 ||
+    entries[0]!.outputRateUpperUsd !== 0.0000015 ||
+    entries[0]!.computedWorstUsd !== 0.531144 ||
+    entries[0]!.maxUsdPerPhysicalDispatch !== 0.55 ||
+    entries[1]!.profileId !== PROFILE_CONTROL_ID ||
+    entries[1]!.model !== 'openai/gpt-6-luna-decisions' ||
+    entries[1]!.inputTokenBound !== 1_050_000 ||
+    entries[1]!.maxOutputTokens !== 0 ||
+    entries[1]!.inputRateUpperUsd !== 0.0000001 ||
+    entries[1]!.outputRateUpperUsd !== 0 ||
+    entries[1]!.computedWorstUsd !== 0.105 ||
+    entries[1]!.maxUsdPerPhysicalDispatch !== 0.12 ||
+    entries[0]!.maxUsdPerPhysicalDispatch * 4 + entries[1]!.maxUsdPerPhysicalDispatch * 6 !==
+      2.92 ||
+    entries[0]!.maxUsdPerPhysicalDispatch * 160 + entries[1]!.maxUsdPerPhysicalDispatch * 240 !==
+      116.8 ||
+    entries[0]!.maxUsdPerPhysicalDispatch * 480 + entries[1]!.maxUsdPerPhysicalDispatch * 720 !==
+      350.4
+  )
+    throw new RangeError(
+      'Successor public-cost bounds differ from the registered per-request ceiling',
+    )
+  const legacyProof = priceProofSchema.parse({
+    schema: 'h8a-public-price-proof-v2',
+    observedUtc: proof.observedUtc,
+    maxCostUsd: CAMPAIGN_MAX_COST_USD,
+    maxPhysicalCalls: proof.physicalCallLimit,
+    entries,
+  })
+  return validatePriceProof(artifactRoot, legacyProof, priceProofSha256, true)
+}
+
 function validatePackedMask(
   bytes: Uint8Array,
   width: number,
@@ -676,6 +932,16 @@ function validatePackedMask(
     throw new RangeError('Reference mask has nonzero packed padding bits')
 }
 
+function hamming64(left: string, right: string): number {
+  let bits = BigInt(`0x${left}`) ^ BigInt(`0x${right}`)
+  let count = 0
+  while (bits !== 0n) {
+    count++
+    bits &= bits - 1n
+  }
+  return count
+}
+
 interface DevFreezeAssemblyOptions {
   authorityPath: string
   authoritySha256: string
@@ -684,17 +950,19 @@ interface DevFreezeAssemblyOptions {
   testOnlyDisjointLineagePins?: DisjointLineagePins
 }
 
-type FreezeVariant = 'v1' | 'flat-v2' | 'flat-disjoint-v1'
+type FreezeVariant = 'v1' | 'flat-v2' | 'flat-disjoint-v1' | 'independent-v2'
 
 type FreezeAuthority =
   | z.infer<typeof preparationAuthoritySchema>
   | z.infer<typeof flatPreparationAuthoritySchema>
   | z.infer<ReturnType<typeof createDisjointPreparationAuthoritySchema>>
+  | z.infer<typeof independentDev40PreparationAuthoritySchema>
 
 const getAuthorityVariant = (schema: unknown): FreezeVariant => {
   if (schema === 'h8a-dev-freeze-preparation-v1') return 'v1'
   if (schema === 'h8a-flat-dev-freeze-preparation-v1') return 'flat-v2'
   if (schema === 'h8a-disjoint-dev-freeze-preparation-v1') return 'flat-disjoint-v1'
+  if (schema === 'h8a-independent-dev40-v2-preparation-v1') return 'independent-v2'
   throw new RangeError('Unsupported DEV freeze preparation authority schema')
 }
 
@@ -996,8 +1264,15 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     variant === 'flat-disjoint-v1'
       ? createDisjointPreparationAuthoritySchema(disjointLineagePins).parse(authorityUnknown)
       : undefined
+  const independentAuthority =
+    variant === 'independent-v2'
+      ? independentDev40PreparationAuthoritySchema.parse(authorityUnknown)
+      : undefined
   const authority: FreezeAuthority =
-    disjointAuthority ?? flatAuthority ?? preparationAuthoritySchema.parse(authorityUnknown)
+    independentAuthority ??
+    disjointAuthority ??
+    flatAuthority ??
+    preparationAuthoritySchema.parse(authorityUnknown)
   const phaseId = variant === 'v1' ? PHASE_DEV40_ID : PHASE_FLAT_DEV40_ID
   const candidateProfileId = candidateIdForPhase(phaseId)
   const candidateProfile =
@@ -1020,7 +1295,7 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     readPinnedJson(artifactRoot, authority.mapRoster, z.unknown()),
     readPinnedJson(artifactRoot, authority.sourceClosure, sourceClosureSchema),
     readPinnedJson(artifactRoot, authority.sourceGroupSplit, sourceGroupSplitDigestSchema),
-    readPinnedJson(artifactRoot, authority.priceProof, priceProofSchema),
+    readPinnedJson(artifactRoot, authority.priceProof, z.unknown()),
     readPinnedJson(artifactRoot, authority.runtimeEnvironment, runtimeEnvironmentSchema),
   ])
   let parentRegistrationSha256: string | undefined
@@ -1091,6 +1366,159 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
       registeredSources.sourceEvidence.map((ref) => readPinnedBytes(artifactRoot, ref)),
     )
   }
+  let independentRows: z.infer<typeof independentSourceRosterSchema>['rows'] | undefined
+  let independentRegisteredRows:
+    | z.infer<typeof independentRegisteredSourcesSchema>['rows']
+    | undefined
+  let independentPixels: z.infer<typeof independentHistoricalPixelsSchema> | undefined
+  let independentUnionAudit: z.infer<typeof independentSourceUnionAuditSchema> | undefined
+  let independentExclusions: z.infer<typeof independentHistoricalExclusionsSchema> | undefined
+  let independentSourceRosterSha256: string | undefined
+  let independentRegisteredSourcesSha256: string | undefined
+  if (independentAuthority) {
+    const artifactRefs = [
+      independentAuthority.orderProtocol,
+      independentAuthority.mapRoster,
+      independentAuthority.sourceRoster,
+      independentAuthority.sourceGroupSplit,
+      independentAuthority.sourceClosure,
+      independentAuthority.priceProof,
+      independentAuthority.runtimeEnvironment,
+      independentAuthority.parentRegistration,
+      independentAuthority.parentLedgerAudit,
+      independentAuthority.historicalExclusions,
+      independentAuthority.historicalPixels,
+      independentAuthority.sourceUnionAudit,
+      independentAuthority.registeredSources,
+      ...independentAuthority.fragments,
+    ]
+    const artifactPrefix = join('zorya-classifier-mcp-20261101', INDEPENDENT_DEV40_STUDY_ID)
+    const artifactPrefixPath = resolve(artifactRoot, artifactPrefix)
+    if (
+      artifactRefs.some((ref) => {
+        const fullPath = resolve(artifactRoot, ref.path)
+        return (
+          isAbsolute(ref.path) ||
+          !isWithin(artifactPrefixPath, fullPath) ||
+          relative(artifactRoot, fullPath) !== ref.path
+        )
+      })
+    )
+      throw new RangeError(
+        'Independent DEV40 artifact references must remain under the registered study root',
+      )
+    if (
+      independentAuthority.orderProtocol.sha256 !== INDEPENDENT_DEV40_ORDER_PROTOCOL_SHA256 ||
+      independentAuthority.mapRoster.sha256 !== INDEPENDENT_DEV40_MAP_ROSTER_SHA256 ||
+      independentAuthority.parentRegistration.sha256 !==
+        INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256 ||
+      independentAuthority.parentLedgerAudit.sha256 !== INDEPENDENT_DEV40_PARENT_AUDIT_SHA256 ||
+      independentAuthority.historicalExclusions.sha256 !==
+        INDEPENDENT_DEV40_HISTORICAL_EXCLUSIONS_SHA256 ||
+      independentAuthority.historicalPixels.sha256 !== INDEPENDENT_DEV40_HISTORICAL_PIXELS_SHA256 ||
+      independentAuthority.priceProof.sha256 !== INDEPENDENT_DEV40_COST_PROOF_SHA256
+    )
+      throw new RangeError(
+        'Independent DEV40 authority changes one or more parent registration pins',
+      )
+    const [parent, parentAudit, exclusions, pixels, sourceRoster, unionAudit, registry] =
+      await Promise.all([
+        readPinnedJson(
+          artifactRoot,
+          independentAuthority.parentRegistration,
+          independentParentRegistrationSchema,
+        ),
+        readPinnedJson(
+          artifactRoot,
+          independentAuthority.parentLedgerAudit,
+          independentParentAuditSchema,
+        ),
+        readPinnedJson(
+          artifactRoot,
+          independentAuthority.historicalExclusions,
+          independentHistoricalExclusionsSchema,
+        ),
+        readPinnedJson(
+          artifactRoot,
+          independentAuthority.historicalPixels,
+          independentHistoricalPixelsSchema,
+        ),
+        readPinnedJson(
+          artifactRoot,
+          independentAuthority.sourceRoster,
+          independentSourceRosterSchema,
+        ),
+        readPinnedJson(
+          artifactRoot,
+          independentAuthority.sourceUnionAudit,
+          independentSourceUnionAuditSchema,
+        ),
+        readPinnedJson(
+          artifactRoot,
+          independentAuthority.registeredSources,
+          independentRegisteredSourcesSchema,
+        ),
+      ])
+    const expectedParentLedgerHash =
+      parent.value.parentFiles['h8a-fresh-dev-qual-campaign-v1/campaign-ledger.json']
+    if (
+      parent.value.studyId !== independentAuthority.studyId ||
+      expectedParentLedgerHash !== INDEPENDENT_DEV40_PARENT_LEDGER_SHA256 ||
+      parentAudit.value.parentLedgerSha256 !== INDEPENDENT_DEV40_PARENT_LEDGER_SHA256 ||
+      exclusions.value.parentRegistrationSha256 !== digestBytes(parent.raw) ||
+      exclusions.value.priorFileSha256 !== digestBytes(pixels.raw) ||
+      registry.value.parentRegistrationSha256 !== digestBytes(parent.raw) ||
+      registry.value.orderProtocolSha256 !== digestBytes(protocolRef.raw) ||
+      registry.value.mapRosterSha256 !== digestBytes(rosterRef.raw) ||
+      registry.value.sourceRosterSha256 !== digestBytes(sourceRoster.raw) ||
+      registry.value.sourceGroupSplitSha256 !== digestBytes(splitRef.raw) ||
+      unionAudit.value.parentRegistrationSha256 !== digestBytes(parent.raw) ||
+      unionAudit.value.historicalPixelsSha256 !== digestBytes(pixels.raw) ||
+      unionAudit.value.algorithm !== pixels.value.algorithm ||
+      unionAudit.value.sha256Implementation !== pixels.value.sha256Implementation ||
+      new Set(exclusions.value.caseIds).size !== exclusions.value.caseIds.length ||
+      new Set(exclusions.value.imageIds).size !== exclusions.value.imageIds.length ||
+      new Set(exclusions.value.sourceGroups.map(normalizeSourceGroup)).size !==
+        exclusions.value.sourceGroups.length ||
+      new Set(pixels.value.rows.map((row) => row.encodedSha256)).size !== pixels.value.rows.length
+    )
+      throw new RangeError('Independent DEV40 source lineage does not match its pinned parent')
+    const requiredEvidence = [
+      independentAuthority.parentRegistration,
+      independentAuthority.parentLedgerAudit,
+      independentAuthority.historicalExclusions,
+      independentAuthority.historicalPixels,
+      independentAuthority.orderProtocol,
+      independentAuthority.mapRoster,
+      independentAuthority.sourceRoster,
+      independentAuthority.sourceGroupSplit,
+      independentAuthority.sourceClosure,
+      independentAuthority.priceProof,
+      independentAuthority.runtimeEnvironment,
+      independentAuthority.sourceUnionAudit,
+      ...independentAuthority.fragments.map(({ path, sha256 }) => ({ path, sha256 })),
+    ]
+    const evidencePins = new Set(
+      registry.value.sourceEvidence.map((ref) => `${ref.path}\0${ref.sha256}`),
+    )
+    if (
+      registry.value.sourceEvidence.length !== requiredEvidence.length ||
+      new Set(registry.value.sourceEvidence.map((ref) => ref.path)).size !==
+        registry.value.sourceEvidence.length ||
+      requiredEvidence.some((ref) => !evidencePins.has(`${ref.path}\0${ref.sha256}`))
+    )
+      throw new RangeError('Independent DEV40 source evidence omits or duplicates a required input')
+    await Promise.all(
+      registry.value.sourceEvidence.map((ref) => readPinnedBytes(artifactRoot, ref)),
+    )
+    independentRows = sourceRoster.value.rows
+    independentRegisteredRows = registry.value.rows
+    independentPixels = pixels.value
+    independentUnionAudit = unionAudit.value
+    independentExclusions = exclusions.value
+    independentSourceRosterSha256 = digestBytes(sourceRoster.raw)
+    independentRegisteredSourcesSha256 = digestBytes(registry.raw)
+  }
   if (variant === 'flat-v2') {
     if (
       !flatAuthority ||
@@ -1139,7 +1567,14 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     )
   const [fragments, conservativeCostProof] = await Promise.all([
     Promise.all(authority.fragments.map((item) => loadFragment(artifactRoot, item))),
-    validatePriceProof(artifactRoot, priceRef.value, digestBytes(priceRef.raw), variant !== 'v1'),
+    variant === 'independent-v2'
+      ? validateIndependentPriceProof(artifactRoot, priceRef.value, digestBytes(priceRef.raw))
+      : validatePriceProof(
+          artifactRoot,
+          priceProofSchema.parse(priceRef.value),
+          digestBytes(priceRef.raw),
+          variant !== 'v1',
+        ),
   ])
   const reviewById = new Map(
     fragments.flatMap((fragment) =>
@@ -1221,6 +1656,156 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     .map((item) => item.row.opaqueCaseId)
   if (mapReviewIds.some((id) => !mapIds.has(id)))
     throw new RangeError('Accepted map rows contain an unregistered slot')
+  if (
+    independentAuthority &&
+    independentRows &&
+    independentRegisteredRows &&
+    independentPixels &&
+    independentUnionAudit &&
+    independentExclusions
+  ) {
+    const mapEntries = new Map(orderRoster.rows.map((row) => [row.opaqueCaseId, row]))
+    const registeredById = new Map(independentRegisteredRows.map((row) => [row.opaqueCaseId, row]))
+    const historicCaseIds = new Set(independentExclusions.caseIds)
+    const historicImageIds = new Set(independentExclusions.imageIds)
+    const historicGroups = new Set(independentExclusions.sourceGroups.map(normalizeSourceGroup))
+    const historicEncoded = new Set(independentPixels.rows.map((row) => row.encodedSha256))
+    const historicHashes = independentPixels.rows.map((row) => row.perceptualHash64)
+    const unionById = new Map(independentUnionAudit.rows.map((row) => [row.opaqueCaseId, row]))
+    if (
+      new Set(independentRows.map((row) => row.opaqueCaseId)).size !== DEV40_CASE_COUNT ||
+      new Set(independentRegisteredRows.map((row) => row.opaqueCaseId)).size !== DEV40_CASE_COUNT ||
+      new Set(independentUnionAudit.rows.map((row) => row.opaqueCaseId)).size !==
+        DEV40_CASE_COUNT ||
+      independentRows.some(
+        (row, index) => index > 0 && independentRows[index - 1]!.opaqueCaseId >= row.opaqueCaseId,
+      ) ||
+      independentRegisteredRows.some(
+        (row, index) =>
+          index > 0 && independentRegisteredRows[index - 1]!.opaqueCaseId >= row.opaqueCaseId,
+      ) ||
+      independentUnionAudit.rows.some(
+        (row, index) =>
+          index > 0 && independentUnionAudit.rows[index - 1]!.opaqueCaseId >= row.opaqueCaseId,
+      )
+    )
+      throw new RangeError(
+        'Independent DEV40 roster, registry, and source union must have unique sorted IDs',
+      )
+    if (
+      independentRows.length !== DEV40_CASE_COUNT ||
+      [...reviewById.keys()].length !== DEV40_CASE_COUNT ||
+      independentRegisteredRows.length !== DEV40_CASE_COUNT ||
+      independentUnionAudit.rows.length !== DEV40_CASE_COUNT
+    )
+      throw new RangeError(
+        'Independent DEV40 requires the complete forty-row reviewed source cohort',
+      )
+    for (const row of independentRows) {
+      const registered = registeredById.get(row.opaqueCaseId)
+      const reviewed = reviewById.get(row.opaqueCaseId)
+      const union = unionById.get(row.opaqueCaseId)
+      if (!registered || !reviewed || !union)
+        throw new RangeError(
+          `Independent DEV40 source row ${row.opaqueCaseId} is not fully reviewed`,
+        )
+      const annotation = reviewed.fragment.annotations.find(
+        (item) => item.opaqueCaseId === row.opaqueCaseId,
+      )!
+      const producer = reviewed.fragment.producerRows.find(
+        (item) => item.opaqueCaseId === row.opaqueCaseId,
+      )!
+      const reviewRow = reviewed.row
+      const expectedRegistryRow = {
+        opaqueCaseId: row.opaqueCaseId,
+        familySlug: row.familySlug,
+        predeclaredStateId: row.predeclaredStateId,
+        stratum: row.stratum,
+        sourceGroup: row.sourceGroup,
+        expectedPresence: row.expectedPresence,
+        sourceSha256: row.sourceSha256,
+        targetTaskSha256: row.targetTaskSha256,
+      }
+      const expectedTaskSha256 = createHash('sha256')
+        .update(producer.targetTaskText, 'utf8')
+        .digest('hex')
+      if (
+        hashIdentity(registered) !== hashIdentity(expectedRegistryRow) ||
+        annotation.stratum !== row.stratum ||
+        normalizeSourceGroup(annotation.sourceGroup) !== normalizeSourceGroup(row.sourceGroup) ||
+        normalizeSourceGroup(row.sourceGroup) !== row.sourceGroup ||
+        annotation.expectedPresence !== row.expectedPresence ||
+        producer.sourceBytesSha256 !== row.sourceSha256 ||
+        reviewRow.sourceSha256 !== row.sourceSha256 ||
+        expectedTaskSha256 !== row.targetTaskSha256 ||
+        union.encodedSha256 !== row.sourceSha256 ||
+        historicCaseIds.has(row.opaqueCaseId) ||
+        historicImageIds.has(row.sourceSha256) ||
+        historicEncoded.has(row.sourceSha256) ||
+        historicGroups.has(normalizeSourceGroup(row.sourceGroup))
+      )
+        throw new RangeError(
+          `Independent DEV40 row ${row.opaqueCaseId} conflicts with its reviewed or historical inputs`,
+        )
+      if (row.stratum === 'map') {
+        const mapRow = mapEntries.get(row.opaqueCaseId)
+        if (
+          !mapRow ||
+          row.familySlug !== mapRow.familySlug ||
+          row.predeclaredStateId !== mapRow.predeclaredStateId ||
+          normalizeSourceGroup(row.sourceGroup) !==
+            normalizeSourceGroup(orderRoster.sourceGroupByFamily[row.familySlug] ?? '')
+        )
+          throw new RangeError(
+            `Independent DEV40 map row ${row.opaqueCaseId} differs from its fixed map roster`,
+          )
+      }
+      const nearestUnion = Math.min(
+        ...historicHashes.map((prior) => hamming64(union.perceptualHash64, prior)),
+        ...independentUnionAudit.rows
+          .filter((other) => other.opaqueCaseId !== union.opaqueCaseId)
+          .map((other) => hamming64(union.perceptualHash64, other.perceptualHash64)),
+      )
+      if (nearestUnion !== union.nearestHamming || nearestUnion <= 4)
+        throw new RangeError(
+          `Independent DEV40 source ${row.opaqueCaseId} fails the pinned source-union pixel-distance gate`,
+        )
+    }
+    for (const stratum of STRATUMS) {
+      const rows = independentRows.filter((row) => row.stratum === stratum)
+      const quota = DEV40_STRATUM_QUOTAS[stratum]
+      if (
+        rows.length !== quota.total ||
+        rows.filter((row) => row.expectedPresence === 'present').length !== quota.present ||
+        rows.filter((row) => row.expectedPresence === 'absent').length !== quota.absent
+      )
+        throw new RangeError(`Independent DEV40 ${stratum} source quota is incomplete`)
+    }
+    const photoRows = [...reviewById.values()].flatMap(({ fragment, row }) => {
+      const annotation = fragment.annotations.find(
+        (item) => item.opaqueCaseId === row.opaqueCaseId,
+      )!
+      return annotation.stratum === 'photo' ? [annotation] : []
+    })
+    if (
+      photoRows.filter(
+        (row) => row.expectedPresence === 'present' && row.exactOriginalCanvasMaskRef,
+      ).length !== 16 ||
+      photoRows.reduce((count, row) => count + row.referenceMasks.length, 0) !== 16
+    )
+      throw new RangeError(
+        'Independent DEV40 photo cohort must bind sixteen positive original-canvas masks',
+      )
+    if (
+      independentExclusions.sourceGroups.some(
+        (group) => !split.exclusionSourceGroupIds.includes(normalizeSourceGroup(group)),
+      ) ||
+      independentRows.some(
+        (row) => !split.devSourceGroupIds.includes(normalizeSourceGroup(row.sourceGroup)),
+      )
+    )
+      throw new RangeError('Independent DEV40 split omits historical or current source groups')
+  }
   if (disjointAuthority && registeredSources && acceptedHistory) {
     const registeredRows = registeredSources.rows
     const registeredById = new Map(registeredRows.map((row) => [row.opaqueCaseId, row]))
@@ -1318,6 +1903,17 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
   const { producerCases, sourceBytesByCaseId } = await verifyCaseInputs(artifactRoot, orderedRows)
   if (new Set(producerCases.map((row) => row.sourceBytesSha256)).size !== producerCases.length)
     throw new RangeError('Reviewed cases must have distinct encoded source bytes')
+  if (independentRows && independentUnionAudit) {
+    const unionById = new Map(independentUnionAudit.rows.map((row) => [row.opaqueCaseId, row]))
+    for (const producer of producerCases) {
+      const source = sourceBytesByCaseId.get(producer.opaqueCaseId)
+      const expected = unionById.get(producer.opaqueCaseId)
+      if (!source || !expected || digestBytes(source) !== expected.encodedSha256)
+        throw new RangeError(
+          `Independent source bytes do not match the pinned union audit for ${producer.opaqueCaseId}`,
+        )
+    }
+  }
   if (mapReviewIds.length !== mapIds.size)
     throw new RangeError(
       `DEV40 incomplete: ${mapIds.size - mapReviewIds.length} registered map rows are missing (accepted ${mapReviewIds.length}/${mapIds.size})`,
@@ -1416,6 +2012,18 @@ export async function assembleDevFreezeFromDisk(options: DevFreezeAssemblyOption
     producerClosureSha256,
     sourceBytesManifestSha256,
     evaluatorAnnotationsSha256,
+    ...(independentAuthority
+      ? {
+          independentStudyId: independentAuthority.studyId,
+          parentRegistrationSha256: independentAuthority.parentRegistration.sha256,
+          parentLedgerAuditSha256: independentAuthority.parentLedgerAudit.sha256,
+          historicalExclusionsSha256: independentAuthority.historicalExclusions.sha256,
+          historicalPixelsSha256: independentAuthority.historicalPixels.sha256,
+          sourceUnionAuditSha256: independentAuthority.sourceUnionAudit.sha256,
+          sourceRosterSha256: independentSourceRosterSha256,
+          registeredSourcesSha256: independentRegisteredSourcesSha256,
+        }
+      : {}),
     ...(disjointAuthority
       ? {
           parentRegistrationSha256,

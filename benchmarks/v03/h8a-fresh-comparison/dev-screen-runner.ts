@@ -4,7 +4,7 @@ import { dirname } from 'node:path'
 import { z } from 'zod'
 import { ImmutableCaseArtifactStore } from './case-artifact-store.js'
 import type { CaseArtifactIdentity, StoredCaseArtifact } from './case-artifact-store.js'
-import type { CampaignLedger } from './campaign-ledger.js'
+import type { CampaignLedgerPort } from './campaign-ledger-port.js'
 import {
   DEV_SCREEN_SEED,
   persistDevScreenSelection,
@@ -160,7 +160,8 @@ interface DevScreenRunnerOptions {
   screen: DevScreenId
   selectionPath: string
   artifactRoot: string
-  ledger: CampaignLedger
+  ledger: CampaignLedgerPort
+  assertFreezeAdmission?: (freeze: PhaseFreeze, ledger: CampaignLedgerPort) => Promise<void>
   candidatePort: CaseExecutionPort
   controlPort: CaseExecutionPort
   runtimeArtifacts: FreshRuntimeArtifacts
@@ -276,7 +277,8 @@ async function runArm(input: {
   bytes: Uint8Array
   profileId: H8aFreshProfileId
   port: CaseExecutionPort
-  ledger: CampaignLedger
+  ledger: CampaignLedgerPort
+  assertFreezeAdmission?: (freeze: PhaseFreeze, ledger: CampaignLedgerPort) => Promise<void>
   store: ImmutableCaseArtifactStore
   artifacts: FreshRuntimeArtifacts
   phaseDeadline: PhaseDeadlineScope
@@ -292,13 +294,16 @@ async function runArm(input: {
   const cached = await input.store.loadOrRecover(identity)
   if (cached) return cached
   input.phaseDeadline.assertOpen()
-  await assertFreezeAdmissionAsync(input.freeze, input.ledger)
+  await (input.assertFreezeAdmission ?? assertFreezeAdmissionAsync)(input.freeze, input.ledger)
   input.phaseDeadline.assertOpen()
   const startedAtIso = input.now()
   const started = input.clockNow()
   const opened = await input.store.begin(identity, startedAtIso)
   if (opened.existing) return opened.existing
-  await input.ledger.recordLogicalAttempt()
+  await input.ledger.recordLogicalAttempt({
+    profileId: input.profileId,
+    opaqueCaseId: input.producer.opaqueCaseId,
+  })
   const dispatchJournal: ArmDispatchJournal = { lastPartialResult: null }
   let result: CaseExecutionPortResult
   try {
@@ -766,6 +771,9 @@ async function executeDevScreenWithinDeadline(
           profileId,
           port: profileId === candidateId ? options.candidatePort : options.controlPort,
           ledger: options.ledger,
+          ...(options.assertFreezeAdmission
+            ? { assertFreezeAdmission: options.assertFreezeAdmission }
+            : {}),
           store,
           artifacts: options.runtimeArtifacts,
           phaseDeadline,
