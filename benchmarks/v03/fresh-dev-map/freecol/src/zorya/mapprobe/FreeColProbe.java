@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.SwingUtilities;
 import javax.swing.AbstractButton;
@@ -56,6 +58,8 @@ public final class FreeColProbe {
     private static final int MAX_UI_ROWS = 48;
     private static final int MAX_CAPTURE_UI_COMPONENTS = 2_048;
     private static final int MAX_START_ACTION_OBSERVATIONS = 16;
+    private static final int MAX_NATION_SELECTION_DIAGNOSTIC_CHARS = 180;
+    private static final Pattern SENSITIVE_DIAGNOSTIC = Pattern.compile("(?i)(token|password|secret|authorization)(\\s*[=:]\\s*)[^\\s,;]+");
     private static final Set<Object> START_PANELS_CLICKED = Collections.newSetFromMap(new IdentityHashMap<>());
     private static final Set<Object> INFORMATION_PANELS_DISMISSED = Collections.newSetFromMap(new IdentityHashMap<>());
     private static final List<String> START_ACTION_OBSERVATIONS = new ArrayList<>();
@@ -68,6 +72,20 @@ public final class FreeColProbe {
     private static String captureAbsentUnitTypeId;
     private static String expectedCaptureStateSignature;
     private static String officialSavePath;
+    private static String requestedNationId;
+    private static String requestedNationTypeId;
+    private static boolean nationSelectionAttempted;
+    private static boolean nationSelectionConfirmed;
+    private static String nationSelectionStatus = "not-requested";
+    private static String nationSelectionJson = "{\"status\":\"not-requested\"}";
+    private static String nationSelectionLastObservedNationId;
+    private static String nationSelectionLastObservedNationTypeId;
+    private static String nationSelectionLastServerNationId;
+    private static String nationSelectionLastServerNationTypeId;
+    private static String nationSelectionFailureType;
+    private static String nationSelectionFailureMessage;
+    private static String nationSelectionLastObservationStatus;
+    private static int nationSelectionObservationCount;
     private static Map<String, BufferedImage> latestTargetSprites = new LinkedHashMap<>();
     private static Map<String, Boolean> latestTargetResourceVerified = new LinkedHashMap<>();
     private static Set<String> latestValidUnitTypeIds = new HashSet<>();
@@ -91,8 +109,8 @@ public final class FreeColProbe {
     private FreeColProbe() {}
 
     public static void premain(String arguments, Instrumentation instrumentation) {
-        String[] parts = arguments == null ? new String[0] : arguments.split(",", 8);
-        if (parts.length != 2 && parts.length != 3 && parts.length != 7 && parts.length != 8) return;
+        String[] parts = arguments == null ? new String[0] : arguments.split(",", -1);
+        if (!validAgentArgumentCount(parts.length)) return;
         Path output = Path.of(parts[0]);
         long timeoutMillis;
         try {
@@ -103,6 +121,16 @@ public final class FreeColProbe {
         if (parts.length == 3) {
             officialSavePath = dashToNull(parts[2]);
             if (officialSavePath == null) return;
+        } else if (parts.length == 4 || parts.length == 5) {
+            int selectionStart = nationSelectionStartIndex(parts);
+            if (selectionStart < 0) return;
+            requestedNationId = dashToNull(parts[selectionStart]);
+            requestedNationTypeId = dashToNull(parts[selectionStart + 1]);
+            if (parts.length == 5) {
+                int saveIndex = selectionStart == 2 ? 4 : 2;
+                officialSavePath = dashToNull(parts[saveIndex]);
+                if (officialSavePath == null) return;
+            }
         } else if (parts.length == 7 || parts.length == 8) {
             captureScreenPath = dashToNull(parts[2]);
             captureSpritePath = dashToNull(parts[3]);
@@ -124,6 +152,23 @@ public final class FreeColProbe {
 
     private static String dashToNull(String value) {
         return "-".equals(value) ? null : value;
+    }
+
+    private static boolean validNationIds(String nationId, String nationTypeId) {
+        return nationId != null && nationTypeId != null
+                && nationId.matches("model\\.nation\\.[A-Za-z0-9._-]{1,96}")
+                && nationTypeId.matches("model\\.nationType\\.[A-Za-z0-9._-]{1,96}");
+    }
+
+    static int nationSelectionStartIndex(String[] arguments) {
+        if (arguments.length == 4 && validNationIds(arguments[2], arguments[3])) return 2;
+        if (arguments.length == 5 && validNationIds(arguments[3], arguments[4])) return 3;
+        return -1;
+    }
+
+    static boolean validAgentArgumentCount(int argumentCount) {
+        return argumentCount == 2 || argumentCount == 3 || argumentCount == 4 || argumentCount == 5
+                || argumentCount == 7 || argumentCount == 8;
     }
 
     private static void observe(Path output, long timeoutMillis) {
@@ -461,7 +506,8 @@ public final class FreeColProbe {
 
         String jarPath = Path.of("/usr/share/java/FreeCol-1.1.0.jar").toString();
         return "{\"schemaVersion\":2,\"status\":\"live-map-observed\",\"oracleScope\":\"source-metadata-only\",\"startActionObservations\":[" + String.join(",", START_ACTION_OBSERVATIONS)
-                + "],\"informationPanelActionObservations\":[" + String.join(",", INFORMATION_PANEL_ACTION_OBSERVATIONS)
+                + "],\"nationSelection\":" + nationSelectionJson
+                + ",\"informationPanelActionObservations\":[" + String.join(",", INFORMATION_PANEL_ACTION_OBSERVATIONS)
                 + "],\"uiState\":" + lastUiState + ",\"sourceStateFeasibility\":" + quote(feasibility)
                 + ",\"clientJar\":" + quote(jarPath) + ",\"clientJarSha256\":" + quote(sha256(Path.of(jarPath)))
                 + ",\"frame\":{" + "\"x\":" + frame.getX() + ",\"y\":" + frame.getY() + ",\"width\":" + frame.getWidth() + ",\"height\":" + frame.getHeight() + "}"
@@ -508,6 +554,18 @@ public final class FreeColProbe {
                 .toList();
         if (panels.size() != 1 || START_ACTION_OBSERVATIONS.size() >= MAX_START_ACTION_OBSERVATIONS) return;
         Component panel = panels.get(0);
+        if (nationSelectionShouldAttempt(requestedNationId != null, nationSelectionAttempted)) {
+            attemptNationSelection(frame);
+            return;
+        }
+        if (!nationSelectionAllowsStart(requestedNationId != null, nationSelectionAttempted,
+                nationSelectionConfirmed)) {
+            if (nationSelectionRequestFailed()) return;
+            confirmNationSelection(frame);
+            if (!nationSelectionAllowsStart(requestedNationId != null, nationSelectionAttempted,
+                    nationSelectionConfirmed)) return;
+        }
+        if (requestedNationId != null && !START_ACTION_OBSERVATIONS.isEmpty()) return;
         if (START_PANELS_CLICKED.contains(panel)) return;
         Field startField = panel.getClass().getDeclaredField("start");
         startField.setAccessible(true);
@@ -533,6 +591,157 @@ public final class FreeColProbe {
                 + ",\"actionCommand\":" + quote(shortText(button.getActionCommand()))
                 + ",\"buttonShowing\":true,\"buttonEnabled\":true"
                 + ",\"normalDoClickCalled\":true,\"actionEventObserved\":" + actionObserved.get() + "}");
+    }
+
+    static boolean nationSelectionShouldAttempt(boolean requested, boolean attempted) {
+        return requested && !attempted;
+    }
+
+    static boolean nationSelectionAllowsStart(boolean requested, boolean attempted, boolean confirmed) {
+        return !requested || (attempted && confirmed);
+    }
+
+    static boolean nationSelectionModelsMatch(String requestedNation, String requestedNationType,
+                                              String clientNation, String clientNationType,
+                                              String serverNation, String serverNationType) {
+        return requestedNation != null && requestedNationType != null
+                && requestedNation.equals(clientNation) && requestedNationType.equals(clientNationType)
+                && requestedNation.equals(serverNation) && requestedNationType.equals(serverNationType);
+    }
+
+    private static boolean nationSelectionRequestFailed() {
+        return "requested-id-not-found".equals(nationSelectionStatus)
+                || "pre-game-controller-unavailable".equals(nationSelectionStatus)
+                || "selection-request-failed".equals(nationSelectionStatus);
+    }
+
+    private static void attemptNationSelection(Window frame) {
+        nationSelectionAttempted = true;
+        try {
+            Object client = field(frame, "freeColClient");
+            Object game = invoke(client, "getGame");
+            Object specification = invoke(game, "getSpecification");
+            Object nation = invoke(specification, "getNation", new Class<?>[]{String.class}, requestedNationId);
+            Object nationType = invoke(specification, "getNationType", new Class<?>[]{String.class}, requestedNationTypeId);
+            if (nation == null || nationType == null) {
+                nationSelectionStatus = "requested-id-not-found";
+                nationSelectionJson = nationSelectionReceipt(null, null, null, null, false, nationSelectionStatus);
+                return;
+            }
+            Object controller = invoke(client, "getPreGameController");
+            if (controller == null) {
+                nationSelectionStatus = "pre-game-controller-unavailable";
+                nationSelectionJson = nationSelectionReceipt(null, null, null, null, false, nationSelectionStatus);
+                return;
+            }
+            Class<?> nationClass = Class.forName("net.sf.freecol.common.model.Nation");
+            Class<?> nationTypeClass = Class.forName("net.sf.freecol.common.model.NationType");
+            Method setNation = controller.getClass().getMethod("setNation", nationClass);
+            Method setNationType = controller.getClass().getMethod("setNationType", nationTypeClass);
+            setNation.invoke(controller, nation);
+            setNationType.invoke(controller, nationType);
+            nationSelectionStatus = "selection-requested-awaiting-model-confirmation";
+            nationSelectionJson = nationSelectionReceipt(null, null, null, null, false, nationSelectionStatus);
+        } catch (Exception exception) {
+            nationSelectionStatus = "selection-request-failed";
+            recordNationSelectionFailure(exception);
+            nationSelectionJson = nationSelectionReceipt(null, null, null, null, false, nationSelectionStatus);
+        }
+    }
+
+    private static void confirmNationSelection(Window frame) {
+        try {
+            Object client = field(frame, "freeColClient");
+            Object player = invoke(client, "getMyPlayer");
+            nationSelectionObservationCount++;
+            if (player == null) {
+                nationSelectionStatus = "awaiting-player-model";
+                nationSelectionLastObservationStatus = nationSelectionStatus;
+                nationSelectionJson = nationSelectionReceipt(null, null, null, null, false, nationSelectionStatus);
+                return;
+            }
+            Object nation = invoke(player, "getNation");
+            Object nationType = invoke(player, "getNationType");
+            String observedNationId = nation == null ? null : String.valueOf(invoke(nation, "getId"));
+            String observedNationTypeId = nationType == null ? null : String.valueOf(invoke(nationType, "getId"));
+            nationSelectionLastObservedNationId = observedNationId;
+            nationSelectionLastObservedNationTypeId = observedNationTypeId;
+            Object server = invoke(client, "getFreeColServer");
+            if (server == null) {
+                nationSelectionStatus = "awaiting-local-server-model";
+                nationSelectionLastObservationStatus = nationSelectionStatus;
+                nationSelectionJson = nationSelectionReceipt(observedNationId, observedNationTypeId,
+                        null, null, false, nationSelectionStatus);
+                return;
+            }
+            Object serverGame = invoke(server, "getGame");
+            Class<?> playerClass = Class.forName("net.sf.freecol.common.model.Player");
+            Object serverPlayer = invoke(serverGame, "getFreeColGameObject",
+                    new Class<?>[]{String.class, Class.class}, String.valueOf(invoke(player, "getId")), playerClass);
+            if (serverPlayer == null) {
+                nationSelectionStatus = "awaiting-server-player-model";
+                nationSelectionLastObservationStatus = nationSelectionStatus;
+                nationSelectionJson = nationSelectionReceipt(observedNationId, observedNationTypeId,
+                        null, null, false, nationSelectionStatus);
+                return;
+            }
+            Object serverNation = invoke(serverPlayer, "getNation");
+            Object serverNationType = invoke(serverPlayer, "getNationType");
+            nationSelectionLastServerNationId = serverNation == null ? null : String.valueOf(invoke(serverNation, "getId"));
+            nationSelectionLastServerNationTypeId = serverNationType == null ? null : String.valueOf(invoke(serverNationType, "getId"));
+            nationSelectionConfirmed = nationSelectionModelsMatch(requestedNationId, requestedNationTypeId,
+                    observedNationId, observedNationTypeId, nationSelectionLastServerNationId,
+                    nationSelectionLastServerNationTypeId);
+            nationSelectionStatus = nationSelectionConfirmed ? "confirmed-by-client-and-server-models" : "player-model-mismatch";
+            nationSelectionLastObservationStatus = nationSelectionStatus;
+            nationSelectionJson = nationSelectionReceipt(observedNationId, observedNationTypeId,
+                    nationSelectionLastServerNationId, nationSelectionLastServerNationTypeId,
+                    nationSelectionConfirmed, nationSelectionStatus);
+        } catch (Exception exception) {
+            nationSelectionStatus = "confirmation-observation-failed";
+            nationSelectionLastObservationStatus = nationSelectionStatus;
+            recordNationSelectionFailure(exception);
+            nationSelectionJson = nationSelectionReceipt(null, null, nationSelectionLastServerNationId,
+                    nationSelectionLastServerNationTypeId, false, nationSelectionStatus);
+        }
+    }
+
+    private static String nationSelectionReceipt(String observedNationId, String observedNationTypeId,
+                                                  String observedServerNationId, String observedServerNationTypeId,
+                                                  boolean confirmed, String status) {
+        return "{\"requestedNationId\":" + quote(requestedNationId)
+                + ",\"requestedNationTypeId\":" + quote(requestedNationTypeId)
+                + ",\"selectionAttempted\":" + nationSelectionAttempted
+                + ",\"selectionMethod\":\"FreeColClient.getPreGameController().setNation/setNationType\""
+                + ",\"observedPlayerNationId\":" + (observedNationId == null ? "null" : quote(observedNationId))
+                + ",\"observedPlayerNationTypeId\":" + (observedNationTypeId == null ? "null" : quote(observedNationTypeId))
+                + ",\"observedServerNationId\":" + (observedServerNationId == null ? "null" : quote(observedServerNationId))
+                + ",\"observedServerNationTypeId\":" + (observedServerNationTypeId == null ? "null" : quote(observedServerNationTypeId))
+                + ",\"confirmationObservationCount\":" + nationSelectionObservationCount
+                + ",\"clientModelObserved\":" + (observedNationId != null && observedNationTypeId != null)
+                + ",\"serverModelObserved\":" + (observedServerNationId != null && observedServerNationTypeId != null)
+                + ",\"confirmed\":" + confirmed + ",\"startActionWithheldUntilConfirmed\":true"
+                + ",\"status\":" + quote(status)
+                + ",\"lastObservationStatus\":" + (nationSelectionLastObservationStatus == null
+                ? "null" : quote(nationSelectionLastObservationStatus))
+                + ",\"failureType\":" + (nationSelectionFailureType == null ? "null" : quote(nationSelectionFailureType))
+                + ",\"failureMessage\":" + (nationSelectionFailureMessage == null ? "null" : quote(nationSelectionFailureMessage))
+                + "}";
+    }
+
+    private static void recordNationSelectionFailure(Exception exception) {
+        Throwable cause = exception;
+        while (cause instanceof InvocationTargetException invocation && invocation.getCause() != null) {
+            cause = invocation.getCause();
+        }
+        nationSelectionFailureType = cause.getClass().getSimpleName();
+        String message = cause.getMessage() == null ? "" : cause.getMessage();
+        message = message.replaceAll("[\\p{Cntrl}&&[^\\n\\t]]", " ").replaceAll("\\s+", " ").trim();
+        message = SENSITIVE_DIAGNOSTIC.matcher(message).replaceAll("$1$2[redacted]");
+        if (message.length() > MAX_NATION_SELECTION_DIAGNOSTIC_CHARS) {
+            message = message.substring(0, MAX_NATION_SELECTION_DIAGNOSTIC_CHARS);
+        }
+        nationSelectionFailureMessage = message;
     }
 
     private static void advanceInformationPanel(Window frame) throws Exception {
@@ -566,8 +775,15 @@ public final class FreeColProbe {
     }
 
     private static String timeoutJson() {
+        if (requestedNationId != null && !nationSelectionConfirmed && !nationSelectionRequestFailed()) {
+            nationSelectionStatus = "confirmation-deadline-exhausted";
+            nationSelectionJson = nationSelectionReceipt(nationSelectionLastObservedNationId,
+                    nationSelectionLastObservedNationTypeId, nationSelectionLastServerNationId,
+                    nationSelectionLastServerNationTypeId, false, nationSelectionStatus);
+        }
         return "{\"schemaVersion\":2,\"status\":\"timeout-no-live-map\",\"startActionObservations\":["
-                + String.join(",", START_ACTION_OBSERVATIONS) + "],\"informationPanelActionObservations\":["
+                + String.join(",", START_ACTION_OBSERVATIONS) + "],\"nationSelection\":" + nationSelectionJson
+                + ",\"informationPanelActionObservations\":["
                 + String.join(",", INFORMATION_PANEL_ACTION_OBSERVATIONS) + "],\"uiState\":" + lastUiState
                 + (captureScreenPath == null ? "" : ",\"actualScreenCapture\":{\"status\":\"timeout-no-live-map\",\"screenshotCreated\":false}") + "}";
     }
@@ -1233,6 +1449,11 @@ public final class FreeColProbe {
     private static Object invoke(Object target, String name) throws Exception {
         if (target == null) throw new IllegalStateException("null receiver for method " + name);
         return target.getClass().getMethod(name).invoke(target);
+    }
+
+    private static Object invoke(Object target, String name, Class<?>[] parameterTypes, Object... arguments) throws Exception {
+        if (target == null) throw new IllegalStateException("null receiver for method " + name);
+        return target.getClass().getMethod(name, parameterTypes).invoke(target, arguments);
     }
 
     private static Object field(Object target, String name) throws Exception {

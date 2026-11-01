@@ -10,6 +10,7 @@ import os
 import re
 import resource
 import signal
+import stat
 import subprocess
 import sys
 import time
@@ -28,9 +29,11 @@ MAX_TRACE_BYTES = 16 * 1024 * 1024
 MAX_TRACE_LINES = 50_001
 MAX_CASE_SECONDS = 30
 MAX_PROCESS_FILE_BYTES = 20 * 1024 * 1024
+MAX_NATIVE_FRAME_BYTES = 1_920_000
 VIEWPORT_WIDTH = 1024
 VIEWPORT_HEIGHT = 768
 ARTIFACT_ROOT = Path("/root/.codex/artifacts/zorya-classifier-mcp-20261031/fresh-map")
+RESUMPTION_ARTIFACT_ROOT = Path("/root/.codex/artifacts/zorya-classifier-mcp-20261101/lincity-resume")
 EXPECTED_SAVE_SHA256 = "2cf706e580e7181bb1dc66f45d4e4c043b296249e18dcade022f2ae5ad22ad6f"
 EXPECTED_CAMERA_SAVE_SHA256 = "c36b456db58f808191f961819384a6d95811c97feb76fd74369faf8f1e621e18"
 EXPECTED_SAVE_SHA256S = frozenset({EXPECTED_SAVE_SHA256, EXPECTED_CAMERA_SAVE_SHA256})
@@ -78,11 +81,154 @@ EXPECTED_SOURCE = {
     "PainterSDL.cpp": "68dbd15bc1ecc19dd94cd12ac98855c5091bd9f56633e5cfac6ba4312a076442",
     "TextureManagerSDL.cpp": "05da5dc6d3a20cafadc22bc893c27a7e4c1d6b67188e8fcd3b35557c42e48c1d",
 }
+EXPECTED_LOADSAVE_SOURCE_SHA256 = "390aed2eb3d9c697a4cf4d6d1f6cc7254bdd4f29bff1af3441cb1c5ae6dfc1ac"
+EXPECTED_MENU_LAYOUT_SHA256 = "ea1e6b955a874203f467570b365cc781f85e293cce80270884f55a0f591468e0"
+EXPECTED_GAME_CAMERA_CLAMP = "world-side - floor(viewport-pixels / 16) - 1"
 EXPECTED_ASSET_LIST = ("farm0.png", "farm3.png", "farm7.png", "farm11.png", "farm15.png")
+NON_DRAW_TRACE_EVENT_TYPES = frozenset({"render_present", "capture_complete", "native_frame_capture"})
 
 
 class OracleError(RuntimeError):
     pass
+
+
+def _write_exclusive(path: Path, payload: bytes, mode: int = 0o600) -> None:
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(path, flags, mode)
+    try:
+        view = memoryview(payload)
+        offset = 0
+        while offset < len(view):
+            written = os.write(fd, view[offset:])
+            if written <= 0:
+                raise OracleError("exclusive output write did not complete")
+            offset += written
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
+def _png_chunk(kind: bytes, payload: bytes) -> bytes:
+    body = kind + payload
+    return len(payload).to_bytes(4, "big") + body + (zlib.crc32(body) & 0xFFFFFFFF).to_bytes(4, "big")
+
+
+def encode_rgba_png(width: int, height: int, rgba: bytes) -> bytes:
+    if (width, height) != (800, 600) or len(rgba) != MAX_NATIVE_FRAME_BYTES:
+        raise OracleError("native framebuffer dimensions or byte length are invalid")
+    rows = b"".join(b"\x00" + rgba[row * width * 4 : (row + 1) * width * 4] for row in range(height))
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + _png_chunk(b"IHDR", width.to_bytes(4, "big") + height.to_bytes(4, "big") + b"\x08\x06\x00\x00\x00")
+        + _png_chunk(b"IDAT", zlib.compress(rows, 9))
+        + _png_chunk(b"IEND", b"")
+    )
+
+
+def validate_native_frame_capture(records: list[dict[str, Any]], target_frame: int | None, output: Path) -> dict[str, Any]:
+    rows = [row for row in records if row.get("type") == "native_frame_capture"]
+    base: dict[str, Any] = {
+        "required": True,
+        "status": "failed",
+        "reason": "native-frame-record-missing" if not rows else None,
+        "sameFrameAsTargetDraw": False,
+        "rgbaPath": str(output / "native-frame.rgba"),
+        "pngPath": None,
+    }
+    if len(rows) != 1:
+        base["reason"] = "native-frame-record-count-mismatch"
+        return base
+    row = rows[0]
+    base.update({
+        "renderer": row.get("renderer"),
+        "targetSurface": row.get("targetSurface"),
+        "frame": row.get("frame"),
+        "width": row.get("width"),
+        "height": row.get("height"),
+        "format": row.get("format"),
+        "byteCount": row.get("byteCount"),
+        "sha256": row.get("sha256"),
+        "readResult": row.get("readResult"),
+        "readStatus": row.get("status"),
+        "failure": row.get("failure"),
+        "errno": row.get("errno"),
+    })
+    start = next((item for item in records if item.get("type") == "capture_start"), None)
+    target_draws = [item for item in records if item.get("type") == "render_copy" and item.get("rgbaSha256") == row.get("targetRgbaSha256")]
+    base["sameFrameAsTargetDraw"] = bool(
+        target_frame is not None and row.get("frame") == target_frame
+        and start is not None and row.get("renderer") == start.get("renderer")
+        and start.get("frame") == target_frame
+        and any(
+            item.get("frame") == target_frame and item.get("renderer") == row.get("renderer")
+            and isinstance(item.get("seq"), int) and isinstance(row.get("seq"), int) and item["seq"] < row["seq"]
+            and isinstance(start.get("seq"), int) and start["seq"] < item["seq"]
+            for item in target_draws
+        )
+    )
+    if row.get("status") != "captured" or row.get("readResult") != 0:
+        base["reason"] = row.get("failure") or "native-frame-read-failed"
+        return base
+    if (row.get("width"), row.get("height"), row.get("format"), row.get("targetSurface")) != (800, 600, "SDL_PIXELFORMAT_RGBA32", None):
+        base["reason"] = "native-frame-format-dimensions-or-window-surface-mismatch"
+        return base
+    if row.get("frame") != target_frame or not base["sameFrameAsTargetDraw"]:
+        base["reason"] = "native-frame-identity-mismatch"
+        return base
+    if start is None or not isinstance(row.get("seq"), int):
+        base["reason"] = "native-frame-trace-order-invalid"
+        return base
+    present = next((
+        item for item in records
+        if item.get("type") == "render_present" and item.get("renderer") == row.get("renderer")
+        and item.get("frame") == row.get("frame", -2) + 1
+        and isinstance(item.get("seq"), int) and item["seq"] > row["seq"]
+    ), None)
+    complete = next((
+        item for item in records
+        if item.get("type") == "capture_complete" and present is not None
+        and item.get("renderer") == row.get("renderer") and item.get("frame") == present.get("frame")
+        and isinstance(item.get("seq"), int) and item["seq"] > present["seq"]
+    ), None)
+    if present is None or complete is None:
+        base["reason"] = "native-frame-trace-order-invalid"
+        return base
+    base["traceOrderValid"] = True
+    rgba_path = output / "native-frame.rgba"
+    try:
+        rgba = read_bounded(rgba_path, MAX_NATIVE_FRAME_BYTES, "native framebuffer RGBA")
+        mode = stat.S_IMODE(rgba_path.stat().st_mode)
+    except (OracleError, OSError) as error:
+        base["reason"] = f"native-frame-file-invalid:{type(error).__name__}"
+        return base
+    base["fileMode"] = f"{mode:04o}"
+    if len(rgba) != MAX_NATIVE_FRAME_BYTES or row.get("byteCount") != MAX_NATIVE_FRAME_BYTES:
+        base["reason"] = "native-frame-byte-length-mismatch"
+        return base
+    digest = sha256_bytes(rgba)
+    if row.get("sha256") != digest:
+        base["reason"] = "native-frame-sha256-mismatch"
+        return base
+    if mode != 0o600:
+        base["reason"] = "native-frame-file-mode-mismatch"
+        return base
+    try:
+        png = encode_rgba_png(800, 600, rgba)
+        png_path = output / "native-frame.png"
+        _write_exclusive(png_path, png)
+        from PIL import Image
+
+        with Image.open(png_path) as image:
+            image.load()
+            exact_pixels = image.mode == "RGBA" and image.size == (800, 600) and image.tobytes() == rgba
+        if not exact_pixels:
+            base["reason"] = "native-frame-png-pixel-verification-failed"
+            return base
+    except (OSError, OracleError) as error:
+        base["reason"] = f"native-frame-png-validation-failed:{type(error).__name__}"
+        return base
+    base.update({"status": "captured-and-pixel-verified", "reason": None, "pngPath": str(png_path), "pngSha256": sha256_bytes(png)})
+    return base
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -275,6 +421,7 @@ def verify_save_lineage(save_path: Path, save_sha256: str, lineage_receipt_path:
         "parentSaveSha256": EXPECTED_CAMERA_SAVE_SHA256,
         "cameraOrigin": receipt.get("postrunCameraOrigin"),
         "parentCameraOriginMatchesExpected": receipt.get("cameraOriginMatchesExpected"),
+        "parentExpectedCameraOrigin": receipt.get("expectedCameraOrigin"),
         "parentPreflightReceiptSha256": sha256_bytes(receipt_bytes),
     }
 
@@ -408,6 +555,54 @@ def parse_camera_origin(value: str | None) -> dict[str, int] | None:
     return {"x": int(parts[0]), "y": int(parts[1])}
 
 
+def validate_viewport(width: int, height: int) -> tuple[int, int]:
+    if isinstance(width, bool) or isinstance(height, bool) or not isinstance(width, int) or not isinstance(height, int):
+        raise OracleError("viewport dimensions must be integers")
+    if not (280 <= width <= 4096 and 240 <= height <= 4096):
+        raise OracleError("viewport dimensions are outside the supported diagnostic range")
+    return width, height
+
+
+def continue_button_center(layout_bytes: bytes, width: int, height: int) -> tuple[int, int]:
+    width, height = validate_viewport(width, height)
+    try:
+        root = ElementTree.fromstring(layout_bytes)
+    except ElementTree.ParseError as error:
+        raise OracleError("installed main menu layout is malformed") from error
+    table = root.find("TableLayout")
+    if table is None:
+        raise OracleError("installed main menu has no table layout")
+    rows, cols = int(table.attrib.get("rows", "0")), int(table.attrib.get("cols", "0"))
+    if rows < 1 or cols < 1:
+        raise OracleError("installed main menu table dimensions are invalid")
+
+    def weights(tag: str, limit: int) -> list[float]:
+        result = [1.0] * limit
+        for item in table.findall(tag):
+            index = int(item.attrib.get("row" if tag == "rowsize" else "col", "0"))
+            value = float(item.attrib.get("relative", "nan"))
+            if not (1 <= index <= limit) or not (value > 0):
+                raise OracleError("installed main menu table proportions are invalid")
+            result[index - 1] = value
+        return result
+
+    row_weights, col_weights = weights("rowsize", rows), weights("colsize", cols)
+    matches = []
+    for cell in table.findall("cell"):
+        buttons = [node for node in list(cell) if node.tag == "Button" and node.attrib.get("name") == "ContinueButton"]
+        if buttons:
+            matches.append((int(cell.attrib.get("row", "0")), int(cell.attrib.get("col", "0"))))
+    if len(matches) != 1:
+        raise OracleError("installed main menu Continue button mapping is missing or ambiguous")
+    row, col = matches[0]
+    if not (1 <= row <= rows and 1 <= col <= cols):
+        raise OracleError("installed main menu Continue button cell is outside the table")
+    row_total, col_total = sum(row_weights), sum(col_weights)
+    x = int(width * (sum(col_weights[: col - 1]) + col_weights[col - 1] / 2) / col_total)
+    y = int(height * (sum(row_weights[: row - 1]) + row_weights[row - 1] / 2) / row_total)
+    return x, y
+
+
 def project_construction_draw(
     construction: dict[str, Any],
     camera_origin: dict[str, int],
@@ -417,14 +612,17 @@ def project_construction_draw(
     image_height: int,
     image_x_offset: int,
     image_y_offset: int,
+    viewport_width: int = VIEWPORT_WIDTH,
+    viewport_height: int = VIEWPORT_HEIGHT,
 ) -> list[int]:
+    viewport_width, viewport_height = validate_viewport(viewport_width, viewport_height)
     if footprint_size < 1 or not 1 <= world_side <= 1000:
         raise OracleError("construction footprint or world dimensions are invalid")
     lower_x = construction["x"] + footprint_size - 1
     lower_y = construction["y"] + footprint_size - 1
     virtual_width = world_side * 128
-    viewport_x = virtual_width / 2 + (camera_origin["x"] - camera_origin["y"]) * 64 - VIEWPORT_WIDTH / 2
-    viewport_y = (camera_origin["x"] + camera_origin["y"]) * 32 + 32 - VIEWPORT_HEIGHT / 2
+    viewport_x = virtual_width / 2 + (camera_origin["x"] - camera_origin["y"]) * 64 - viewport_width / 2
+    viewport_y = (camera_origin["x"] + camera_origin["y"]) * 32 + 32 - viewport_height / 2
     point_x = virtual_width / 2 + (lower_x - lower_y) * 64
     point_y = (lower_x + lower_y) * 32 + 64
     return [
@@ -462,7 +660,11 @@ def parse_trace(path: Path) -> list[dict[str, Any]]:
     return records
 
 
-def _farm_target_rects(save: dict[str, Any], assets: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _farm_target_rects(
+    save: dict[str, Any], assets: list[dict[str, Any]], viewport_width: int = VIEWPORT_WIDTH,
+    viewport_height: int = VIEWPORT_HEIGHT,
+) -> list[dict[str, Any]]:
+    viewport_width, viewport_height = validate_viewport(viewport_width, viewport_height)
     frames = assets[0]["frames"]
     if not frames:
         raise OracleError("Farm frame list is empty")
@@ -471,8 +673,8 @@ def _farm_target_rects(save: dict[str, Any], assets: list[dict[str, Any]]) -> li
         raise OracleError("reviewed save contains no Farm construction")
     camera = save["cameraOrigin"]
     virtual_width = save["worldSide"] * 128
-    viewport_x = virtual_width / 2 + (camera["x"] - camera["y"]) * 64 - VIEWPORT_WIDTH / 2
-    viewport_y = (camera["x"] + camera["y"]) * 32 + 32 - VIEWPORT_HEIGHT / 2
+    viewport_x = virtual_width / 2 + (camera["x"] - camera["y"]) * 64 - viewport_width / 2
+    viewport_y = (camera["x"] + camera["y"]) * 32 + 32 - viewport_height / 2
     rects: list[dict[str, Any]] = []
     for farm in farms:
         for size in range(1, 9):
@@ -501,7 +703,11 @@ def _farm_target_rects(save: dict[str, Any], assets: list[dict[str, Any]]) -> li
     return rects
 
 
-def analyze_trace(save: dict[str, Any], assets: list[dict[str, Any]], records: list[dict[str, Any]]) -> dict[str, Any]:
+def analyze_trace(
+    save: dict[str, Any], assets: list[dict[str, Any]], records: list[dict[str, Any]],
+    viewport_width: int = VIEWPORT_WIDTH, viewport_height: int = VIEWPORT_HEIGHT,
+) -> dict[str, Any]:
+    viewport_width, viewport_height = validate_viewport(viewport_width, viewport_height)
     capture_start_rows = [row for row in records if row.get("type") == "capture_start"]
     capture_complete_rows = [row for row in records if row.get("type") == "capture_complete"]
     capture_start = capture_start_rows[0] if capture_start_rows else None
@@ -526,7 +732,7 @@ def analyze_trace(save: dict[str, Any], assets: list[dict[str, Any]], records: l
     ]
     if not selected_records:
         selected_records = records
-    expected = _farm_target_rects(save, assets)
+    expected = _farm_target_rects(save, assets, viewport_width, viewport_height)
     farm_hashes = {frame["rgbaSha256"]: frame for frame in assets[0]["frames"]}
     draw_matches: list[dict[str, Any]] = []
     for record in selected_records:
@@ -578,11 +784,11 @@ def analyze_trace(save: dict[str, Any], assets: list[dict[str, Any]], records: l
             ax0, ay0, ax1, ay1 = alpha
             clip = representative.get("clip")
             if not (isinstance(clip, list) and len(clip) == 4 and clip[2] > 0 and clip[3] > 0):
-                clip = [0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT]
+                clip = [0, 0, viewport_width, viewport_height]
             left = max(x + ax0, clip[0], 0)
             top = max(y + ay0, clip[1], 0)
-            right = min(x + ax1, clip[0] + clip[2], VIEWPORT_WIDTH)
-            bottom = min(y + ay1, clip[1] + clip[3], VIEWPORT_HEIGHT)
+            right = min(x + ax1, clip[0] + clip[2], viewport_width)
+            bottom = min(y + ay1, clip[1] + clip[3], viewport_height)
             if right > left and bottom > top:
                 visible_alpha_bbox = [left, top, right, bottom]
             same_renderer_matches = [
@@ -596,7 +802,7 @@ def analyze_trace(save: dict[str, Any], assets: list[dict[str, Any]], records: l
                 bx0, by0, bx1, by1 = visible_alpha_bbox
                 for row in selected_records:
                     seq = row.get("seq")
-                    if not isinstance(seq, int) or seq <= first_seq or row.get("type") in {"render_present", "capture_complete"}:
+                    if not isinstance(seq, int) or seq <= first_seq or row.get("type") in NON_DRAW_TRACE_EVENT_TYPES:
                         continue
                     if row.get("renderer") != representative["renderer"]:
                         continue
@@ -634,7 +840,7 @@ def analyze_trace(save: dict[str, Any], assets: list[dict[str, Any]], records: l
                             rect = [min(x1, x2), min(y1, y2), max(x1, x2) + 1, max(y1, y2) + 1]
                             if rect[0] < bx1 and bx0 < rect[2] and rect[1] < by1 and by0 < rect[3]:
                                 later_overlap_events.append({"seq": seq, "type": "render_line", "rect": rect})
-                    elif row.get("type") not in {"render_present", "capture_complete"}:
+                    elif row.get("type") not in NON_DRAW_TRACE_EVENT_TYPES:
                         later_unknown_events.append({"seq": seq, "type": row.get("type")})
     sizes_by_coordinate: dict[tuple[int, int], set[int]] = {}
     for item in unique:
@@ -682,13 +888,54 @@ def analyze_trace(save: dict[str, Any], assets: list[dict[str, Any]], records: l
     }
 
 
+def expected_target_coordinate_for_run(
+    value: str | None, target_name: str, metadata_gate_required: bool,
+) -> dict[str, int] | None:
+    coordinate = parse_camera_origin(value)
+    if coordinate is None and target_name == "Farm" and not metadata_gate_required:
+        return {"x": 32, "y": 50}
+    if metadata_gate_required and coordinate is None:
+        raise OracleError("strict metadata gate requires an explicit target coordinate")
+    return coordinate
+
+
+def preflight_exit_code(
+    camera_origin_matches_expected: bool, metadata_gate_required: bool,
+    metadata_gate_passed: bool | None,
+) -> int:
+    if metadata_gate_required:
+        return 0 if metadata_gate_passed is True else 2
+    return 0 if camera_origin_matches_expected else 2
+
+
+def verify_observed_viewport(
+    records: list[dict[str, Any]], viewport_width: int, viewport_height: int,
+) -> tuple[bool, list[list[int]]]:
+    viewport_width, viewport_height = validate_viewport(viewport_width, viewport_height)
+    starts = [row for row in records if row.get("type") == "capture_start"]
+    capture_dimensions = [(row.get("width"), row.get("height")) for row in starts]
+    window_dimensions = [
+        (row.get("width"), row.get("height"))
+        for row in records if row.get("type") == "renderer_window"
+    ]
+    matches = (
+        len(starts) == 1
+        and capture_dimensions == [(viewport_width, viewport_height)]
+        and all(dimensions == (viewport_width, viewport_height) for dimensions in window_dimensions)
+    )
+    return matches, [list(dimensions) for dimensions in sorted(set(capture_dimensions))]
+
+
 def analyze_construction_trace(
     save: dict[str, Any],
     target_name: str,
     target_asset: dict[str, Any],
     footprint_size: int,
     records: list[dict[str, Any]],
+    viewport_width: int = VIEWPORT_WIDTH,
+    viewport_height: int = VIEWPORT_HEIGHT,
 ) -> dict[str, Any]:
+    viewport_width, viewport_height = validate_viewport(viewport_width, viewport_height)
     if target_name not in CONSTRUCTION_FOOTPRINTS or footprint_size != CONSTRUCTION_FOOTPRINTS[target_name]:
         raise OracleError("construction footprint must match its pinned upstream group size")
     starts = [row for row in records if row.get("type") == "capture_start"]
@@ -718,6 +965,8 @@ def analyze_construction_trace(
             target_asset["height"],
             x_offset,
             y_offset,
+            viewport_width,
+            viewport_height,
         )
         for row in selected:
             if (
@@ -753,12 +1002,12 @@ def analyze_construction_trace(
         ax0, ay0, ax1, ay1 = alpha
         clip = representative["clip"]
         if not (isinstance(clip, list) and len(clip) == 4 and clip[2] > 0 and clip[3] > 0):
-            clip = [0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT]
+            clip = [0, 0, viewport_width, viewport_height]
         visible_alpha = [
             max(x + ax0, clip[0], 0),
             max(y + ay0, clip[1], 0),
-            min(x + ax1, clip[0] + clip[2], VIEWPORT_WIDTH),
-            min(y + ay1, clip[1] + clip[3], VIEWPORT_HEIGHT),
+            min(x + ax1, clip[0] + clip[2], viewport_width),
+            min(y + ay1, clip[1] + clip[3], viewport_height),
         ]
         if visible_alpha[2] <= visible_alpha[0] or visible_alpha[3] <= visible_alpha[1]:
             visible_alpha = None
@@ -793,7 +1042,7 @@ def analyze_construction_trace(
                         x1, y1 = endpoints[0]
                         x2, y2 = endpoints[1]
                         rect = [min(x1, x2), min(y1, y2), max(x1, x2) + 1, max(y1, y2) + 1]
-                elif kind not in {"render_present", "capture_complete"}:
+                elif kind not in NON_DRAW_TRACE_EVENT_TYPES:
                     unknown_later.append({"seq": seq, "type": kind})
                 if rect is not None and rect[0] < bx1 and bx0 < rect[2] and rect[1] < by1 and by0 < rect[3]:
                     later_intersections.append({"seq": seq, "type": kind, "rect": rect})
@@ -807,6 +1056,7 @@ def analyze_construction_trace(
         "schemaVersion": "lincity-construction-draw-analysis-v1",
         "status": status,
         "target": target_name,
+        "viewport": {"width": viewport_width, "height": viewport_height},
         "sourceInventoryCount": len(constructions),
         "sourceUnique": len(constructions) == 1,
         "exactMatchCount": len(unique_matches),
@@ -832,9 +1082,13 @@ def analyze_construction_trace(
 
 
 
-def verify_owned_output(path: Path) -> Path:
+def verify_owned_output(path: Path, artifact_root: Path = ARTIFACT_ROOT) -> Path:
     output = path.absolute()
-    root = ARTIFACT_ROOT.resolve()
+    requested_root = artifact_root.absolute()
+    allowed_roots = (ARTIFACT_ROOT.resolve(), RESUMPTION_ARTIFACT_ROOT.resolve())
+    if requested_root.is_symlink() or requested_root.resolve() not in allowed_roots:
+        raise OracleError("artifact root must be one of the two frozen external diagnostic roots")
+    root = requested_root.resolve()
     if output.exists() or output.is_symlink():
         raise OracleError("diagnostic output already exists; use a new uniquely named path")
     parent = output.parent.resolve()
@@ -855,7 +1109,23 @@ def _quoted(value: str) -> str:
     return "'" + value.replace("'", "'\"'\"'") + "'"
 
 
-def _session_script(output: Path, observer: Path, app: Path, camera_action: str) -> str:
+def _session_script(
+    output: Path, observer: Path, app: Path, camera_action: str,
+    viewport_width: int = VIEWPORT_WIDTH, viewport_height: int = VIEWPORT_HEIGHT,
+    continue_x: int | None = None, continue_y: int | None = None,
+    capture_native_frame: bool = False,
+) -> str:
+    viewport_width, viewport_height = validate_viewport(viewport_width, viewport_height)
+    if continue_x is None or continue_y is None:
+        if viewport_width == VIEWPORT_WIDTH and viewport_height == VIEWPORT_HEIGHT:
+            continue_x, continue_y = 815, 242
+        else:
+            continue_x, continue_y = continue_button_center(
+                read_bounded(Path("/usr/share/lincity-ng/gui/mainmenu.xml"), MAX_IMAGES_XML_BYTES, "main menu layout"),
+                viewport_width, viewport_height,
+            )
+    if not (0 <= continue_x < viewport_width and 0 <= continue_y < viewport_height):
+        raise OracleError("Continue button center is outside the viewport")
     trace = output / "sdl-trace.jsonl"
     control = output / "capture-control"
     display_file = output / "display-number"
@@ -876,17 +1146,17 @@ def _session_script(output: Path, observer: Path, app: Path, camera_action: str)
         "trap 'exit 130' INT",
         "trap 'exit 143' TERM",
         "trap 'exit 129' HUP",
-        f"Xvfb -displayfd 3 -screen 0 {VIEWPORT_WIDTH}x{VIEWPORT_HEIGHT}x24 -noreset -nolisten tcp 3>{_quoted(str(display_file))} >{_quoted(str(xvfb_log))} 2>&1 &",
+        f"Xvfb -displayfd 3 -screen 0 {viewport_width}x{viewport_height}x24 -noreset -nolisten tcp 3>{_quoted(str(display_file))} >{_quoted(str(xvfb_log))} 2>&1 &",
         "XVFB_PID=$!",
         "DISPLAY_ATTEMPT=0",
         f"while [ \"$DISPLAY_ATTEMPT\" -lt 50 ]; do if [ -s {_quoted(str(display_file))} ]; then break; fi; if ! kill -0 \"$XVFB_PID\" 2>/dev/null; then wait \"$XVFB_PID\" || true; exit 71; fi; DISPLAY_ATTEMPT=$((DISPLAY_ATTEMPT + 1)); sleep 0.1; done",
         f"DISPLAY_NUMBER=$(cat {_quoted(str(display_file))})",
         'case "$DISPLAY_NUMBER" in ""|*[!0-9]*) exit 72 ;; esac',
         'export DISPLAY=":$DISPLAY_NUMBER"',
-        f"env LD_PRELOAD={_quoted(str(observer))} ZORYA_LINCITY_TRACE_JSONL={_quoted(str(trace))} ZORYA_LINCITY_CAPTURE_CONTROL={_quoted(str(control))} {_quoted(str(app))} --sdl --size 1024x768 --window --mute >{_quoted(str(log))} 2>&1 &",
+        f"env LD_PRELOAD={_quoted(str(observer))} ZORYA_LINCITY_TRACE_JSONL={_quoted(str(trace))} ZORYA_LINCITY_CAPTURE_CONTROL={_quoted(str(control))} {'ZORYA_LINCITY_CAPTURE_NATIVE_FRAME=1 ZORYA_LINCITY_NATIVE_FRAME_RGBA_PATH=' + _quoted(str(output / 'native-frame.rgba')) if capture_native_frame else ''} {_quoted(str(app))} --sdl --size {viewport_width}x{viewport_height} --window --mute >{_quoted(str(log))} 2>&1 &",
         "APP_PID=$!",
         "sleep 3",
-        "xdotool mousemove --sync 815 242 click 1",
+        f"xdotool mousemove --sync {continue_x} {continue_y} click 1",
     ]
     if camera_action == "none":
         inner_lines.append("sleep 3")
@@ -988,7 +1258,15 @@ def _wait_group_closed(pgid: int, timeout: float) -> bool:
 
 
 def run_preflight(args: argparse.Namespace) -> int:
-    output = verify_owned_output(Path(args.output))
+    viewport_width, viewport_height = validate_viewport(args.viewport_width, args.viewport_height)
+    if args.require_metadata_gate and (
+        not args.expected_camera_origin or not args.expected_target_coordinate or not args.loadsave_source
+        or args.camera_action != "none" or (viewport_width, viewport_height) != (800, 600)
+    ):
+        raise OracleError("strict metadata gate requires explicit camera, target, pinned clamp source, no camera action, and 800x600")
+    if args.capture_native_frame and (not args.require_metadata_gate or (viewport_width, viewport_height) != (800, 600)):
+        raise OracleError("native framebuffer capture requires the strict 800x600 metadata gate")
+    output = verify_owned_output(Path(args.output), Path(args.artifact_root))
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
     output.chmod(0o700)
     process: subprocess.Popen[bytes] | None = None
@@ -998,11 +1276,32 @@ def run_preflight(args: argparse.Namespace) -> int:
         if save_sha != args.expected_save_sha256:
             raise OracleError("pinned save digest mismatch")
         expected_camera_origin = parse_camera_origin(args.expected_camera_origin)
-        save_lineage = verify_save_lineage(Path(args.save), save_sha, Path(args.lineage_receipt) if args.lineage_receipt else None)
+        save_lineage = verify_save_lineage(
+            Path(args.save), save_sha, Path(args.lineage_receipt) if args.lineage_receipt else None,
+        )
         save = parse_save(save_bytes)
         if save_lineage.get("cameraOrigin") is not None and save_lineage.get("cameraOrigin") != save["cameraOrigin"]:
             raise OracleError("derived save camera origin differs from its parent receipt")
         source_hashes = verify_pinned_sources(Path(args.source_root), Path(args.painter_source_root))
+        loadsave_source_sha = None
+        if args.loadsave_source:
+            loadsave_source_bytes = read_bounded(Path(args.loadsave_source), 64 * 1024, "upstream loadsave.cpp")
+            loadsave_source_sha = sha256_bytes(loadsave_source_bytes)
+            if loadsave_source_sha != EXPECTED_LOADSAVE_SOURCE_SHA256:
+                raise OracleError("pinned upstream loadsave.cpp hash mismatch")
+        menu_layout_sha = None
+        if args.require_metadata_gate:
+            menu_layout_bytes = read_bounded(Path(args.main_menu_layout), MAX_IMAGES_XML_BYTES, "installed main menu layout")
+            menu_layout_sha = sha256_bytes(menu_layout_bytes)
+            if menu_layout_sha != EXPECTED_MENU_LAYOUT_SHA256:
+                raise OracleError("pinned installed main menu layout hash mismatch")
+            continue_x, continue_y = continue_button_center(menu_layout_bytes, viewport_width, viewport_height)
+        elif (viewport_width, viewport_height) == (VIEWPORT_WIDTH, VIEWPORT_HEIGHT):
+            continue_x, continue_y = 815, 242
+        else:
+            menu_layout_bytes = read_bounded(Path(args.main_menu_layout), MAX_IMAGES_XML_BYTES, "installed main menu layout")
+            menu_layout_sha = sha256_bytes(menu_layout_bytes)
+            continue_x, continue_y = continue_button_center(menu_layout_bytes, viewport_width, viewport_height)
         assets_nested = collect_farm_assets(Path(args.tiles_dir))
         assets = assets_nested[0]["frames"]
         capture_target_asset = verify_capture_target_asset(Path(args.tiles_dir), args.capture_target)
@@ -1022,6 +1321,17 @@ def run_preflight(args: argparse.Namespace) -> int:
         farm_target = [row for row in save["constructions"] if row["type"] == "Farm" and row["x"] == 32 and row["y"] == 50]
         if len(farm_target) != 1:
             raise OracleError("the frozen diagnostic Farm target is missing or ambiguous")
+        expected_target_coordinate = expected_target_coordinate_for_run(
+            args.expected_target_coordinate, args.capture_target, args.require_metadata_gate,
+        )
+        all_target_constructions = [row for row in save["constructions"] if row["type"] == args.capture_target]
+        if expected_target_coordinate is not None:
+            target_constructions = [
+                row for row in all_target_constructions
+                if [row["x"], row["y"]] == [expected_target_coordinate["x"], expected_target_coordinate["y"]]
+            ]
+            if len(target_constructions) != 1 or (args.require_metadata_gate and len(all_target_constructions) != 1):
+                raise OracleError("the frozen diagnostic target must be unique in the source inventory")
         observer_source = Path(args.observer_source).resolve()
         observer_digest = sha256_bytes(read_bounded(observer_source, 64 * 1024, "observer source"))
         compiler = Path(args.tcc).resolve()
@@ -1071,7 +1381,10 @@ def run_preflight(args: argparse.Namespace) -> int:
             handle.write(save_bytes)
         save_path.chmod(0o400)
         script_path = output / "session.sh"
-        script_path.write_text(_session_script(output, observer_binary, app, args.camera_action), encoding="utf-8")
+        script_path.write_text(
+            _session_script(output, observer_binary, app, args.camera_action, viewport_width, viewport_height, continue_x, continue_y, args.capture_native_frame),
+            encoding="utf-8",
+        )
         script_path.chmod(0o700)
         trace_path = output / "sdl-trace.jsonl"
         env = {
@@ -1136,7 +1449,7 @@ def run_preflight(args: argparse.Namespace) -> int:
         )
         inventory_stable = state_signature(save) == state_signature(postrun_save)
         camera_origin_matches_expected = expected_camera_origin is None or postrun_save["cameraOrigin"] == expected_camera_origin
-        analysis = analyze_trace(postrun_save, assets_nested, trace_records) if trace_records and inventory_stable else {
+        analysis = analyze_trace(postrun_save, assets_nested, trace_records, viewport_width, viewport_height) if trace_records and inventory_stable else {
             "schemaVersion": "lincity-sdl-draw-analysis-v1",
             "status": "unresolved",
             "reason": "no observer records" if not trace_records else "construction inventory changed during diagnostic",
@@ -1151,6 +1464,38 @@ def run_preflight(args: argparse.Namespace) -> int:
                 capture_target_asset,
                 CONSTRUCTION_FOOTPRINTS[args.capture_target],
                 trace_records,
+                viewport_width,
+                viewport_height,
+            )
+        native_frame_capture = None
+        native_frame_gate_passed = None
+        if args.capture_native_frame:
+            matched_calls = construction_analysis.get("matchedCalls", []) if construction_analysis else []
+            target_frame = matched_calls[0].get("frame") if len(matched_calls) == 1 else None
+            native_frame_capture = validate_native_frame_capture(trace_records, target_frame, output)
+            native_frame_gate_passed = native_frame_capture.get("status") == "captured-and-pixel-verified"
+        renderer_windows = [row for row in trace_records if row.get("type") == "renderer_window"]
+        actual_viewport_matches, capture_dimensions = verify_observed_viewport(
+            trace_records, viewport_width, viewport_height,
+        )
+        observed_dimensions = sorted({(row.get("width"), row.get("height")) for row in renderer_windows})
+        expected_destination_match = bool(construction_analysis) and expected_target_coordinate is not None and any(
+            row.get("sourceCoordinate") == [expected_target_coordinate["x"], expected_target_coordinate["y"]]
+            and row.get("expectedDestination") == row.get("observedDestination")
+            for row in construction_analysis.get("matchedCalls", [])
+        )
+        target_draw_matches = bool(construction_analysis) and construction_analysis.get("status") == "matched-one-source-draw" and expected_destination_match
+        metadata_gate_passed = None
+        if args.require_metadata_gate:
+            metadata_gate_passed = (
+                not timed_out and exit_code == 0 and closed and camera_origin_matches_expected and inventory_stable
+                and actual_viewport_matches and target_draw_matches
+                and save["constructionCount"] == 54 and postrun_save["constructionCount"] == 54
+                and construction_analysis is not None
+                and construction_analysis.get("selectedFrameComplete") is True
+                and construction_analysis.get("traceCapReached") is False
+                and construction_analysis.get("selectedFramePresentCount") == 1
+                and construction_analysis.get("alphaUnclipped") is True
             )
         receipt = {
             "schemaVersion": "lincity-draw-preflight-v1",
@@ -1168,7 +1513,29 @@ def run_preflight(args: argparse.Namespace) -> int:
             "postrunCameraOrigin": postrun_save["cameraOrigin"],
             "expectedCameraOrigin": expected_camera_origin,
             "cameraOriginMatchesExpected": camera_origin_matches_expected,
+            "viewport": {"width": viewport_width, "height": viewport_height},
+            "actualViewportMatchesRequest": actual_viewport_matches,
+            "rendererWindowDimensions": [list(size) for size in observed_dimensions],
+            "captureStartDimensions": capture_dimensions,
+            "captureStartUsesSDLRendererOutputSize": True,
+            "continueButtonCenter": {"x": continue_x, "y": continue_y},
+            "mainMenuLayoutSha256": menu_layout_sha,
+            "loadsaveSourceSha256": loadsave_source_sha,
+            "cameraClampSource": "src/lincity/loadsave.cpp:612-617",
+            "cameraClampFormula": EXPECTED_GAME_CAMERA_CLAMP,
+            "expectedTarget": {
+                "type": args.capture_target,
+                "coordinate": [expected_target_coordinate["x"], expected_target_coordinate["y"]] if expected_target_coordinate else None,
+            },
+            "expectedDestinationMatchesObserved": expected_destination_match,
+            "metadataGateRequired": args.require_metadata_gate,
+            "metadataGatePassed": metadata_gate_passed,
+            "nativeFrameCaptureRequired": args.capture_native_frame,
+            "nativeFrameCapturePassed": native_frame_gate_passed,
+            "nativeFrameCapture": native_frame_capture,
             "postrunConstructionInventoryMatchesInput": inventory_stable,
+            "inputConstructionCount": save["constructionCount"],
+            "postrunConstructionCount": postrun_save["constructionCount"],
             "packageVersion": package_version,
             "gameBinarySha256": app_sha,
             "sourceHashes": source_hashes,
@@ -1184,8 +1551,9 @@ def run_preflight(args: argparse.Namespace) -> int:
             "drawAnalysis": analysis,
             "limitations": [
                 "This diagnostic made no screenshot or corpus case.",
-                "Farm construction-size candidates are evaluated from the upstream draw formula and must not be treated as independent visibility proof.",
+                "Construction destinations are evaluated from upstream draw formulas and must not be treated as independent visibility proof.",
                 "Window composition, later overlapping draw calls, and manual visual review remain required for an eventual positive case.",
+                "Native framebuffer capture, when explicitly requested, proves only that the exact SDL output pixels were retained; it does not establish that the target is visible or unobstructed.",
                 "No negative inventory was collected.",
             ],
         }
@@ -1194,7 +1562,9 @@ def run_preflight(args: argparse.Namespace) -> int:
             raise OracleError("owned process group did not close; receipt retained")
         if timed_out or exit_code != 0:
             return 2
-        return 0 if camera_origin_matches_expected else 2
+        if args.capture_native_frame and not native_frame_gate_passed:
+            return 2
+        return preflight_exit_code(camera_origin_matches_expected, args.require_metadata_gate, metadata_gate_passed)
     except BaseException as error:
         if process is not None and process.poll() is None:
             os.killpg(process.pid, signal.SIGTERM)
@@ -1231,6 +1601,14 @@ def build_parser() -> argparse.ArgumentParser:
     preflight.add_argument("--lineage-receipt")
     preflight.add_argument("--expected-camera-origin")
     preflight.add_argument("--capture-target", choices=tuple(CAPTURE_TARGET_ASSETS), default="Farm")
+    preflight.add_argument("--expected-target-coordinate")
+    preflight.add_argument("--require-metadata-gate", action="store_true")
+    preflight.add_argument("--capture-native-frame", action="store_true")
+    preflight.add_argument("--viewport-width", type=int, default=VIEWPORT_WIDTH)
+    preflight.add_argument("--viewport-height", type=int, default=VIEWPORT_HEIGHT)
+    preflight.add_argument("--artifact-root", default=str(ARTIFACT_ROOT))
+    preflight.add_argument("--loadsave-source")
+    preflight.add_argument("--main-menu-layout", default="/usr/share/lincity-ng/gui/mainmenu.xml")
     preflight.add_argument("--output", required=True)
     preflight.add_argument("--source-root", required=True)
     preflight.add_argument("--painter-source-root", required=True)

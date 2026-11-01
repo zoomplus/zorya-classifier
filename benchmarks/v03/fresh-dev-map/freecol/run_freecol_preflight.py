@@ -20,6 +20,8 @@ from preflight_runtime import BoundedLogWriter, bounded_tail, stop_owned_group
 
 
 EXPECTED_ROOT = Path("/root/.codex/artifacts/zorya-classifier-mcp-20261031/fresh-map")
+CARAVEL_EVIDENCE_ROOT = Path("/root/.codex/artifacts/zorya-classifier-mcp-20261101/freecol-caravel")
+ALLOWED_EVIDENCE_ROOTS = (EXPECTED_ROOT, CARAVEL_EVIDENCE_ROOT)
 JAR = Path("/usr/share/java/FreeCol-1.1.0.jar")
 RESOURCE_MAPPING = Path("/usr/share/games/freecol/default/resources.properties")
 PACKAGE_COPYRIGHT = Path("/usr/share/doc/freecol/copyright")
@@ -41,7 +43,39 @@ SOURCE_FILES = (
     Path("test_run_freecol_preflight.py"),
     Path("src/zorya/mapprobe/FreeColProbe.java"),
     Path("src/zorya/mapprobe/FreeColCaptureUiGateFixture.java"),
+    Path("src/zorya/mapprobe/FreeColNationSelectionFixture.java"),
 )
+
+NATION_ID_PATTERN = re.compile(r"model\.nation\.[A-Za-z0-9._-]{1,96}\Z")
+NATION_TYPE_ID_PATTERN = re.compile(r"model\.nationType\.[A-Za-z0-9._-]{1,96}\Z")
+
+
+def validate_nation_selection(nation_id: str | None, nation_type_id: str | None,
+                              capture_requested: bool = False) -> None:
+    if (nation_id is None) != (nation_type_id is None):
+        raise ValueError("nation selection requires both --nation-id and --nation-type-id")
+    if nation_id is not None and (NATION_ID_PATTERN.fullmatch(nation_id) is None
+                                  or NATION_TYPE_ID_PATTERN.fullmatch(nation_type_id or "") is None):
+        raise ValueError("nation selection IDs must be safe FreeCol nation and nation-type IDs")
+    if nation_id is not None and capture_requested:
+        raise ValueError("nation selection cannot be combined with screenshot capture options")
+
+
+def build_agent_arguments(output: Path, timeout_ms: int, save_path: Path | None,
+                          capture_fields: tuple[str, ...] | None,
+                          nation_id: str | None, nation_type_id: str | None) -> str:
+    parts = [str(output), str(timeout_ms)]
+    if capture_fields is not None:
+        if len(capture_fields) != 5:
+            raise ValueError("capture agent arguments require exactly five bounded fields")
+        validate_nation_selection(nation_id, nation_type_id, capture_requested=True)
+        parts.extend(capture_fields)
+    if save_path is not None:
+        parts.append(str(save_path))
+    if nation_id is not None:
+        validate_nation_selection(nation_id, nation_type_id)
+        parts.extend((nation_id, nation_type_id or ""))
+    return ",".join(parts)
 
 
 def sha256(path: Path) -> str:
@@ -218,11 +252,15 @@ def remove_owned_private_root(run_dir: Path) -> bool:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-id", required=True)
+    parser.add_argument("--evidence-root", choices=tuple(str(root) for root in ALLOWED_EVIDENCE_ROOTS),
+                        default=str(EXPECTED_ROOT), help="bounded task-owned evidence root")
     parser.add_argument("--timeout-seconds", type=int, default=180)
     parser.add_argument("--seed", type=int, default=20261031)
     parser.add_argument("--capture-target-unit-id")
     parser.add_argument("--capture-absent-unit-type-id")
     parser.add_argument("--expected-state-signature-sha256")
+    parser.add_argument("--nation-id", help="optional exact FreeCol nation ID selected through the pre-game controller")
+    parser.add_argument("--nation-type-id", help="optional exact FreeCol nation-type ID selected through the pre-game controller")
     operations = parser.add_mutually_exclusive_group()
     operations.add_argument("--save-state", action="store_true", help="save the fresh live game through FreeCol's official client API")
     operations.add_argument("--load-savegame", type=Path, help="load a previously frozen owned FreeCol save")
@@ -235,6 +273,10 @@ def main() -> int:
         parser.error("--seed must be a non-negative 32-bit integer")
     capture_targets = sum((args.capture_target_unit_id is not None, args.capture_absent_unit_type_id is not None))
     capture_requested = capture_targets > 0 or args.expected_state_signature_sha256 is not None
+    try:
+        validate_nation_selection(args.nation_id, args.nation_type_id, capture_requested)
+    except ValueError as error:
+        parser.error(str(error))
     if capture_requested and (capture_targets != 1 or args.expected_state_signature_sha256 is None):
         parser.error("capture requires exactly one positive unit ID or absent unit type ID and an expected state signature")
     if args.expected_state_signature_sha256 is not None and not re.fullmatch(r"[0-9a-f]{64}", args.expected_state_signature_sha256):
@@ -255,7 +297,7 @@ def main() -> int:
             parser.error("--load-savegame must name an existing regular, non-symlink save file")
         try:
             resolved_save = args.load_savegame.resolve(strict=True)
-            resolved_save.relative_to(EXPECTED_ROOT.resolve())
+            resolved_save.relative_to(Path(args.evidence_root).resolve())
         except (OSError, ValueError):
             parser.error("--load-savegame must be inside the task-owned external evidence root")
         load_save_sha256 = sha256(resolved_save)
@@ -288,7 +330,8 @@ def main() -> int:
             parser.error("negative capture unit type exists in the official authoritative saved world")
 
     source_dir = Path(__file__).resolve().parent
-    run_dir = create_owned_run_dir(EXPECTED_ROOT, args.run_id)
+    evidence_root = Path(args.evidence_root)
+    run_dir = create_owned_run_dir(evidence_root, args.run_id, approved_root=evidence_root)
     started = time.monotonic()
     status = "startup-error"
     owned_close: dict[str, object] = {"closed": True, "notStarted": True}
@@ -311,7 +354,7 @@ def main() -> int:
         private_root = run_dir / "private"
         receipt_path = run_dir / "live-state.json"
         agent_timeout_ms = min(args.timeout_seconds * 1000 - 20_000, 580_000)
-        agent_args = f"{receipt_path},{agent_timeout_ms}"
+        capture_fields: tuple[str, ...] | None = None
         save_path: Path | None = run_dir / "official-state.fsg" if args.save_state else None
         capture_mode: str | None = None
         if capture_requested:
@@ -320,15 +363,15 @@ def main() -> int:
             screen_path = capture_dir / "full-screen.png"
             sprite_path = capture_dir / "target-sprite.png" if args.capture_target_unit_id is not None else None
             capture_mode = "positive-unit" if sprite_path is not None else "negative-type-absence"
-            agent_args += "," + ",".join((
+            capture_fields = (
                 str(screen_path),
                 "-" if sprite_path is None else str(sprite_path),
                 args.capture_target_unit_id or "-",
                 args.capture_absent_unit_type_id or "-",
                 args.expected_state_signature_sha256 or "-",
-            ))
-        if save_path is not None:
-            agent_args += "," + str(save_path)
+            )
+        agent_args = build_agent_arguments(receipt_path, agent_timeout_ms, save_path, capture_fields,
+                                          args.nation_id, args.nation_type_id)
         env = {
             "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games",
             "LANG": "C.UTF-8",
@@ -436,6 +479,7 @@ def main() -> int:
             except (OSError, json.JSONDecodeError):
                 pass
         official_save = live_data.get("officialSave") if isinstance(live_data.get("officialSave"), dict) else None
+        nation_selection = live_data.get("nationSelection") if isinstance(live_data.get("nationSelection"), dict) else None
         save_file_sha256 = sha256(save_path) if save_path is not None and save_path.is_file() else None
         saved_world_inventory: dict[str, object] | None = None
         if save_path is not None and save_file_sha256 is not None:
@@ -474,10 +518,45 @@ def main() -> int:
             valid_types = live_data.get("validGameUnitTypeIds")
             if not isinstance(valid_types, list) or args.capture_absent_unit_type_id not in valid_types:
                 status = "negative-capture-unit-type-not-valid-in-specification"
+        if args.nation_id is not None:
+            start_actions = live_data.get("startActionObservations")
+            selection_confirmed = bool(
+                nation_selection is not None
+                and nation_selection.get("selectionAttempted") is True
+                and nation_selection.get("requestedNationId") == args.nation_id
+                and nation_selection.get("requestedNationTypeId") == args.nation_type_id
+                and nation_selection.get("confirmed") is True
+                and nation_selection.get("observedPlayerNationId") == args.nation_id
+                and nation_selection.get("observedPlayerNationTypeId") == args.nation_type_id
+                and nation_selection.get("observedServerNationId") == args.nation_id
+                and nation_selection.get("observedServerNationTypeId") == args.nation_type_id
+            )
+            if nation_selection is None:
+                status = "requested-nation-selection-observation-missing"
+            elif not selection_confirmed:
+                status = "requested-nation-selection-not-confirmed-before-start"
+            elif not isinstance(start_actions, list) or len(start_actions) != 1 or not any(
+                isinstance(action, dict) and action.get("normalDoClickCalled") is True
+                and action.get("actionEventObserved") is True for action in start_actions
+            ):
+                status = "requested-nation-selection-start-action-not-observed"
         meta = {
             "schemaVersion": 1,
             "status": status,
             "seed": args.seed,
+            "requestedNationSelection": None if args.nation_id is None else {
+                "nationId": args.nation_id,
+                "nationTypeId": args.nation_type_id,
+                "selectionMethod": "FreeColClient.getPreGameController().setNation/setNationType",
+                "confirmationRequiredBeforeStart": True,
+            },
+            "nationSelectionResult": nation_selection,
+            "renderingSettingsUnchanged": {
+                "display": "1024x768 windowed",
+                "gameAssets": "installed default resources",
+                "scale": "FreeCol default",
+                "overlayAndHUDChanges": False,
+            },
             "packageVersion": dpkg.stdout.strip(),
             "freecolJarSha256": sha256(JAR),
             "resourceMappingPath": str(RESOURCE_MAPPING),

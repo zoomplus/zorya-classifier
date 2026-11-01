@@ -52,6 +52,71 @@ class RunDirectoryTests(unittest.TestCase):
             self.assertEqual(run_result.returncode, 0, run_result.stdout.decode("utf-8", errors="replace"))
             self.assertIn(b"capture-ui-gate-fixtures: 7 passed", run_result.stdout)
 
+    def test_nation_selection_gate_waits_for_attempt_and_matching_player_confirmation(self):
+        source_dir = Path(__file__).with_name("src") / "zorya" / "mapprobe"
+        sources = [source_dir / "FreeColProbe.java", source_dir / "FreeColNationSelectionFixture.java"]
+        with tempfile.TemporaryDirectory(prefix="freecol-nation-gate-test-") as temporary:
+            build = Path(temporary) / "classes"
+            build.mkdir()
+            compile_result = subprocess.run(
+                [str(JAVA), "-m", JAVAC_MODULE, "-classpath", str(JAR), "-d", str(build), *(str(path) for path in sources)],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                timeout=60,
+                check=False,
+            )
+            self.assertEqual(compile_result.returncode, 0, compile_result.stdout.decode("utf-8", errors="replace"))
+            run_result = subprocess.run(
+                [str(JAVA), "-classpath", f"{build}:{JAR}", "zorya.mapprobe.FreeColNationSelectionFixture"],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                timeout=20,
+                check=False,
+            )
+            self.assertEqual(run_result.returncode, 0, run_result.stdout.decode("utf-8", errors="replace"))
+            self.assertIn(b"nation-selection-fixtures: 17 passed", run_result.stdout)
+
+    def test_optional_nation_selection_ids_are_paired_and_safe(self):
+        probe.validate_nation_selection(None, None)
+        probe.validate_nation_selection("model.nation.english", "model.nationType.immigration")
+        for nation_id, nation_type_id in (
+            ("model.nation.english", None),
+            (None, "model.nationType.default"),
+            ("model.nation.english, --save", "model.nationType.default"),
+            ("../nation", "model.nationType.default"),
+            ("model.nation.english", "model.nationType.default --save"),
+        ):
+            with self.subTest(nation_id=nation_id, nation_type_id=nation_type_id), self.assertRaises(ValueError):
+                probe.validate_nation_selection(nation_id, nation_type_id)
+        with self.assertRaises(ValueError):
+            probe.validate_nation_selection("model.nation.english", "model.nationType.immigration", capture_requested=True)
+
+    def test_agent_argument_builder_preserves_legacy_forms_and_actual_selection_order(self):
+        output = Path("/tmp/live-state.json")
+        save = Path("/tmp/official-state.fsg")
+        capture = ("/tmp/screen.png", "/tmp/sprite.png", "unit:1", "-", "a" * 64)
+        nation = "model.nation.english"
+        nation_type = "model.nationType.immigration"
+        self.assertEqual(len(probe.build_agent_arguments(output, 1000, None, None, None, None).split(",")), 2)
+        self.assertEqual(len(probe.build_agent_arguments(output, 1000, save, None, None, None).split(",")), 3)
+        self.assertEqual(len(probe.build_agent_arguments(output, 1000, None, capture, None, None).split(",")), 7)
+        self.assertEqual(len(probe.build_agent_arguments(output, 1000, save, capture, None, None).split(",")), 8)
+        selection_only = probe.build_agent_arguments(output, 1000, None, None, nation, nation_type).split(",")
+        self.assertEqual(selection_only[2:], [nation, nation_type])
+        selected_save = probe.build_agent_arguments(output, 1000, save, None, nation, nation_type).split(",")
+        self.assertEqual(selected_save[2:], [str(save), nation, nation_type])
+        with self.assertRaises(ValueError):
+            probe.build_agent_arguments(output, 1000, save, capture, nation, nation_type)
+
+    def test_evidence_root_is_an_exact_two_path_allowlist_with_legacy_default(self):
+        self.assertEqual(probe.EXPECTED_ROOT, Path("/root/.codex/artifacts/zorya-classifier-mcp-20261031/fresh-map"))
+        self.assertEqual(probe.ALLOWED_EVIDENCE_ROOTS, (
+            Path("/root/.codex/artifacts/zorya-classifier-mcp-20261031/fresh-map"),
+            Path("/root/.codex/artifacts/zorya-classifier-mcp-20261101/freecol-caravel"),
+        ))
+
     def test_official_save_inventory_counts_only_complete_dynamic_units(self):
         with tempfile.TemporaryDirectory(prefix="freecol-savegame-test-") as temporary:
             path = Path(temporary) / "state.fsg"
@@ -86,7 +151,7 @@ class RunDirectoryTests(unittest.TestCase):
             run_dir.mkdir()
             snapshot, receipt = probe.snapshot_source_closure(source, run_dir)
             self.assertTrue(receipt["capturedBeforeCompile"])
-            self.assertEqual(len(receipt["files"]), 8)
+            self.assertEqual(len(receipt["files"]), 9)
             self.assertEqual(receipt["closureSha256"], hashlib.sha256(
                 "".join(f"{entry['path']}\0{entry['sha256']}\n" for entry in receipt["files"]).encode("utf-8")
             ).hexdigest())

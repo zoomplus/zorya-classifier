@@ -62,6 +62,10 @@ static int capture_requested = 0;
 static int capture_finished = 0;
 static int target_draw_seen = 0;
 static char capture_control_path[4096];
+static char native_frame_path[4096];
+static SDL_Renderer *native_capture_renderer = NULL;
+static int native_capture_requested = 0;
+static int native_capture_written = 0;
 static char capture_target_rgba_sha256[65] = "a6d5aa264a64eca2fa54cd2e06278d7e96472ece796fda95148a9baeba0900f5";
 static void *crypto_handle = NULL;
 static EVPDigestFn evp_digest = NULL;
@@ -77,6 +81,12 @@ static void init_trace(void) {
     const char *path = getenv("ZORYA_LINCITY_TRACE_JSONL");
     const char *control = getenv("ZORYA_LINCITY_CAPTURE_CONTROL");
     const char *target = getenv("ZORYA_LINCITY_TARGET_RGBA_SHA256");
+    const char *native_path = getenv("ZORYA_LINCITY_NATIVE_FRAME_RGBA_PATH");
+    const char *native_enabled = getenv("ZORYA_LINCITY_CAPTURE_NATIVE_FRAME");
+    if (native_enabled && strcmp(native_enabled, "1") == 0) native_capture_requested = 1;
+    if (native_path && *native_path && strlen(native_path) < sizeof(native_frame_path)) {
+        memcpy(native_frame_path, native_path, strlen(native_path) + 1);
+    }
     if (control && *control && strlen(control) < sizeof(capture_control_path)) {
         memcpy(capture_control_path, control, strlen(control) + 1);
     }
@@ -355,8 +365,96 @@ void SDL_RenderPresent(SDL_Renderer *renderer) {
     ensure_trace();
     static void (*real_fn)(SDL_Renderer *) = NULL;
     if (!real_fn) real_fn = dlsym(RTLD_NEXT, "SDL_RenderPresent");
-    if (real_fn) real_fn(renderer);
     RendererEntry *entry = find_renderer(renderer);
+    if (recording_enabled && native_capture_requested && !native_capture_written &&
+        renderer == native_capture_renderer) {
+        int width = 0, height = 0;
+        Uint32 format = SDL_PIXELFORMAT_RGBA32;
+        size_t expected_bytes = 0;
+        int read_result = -1;
+        int fd = -1;
+        int saved_errno = 0;
+        unsigned char *pixels = NULL;
+        unsigned int digest_len = 0;
+        unsigned char digest[EVP_MAX_MD_SIZE];
+        char digest_hex[65] = "";
+        char failure[96] = "";
+        SDL_Texture *render_target = SDL_GetRenderTarget(renderer);
+        (void)SDL_GetRendererOutputSize(renderer, &width, &height);
+        if (!entry || entry->surface != NULL) {
+            snprintf(failure, sizeof(failure), "renderer-is-not-main-window-renderer");
+        } else if (render_target != NULL) {
+            snprintf(failure, sizeof(failure), "renderer-has-offscreen-target");
+        } else if (width != 800 || height != 600) {
+            snprintf(failure, sizeof(failure), "renderer-dimensions-mismatch");
+        } else if (width <= 0 || height <= 0 || (size_t)width > SIZE_MAX / (size_t)height / 4u) {
+            snprintf(failure, sizeof(failure), "invalid-renderer-dimensions");
+        } else {
+            expected_bytes = (size_t)width * (size_t)height * 4u;
+            if (expected_bytes != 1920000u) {
+                snprintf(failure, sizeof(failure), "frame-byte-limit-mismatch");
+            } else if (!native_frame_path[0]) {
+                snprintf(failure, sizeof(failure), "capture-path-missing");
+            } else {
+                pixels = malloc(expected_bytes);
+                if (!pixels) {
+                    snprintf(failure, sizeof(failure), "capture-allocation-failed");
+                } else {
+                    read_result = SDL_RenderReadPixels(renderer, NULL, format, pixels, width * 4);
+                    if (read_result != 0) {
+                        snprintf(failure, sizeof(failure), "SDL_RenderReadPixels-failed");
+                    } else if (!crypto_handle || !evp_digest || !evp_sha256 ||
+                               evp_digest(pixels, expected_bytes, digest, &digest_len, evp_sha256(), NULL) != 1 || digest_len != 32) {
+                        snprintf(failure, sizeof(failure), "sha256-unavailable-or-failed");
+                    } else {
+                        for (unsigned int i = 0; i < digest_len; i++) snprintf(digest_hex + i * 2, 3, "%02x", digest[i]);
+                        fd = open(native_frame_path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0600);
+                        if (fd < 0) {
+                            saved_errno = errno;
+                            snprintf(failure, sizeof(failure), "capture-file-open-failed");
+                        } else {
+                            size_t written = 0;
+                            while (written < expected_bytes) {
+                                ssize_t amount = write(fd, pixels + written, expected_bytes - written);
+                                if (amount < 0 && errno == EINTR) continue;
+                                if (amount <= 0) { saved_errno = errno; break; }
+                                written += (size_t)amount;
+                            }
+                            if (written != expected_bytes || fsync(fd) != 0) {
+                                if (!saved_errno) saved_errno = errno;
+                                snprintf(failure, sizeof(failure), "capture-file-write-failed");
+                            } else {
+                                native_capture_written = 1;
+                            }
+                            if (close(fd) != 0 && native_capture_written) {
+                                saved_errno = errno;
+                                native_capture_written = 0;
+                                snprintf(failure, sizeof(failure), "capture-file-close-failed");
+                            }
+                            fd = -1;
+                        }
+                    }
+                }
+            }
+        }
+        if (fd >= 0) close(fd);
+        char capture_line[1024];
+        char target_surface_value[32];
+        char renderer_surface_value[32];
+        if (render_target) snprintf(target_surface_value, sizeof(target_surface_value), "\"%p\"", (void *)render_target);
+        else snprintf(target_surface_value, sizeof(target_surface_value), "null");
+        if (entry && entry->surface) snprintf(renderer_surface_value, sizeof(renderer_surface_value), "\"%p\"", (void *)entry->surface);
+        else snprintf(renderer_surface_value, sizeof(renderer_surface_value), "null");
+        snprintf(capture_line, sizeof(capture_line),
+            "{\"type\":\"native_frame_capture\",\"seq\":%u,\"renderer\":\"%p\",\"targetSurface\":%s,\"rendererSurface\":%s,\"frame\":%u,\"width\":%d,\"height\":%d,\"format\":\"SDL_PIXELFORMAT_RGBA32\",\"targetRgbaSha256\":\"%s\",\"byteCount\":%zu,\"sha256\":\"%s\",\"readResult\":%d,\"status\":\"%s\",\"failure\":\"%s\",\"errno\":%d}",
+            next_sequence(), (void *)renderer, target_surface_value, renderer_surface_value, entry ? entry->present_count : 0, width, height, capture_target_rgba_sha256,
+            native_capture_written ? expected_bytes : 0u, digest_hex, read_result,
+            native_capture_written ? "captured" : "failed", failure, saved_errno);
+        emit(capture_line);
+        native_capture_requested = 0;
+        if (pixels) { memset(pixels, 0, expected_bytes); free(pixels); }
+    }
+    if (real_fn) real_fn(renderer);
     if (entry) entry->present_count++;
     if (!recording_enabled && !capture_finished && capture_control_path[0] != '\0') {
         struct stat control_stat;
@@ -370,6 +468,7 @@ void SDL_RenderPresent(SDL_Renderer *renderer) {
         target_draw_seen = 0;
         int width = 0, height = 0;
         (void)SDL_GetRendererOutputSize(renderer, &width, &height);
+        native_capture_renderer = renderer;
         char start_line[640];
         snprintf(start_line, sizeof(start_line),
             "{\"type\":\"capture_start\",\"seq\":%u,\"renderer\":\"%p\",\"width\":%d,\"height\":%d,\"frame\":%u,\"readiness\":\"pinned-target-resource-draw\",\"targetRgbaSha256\":\"%s\"}",
