@@ -357,7 +357,7 @@ function scorePredictionMask(
   return { iou: binaryMaskIoU(predictedPixels, referencePixels).iou, missReason: null }
 }
 
-function assertReferenceBoxesWithinCanvas(
+export function assertReferenceBoxesWithinCanvas(
   truth: EvaluatorPrivateAnnotationBundle['cases'][number],
   canvasWidth: number,
   canvasHeight: number,
@@ -380,7 +380,7 @@ function assertReferenceBoxesWithinCanvas(
   }
 }
 
-function assertReferenceMaskDeclaration(
+export function assertReferenceMaskDeclaration(
   truth: EvaluatorPrivateAnnotationBundle['cases'][number],
   canvasWidth: number,
   canvasHeight: number,

@@ -15,6 +15,7 @@
       "benchmarks/v03/h8a-fresh-comparison/h8a-fresh-paired-runner.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/h8a-fresh-schemas.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/case-artifact-store.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/dev-freeze-cli.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/dev-screen-sampling.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/dev-screen-runner.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/runtime-ports.test.ts",
