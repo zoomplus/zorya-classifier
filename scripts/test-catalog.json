@@ -5,6 +5,7 @@
       "benchmarks/v03/evaluate-h10-clipseg.test.ts",
       "benchmarks/v03/evaluate-h11-sa2va.test.ts",
       "benchmarks/v03/evaluate-h8-ordinary-vision.test.ts",
+      "benchmarks/v03/h8a-cpu/tiled-proposal-probe.test.ts",
       "benchmarks/v03/h8a-full/h8a-full-portable.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/h8a-fresh-bootstrap.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/h8a-fresh-cancellation.test.ts",
