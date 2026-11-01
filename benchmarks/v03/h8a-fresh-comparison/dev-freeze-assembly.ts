@@ -49,6 +49,7 @@ import {
   UI_STATE_DEV40_ORDER_PROTOCOL_SHA256,
   UI_STATE_DEV40_MAP_ROSTER_SHA256,
   UI_STATE_DEV40_STUDY_ID,
+  UI_STATE_DEV40_ROOT,
   UI_STATE_DEV40_WORDING_SHA256,
   UI_STATE_DEV40_CAPTURE_VIEW_SHA256,
   UI_STATE_DEV40_PRECAPTURE_STABILITY_SHA256,
@@ -1066,17 +1067,13 @@ async function validateIndependentPriceProof(
     const relativePath = relative(resolve(artifactRoot), catalogPath)
     const expectedFilename =
       index === 0 ? 'gpt-6-luna-endpoints.json' : 'gpt-6-luna-decisions-endpoints.json'
+    const expectedCatalogPath = resolve(UI_STATE_DEV40_ROOT, 'main', expectedFilename)
+    const expectedRelativePath = relative(resolve(artifactRoot), expectedCatalogPath)
     if (
       isAbsolute(relativePath) ||
       relativePath === '..' ||
       relativePath.startsWith(`..${sep}`) ||
-      relativePath !==
-        join(
-          'zorya-classifier-mcp-20261101',
-          'original-h8a-independent-dev40-v2',
-          'main',
-          expectedFilename,
-        )
+      relativePath !== expectedRelativePath
     )
       throw new RangeError('Successor public-cost catalog path differs from its pinned study input')
     return { ...entry, rawCatalog: { path: relativePath, sha256: entry.rawCatalog.sha256 } }
