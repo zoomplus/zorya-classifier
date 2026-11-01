@@ -4,7 +4,12 @@ import type { DecisionPort, RasterPort } from '../../../src/entities/contracts.j
 import type { createSharpH6Presentation } from '../h6-context-composer.js'
 import type { H6DecisionBudgetRecordPort } from '../h6-context-composer.js'
 import type { H8aFullSuccess } from './contracts.js'
-import { H8A_FULL_CASE_DEADLINE_MS, H8A_FULL_MAX_NATIVE_WAITING } from './constants.js'
+import {
+  H8A_FULL_CASE_DEADLINE_MS,
+  H8A_FULL_MAX_NATIVE_WAITING,
+  H8A_FULL_RECIPE_ID,
+  type H8aFullRecipeId,
+} from './constants.js'
 import {
   captureH8aFullRun,
   ownH8aFullRunSnapshot,
@@ -31,6 +36,7 @@ interface H8aFullRuntimeFactoryConfig {
   assetRoot: string
   artifactRoot: string
   workerScriptPath?: string
+  recipeId?: H8aFullRecipeId
 }
 
 interface H8aFullRuntime {
@@ -57,11 +63,13 @@ export function createH8aFullRuntime(config: H8aFullRuntimeFactoryConfig): H8aFu
   if (!config.pythonExecutable || !config.assetRoot || !config.artifactRoot)
     throw new ClassifierError('INVALID_INPUT', 'H8a runtime factory requires explicit paths')
   const artifactRoot = config.artifactRoot
+  const recipeId = config.recipeId ?? H8A_FULL_RECIPE_ID
   const nativeOptions: H8aFullNativePortOptions = {
     pythonExecutable: config.pythonExecutable,
     assetRoot: config.assetRoot,
     artifactRoot,
     workerScriptPath: config.workerScriptPath ?? defaultWorkerScriptPath(),
+    recipeId,
   }
   const native = new H8aFullNativePort(nativeOptions)
   const waiting: FullRunJob[] = []

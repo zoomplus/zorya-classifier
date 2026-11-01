@@ -1,4 +1,6 @@
 export const H8A_FULL_RECIPE_ID = 'h8a-cpu-raw-target-v1' as const
+export const H8A_FULL_RECIPE_IDS = [H8A_FULL_RECIPE_ID, 'h8a-cpu-flat-target-v2'] as const
+export type H8aFullRecipeId = (typeof H8A_FULL_RECIPE_IDS)[number]
 export const H8A_FULL_NATIVE_REQUEST_SCHEMA = 'h8a-full-native-request-v1' as const
 export const H8A_FULL_NATIVE_RESPONSE_SCHEMA = 'h8a-full-native-response-v1' as const
 export const H8A_FULL_CASE_DEADLINE_MS = 240_000 as const

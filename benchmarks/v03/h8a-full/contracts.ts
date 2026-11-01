@@ -5,10 +5,11 @@ import {
   H8A_FULL_MAX_ORIENTED_PIXELS,
   H8A_FULL_NATIVE_REQUEST_SCHEMA,
   H8A_FULL_NATIVE_RESPONSE_SCHEMA,
-  H8A_FULL_RECIPE_ID,
+  H8A_FULL_RECIPE_IDS,
 } from './constants.js'
 
 const digestSchema = z.string().regex(/^[a-f0-9]{64}$/u)
+const recipeIdSchema = z.enum(H8A_FULL_RECIPE_IDS)
 
 const h8aPackedMaskSchema = z
   .object({
@@ -37,7 +38,7 @@ const h8aNativeRequestSchema = z
   .object({
     schema: z.literal(H8A_FULL_NATIVE_REQUEST_SCHEMA),
     request_id: z.string().uuid(),
-    recipe_id: z.literal(H8A_FULL_RECIPE_ID),
+    recipe_id: recipeIdSchema,
     authored_target: h8aAuthoredTargetSchema,
     task_dir: z.string().min(1),
     assets_dir: z.string().min(1),
@@ -90,7 +91,7 @@ const h8aNativeResponseSchema = z.discriminatedUnion('status', [
       schema: z.literal(H8A_FULL_NATIVE_RESPONSE_SCHEMA),
       status: z.literal('complete'),
       request_id: z.string().uuid(),
-      recipe_id: z.literal(H8A_FULL_RECIPE_ID),
+      recipe_id: recipeIdSchema,
       source_sha256: digestSchema,
       width: z.number().int().positive().safe(),
       height: z.number().int().positive().safe(),
@@ -110,7 +111,7 @@ const h8aNativeResponseSchema = z.discriminatedUnion('status', [
       schema: z.literal(H8A_FULL_NATIVE_RESPONSE_SCHEMA),
       status: z.literal('error'),
       request_id: z.string().uuid(),
-      recipe_id: z.literal(H8A_FULL_RECIPE_ID),
+      recipe_id: recipeIdSchema,
       source_sha256: digestSchema,
       error: z.string(),
       error_type: z.string().optional(),
@@ -130,6 +131,7 @@ export const h8aNativeStdoutTrailerSchema = z
 const h8aLocatedResultObjectSchema = z
   .object({
     status: z.literal('located'),
+    recipeId: z.literal('h8a-cpu-flat-target-v2').optional(),
     family: z.enum(['D', 'U']),
     alias: z.string().min(1),
     sourceAlias: z.string().min(1),
@@ -253,6 +255,7 @@ function refineLocatedResult(
 const h8aUnknownResultSchema = z
   .object({
     status: z.literal('unknown'),
+    recipeId: z.literal('h8a-cpu-flat-target-v2').optional(),
     reason: z.string().min(1),
   })
   .strict()

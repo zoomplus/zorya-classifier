@@ -45,6 +45,7 @@ def generate_proposals(request_path: Path) -> int:
     started = time.monotonic()
     asset_session = common.VerifiedAssetSession()
     try:
+        common.load_pinned_recipe(payload["recipe_id"])
         grounded, omni_mod, h4e = common.load_pinned_helpers_for_generation()
         import numpy as np
         import torch
@@ -92,7 +93,8 @@ def generate_proposals(request_path: Path) -> int:
         ).to(device).eval()
 
         detector_prompt = payload["detector_prompt"]
-        inputs = dino_processor(images=image, text=[[detector_prompt]], return_tensors="pt").to(device)
+        processor_text = common.build_processor_text(payload["recipe_id"], detector_prompt)
+        inputs = dino_processor(images=image, text=processor_text, return_tensors="pt").to(device)
         with torch.inference_mode():
             raw_outputs = dino_model(**inputs)
         detections = dino_processor.post_process_grounded_object_detection(

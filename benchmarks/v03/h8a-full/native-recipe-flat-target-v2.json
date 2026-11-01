@@ -1,0 +1,48 @@
+{
+  "schema": "h8a-full-native-recipe-v1",
+  "recipe_id": "h8a-cpu-flat-target-v2",
+  "hypothesis_freeze_sha256": "62a713b6c4ad82fec4e595567632378ae75321375fd7cc7a9f29552564fb7c4f",
+  "backend": "CPU",
+  "dtype": "float32",
+  "pinned_helpers": [
+    {
+      "path": "benchmarks/v03/grounded-proposals-probe.py",
+      "sha256": "7695cb42cd6e4e583f6cb5bab08d93d40c18d08c188651948b4fed0b43fdc8b5"
+    },
+    {
+      "path": "benchmarks/v03/ui-proposal-probe.py",
+      "sha256": "fd1cc46823913e143219dcb4e2faf28393f21324b146e14d9feebbb6d58d217d"
+    },
+    {
+      "path": "benchmarks/v03/h4e-sam2-context-prompt.py",
+      "sha256": "4b74661b0fe156c4f1da46a24fc25e313150ac9d0f83076a1eae441425fb3582"
+    }
+  ],
+  "h6_composer_reference_sha256": "0297fa69e4ef4b8fc395415d347097343397ad4e468b9269c441668cd46c471c",
+  "runtime_packages": {
+    "python": "3.12.3",
+    "torch": "2.6.0+cu124",
+    "torchvision": "0.21.0+cu124",
+    "transformers": "4.57.3",
+    "pillow": "12.3.0"
+  },
+  "limits": {
+    "absolute_deadline_ms": 240000,
+    "family_candidates": 36,
+    "total_candidates": 72,
+    "source_pixels": 2097152,
+    "source_encoded_bytes": 25165824,
+    "aggregate_packed_mask_bytes": 19922944,
+    "stdout_bytes": 1048576,
+    "stderr_bytes": 8388608,
+    "parent_rss_bytes": 17179869184,
+    "decision_calls": 4,
+    "native_parallelism_per_factory": 1,
+    "native_waiting_queue_per_factory": 2
+  },
+  "target_policy": {
+    "dino_prefix": "a ",
+    "verbatim_authored_target": true,
+    "processor_text": "stripped-lower-terminal-period"
+  }
+}

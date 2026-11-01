@@ -5,7 +5,11 @@ import type { DecisionPort, RasterPort } from '../../../src/entities/contracts.j
 import { ClassifierError, assertActive } from '../../../src/entities/errors.js'
 import { createH6ContextComposer, createSharpH6Presentation } from '../h6-context-composer.js'
 import type { H6DecisionBudgetRecordPort } from '../h6-context-composer.js'
-import { H8A_FULL_CASE_DEADLINE_MS, H8A_FULL_MAX_ENCODED_BYTES } from './constants.js'
+import {
+  H8A_FULL_CASE_DEADLINE_MS,
+  H8A_FULL_MAX_ENCODED_BYTES,
+  H8A_FULL_RECIPE_ID,
+} from './constants.js'
 import { h8aExclusionsSchema, h8aAuthoredTargetSchema, h8aFullSuccessSchema } from './contracts.js'
 import {
   copyEncodedImageBytes,
@@ -249,6 +253,8 @@ export async function runH8aFullPipelineSnapshot(
       compositionMask?.data.fill(0)
       compositionMask = undefined
     }
+    if (nativeResult.recipeId !== H8A_FULL_RECIPE_ID && result)
+      result = { ...result, recipeId: nativeResult.recipeId }
     result = h8aFullSuccessSchema.parse(result)
   } catch (error) {
     failure = normalizePipelineError(error)

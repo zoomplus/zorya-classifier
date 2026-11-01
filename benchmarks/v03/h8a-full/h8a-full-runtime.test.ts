@@ -217,6 +217,66 @@ await test('fake native worker completes and filters empty masks without renumbe
   await rm(sourcePath, { force: true })
 })
 
+await test('native port carries an explicit v2 recipe identity through the worker reply', async () => {
+  const artifactRoot = await mkdtemp(join(tmpdir(), 'h8af-artifacts-v2-'))
+  const sourcePath = join(tmpdir(), 'h8af-v2-source.png')
+  const port = new H8aFullNativePort({
+    pythonExecutable,
+    assetRoot: join(tmpdir(), 'h8af-assets-unused'),
+    artifactRoot,
+    workerScriptPath: fakeWorkerScriptPath(),
+    recipeId: 'h8a-cpu-flat-target-v2',
+  })
+  try {
+    const result = await port.generate({
+      authoredTarget: 'toolbar button for Search for Files...',
+      sourcePath,
+      sourceSha256: 'a'.repeat(64),
+      width: 64,
+      height: 48,
+      deadlineAt: performance.now() + 20_000,
+      signal: new AbortController().signal,
+    })
+    assert.equal(result.recipeId, 'h8a-cpu-flat-target-v2')
+    assert.equal(result.detectorPrompt, 'a toolbar button for Search for Files...')
+  } finally {
+    await port.dispose()
+    await rm(artifactRoot, { recursive: true, force: true })
+  }
+})
+
+await test('native port rejects a worker reply carrying the other recipe identity', async () => {
+  const artifactRoot = await mkdtemp(join(tmpdir(), 'h8af-artifacts-v2-mismatch-'))
+  const priorMode = process.env.H8A_FAKE_WORKER_MODE
+  process.env.H8A_FAKE_WORKER_MODE = 'wrong_recipe_identity'
+  const port = new H8aFullNativePort({
+    pythonExecutable,
+    assetRoot: join(tmpdir(), 'h8af-assets-unused'),
+    artifactRoot,
+    workerScriptPath: fakeWorkerScriptPath(),
+    recipeId: 'h8a-cpu-flat-target-v2',
+  })
+  try {
+    await assert.rejects(
+      port.generate({
+        authoredTarget: 'toolbar button for Search for Files...',
+        sourcePath: join(tmpdir(), 'h8af-v2-source.png'),
+        sourceSha256: 'b'.repeat(64),
+        width: 64,
+        height: 48,
+        deadlineAt: performance.now() + 20_000,
+        signal: new AbortController().signal,
+      }),
+      /native response recipe_id mismatch/u,
+    )
+  } finally {
+    await port.dispose()
+    await rm(artifactRoot, { recursive: true, force: true })
+    if (priorMode === undefined) delete process.env.H8A_FAKE_WORKER_MODE
+    else process.env.H8A_FAKE_WORKER_MODE = priorMode
+  }
+})
+
 await test('full runtime locates with fake native worker and respects four decision calls', async () => {
   const { createH8aFullRuntime } = await import('./factory.js')
   const artifactRoot = await mkdtemp(join(tmpdir(), 'h8af-artifacts-'))
@@ -225,6 +285,7 @@ await test('full runtime locates with fake native worker and respects four decis
     assetRoot: join(tmpdir(), 'h8af-assets-unused'),
     artifactRoot,
     workerScriptPath: fakeWorkerScriptPath(),
+    recipeId: 'h8a-cpu-flat-target-v2',
   })
   const stages: string[] = []
   const rawWidth = 96
@@ -398,6 +459,7 @@ await test('full runtime locates with fake native worker and respects four decis
       assert.fail(`${message}; presentation counts: ${presentationCounts.join(',')}`)
     }
     assert.equal(result.status, 'located')
+    assert.equal(result.recipeId, 'h8a-cpu-flat-target-v2')
     assert.equal(stages.length, 4)
     if (result.status !== 'located') assert.fail('full runtime should locate fixture mask')
     assert.ok(result.cutout)
@@ -490,6 +552,7 @@ await test('semantic unknown from composer differs from native failure', async (
   const native = {
     async generate() {
       return {
+        recipeId: 'h8a-cpu-flat-target-v2' as const,
         families: { D: [], U: [] },
         detectorPrompt: 'a fixture',
       }
@@ -511,6 +574,7 @@ await test('semantic unknown from composer differs from native failure', async (
       },
     )
     assert.equal(result.status, 'unknown')
+    assert.equal(result.recipeId, 'h8a-cpu-flat-target-v2')
     assert.ok(result.reason === 'target-absent' || result.reason === 'no-nominees')
     await assert.rejects(
       runH8aFullPipeline(

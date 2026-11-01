@@ -13,6 +13,18 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+RECIPE_IDS = {
+    "h8a-cpu-raw-target-v1": (
+        "benchmarks/v03/h8a-full/native-recipe.json",
+        "2490bef2738cc50b7a9731e47d5774dd4a2387887c35359939cf9757c58ffa4b",
+        "verbatim",
+    ),
+    "h8a-cpu-flat-target-v2": (
+        "benchmarks/v03/h8a-full/native-recipe-flat-target-v2.json",
+        "a3d333cf34959a833f528ca098b239d819a29e626156adf00e429b0f172ee5f6",
+        "flat",
+    ),
+}
 RECIPE_ID = "h8a-cpu-raw-target-v1"
 HYPOTHESIS_FREEZE_SHA256 = "62a713b6c4ad82fec4e595567632378ae75321375fd7cc7a9f29552564fb7c4f"
 
@@ -210,7 +222,7 @@ def validate_native_request(raw: Any) -> dict[str, Any]:
         raise WorkerError("native request schema mismatch")
     request_id = validate_request_id(payload.get("request_id"))
     recipe_id = require_string_field(payload.get("recipe_id"), "recipe_id")
-    if recipe_id != RECIPE_ID:
+    if recipe_id not in RECIPE_IDS:
         raise WorkerError("recipe_id mismatch")
     authored_target = validate_authored_target(payload.get("authored_target"))
     task_dir = require_external_path(
@@ -242,6 +254,57 @@ def validate_native_request(raw: Any) -> dict[str, Any]:
         "height": height,
         "detector_prompt": expected_detector_prompt,
     }
+
+
+def load_pinned_recipe(recipe_id: str) -> dict[str, Any]:
+    recipe = RECIPE_IDS.get(recipe_id)
+    if recipe is None:
+        raise WorkerError("recipe_id mismatch")
+    relative_path, expected_sha256, processor_text = recipe
+    path = _pinned_module_leaf(relative_path)
+    if path.is_symlink():
+        raise WorkerError(f"refusing symlink recipe path: {path}")
+    try:
+        fd = os.open(path, O_RDONLY_NOFOLLOW)
+    except OSError as error:
+        raise WorkerError(f"cannot open pinned recipe: {path}") from error
+    try:
+        chunks: list[bytes] = []
+        digest = hashlib.sha256()
+        while True:
+            piece = os.read(fd, 1024 * 1024)
+            if not piece:
+                break
+            chunks.append(piece)
+            digest.update(piece)
+    finally:
+        os.close(fd)
+    if digest.hexdigest() != expected_sha256:
+        raise WorkerError(f"pinned recipe digest mismatch: {path}")
+    try:
+        value = json.loads(b"".join(chunks))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise WorkerError(f"pinned recipe JSON invalid: {path}") from error
+    if not isinstance(value, dict) or value.get("recipe_id") != recipe_id:
+        raise WorkerError("pinned recipe identity mismatch")
+    target_policy = value.get("target_policy")
+    expected_policy: dict[str, Any] = {"dino_prefix": "a ", "verbatim_authored_target": True}
+    if processor_text == "flat":
+        expected_policy["processor_text"] = "stripped-lower-terminal-period"
+    if target_policy != expected_policy:
+        raise WorkerError("pinned recipe target policy mismatch")
+    return value
+
+
+def build_processor_text(recipe_id: str, detector_prompt: str) -> str | list[list[str]]:
+    if recipe_id not in RECIPE_IDS:
+        raise WorkerError("recipe_id mismatch")
+    if RECIPE_IDS[recipe_id][2] == "verbatim":
+        return [[detector_prompt]]
+    flat_text = detector_prompt.strip().lower()
+    if not flat_text.endswith("."):
+        flat_text += "."
+    return flat_text
 
 
 def exif_orientation_tag(image: Any) -> int:
@@ -315,4 +378,6 @@ def runtime_source_closure_digest() -> str:
     parts.append(f"{worker.relative_to(REPO_ROOT)}:{sha256_file(worker)[0]}")
     common = worker.with_name("native-common.py")
     parts.append(f"{common.relative_to(REPO_ROOT)}:{sha256_file(common)[0]}")
+    for relative_path, expected_sha256, _ in RECIPE_IDS.values():
+        parts.append(f"{relative_path}:{expected_sha256}")
     return sha256_bytes("\n".join(parts).encode("utf-8"))

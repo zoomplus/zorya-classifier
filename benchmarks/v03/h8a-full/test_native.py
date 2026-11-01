@@ -38,6 +38,37 @@ class TargetTests(unittest.TestCase):
         self.assertEqual(common.build_dino_prompt(raw), f"a {raw}")
         self.assertNotEqual(common.build_dino_prompt(raw), f"a {grounded.normalize_target(raw)}")
 
+    def test_recipe_specific_processor_text_preserves_v1_and_flattens_only_v2(self) -> None:
+        prompt = "a toolbar button for Search for Files..."
+        self.assertEqual(
+            common.build_processor_text("h8a-cpu-raw-target-v1", prompt), [[prompt]]
+        )
+        self.assertEqual(
+            common.build_processor_text("h8a-cpu-flat-target-v2", prompt),
+            "a toolbar button for search for files...",
+        )
+        self.assertEqual(
+            common.build_processor_text("h8a-cpu-flat-target-v2", "a Thing, e.g. UI"),
+            "a thing, e.g. ui.",
+        )
+        with self.assertRaises(common.WorkerError):
+            common.build_processor_text("h8a-unsupported", prompt)
+
+    def test_v1_and_v2_recipe_json_are_pinned_to_distinct_target_policies(self) -> None:
+        v1 = common.load_pinned_recipe("h8a-cpu-raw-target-v1")
+        v2 = common.load_pinned_recipe("h8a-cpu-flat-target-v2")
+        self.assertEqual(v1["target_policy"], {"dino_prefix": "a ", "verbatim_authored_target": True})
+        self.assertEqual(
+            v2["target_policy"],
+            {
+                "dino_prefix": "a ",
+                "verbatim_authored_target": True,
+                "processor_text": "stripped-lower-terminal-period",
+            },
+        )
+        with self.assertRaises(common.WorkerError):
+            common.load_pinned_recipe("h8a-unsupported")
+
 
 class HeaderValidationTests(unittest.TestCase):
     def test_header_validation_before_full_decode(self) -> None:

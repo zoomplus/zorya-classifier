@@ -13,7 +13,9 @@ import {
   H8A_FULL_MAX_PACKED_MASK_BYTES,
   H8A_FULL_NATIVE_REQUEST_SCHEMA,
   H8A_FULL_RECIPE_ID,
+  H8A_FULL_RECIPE_IDS,
   H8A_FULL_TOTAL_CANDIDATES,
+  type H8aFullRecipeId,
 } from './constants.js'
 import {
   buildDinoPrompt,
@@ -45,6 +47,7 @@ export interface H8aFullNativePortOptions {
   assetRoot: string
   artifactRoot: string
   workerScriptPath: string
+  recipeId?: H8aFullRecipeId
   cleanupTaskDirectory?: (taskDir: string) => Promise<void>
 }
 
@@ -59,11 +62,13 @@ export interface H8aNativeGenerationInput {
 }
 
 export interface H8aNativeGenerationOutput {
+  recipeId: H8aFullRecipeId
   families: Record<H6Family, readonly H6ProposalCandidate[]>
   detectorPrompt: string
 }
 
 interface JobSnapshot {
+  recipeId: H8aFullRecipeId
   authoredTarget: string
   sourcePath: string
   sourceSha256: string
@@ -91,6 +96,7 @@ export class H8aFullNativePort {
   readonly #assetRoot: string
   readonly #artifactRoot: string
   readonly #workerScriptPath: string
+  readonly #recipeId: H8aFullRecipeId
   readonly #cleanupTaskDirectory: ((taskDir: string) => Promise<void>) | undefined
   readonly #waiting: QueueJob[] = []
   readonly #physicalJobs = new Set<Promise<void>>()
@@ -109,12 +115,15 @@ export class H8aFullNativePort {
     this.#assetRoot = resolve(options.assetRoot)
     this.#artifactRoot = resolve(options.artifactRoot)
     this.#workerScriptPath = resolve(options.workerScriptPath)
+    this.#recipeId = options.recipeId ?? H8A_FULL_RECIPE_ID
+    if (!H8A_FULL_RECIPE_IDS.includes(this.#recipeId))
+      throw new ClassifierError('INVALID_INPUT', 'H8a native port recipeId is unsupported')
     this.#cleanupTaskDirectory = options.cleanupTaskDirectory
   }
 
   async generate(input: H8aNativeGenerationInput): Promise<H8aNativeGenerationOutput> {
     if (this.#disposed) throw new ClassifierError('DISPOSED', 'H8a native port is disposed')
-    const captured = captureNativePortEnqueueSnapshot(input)
+    const captured = captureNativePortEnqueueSnapshot(input, this.#recipeId)
     const snapshot = captured.snapshot
     const callerSignal = captured.callerSignal
     if (performance.now() >= snapshot.deadlineAt) throw deadlineExceeded()
@@ -314,6 +323,7 @@ export class H8aFullNativePort {
         job.abortController.signal,
       )
       output = {
+        recipeId: response.recipe_id,
         families,
         detectorPrompt: response.detector_prompt ?? buildDinoPrompt(snapshot.authoredTarget),
       }
@@ -348,7 +358,7 @@ export class H8aFullNativePort {
   ): void {
     if (response.request_id !== requestId)
       throw nativeFailure('native response request_id mismatch')
-    if (response.recipe_id !== H8A_FULL_RECIPE_ID)
+    if (response.recipe_id !== snapshot.recipeId)
       throw nativeFailure('native response recipe_id mismatch')
     if (response.source_sha256 !== snapshot.sourceSha256)
       throw nativeFailure('native response source digest mismatch request')
@@ -497,13 +507,17 @@ export class H8aFullNativePort {
   }
 }
 
-function captureNativePortEnqueueSnapshot(input: H8aNativeGenerationInput): {
+function captureNativePortEnqueueSnapshot(
+  input: H8aNativeGenerationInput,
+  recipeId: H8aFullRecipeId,
+): {
   snapshot: JobSnapshot
   callerSignal: AbortSignal
 } {
   validateNativePortEnqueueInput(input)
   return {
     snapshot: {
+      recipeId,
       authoredTarget: input.authoredTarget,
       sourcePath: input.sourcePath,
       sourceSha256: input.sourceSha256,
@@ -573,7 +587,7 @@ function buildNativeRequestPayload(
   return {
     schema: H8A_FULL_NATIVE_REQUEST_SCHEMA,
     request_id: requestId,
-    recipe_id: H8A_FULL_RECIPE_ID,
+    recipe_id: snapshot.recipeId,
     authored_target: snapshot.authoredTarget,
     task_dir: join(artifactRoot, 'h8a-full-tasks', requestId),
     assets_dir: assetRoot,

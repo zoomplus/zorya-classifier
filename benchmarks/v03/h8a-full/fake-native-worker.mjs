@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path'
 
 const NATIVE_RESPONSE_SCHEMA = 'h8a-full-native-response-v1'
 const NATIVE_REQUEST_SCHEMA = 'h8a-full-native-request-v1'
-const RECIPE_ID = 'h8a-cpu-raw-target-v1'
+const RECIPE_IDS = new Set(['h8a-cpu-raw-target-v1', 'h8a-cpu-flat-target-v2'])
 
 function sha256Bytes(data) {
   return createHash('sha256').update(data).digest('hex')
@@ -37,7 +37,7 @@ function validateRequest(raw) {
   if (raw.schema !== NATIVE_REQUEST_SCHEMA) throw new Error('schema mismatch')
   if (typeof raw.request_id !== 'string' || raw.request_id.length !== 36)
     throw new Error('request_id')
-  if (raw.recipe_id !== RECIPE_ID) throw new Error('recipe_id')
+  if (!RECIPE_IDS.has(raw.recipe_id)) throw new Error('recipe_id')
   if (typeof raw.authored_target !== 'string' || !raw.authored_target)
     throw new Error('authored_target')
   if (typeof raw.task_dir !== 'string') throw new Error('task_dir')
@@ -106,8 +106,9 @@ async function main() {
   const index = args.indexOf('--generate')
   const requestPath = args[index + 1]
   const payload = validateRequest(JSON.parse(await readFile(requestPath, 'utf8')))
-  const identity = identityFromRequest(payload)
   const mode = process.env.H8A_FAKE_WORKER_MODE ?? 'complete'
+  const identity = identityFromRequest(payload)
+  if (mode === 'wrong_recipe_identity') identity.recipe_id = 'h8a-cpu-raw-target-v1'
   const taskDir = payload.task_dir
   await mkdir(taskDir, { recursive: true })
   await appendFile(join(dirname(taskDir), 'fake-worker-launches.log'), 'launch\n', 'utf8')
@@ -165,7 +166,7 @@ async function main() {
       schema: NATIVE_RESPONSE_SCHEMA,
       status: 'error',
       request_id: randomUUID(),
-      recipe_id: RECIPE_ID,
+      recipe_id: payload.recipe_id,
       source_sha256: payload.source_sha256,
       error: 'fixture identity error',
     }
@@ -242,7 +243,7 @@ async function main() {
       schema: NATIVE_RESPONSE_SCHEMA,
       status: 'complete',
       request_id: randomUUID(),
-      recipe_id: RECIPE_ID,
+      recipe_id: payload.recipe_id,
       source_sha256: payload.source_sha256,
       width,
       height,
