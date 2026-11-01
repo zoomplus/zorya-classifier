@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { access, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { z } from 'zod'
@@ -41,6 +41,15 @@ import { PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
 import { hashIdentity } from './hash-identity.js'
 
 const hash = (value: string): string => createHash('sha256').update(value).digest('hex')
+
+test.beforeEach((context) => {
+  if ('mock' in context)
+    context.mock.timers.enable({ apis: ['Date'], now: new Date('2026-11-01T00:00:00.000Z') })
+})
+
+test.afterEach((context) => {
+  if ('mock' in context) context.mock.timers.reset()
+})
 
 async function buildOfflineCliFixture(directory: string): Promise<{
   admission: VerifiedProviderRefusalReplayAdmission
@@ -419,6 +428,31 @@ await test('mismatched protocol digest is refused before schema parsing or names
     )
     assert.deepEqual(await readFile(path, 'utf8'), '{}\n')
     assert.deepEqual(await (await import('node:fs/promises')).readdir(directory), ['protocol.json'])
+  } finally {
+    await rm(directory, { recursive: true, force: false })
+  }
+})
+
+await test('pinned absolute deadline refuses registration when the mocked clock reaches it', async (context) => {
+  const directory = await mkdtemp(join(tmpdir(), 'provider-refusal-cli-deadline-'))
+  try {
+    const fixture = await buildOfflineCliFixture(directory)
+    context.mock.timers.setTime(Date.parse(PROVIDER_REFUSAL_REPLAY_DEADLINE_ISO))
+    await assert.rejects(
+      runProviderRefusalReplayCli(
+        [
+          'register',
+          '--protocol',
+          fixture.protocolPath,
+          '--protocol-sha256',
+          fixture.protocolSha256,
+        ],
+        directory,
+        fixture.hooks,
+      ),
+      /deadline is closed/u,
+    )
+    await assert.rejects(access(fixture.namespaceRoot), /ENOENT/u)
   } finally {
     await rm(directory, { recursive: true, force: false })
   }

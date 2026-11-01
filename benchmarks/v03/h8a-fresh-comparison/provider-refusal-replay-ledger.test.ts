@@ -256,7 +256,7 @@ await test('initial ledger without registration recovers, progressed orphan stat
 })
 
 await test('ambiguous dispatch remains reserved and blocks resume; charge over bound is retained and integrity-latched', async () => {
-  await withLedger(async (ledger) => {
+  await withLedger(async (ledger, root) => {
     const ambiguous = await ledger.admitPhysical(REPLAY_CONTROL_MAX_USD, {
       profileId: PROFILE_CONTROL_ID,
       opaqueCaseId: 'case-0',
@@ -266,8 +266,17 @@ await test('ambiguous dispatch remains reserved and blocks resume; charge over b
     assert.equal(ledger.snapshot().inFlightReservations.length, 1)
     assert.equal(ledger.uncertainDispatchCount(), 1)
     assert.throws(() => ledger.assertResumeAllowed(), /unresolved/u)
+    const reopened = await ProviderRefusalReplayLedger.register({
+      root,
+      offlineTestOnly: true,
+      protocolSha256: 'a'.repeat(64),
+      caseIds: Array.from({ length: 40 }, (_, index) => `case-${index}`),
+    })
+    assert.equal(reopened.uncertainDispatchCount(), 1)
+    assert.equal(reopened.snapshot().inFlightReservations.length, 1)
+    assert.throws(() => reopened.assertResumeAllowed(), /unresolved/u)
   })
-  await withLedger(async (ledger) => {
+  await withLedger(async (ledger, root) => {
     const id = await ledger.admitPhysical(REPLAY_CONTROL_MAX_USD, {
       profileId: PROFILE_CONTROL_ID,
       opaqueCaseId: 'case-1',
@@ -277,5 +286,13 @@ await test('ambiguous dispatch remains reserved and blocks resume; charge over b
     await ledger.settle(id, 200)
     assert.ok(Math.abs(ledger.snapshot().knownCostUsd - 200.118405065) < 1e-9)
     assert.equal(ledger.snapshot().resumeBlocked, true)
+    const reopened = await ProviderRefusalReplayLedger.register({
+      root,
+      offlineTestOnly: true,
+      protocolSha256: 'a'.repeat(64),
+      caseIds: Array.from({ length: 40 }, (_, index) => `case-${index}`),
+    })
+    assert.ok(Math.abs(reopened.snapshot().knownCostUsd - 200.118405065) < 1e-9)
+    assert.equal(reopened.snapshot().resumeBlocked, true)
   })
 })

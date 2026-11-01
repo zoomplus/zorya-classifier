@@ -1,6 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import {
   providerRefusalReplayProtocolSchema,
   PROVIDER_REFUSAL_REPLAY_DEADLINE_ISO,
@@ -13,6 +16,18 @@ import {
   PROVIDER_REFUSAL_REPLAY_STUDY_ID,
   PROVIDER_REFUSAL_REPLAY_FREEZE_ID,
 } from './provider-refusal-replay-admission.js'
+import * as legacyAdmission from './provider-refusal-replay-admission.js'
+import {
+  PROVIDER_REFUSAL_REPLAY_ROOT,
+  verifyProviderRefusalReplayAdmission,
+} from './provider-refusal-replay-admission.js'
+import { verifyDevReplayAdmission } from './dev-replay-admission.js'
+import {
+  AUTHORED_SCOPE_ROOT,
+  AUTHORED_SCOPE_STUDY_ID,
+  LEGACY_REPLAY_ROOT,
+} from './dev-replay-study-policy.js'
+import { makeAuthoredScopeProtocolFixture } from './dev-replay-test-fixtures.js'
 import { PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY } from './provider-refusal-replay.js'
 import {
   UI_STATE_DEV40_RUNTIME_ENVIRONMENT_SHA256,
@@ -75,6 +90,27 @@ await test('replay protocol schema binds fixed namespace, policy and unchanged b
   assert.equal(protocol.referenceMasks.length, 16)
   assert.equal(protocol.runtimeProof.path, PROVIDER_REFUSAL_REPLAY_RUNTIME_PROOF_PATH)
   assert.equal(protocol.runtimeEnvironment.path, PROVIDER_REFUSAL_REPLAY_RUNTIME_ENVIRONMENT_PATH)
+  assert.deepEqual(Object.keys(protocol), [
+    'schema',
+    'studyId',
+    'freezeId',
+    'deadlineIso',
+    'parentAudit',
+    'sourceAudit',
+    'freeze',
+    'annotations',
+    'selection',
+    'producerClosure',
+    'runtimeProof',
+    'runtimeEnvironment',
+    'sourceBytes',
+    'referenceMasks',
+    'executionPolicy',
+    'budget',
+    'noRetryOrFallback',
+    'physicalCallsAt',
+  ])
+  assert.equal(Object.hasOwn(protocol, 'queryPolicy'), false)
   assert.throws(() =>
     providerRefusalReplayProtocolSchema.parse({
       ...protocol,
@@ -101,5 +137,123 @@ await test('replay protocol schema binds fixed namespace, policy and unchanged b
         path: '/tmp/runtime-environment.json',
       },
     }),
+  )
+  assert.throws(() =>
+    providerRefusalReplayProtocolSchema.parse({
+      ...protocol,
+      studyId: AUTHORED_SCOPE_STUDY_ID,
+    }),
+  )
+  assert.throws(() =>
+    providerRefusalReplayProtocolSchema.parse({
+      ...protocol,
+      freezeId: 'h8a-authored-scope-dev40-20261101-v1',
+    }),
+  )
+  assert.throws(() =>
+    providerRefusalReplayProtocolSchema.parse({
+      ...protocol,
+      queryPolicy: { policyId: 'strict-authored-scope-v1' },
+    }),
+  )
+})
+
+await test('legacy wrapper retains its bound exports and rejects a scope protocol before parent reads', async () => {
+  assert.equal(PROVIDER_REFUSAL_REPLAY_ROOT, LEGACY_REPLAY_ROOT)
+  assert.equal(
+    PROVIDER_REFUSAL_REPLAY_ROOT,
+    '/root/.codex/artifacts/zorya-classifier-mcp-20261101/provider-refusal-dev40-replay-v1',
+  )
+  assert.deepEqual(
+    Object.keys(legacyAdmission).sort(),
+    [
+      'PROVIDER_REFUSAL_REPLAY_DEADLINE_ISO',
+      'PROVIDER_REFUSAL_REPLAY_FREEZE_ID',
+      'PROVIDER_REFUSAL_REPLAY_INPUT_AUDIT_PATH',
+      'PROVIDER_REFUSAL_REPLAY_INPUT_AUDIT_SHA256',
+      'PROVIDER_REFUSAL_REPLAY_PARENT_AUDIT_PATH',
+      'PROVIDER_REFUSAL_REPLAY_PARENT_AUDIT_SHA256',
+      'PROVIDER_REFUSAL_REPLAY_ROOT',
+      'PROVIDER_REFUSAL_REPLAY_RUNTIME_ENVIRONMENT_PATH',
+      'PROVIDER_REFUSAL_REPLAY_RUNTIME_PROOF_PATH',
+      'PROVIDER_REFUSAL_REPLAY_STUDY_ID',
+      'providerRefusalReplayProtocolSchema',
+      'verifyProviderRefusalReplayAdmission',
+    ].sort(),
+  )
+
+  const root = await mkdtemp(join(tmpdir(), 'legacy-replay-boundary-'))
+  try {
+    const protocol = {
+      ...makeAuthoredScopeProtocolFixture(),
+      parentAudit: {
+        path: join(root, 'parent-must-not-be-read.json'),
+        sha256: hash('parent sentinel'),
+      },
+      sourceAudit: {
+        path: join(root, 'source-must-not-be-read.json'),
+        sha256: hash('source sentinel'),
+      },
+    }
+    const protocolPath = join(root, 'scope-protocol.json')
+    const protocolBytes = Buffer.from(JSON.stringify(protocol), 'utf8')
+    await writeFile(protocolPath, protocolBytes, { mode: 0o600, flag: 'wx' })
+    await assert.rejects(
+      verifyProviderRefusalReplayAdmission({
+        protocolPath,
+        protocolSha256: hash(protocolBytes.toString('utf8')),
+        repositoryRoot: process.cwd(),
+        now: () => Date.parse('2026-11-01T12:00:00.000Z'),
+      }),
+      (error: unknown) => error instanceof Error && Reflect.get(error, 'code') !== 'ENOENT',
+    )
+  } finally {
+    await rm(root, { recursive: true, force: false })
+  }
+})
+
+await test('shared admission rejects unknown selectors before file access and snapshots caller inputs', async () => {
+  await assert.rejects(
+    verifyDevReplayAdmission({
+      studyId: 'caller-selected-study-v1',
+      protocolPath: '/missing/protocol.json',
+      protocolSha256: hash('protocol'),
+      repositoryRoot: process.cwd(),
+    }),
+    /closed registry/u,
+  )
+  const options: {
+    studyId: string
+    protocolPath: string
+    protocolSha256: string
+    repositoryRoot: string
+    allowExpiredReadOnly: boolean
+  } = {
+    studyId: AUTHORED_SCOPE_STUDY_ID,
+    protocolPath: `${AUTHORED_SCOPE_ROOT}/protocol-inputs/protocol.json`,
+    protocolSha256: hash('offline-missing-protocol'),
+    repositoryRoot: process.cwd(),
+    allowExpiredReadOnly: true,
+  }
+  const pending = verifyDevReplayAdmission(options)
+  options.studyId = 'caller-selected-study-v1'
+  options.protocolPath = '/missing/changed-protocol.json'
+  options.allowExpiredReadOnly = false
+  await assert.rejects(
+    pending,
+    (error: unknown) =>
+      error instanceof Error &&
+      Reflect.get(error, 'code') === 'ENOENT' &&
+      Reflect.get(error, 'path') === `${AUTHORED_SCOPE_ROOT}/protocol-inputs/protocol.json`,
+  )
+  await assert.rejects(
+    verifyDevReplayAdmission({
+      studyId: AUTHORED_SCOPE_STUDY_ID,
+      protocolPath: `${AUTHORED_SCOPE_ROOT}/protocol-inputs/protocol.json`,
+      protocolSha256: hash('offline-missing-protocol'),
+      repositoryRoot: process.cwd(),
+      allowExpiredReadOnly: 'yes' as unknown as boolean,
+    }),
+    /must be boolean/u,
   )
 })
