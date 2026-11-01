@@ -28,7 +28,7 @@ import {
 } from './dev-replay-study-policy.js'
 import type { ReplayStudyId } from './dev-replay-study-policy.js'
 import { makeAuthoredScopeProtocolFixture } from './dev-replay-test-fixtures.js'
-import { DevReplayLedger } from './dev-replay-ledger.js'
+import { DevReplayLedger, validateAuthoredScopeReplayParentPair } from './dev-replay-ledger.js'
 import { ProviderRefusalReplayLedger } from './provider-refusal-replay-ledger.js'
 import { buildSyntheticAnnotationBundle, buildSyntheticPhaseFreeze } from './test-fixtures.js'
 import {
@@ -489,6 +489,126 @@ await test('legacy and authored-scope ledgers keep isolated inherited baselines 
   } finally {
     await rm(outer, { recursive: true, force: false })
   }
+})
+
+await test('authored-scope parent registration supplies the cap and links the cap-free state', () => {
+  const policy = replayStudyPolicy(AUTHORED_SCOPE_STUDY_ID)
+  const registrationBody = {
+    schema: 'h8a-provider-refusal-replay-registration-v1',
+    studyId: 'provider-refusal-dev40-replay-v1',
+    freezeId: 'h8a-provider-refusal-dev40-replay-20261101-v1',
+    protocolSha256: 'a'.repeat(64),
+    parentAuditSha256: '5e7f8db8bbdd59c39d04bd78536fead6dd269568f5816872e0cbfef48e18736a',
+    parentLedgerSha256: 'b3c2348e09d8459ebc8b6935b03753c6b1082ce1f0f6584656bd8f39c4ca727b',
+    parentLedgerVersion: 556,
+    canonicalRoot: join(LEGACY_REPLAY_ROOT, 'admission', 'successor-campaign'),
+    caseIds: Array.from({ length: 40 }, (_, index) => `opaque-${index}`),
+    maxPhysicalCalls: 2_000,
+    dev40MaxPhysicalCalls: 400,
+    dev40MaxIncrementalUsd: 116.8,
+    candidateMaxUsdPerDispatch: 0.55,
+    controlMaxUsdPerDispatch: 0.12,
+    ownerDollarCeilingUsd: null,
+    retries: 0,
+  }
+  const registration = {
+    ...registrationBody,
+    registrationSha256: replaySha256(JSON.stringify(registrationBody)),
+  }
+  const state = {
+    schema: 'h8a-provider-refusal-replay-ledger-v1',
+    ledgerVersion: 161,
+    registrationSha256: registration.registrationSha256,
+    nextReservationId: 240,
+    nextPhysicalId: 240,
+    physicalDispatchCount: 239,
+    uncertainPhysicalDispatchCount: 0,
+    logicalAttemptCount: 75,
+    knownCostUsd: 0.14494101499999998,
+    unknownReserveUsd: 0.24,
+    inFlightReservations: [],
+    resumeBlocked: false,
+    crashRecoveryLatched: false,
+    integrityBlocked: false,
+  }
+  assert.equal(Object.hasOwn(state, 'maxPhysicalCalls'), false)
+  assert.deepEqual(
+    validateAuthoredScopeReplayParentPair(state, registration, AUTHORED_SCOPE_STUDY_ID),
+    {
+      ledgerVersion: 161,
+      physicalDispatchCount: 239,
+      logicalAttemptCount: 75,
+      knownCostUsd: 0.14494101499999998,
+      unknownReserveUsd: 0.24,
+      maxPhysicalCalls: 2_000,
+      nextPhysicalId: 240,
+      nextReservationId: 240,
+    },
+  )
+  assert.throws(
+    () => validateAuthoredScopeReplayParentPair(state, undefined, AUTHORED_SCOPE_STUDY_ID),
+    /invalid_type/u,
+  )
+  assert.throws(
+    () =>
+      validateAuthoredScopeReplayParentPair(
+        { ...state, registrationSha256: 'c'.repeat(64) },
+        registration,
+        AUTHORED_SCOPE_STUDY_ID,
+      ),
+    /do not match/u,
+  )
+  assert.throws(
+    () =>
+      validateAuthoredScopeReplayParentPair(
+        { ...state, maxPhysicalCalls: 2_000 },
+        registration,
+        AUTHORED_SCOPE_STUDY_ID,
+      ),
+    /do not match/u,
+  )
+  assert.throws(
+    () =>
+      validateAuthoredScopeReplayParentPair(
+        { ...state, physicalDispatchCount: 238 },
+        registration,
+        AUTHORED_SCOPE_STUDY_ID,
+      ),
+    /baseline differs/u,
+  )
+  const brokenRegistration = { ...registration, registrationSha256: 'e'.repeat(64) }
+  assert.throws(
+    () =>
+      validateAuthoredScopeReplayParentPair(
+        { ...state, registrationSha256: 'e'.repeat(64) },
+        brokenRegistration,
+        AUTHORED_SCOPE_STUDY_ID,
+      ),
+    /do not match/u,
+  )
+  assert.throws(
+    () =>
+      validateAuthoredScopeReplayParentPair(
+        state,
+        { ...registration, maxPhysicalCalls: 1_999 },
+        AUTHORED_SCOPE_STUDY_ID,
+      ),
+    /invalid_literal/u,
+  )
+  assert.throws(
+    () =>
+      validateAuthoredScopeReplayParentPair(
+        state,
+        { ...registration, registrationSha256: 'd'.repeat(64) },
+        AUTHORED_SCOPE_STUDY_ID,
+      ),
+    /do not match/u,
+  )
+  assert.throws(
+    () => validateAuthoredScopeReplayParentPair(state, registration, LEGACY_REPLAY_STUDY_ID),
+    /not registered/u,
+  )
+  assert.equal(policy.parentLedgerVersion, 161)
 })
 
 await test('registration owns every selector and ordered case ID before awaiting', async () => {

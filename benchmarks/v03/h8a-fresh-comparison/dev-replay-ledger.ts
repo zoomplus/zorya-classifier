@@ -19,7 +19,11 @@ import {
   PROFILE_SCOPE_CANDIDATE_ID,
 } from './constants.js'
 import type { H8aFreshProfileId } from './profiles.js'
-import { replayStudyPolicy } from './dev-replay-study-policy.js'
+import {
+  AUTHORED_SCOPE_STUDY_ID,
+  LEGACY_REPLAY_ROOT,
+  replayStudyPolicy,
+} from './dev-replay-study-policy.js'
 import type { ReplayStudyId, ReplayStudyPolicy } from './dev-replay-study-policy.js'
 import { parseReplayJson, readPinnedReplayFile } from './dev-replay-files.js'
 
@@ -34,24 +38,71 @@ const profileSchema = z.union([
   z.literal(PROFILE_CONTROL_ID),
 ])
 const digest = z.string().regex(/^[a-f0-9]{64}$/u)
-const parentSchema = z
+const parentFields = {
+  ledgerVersion: z.number().int().nonnegative(),
+  nextReservationId: z.number().int().positive(),
+  nextPhysicalId: z.number().int().positive(),
+  physicalDispatchCount: z.number().int().nonnegative(),
+  uncertainPhysicalDispatchCount: z.literal(0),
+  logicalAttemptCount: z.number().int().nonnegative(),
+  knownCostUsd: z.number().finite().nonnegative(),
+  unknownReserveUsd: z.literal(0.24),
+  inFlightReservations: z.array(z.unknown()).length(0),
+  resumeBlocked: z.literal(false),
+  crashRecoveryLatched: z.literal(false),
+  integrityBlocked: z.literal(false),
+}
+const legacyParentSchema = z
   .object({
-    schema: z.string().min(1),
-    ledgerVersion: z.number().int().nonnegative(),
-    maxPhysicalCalls: z.literal(2_000),
-    nextReservationId: z.number().int().positive(),
-    nextPhysicalId: z.number().int().positive(),
-    physicalDispatchCount: z.number().int().nonnegative(),
-    uncertainPhysicalDispatchCount: z.literal(0),
-    logicalAttemptCount: z.number().int().nonnegative(),
-    knownCostUsd: z.number().finite().nonnegative(),
-    unknownReserveUsd: z.literal(0.24),
-    inFlightReservations: z.array(z.unknown()).length(0),
-    resumeBlocked: z.literal(false),
-    crashRecoveryLatched: z.literal(false),
-    integrityBlocked: z.literal(false),
+    schema: z.literal('h8a-ui-state-dev40-successor-ledger-v1'),
+    ...parentFields,
+    maxPhysicalCalls: z.literal(REPLAY_GLOBAL_MAX_PHYSICAL_CALLS),
   })
   .passthrough()
+const authoredScopeParentSchema = z
+  .object({
+    schema: z.literal('h8a-provider-refusal-replay-ledger-v1'),
+    ...parentFields,
+    registrationSha256: digest,
+  })
+  .passthrough()
+const authoredScopeParentRegistrationSchema = z
+  .object({
+    schema: z.literal('h8a-provider-refusal-replay-registration-v1'),
+    studyId: z.literal('provider-refusal-dev40-replay-v1'),
+    freezeId: z.literal('h8a-provider-refusal-dev40-replay-20261101-v1'),
+    protocolSha256: digest,
+    parentAuditSha256: digest,
+    parentLedgerSha256: digest,
+    parentLedgerVersion: z.number().int().nonnegative(),
+    canonicalRoot: z.string().min(1),
+    caseIds: z.array(z.string().min(1)).length(40),
+    maxPhysicalCalls: z.literal(REPLAY_GLOBAL_MAX_PHYSICAL_CALLS),
+    dev40MaxPhysicalCalls: z.number().int().positive(),
+    dev40MaxIncrementalUsd: z.number().finite().positive(),
+    candidateMaxUsdPerDispatch: z.number().finite().positive(),
+    controlMaxUsdPerDispatch: z.number().finite().positive(),
+    ownerDollarCeilingUsd: z.null(),
+    retries: z.literal(0),
+    registrationSha256: digest,
+  })
+  .strict()
+type VerifiedParentBaseline = Readonly<{
+  schema: string
+  ledgerVersion: number
+  maxPhysicalCalls: typeof REPLAY_GLOBAL_MAX_PHYSICAL_CALLS
+  nextReservationId: number
+  nextPhysicalId: number
+  physicalDispatchCount: number
+  uncertainPhysicalDispatchCount: 0
+  logicalAttemptCount: number
+  knownCostUsd: number
+  unknownReserveUsd: 0.24
+  inFlightReservations: readonly []
+  resumeBlocked: false
+  crashRecoveryLatched: false
+  integrityBlocked: false
+}>
 
 const registrationSchema = z
   .object({
@@ -319,10 +370,7 @@ function initialState(registration: Registration, policy: ReplayStudyPolicy): St
   })
 }
 
-function assertParentBaseline(
-  parent: z.infer<typeof parentSchema>,
-  policy: ReplayStudyPolicy,
-): void {
+function assertParentBaseline(parent: VerifiedParentBaseline, policy: ReplayStudyPolicy): void {
   if (
     parent.ledgerVersion !== policy.parentLedgerVersion ||
     parent.maxPhysicalCalls !== REPLAY_GLOBAL_MAX_PHYSICAL_CALLS ||
@@ -343,18 +391,111 @@ function assertParentBaseline(
     )
 }
 
+function parentRegistrationDigest(registration: Record<string, unknown>): string {
+  const entries = Object.entries(registration).filter(([key]) => key !== 'registrationSha256')
+  if (Object.keys(registration).at(-1) !== 'registrationSha256')
+    throw new ProviderRefusalReplayLedgerError('Pinned parent registration wire order is invalid')
+  return sha256(JSON.stringify(Object.fromEntries(entries)))
+}
+
+function verifyAuthoredScopeParentPair(
+  parentValue: unknown,
+  registrationValue: unknown,
+  policy: ReplayStudyPolicy,
+): VerifiedParentBaseline {
+  const parent = authoredScopeParentSchema.parse(parentValue)
+  const rawRegistration = z.record(z.unknown()).parse(registrationValue)
+  const registration = authoredScopeParentRegistrationSchema.parse(registrationValue)
+  if (policy.studyId !== 'authored-scope-dev40-v1')
+    throw new ProviderRefusalReplayLedgerError('Parent registration wire pair is not registered')
+  if (
+    parent.schema !== policy.parentLedgerSchema ||
+    registration.schema !== policy.parentRegistrationSchema ||
+    registration.studyId !== policy.parentRegistrationStudyId ||
+    registration.freezeId !== policy.parentRegistrationFreezeId ||
+    registration.canonicalRoot !== join(LEGACY_REPLAY_ROOT, 'admission', 'successor-campaign') ||
+    registration.parentAuditSha256 !== LEGACY_REPLAY_POLICY.parentAuditSha256 ||
+    registration.parentLedgerSha256 !== LEGACY_REPLAY_POLICY.parentLedgerSha256 ||
+    registration.parentLedgerVersion !== LEGACY_REPLAY_POLICY.parentLedgerVersion ||
+    new Set(registration.caseIds).size !== registration.caseIds.length ||
+    registration.maxPhysicalCalls !== REPLAY_GLOBAL_MAX_PHYSICAL_CALLS ||
+    registration.dev40MaxPhysicalCalls !== LEGACY_REPLAY_POLICY.incrementalCallLimit ||
+    registration.dev40MaxIncrementalUsd !== LEGACY_REPLAY_POLICY.incrementalExposureUsd ||
+    registration.candidateMaxUsdPerDispatch !== LEGACY_REPLAY_POLICY.candidateUsdPerDispatch ||
+    registration.controlMaxUsdPerDispatch !== LEGACY_REPLAY_POLICY.controlUsdPerDispatch ||
+    parent.registrationSha256 !== registration.registrationSha256 ||
+    parent.registrationSha256 !== parentRegistrationDigest(rawRegistration) ||
+    Object.hasOwn(parent, 'maxPhysicalCalls')
+  )
+    throw new ProviderRefusalReplayLedgerError('Pinned parent registration and ledger do not match')
+  const verified: VerifiedParentBaseline = {
+    schema: parent.schema,
+    ledgerVersion: parent.ledgerVersion,
+    maxPhysicalCalls: registration.maxPhysicalCalls,
+    nextReservationId: parent.nextReservationId,
+    nextPhysicalId: parent.nextPhysicalId,
+    physicalDispatchCount: parent.physicalDispatchCount,
+    uncertainPhysicalDispatchCount: parent.uncertainPhysicalDispatchCount,
+    logicalAttemptCount: parent.logicalAttemptCount,
+    knownCostUsd: parent.knownCostUsd,
+    unknownReserveUsd: parent.unknownReserveUsd,
+    inFlightReservations: [],
+    resumeBlocked: parent.resumeBlocked,
+    crashRecoveryLatched: parent.crashRecoveryLatched,
+    integrityBlocked: parent.integrityBlocked,
+  }
+  assertParentBaseline(verified, policy)
+  return verified
+}
+
+/** Validates the closed authored-scope parent wire pair without reading or writing files. */
+export function validateAuthoredScopeReplayParentPair(
+  parentValue: unknown,
+  registrationValue: unknown,
+  studyId: ReplayStudyId,
+): Readonly<{
+  ledgerVersion: number
+  physicalDispatchCount: number
+  logicalAttemptCount: number
+  knownCostUsd: number
+  unknownReserveUsd: number
+  maxPhysicalCalls: number
+  nextPhysicalId: number
+  nextReservationId: number
+}> {
+  const policy = replayStudyPolicy(studyId)
+  if (studyId !== 'authored-scope-dev40-v1')
+    throw new ProviderRefusalReplayLedgerError('Parent registration wire pair is not registered')
+  const parent = verifyAuthoredScopeParentPair(parentValue, registrationValue, policy)
+  return Object.freeze({
+    ledgerVersion: parent.ledgerVersion,
+    physicalDispatchCount: parent.physicalDispatchCount,
+    logicalAttemptCount: parent.logicalAttemptCount,
+    knownCostUsd: parent.knownCostUsd,
+    unknownReserveUsd: parent.unknownReserveUsd,
+    maxPhysicalCalls: parent.maxPhysicalCalls,
+    nextPhysicalId: parent.nextPhysicalId,
+    nextReservationId: parent.nextReservationId,
+  })
+}
+
 async function readParentLedger(
   offlineTestOnly: boolean,
   policy: ReplayStudyPolicy,
-): Promise<z.infer<typeof parentSchema>> {
-  if (offlineTestOnly)
-    return parentSchema.parse({
+): Promise<VerifiedParentBaseline> {
+  if (offlineTestOnly) {
+    const parent = {
       schema:
         policy.studyId === LEGACY_REPLAY_POLICY.studyId
           ? 'h8a-ui-state-dev40-successor-ledger-v1'
           : 'h8a-provider-refusal-replay-ledger-v1',
+      ...(policy.studyId === LEGACY_REPLAY_POLICY.studyId
+        ? { maxPhysicalCalls: REPLAY_GLOBAL_MAX_PHYSICAL_CALLS }
+        : {}),
       ledgerVersion: policy.parentLedgerVersion,
-      maxPhysicalCalls: 2_000,
+      ...(policy.studyId === LEGACY_REPLAY_POLICY.studyId
+        ? {}
+        : { registrationSha256: '0'.repeat(64) }),
       nextReservationId: policy.nextReservationId,
       nextPhysicalId: policy.nextPhysicalId,
       physicalDispatchCount: policy.inheritedPhysicalCalls,
@@ -366,7 +507,38 @@ async function readParentLedger(
       resumeBlocked: false,
       crashRecoveryLatched: false,
       integrityBlocked: false,
-    })
+    }
+    if (policy.studyId === LEGACY_REPLAY_POLICY.studyId) {
+      const parsed = legacyParentSchema.parse(parent)
+      const verified: VerifiedParentBaseline = { ...parsed, inFlightReservations: [] }
+      assertParentBaseline(verified, policy)
+      return verified
+    }
+    const parentRegistrationBody = {
+      schema: 'h8a-provider-refusal-replay-registration-v1',
+      studyId: 'provider-refusal-dev40-replay-v1',
+      freezeId: 'h8a-provider-refusal-dev40-replay-20261101-v1',
+      protocolSha256: '0'.repeat(64),
+      parentAuditSha256: LEGACY_REPLAY_POLICY.parentAuditSha256,
+      parentLedgerSha256: LEGACY_REPLAY_POLICY.parentLedgerSha256,
+      parentLedgerVersion: LEGACY_REPLAY_POLICY.parentLedgerVersion,
+      canonicalRoot: join(LEGACY_REPLAY_ROOT, 'admission', 'successor-campaign'),
+      caseIds: Array.from({ length: 40 }, (_, index) => `offline-case-${index}`),
+      maxPhysicalCalls: REPLAY_GLOBAL_MAX_PHYSICAL_CALLS,
+      dev40MaxPhysicalCalls: LEGACY_REPLAY_POLICY.incrementalCallLimit,
+      dev40MaxIncrementalUsd: LEGACY_REPLAY_POLICY.incrementalExposureUsd,
+      candidateMaxUsdPerDispatch: LEGACY_REPLAY_POLICY.candidateUsdPerDispatch,
+      controlMaxUsdPerDispatch: LEGACY_REPLAY_POLICY.controlUsdPerDispatch,
+      ownerDollarCeilingUsd: null,
+      retries: 0,
+    }
+    const syntheticRegistration = {
+      ...parentRegistrationBody,
+      registrationSha256: sha256(JSON.stringify(parentRegistrationBody)),
+    }
+    const linkedParent = { ...parent, registrationSha256: syntheticRegistration.registrationSha256 }
+    return verifyAuthoredScopeParentPair(linkedParent, syntheticRegistration, policy)
+  }
   const auditBytes = await readPinnedReplayFile(policy.parentAuditPath, policy.parentAuditSha256)
   const audit = z
     .object({ references: z.array(z.object({ path: z.string(), sha256: digest }).strict()) })
@@ -376,9 +548,27 @@ async function readParentLedger(
   if (!ref || ref.sha256 !== policy.parentLedgerSha256)
     throw new ProviderRefusalReplayLedgerError('Pinned parent ledger reference is missing')
   const bytes = await readPinnedReplayFile(ref.path, ref.sha256, 4 * 1024 * 1024)
-  const parent = parentSchema.parse(parseReplayJson(bytes))
-  assertParentBaseline(parent, policy)
-  return parent
+  if (policy.studyId === LEGACY_REPLAY_POLICY.studyId) {
+    const parent = legacyParentSchema.parse(parseReplayJson(bytes))
+    const verified: VerifiedParentBaseline = { ...parent, inFlightReservations: [] }
+    assertParentBaseline(verified, policy)
+    return verified
+  }
+  if (policy.studyId !== AUTHORED_SCOPE_STUDY_ID)
+    throw new ProviderRefusalReplayLedgerError('Parent registration wire pair is not registered')
+  const registrationRef = audit.references.find((row) => row.path === policy.parentRegistrationPath)
+  if (!registrationRef || registrationRef.sha256 !== policy.parentRegistrationSha256)
+    throw new ProviderRefusalReplayLedgerError('Pinned parent registration reference is missing')
+  const registrationBytes = await readPinnedReplayFile(
+    registrationRef.path,
+    registrationRef.sha256,
+    64 * 1024,
+  )
+  return verifyAuthoredScopeParentPair(
+    parseReplayJson(bytes),
+    parseReplayJson(registrationBytes),
+    policy,
+  )
 }
 
 export class DevReplayLedger implements SuccessorCampaignAdmissionPort {
@@ -389,6 +579,32 @@ export class DevReplayLedger implements SuccessorCampaignAdmissionPort {
     private state: State,
     private readonly store = new AtomicJsonLedgerStore(join(root, 'campaign-ledger.json'), true),
   ) {}
+  /** Reads and validates the closed, pinned parent state without creating or changing files. */
+  static async preflightParent(studyId: ReplayStudyId): Promise<
+    Readonly<{
+      ledgerVersion: number
+      physicalDispatchCount: number
+      logicalAttemptCount: number
+      knownCostUsd: number
+      unknownReserveUsd: number
+      maxPhysicalCalls: number
+      nextPhysicalId: number
+      nextReservationId: number
+    }>
+  > {
+    const policy = replayStudyPolicy(studyId)
+    const parent = await readParentLedger(false, policy)
+    return Object.freeze({
+      ledgerVersion: parent.ledgerVersion,
+      physicalDispatchCount: parent.physicalDispatchCount,
+      logicalAttemptCount: parent.logicalAttemptCount,
+      knownCostUsd: parent.knownCostUsd,
+      unknownReserveUsd: parent.unknownReserveUsd,
+      maxPhysicalCalls: parent.maxPhysicalCalls,
+      nextPhysicalId: parent.nextPhysicalId,
+      nextReservationId: parent.nextReservationId,
+    })
+  }
   static async register(options: {
     root?: string
     offlineTestOnly?: boolean
@@ -420,7 +636,9 @@ export class DevReplayLedger implements SuccessorCampaignAdmissionPort {
       new Set(caseIds).size !== 40
     )
       throw new ProviderRefusalReplayLedgerError('Registration must bind 40 unique frozen case IDs')
-    const parent = await readParentLedger(offlineTestOnly, policy)
+    const parent = offlineTestOnly
+      ? await readParentLedger(true, policy)
+      : await DevReplayLedger.preflightParent(policy.studyId)
     const body = {
       schema: policy.registrationSchema,
       studyId: policy.studyId,
