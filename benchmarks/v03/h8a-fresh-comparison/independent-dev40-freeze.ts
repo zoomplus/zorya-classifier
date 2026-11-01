@@ -31,12 +31,21 @@ import type { PhaseFreeze } from './schemas.js'
 import { phaseFreezeSchema } from './schemas.js'
 import {
   UI_STATE_DEV40_FREEZE_ID,
+  UI_STATE_DEV40_EXECUTION_V2_DEADLINE_ISO,
+  UI_STATE_DEV40_EXECUTION_V2_ID,
+  UI_STATE_DEV40_EXECUTION_V2_PREPARATION_PATH,
+  UI_STATE_DEV40_EXECUTION_V2_FREEZE_ROOT,
+  UI_STATE_DEV40_EXECUTION_V2_ROOT,
   UI_STATE_DEV40_PARENT_REGISTRATION_SHA256,
   UI_STATE_DEV40_PUBLIC_COST_BOUNDS_SHA256,
   UI_STATE_DEV40_ROOT,
   UI_STATE_DEV40_SOURCE_ADMISSION_POLICY,
   UI_STATE_DEV40_STUDY_ID,
 } from './ui-state-dev40-policy.js'
+import {
+  assertExecutionV2DeadlineScope,
+  verifyZeroQueryExecutionV2Preconditions,
+} from './ui-state-zero-query-execution-v2.js'
 
 const ARTIFACT_ROOT = '/root/.codex/artifacts'
 const STUDY_ID = UI_STATE_DEV40_STUDY_ID
@@ -79,6 +88,7 @@ const sourceClosureSchema = z
 type IndependentDev40FreezeOptions = z.infer<typeof optionsSchema>
 interface VerifiedIndependentDev40Authority {
   studyId: typeof STUDY_ID
+  executionId?: typeof UI_STATE_DEV40_EXECUTION_V2_ID
   sourceAdmissionPolicy: typeof UI_STATE_DEV40_SOURCE_ADMISSION_POLICY
   sourceStateProofSha256: string
   authoritySha256: string
@@ -88,6 +98,12 @@ interface VerifiedIndependentDev40Authority {
 }
 type IndependentDev40Freeze = Awaited<ReturnType<typeof assembleDevFreezeFromDisk>> & {
   verifiedAuthority: VerifiedIndependentDev40Authority
+}
+interface ExecutionV2FreezeOptions {
+  authorityPath: typeof UI_STATE_DEV40_EXECUTION_V2_PREPARATION_PATH
+  authoritySha256: string
+  sourceRoot: typeof REPOSITORY_ROOT
+  outputDirectory: typeof UI_STATE_DEV40_EXECUTION_V2_FREEZE_ROOT
 }
 const verifiedFreezeAuthorities = new WeakMap<object, string>()
 
@@ -126,8 +142,9 @@ async function readPinnedRegularFile(path: string, expectedSha256: string): Prom
 }
 
 async function verifiedAuthorityFor(
-  options: IndependentDev40FreezeOptions,
+  options: IndependentDev40FreezeOptions | ExecutionV2FreezeOptions,
   freeze: PhaseFreeze,
+  executionId?: typeof UI_STATE_DEV40_EXECUTION_V2_ID,
 ): Promise<VerifiedIndependentDev40Authority> {
   const authorityBytes = await readPinnedRegularFile(options.authorityPath, options.authoritySha256)
   const authority = verifiedInputsSchema.parse(
@@ -135,6 +152,10 @@ async function verifiedAuthorityFor(
   )
   if (Date.parse(authority.deadlineIso) <= Date.now())
     throw new RangeError('Independent DEV40 preparation deadline has expired')
+  if (executionId && authority.executionId !== executionId)
+    throw new RangeError('Execution-v2 authority has a different execution identity')
+  if (executionId && authority.deadlineIso !== UI_STATE_DEV40_EXECUTION_V2_DEADLINE_ISO)
+    throw new RangeError('Execution-v2 authority deadline differs from its zero-query protocol')
   const studyPrefix = STUDY_ROOT
   const closurePath = resolve(ARTIFACT_ROOT, authority.sourceClosure.path)
   const stateProofPath = resolve(ARTIFACT_ROOT, authority.sourceStateProof.path)
@@ -149,6 +170,7 @@ async function verifiedAuthorityFor(
   const closure = sourceClosureSchema.parse(JSON.parse(closureBytes.toString('utf8')) as unknown)
   return {
     studyId: STUDY_ID,
+    ...(executionId ? { executionId } : {}),
     sourceAdmissionPolicy: UI_STATE_DEV40_SOURCE_ADMISSION_POLICY,
     sourceStateProofSha256: authority.sourceStateProof.sha256,
     authoritySha256: sha256(authorityBytes),
@@ -156,6 +178,52 @@ async function verifiedAuthorityFor(
     priceProofSha256: authority.priceProof.sha256,
     freezeCommitmentSha256: hashIdentity(freeze),
   }
+}
+
+function executionV2OptionsSchema() {
+  return z
+    .object({
+      authorityPath: z.literal(UI_STATE_DEV40_EXECUTION_V2_PREPARATION_PATH),
+      authoritySha256: DIGEST,
+      sourceRoot: z.literal(REPOSITORY_ROOT),
+      outputDirectory: z.literal(UI_STATE_DEV40_EXECUTION_V2_FREEZE_ROOT),
+    })
+    .strict()
+}
+
+async function validateExecutionV2FilesystemRoots(
+  options: ExecutionV2FreezeOptions,
+): Promise<void> {
+  const [artifactReal, studyReal, rootReal] = await Promise.all([
+    realpath(ARTIFACT_ROOT),
+    realpath(STUDY_ROOT),
+    realpath(REPOSITORY_ROOT),
+  ])
+  if (
+    artifactReal !== ARTIFACT_ROOT ||
+    studyReal !== STUDY_ROOT ||
+    rootReal !== REPOSITORY_ROOT ||
+    resolve(options.authorityPath) !== UI_STATE_DEV40_EXECUTION_V2_PREPARATION_PATH ||
+    resolve(options.sourceRoot) !== REPOSITORY_ROOT ||
+    resolve(options.outputDirectory) !== UI_STATE_DEV40_EXECUTION_V2_FREEZE_ROOT
+  )
+    throw new RangeError('Execution-v2 roots differ from the registered paths')
+  assertPhysicalNewChild(resolve(STUDY_ROOT, 'admission'), options.outputDirectory)
+  const executionRoot = resolve(UI_STATE_DEV40_EXECUTION_V2_ROOT)
+  if ((await realpath(executionRoot)) !== executionRoot)
+    throw new RangeError('Execution-v2 root is aliased')
+  const outputParent = resolve(dirname(options.outputDirectory))
+  if ((await realpath(outputParent)) !== outputParent)
+    throw new RangeError('Execution-v2 freeze parent is aliased')
+  try {
+    const existing = await lstat(options.outputDirectory)
+    if (!existing.isDirectory() || existing.isSymbolicLink())
+      throw new RangeError('Execution-v2 freeze output is not a physical directory')
+  } catch (error) {
+    if (error instanceof Error && Reflect.get(error, 'code') === 'ENOENT') return
+    throw error
+  }
+  throw new RangeError('Execution-v2 freeze output is immutable and already exists')
 }
 
 function assertPhysicalNewChild(parent: string, target: string): void {
@@ -261,20 +329,61 @@ export async function assembleIndependentDev40V2FromDisk(
   return result
 }
 
-export async function verifyPersistedIndependentDev40V2(
-  freezeDirectory: string,
-  optionsUnknown: Omit<IndependentDev40FreezeOptions, 'outputDirectory'>,
+export async function assembleIndependentDev40ExecutionV2FromDisk(
+  optionsUnknown: ExecutionV2FreezeOptions,
 ): Promise<IndependentDev40Freeze> {
-  const options = optionsSchema.parse({ ...optionsUnknown, outputDirectory: FREEZE_DIRECTORY })
-  if (resolve(freezeDirectory) !== FREEZE_DIRECTORY)
-    throw new RangeError('Persisted independent DEV40 freeze is not in its registered directory')
-  const root = await realpath(freezeDirectory)
-  if (root !== FREEZE_DIRECTORY) throw new RangeError('Persisted freeze directory is aliased')
-  const assembled = await verifyPersistedDevFreeze(freezeDirectory, options)
+  const options = executionV2OptionsSchema().parse(optionsUnknown)
+  await verifyZeroQueryExecutionV2Preconditions()
+  await validateExecutionV2FilesystemRoots(options)
+  const authorityBytes = await readPinnedRegularFile(options.authorityPath, options.authoritySha256)
+  const authority = verifiedInputsSchema.parse(
+    JSON.parse(authorityBytes.toString('utf8')) as unknown,
+  )
+  if (authority.executionId !== UI_STATE_DEV40_EXECUTION_V2_ID)
+    throw new RangeError('Execution-v2 preparation has a different execution identity')
+  assertExecutionV2DeadlineScope(authority.deadlineIso)
+  const assembled = await assembleDevFreezeFromDisk(options)
   assertIndependentFreeze(assembled.freeze)
+  if (assembled.freeze.deadlineIso !== UI_STATE_DEV40_EXECUTION_V2_DEADLINE_ISO)
+    throw new RangeError('Execution-v2 freeze deadline differs from its fixed authority')
   const result: IndependentDev40Freeze = {
     ...assembled,
-    verifiedAuthority: await verifiedAuthorityFor(options, assembled.freeze),
+    verifiedAuthority: await verifiedAuthorityFor(
+      options,
+      assembled.freeze,
+      UI_STATE_DEV40_EXECUTION_V2_ID,
+    ),
+  }
+  verifiedFreezeAuthorities.set(result, hashIdentity(result.verifiedAuthority))
+  assertExecutionV2DeadlineScope(assembled.freeze.deadlineIso)
+  await writeDevFreezeExclusive(options.outputDirectory, assembled)
+  return result
+}
+
+export async function verifyPersistedIndependentDev40ExecutionV2(
+  freezeDirectory: string,
+  optionsUnknown: Omit<ExecutionV2FreezeOptions, 'outputDirectory'>,
+): Promise<IndependentDev40Freeze> {
+  const options = executionV2OptionsSchema().parse({
+    ...optionsUnknown,
+    outputDirectory: UI_STATE_DEV40_EXECUTION_V2_FREEZE_ROOT,
+  })
+  if (resolve(freezeDirectory) !== UI_STATE_DEV40_EXECUTION_V2_FREEZE_ROOT)
+    throw new RangeError('Persisted execution-v2 freeze is outside its registered directory')
+  await verifyZeroQueryExecutionV2Preconditions()
+  const root = await realpath(freezeDirectory)
+  if (root !== UI_STATE_DEV40_EXECUTION_V2_FREEZE_ROOT)
+    throw new RangeError('Persisted execution-v2 freeze directory is aliased')
+  const assembled = await verifyPersistedDevFreeze(freezeDirectory, options)
+  assertIndependentFreeze(assembled.freeze)
+  assertExecutionV2DeadlineScope(assembled.freeze.deadlineIso)
+  const result: IndependentDev40Freeze = {
+    ...assembled,
+    verifiedAuthority: await verifiedAuthorityFor(
+      options,
+      assembled.freeze,
+      UI_STATE_DEV40_EXECUTION_V2_ID,
+    ),
   }
   verifiedFreezeAuthorities.set(result, hashIdentity(result.verifiedAuthority))
   return result

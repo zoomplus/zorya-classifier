@@ -17,12 +17,17 @@ import type {
 } from './campaign-ledger-port.js'
 import type { H8aFreshProfileId } from './profiles.js'
 import {
+  UI_STATE_DEV40_EXECUTION_V2_ID,
+  UI_STATE_DEV40_EXECUTION_V2_SUCCESSOR_ROOT,
   UI_STATE_DEV40_PARENT_LEDGER_SHA256,
+  UI_STATE_DEV40_PARENT_ROOT,
   UI_STATE_DEV40_PARENT_REGISTRATION_SHA256,
   UI_STATE_DEV40_FREEZE_ID,
   UI_STATE_DEV40_PUBLIC_COST_BOUNDS_SHA256,
   UI_STATE_DEV40_STUDY_ID,
+  UI_STATE_DEV40_ROOT,
 } from './ui-state-dev40-policy.js'
+import { verifyZeroQueryExecutionV2Preconditions } from './ui-state-zero-query-execution-v2.js'
 
 const INDEPENDENT_DEV40_STUDY_ID = UI_STATE_DEV40_STUDY_ID
 export const SUCCESSOR_REGISTRATION_RELATIVE_PATH = join('admission', 'successor-campaign-v1')
@@ -66,8 +71,12 @@ const parentLedgerSchema = z
 
 const registrationSchema = z
   .object({
-    schema: z.literal('h8a-ui-state-dev40-successor-registration-v1'),
+    schema: z.enum([
+      'h8a-ui-state-dev40-successor-registration-v1',
+      'h8a-ui-state-dev40-execution-v2-successor-registration-v1',
+    ]),
     studyId: z.literal(INDEPENDENT_DEV40_STUDY_ID),
+    executionId: z.literal(UI_STATE_DEV40_EXECUTION_V2_ID).optional(),
     parentRegistrationSha256: z.literal(INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256),
     parentLedgerSha256: z.literal(INDEPENDENT_DEV40_PARENT_LEDGER_SHA256),
     publicCostProofSha256: z.literal(INDEPENDENT_DEV40_COST_PROOF_SHA256),
@@ -96,6 +105,15 @@ const registrationSchema = z
     registrationSha256: DIGEST,
   })
   .strict()
+  .superRefine((registration, context) => {
+    const executionV2 =
+      registration.schema === 'h8a-ui-state-dev40-execution-v2-successor-registration-v1'
+    if (executionV2 !== (registration.executionId === UI_STATE_DEV40_EXECUTION_V2_ID))
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Registration execution identity is inconsistent',
+      })
+  })
 
 const profileCounterSchema = z
   .object({
@@ -169,6 +187,7 @@ export interface SuccessorCampaignLedgerOptions {
   studyRoot: string
   parentRoot: string
   parentLedgerPath: string
+  executionId?: typeof UI_STATE_DEV40_EXECUTION_V2_ID
 }
 
 export class SuccessorCampaignLedgerBlockedError extends Error {
@@ -205,10 +224,14 @@ function registrationBody(options: {
   parentRoot: string
   successorRoot: string
   parentLedger: z.infer<typeof parentLedgerSchema>
+  executionId?: typeof UI_STATE_DEV40_EXECUTION_V2_ID
 }): Omit<SuccessorRegistration, 'registrationSha256'> {
   return {
-    schema: 'h8a-ui-state-dev40-successor-registration-v1',
+    schema: options.executionId
+      ? 'h8a-ui-state-dev40-execution-v2-successor-registration-v1'
+      : 'h8a-ui-state-dev40-successor-registration-v1',
     studyId: INDEPENDENT_DEV40_STUDY_ID,
+    ...(options.executionId ? { executionId: options.executionId } : {}),
     parentRegistrationSha256: INDEPENDENT_DEV40_PARENT_REGISTRATION_SHA256,
     parentLedgerSha256: INDEPENDENT_DEV40_PARENT_LEDGER_SHA256,
     publicCostProofSha256: INDEPENDENT_DEV40_COST_PROOF_SHA256,
@@ -481,6 +504,14 @@ async function validateRegistrationInputs(options: SuccessorCampaignLedgerOption
   const parentRoot = await assertPhysicalDirectory(options.parentRoot, true)
   const expectedParentLedger = resolve(options.parentLedgerPath)
   const expectedParentRoot = resolve(studyRoot, '..', 'h8a-fresh-dev-qual-campaign-v1')
+  if (options.executionId && options.executionId !== UI_STATE_DEV40_EXECUTION_V2_ID)
+    throw new SuccessorCampaignLedgerBlockedError('Unknown successor execution identity')
+  if (options.executionId) await verifyZeroQueryExecutionV2Preconditions()
+  const canonicalRootsMatch = options.executionId
+    ? studyRoot === UI_STATE_DEV40_ROOT &&
+      parentRoot === UI_STATE_DEV40_PARENT_ROOT &&
+      expectedParentLedger === join(UI_STATE_DEV40_PARENT_ROOT, 'campaign-ledger.json')
+    : true
   if (
     basename(studyRoot) !== INDEPENDENT_DEV40_STUDY_ID ||
     basename(parentRoot) !== 'h8a-fresh-dev-qual-campaign-v1' ||
@@ -489,7 +520,8 @@ async function validateRegistrationInputs(options: SuccessorCampaignLedgerOption
     isInside(REPOSITORY_ROOT, parentRoot) ||
     expectedParentLedger !== join(parentRoot, 'campaign-ledger.json') ||
     isInside(studyRoot, parentRoot) ||
-    isInside(parentRoot, studyRoot)
+    isInside(parentRoot, studyRoot) ||
+    !canonicalRootsMatch
   )
     throw new SuccessorCampaignLedgerBlockedError('Parent and successor roots are not distinct')
 
@@ -548,12 +580,15 @@ async function validateRegistrationInputs(options: SuccessorCampaignLedgerOption
 
   const costBytes = await readPinnedRegularFile(costProofPath, INDEPENDENT_DEV40_COST_PROOF_SHA256)
   parseCostProof(JSON.parse(costBytes.toString('utf8')) as unknown)
-  const successorRoot = resolve(studyRoot, SUCCESSOR_REGISTRATION_RELATIVE_PATH)
+  const successorRoot = options.executionId
+    ? UI_STATE_DEV40_EXECUTION_V2_SUCCESSOR_ROOT
+    : resolve(studyRoot, SUCCESSOR_REGISTRATION_RELATIVE_PATH)
   const registrationBodyValue = registrationBody({
     studyRoot,
     parentRoot,
     successorRoot,
     parentLedger,
+    ...(options.executionId ? { executionId: options.executionId } : {}),
   })
   const registration = registrationSchema.parse({
     ...registrationBodyValue,

@@ -24,6 +24,7 @@
       "benchmarks/v03/h8a-fresh-comparison/independent-dev40-freeze.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/successor-campaign-ledger.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/ui-state-source-policy.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/ui-state-zero-query-execution-v2.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/successor-dev-screen-cli.test.ts",
       "test/benchmark-credentials.test.ts",
       "test/benchmark-budget.test.ts",

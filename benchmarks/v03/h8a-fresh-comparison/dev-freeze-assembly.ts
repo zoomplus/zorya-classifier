@@ -40,6 +40,7 @@ import {
 import {
   UI_STATE_DEV40_ANCESTOR_PARENT_REGISTRATION_SHA256,
   UI_STATE_DEV40_FREEZE_ID,
+  UI_STATE_DEV40_EXECUTION_V2_ID,
   UI_STATE_DEV40_HISTORICAL_EXCLUSIONS_SHA256,
   UI_STATE_DEV40_HISTORICAL_PIXELS_SHA256,
   UI_STATE_DEV40_PARENT_AUDIT_SHA256,
@@ -130,6 +131,7 @@ const independentDev40PreparationAuthoritySchema = z
     freezeId: z.literal(UI_STATE_DEV40_FREEZE_ID),
     parentRegistrationSha256: z.literal(UI_STATE_DEV40_PARENT_REGISTRATION_SHA256),
     sourcePolicyId: z.literal(UI_STATE_DEV40_SOURCE_ADMISSION_POLICY),
+    executionId: z.literal(UI_STATE_DEV40_EXECUTION_V2_ID).optional(),
     deadlineIso: z.string().datetime({ offset: true }),
     trustedRoot: z.string().min(1),
     orderProtocol: artifactRefSchema,

@@ -19,8 +19,8 @@ import {
 import type { DevScreenId } from './dev-screen-sampling.js'
 import {
   assertSuccessorFreezeAdmission,
-  assembleIndependentDev40V2FromDisk,
-  verifyPersistedIndependentDev40V2,
+  assembleIndependentDev40ExecutionV2FromDisk,
+  verifyPersistedIndependentDev40ExecutionV2,
 } from './independent-dev40-freeze.js'
 import { SuccessorCampaignLedger } from './successor-campaign-ledger.js'
 import { createH8FreshRuntimePorts } from './runtime-ports.js'
@@ -37,28 +37,36 @@ import { hashIdentity } from './hash-identity.js'
 import { immutableCloseoutSchema } from './schemas.js'
 import {
   UI_STATE_DEV40_FREEZE_ID,
+  UI_STATE_DEV40_EXECUTION_V2_BINDING_PATH,
+  UI_STATE_DEV40_EXECUTION_V2_FREEZE_ROOT,
+  UI_STATE_DEV40_EXECUTION_V2_ID,
+  UI_STATE_DEV40_EXECUTION_V2_PREPARATION_PATH,
+  UI_STATE_DEV40_EXECUTION_V2_SUCCESSOR_ROOT,
+  UI_STATE_DEV40_RUNTIME_ENVIRONMENT_SHA256,
   UI_STATE_DEV40_RUNTIME_PROOF_PATH,
   UI_STATE_DEV40_RUNTIME_PROOF_SHA256,
   UI_STATE_DEV40_ROOT,
   UI_STATE_DEV40_STUDY_ID,
   UI_STATE_DEV40_PARENT_ROOT,
   UI_STATE_DEV40_SOURCE_ADMISSION_POLICY,
-  UI_STATE_DEV40_SUCCESSOR_ROOT,
-  uiStateDev40Path,
+  UI_STATE_DEV40_ZERO_QUERY_PROTOCOL_SHA256,
 } from './ui-state-dev40-policy.js'
+import {
+  assertExecutionV2DeadlineScope,
+  verifyZeroQueryExecutionV2Preconditions,
+} from './ui-state-zero-query-execution-v2.js'
 
 const STUDY_ROOT = UI_STATE_DEV40_ROOT
 const PARENT_ROOT = UI_STATE_DEV40_PARENT_ROOT
 const PARENT_LEDGER_PATH = join(PARENT_ROOT, 'campaign-ledger.json')
-const AUTHORITY_PATH = uiStateDev40Path('admission', 'independent-dev40-v2-preparation.json')
-const FREEZE_DIRECTORY = uiStateDev40Path('admission', 'freeze-v2')
-const SUCCESSOR_ROOT = UI_STATE_DEV40_SUCCESSOR_ROOT
+const AUTHORITY_PATH = UI_STATE_DEV40_EXECUTION_V2_PREPARATION_PATH
+const FREEZE_DIRECTORY = UI_STATE_DEV40_EXECUTION_V2_FREEZE_ROOT
+const SUCCESSOR_ROOT = UI_STATE_DEV40_EXECUTION_V2_SUCCESSOR_ROOT
 const RUNTIME_PROOF_PATH = resolve('/root/.codex/artifacts', UI_STATE_DEV40_RUNTIME_PROOF_PATH)
 const RUNTIME_PROOF_SHA256 = UI_STATE_DEV40_RUNTIME_PROOF_SHA256
-const RUNTIME_ENVIRONMENT_SHA256 =
-  '1941f16dfb906f54331cc06c8b58bed15b86b65d86f16f7f708b49bc60680ba6'
+const RUNTIME_ENVIRONMENT_SHA256 = UI_STATE_DEV40_RUNTIME_ENVIRONMENT_SHA256
 const SOURCE_ROOT = resolve(fileURLToPath(new URL('../../../', import.meta.url)))
-const BINDING_PATH = uiStateDev40Path('admission', 'successor-study-binding.json')
+const BINDING_PATH = UI_STATE_DEV40_EXECUTION_V2_BINDING_PATH
 const JSON_LIMIT = 4 * 1024 * 1024
 
 const digestSchema = z.string().regex(/^[a-f0-9]{64}$/u)
@@ -84,13 +92,14 @@ const terminalStopSchema = z
   .strict()
 const terminalStopBodySchema = terminalStopSchema.omit({ terminalSha256: true })
 
-type VerifiedStudy = Awaited<ReturnType<typeof verifyPersistedIndependentDev40V2>>
+type VerifiedStudy = Awaited<ReturnType<typeof verifyPersistedIndependentDev40ExecutionV2>>
 type ScreenReport = z.infer<typeof devScreenReportSchema>
 
 interface SuccessorOptions {
   studyRoot: string
   parentRoot: string
   parentLedgerPath: string
+  executionId: typeof UI_STATE_DEV40_EXECUTION_V2_ID
 }
 
 interface RuntimePorts {
@@ -109,6 +118,7 @@ interface SuccessorRuntimeProof {
 }
 
 export interface SuccessorDependencies {
+  verifyExecutionPreconditions(): Promise<void>
   getApiKey(): string | undefined
   openLedger(options: SuccessorOptions): Promise<SuccessorCampaignAdmissionPort>
   assertFreezeAdmission(
@@ -136,7 +146,12 @@ function sha256(value: Uint8Array): string {
 }
 
 function canonicalOptions(): SuccessorOptions {
-  return { studyRoot: STUDY_ROOT, parentRoot: PARENT_ROOT, parentLedgerPath: PARENT_LEDGER_PATH }
+  return {
+    studyRoot: STUDY_ROOT,
+    parentRoot: PARENT_ROOT,
+    parentLedgerPath: PARENT_LEDGER_PATH,
+    executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
+  }
 }
 
 async function readAuthority(): Promise<{ sha256: string }> {
@@ -154,6 +169,7 @@ function assertFullFreeze(
   const { freeze, annotations, sourceBytesByCaseId, sourceClosurePaths } = verified
   if (
     verified.verifiedAuthority.studyId !== UI_STATE_DEV40_STUDY_ID ||
+    verified.verifiedAuthority.executionId !== UI_STATE_DEV40_EXECUTION_V2_ID ||
     verified.verifiedAuthority.sourceAdmissionPolicy !== UI_STATE_DEV40_SOURCE_ADMISSION_POLICY ||
     !digestSchema.safeParse(verified.verifiedAuthority.sourceStateProofSha256).success ||
     freeze.freezeId !== UI_STATE_DEV40_FREEZE_ID ||
@@ -229,14 +245,13 @@ async function verifyRegisteredBinding(
   authoritySha256: string,
   root: string = STUDY_ROOT,
 ): Promise<void> {
-  const raw = await readBoundedJson(
-    join(root, 'admission', 'successor-study-binding.json'),
-    join(root, 'admission'),
-  )
+  const raw = await readBoundedJson(join(root, relative(STUDY_ROOT, BINDING_PATH)), root)
   const bindingSchema = z
     .object({
-      schema: z.literal('h8a-independent-dev40-successor-study-binding-v1'),
+      schema: z.literal('h8a-independent-dev40-successor-study-binding-v2'),
       studyId: z.literal(UI_STATE_DEV40_STUDY_ID),
+      executionId: z.literal(UI_STATE_DEV40_EXECUTION_V2_ID),
+      zeroQueryProtocolSha256: z.literal(UI_STATE_DEV40_ZERO_QUERY_PROTOCOL_SHA256),
       authoritySha256: digestSchema,
       freezeId: z.literal(UI_STATE_DEV40_FREEZE_ID),
       freezeCommitmentSha256: digestSchema,
@@ -257,6 +272,8 @@ async function verifyRegisteredBinding(
   if (
     hashIdentity(body) !== bindingSha256 ||
     binding.authoritySha256 !== authoritySha256 ||
+    binding.executionId !== verified.verifiedAuthority.executionId ||
+    binding.zeroQueryProtocolSha256 !== UI_STATE_DEV40_ZERO_QUERY_PROTOCOL_SHA256 ||
     binding.freezeId !== verified.freeze.freezeId ||
     binding.freezeCommitmentSha256 !== verified.freeze.cohortCommitmentSha256 ||
     binding.producerClosureSha256 !== verified.freeze.producerClosureSha256 ||
@@ -270,7 +287,7 @@ async function verifyRegisteredBinding(
   )
     throw new RangeError('Registered successor binding differs from the verified freeze inputs')
   const registrationBytes = await readFile(
-    join(root, 'admission', 'successor-campaign-v1', 'registration.json'),
+    join(root, relative(STUDY_ROOT, SUCCESSOR_ROOT), 'registration.json'),
   )
   if (sha256(registrationBytes) !== binding.successorLedgerRegistrationSha256)
     throw new RangeError(
@@ -284,8 +301,10 @@ async function writeStudyBinding(
   registrationSha256: string,
 ): Promise<void> {
   const body = {
-    schema: 'h8a-independent-dev40-successor-study-binding-v1' as const,
+    schema: 'h8a-independent-dev40-successor-study-binding-v2' as const,
     studyId: UI_STATE_DEV40_STUDY_ID,
+    executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
+    zeroQueryProtocolSha256: UI_STATE_DEV40_ZERO_QUERY_PROTOCOL_SHA256,
     authoritySha256,
     freezeId: verified.freeze.freezeId,
     freezeCommitmentSha256: verified.freeze.cohortCommitmentSha256,
@@ -303,8 +322,9 @@ async function writeStudyBinding(
 }
 
 async function registerSuccessor(): Promise<void> {
+  await verifyZeroQueryExecutionV2Preconditions()
   const authority = await readAuthority()
-  const verified = await assembleIndependentDev40V2FromDisk({
+  const verified = await assembleIndependentDev40ExecutionV2FromDisk({
     authorityPath: AUTHORITY_PATH,
     authoritySha256: authority.sha256,
     sourceRoot: SOURCE_ROOT,
@@ -331,6 +351,9 @@ async function registerSuccessor(): Promise<void> {
 }
 
 const productionDependencies = (): SuccessorDependencies => ({
+  verifyExecutionPreconditions: async () => {
+    await verifyZeroQueryExecutionV2Preconditions()
+  },
   getApiKey: () => undefined,
   openLedger: async (options) => await SuccessorCampaignLedger.open(options),
   assertFreezeAdmission: async (verified, ledger) =>
@@ -339,7 +362,7 @@ const productionDependencies = (): SuccessorDependencies => ({
     const authority = await readAuthority()
     if (authority.sha256 !== authoritySha256)
       throw new RangeError('Independent DEV40 authority changed after runner preflight')
-    const persisted = await verifyPersistedIndependentDev40V2(FREEZE_DIRECTORY, {
+    const persisted = await verifyPersistedIndependentDev40ExecutionV2(FREEZE_DIRECTORY, {
       authorityPath: AUTHORITY_PATH,
       authoritySha256,
       sourceRoot: SOURCE_ROOT,
@@ -520,9 +543,11 @@ async function verifyLaunchIntent(
 ): Promise<void> {
   const launchSchema = z
     .object({
-      schema: z.literal('h8a-independent-dev40-screen-launch-v1'),
+      schema: z.literal('h8a-independent-dev40-screen-launch-v2'),
       screen: z.enum(['dev8', 'dev12', 'dev40']),
       studyId: z.literal(UI_STATE_DEV40_STUDY_ID),
+      executionId: z.literal(UI_STATE_DEV40_EXECUTION_V2_ID),
+      zeroQueryProtocolSha256: z.literal(UI_STATE_DEV40_ZERO_QUERY_PROTOCOL_SHA256),
       authoritySha256: digestSchema,
       freezeId: z.literal(UI_STATE_DEV40_FREEZE_ID),
       freezeCommitmentSha256: digestSchema,
@@ -545,6 +570,8 @@ async function verifyLaunchIntent(
   if (
     hashIdentity(body) !== launchSha256 ||
     launch.screen !== screen ||
+    launch.executionId !== verified.verifiedAuthority.executionId ||
+    launch.zeroQueryProtocolSha256 !== UI_STATE_DEV40_ZERO_QUERY_PROTOCOL_SHA256 ||
     launch.authoritySha256 !== verified.verifiedAuthority.authoritySha256 ||
     launch.freezeId !== verified.freeze.freezeId ||
     launch.freezeCommitmentSha256 !== verified.freeze.cohortCommitmentSha256 ||
@@ -588,7 +615,7 @@ async function runSuccessorDevScreen(
   },
 ): Promise<ScreenReport> {
   const authority = await readAuthority()
-  const verified = await verifyPersistedIndependentDev40V2(FREEZE_DIRECTORY, {
+  const verified = await verifyPersistedIndependentDev40ExecutionV2(FREEZE_DIRECTORY, {
     authorityPath: AUTHORITY_PATH,
     authoritySha256: authority.sha256,
     sourceRoot: SOURCE_ROOT,
@@ -631,6 +658,8 @@ export async function runVerifiedSuccessorDevScreen(
 ): Promise<ScreenReport> {
   const { verified, runtime, artifactRoot } = input
   assertFullFreeze(verified, dependencies.assertSourceClosure)
+  assertExecutionV2DeadlineScope(verified.freeze.deadlineIso)
+  await dependencies.verifyExecutionPreconditions()
   const release = await dependencies.acquireLock(artifactRoot)
   const controller = new AbortController()
   const abort = (): void => {
@@ -664,9 +693,11 @@ export async function runVerifiedSuccessorDevScreen(
       )
     if (!runtime) throw new RangeError('Verified runtime proof is required before runtime creation')
     const launchBody = {
-      schema: 'h8a-independent-dev40-screen-launch-v1' as const,
+      schema: 'h8a-independent-dev40-screen-launch-v2' as const,
       screen: input.screen,
       studyId: UI_STATE_DEV40_STUDY_ID,
+      executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
+      zeroQueryProtocolSha256: UI_STATE_DEV40_ZERO_QUERY_PROTOCOL_SHA256,
       authoritySha256: input.authoritySha256,
       freezeId: verified.freeze.freezeId,
       freezeCommitmentSha256: verified.freeze.cohortCommitmentSha256,
@@ -789,8 +820,9 @@ async function reviewScreen(input: z.infer<typeof reviewInputSchema>): Promise<v
 }
 
 async function reviewScreenLocked(input: z.infer<typeof reviewInputSchema>): Promise<void> {
+  await verifyZeroQueryExecutionV2Preconditions()
   const authority = await readAuthority()
-  const verified = await verifyPersistedIndependentDev40V2(FREEZE_DIRECTORY, {
+  const verified = await verifyPersistedIndependentDev40ExecutionV2(FREEZE_DIRECTORY, {
     authorityPath: AUTHORITY_PATH,
     authoritySha256: authority.sha256,
     sourceRoot: SOURCE_ROOT,
@@ -856,8 +888,9 @@ async function closeoutSuccessor(): Promise<void> {
 }
 
 async function closeoutSuccessorLocked(): Promise<void> {
+  await verifyZeroQueryExecutionV2Preconditions()
   const authority = await readAuthority()
-  const verified = await verifyPersistedIndependentDev40V2(FREEZE_DIRECTORY, {
+  const verified = await verifyPersistedIndependentDev40ExecutionV2(FREEZE_DIRECTORY, {
     authorityPath: AUTHORITY_PATH,
     authoritySha256: authority.sha256,
     sourceRoot: SOURCE_ROOT,

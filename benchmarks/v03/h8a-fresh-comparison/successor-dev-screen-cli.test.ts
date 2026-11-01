@@ -19,9 +19,12 @@ import type { CaseExecutionPort } from './paired-runner.js'
 import type { LedgerPhysicalCallContext } from './campaign-ledger-port.js'
 import type { PhaseFreeze } from './schemas.js'
 import {
+  UI_STATE_DEV40_EXECUTION_V2_DEADLINE_ISO,
+  UI_STATE_DEV40_EXECUTION_V2_ID,
   UI_STATE_DEV40_FREEZE_ID,
   UI_STATE_DEV40_SOURCE_ADMISSION_POLICY,
   UI_STATE_DEV40_STUDY_ID,
+  UI_STATE_DEV40_ZERO_QUERY_PROTOCOL_SHA256,
 } from './ui-state-dev40-policy.js'
 
 const directoryRoots: string[] = []
@@ -38,11 +41,13 @@ async function fixture(): Promise<Parameters<typeof runVerifiedSuccessorDevScree
   const freeze: PhaseFreeze = {
     ...generated.freeze,
     freezeId,
+    deadlineIso: UI_STATE_DEV40_EXECUTION_V2_DEADLINE_ISO,
     evaluatorAnnotationsSha256: computeEvaluatorAnnotationsSha256(annotations),
   }
   const selection = buildDevScreenSelection(freeze, annotations)
   const verifiedAuthority = {
     studyId: UI_STATE_DEV40_STUDY_ID,
+    executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
     authoritySha256: 'a'.repeat(64),
     sourceCommit: 'b'.repeat(40),
     priceProofSha256: 'c'.repeat(64),
@@ -66,11 +71,13 @@ async function fixture(): Promise<Parameters<typeof runVerifiedSuccessorDevScree
 function dependencies(input: {
   root: string
   getApiKey(): string | undefined
-  counters: { runtime: number; execute: number }
+  counters: { runtime: number; execute: number; ledgerExecutionIds?: string[] }
 }): SuccessorDependencies {
   return {
+    verifyExecutionPreconditions: async () => undefined,
     getApiKey: input.getApiKey,
-    openLedger: async () => {
+    openLedger: async (options) => {
+      input.counters.ledgerExecutionIds?.push(options.executionId)
       const ledger = await CampaignLedger.open(join(input.root, 'ledger.json'))
       return Object.assign(ledger, {
         async assertStudyScopeCanAdmitPhysicalReservedUsd(
@@ -115,7 +122,12 @@ await test('incomplete freeze refuses before key read, runtime creation, and pro
         authoritySha256: 'a'.repeat(64),
         artifactRoot: root,
       },
-      { studyRoot: root, parentRoot: root, parentLedgerPath: join(root, 'parent.json') },
+      {
+        studyRoot: root,
+        parentRoot: root,
+        parentLedgerPath: join(root, 'parent.json'),
+        executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
+      },
       dependencies({
         root,
         getApiKey: () => {
@@ -129,6 +141,116 @@ await test('incomplete freeze refuses before key read, runtime creation, and pro
   )
   assert.equal(keyReads, 0)
   assert.deepEqual(counters, { runtime: 0, execute: 0 })
+  await assert.rejects(readFile(join(root, 'terminal-stop.json')), { code: 'ENOENT' })
+})
+
+await test('zero-query recovery guard refuses before lock, ledger, key, runtime, or launch intent', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-successor-zero-query-guard-'))
+  directoryRoots.push(root)
+  const verified = await fixture()
+  let keyReads = 0
+  let lockAcquisitions = 0
+  const counters = { runtime: 0, execute: 0, ledgerExecutionIds: [] as string[] }
+  const deps = dependencies({
+    root,
+    getApiKey: () => {
+      keyReads++
+      return 'synthetic-key'
+    },
+    counters,
+  })
+  deps.verifyExecutionPreconditions = async () => {
+    throw new RangeError('zero-query prior-attempt proof mismatch')
+  }
+  deps.acquireLock = async () => {
+    lockAcquisitions++
+    return async () => undefined
+  }
+  await assert.rejects(
+    runVerifiedSuccessorDevScreen(
+      {
+        screen: 'dev8',
+        apiKeyEnv: 'OFFLINE_TEST_KEY',
+        verified,
+        runtime: null,
+        authoritySha256: 'a'.repeat(64),
+        artifactRoot: root,
+      },
+      {
+        studyRoot: root,
+        parentRoot: root,
+        parentLedgerPath: join(root, 'parent.json'),
+        executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
+      },
+      deps,
+    ),
+    /zero-query prior-attempt proof mismatch/u,
+  )
+  assert.equal(lockAcquisitions, 0)
+  assert.deepEqual(counters.ledgerExecutionIds, [])
+  assert.equal(keyReads, 0)
+  assert.deepEqual(counters, { runtime: 0, execute: 0, ledgerExecutionIds: [] })
+  await assert.rejects(readFile(join(root, 'launch-intents', 'dev8-launch.json')), {
+    code: 'ENOENT',
+  })
+  await assert.rejects(readFile(join(root, 'terminal-stop.json')), { code: 'ENOENT' })
+})
+
+await test('invalid deadline refuses before guard, lock, key, runtime, and launch intent', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-successor-deadline-preflight-'))
+  directoryRoots.push(root)
+  const complete = await fixture()
+  const verified = {
+    ...complete,
+    freeze: { ...complete.freeze, deadlineIso: '2030-01-01T00:00:00.738058Z' },
+  }
+  let keyReads = 0
+  let guardCalls = 0
+  let lockAcquisitions = 0
+  const counters = { runtime: 0, execute: 0, ledgerExecutionIds: [] as string[] }
+  const deps = dependencies({
+    root,
+    getApiKey: () => {
+      keyReads++
+      return 'synthetic-key'
+    },
+    counters,
+  })
+  deps.verifyExecutionPreconditions = async () => {
+    guardCalls++
+  }
+  deps.acquireLock = async () => {
+    lockAcquisitions++
+    return async () => undefined
+  }
+  await assert.rejects(
+    runVerifiedSuccessorDevScreen(
+      {
+        screen: 'dev8',
+        apiKeyEnv: 'OFFLINE_TEST_KEY',
+        verified,
+        runtime: null,
+        authoritySha256: 'a'.repeat(64),
+        artifactRoot: root,
+      },
+      {
+        studyRoot: root,
+        parentRoot: root,
+        parentLedgerPath: join(root, 'parent.json'),
+        executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
+      },
+      deps,
+    ),
+    /Execution-v2 deadline differs from its zero-query protocol/u,
+  )
+  assert.equal(guardCalls, 0)
+  assert.equal(lockAcquisitions, 0)
+  assert.deepEqual(counters.ledgerExecutionIds, [])
+  assert.equal(keyReads, 0)
+  assert.deepEqual(counters, { runtime: 0, execute: 0, ledgerExecutionIds: [] })
+  await assert.rejects(readFile(join(root, 'launch-intents', 'dev8-launch.json')), {
+    code: 'ENOENT',
+  })
   await assert.rejects(readFile(join(root, 'terminal-stop.json')), { code: 'ENOENT' })
 })
 
@@ -322,7 +444,12 @@ await test('runner lock serializes contenders before key lookup without poisonin
     authoritySha256: 'a'.repeat(64),
     artifactRoot: root,
   }
-  const options = { studyRoot: root, parentRoot: root, parentLedgerPath: join(root, 'parent.json') }
+  const options = {
+    studyRoot: root,
+    parentRoot: root,
+    parentLedgerPath: join(root, 'parent.json'),
+    executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
+  }
   const firstRun = runVerifiedSuccessorDevScreen(input, options, deps)
   await admissionEntered
   await assert.rejects(
@@ -343,7 +470,7 @@ await test('a launched failed stage is terminal and cannot read the key or execu
   directoryRoots.push(root)
   const verified = await fixture()
   let keyReads = 0
-  const counters = { runtime: 0, execute: 0 }
+  const counters = { runtime: 0, execute: 0, ledgerExecutionIds: [] as string[] }
   const deps = dependencies({
     root,
     getApiKey: () => {
@@ -366,7 +493,12 @@ await test('a launched failed stage is terminal and cannot read the key or execu
     authoritySha256: 'a'.repeat(64),
     artifactRoot: root,
   }
-  const options = { studyRoot: root, parentRoot: root, parentLedgerPath: join(root, 'parent.json') }
+  const options = {
+    studyRoot: root,
+    parentRoot: root,
+    parentLedgerPath: join(root, 'parent.json'),
+    executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
+  }
   await assert.rejects(
     runVerifiedSuccessorDevScreen(input, options, deps),
     /runtime must not initialize/u,
@@ -374,10 +506,16 @@ await test('a launched failed stage is terminal and cannot read the key or execu
   assert.equal(keyReads, 1)
   assert.equal(counters.runtime, 1)
   assert.equal(counters.execute, 0)
+  assert.deepEqual(counters.ledgerExecutionIds, [
+    UI_STATE_DEV40_EXECUTION_V2_ID,
+    UI_STATE_DEV40_EXECUTION_V2_ID,
+  ])
   const launch = JSON.parse(
     await readFile(join(root, 'launch-intents', 'dev8-launch.json'), 'utf8'),
   ) as Record<string, unknown>
   assert.equal(launch.studyId, UI_STATE_DEV40_STUDY_ID)
+  assert.equal(launch.executionId, UI_STATE_DEV40_EXECUTION_V2_ID)
+  assert.equal(launch.zeroQueryProtocolSha256, UI_STATE_DEV40_ZERO_QUERY_PROTOCOL_SHA256)
   assert.equal(launch.freezeId, UI_STATE_DEV40_FREEZE_ID)
   assert.equal(launch.sourceAdmissionPolicy, UI_STATE_DEV40_SOURCE_ADMISSION_POLICY)
   assert.equal(launch.sourceStateProofSha256, 'e'.repeat(64))
@@ -406,7 +544,12 @@ await test('missing cumulative prior-stage report is not swallowed and refuses b
         authoritySha256: 'a'.repeat(64),
         artifactRoot: root,
       },
-      { studyRoot: root, parentRoot: root, parentLedgerPath: join(root, 'parent.json') },
+      {
+        studyRoot: root,
+        parentRoot: root,
+        parentLedgerPath: join(root, 'parent.json'),
+        executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
+      },
       dependencies({
         root,
         getApiKey: () => {
@@ -445,7 +588,12 @@ await test('corrupt cumulative prior-stage report is not swallowed and refuses b
         authoritySha256: 'a'.repeat(64),
         artifactRoot: root,
       },
-      { studyRoot: root, parentRoot: root, parentLedgerPath: join(root, 'parent.json') },
+      {
+        studyRoot: root,
+        parentRoot: root,
+        parentLedgerPath: join(root, 'parent.json'),
+        executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
+      },
       dependencies({
         root,
         getApiKey: () => {

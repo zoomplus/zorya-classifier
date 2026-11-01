@@ -1,3 +1,5 @@
+import { resolve } from 'node:path'
+
 export const UI_STATE_DEV40_STUDY_ID = 'ui-state-dev40-v1' as const
 export const UI_STATE_DEV40_FREEZE_ID = 'h8a-ui-native-state-dev40-20261101-v1' as const
 export const UI_STATE_DEV40_ROOT =
@@ -61,11 +63,36 @@ export const UI_STATE_DEV40_CONTACT_SHEET_SHA256 =
   '3f0fe7a30f63f7f5c8f4b046bb8e5cd6ccfcc380829397615da8c39c17622139' as const
 export const UI_STATE_DEV40_NATIVE_STATE_PROOFS_PATH =
   'zorya-classifier-mcp-20261101/ui-state-dev40-v1/ui/bundle-v3/native-ui-state-proofs.json' as const
-export const UI_STATE_DEV40_SUCCESSOR_ROOT = resolve(
+export const UI_STATE_DEV40_EXECUTION_V2_ID = 'zero-query-deadline-repair-v2' as const
+export const UI_STATE_DEV40_EXECUTION_V2_DEADLINE_ISO = '2026-11-02T12:11:51.738Z' as const
+export const UI_STATE_DEV40_EXECUTION_V2_ROOT = resolve(
   UI_STATE_DEV40_ROOT,
   'admission',
-  'successor-campaign-v1',
+  'execution-v2',
 )
+export const UI_STATE_DEV40_EXECUTION_V2_PREPARATION_PATH = resolve(
+  UI_STATE_DEV40_EXECUTION_V2_ROOT,
+  'preparation.json',
+)
+export const UI_STATE_DEV40_EXECUTION_V2_FREEZE_ROOT = resolve(
+  UI_STATE_DEV40_EXECUTION_V2_ROOT,
+  'freeze',
+)
+export const UI_STATE_DEV40_EXECUTION_V2_SUCCESSOR_ROOT = resolve(
+  UI_STATE_DEV40_EXECUTION_V2_ROOT,
+  'successor-campaign',
+)
+export const UI_STATE_DEV40_EXECUTION_V2_BINDING_PATH = resolve(
+  UI_STATE_DEV40_EXECUTION_V2_ROOT,
+  'study-binding.json',
+)
+export const UI_STATE_DEV40_ZERO_QUERY_PROTOCOL_PATH = resolve(
+  UI_STATE_DEV40_ROOT,
+  'policy',
+  'zero-query-execution-v2.json',
+)
+export const UI_STATE_DEV40_ZERO_QUERY_PROTOCOL_SHA256 =
+  '712a87558c8d6592b3c98f02cf956ef304e83173ff09278ee839b22cb9e5b961' as const
 export const UI_STATE_DEV40_PRECAPTURE_ROSTER_PATH =
   'zorya-classifier-mcp-20261101/original-h8a-independent-dev40-v2/ui/pre-capture-roster-v1.json' as const
 
@@ -97,11 +124,3 @@ export const UI_STATE_DEV40_EXTERNAL_INPUT_PINS = {
     sha256: '348bc268b5ddfbc7289a636182edd4fddaca40ba2614e95fc9b2d1d42ff582ab',
   },
 } as const
-import { resolve } from 'node:path'
-
-export function uiStateDev40Path(...segments: string[]): string {
-  const result = resolve(UI_STATE_DEV40_ROOT, ...segments)
-  if (result !== UI_STATE_DEV40_ROOT && !result.startsWith(`${UI_STATE_DEV40_ROOT}/`))
-    throw new RangeError('UI-state DEV40 artifact path escapes its registered study root')
-  return result
-}
