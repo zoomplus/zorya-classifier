@@ -534,8 +534,8 @@ await test('new source closures include the dedicated plan, CLI, and its transit
       .sort(),
     runtimePaths,
   )
-  assert.equal(Object.keys(candidate).length, runtimePaths.length + 34)
-  assert.equal(Object.keys(noImage).length, runtimePaths.length + 34)
+  assert.equal(Object.keys(candidate).length, runtimePaths.length + 35)
+  assert.equal(Object.keys(noImage).length, runtimePaths.length + 35)
   assert.ok(Object.hasOwn(candidate, 'src/processes/extract-from-region.ts'))
   for (const sources of [candidate, noImage]) {
     assert.ok(Object.hasOwn(sources, './categorical-box-heldout-plan.ts'))
@@ -554,6 +554,12 @@ await test('new source closures include the dedicated plan, CLI, and its transit
     await categoricalBoxHeldoutProducerSourceSha256(),
     hashCanonical(Object.entries(candidate).sort(([a], [b]) => a.localeCompare(b))),
   )
+  const refusalSourceBytes = await readFile(
+    new URL('../benchmarks/v02/provider-refusal.ts', import.meta.url),
+  )
+  const refusalSourceSha256 = createHash('sha256').update(refusalSourceBytes).digest('hex')
+  assert.equal(candidate['./provider-refusal.ts'], refusalSourceSha256)
+  assert.equal(noImage['./provider-refusal.ts'], refusalSourceSha256)
 
   const benchmarkRoot = fileURLToPath(new URL('../benchmarks/v02/', import.meta.url))
   const projectRoot = resolve(benchmarkRoot, '../..')

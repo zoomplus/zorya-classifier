@@ -3,6 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
+import { z } from 'zod'
 import sharp from 'sharp'
 import type { DecisionRequest, DecisionResult } from '../src/entities/contracts.js'
 import { createResearchClassifier } from '../benchmarks/experiments/create-research-classifier.js'
@@ -14,11 +15,14 @@ import {
   modelRequestManifest,
 } from '../benchmarks/v02/protocol.js'
 import { recordProvider } from '../benchmarks/v02/recording.js'
+import { observeProviderRefusal } from '../benchmarks/v02/provider-refusal.js'
+import { createOpenRouterVision } from '../src/infrastructure/openrouter-vision.js'
 import { applyPromptVariant, promptVariants } from '../benchmarks/v02/promptvariants.js'
 import {
   createLunaDecisionProvider,
   createTextProviderForVariant,
 } from '../benchmarks/v02/runner.js'
+import { createOpenRouterDecisions } from '../src/infrastructure/openrouter.js'
 import { parseV02RunnerArgs } from '../benchmarks/v02/run.js'
 import { evaluateDiagnostic } from '../benchmarks/v02/evaluate-diagnostic.js'
 import { withSeedUnboundedPrompt } from '../benchmarks/v02/seedunboundedprompt.js'
@@ -1178,6 +1182,408 @@ await test('wire diagnostics drop unrecognized error fields instead of serializi
     assert.match(receipt, /"errorCode": null/u)
     assert.match(receipt, /"errorParameter": null/u)
     assert.doesNotMatch(receipt, /OPENROUTER_API_KEY|private-wire-value/u)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+await test('provider refusal observations are request-bound diagnostics and preserve provider failures', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'v02-provider-refusal-'))
+  const requestFor = (id: string): DecisionRequest => ({
+    state: ['fixture'],
+    questions: {
+      [id]: { type: 'choice', instructions: 'Choose', criteria: { a: 'A', b: 'B' } },
+    },
+  })
+  const nativeRoute: {
+    model: string
+    provider: string
+    providerName: string
+    apiEndpoint: string
+    allowFallbacks: false
+  } = {
+    model: 'openai/gpt-6-luna-decisions',
+    provider: 'openai',
+    providerName: 'OpenAI',
+    apiEndpoint: '/api/alpha/decisions',
+    allowFallbacks: false as const,
+  }
+  const chatRoute: typeof nativeRoute = {
+    model: 'openai/gpt-6-luna',
+    provider: 'openai',
+    providerName: 'OpenAI',
+    apiEndpoint: '/api/v1/chat/completions',
+    allowFallbacks: false as const,
+  }
+  const nativeBody = (message: string) => JSON.stringify({ error: { code: 502, message } })
+  const runFailure = async (
+    name: string,
+    route: typeof nativeRoute | typeof chatRoute,
+    status: number,
+    body: string,
+    id = 'selection',
+  ) => {
+    let fetches = 0
+    const observedResponses: Array<{ status: number; body: string }> = []
+    const budget = new RunBudget(1, 0.1)
+    const recorder = recordProvider(
+      (fetch) => {
+        const captureFetch: typeof globalThis.fetch = async (input, init) => {
+          const response = await fetch(input, init)
+          const clone = response.clone()
+          observedResponses.push({ status: clone.status, body: await clone.text() })
+          return response
+        }
+        return route.model === 'openai/gpt-6-luna-decisions' ||
+          route.apiEndpoint === '/api/alpha/decisions'
+          ? createOpenRouterDecisions({
+              apiKey: 'fixture-key',
+              model: route.model,
+              provider: route.provider,
+              providerName: route.providerName,
+              fetch: captureFetch,
+            })
+          : createOpenRouterVision({
+              apiKey: 'fixture-key',
+              model: route.model,
+              provider: route.provider,
+              providerName: route.providerName,
+              responseFormat: 'json-schema',
+              maxOutputTokens: 1024,
+              fetch: captureFetch,
+            })
+      },
+      budget,
+      join(directory, name),
+      route,
+      async () => {
+        fetches++
+        return new Response(body, { status })
+      },
+    )
+    const expectedErrorCode = status === 502 ? 'PROVIDER' : 'INVALID_RESPONSE'
+    await assert.rejects(recorder.port.decide(requestFor(id), new AbortController().signal), {
+      code: expectedErrorCode,
+    })
+    assert.equal(fetches, 1)
+    assert.equal(budget.snapshot().admittedPhysicalCalls, 1)
+    assert.equal(budget.snapshot().unknownCostCalls, 1)
+    const receiptText = await readFile(join(directory, name, 'physical-receipt-1.json'), 'utf8')
+    const physical = recorder.calls[0]
+    assert.ok(physical)
+    assert.equal(physical.httpStatus, status)
+    assert.equal(physical.errorCode, expectedErrorCode)
+    assert.equal(observedResponses.length, 1)
+    assert.equal(observedResponses[0]?.status, status)
+    assert.equal(observedResponses[0]?.body, body)
+    return { receipt: physical, receiptText }
+  }
+  try {
+    const exact = await runFailure(
+      'native-exact',
+      nativeRoute,
+      502,
+      nativeBody('OpenAI refused to answer question "selection"'),
+    )
+    const exactObservation = exact.receipt.providerRefusal
+    assert.ok(exactObservation)
+    assert.equal(exactObservation.protocol, 'openrouter-native-named-refusal-v1')
+    assert.equal(exactObservation.questionId, 'selection')
+    assert.equal(exactObservation.physicalId, 1)
+    assert.equal(typeof exactObservation.requestSha256, 'string')
+    assert.equal(typeof exactObservation.requestBodySha256, 'string')
+    assert.equal(exact.receipt.wireReceipt?.errorCategory, 'other')
+
+    const mismatches: Array<{
+      name: string
+      route: typeof nativeRoute | typeof chatRoute
+      status: number
+      body: string
+      id?: string
+    }> = [
+      {
+        name: 'generic-502',
+        route: nativeRoute,
+        status: 502,
+        body: '{"error":{"code":502,"message":"Bad gateway"}}',
+      },
+      {
+        name: 'foreign-question',
+        route: nativeRoute,
+        status: 502,
+        body: nativeBody('OpenAI refused to answer question "foreign"'),
+      },
+      {
+        name: 'near-match',
+        route: nativeRoute,
+        status: 502,
+        body: nativeBody('OpenAI refused to answer question "selection-extra"'),
+      },
+      {
+        name: 'suffix-after-quote',
+        route: nativeRoute,
+        status: 502,
+        body: nativeBody('OpenAI refused to answer question "selection" retry'),
+      },
+      {
+        name: 'missing-name',
+        route: nativeRoute,
+        status: 502,
+        body: '{"error":{"code":502,"message":"OpenAI refused to answer"}}',
+      },
+      {
+        name: 'wrong-model',
+        route: { ...nativeRoute, model: 'openai/other' },
+        status: 502,
+        body: nativeBody('OpenAI refused to answer question "selection"'),
+      },
+      {
+        name: 'wrong-provider',
+        route: { ...nativeRoute, provider: 'other' },
+        status: 502,
+        body: nativeBody('OpenAI refused to answer question "selection"'),
+      },
+      {
+        name: 'wrong-name',
+        route: { ...nativeRoute, providerName: 'Other' },
+        status: 502,
+        body: nativeBody('OpenAI refused to answer question "selection"'),
+      },
+      {
+        name: 'wrong-route',
+        route: { ...nativeRoute, apiEndpoint: '/api/v1/systemone/decisions' },
+        status: 502,
+        body: nativeBody('OpenAI refused to answer question "selection"'),
+      },
+      {
+        name: 'malformed-envelope',
+        route: nativeRoute,
+        status: 502,
+        body: '{"error":{"code":"502","message":"OpenAI refused to answer question \\"selection\\""}}',
+      },
+    ]
+    for (const mismatch of mismatches) {
+      const result = await runFailure(
+        `mismatch-${mismatch.name}`,
+        mismatch.route,
+        mismatch.status,
+        mismatch.body,
+        mismatch.id,
+      )
+      assert.equal(Object.hasOwn(result.receipt, 'providerRefusal'), false, mismatch.name)
+    }
+
+    const typed = await runFailure(
+      'native-typed',
+      nativeRoute,
+      200,
+      JSON.stringify({ answers: [{ type: 'refusal', name: 'selection' }] }),
+    )
+    assert.equal(typed.receipt.providerRefusal?.protocol, 'openrouter-native-named-refusal-v1')
+    const typedWrongId = await runFailure(
+      'native-typed-wrong-id',
+      nativeRoute,
+      200,
+      JSON.stringify({ answers: [{ type: 'refusal', name: 'foreign' }] }),
+    )
+    assert.equal(Object.hasOwn(typedWrongId.receipt, 'providerRefusal'), false)
+    const mixedNative = await runFailure(
+      'native-mixed-error-and-answers',
+      nativeRoute,
+      200,
+      JSON.stringify({
+        error: { code: 'invalid_request', message: 'not a refusal envelope' },
+        answers: [{ type: 'refusal', name: 'selection' }],
+      }),
+    )
+    assert.equal(Object.hasOwn(mixedNative.receipt, 'providerRefusal'), false)
+
+    const secretMarker = 'OPENROUTER_API_KEY=private-refusal-marker'
+    const chat = await runFailure(
+      'chat-refusal',
+      chatRoute,
+      200,
+      JSON.stringify({ choices: [{ message: { refusal: secretMarker } }] }),
+    )
+    const chatObservation = chat.receipt.providerRefusal
+    assert.ok(chatObservation)
+    assert.equal(chatObservation.protocol, 'openrouter-chat-message-refusal-v1')
+    assert.equal(chatObservation.scope, 'request')
+    assert.equal(Object.hasOwn(chatObservation, 'questionId'), false)
+    assert.doesNotMatch(chat.receiptText, /OPENROUTER_API_KEY|private-refusal-marker/u)
+    const multiChoiceChat = await runFailure(
+      'chat-multiple-choices',
+      chatRoute,
+      200,
+      JSON.stringify({
+        choices: [
+          { message: { refusal: 'provider refusal' } },
+          { message: { refusal: 'second choice' } },
+        ],
+      }),
+    )
+    assert.equal(Object.hasOwn(multiChoiceChat.receipt, 'providerRefusal'), false)
+
+    const pinnedNativeRequest = {
+      model: nativeRoute.model,
+      provider: { only: [nativeRoute.provider], allow_fallbacks: false },
+      questions: { selection: { type: 'choice' } },
+    }
+    for (const dispatchedUrl of [
+      'https://openrouter.ai/api/alpha/decisions?unexpected=1',
+      'https://openrouter.ai/api/alpha/decisions#unexpected',
+      'https://user@openrouter.ai/api/alpha/decisions',
+    ]) {
+      assert.equal(
+        observeProviderRefusal({
+          body: { error: { code: 502, message: 'OpenAI refused to answer question "selection"' } },
+          route: nativeRoute,
+          status: 502,
+          responseDisposition: 'error-envelope',
+          dispatchedMethod: 'POST',
+          requestedQuestionIds: ['selection'],
+          binding: {
+            physicalId: 1,
+            requestSha256: 'a'.repeat(64),
+            requestBodySha256: 'b'.repeat(64),
+          },
+          dispatchedUrl,
+          dispatchedBody: JSON.stringify(pinnedNativeRequest),
+        }),
+        undefined,
+      )
+    }
+    assert.equal(
+      observeProviderRefusal({
+        body: { error: { code: 502, message: 'OpenAI refused to answer question "selection"' } },
+        route: nativeRoute,
+        status: 502,
+        responseDisposition: 'error-envelope',
+        requestedQuestionIds: ['selection'],
+        binding: {
+          physicalId: 1,
+          requestSha256: 'a'.repeat(64),
+          requestBodySha256: 'b'.repeat(64),
+        },
+        dispatchedUrl: 'https://openrouter.ai/api/alpha/decisions',
+        dispatchedMethod: 'GET',
+        dispatchedBody: JSON.stringify(pinnedNativeRequest),
+      }),
+      undefined,
+    )
+
+    const concurrentDir = join(directory, 'concurrent')
+    const concurrentBudget = new RunBudget(2, 0.1)
+    const bothFetched: Array<() => void> = []
+    let fetched = 0
+    const concurrent = recordProvider(
+      (fetch) =>
+        createOpenRouterDecisions({
+          apiKey: 'fixture-key',
+          model: nativeRoute.model,
+          provider: nativeRoute.provider,
+          providerName: nativeRoute.providerName,
+          fetch,
+        }),
+      concurrentBudget,
+      concurrentDir,
+      nativeRoute,
+      async (_input, init) => {
+        fetched++
+        const requestBody = z
+          .object({ questions: z.record(z.unknown()) })
+          .parse(JSON.parse(String(init?.body)))
+        const id = Object.keys(requestBody.questions)[0]
+        if (fetched === 2) bothFetched.splice(0).forEach((resolve) => resolve())
+        else await new Promise<void>((resolve) => bothFetched.push(resolve))
+        return new Response(nativeBody(`OpenAI refused to answer question "${id}"`), {
+          status: 502,
+        })
+      },
+    )
+    await Promise.all([
+      assert.rejects(concurrent.port.decide(requestFor('alpha'), new AbortController().signal)),
+      assert.rejects(concurrent.port.decide(requestFor('beta'), new AbortController().signal)),
+    ])
+    assert.deepEqual(
+      concurrent.calls
+        .map((call) =>
+          call.providerRefusal?.protocol === 'openrouter-native-named-refusal-v1'
+            ? call.providerRefusal.questionId
+            : undefined,
+        )
+        .sort(),
+      ['alpha', 'beta'],
+    )
+    assert.equal(fetched, 2)
+
+    const abortController = new AbortController()
+    const abortedFetches = { count: 0 }
+    const abortedRefusal = recordProvider(
+      (fetch) =>
+        createOpenRouterDecisions({
+          apiKey: 'fixture-key',
+          model: nativeRoute.model,
+          provider: nativeRoute.provider,
+          providerName: nativeRoute.providerName,
+          fetch,
+        }),
+      new RunBudget(1, 0.1),
+      join(directory, 'aborted-refusal'),
+      nativeRoute,
+      async () => {
+        abortedFetches.count++
+        setTimeout(() => abortController.abort(), 0)
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(
+                new TextEncoder().encode(
+                  nativeBody('OpenAI refused to answer question "selection"'),
+                ),
+              )
+            },
+          }),
+          { status: 502 },
+        )
+      },
+    )
+    await assert.rejects(
+      abortedRefusal.port.decide(requestFor('selection'), abortController.signal),
+      { code: 'ABORTED' },
+    )
+    assert.equal(abortedFetches.count, 1)
+    assert.equal(Object.hasOwn(abortedRefusal.calls[0] ?? {}, 'providerRefusal'), false)
+
+    const blockedDirectory = join(directory, 'blocked-output')
+    await writeFile(blockedDirectory, 'fixture file blocks directory creation')
+    let blockedFetches = 0
+    const blockedBudget = new RunBudget(1, 0.1)
+    const blockedRecorder = recordProvider(
+      (fetch) =>
+        createOpenRouterDecisions({
+          apiKey: 'fixture-key',
+          model: nativeRoute.model,
+          provider: nativeRoute.provider,
+          providerName: nativeRoute.providerName,
+          fetch,
+        }),
+      blockedBudget,
+      blockedDirectory,
+      nativeRoute,
+      async () => {
+        blockedFetches++
+        return new Response(nativeBody('OpenAI refused to answer question "selection"'), {
+          status: 502,
+        })
+      },
+    )
+    await assert.rejects(
+      blockedRecorder.port.decide(requestFor('selection'), new AbortController().signal),
+      { code: 'RESOURCE_LIMIT' },
+    )
+    assert.equal(blockedFetches, 0)
+    assert.equal(blockedBudget.snapshot().admittedPhysicalCalls, 0)
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

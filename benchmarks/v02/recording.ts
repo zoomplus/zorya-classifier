@@ -6,6 +6,8 @@ import type { DecisionPort, DecisionRequest, DecisionResult } from '../../src/en
 import { ClassifierError } from '../../src/entities/errors.js'
 import type { RunBudget } from './budget.js'
 import { createDecisionTrace, hashCanonical, sanitizeDecisionRequest } from './protocol.js'
+import { observeProviderRefusal } from './provider-refusal.js'
+import type { ProviderRefusalObservation } from './provider-refusal.js'
 
 type WireErrorCategory =
   | 'unsupported-parameter'
@@ -85,6 +87,7 @@ export interface PhysicalCallRecord {
     attempts: number
   }
   errorCode?: string
+  providerRefusal?: ProviderRefusalObservation
 }
 
 interface LogicalCallRecord {
@@ -334,6 +337,7 @@ const emptyWireReceipt = (
 interface CapturedResponse {
   response: Response
   wireReceipt: NonNullable<PhysicalCallRecord['wireReceipt']>
+  providerRefusal?: ProviderRefusalObservation
 }
 
 /** Read the wire body once, then replay only the bounded captured bytes to the adapter. */
@@ -341,6 +345,16 @@ async function readWireReceipt(
   response: Response,
   signal: AbortSignal | null | undefined,
   timeoutMs: number,
+  context: {
+    route: PhysicalCallRecord['route']
+    dispatchedUrl: string
+    dispatchedMethod: string
+    dispatchedBody: string
+    requestedQuestionIds: readonly string[]
+    physicalId: number
+    requestSha256: string
+    requestBodySha256: string
+  },
 ): Promise<CapturedResponse> {
   const replay = (bytes: Uint8Array): Response => {
     const headers = new Headers(response.headers)
@@ -460,6 +474,21 @@ async function readWireReceipt(
     return { response: replay(raw), wireReceipt: emptyWireReceipt(response, 'invalid-json') }
   const object = parsed as Record<string, unknown>
   const parsedDisposition = responseDisposition(object)
+  const providerRefusal = observeProviderRefusal({
+    body: parsed,
+    dispatchedUrl: context.dispatchedUrl,
+    dispatchedMethod: context.dispatchedMethod,
+    dispatchedBody: context.dispatchedBody,
+    route: context.route,
+    status: response.status,
+    responseDisposition: parsedDisposition.disposition,
+    requestedQuestionIds: context.requestedQuestionIds,
+    binding: {
+      physicalId: context.physicalId,
+      requestSha256: context.requestSha256,
+      requestBodySha256: context.requestBodySha256,
+    },
+  })
   const usage =
     object.usage && typeof object.usage === 'object'
       ? (object.usage as Record<string, unknown>)
@@ -480,7 +509,7 @@ async function readWireReceipt(
     (typeof message === 'string'
       ? /(?:parameter|param)\s+["'`]?([a-zA-Z0-9_.-]{1,80})/iu.exec(message)?.[1]
       : undefined)
-  return {
+  const captured: CapturedResponse = {
     response: replay(raw),
     wireReceipt: {
       responseModel: safeField(object.model),
@@ -499,6 +528,8 @@ async function readWireReceipt(
       bodyRead: 'parsed',
     },
   }
+  if (providerRefusal) captured.providerRefusal = providerRefusal
+  return captured
 }
 
 /** Instrument the actual transport fetch boundary. A DecisionPort attempt alone consumes no budget. */
@@ -551,6 +582,13 @@ export function recordProvider(
     if (!logical) throw new Error('Provider fetch occurred outside a recorded logical decision')
     if (logical.physicalIds.length > 0)
       throw new Error('Pinned provider attempted an extra physical request')
+    const routeSnapshot = { ...route }
+    const dispatchedUrl =
+      input instanceof Request ? input.url : input instanceof URL ? input.href : input
+    const dispatchedMethod = init?.method ?? (input instanceof Request ? input.method : 'GET')
+    const requestedQuestionIds = Object.freeze(
+      logical.request.questions.map((question) => question.id),
+    )
     const body = init?.body
     const bodyText =
       typeof body === 'string'
@@ -570,8 +608,18 @@ export function recordProvider(
       dispatched: true,
       httpStatus: null,
       wireReceipt: null,
-      route,
+      route: routeSnapshot,
       receipt: null,
+    }
+    const refusalContext = {
+      route: routeSnapshot,
+      dispatchedUrl,
+      dispatchedMethod,
+      dispatchedBody: bodyText,
+      requestedQuestionIds,
+      physicalId: record.physicalId,
+      requestSha256: record.requestSha256,
+      requestBodySha256: record.requestBodySha256,
     }
     const started = performance.now()
     try {
@@ -587,7 +635,7 @@ export function recordProvider(
             dispatched: true,
             requestSha256: record.requestSha256,
             requestBodySha256: record.requestBodySha256,
-            route,
+            route: routeSnapshot,
             redirects: 'error',
             retries: 0,
           },
@@ -606,8 +654,14 @@ export function recordProvider(
     try {
       const response = await baseFetch(input, init)
       record.httpStatus = response.status
-      const captured = await readWireReceipt(response, init?.signal, wireReadTimeoutMs)
+      const captured = await readWireReceipt(
+        response,
+        init?.signal,
+        wireReadTimeoutMs,
+        refusalContext,
+      )
       record.wireReceipt = captured.wireReceipt
+      if (captured.providerRefusal) record.providerRefusal = captured.providerRefusal
       record.durationMs = performance.now() - started
       await persist(
         'physical-http',
