@@ -730,10 +730,6 @@ async function executeDevScreenWithinDeadline(
       annotations,
     )
 
-  const storedByCase = new Map<
-    string,
-    { candidate: StoredCaseArtifact; control: StoredCaseArtifact }
-  >()
   const storedArmsByCase = new Map<string, Partial<Record<H8aFreshProfileId, StoredCaseArtifact>>>()
   const hardBlockers: string[] = []
   const candidateDurations: number[] = []
@@ -759,7 +755,6 @@ async function executeDevScreenWithinDeadline(
     const armOrder: H8aFreshProfileId[] = schedule.candidateArmFirst
       ? [candidateId, PROFILE_CONTROL_ID]
       : [PROFILE_CONTROL_ID, candidateId]
-    const byProfile = new Map<H8aFreshProfileId, StoredCaseArtifact>()
     for (const profileId of armOrder) {
       try {
         phaseDeadline.assertOpen()
@@ -777,38 +772,14 @@ async function executeDevScreenWithinDeadline(
           now,
           clockNow,
         })
-        byProfile.set(profileId, stored)
         const attempts = storedArmsByCase.get(schedule.opaqueCaseId) ?? {}
         attempts[profileId] = stored
         storedArmsByCase.set(schedule.opaqueCaseId, attempts)
-        const isCandidate = profileId === candidateId
-        if (stored.durationMs === null) {
-          if (isCandidate) candidateUnknownDurationCount++
-          else controlUnknownDurationCount++
-        } else (isCandidate ? candidateDurations : controlDurations).push(stored.durationMs)
-        if (isCandidate) {
-          candidateKnownCostUsd += stored.knownCostUsd
-          candidateLogicalAttempts += stored.result.logicalReceipts.length
-          candidatePhysicalCalls += stored.result.physicalReceipts.filter(
-            (receipt) => receipt.dispatchState === 'confirmed',
-          ).length
-        } else {
-          controlKnownCostUsd += stored.knownCostUsd
-          controlLogicalAttempts += stored.result.logicalReceipts.length
-          controlPhysicalCalls += stored.result.physicalReceipts.filter(
-            (receipt) => receipt.dispatchState === 'confirmed',
-          ).length
-        }
         if (stored.completionFailureCode && stored.completionRecovery === 'receipt-only') {
           hardBlockers.push(
             `artifact-complete-failed:${schedule.opaqueCaseId}:${profileId}:${stored.completionFailureCode}:recovered-receipt-only`,
           )
         }
-        const bound = freeze.conservativeCostProof.profileDispatchUpperBounds.find(
-          (item) => item.profileId === profileId,
-        )!.maxUsdPerPhysicalDispatch
-        if (isCandidate) candidateUnknownReservedUsd += stored.unknownDispatchCount * bound
-        else controlUnknownReservedUsd += stored.unknownDispatchCount * bound
         const blocker = blockReason(stored.result)
         if (blocker) {
           hardBlockers.push(blocker)
@@ -827,19 +798,103 @@ async function executeDevScreenWithinDeadline(
         break
       }
     }
-    const candidate = byProfile.get(candidateId)
-    const control = byProfile.get(PROFILE_CONTROL_ID)
+    const attempts = storedArmsByCase.get(schedule.opaqueCaseId)
+    const candidate = attempts?.[candidateId]
+    if (
+      candidate &&
+      truth.expectedPresence === 'absent' &&
+      scoreNegativeFalseOutputRow(candidate.result.outputRow)
+    )
+      hardBlockers.push(`candidate-negative-false-output:${schedule.opaqueCaseId}`)
+    if (hardBlockers.length > 0) break
+  }
+
+  // A stopped stage still reports every eligible arm already sealed for this
+  // exact freeze, selection, source and profile identity. Recovery reads only
+  // immutable case artifacts and never re-dispatches a missing arm.
+  const hasIncompletePair = selectedInOrder.some((schedule) => {
+    const arms = storedArmsByCase.get(schedule.opaqueCaseId)
+    return !arms?.[candidateId] || !arms[PROFILE_CONTROL_ID]
+  })
+  if (hardBlockers.length > 0 || hasIncompletePair) {
+    for (const schedule of selectedInOrder) {
+      const producer = producerById.get(schedule.opaqueCaseId)
+      if (!producer) throw new RangeError('Selected screen case is incomplete')
+      const arms = storedArmsByCase.get(schedule.opaqueCaseId) ?? {}
+      for (const profileId of [candidateId, PROFILE_CONTROL_ID] as const) {
+        if (arms[profileId]) continue
+        try {
+          const cached = await store.loadOrRecover(
+            buildCaseArtifactIdentity(freeze, selection, producer, profileId),
+          )
+          if (cached) arms[profileId] = cached
+        } catch (error) {
+          hardBlockers.push(
+            `cached-arm-recovery-blocked:${schedule.opaqueCaseId}:${profileId}:${safeFailureCode(error)}`,
+          )
+        }
+      }
+      if (Object.keys(arms).length > 0) storedArmsByCase.set(schedule.opaqueCaseId, arms)
+    }
+  }
+
+  // Derive every stage metric once, in frozen schedule/arm order.
+  for (const schedule of selectedInOrder) {
+    const arms = storedArmsByCase.get(schedule.opaqueCaseId)
+    if (!arms) continue
+    const armOrder: H8aFreshProfileId[] = schedule.candidateArmFirst
+      ? [candidateId, PROFILE_CONTROL_ID]
+      : [PROFILE_CONTROL_ID, candidateId]
+    for (const profileId of armOrder) {
+      const stored = arms[profileId]
+      if (!stored) continue
+      const isCandidate = profileId === candidateId
+      if (stored.durationMs === null) {
+        if (isCandidate) candidateUnknownDurationCount++
+        else controlUnknownDurationCount++
+      } else (isCandidate ? candidateDurations : controlDurations).push(stored.durationMs)
+      if (isCandidate) {
+        candidateKnownCostUsd += stored.knownCostUsd
+        candidateLogicalAttempts += stored.result.logicalReceipts.length
+        candidatePhysicalCalls += stored.result.physicalReceipts.filter(
+          (receipt) => receipt.dispatchState === 'confirmed',
+        ).length
+      } else {
+        controlKnownCostUsd += stored.knownCostUsd
+        controlLogicalAttempts += stored.result.logicalReceipts.length
+        controlPhysicalCalls += stored.result.physicalReceipts.filter(
+          (receipt) => receipt.dispatchState === 'confirmed',
+        ).length
+      }
+      const bound = freeze.conservativeCostProof.profileDispatchUpperBounds.find(
+        (item) => item.profileId === profileId,
+      )!.maxUsdPerPhysicalDispatch
+      if (isCandidate) candidateUnknownReservedUsd += stored.unknownDispatchCount * bound
+      else controlUnknownReservedUsd += stored.unknownDispatchCount * bound
+      const blocker = blockReason(stored.result)
+      if (blocker) hardBlockers.push(blocker)
+      if (
+        stored.result.caseError === 'RECOVERED_AFTER_DISPATCH_WITHOUT_OUTPUT' &&
+        !hardBlockers.some((item) =>
+          item.startsWith(`artifact-complete-failed:${schedule.opaqueCaseId}:${profileId}:`),
+        )
+      )
+        hardBlockers.push(
+          `artifact-complete-failed:${schedule.opaqueCaseId}:${profileId}:RECOVERED_AFTER_DISPATCH_WITHOUT_OUTPUT:recovered-receipt-only`,
+        )
+    }
+    const candidate = arms[candidateId]
+    const control = arms[PROFILE_CONTROL_ID]
     if (candidate && control) {
-      storedByCase.set(schedule.opaqueCaseId, { candidate, control })
       if (isSemanticallyObserved(candidate.result) && isSemanticallyObserved(control.result))
         completedPairs++
+      const truth = truthById.get(schedule.opaqueCaseId)!
       if (
         truth.expectedPresence === 'absent' &&
         scoreNegativeFalseOutputRow(candidate.result.outputRow)
       )
         hardBlockers.push(`candidate-negative-false-output:${schedule.opaqueCaseId}`)
     }
-    if (hardBlockers.length > 0) break
   }
 
   const campaignState = options.ledger.snapshot()

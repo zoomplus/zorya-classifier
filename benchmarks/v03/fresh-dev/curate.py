@@ -172,12 +172,12 @@ MASK_HEADERS = (
 )
 
 
-def deterministic_key(category: str, image_id: str, class_id: str) -> str:
-    return sha256_bytes(f"{SEED}/{category}/{image_id}/{class_id}".encode())
+def deterministic_key(category: str, image_id: str, class_id: str, *, seed: str = SEED) -> str:
+    return sha256_bytes(f"{seed}/{category}/{image_id}/{class_id}".encode())
 
 
-def opaque_case_id(image_id: str, class_id: str) -> str:
-    return sha256_bytes(f"{SEED}/case-id/{image_id}/{class_id}".encode())[:32]
+def opaque_case_id(image_id: str, class_id: str, *, seed: str = SEED) -> str:
+    return sha256_bytes(f"{seed}/case-id/{image_id}/{class_id}".encode())[:32]
 
 
 def note_rejection(
@@ -410,6 +410,7 @@ def scan_candidates(
     mask_row_index: dict[tuple[str, str], list[tuple[int, dict[str, str]]]],
     mask_header_entries: dict[str, dict[str, int]],
     require_exact_max_dimension: bool = False,
+    selection_seed: str = SEED,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], Counter[str], dict[str, list[dict[str, Any]]]]:
     eligible_images = indexes["eligibleImages"]
     classes = indexes.get("classes") or {}
@@ -575,7 +576,7 @@ def scan_candidates(
                     "author": meta["Author"],
                     "title": meta["Title"],
                 },
-                "sortKey": deterministic_key("positive", image_id, class_id),
+                "sortKey": deterministic_key("positive", image_id, class_id, seed=selection_seed),
             }
         )
 
@@ -617,7 +618,7 @@ def scan_candidates(
                     "author": meta["Author"],
                     "title": meta["Title"],
                 },
-                "sortKey": deterministic_key("negative", image_id, class_id),
+                "sortKey": deterministic_key("negative", image_id, class_id, seed=selection_seed),
             }
         )
 
@@ -779,12 +780,14 @@ def build_attempt_list_rows(
 def build_private_rows(
     positives: list[dict[str, Any]],
     negatives: list[dict[str, Any]],
+    *,
+    selection_seed: str = SEED,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for candidate in positives:
         rows.append(
             {
-                "caseId": opaque_case_id(candidate["imageId"], candidate["classId"]),
+                "caseId": opaque_case_id(candidate["imageId"], candidate["classId"], seed=selection_seed),
                 "expectedPresence": "present",
                 "imageId": candidate["imageId"],
                 "targetClassId": candidate["classId"],
@@ -805,7 +808,7 @@ def build_private_rows(
     for candidate in negatives:
         rows.append(
             {
-                "caseId": opaque_case_id(candidate["imageId"], candidate["classId"]),
+                "caseId": opaque_case_id(candidate["imageId"], candidate["classId"], seed=selection_seed),
                 "expectedPresence": "absent",
                 "imageId": candidate["imageId"],
                 "targetClassId": candidate["classId"],

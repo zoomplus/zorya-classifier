@@ -136,9 +136,15 @@ ATTEMPT_LIST_SCHEMA_V3 = "h8a-fresh-dev-photo-acquisition-attempt-list-v3"
 DUPLICATE_POLICY_SCHEMA_V1 = "h8a-fresh-dev-photo-duplicate-policy-v1"
 DUPLICATE_POLICY_SCHEMA_V2 = "h8a-fresh-dev-photo-duplicate-policy-v2"
 DUPLICATE_POLICY_SCHEMA_V3 = "h8a-fresh-dev-photo-duplicate-policy-v3"
+DUPLICATE_POLICY_STATUS_DISJOINT_V1 = "frozen-pre-acquisition-disjoint-photo-v1"
 FINGERPRINT_INDEX_SCHEMA_V1 = "h8a-fresh-dev-prior-fingerprint-index-v1"
 FINGERPRINT_INDEX_SCHEMA_V2 = "h8a-fresh-dev-prior-fingerprint-index-v2"
 FINGERPRINT_INDEX_SCHEMA_V3 = "h8a-fresh-dev-prior-fingerprint-index-v3"
+DISJOINT_PHOTO_EXCLUSION_SCHEMA_V1 = "h8a-fresh-dev-disjoint-photo-exclusion-v1"
+DISJOINT_PHOTO_EXCLUSION_STATUS_V1 = "frozen-prior-exclusions-and-v4-retained-images"
+DISJOINT_PHOTO_SELECTION_SEED_V1 = "h8a-independent-dev40-20261101-r1"
+DISJOINT_PHOTO_PRIOR_AUDIT_V3_SHA256 = "4232f8d08bb885435724d6765afeefe79ef6ee0c1f85804881b0c936718a39c7"
+DISJOINT_PHOTO_PRIOR_INDEX_SHA256 = "a0443bdb22e4d9952460415c5eff91d9f4db55fbce4248af0050be9f4ce36ec8"
 CORRECTED_PRIMARY_SHORTLIST_SHA256 = (
     "e30a8b03d7d0aa2268babf53419a13d475b7bdda475df8e914bac469fde3b299"
 )
@@ -842,6 +848,109 @@ def validate_additive_exclusion_audit_v3(path: Path, *, expected_sha256: str) ->
     return exclusion_audit_view(payload, digest)
 
 
+def validate_disjoint_photo_exclusion_audit_v1(
+    path: Path, *, expected_sha256: str
+) -> dict[str, Any]:
+    raw, digest = read_bounded_file_bytes(
+        path, max_bytes=MAX_EXCLUSION_AUDIT_BYTES, label="disjoint photo exclusion audit"
+    )
+    if digest != expected_sha256:
+        raise CurateError("disjoint photo exclusion audit SHA-256 mismatch")
+    payload = require_json_object(
+        loads_strict_json(raw.decode("utf-8"), label="disjoint photo exclusion audit"),
+        "disjoint photo exclusion audit",
+    )
+    required = {
+        "schemaVersion", "status", "selectionSeed", "priorAuditV3Sha256",
+        "priorFingerprintIndexSha256", "v4AttemptListSha256", "v4PrimaryShortlistSha256",
+        "v4ReserveCommitSha256", "v4AcquisitionReportSha256", "v4PrivateReceiptsSha256",
+        "sourceGroupSplitSha256", "parentInputs", "ledgers", "imageIds", "caseIds",
+        "encodedImageSha256", "sourceGroups", "missingSourceMetadataIds", "sources",
+        "v4RetainedJpegFingerprints",
+    }
+    if set(payload) != required:
+        raise CurateError("disjoint photo exclusion audit keys mismatch")
+    if require_string(payload.get("schemaVersion"), "schemaVersion") != DISJOINT_PHOTO_EXCLUSION_SCHEMA_V1:
+        raise CurateError("disjoint photo exclusion audit schema mismatch")
+    if require_string(payload.get("status"), "status") != DISJOINT_PHOTO_EXCLUSION_STATUS_V1:
+        raise CurateError("disjoint photo exclusion audit status mismatch")
+    if require_string(payload.get("selectionSeed"), "selectionSeed") != DISJOINT_PHOTO_SELECTION_SEED_V1:
+        raise CurateError("disjoint photo exclusion audit seed mismatch")
+    if require_sha256_hex(payload.get("priorAuditV3Sha256"), "priorAuditV3Sha256") != DISJOINT_PHOTO_PRIOR_AUDIT_V3_SHA256:
+        raise CurateError("disjoint photo prior audit pin mismatch")
+    if require_sha256_hex(payload.get("priorFingerprintIndexSha256"), "priorFingerprintIndexSha256") != DISJOINT_PHOTO_PRIOR_INDEX_SHA256:
+        raise CurateError("disjoint photo prior fingerprint index pin mismatch")
+    for field in (
+        "v4AttemptListSha256", "v4PrimaryShortlistSha256", "v4ReserveCommitSha256",
+        "v4AcquisitionReportSha256", "v4PrivateReceiptsSha256", "sourceGroupSplitSha256",
+    ):
+        require_sha256_hex(payload.get(field), field)
+    parents = payload.get("parentInputs")
+    if not isinstance(parents, list) or not parents:
+        raise CurateError("disjoint photo parentInputs must be a nonempty array")
+    labels: set[str] = set()
+    for index, parent in enumerate(parents):
+        item = require_json_object(parent, f"parentInputs[{index}]")
+        if set(item) != PARENT_INPUT_RECORD_KEYS:
+            raise CurateError(f"parentInputs[{index}] keys mismatch")
+        label = require_string(item.get("label"), f"parentInputs[{index}].label")
+        if not label or label in labels:
+            raise CurateError("disjoint photo parentInputs labels must be unique")
+        labels.add(label)
+        require_string(item.get("path"), f"parentInputs[{index}].path")
+        require_sha256_hex(item.get("sha256"), f"parentInputs[{index}].sha256")
+    _validate_exclusion_audit_collection_fields(payload)
+    cases = payload.get("caseIds")
+    if not isinstance(cases, list):
+        raise CurateError("disjoint photo caseIds must be an array")
+    case_ids = [require_string(value, f"caseIds[{index}]") for index, value in enumerate(cases)]
+    if any(not value or value != value.strip() for value in case_ids) or len(set(case_ids)) != len(case_ids):
+        raise CurateError("disjoint photo caseIds must be nonempty and unique")
+    retained_raw = payload.get("v4RetainedJpegFingerprints")
+    if not isinstance(retained_raw, list) or len(retained_raw) != 20:
+        raise CurateError("disjoint photo must pin exactly 20 retained v4 JPEG fingerprints")
+    retained_encoded: set[str] = set()
+    encoded_universe = set(payload["encodedImageSha256"])
+    for index, value in enumerate(retained_raw):
+        item = require_json_object(value, f"v4RetainedJpegFingerprints[{index}]")
+        if set(item) != {
+            "encodedSha256", "decodedRgbSha256", "perceptualHash64", "source", "sourcePath", "width", "height"
+        }:
+            raise CurateError(f"v4RetainedJpegFingerprints[{index}] keys mismatch")
+        encoded = require_sha256_hex(item.get("encodedSha256"), f"v4RetainedJpegFingerprints[{index}].encodedSha256")
+        require_sha256_hex(item.get("decodedRgbSha256"), f"v4RetainedJpegFingerprints[{index}].decodedRgbSha256")
+        phash = require_string(item.get("perceptualHash64"), f"v4RetainedJpegFingerprints[{index}].perceptualHash64")
+        if not PHASH64_HEX.fullmatch(phash):
+            raise CurateError("v4 retained JPEG perceptualHash64 is malformed")
+        if require_string(item.get("source"), "v4 retained JPEG source") != "retained-v4-acquisition-jpeg":
+            raise CurateError("v4 retained JPEG source mismatch")
+        path = require_string(item.get("sourcePath"), "v4 retained JPEG sourcePath")
+        if not Path(path).is_absolute():
+            raise CurateError("v4 retained JPEG sourcePath must be absolute")
+        width = require_int_not_bool(item.get("width"), f"v4RetainedJpegFingerprints[{index}].width")
+        height = require_int_not_bool(item.get("height"), f"v4RetainedJpegFingerprints[{index}].height")
+        if width <= 0 or height <= 0:
+            raise CurateError("historical v4 retained JPEG dimensions must be positive")
+        if encoded not in encoded_universe or encoded in retained_encoded:
+            raise CurateError("v4 retained JPEG encoded SHA is absent or duplicated")
+        retained_encoded.add(encoded)
+    if len(payload["encodedImageSha256"]) != len(encoded_universe):
+        raise CurateError("disjoint photo encodedImageSha256 contains duplicates")
+    return {
+        "payload": payload,
+        "auditSha256": digest,
+        "counts": {
+            "imageIds": len(payload["imageIds"]),
+            "encodedImageSha256": len(payload["encodedImageSha256"]),
+            "sourceGroups": len(payload["sourceGroups"]),
+            "ledgers": len(payload["ledgers"]),
+        },
+        "excludedImageIds": set(payload["imageIds"]),
+        "excludedImageSha256": set(payload["encodedImageSha256"]),
+        "excludedSourceGroups": {normalize_source_group(value) for value in payload["sourceGroups"]},
+    }
+
+
 def producer_record_has_forbidden_leak(value: Any, *, path: str = "") -> str | None:
     if isinstance(value, dict):
         for key, child in value.items():
@@ -1143,6 +1252,7 @@ def validate_duplicate_policy(
     *,
     fingerprint_index_sha256: str,
     exclusion_audit_sha256: str | None = None,
+    allow_disjoint_photo: bool = False,
 ) -> dict[str, Any]:
     payload = require_json_object(raw, "duplicate policy")
     extra = set(payload) - {
@@ -1167,8 +1277,14 @@ def validate_duplicate_policy(
         DUPLICATE_POLICY_SCHEMA_V3,
     ):
         raise CurateError("duplicate policy schemaVersion mismatch")
-    if require_string(payload.get("status"), "duplicate policy.status") != "frozen-pre-acquisition":
+    status = require_string(payload.get("status"), "duplicate policy.status")
+    allowed_statuses = {"frozen-pre-acquisition"}
+    if allow_disjoint_photo:
+        allowed_statuses.add(DUPLICATE_POLICY_STATUS_DISJOINT_V1)
+    if status not in allowed_statuses:
         raise CurateError("duplicate policy status mismatch")
+    if status == DUPLICATE_POLICY_STATUS_DISJOINT_V1 and exclusion_audit_sha256 is None:
+        raise CurateError("disjoint photo duplicate policy requires its exclusion audit pin")
     pinned = require_sha256_hex(payload.get("fingerprintIndexSha256"), "duplicate policy.fingerprintIndexSha256")
     if pinned != fingerprint_index_sha256:
         raise CurateError("duplicate policy fingerprint index SHA-256 mismatch")

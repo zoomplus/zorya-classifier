@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import argparse
 import io
 import json
 import struct
@@ -10,6 +11,7 @@ import sys
 import tempfile
 import time
 import unittest
+import unittest.mock
 import zlib
 import zipfile
 from pathlib import Path
@@ -204,6 +206,56 @@ class UrlPolicyTests(unittest.TestCase):
 
 
 class FingerprintPolicyTests(unittest.TestCase):
+    def test_disjoint_acquisition_requires_external_exclusion_pin(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = {}
+            for name in ("attempt", "primary", "reserve", "policy", "fingerprint", "exclusion"):
+                path = root / f"{name}.json"
+                path.write_text("{}", encoding="utf-8")
+                paths[name] = path
+            args = [
+                "acquire",
+                "--attempt-list", str(paths["attempt"]),
+                "--primary-manifest", str(paths["primary"]),
+                "--reserve-manifest", str(paths["reserve"]),
+                "--duplicate-policy", str(paths["policy"]),
+                "--fingerprint-index", str(paths["fingerprint"]),
+                "--exclusion-audit", str(paths["exclusion"]),
+                "--disjoint-photo",
+                "--output-dir", str(root / "out"),
+            ]
+            with unittest.mock.patch.object(acquire, "UrllibHttpTransport") as transport:
+                with self.assertRaisesRegex(SystemExit, "requires --expected-exclusion-audit-sha256"):
+                    acquire.main(args)
+                transport.assert_not_called()
+
+    def test_duplicate_policy_status_cannot_cross_acquisition_modes(self) -> None:
+        fingerprint_sha = "a" * 64
+        audit_sha = validation.EXCLUSION_AUDIT_SHA256
+        disjoint_policy = duplicate_policy_template(fingerprint_index_sha256=fingerprint_sha)
+        disjoint_policy["status"] = validation.DUPLICATE_POLICY_STATUS_DISJOINT_V1
+        acquire._validate_duplicate_policy_for_mode(
+            disjoint_policy,
+            fingerprint_index_sha256=fingerprint_sha,
+            exclusion_audit_sha256=audit_sha,
+            disjoint_photo=True,
+        )
+        with self.assertRaisesRegex(validation.CurateError, "status mismatch|status does not match"):
+            acquire._validate_duplicate_policy_for_mode(
+                duplicate_policy_template(fingerprint_index_sha256=fingerprint_sha),
+                fingerprint_index_sha256=fingerprint_sha,
+                exclusion_audit_sha256=audit_sha,
+                disjoint_photo=True,
+            )
+        with self.assertRaisesRegex(validation.CurateError, "status mismatch|status does not match"):
+            acquire._validate_duplicate_policy_for_mode(
+                disjoint_policy,
+                fingerprint_index_sha256=fingerprint_sha,
+                exclusion_audit_sha256=audit_sha,
+                disjoint_photo=False,
+            )
+
     def test_missing_pillow_version_fails_fingerprint_index(self) -> None:
         payload = {
             "schemaVersion": validation.FINGERPRINT_INDEX_SCHEMA_V1,
@@ -252,6 +304,68 @@ class FingerprintPolicyTests(unittest.TestCase):
         )
         with self.assertRaises(validation.CurateError):
             validation.validate_fingerprint_index(payload)
+
+    def test_disjoint_photo_exclusion_requires_explicit_acquisition_route(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            fingerprints = []
+            encoded = []
+            for index in range(20):
+                encoded_sha = f"{index + 1:064x}"
+                encoded.append(encoded_sha)
+                fingerprints.append(
+                    {
+                        "encodedSha256": encoded_sha,
+                        "decodedRgbSha256": f"{index + 101:064x}",
+                        "perceptualHash64": f"{index + 1:016x}",
+                        "source": "retained-v4-acquisition-jpeg",
+                        "sourcePath": f"/retained/history/{index}.jpg",
+                        "width": 1024,
+                        "height": 768,
+                    }
+                )
+            parent = {
+                "label": "pinned-parent",
+                "path": "/retained/history/parent.json",
+                "sha256": "f" * 64,
+            }
+            audit = {
+                "schemaVersion": validation.DISJOINT_PHOTO_EXCLUSION_SCHEMA_V1,
+                "status": validation.DISJOINT_PHOTO_EXCLUSION_STATUS_V1,
+                "selectionSeed": validation.DISJOINT_PHOTO_SELECTION_SEED_V1,
+                "priorAuditV3Sha256": validation.DISJOINT_PHOTO_PRIOR_AUDIT_V3_SHA256,
+                "priorFingerprintIndexSha256": validation.DISJOINT_PHOTO_PRIOR_INDEX_SHA256,
+                "v4AttemptListSha256": "a" * 64,
+                "v4PrimaryShortlistSha256": "b" * 64,
+                "v4ReserveCommitSha256": "c" * 64,
+                "v4AcquisitionReportSha256": "d" * 64,
+                "v4PrivateReceiptsSha256": "e" * 64,
+                "sourceGroupSplitSha256": "1" * 64,
+                "parentInputs": [parent],
+                "ledgers": [{"path": "/retained/history/ledger.json", "sha256": "2" * 64, "imageRows": 1}],
+                "imageIds": [],
+                "caseIds": [],
+                "encodedImageSha256": encoded,
+                "sourceGroups": [],
+                "missingSourceMetadataIds": [],
+                "sources": [{"path": "/retained/history/source.csv", "sha256": "3" * 64}],
+                "v4RetainedJpegFingerprints": fingerprints,
+            }
+            audit_path = root / "disjoint-photo-audit.json"
+            audit_path.write_text(json.dumps(audit), encoding="utf-8")
+            digest = validation.sha256_file(audit_path)
+            args = argparse.Namespace(
+                expected_exclusion_audit_sha256=digest,
+                disjoint_photo=True,
+            )
+            loaded = acquire._load_exclusions_for_acquire(args, audit_path)
+            self.assertEqual(loaded["auditSha256"], digest)
+            self.assertEqual(loaded["excludedImageSha256"], set(encoded))
+            self.assertEqual(loaded["counts"]["encodedImageSha256"], 20)
+
+            args.disjoint_photo = False
+            with self.assertRaises(validation.CurateError):
+                acquire._load_exclusions_for_acquire(args, audit_path)
 
     def test_fingerprint_index_coverage_count_from_exclusion_set(self) -> None:
         excluded = {f"{index:064x}" for index in (1, 2, 3)}
@@ -533,7 +647,7 @@ class AcquisitionFlowTests(unittest.TestCase):
             duplicate_policy = duplicate_policy_template()
             attempt_doc = {
                 "schemaVersion": validation.ATTEMPT_LIST_SCHEMA_V1,
-                "selectionSeed": curate.SEED,
+                "selectionSeed": "fixture-disjoint-photo-seed-v1",
                 "primaryShortlistSha256": "a" * 64,
                 "reserveCommitSha256": "b" * 64,
                 "attempts": [
@@ -558,6 +672,7 @@ class AcquisitionFlowTests(unittest.TestCase):
                 output_dir=output_dir,
                 local_mask_archives={image_id[0].lower(): zip_path},
             )
+            self.assertEqual(report["selectionSeed"], "fixture-disjoint-photo-seed-v1")
             self.assertEqual(report["admitted"]["present"], 0)
 
     def test_oversize_jpeg_rejected(self) -> None:

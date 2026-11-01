@@ -449,6 +449,29 @@ class OpaqueCaseIdTests(unittest.TestCase):
         self.assertNotIn("positive", case_a)
         self.assertNotIn("negative", case_a)
 
+    def test_named_seed_is_local_and_does_not_change_historical_default_after_error(self) -> None:
+        image_id = "seed-locality-image"
+        class_id = "seed-locality-class"
+        historical_key = curate.deterministic_key("positive", image_id, class_id)
+        historical_case = curate.opaque_case_id(image_id, class_id)
+        disjoint_seed = "h8a-independent-dev40-20261101-r1"
+        disjoint_key = curate.deterministic_key("positive", image_id, class_id, seed=disjoint_seed)
+        disjoint_case = curate.opaque_case_id(image_id, class_id, seed=disjoint_seed)
+        self.assertNotEqual(disjoint_key, historical_key)
+        self.assertNotEqual(disjoint_case, historical_case)
+
+        with self.assertRaises(KeyError):
+            curate.scan_candidates(
+                {},
+                {"excludedImageIds": set(), "excludedSourceGroups": set()},
+                mask_row_index={},
+                mask_header_entries={},
+                selection_seed=disjoint_seed,
+            )
+
+        self.assertEqual(curate.deterministic_key("positive", image_id, class_id), historical_key)
+        self.assertEqual(curate.opaque_case_id(image_id, class_id), historical_case)
+
 
 class MaskPathSlugTests(unittest.TestCase):
     def test_expected_path_allows_underscore_in_label_slug(self) -> None:

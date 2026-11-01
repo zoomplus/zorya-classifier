@@ -425,11 +425,13 @@ def _bind_acquisition_inputs(
     fingerprint_index_sha256: str,
     exclusion_audit_sha256: str,
     excluded_encoded_sha256: set[str],
+    disjoint_photo: bool = False,
 ) -> None:
-    validate_duplicate_policy(
+    _validate_duplicate_policy_for_mode(
         duplicate_policy,
         fingerprint_index_sha256=fingerprint_index_sha256,
         exclusion_audit_sha256=exclusion_audit_sha256,
+        disjoint_photo=disjoint_photo,
     )
     validate_fingerprint_index_exclusion_coverage(
         fingerprint_index,
@@ -444,12 +446,41 @@ def _bind_acquisition_inputs(
 
 def _load_exclusions_for_acquire(args: argparse.Namespace, exclusion_path: Path) -> dict[str, Any]:
     expected_v2 = getattr(args, "expected_exclusion_audit_sha256", None)
+    if getattr(args, "disjoint_photo", False) and not expected_v2:
+        raise CurateError("--disjoint-photo requires --expected-exclusion-audit-sha256")
     if expected_v2:
         expected = require_string(expected_v2, "expected exclusion audit sha256")
+        if getattr(args, "disjoint_photo", False):
+            return validation.validate_disjoint_photo_exclusion_audit_v1(
+                exclusion_path, expected_sha256=expected
+            )
         if expected == validation.EXCLUSION_AUDIT_V2_SHA256:
             return validate_additive_exclusion_audit_v2(exclusion_path, expected_sha256=expected)
         return validate_additive_exclusion_audit_v3(exclusion_path, expected_sha256=expected)
     return validate_exclusion_audit(exclusion_path)
+
+
+def _validate_duplicate_policy_for_mode(
+    duplicate_policy: dict[str, Any],
+    *,
+    fingerprint_index_sha256: str,
+    exclusion_audit_sha256: str,
+    disjoint_photo: bool,
+) -> dict[str, Any]:
+    validated = validate_duplicate_policy(
+        duplicate_policy,
+        fingerprint_index_sha256=fingerprint_index_sha256,
+        exclusion_audit_sha256=exclusion_audit_sha256,
+        allow_disjoint_photo=disjoint_photo,
+    )
+    expected_status = (
+        validation.DUPLICATE_POLICY_STATUS_DISJOINT_V1
+        if disjoint_photo
+        else "frozen-pre-acquisition"
+    )
+    if validated.get("status") != expected_status:
+        raise CurateError("duplicate policy status does not match acquisition mode")
+    return validated
 
 
 def cmd_freeze_duplicate_policy(args: argparse.Namespace) -> int:
@@ -473,7 +504,11 @@ def cmd_freeze_duplicate_policy(args: argparse.Namespace) -> int:
         raise CurateError("unsupported fingerprint index schema for duplicate policy")
     policy = {
         "schemaVersion": policy_schema,
-        "status": "frozen-pre-acquisition",
+        "status": (
+            validation.DUPLICATE_POLICY_STATUS_DISJOINT_V1
+            if getattr(args, "disjoint_photo", False)
+            else "frozen-pre-acquisition"
+        ),
         "fingerprintIndexSha256": fingerprint_sha256,
         "exclusionAuditSha256": exclusions["auditSha256"],
         "perceptualHashAlgorithmId": PERCEPTUAL_HASH_ALGORITHM_ID,
@@ -489,7 +524,12 @@ def cmd_freeze_duplicate_policy(args: argparse.Namespace) -> int:
         policy["exactOnlyEncodedSha256Reject"] = True
     elif policy["schemaVersion"] != DUPLICATE_POLICY_SCHEMA_V1:
         raise CurateError("unsupported fingerprint index schema for duplicate policy")
-    validate_duplicate_policy(policy, fingerprint_index_sha256=fingerprint_sha256, exclusion_audit_sha256=exclusions["auditSha256"])
+    validate_duplicate_policy(
+        policy,
+        fingerprint_index_sha256=fingerprint_sha256,
+        exclusion_audit_sha256=exclusions["auditSha256"],
+        allow_disjoint_photo=getattr(args, "disjoint_photo", False),
+    )
     output_dir.mkdir(parents=True, exist_ok=False)
     (output_dir / "photo-duplicate-policy.json").write_text(
         json.dumps(policy, indent=2, ensure_ascii=False) + "\n",
@@ -962,7 +1002,9 @@ def run_acquisition(
     persist_artifacts: bool = False,
     primary_shortlist_sha256: str | None = None,
     reserve_commit_sha256: str | None = None,
+    disjoint_photo: bool = False,
 ) -> dict[str, Any]:
+    selection_seed = require_string(attempt_doc.get("selectionSeed"), "attempt list.selectionSeed")
     if (
         exclusion_audit_sha256 is not None
         and excluded_encoded_sha256 is not None
@@ -974,11 +1016,14 @@ def run_acquisition(
             fingerprint_index_sha256=fingerprint_index_sha256,
             exclusion_audit_sha256=exclusion_audit_sha256,
             excluded_encoded_sha256=excluded_encoded_sha256,
+            disjoint_photo=disjoint_photo,
         )
     else:
-        validate_duplicate_policy(
+        _validate_duplicate_policy_for_mode(
             duplicate_policy,
             fingerprint_index_sha256=duplicate_policy["fingerprintIndexSha256"],
+            exclusion_audit_sha256=duplicate_policy["exclusionAuditSha256"],
+            disjoint_photo=disjoint_photo,
         )
     attempts = bind_frozen_attempt_list(
         attempt_doc,
@@ -1305,7 +1350,7 @@ def run_acquisition(
                 "schemaVersion": 1,
                 "status": "infrastructure-stopped",
                 "infrastructureStopReason": error.reason_code,
-                "selectionSeed": SEED,
+                "selectionSeed": selection_seed,
                 "attemptCount": len(attempts),
                 "admitted": {"present": admitted_present, "absent": admitted_absent},
                 "rejections": rejections,
@@ -1353,7 +1398,7 @@ def run_acquisition(
     report = {
         "schemaVersion": 1,
         "status": status,
-        "selectionSeed": SEED,
+        "selectionSeed": selection_seed,
         "attemptCount": len(attempts),
         "admitted": {"present": admitted_present, "absent": admitted_absent},
         "rejections": rejections,
@@ -1407,10 +1452,11 @@ def cmd_acquire(args: argparse.Namespace) -> int:
         validation.loads_strict_json(duplicate_raw.decode("utf-8"), label="duplicate policy"),
         "duplicate policy",
     )
-    validate_duplicate_policy(
+    _validate_duplicate_policy_for_mode(
         duplicate_policy,
         fingerprint_index_sha256=fingerprint_sha256,
         exclusion_audit_sha256=exclusions["auditSha256"],
+        disjoint_photo=getattr(args, "disjoint_photo", False),
     )
 
     primary_expected = args.primary_shortlist_sha256 or CORRECTED_PRIMARY_SHORTLIST_SHA256
@@ -1428,6 +1474,31 @@ def cmd_acquire(args: argparse.Namespace) -> int:
         "reserve manifest",
     )
     validate_reserve_manifest(reserve_payload, primary_shortlist_sha256=primary["_sha256"])
+    if getattr(args, "disjoint_photo", False):
+        expected_seed = validation.DISJOINT_PHOTO_SELECTION_SEED_V1
+        if exclusions["payload"].get("selectionSeed") != expected_seed:
+            raise CurateError("disjoint photo exclusion seed mismatch")
+        for label, payload in (
+            ("attempt list", attempt_doc),
+            ("primary manifest", primary),
+            ("reserve manifest", reserve_payload),
+        ):
+            if payload.get("selectionSeed") != expected_seed:
+                raise CurateError(f"disjoint photo {label} selectionSeed mismatch")
+        if attempt_doc.get("metadataProfile") != validation.METADATA_PROFILE_V4:
+            raise CurateError("disjoint photo attempt list must use exact-1024 metadata profile v4")
+        if primary.get("metadataProfile") != validation.METADATA_PROFILE_V4:
+            raise CurateError("disjoint photo primary manifest must use exact-1024 metadata profile v4")
+        if reserve_payload.get("metadataProfile") != validation.METADATA_PROFILE_V4:
+            raise CurateError("disjoint photo reserve manifest must use exact-1024 metadata profile v4")
+    else:
+        for label, payload in (
+            ("attempt list", attempt_doc),
+            ("primary manifest", primary),
+            ("reserve manifest", reserve_payload),
+        ):
+            if payload.get("selectionSeed") != curate.SEED:
+                raise CurateError(f"historical {label} selectionSeed mismatch")
     bind_frozen_attempt_list(
         attempt_doc,
         primary_shortlist_sha256=primary["_sha256"],
@@ -1453,6 +1524,7 @@ def cmd_acquire(args: argparse.Namespace) -> int:
         persist_artifacts=True,
         primary_shortlist_sha256=primary["_sha256"],
         reserve_commit_sha256=reserve_digest,
+        disjoint_photo=getattr(args, "disjoint_photo", False),
     )
     return acquisition_exit_code(report)
 
@@ -1464,6 +1536,7 @@ def build_parser() -> argparse.ArgumentParser:
     freeze_policy.add_argument("--fingerprint-index", required=True)
     freeze_policy.add_argument("--exclusion-audit", required=True)
     freeze_policy.add_argument("--expected-exclusion-audit-sha256", default=None)
+    freeze_policy.add_argument("--disjoint-photo", action="store_true")
     freeze_policy.add_argument("--output-dir", required=True)
     freeze_policy.set_defaults(func=cmd_freeze_duplicate_policy)
     freeze_index = sub.add_parser("freeze-fingerprint-index-v2")
@@ -1506,6 +1579,7 @@ def build_parser() -> argparse.ArgumentParser:
     acquire.add_argument("--fingerprint-index", required=True)
     acquire.add_argument("--exclusion-audit", required=True)
     acquire.add_argument("--expected-exclusion-audit-sha256", default=None)
+    acquire.add_argument("--disjoint-photo", action="store_true")
     acquire.add_argument("--primary-shortlist-sha256", default=None)
     acquire.add_argument("--expected-attempt-list-sha256", default=None)
     acquire.add_argument("--output-dir", required=True)

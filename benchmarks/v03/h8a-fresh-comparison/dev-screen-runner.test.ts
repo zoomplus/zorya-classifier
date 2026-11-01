@@ -160,6 +160,185 @@ await test('DEV8 to DEV12 restart reuses exact paired artifacts without repeat p
   }
 })
 
+await test('early DEV40 stop reports cumulative eligible cache without redispatch', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-dev-screen-cumulative-stop-'))
+  try {
+    const { freeze, annotations, sourceBytesByCaseId, selection } = fixture()
+    const truth = new Map(annotations.cases.map((item) => [item.opaqueCaseId, item]))
+    const calls = new Map<string, number>()
+    const makePort = (
+      profileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_CONTROL_ID,
+      failCaseId?: string,
+    ): CaseExecutionPort => ({
+      async execute(input) {
+        const key = `${profileId}:${input.opaqueCaseId}`
+        calls.set(key, (calls.get(key) ?? 0) + 1)
+        if (profileId === PROFILE_CONTROL_ID && input.opaqueCaseId === failCaseId) {
+          return {
+            outputRow: {
+              schema: 'h8a-fresh-output-row-v1',
+              opaqueCaseId: input.opaqueCaseId,
+              profileId,
+              executionValidity: 'invalid',
+              caseState: 'unknown',
+              box: null,
+              cutoutPresent: false,
+              maskPackedSha256: null,
+              logicalReceiptIds: [1],
+              physicalReceiptIds: [1],
+            },
+            caseError: 'HTTP_502',
+            logicalReceipts: [
+              {
+                logicalId: 1,
+                opaqueCaseId: input.opaqueCaseId,
+                profileId,
+                requestSha256: sha256(key),
+                physicalIds: [1],
+                outcome: 'unknown',
+                errorCode: 'HTTP_502',
+              },
+            ],
+            physicalReceipts: [
+              {
+                receiptId: 1,
+                physicalId: null,
+                logicalId: 1,
+                dispatchState: 'uncertain',
+                settled: false,
+                costUsd: null,
+                chargeState: 'unknown',
+              },
+            ],
+          }
+        }
+        const positive = truth.get(input.opaqueCaseId)!.expectedPresence === 'present'
+        return {
+          outputRow: {
+            schema: 'h8a-fresh-output-row-v1',
+            opaqueCaseId: input.opaqueCaseId,
+            profileId,
+            executionValidity: 'valid',
+            caseState: positive ? 'success' : 'negative_clean',
+            box: positive ? { left: 1, top: 1, width: 4, height: 4 } : null,
+            cutoutPresent: false,
+            maskPackedSha256: null,
+            logicalReceiptIds: [1],
+            physicalReceiptIds: [],
+          },
+          logicalReceipts: [
+            {
+              logicalId: 1,
+              opaqueCaseId: input.opaqueCaseId,
+              profileId,
+              requestSha256: sha256(key),
+              physicalIds: [],
+              outcome: 'resolved',
+            },
+          ],
+          physicalReceipts: [],
+        }
+      },
+    })
+    const artifactRoot = join(root, 'artifacts')
+    const runtimeArtifacts: FreshRuntimeArtifacts = {
+      masksBySha256: new Map(),
+      cutoutsBySha256: new Map(),
+      cutoutsByProfileAndCase: new Map(),
+    }
+    const common = {
+      freeze,
+      annotations,
+      sourceBytesByCaseId,
+      selection,
+      selectionPath: join(root, 'selection.json'),
+      artifactRoot,
+      ledger: await CampaignLedger.open(join(root, 'ledger.json')),
+      runtimeArtifacts,
+    }
+    const dev8 = await executeDevScreen({
+      ...common,
+      screen: 'dev8',
+      candidatePort: makePort(PROFILE_CANDIDATE_ID),
+      controlPort: makePort(PROFILE_CONTROL_ID),
+    })
+    await sealDevScreenReview(artifactRoot, dev8, 'advance', 'Offline cache fixture.')
+    const dev12 = await executeDevScreen({
+      ...common,
+      screen: 'dev12',
+      candidatePort: makePort(PROFILE_CANDIDATE_ID),
+      controlPort: makePort(PROFILE_CONTROL_ID),
+    })
+    await sealDevScreenReview(artifactRoot, dev12, 'advance', 'Offline cache fixture.')
+
+    const previouslySelected = new Set(selection.dev12CaseIds)
+    const secondUncachedSchedule = freeze.pairedSchedule.filter(
+      (row) => !previouslySelected.has(row.opaqueCaseId),
+    )[1]
+    const secondUncached = secondUncachedSchedule?.opaqueCaseId
+    assert.ok(secondUncached)
+    assert.ok(secondUncachedSchedule)
+    const fullCandidate = makePort(PROFILE_CANDIDATE_ID)
+    const fullControl = makePort(PROFILE_CONTROL_ID, secondUncached)
+    const dev40 = await executeDevScreen({
+      ...common,
+      screen: 'dev40',
+      candidatePort: fullCandidate,
+      controlPort: fullControl,
+    })
+
+    assert.equal(dev40.completedPairs, 13)
+    assert.equal(dev40.expectedPairs, 40)
+    assert.equal(dev40.weightedEstimateComplete, false)
+    assert.equal(dev40.outputs.length, 40)
+    const failedOutput = dev40.outputs.find((row) => row.opaqueCaseId === secondUncached)
+    assert.ok(failedOutput)
+    assert.equal(failedOutput.controlCaseState, 'unknown')
+    assert.match(failedOutput.controlIdentitySha256, /^[a-f0-9]{64}$/u)
+    assert.equal(
+      dev40.outputs.filter((row) => row.candidateCaseState !== 'unstarted').length,
+      secondUncachedSchedule.candidateArmFirst ? 14 : 13,
+    )
+    assert.equal(dev40.outputs.filter((row) => row.controlCaseState !== 'unstarted').length, 14)
+    assert.ok(dev40.hardBlockers.some((item) => item.startsWith('invalid-output:')))
+    assert.equal(
+      dev40.control.unknownReservedUsd,
+      freeze.conservativeCostProof.profileDispatchUpperBounds.find(
+        (item) => item.profileId === PROFILE_CONTROL_ID,
+      )!.maxUsdPerPhysicalDispatch,
+    )
+    assert.equal(dev40.control.logicalAttempts, 14)
+    assert.equal(
+      dev40.candidate.logicalAttempts,
+      secondUncachedSchedule.candidateArmFirst ? 14 : 13,
+    )
+    assert.equal(dev40.control.durationsMs.length, 14)
+    assert.equal(
+      dev40.perCell.reduce(
+        (sum, cell) => sum + cell.observedPositivePairs + cell.observedNegativePairs,
+        0,
+      ),
+      13,
+    )
+    const attemptsAfterStop = new Map(calls)
+    assert.equal(
+      [...calls.values()].reduce((sum, count) => sum + count, 0),
+      24 + (secondUncachedSchedule.candidateArmFirst ? 4 : 3),
+    )
+
+    const resumed = await executeDevScreen({
+      ...common,
+      screen: 'dev40',
+      candidatePort: fullCandidate,
+      controlPort: fullControl,
+    })
+    assert.deepEqual(resumed, dev40)
+    assert.deepEqual(calls, attemptsAfterStop)
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
 await test('a semantic unknown is a positive miss but does not become a technical blocker', async () => {
   const root = await mkdtemp(join(tmpdir(), 'h8a-dev-unknown-'))
   try {
