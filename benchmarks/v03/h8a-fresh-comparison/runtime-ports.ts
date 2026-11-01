@@ -10,6 +10,7 @@ import { createSharpRaster } from '../../../src/infrastructure/raster.js'
 import { createH8aFullRuntime } from '../h8a-full/factory.js'
 import type { H8aFullSuccess } from '../h8a-full/contracts.js'
 import type { H8aFullRecipeId } from '../h8a-full/constants.js'
+import type { H6QueryPolicyId } from '../h6-query-policy.js'
 import { orientedDimensionsFromHeader } from '../h8a-full/image-source.js'
 import { freshCaseSchema } from '../../v02/fresh-corpus.js'
 import type { FreshCase } from '../../v02/fresh-corpus.js'
@@ -25,13 +26,19 @@ import {
   assertIndependentProfilePolicies,
   H8A_CANDIDATE_PROFILE,
   H8A_FLAT_CANDIDATE_PROFILE,
+  H8A_SCOPE_CANDIDATE_PROFILE,
   V02_CONTROL_PROFILE,
 } from './profiles.js'
 import type { H8aFreshProfileId } from './profiles.js'
 import { createCampaignFetchBoundary } from './campaign-fetch-boundary.js'
 import type { CampaignFetchJournalEntry, RecordedProviderCall } from './campaign-fetch-boundary.js'
 import type { CampaignLedgerPort } from './campaign-ledger-port.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
+import {
+  PROFILE_CANDIDATE_ID,
+  PROFILE_CONTROL_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
+} from './constants.js'
 import type { H8aFreshCandidateId } from './constants.js'
 import { assertNoForbiddenEvaluatorFields } from './forbidden-leakage.js'
 import type {
@@ -89,6 +96,12 @@ export interface CandidateRuntimePort {
   dispose(): Promise<void>
 }
 
+export interface CandidateRuntimeBinding {
+  candidateProfileId: H8aFreshCandidateId
+  recipeId: H8aFullRecipeId
+  queryPolicyId: H6QueryPolicyId
+}
+
 type HistoricalCaseKernel = typeof processRegionSeededCase
 type HistoricalRecorderHealthCheck = typeof assertRecorderHealthy
 type HistoricalClassifierFactory = typeof createClassifier
@@ -140,11 +153,13 @@ interface H8FreshRuntimePortOptionsBase {
   maskArtifactDirectory: string
   cutoutArtifactDirectory: string
   nativeRuntime: Omit<Parameters<typeof createH8aFullRuntime>[0], 'artifactRoot'>
+  candidateProfileId?: H8aFreshCandidateId
   mobileSam: { encoderPath: string; decoderPath: string }
   sourceCanvasByOpaqueCaseId: ReadonlyMap<string, { width: number; height: number }>
   fetch?: typeof globalThis.fetch
   createCandidateRuntime?: (
     recipeId: H8aFullRecipeId,
+    binding: CandidateRuntimeBinding,
   ) => CandidateRuntimePort | Promise<CandidateRuntimePort>
 }
 
@@ -221,17 +236,21 @@ function recorderCallForBoundary(
 }
 
 function candidateProfile(profileId: H8aFreshCandidateId) {
-  return profileId === PROFILE_FLAT_CANDIDATE_ID
-    ? H8A_FLAT_CANDIDATE_PROFILE
-    : H8A_CANDIDATE_PROFILE
+  if (profileId === PROFILE_CANDIDATE_ID) return H8A_CANDIDATE_PROFILE
+  if (profileId === PROFILE_FLAT_CANDIDATE_ID) return H8A_FLAT_CANDIDATE_PROFILE
+  return H8A_SCOPE_CANDIDATE_PROFILE
 }
 
 function isCandidateProfileId(profileId: H8aFreshProfileId): profileId is H8aFreshCandidateId {
-  return profileId === PROFILE_CANDIDATE_ID || profileId === PROFILE_FLAT_CANDIDATE_ID
+  return (
+    profileId === PROFILE_CANDIDATE_ID ||
+    profileId === PROFILE_FLAT_CANDIDATE_ID ||
+    profileId === PROFILE_SCOPE_CANDIDATE_ID
+  )
 }
 
 function candidateRecipeId(profileId: H8aFreshCandidateId): H8aFullRecipeId {
-  return profileId === PROFILE_FLAT_CANDIDATE_ID ? PROFILE_FLAT_CANDIDATE_ID : PROFILE_CANDIDATE_ID
+  return profileId === PROFILE_CANDIDATE_ID ? PROFILE_CANDIDATE_ID : PROFILE_FLAT_CANDIDATE_ID
 }
 
 function assertCandidateResultRecipe(
@@ -602,6 +621,7 @@ function makeCaseExecutionResult(
 
 function buildCandidatePort(
   runtime: CandidateRuntimePort,
+  selectedProfileId: H8aFreshCandidateId,
   selectedRecipeId: H8aFullRecipeId,
   options: AnyFreshRuntimePortOptions,
   raster: ReturnType<typeof createSharpRaster>,
@@ -614,6 +634,10 @@ function buildCandidatePort(
       const profileId = context.profileId
       if (!isCandidateProfileId(profileId))
         throw new RangeError('Candidate port received a control profile')
+      if (profileId !== selectedProfileId)
+        throw new RangeError(
+          'Selected candidate profile does not match the frozen candidate profile',
+        )
       if (candidateRecipeId(profileId) !== selectedRecipeId)
         throw new RangeError('Selected native recipe does not match the candidate profile')
       const expectedCanvas = options.sourceCanvasByOpaqueCaseId.get(input.opaqueCaseId)
@@ -1231,6 +1255,52 @@ async function createH8FreshRuntimePortsInternal(
   } else {
     throw new RangeError('Unsupported control engine kind')
   }
+  const runtimeProfileId: unknown = options.candidateProfileId
+  if (
+    runtimeProfileId !== undefined &&
+    runtimeProfileId !== PROFILE_CANDIDATE_ID &&
+    runtimeProfileId !== PROFILE_FLAT_CANDIDATE_ID &&
+    runtimeProfileId !== PROFILE_SCOPE_CANDIDATE_ID
+  )
+    throw new RangeError('Unknown candidate profile identity')
+  const requestedRecipeId: unknown = options.nativeRuntime.recipeId ?? PROFILE_CANDIDATE_ID
+  if (requestedRecipeId !== PROFILE_CANDIDATE_ID && requestedRecipeId !== PROFILE_FLAT_CANDIDATE_ID)
+    throw new RangeError('Unknown native recipe identity')
+  const selectedRecipeId = requestedRecipeId
+  const requestedQueryPolicyId: unknown = options.nativeRuntime.queryPolicyId ?? 'legacy-v1'
+  if (
+    requestedQueryPolicyId !== 'legacy-v1' &&
+    requestedQueryPolicyId !== 'strict-authored-scope-v1'
+  )
+    throw new RangeError('Unknown H6 query policy identity')
+  const selectedQueryPolicyId = requestedQueryPolicyId
+  const selectedProfileId: H8aFreshCandidateId =
+    runtimeProfileId === undefined
+      ? selectedRecipeId === PROFILE_FLAT_CANDIDATE_ID
+        ? PROFILE_FLAT_CANDIDATE_ID
+        : PROFILE_CANDIDATE_ID
+      : runtimeProfileId
+  if (
+    (selectedProfileId === PROFILE_CANDIDATE_ID && selectedRecipeId !== PROFILE_CANDIDATE_ID) ||
+    ((selectedProfileId === PROFILE_FLAT_CANDIDATE_ID ||
+      selectedProfileId === PROFILE_SCOPE_CANDIDATE_ID) &&
+      selectedRecipeId !== PROFILE_FLAT_CANDIDATE_ID)
+  )
+    throw new RangeError('Candidate profile is incompatible with the selected native recipe')
+  if (
+    selectedProfileId === PROFILE_SCOPE_CANDIDATE_ID &&
+    (runtimeProfileId === undefined || selectedQueryPolicyId !== 'strict-authored-scope-v1')
+  )
+    throw new RangeError(
+      'Authored-scope profile requires explicit flat recipe and strict query policy',
+    )
+  if (selectedProfileId !== PROFILE_SCOPE_CANDIDATE_ID && selectedQueryPolicyId !== 'legacy-v1')
+    throw new RangeError('Strict authored-scope query policy requires the authored-scope profile')
+  const selectedBinding: CandidateRuntimeBinding = Object.freeze({
+    candidateProfileId: selectedProfileId,
+    recipeId: selectedRecipeId,
+    queryPolicyId: selectedQueryPolicyId,
+  })
   const ownedCanvasEntries = [...options.sourceCanvasByOpaqueCaseId].map(([opaqueId, canvas]) => {
     if (
       !opaqueId ||
@@ -1247,30 +1317,42 @@ async function createH8FreshRuntimePortsInternal(
     throw new RangeError('Frozen source canvas map must not be empty')
   const ownedOptions: AnyFreshRuntimePortOptions = {
     ...options,
+    artifactRoot: options.artifactRoot,
+    temporaryRoot: options.temporaryRoot,
+    maskArtifactDirectory: options.maskArtifactDirectory,
+    cutoutArtifactDirectory: options.cutoutArtifactDirectory,
+    apiKey: options.apiKey,
+    candidateProfileId: selectedProfileId,
+    nativeRuntime: {
+      ...options.nativeRuntime,
+      recipeId: selectedRecipeId,
+      queryPolicyId: selectedQueryPolicyId,
+    },
+    mobileSam: { ...options.mobileSam },
     sourceCanvasByOpaqueCaseId: new Map(ownedCanvasEntries),
   }
-  await mkdir(options.artifactRoot, { recursive: true, mode: 0o700 })
-  await mkdir(options.temporaryRoot, { recursive: true, mode: 0o700 })
+  await mkdir(ownedOptions.artifactRoot, { recursive: true, mode: 0o700 })
+  await mkdir(ownedOptions.temporaryRoot, { recursive: true, mode: 0o700 })
   const raster = createSharpRaster()
-  const selectedRecipeId = options.nativeRuntime.recipeId ?? PROFILE_CANDIDATE_ID
-  const candidateRuntime = options.createCandidateRuntime
-    ? await options.createCandidateRuntime(selectedRecipeId)
+  const candidateRuntime = ownedOptions.createCandidateRuntime
+    ? await ownedOptions.createCandidateRuntime(selectedRecipeId, selectedBinding)
     : createH8aFullRuntime({
-        ...options.nativeRuntime,
+        ...ownedOptions.nativeRuntime,
         recipeId: selectedRecipeId,
-        artifactRoot: options.artifactRoot,
+        queryPolicyId: selectedQueryPolicyId,
+        artifactRoot: ownedOptions.artifactRoot,
       })
   let segmenter: SegmentationPort | undefined
   try {
     segmenter =
-      options.controlEngine.kind === 'verified-historical-v02'
-        ? await options.controlEngine.createMobileSamSegmenter({
-            encoderPath: options.mobileSam.encoderPath,
-            decoderPath: options.mobileSam.decoderPath,
+      ownedOptions.controlEngine.kind === 'verified-historical-v02'
+        ? await ownedOptions.controlEngine.createMobileSamSegmenter({
+            encoderPath: ownedOptions.mobileSam.encoderPath,
+            decoderPath: ownedOptions.mobileSam.decoderPath,
             executionProvider: 'cpu',
             threads: 2,
           })
-        : await options.controlEngine.createControlSegmenter()
+        : await ownedOptions.controlEngine.createControlSegmenter()
   } catch (error) {
     await candidateRuntime.dispose()
     throw error
@@ -1283,6 +1365,7 @@ async function createH8FreshRuntimePortsInternal(
   const fetchJournal: CampaignFetchJournalEntry[] = []
   const candidatePort = buildCandidatePort(
     candidateRuntime,
+    selectedProfileId,
     selectedRecipeId,
     ownedOptions,
     raster,

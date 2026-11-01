@@ -10,7 +10,12 @@ import {
   persistDevScreenSelection,
   validateDevScreenSelection,
 } from './dev-screen-sampling.js'
-import { PHASE_DEV40_ID, PHASE_FLAT_DEV40_ID } from './constants.js'
+import {
+  PHASE_DEV40_ID,
+  PHASE_FLAT_DEV40_ID,
+  PHASE_SCOPE_DEV40_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
+} from './constants.js'
 import { buildSyntheticAnnotationBundle, buildSyntheticPhaseFreeze } from './test-fixtures.js'
 import type { EvaluatorPrivateAnnotationBundle } from './schemas.js'
 
@@ -133,4 +138,23 @@ await test('flat DEV profile gets a separately committed freeze with the same se
     validateDevScreenSelection(flatSelection, flat.freeze, flat.annotations),
     flatSelection,
   )
+})
+
+await test('authored-scope DEV selection binds its new phase while keeping the fixed screen quotas', () => {
+  const { freeze: baseFreeze } = buildSyntheticPhaseFreeze(PHASE_SCOPE_DEV40_ID)
+  const annotations = buildSyntheticAnnotationBundle(
+    baseFreeze.phaseId,
+    baseFreeze.freezeId,
+    baseFreeze.producerCases,
+    baseFreeze.pairedSchedule,
+  )
+  const freeze = {
+    ...baseFreeze,
+    evaluatorAnnotationsSha256: computeEvaluatorAnnotationsSha256(annotations),
+  }
+  const selection = buildDevScreenSelection(freeze, annotations)
+  assert.equal(selection.profileBindings[0]?.profileId, PROFILE_SCOPE_CANDIDATE_ID)
+  assert.equal(selection.dev8CaseIds.length, 8)
+  assert.equal(selection.dev12CaseIds.length, 12)
+  assert.deepEqual(validateDevScreenSelection(selection, freeze, annotations), selection)
 })

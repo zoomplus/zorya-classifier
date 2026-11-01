@@ -9,7 +9,12 @@ import {
 } from '../../../src/infrastructure/decision-transport/route-identity.js'
 import type { CampaignFetchJournalEntry } from './campaign-fetch-boundary.js'
 import type { H8aFreshProfileId } from './profiles.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
+import {
+  PROFILE_CANDIDATE_ID,
+  PROFILE_CONTROL_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
+} from './constants.js'
 
 const PROVIDER_REFUSAL_REPLAY_POLICY_ID = 'h8a-provider-reported-refusal-replay-v1'
 const PROVIDER_REFUSAL_HYPOTHESIS_SHA256 =
@@ -68,7 +73,12 @@ const refusalEvidenceBaseSchema = z
     policySha256: z.literal(PROVIDER_REFUSAL_REPLAY_POLICY_SHA256),
     hypothesisSha256: z.literal(PROVIDER_REFUSAL_HYPOTHESIS_SHA256),
     opaqueCaseId: z.string().min(1),
-    profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+    profileId: z.enum([
+      PROFILE_CANDIDATE_ID,
+      PROFILE_FLAT_CANDIDATE_ID,
+      PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_CONTROL_ID,
+    ]),
     caseExecutionIdentitySha256: digestSchema,
     logicalReceiptId: z.number().int().positive(),
     physicalReceiptId: z.number().int().positive(),
@@ -175,7 +185,11 @@ function matchingRoute(
   profileId: H8aFreshProfileId,
   route: Recorder['calls'][number]['route'],
 ): ExpectedRoute | undefined {
-  if (profileId === PROFILE_CANDIDATE_ID || profileId === PROFILE_FLAT_CANDIDATE_ID) {
+  if (
+    profileId === PROFILE_CANDIDATE_ID ||
+    profileId === PROFILE_FLAT_CANDIDATE_ID ||
+    profileId === PROFILE_SCOPE_CANDIDATE_ID
+  ) {
     const expected = {
       model: 'openai/gpt-6-luna',
       provider: 'openai',

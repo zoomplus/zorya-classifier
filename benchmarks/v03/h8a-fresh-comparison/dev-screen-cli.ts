@@ -14,8 +14,10 @@ import {
   CAMPAIGN_MAX_PHYSICAL_CALLS,
   candidateIdForPhase,
   PHASE_FLAT_DEV40_ID,
+  PROFILE_CANDIDATE_ID,
   PROFILE_FLAT_CANDIDATE_ID,
 } from './constants.js'
+import type { H8aFullRecipeId } from '../h8a-full/constants.js'
 import type { createH8FreshRuntimePorts } from './runtime-ports.js'
 import type {
   processRegionSeededCase,
@@ -1460,11 +1462,25 @@ interface ScreenRunDependencies {
   verifyPriorDisjointEvidence?(root: string): Promise<number>
 }
 
+export function resolveLegacyDevScreenCandidateBinding(value: unknown): {
+  candidateProfileId: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_FLAT_CANDIDATE_ID
+  recipeId: H8aFullRecipeId
+} {
+  if (value === PROFILE_CANDIDATE_ID)
+    return { candidateProfileId: PROFILE_CANDIDATE_ID, recipeId: PROFILE_CANDIDATE_ID }
+  if (value === PROFILE_FLAT_CANDIDATE_ID)
+    return { candidateProfileId: PROFILE_FLAT_CANDIDATE_ID, recipeId: PROFILE_FLAT_CANDIDATE_ID }
+  throw new RangeError('Legacy DEV screen CLI does not accept this candidate profile')
+}
+
 const productionScreenDependencies: ScreenRunDependencies = {
   getApiKey: () => undefined,
   acquireLock: acquireRunnerLock,
   openLedger: (path) => CampaignLedger.open(path),
   createRuntime: async ({ apiKey, root, runtime, verified }) => {
+    const selectedBinding = resolveLegacyDevScreenCandidateBinding(
+      verified.freeze.profileBindings[0]!.profileId,
+    )
     const historical = await loadHistoricalControl(runtime.proof.historicalSourceRoot)
     const runtimePortsModule = await import('./runtime-ports.js')
     return await runtimePortsModule.createH8FreshRuntimePorts({
@@ -1474,10 +1490,11 @@ const productionScreenDependencies: ScreenRunDependencies = {
       maskArtifactDirectory: join(root, 'masks'),
       cutoutArtifactDirectory: join(root, 'cutouts'),
       nativeRuntime: {
-        recipeId: verified.freeze.profileBindings[0]!.profileId,
+        recipeId: selectedBinding.recipeId,
         pythonExecutable: runtime.pythonExecutable,
         assetRoot: runtime.candidateAssetsRoot,
       },
+      candidateProfileId: selectedBinding.candidateProfileId,
       mobileSam: {
         encoderPath: runtime.mobileSamEncoderPath,
         decoderPath: runtime.mobileSamDecoderPath,

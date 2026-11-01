@@ -1,12 +1,11 @@
 import {
   CAMPAIGN_MAX_COST_USD,
   DEV40_WORST_CASE_PHYSICAL_CALLS,
-  PHASE_DEV40_ID,
-  PHASE_FLAT_DEV40_ID,
-  PHASE_FLAT_QUAL120_ID,
-  PHASE_QUAL120_ID,
+  isDevPhase,
+  isQualificationPhase,
   PROFILE_CONTROL_ID,
   PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
   QUAL120_WORST_CASE_PHYSICAL_CALLS,
   candidateIdForPhase,
 } from './constants.js'
@@ -83,8 +82,7 @@ function validateProfileDispatchUpperBoundBinding(freeze: PhaseFreeze): void {
 }
 
 function phaseWorstCasePhysicalCalls(phaseId: PhaseFreeze['phaseId']): number {
-  if (phaseId === PHASE_DEV40_ID || phaseId === PHASE_FLAT_DEV40_ID)
-    return DEV40_WORST_CASE_PHYSICAL_CALLS
+  if (isDevPhase(phaseId)) return DEV40_WORST_CASE_PHYSICAL_CALLS
   return QUAL120_WORST_CASE_PHYSICAL_CALLS
 }
 
@@ -92,7 +90,7 @@ export function validateQualificationSourceGroupSeparation(
   freeze: PhaseFreeze,
   groupIds: readonly string[],
 ): void {
-  if (freeze.phaseId !== PHASE_QUAL120_ID && freeze.phaseId !== PHASE_FLAT_QUAL120_ID) return
+  if (!isQualificationPhase(freeze.phaseId)) return
   if (!freeze.enforceQualificationSourceGroupSeparation)
     throw new RangeError('Qualification freeze must declare source-group separation')
   if (groupIds.length === 0) throw new RangeError('Qualification source groups required')
@@ -134,12 +132,15 @@ export async function assertFreezeAdmissionAsync(
   )
   const controlBound = reservedUsdUpperBoundForProfile(freeze, PROFILE_CONTROL_ID)
   if (supportsStudyScopeAdmission(ledger)) {
-    if (candidateIdForPhase(freeze.phaseId) !== PROFILE_FLAT_CANDIDATE_ID)
-      throw new RangeError('Successor ledger requires the registered flat candidate profile')
-    await ledger.assertStudyScopeCanAdmitPhysicalReservedUsd(
-      PROFILE_FLAT_CANDIDATE_ID,
-      candidateBound,
+    const candidateProfileId = candidateIdForPhase(freeze.phaseId)
+    if (
+      candidateProfileId !== PROFILE_FLAT_CANDIDATE_ID &&
+      candidateProfileId !== PROFILE_SCOPE_CANDIDATE_ID
     )
+      throw new RangeError(
+        'Study-scoped ledger requires a registered flat or authored-scope profile',
+      )
+    await ledger.assertStudyScopeCanAdmitPhysicalReservedUsd(candidateProfileId, candidateBound)
     await ledger.assertStudyScopeCanAdmitPhysicalReservedUsd(PROFILE_CONTROL_ID, controlBound)
     await ledger.assertExposureAllowsAdditionalUsd(pairedCaseReserve)
     return

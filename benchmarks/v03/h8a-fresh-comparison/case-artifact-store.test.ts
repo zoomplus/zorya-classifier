@@ -8,7 +8,12 @@ import sharp from 'sharp'
 import { z } from 'zod'
 import { ImmutableCaseArtifactStore } from './case-artifact-store.js'
 import type { CaseArtifactIdentity } from './case-artifact-store.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
+import {
+  PROFILE_CANDIDATE_ID,
+  PROFILE_CONTROL_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
+} from './constants.js'
 import { hashIdentity } from './hash-identity.js'
 import type { CaseExecutionPortResult } from './paired-runner.js'
 
@@ -20,6 +25,7 @@ function identity(
   profileId:
     | typeof PROFILE_CANDIDATE_ID
     | typeof PROFILE_FLAT_CANDIDATE_ID
+    | typeof PROFILE_SCOPE_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID = PROFILE_CANDIDATE_ID,
 ): CaseArtifactIdentity {
   const hash = 'a'.repeat(64)
@@ -45,6 +51,7 @@ function result(
   profileId:
     | typeof PROFILE_CANDIDATE_ID
     | typeof PROFILE_FLAT_CANDIDATE_ID
+    | typeof PROFILE_SCOPE_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID = PROFILE_CANDIDATE_ID,
 ): CaseExecutionPortResult {
   const maskSha = maskBytes ? digest(maskBytes) : null
@@ -109,6 +116,41 @@ await test('an incomplete immutable intent is validated and never autorizes a re
     const path = join(root, 'case-intents', opened.sha256.slice(0, 2), `${opened.sha256}.json`)
     await writeFile(path, '{broken', 'utf8')
     await assert.rejects(() => store.begin(id, new Date().toISOString()), /JSON|Unexpected/u)
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('authored-scope profile identity and candidate sidecar survive immutable storage', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-scope-case-artifact-'))
+  try {
+    const store = new ImmutableCaseArtifactStore(root)
+    const id = identity(PROFILE_SCOPE_CANDIDATE_ID)
+    const opened = await store.begin(id, new Date().toISOString())
+    const bytes = new Uint8Array(16).fill(17)
+    for (let index = 0; index < bytes.length; index += 4) bytes[index + 3] = 255
+    const mask = new Uint8Array(8)
+    for (const pixel of [9, 10, 17, 18]) mask[Math.floor(pixel / 8)]! |= 1 << pixel % 8
+    const completed = await store.complete({
+      identitySha256: opened.identitySha256,
+      identity: opened.identity,
+      result: result(bytes, mask, PROFILE_SCOPE_CANDIDATE_ID),
+      durationMs: 1,
+      startedAtIso: new Date().toISOString(),
+      completedAtIso: new Date().toISOString(),
+      knownCostUsd: 0,
+      unknownDispatchCount: 0,
+      blobs: new Map([
+        [digest(bytes), bytes],
+        [digest(mask), mask],
+      ]),
+    })
+    assert.equal(completed.result.outputRow.profileId, PROFILE_SCOPE_CANDIDATE_ID)
+    assert.equal(completed.result.caseArtifactSidecars?.[0]?.profileId, PROFILE_SCOPE_CANDIDATE_ID)
+    assert.equal(
+      (await store.load(opened.identitySha256, id))?.identitySha256,
+      opened.identitySha256,
+    )
   } finally {
     await rm(root, { recursive: true, force: true })
   }

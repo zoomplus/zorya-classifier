@@ -8,8 +8,9 @@ import {
   DEV40_CASE_COUNT,
   DEV40_POSITIVE_COUNT,
   DEV40_STRATUM_QUOTAS,
-  PHASE_DEV40_ID,
-  PHASE_FLAT_DEV40_ID,
+  isDevPhase,
+  PHASE_SCOPE_DEV40_ID,
+  PHASE_SCOPE_QUAL120_ID,
   PROFILE_CANDIDATE_ID,
   candidateIdForPhase,
   PROFILE_CONTROL_ID,
@@ -437,11 +438,13 @@ export function scorePositiveOutputRow(
   canvasWidth: number,
   canvasHeight: number,
   packedMasksBySha256: ReadonlyMap<string, Uint8Array>,
+  requireMaskDerivedBox = false,
 ): boolean {
   if (row.executionValidity !== 'valid') return false
   if (row.caseState !== 'success' || row.box === null) return false
 
-  const usesMaskPath = row.maskPackedSha256 !== null || truth.exactOriginalCanvasMaskRef
+  const usesMaskPath =
+    requireMaskDerivedBox || row.maskPackedSha256 !== null || truth.exactOriginalCanvasMaskRef
   if (!usesMaskPath) {
     if (!isValidBoxWithinCanvas(row.box, canvasWidth, canvasHeight)) return false
     return referenceBoxes.some(
@@ -531,7 +534,7 @@ function assertAnnotationBundleMatchesFreeze(
 
   const positives = annotations.cases.filter((item) => item.expectedPresence === 'present')
   const negatives = annotations.cases.filter((item) => item.expectedPresence === 'absent')
-  if (freeze.phaseId === PHASE_DEV40_ID || freeze.phaseId === PHASE_FLAT_DEV40_ID) {
+  if (isDevPhase(freeze.phaseId)) {
     if (annotations.independentMaskCaseIds.length !== 0)
       throw new RangeError('DEV40 cannot contain qualification independent-mask IDs')
     if (positives.length !== DEV40_POSITIVE_COUNT || negatives.length !== DEV40_NEGATIVE_COUNT)
@@ -600,6 +603,8 @@ export function joinCloseoutsWithPrivateAnnotations(input: {
     input.controlCloseout.outputRows.map((item) => [item.opaqueCaseId, item]),
   )
   const independentMaskCaseIds = new Set(annotations.independentMaskCaseIds)
+  const requireMaskDerivedBox =
+    input.freeze.phaseId === PHASE_SCOPE_DEV40_ID || input.freeze.phaseId === PHASE_SCOPE_QUAL120_ID
 
   const joined: CaseQualityRow[] = []
   for (const truth of annotations.cases) {
@@ -653,6 +658,7 @@ export function joinCloseoutsWithPrivateAnnotations(input: {
         canvasWidth,
         canvasHeight,
         input.packedMasksBySha256,
+        requireMaskDerivedBox,
       ),
       controlPositiveSuccess: scorePositiveOutputRow(
         control,
@@ -661,6 +667,7 @@ export function joinCloseoutsWithPrivateAnnotations(input: {
         canvasWidth,
         canvasHeight,
         input.packedMasksBySha256,
+        requireMaskDerivedBox,
       ),
       candidateNegativeFalse:
         truth.expectedPresence === 'absent' && scoreNegativeFalseOutputRow(candidate),
@@ -915,7 +922,6 @@ export function evaluatePhaseGate(
   rows: readonly CaseQualityRow[],
 ): Dev40GateResult | Qual120GateResult {
   const candidateId = candidateIdForPhase(phaseId)
-  if (phaseId === PHASE_DEV40_ID || phaseId === PHASE_FLAT_DEV40_ID)
-    return evaluateDev40Gate(rows, candidateId)
+  if (isDevPhase(phaseId)) return evaluateDev40Gate(rows, candidateId)
   return evaluateQual120Gate(rows, candidateId)
 }

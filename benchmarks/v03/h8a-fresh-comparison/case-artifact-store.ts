@@ -7,7 +7,12 @@ import type { CaseExecutionPortResult } from './paired-runner.js'
 import { logicalReceiptSchema, outputRowSchema, physicalReceiptSchema } from './schemas.js'
 import { hashIdentity } from './hash-identity.js'
 import { sha256PackedBytes, unpackBinaryLsb0V1 } from './packed-binary-lsb0.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID } from './constants.js'
+import {
+  PROFILE_CANDIDATE_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_CONTROL_ID,
+} from './constants.js'
 import { assertProviderRefusalReplayEvidence } from './provider-refusal-replay.js'
 import { PROVIDER_REFUSAL_REPLAY_POLICY_SHA256 } from './provider-refusal-replay.js'
 import { PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY } from './provider-refusal-replay.js'
@@ -20,7 +25,12 @@ const identitySchema = z.object({
   pairedScheduleSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   selectionCommitmentSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   opaqueCaseId: z.string().min(1),
-  profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+  profileId: z.enum([
+    PROFILE_CANDIDATE_ID,
+    PROFILE_FLAT_CANDIDATE_ID,
+    PROFILE_SCOPE_CANDIDATE_ID,
+    PROFILE_CONTROL_ID,
+  ]),
   sourceBytesSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   targetTaskSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   sourceCanvasWidth: z.number().int().positive(),
@@ -92,7 +102,11 @@ function artifactPath(root: string, digest: string): string {
 }
 
 function isCandidateProfile(profileId: CaseArtifactIdentity['profileId']): boolean {
-  return profileId === PROFILE_CANDIDATE_ID || profileId === PROFILE_FLAT_CANDIDATE_ID
+  return (
+    profileId === PROFILE_CANDIDATE_ID ||
+    profileId === PROFILE_FLAT_CANDIDATE_ID ||
+    profileId === PROFILE_SCOPE_CANDIDATE_ID
+  )
 }
 
 async function readOptional(path: string): Promise<string | null> {
@@ -116,7 +130,12 @@ const intentSchema = z
 
 const dispatchBaseSchema = z.object({
   reservationId: z.number().int().positive(),
-  profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+  profileId: z.enum([
+    PROFILE_CANDIDATE_ID,
+    PROFILE_FLAT_CANDIDATE_ID,
+    PROFILE_SCOPE_CANDIDATE_ID,
+    PROFILE_CONTROL_ID,
+  ]),
   opaqueCaseId: z.string().min(1),
   caseExecutionIdentitySha256: z.string().regex(/^[a-f0-9]{64}$/u),
   logicalId: z.number().int().positive(),
@@ -479,7 +498,9 @@ export class ImmutableCaseArtifactStore {
       if (data.opaqueCaseId !== parsed.opaqueCaseId || data.profileId !== parsed.profileId)
         throw new RangeError('Dispatch journal case/profile does not match pending identity')
       const expectedEndpoint =
-        parsed.profileId === PROFILE_CANDIDATE_ID || parsed.profileId === PROFILE_FLAT_CANDIDATE_ID
+        parsed.profileId === PROFILE_CANDIDATE_ID ||
+        parsed.profileId === PROFILE_FLAT_CANDIDATE_ID ||
+        parsed.profileId === PROFILE_SCOPE_CANDIDATE_ID
           ? '/api/v1/chat/completions'
           : '/api/alpha/decisions'
       if (data.endpoint !== expectedEndpoint)

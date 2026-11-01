@@ -18,7 +18,7 @@ import { CampaignLedger } from './campaign-ledger.js'
 import { validateImmutableCloseouts } from './evaluator.js'
 import { hashIdentity } from './hash-identity.js'
 import { outputRowSchema, phaseFreezeSchema } from './schemas.js'
-import { PROFILE_CANDIDATE_ID, PHASE_DEV40_ID } from './constants.js'
+import { PROFILE_CANDIDATE_ID, PROFILE_SCOPE_CANDIDATE_ID, PHASE_DEV40_ID } from './constants.js'
 import {
   PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY,
   PROVIDER_REFUSAL_REPLAY_POLICY_SHA256,
@@ -370,6 +370,16 @@ await test('only actual request-bound chat refusal with a complete settled recei
     }
     const evidence = buildProviderRefusalReplayEvidence(evidenceInput)
     assert.ok(evidence)
+    const scopeEvidence = buildProviderRefusalReplayEvidence({
+      ...evidenceInput,
+      profileId: PROFILE_SCOPE_CANDIDATE_ID,
+      journal: journal.map((entry) => ({ ...entry, profileId: PROFILE_SCOPE_CANDIDATE_ID })),
+      logicalReceipts: logicalReceipts.map((receipt) => ({
+        ...receipt,
+        profileId: PROFILE_SCOPE_CANDIDATE_ID,
+      })),
+    })
+    assert.equal(scopeEvidence?.profileId, PROFILE_SCOPE_CANDIDATE_ID)
     const aborted = new AbortController()
     aborted.abort(new Error('controlled cancellation'))
     assert.equal(

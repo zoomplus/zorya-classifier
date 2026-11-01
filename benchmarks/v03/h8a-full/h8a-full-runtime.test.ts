@@ -2,12 +2,13 @@ import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash, randomUUID } from 'node:crypto'
 import { accessSync } from 'node:fs'
-import { access, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { access, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { test } from 'node:test'
+import { z } from 'zod'
 import type {
   DecisionRequest,
   DecisionResult,
@@ -24,6 +25,17 @@ import { runBoundedNativeChild, buildNativeChildEnv } from './native-bounded-chi
 import { H8A_FULL_NATIVE_REQUEST_SCHEMA, H8A_FULL_RECIPE_ID } from './constants.js'
 import { H6_QUERY_POLICY_INSTRUCTIONS } from '../h6-query-policy.js'
 import type { H6QueryPolicyId } from '../h6-query-policy.js'
+import type { SegmentationPort } from '../../../src/entities/segmentation.js'
+import { createClassifier } from '../../../src/app/create-classifier.js'
+import { createOpenRouterDecisions } from '../../../src/openrouter.js'
+import { createNativeCategoricalPresencePort } from '../../v02/native-categorical-presence-port.js'
+import { assertRecorderHealthy, processRegionSeededCase } from '../../v02/region-seeded-runner.js'
+import { CampaignLedger } from '../h8a-fresh-comparison/campaign-ledger.js'
+import { createH8FreshRuntimePortsForOfflineFixture } from '../h8a-fresh-comparison/runtime-ports.js'
+import {
+  PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
+} from '../h8a-fresh-comparison/constants.js'
 
 function missingPythonExecutable(): never {
   throw new Error('H8A_PYTHON_EXECUTABLE is required for the native test group')
@@ -276,6 +288,219 @@ await test('native port rejects a worker reply carrying the other recipe identit
     await rm(artifactRoot, { recursive: true, force: true })
     if (priorMode === undefined) delete process.env.H8A_FAKE_WORKER_MODE
     else process.env.H8A_FAKE_WORKER_MODE = priorMode
+  }
+})
+
+await test('fresh authored-scope binding reaches the real factory and four offline provider stages', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8af-fresh-scope-'))
+  const source = await writeFixtureSource()
+  const requests: Array<{ body: unknown; task: unknown }> = []
+  const requestBodySchema = z
+    .object({
+      model: z.string(),
+      provider: z
+        .object({
+          only: z.array(z.string()),
+          allow_fallbacks: z.boolean(),
+          sort: z.string().optional(),
+        })
+        .passthrough(),
+      max_tokens: z.number(),
+      reasoning: z.object({ effort: z.string() }).passthrough(),
+      messages: z
+        .array(
+          z
+            .object({
+              role: z.string(),
+              content: z.union([
+                z.string(),
+                z.array(z.object({ type: z.string(), text: z.string().optional() }).passthrough()),
+              ]),
+            })
+            .passthrough(),
+        )
+        .length(2),
+    })
+    .passthrough()
+  const taskSchema = z
+    .object({
+      questions: z.record(
+        z
+          .object({
+            kind: z.enum(['presence', 'categorical']),
+            rankingSize: z.number().int().positive().optional(),
+            instructions: z.string(),
+            options: z.record(z.string()).optional(),
+          })
+          .passthrough(),
+      ),
+    })
+    .passthrough()
+  const controlledFetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
+    const nativeTaskEntries = await readdir(join(root, 'artifacts', 'h8a-full-tasks'), {
+      withFileTypes: true,
+    })
+    assert.deepEqual(
+      nativeTaskEntries.filter((entry) => entry.isDirectory()),
+      [],
+    )
+    const body = requestBodySchema.parse(JSON.parse(String(init?.body)))
+    const user = body.messages[1]
+    assert.ok(user && Array.isArray(user.content))
+    const taskPart = user.content.find(
+      (part) => typeof part.text === 'string' && part.text.startsWith('CLASSIFICATION_TASK\n'),
+    )
+    assert.ok(taskPart?.text)
+    const task = taskSchema.parse(JSON.parse(taskPart.text.slice('CLASSIFICATION_TASK\n'.length)))
+    requests.push({ body, task })
+    const answers = Object.fromEntries(
+      Object.entries(task.questions).map(([id, question]) => {
+        if (question.kind === 'presence') return [id, { presence: 'present' }]
+        const keys = Object.keys(question.options ?? {})
+        return [id, { ranking: keys.slice(0, Math.min(question.rankingSize ?? 4, keys.length)) }]
+      }),
+    )
+    return new Response(
+      JSON.stringify({
+        id: `scope-offline-${requests.length}`,
+        model: 'openai/gpt-6-luna',
+        provider: 'OpenAI',
+        choices: [
+          {
+            index: 0,
+            finish_reason: 'stop',
+            message: { content: JSON.stringify({ answers }) },
+          },
+        ],
+        usage: { cost: 0.002 },
+      }),
+      { headers: { 'Content-Type': 'application/json' } },
+    )
+  }
+  const unusedSegmenter: SegmentationPort = {
+    async segment() {
+      return {
+        status: 'unknown',
+        reason: 'unused',
+        metadata: {
+          method: 'fixture',
+          backend: 'fixture',
+          durationMs: 0,
+          input: { width: 1, height: 1 },
+        },
+      }
+    },
+    async settle() {},
+    async dispose() {},
+  }
+  const options = {
+    apiKey: 'offline',
+    artifactRoot: join(root, 'artifacts'),
+    temporaryRoot: join(root, 'temporary'),
+    maskArtifactDirectory: join(root, 'masks'),
+    cutoutArtifactDirectory: join(root, 'cutouts'),
+    nativeRuntime: {
+      pythonExecutable,
+      assetRoot: join(root, 'assets-unused'),
+      workerScriptPath: fakeWorkerScriptPath(),
+      recipeId: PROFILE_FLAT_CANDIDATE_ID,
+      queryPolicyId: 'strict-authored-scope-v1' as const,
+    },
+    candidateProfileId: PROFILE_SCOPE_CANDIDATE_ID,
+    mobileSam: {
+      encoderPath: join(root, 'unused-encoder.onnx'),
+      decoderPath: join(root, 'unused-decoder.onnx'),
+    },
+    sourceCanvasByOpaqueCaseId: new Map([['scope-native-suite-case', { width: 64, height: 48 }]]),
+    fetch: controlledFetch,
+    controlEngine: {
+      kind: 'offline-fixture-only' as const,
+      processRegionSeededCase,
+      assertRecorderHealthy,
+      createClassifier,
+      createOpenRouterDecisions,
+      createNativeCategoricalPresencePort,
+      createControlSegmenter: () => unusedSegmenter,
+    },
+  }
+  const originalFetch = globalThis.fetch
+  Reflect.set(globalThis, 'fetch', async () => {
+    throw new Error('unexpected non-injected network request')
+  })
+  let runtimePorts:
+    | Awaited<ReturnType<typeof createH8FreshRuntimePortsForOfflineFixture>>
+    | undefined
+  try {
+    runtimePorts = await createH8FreshRuntimePortsForOfflineFixture(options)
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    const result = await runtimePorts.candidatePort.execute(
+      {
+        opaqueCaseId: 'scope-native-suite-case',
+        sourceBytes: new Uint8Array(source.png),
+        targetTaskText: 'the visible amber marker',
+      },
+      { profileId: PROFILE_SCOPE_CANDIDATE_ID, reservedUsdPerFetch: 0.55, ledger },
+    )
+    assert.equal(requests.length, 4)
+    assert.equal(ledger.snapshot().physicalDispatchCount, 4)
+    assert.equal(ledger.snapshot().knownCostUsd, 0.008)
+    assert.equal(ledger.snapshot().unknownReserveUsd, 0)
+    assert.equal(ledger.snapshot().inFlightReservations.length, 0)
+    assert.equal(result.outputRow.profileId, PROFILE_SCOPE_CANDIDATE_ID)
+    assert.equal(result.outputRow.caseState, 'success')
+    assert.deepEqual(result.outputRow.box, { left: 2, top: 2, width: 6, height: 6 })
+    assert.equal(result.caseArtifactSidecars?.[0]?.profileId, PROFILE_SCOPE_CANDIDATE_ID)
+    assert.equal(
+      runtimePorts.artifacts.cutoutsByProfileAndCase.has(
+        `${PROFILE_SCOPE_CANDIDATE_ID}:scope-native-suite-case`,
+      ),
+      true,
+    )
+    assert.ok(
+      [...runtimePorts.artifacts.masksBySha256.values()].some(
+        (mask) =>
+          mask.width === 64 &&
+          mask.height === 48 &&
+          mask.sha256 === result.outputRow.maskPackedSha256,
+      ),
+    )
+    const expectedInstructionPairs = [
+      [H6_QUERY_POLICY_INSTRUCTIONS.presenceState, H6_QUERY_POLICY_INSTRUCTIONS.presenceQuestion],
+      [
+        H6_QUERY_POLICY_INSTRUCTIONS.nominationState,
+        H6_QUERY_POLICY_INSTRUCTIONS.nominationQuestion,
+      ],
+      [
+        H6_QUERY_POLICY_INSTRUCTIONS.nominationState,
+        H6_QUERY_POLICY_INSTRUCTIONS.nominationQuestion,
+      ],
+      [H6_QUERY_POLICY_INSTRUCTIONS.finalState, H6_QUERY_POLICY_INSTRUCTIONS.finalQuestion],
+    ] as const
+    for (const [index, request] of requests.entries()) {
+      const task = taskSchema.parse(request.task)
+      const question = Object.values(task.questions)[0]
+      assert.ok(question)
+      assert.ok(question.instructions.endsWith(expectedInstructionPairs[index]![1]))
+      const body = requestBodySchema.parse(request.body)
+      const user = body.messages[1]
+      assert.ok(user && Array.isArray(user.content))
+      const stateTexts = user.content.flatMap((part) => (part.text ? [part.text] : []))
+      assert.ok(stateTexts.some((text) => text.endsWith(expectedInstructionPairs[index]![0])))
+      assert.equal(body.model, 'openai/gpt-6-luna')
+      assert.deepEqual(body.provider.only, ['openai'])
+      assert.equal(body.provider.allow_fallbacks, false)
+      assert.equal(body.provider.sort, undefined)
+      assert.equal(body.max_tokens, 4096)
+      assert.equal(body.reasoning.effort, 'medium')
+    }
+  } finally {
+    try {
+      await runtimePorts?.dispose()
+    } finally {
+      Reflect.set(globalThis, 'fetch', originalFetch)
+      await rm(root, { recursive: true, force: true })
+      await rm(source.sourcePath, { force: true })
+    }
   }
 })
 

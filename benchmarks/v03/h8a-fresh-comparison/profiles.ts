@@ -1,9 +1,21 @@
 import { hashIdentity } from './hash-identity.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
+import {
+  PROFILE_CANDIDATE_ID,
+  PROFILE_CONTROL_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
+} from './constants.js'
+import { H6_QUERY_POLICY_SHA256 } from '../h6-query-policy.js'
+
+const H8A_SCOPE_QUERY_POLICY_SHA256 =
+  '8146bc76ed3166a1cf8573518d23765266bf53f9172f9794e1e85a3fe793d9bc'
+if (H6_QUERY_POLICY_SHA256 !== H8A_SCOPE_QUERY_POLICY_SHA256)
+  throw new RangeError('Authored-scope query policy identity differs from the frozen profile')
 
 export type H8aFreshProfileId =
   | typeof PROFILE_CANDIDATE_ID
   | typeof PROFILE_FLAT_CANDIDATE_ID
+  | typeof PROFILE_SCOPE_CANDIDATE_ID
   | typeof PROFILE_CONTROL_ID
 
 const h8aCandidateRequestPolicy = {
@@ -58,6 +70,33 @@ export const H8A_FLAT_CANDIDATE_PROFILE = {
   requestPolicyIdentitySha256: hashIdentity(h8aCandidateRequestPolicy),
 }
 
+const h8aScopeCandidateRequestPolicy = Object.freeze({
+  allowFallbacks: false,
+  allowProviderSort: false,
+  allowRetries: false,
+  caseDeadlineSeconds: 240,
+  maxVisionChatPhysicalCallsPerCase: 4,
+  reasoning: 'medium' as const,
+  route: Object.freeze({
+    apiKind: 'openai-compatible-vision-chat' as const,
+    apiEndpoint: '/api/v1/chat/completions' as const,
+    maxOutputTokens: 4096,
+    model: 'openai/gpt-6-luna',
+    provider: 'openai' as const,
+    providerName: 'OpenAI',
+  }),
+  nativeRecipeId: PROFILE_FLAT_CANDIDATE_ID,
+  queryPolicyId: 'strict-authored-scope-v1' as const,
+  queryPolicySha256: H8A_SCOPE_QUERY_POLICY_SHA256,
+})
+
+export const H8A_SCOPE_CANDIDATE_PROFILE = Object.freeze({
+  profileId: PROFILE_SCOPE_CANDIDATE_ID,
+  recipeKind: 'h8a-cpu-flat-scope-then-h6-composer' as const,
+  requestPolicy: h8aScopeCandidateRequestPolicy,
+  requestPolicyIdentitySha256: hashIdentity(h8aScopeCandidateRequestPolicy),
+})
+
 export const V02_CONTROL_PROFILE = {
   profileId: PROFILE_CONTROL_ID,
   recipeKind: 'v02-final-v3-fresh-cohort-replay' as const,
@@ -68,13 +107,17 @@ export const V02_CONTROL_PROFILE = {
 export function profileById(profileId: H8aFreshProfileId) {
   if (profileId === PROFILE_CANDIDATE_ID) return H8A_CANDIDATE_PROFILE
   if (profileId === PROFILE_FLAT_CANDIDATE_ID) return H8A_FLAT_CANDIDATE_PROFILE
-  return V02_CONTROL_PROFILE
+  if (profileId === PROFILE_SCOPE_CANDIDATE_ID) return H8A_SCOPE_CANDIDATE_PROFILE
+  if (profileId === PROFILE_CONTROL_ID) return V02_CONTROL_PROFILE
+  throw new RangeError('Unknown profile identity')
 }
 
 export function assertIndependentProfilePolicies(): void {
   if (
-    H8A_CANDIDATE_PROFILE.requestPolicyIdentitySha256 ===
-    V02_CONTROL_PROFILE.requestPolicyIdentitySha256
+    [H8A_CANDIDATE_PROFILE, H8A_FLAT_CANDIDATE_PROFILE, H8A_SCOPE_CANDIDATE_PROFILE].some(
+      (candidate) =>
+        candidate.requestPolicyIdentitySha256 === V02_CONTROL_PROFILE.requestPolicyIdentitySha256,
+    )
   )
     throw new RangeError('Candidate and control request policies must remain distinct')
 }

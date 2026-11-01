@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import sharp from 'sharp'
@@ -15,7 +15,13 @@ import { assertRecorderHealthy, processRegionSeededCase } from '../../v02/region
 import { CampaignLedger } from './campaign-ledger.js'
 import { ImmutableCaseArtifactStore } from './case-artifact-store.js'
 import { createCampaignFetchBoundary } from './campaign-fetch-boundary.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
+import {
+  PROFILE_CANDIDATE_ID,
+  PROFILE_CONTROL_ID,
+  PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
+} from './constants.js'
+import type { CandidateRuntimeBinding } from './runtime-ports.js'
 import type {
   CandidateRuntimePort,
   H8FreshRuntimePortOptions,
@@ -236,6 +242,58 @@ await test('runtime rejects a historical control bundle with a different source 
       },
     }
     await assert.rejects(createH8FreshRuntimePorts(options), /Historical control engine identity/u)
+  })
+})
+
+await test('candidate profile, recipe, and query policy mismatches fail before factory work', async () => {
+  await withFixtureRoot(async (root) => {
+    const candidateRuntime: CandidateRuntimePort = {
+      async run() {
+        return { status: 'unknown' as const, reason: 'unused' }
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment() {
+        return {
+          status: 'unknown',
+          reason: 'unused',
+          metadata: {
+            method: 'fixture',
+            backend: 'fixture',
+            durationMs: 0,
+            input: { width: 1, height: 1 },
+          },
+        }
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const mutations: Array<(options: OfflineFixtureRuntimePortOptions) => void> = [
+      (options) => Reflect.set(options, 'candidateProfileId', 'unknown-profile'),
+      (options) => Reflect.set(options.nativeRuntime, 'recipeId', 'unknown-recipe'),
+      (options) => Reflect.set(options.nativeRuntime, 'queryPolicyId', 'unknown-policy'),
+      (options) => Reflect.set(options.nativeRuntime, 'queryPolicyId', 'strict-authored-scope-v1'),
+      (options) => {
+        options.candidateProfileId = PROFILE_SCOPE_CANDIDATE_ID
+        options.nativeRuntime.queryPolicyId = 'strict-authored-scope-v1'
+      },
+    ]
+    for (const [index, mutate] of mutations.entries()) {
+      const caseRoot = join(root, `case-${index}`)
+      const options = fixtureOptions(
+        caseRoot,
+        async () => response({}),
+        candidateRuntime,
+        segmenter,
+      )
+      options.createCandidateRuntime = () => {
+        assert.fail('invalid binding must be rejected before runtime construction')
+      }
+      mutate(options)
+      await assert.rejects(createH8FreshRuntimePortsForOfflineFixture(options))
+      await assert.rejects(stat(join(caseRoot, 'artifacts')))
+    }
   })
 })
 
@@ -715,6 +773,123 @@ await test('flat candidate selects its explicit native recipe and preserves prof
   })
 })
 
+await test('authored-scope runtime snapshots and stamps the exact candidate binding', async () => {
+  await withFixtureRoot(async (root, source) => {
+    const selectedBindings: CandidateRuntimeBinding[] = []
+    let fetchCalls = 0
+    const candidateRuntime: CandidateRuntimePort = {
+      async run(input) {
+        const pixels = maskBytes(64, 48, { left: 10, top: 8, width: 6, height: 5 })
+        const packed = packBinaryLsb0V1(64, 48, pixels)
+        const mask = new Uint8Array(packed.byteLength)
+        mask.set(packed)
+        return {
+          status: 'located' as const,
+          recipeId: PROFILE_FLAT_CANDIDATE_ID,
+          family: 'D' as const,
+          alias: 'D00',
+          sourceAlias: 'D00',
+          originalEncodedSha256: digest(input.encodedImage),
+          sourceFrame: { sha256: digest('scope-frame'), width: 64, height: 48 },
+          mask: { format: 'binary-lsb0' as const, width: 64, height: 48, data: mask },
+          region: { left: 10, top: 8, width: 6, height: 5 },
+          center: { x: 13, y: 10.5 },
+          cutout: {
+            data: new Uint8Array(6 * 5 * 4).fill(255),
+            width: 6,
+            height: 5,
+            format: 'rgba8' as const,
+          },
+        }
+      },
+      async dispose() {},
+    }
+    const segmenter: SegmentationPort = {
+      async segment() {
+        return {
+          status: 'unknown',
+          reason: 'unused',
+          metadata: {
+            method: 'fixture',
+            backend: 'fixture',
+            durationMs: 0,
+            input: { width: 1, height: 1 },
+          },
+        }
+      },
+      async settle() {},
+      async dispose() {},
+    }
+    const options = fixtureOptions(
+      root,
+      async () => {
+        fetchCalls++
+        return visionReply('openai/gpt-6-luna', 0.002)
+      },
+      candidateRuntime,
+      segmenter,
+    )
+    options.sourceCanvasByOpaqueCaseId = new Map([
+      ['scope-candidate-case', { width: 64, height: 48 }],
+    ])
+    options.candidateProfileId = PROFILE_SCOPE_CANDIDATE_ID
+    options.nativeRuntime.recipeId = PROFILE_FLAT_CANDIDATE_ID
+    options.nativeRuntime.queryPolicyId = 'strict-authored-scope-v1'
+    options.createCandidateRuntime = (recipeId, binding) => {
+      assert.equal(recipeId, PROFILE_FLAT_CANDIDATE_ID)
+      selectedBindings.push(binding)
+      return candidateRuntime
+    }
+
+    const creating = createH8FreshRuntimePortsForOfflineFixture(options)
+    options.candidateProfileId = PROFILE_FLAT_CANDIDATE_ID
+    options.nativeRuntime.recipeId = PROFILE_CANDIDATE_ID
+    options.nativeRuntime.queryPolicyId = 'legacy-v1'
+    const runtimePorts = await creating
+    const ledger = await CampaignLedger.open(join(root, 'ledger.json'))
+    try {
+      assert.deepEqual(selectedBindings, [
+        {
+          candidateProfileId: PROFILE_SCOPE_CANDIDATE_ID,
+          recipeId: PROFILE_FLAT_CANDIDATE_ID,
+          queryPolicyId: 'strict-authored-scope-v1',
+        },
+      ])
+      const result = await runtimePorts.candidatePort.execute(
+        {
+          opaqueCaseId: 'scope-candidate-case',
+          sourceBytes: source,
+          targetTaskText: 'the authored visible sign',
+        },
+        { profileId: PROFILE_SCOPE_CANDIDATE_ID, reservedUsdPerFetch: 0.55, ledger },
+      )
+      assert.equal(result.outputRow.profileId, PROFILE_SCOPE_CANDIDATE_ID)
+      assert.equal(result.outputRow.caseState, 'success')
+      assert.equal(result.caseArtifactSidecars?.[0]?.profileId, PROFILE_SCOPE_CANDIDATE_ID)
+      assert.equal(
+        runtimePorts.artifacts.cutoutsByProfileAndCase.has(
+          `${PROFILE_SCOPE_CANDIDATE_ID}:scope-candidate-case`,
+        ),
+        true,
+      )
+      await assert.rejects(
+        runtimePorts.candidatePort.execute(
+          {
+            opaqueCaseId: 'scope-candidate-case',
+            sourceBytes: source,
+            targetTaskText: 'the authored visible sign',
+          },
+          { profileId: PROFILE_FLAT_CANDIDATE_ID, reservedUsdPerFetch: 0.55, ledger },
+        ),
+        /Selected candidate profile/u,
+      )
+      assert.equal(fetchCalls, 0)
+    } finally {
+      await runtimePorts.dispose()
+    }
+  })
+})
+
 await test('candidate port refuses selected or returned V1/V2 recipe swaps before paid dispatch', async () => {
   await withFixtureRoot(async (root, source) => {
     let fetchCalls = 0
@@ -780,7 +955,7 @@ await test('candidate port refuses selected or returned V1/V2 recipe swaps befor
             ledger,
           },
         ),
-        /Selected native recipe does not match the candidate profile/u,
+        /Selected candidate profile does not match the frozen candidate profile/u,
       )
       assert.equal(runtimeFactoryCalls, 1)
       assert.equal(fetchCalls, 0)

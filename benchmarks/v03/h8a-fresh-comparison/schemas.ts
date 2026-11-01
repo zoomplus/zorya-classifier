@@ -11,9 +11,12 @@ import {
   PHASE_DEV40_ID,
   PHASE_FLAT_DEV40_ID,
   PHASE_FLAT_QUAL120_ID,
+  PHASE_SCOPE_DEV40_ID,
+  PHASE_SCOPE_QUAL120_ID,
   PHASE_QUAL120_ID,
   PROFILE_CANDIDATE_ID,
   PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
   QUAL120_CASE_COUNT,
   QUAL120_NEGATIVE_COUNT,
@@ -29,7 +32,12 @@ const sha256Hex = z.string().regex(/^[a-f0-9]{64}$/u)
 
 const profileDispatchUpperBoundSchema = z
   .object({
-    profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+    profileId: z.enum([
+      PROFILE_CANDIDATE_ID,
+      PROFILE_FLAT_CANDIDATE_ID,
+      PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_CONTROL_ID,
+    ]),
     maxUsdPerPhysicalDispatch: z.number().finite().positive(),
   })
   .strict()
@@ -43,6 +51,9 @@ const conservativeCostProofSchema = z
       z.union([
         profileDispatchUpperBoundSchema.extend({ profileId: z.literal(PROFILE_CANDIDATE_ID) }),
         profileDispatchUpperBoundSchema.extend({ profileId: z.literal(PROFILE_FLAT_CANDIDATE_ID) }),
+        profileDispatchUpperBoundSchema.extend({
+          profileId: z.literal(PROFILE_SCOPE_CANDIDATE_ID),
+        }),
       ]),
       profileDispatchUpperBoundSchema.extend({ profileId: z.literal(PROFILE_CONTROL_ID) }),
     ]),
@@ -53,7 +64,12 @@ const conservativeCostProofSchema = z
 
 const profileBindingSchema = z
   .object({
-    profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+    profileId: z.enum([
+      PROFILE_CANDIDATE_ID,
+      PROFILE_FLAT_CANDIDATE_ID,
+      PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_CONTROL_ID,
+    ]),
     recipeIdentitySha256: sha256Hex,
     requestPolicyIdentitySha256: sha256Hex,
   })
@@ -114,7 +130,14 @@ export const phaseFreezeSchema = z
   .object({
     schema: z.literal(H8A_FRESH_SCHEMA),
     freezeId: z.string().min(1),
-    phaseId: z.enum([PHASE_DEV40_ID, PHASE_QUAL120_ID, PHASE_FLAT_DEV40_ID, PHASE_FLAT_QUAL120_ID]),
+    phaseId: z.enum([
+      PHASE_DEV40_ID,
+      PHASE_QUAL120_ID,
+      PHASE_FLAT_DEV40_ID,
+      PHASE_FLAT_QUAL120_ID,
+      PHASE_SCOPE_DEV40_ID,
+      PHASE_SCOPE_QUAL120_ID,
+    ]),
     phaseCounts: phaseCountsSchema,
     cohortCommitmentSha256: sha256Hex,
     producerClosureSha256: sha256Hex,
@@ -124,6 +147,7 @@ export const phaseFreezeSchema = z
       z.union([
         profileBindingSchema.extend({ profileId: z.literal(PROFILE_CANDIDATE_ID) }),
         profileBindingSchema.extend({ profileId: z.literal(PROFILE_FLAT_CANDIDATE_ID) }),
+        profileBindingSchema.extend({ profileId: z.literal(PROFILE_SCOPE_CANDIDATE_ID) }),
       ]),
       profileBindingSchema.extend({ profileId: z.literal(PROFILE_CONTROL_ID) }),
     ]),
@@ -150,7 +174,9 @@ export const phaseFreezeSchema = z
   .strict()
   .superRefine((freeze, context) => {
     const expectedStratumCounts =
-      freeze.phaseId === PHASE_DEV40_ID || freeze.phaseId === PHASE_FLAT_DEV40_ID
+      freeze.phaseId === PHASE_DEV40_ID ||
+      freeze.phaseId === PHASE_FLAT_DEV40_ID ||
+      freeze.phaseId === PHASE_SCOPE_DEV40_ID
         ? {
             photo: DEV40_STRATUM_QUOTAS.photo.total,
             ui: DEV40_STRATUM_QUOTAS.ui.total,
@@ -174,7 +200,11 @@ export const phaseFreezeSchema = z
           message: `Freeze stratum ${stratum} commitment count mismatch`,
         })
     }
-    if (freeze.phaseId === PHASE_DEV40_ID || freeze.phaseId === PHASE_FLAT_DEV40_ID) {
+    if (
+      freeze.phaseId === PHASE_DEV40_ID ||
+      freeze.phaseId === PHASE_FLAT_DEV40_ID ||
+      freeze.phaseId === PHASE_SCOPE_DEV40_ID
+    ) {
       if (freeze.phaseCounts.totalCases !== DEV40_CASE_COUNT)
         context.addIssue({ code: z.ZodIssueCode.custom, message: 'DEV40 case count mismatch' })
       if (freeze.phaseCounts.positiveCases !== DEV40_POSITIVE_COUNT)
@@ -192,7 +222,11 @@ export const phaseFreezeSchema = z
           message: 'DEV40 cannot preselect qualification independent-mask cases',
         })
     }
-    if (freeze.phaseId === PHASE_QUAL120_ID || freeze.phaseId === PHASE_FLAT_QUAL120_ID) {
+    if (
+      freeze.phaseId === PHASE_QUAL120_ID ||
+      freeze.phaseId === PHASE_FLAT_QUAL120_ID ||
+      freeze.phaseId === PHASE_SCOPE_QUAL120_ID
+    ) {
       if (freeze.phaseCounts.totalCases !== QUAL120_CASE_COUNT)
         context.addIssue({ code: z.ZodIssueCode.custom, message: 'QUAL120 case count mismatch' })
       if (freeze.phaseCounts.positiveCases !== QUAL120_POSITIVE_COUNT)
@@ -263,7 +297,12 @@ export const logicalReceiptSchema = z
   .object({
     logicalId: z.number().int().positive(),
     opaqueCaseId: z.string().min(1),
-    profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+    profileId: z.enum([
+      PROFILE_CANDIDATE_ID,
+      PROFILE_FLAT_CANDIDATE_ID,
+      PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_CONTROL_ID,
+    ]),
     requestSha256: sha256Hex,
     physicalIds: z.array(z.number().int().positive()),
     outcome: z.enum(['resolved', 'failed', 'cancelled', 'timeout', 'unknown', 'preflight_failed']),
@@ -287,7 +326,12 @@ export const outputRowSchema = z
   .object({
     schema: z.literal('h8a-fresh-output-row-v1'),
     opaqueCaseId: z.string().min(1),
-    profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+    profileId: z.enum([
+      PROFILE_CANDIDATE_ID,
+      PROFILE_FLAT_CANDIDATE_ID,
+      PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_CONTROL_ID,
+    ]),
     executionValidity: z.enum(['valid', 'invalid']),
     caseState: z.enum([
       'success',
@@ -323,8 +367,20 @@ export const immutableCloseoutSchema = z
     schema: z.literal('h8a-fresh-immutable-closeout-v1'),
     freezeId: z.string().min(1),
     freezeCommitmentSha256: sha256Hex,
-    phaseId: z.enum([PHASE_DEV40_ID, PHASE_QUAL120_ID, PHASE_FLAT_DEV40_ID, PHASE_FLAT_QUAL120_ID]),
-    profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+    phaseId: z.enum([
+      PHASE_DEV40_ID,
+      PHASE_QUAL120_ID,
+      PHASE_FLAT_DEV40_ID,
+      PHASE_FLAT_QUAL120_ID,
+      PHASE_SCOPE_DEV40_ID,
+      PHASE_SCOPE_QUAL120_ID,
+    ]),
+    profileId: z.enum([
+      PROFILE_CANDIDATE_ID,
+      PROFILE_FLAT_CANDIDATE_ID,
+      PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_CONTROL_ID,
+    ]),
     closedAtIso: z.string().min(1),
     cohortCommitmentSha256: sha256Hex,
     producerClosureSha256: sha256Hex,
@@ -372,7 +428,14 @@ const evaluatorPrivateCaseAnnotationSchema = z
 export const evaluatorPrivateAnnotationBundleSchema = z
   .object({
     schema: z.literal('h8a-fresh-evaluator-private-v1'),
-    phaseId: z.enum([PHASE_DEV40_ID, PHASE_QUAL120_ID, PHASE_FLAT_DEV40_ID, PHASE_FLAT_QUAL120_ID]),
+    phaseId: z.enum([
+      PHASE_DEV40_ID,
+      PHASE_QUAL120_ID,
+      PHASE_FLAT_DEV40_ID,
+      PHASE_FLAT_QUAL120_ID,
+      PHASE_SCOPE_DEV40_ID,
+      PHASE_SCOPE_QUAL120_ID,
+    ]),
     freezeId: z.string().min(1),
     independentMaskCaseIds: z.array(z.string().min(1)),
     cases: z.array(evaluatorPrivateCaseAnnotationSchema),

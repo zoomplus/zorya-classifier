@@ -6,8 +6,10 @@ import {
   DEV40_STRATUM_QUOTAS,
   PHASE_DEV40_ID,
   PHASE_FLAT_DEV40_ID,
+  PHASE_SCOPE_DEV40_ID,
   PROFILE_CANDIDATE_ID,
   PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
   STRATUMS,
 } from './constants.js'
@@ -34,7 +36,12 @@ const SCREEN_SIZES = {
 
 const profileBindingSchema = z
   .object({
-    profileId: z.enum([PROFILE_CANDIDATE_ID, PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID]),
+    profileId: z.enum([
+      PROFILE_CANDIDATE_ID,
+      PROFILE_FLAT_CANDIDATE_ID,
+      PROFILE_SCOPE_CANDIDATE_ID,
+      PROFILE_CONTROL_ID,
+    ]),
     recipeIdentitySha256: z.string().regex(/^[a-f0-9]{64}$/u),
     requestPolicyIdentitySha256: z.string().regex(/^[a-f0-9]{64}$/u),
   })
@@ -136,7 +143,9 @@ export function buildDevScreenSelection(
   const freeze = phaseFreezeSchema.parse(rawFreeze)
   const annotations = evaluatorPrivateAnnotationBundleSchema.parse(rawAnnotations)
   if (
-    (freeze.phaseId !== PHASE_DEV40_ID && freeze.phaseId !== PHASE_FLAT_DEV40_ID) ||
+    (freeze.phaseId !== PHASE_DEV40_ID &&
+      freeze.phaseId !== PHASE_FLAT_DEV40_ID &&
+      freeze.phaseId !== PHASE_SCOPE_DEV40_ID) ||
     annotations.phaseId !== freeze.phaseId
   )
     throw new RangeError('DEV screens require the matching frozen DEV40 cohort')

@@ -6,12 +6,11 @@ import {
   DEV40_POSITIVE_COUNT,
   DEV40_STRATUM_QUOTAS,
   H8A_FRESH_SCHEMA,
-  PHASE_DEV40_ID,
-  PHASE_QUAL120_ID,
-  PHASE_FLAT_DEV40_ID,
-  PHASE_FLAT_QUAL120_ID,
   PROFILE_CANDIDATE_ID,
   PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
+  isDevPhase,
+  isQualificationPhase,
   candidateIdForPhase,
   PROFILE_CONTROL_ID,
   type H8aFreshPhaseId,
@@ -26,6 +25,7 @@ import { computeSourceGroupStratumCommitmentSha256 } from './source-group-valida
 import {
   H8A_CANDIDATE_PROFILE,
   H8A_FLAT_CANDIDATE_PROFILE,
+  H8A_SCOPE_CANDIDATE_PROFILE,
   V02_CONTROL_PROFILE,
 } from './profiles.js'
 import type {
@@ -47,6 +47,7 @@ function recipeIdentity(
   profileId:
     | typeof PROFILE_CANDIDATE_ID
     | typeof PROFILE_FLAT_CANDIDATE_ID
+    | typeof PROFILE_SCOPE_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID,
 ): string {
   const profile =
@@ -54,7 +55,9 @@ function recipeIdentity(
       ? H8A_CANDIDATE_PROFILE
       : profileId === PROFILE_FLAT_CANDIDATE_ID
         ? H8A_FLAT_CANDIDATE_PROFILE
-        : V02_CONTROL_PROFILE
+        : profileId === PROFILE_SCOPE_CANDIDATE_ID
+          ? H8A_SCOPE_CANDIDATE_PROFILE
+          : V02_CONTROL_PROFILE
   return hashIdentity({
     profileId: profile.profileId,
     recipeKind: profile.recipeKind,
@@ -67,7 +70,10 @@ export function buildConservativeCostProof(
   profileBounds?: {
     candidateMaxUsdPerPhysicalDispatch?: number
     controlMaxUsdPerPhysicalDispatch?: number
-    candidateProfileId?: typeof PROFILE_CANDIDATE_ID | typeof PROFILE_FLAT_CANDIDATE_ID
+    candidateProfileId?:
+      | typeof PROFILE_CANDIDATE_ID
+      | typeof PROFILE_FLAT_CANDIDATE_ID
+      | typeof PROFILE_SCOPE_CANDIDATE_ID
   },
 ): PhaseFreeze['conservativeCostProof'] {
   const candidateMax =
@@ -121,7 +127,7 @@ function buildScheduledCases(phaseId: H8aFreshPhaseId): {
     globalIndex++
   }
 
-  if (phaseId === PHASE_DEV40_ID || phaseId === PHASE_FLAT_DEV40_ID) {
+  if (isDevPhase(phaseId)) {
     for (const stratum of ['photo', 'ui', 'map'] as const) {
       const quota = DEV40_STRATUM_QUOTAS[stratum]
       for (let index = 0; index < quota.present; index++) pushCase(stratum)
@@ -145,14 +151,13 @@ export function buildSyntheticAnnotationBundle(
   producerCases: PhaseFreeze['producerCases'],
   pairedSchedule: PhaseFreeze['pairedSchedule'],
 ): EvaluatorPrivateAnnotationBundle {
-  const stratumPresentRemaining: Record<'photo' | 'ui' | 'map', number> =
-    phaseId === PHASE_DEV40_ID || phaseId === PHASE_FLAT_DEV40_ID
-      ? {
-          photo: DEV40_STRATUM_QUOTAS.photo.present,
-          ui: DEV40_STRATUM_QUOTAS.ui.present,
-          map: DEV40_STRATUM_QUOTAS.map.present,
-        }
-      : { photo: QUAL120_STRATUM_COUNT, ui: QUAL120_STRATUM_COUNT, map: QUAL120_STRATUM_COUNT }
+  const stratumPresentRemaining: Record<'photo' | 'ui' | 'map', number> = isDevPhase(phaseId)
+    ? {
+        photo: DEV40_STRATUM_QUOTAS.photo.present,
+        ui: DEV40_STRATUM_QUOTAS.ui.present,
+        map: DEV40_STRATUM_QUOTAS.map.present,
+      }
+    : { photo: QUAL120_STRATUM_COUNT, ui: QUAL120_STRATUM_COUNT, map: QUAL120_STRATUM_COUNT }
 
   const cases = producerCases.map((row, index) => {
     const stratum = pairedSchedule[index]!.stratum
@@ -174,13 +179,12 @@ export function buildSyntheticAnnotationBundle(
     }
   })
 
-  const independentMaskCaseIds =
-    phaseId === PHASE_QUAL120_ID || phaseId === PHASE_FLAT_QUAL120_ID
-      ? cases
-          .filter((item) => item.stratum === 'photo' && item.expectedPresence === 'present')
-          .slice(0, 30)
-          .map((item) => item.opaqueCaseId)
-      : []
+  const independentMaskCaseIds = isQualificationPhase(phaseId)
+    ? cases
+        .filter((item) => item.stratum === 'photo' && item.expectedPresence === 'present')
+        .slice(0, 30)
+        .map((item) => item.opaqueCaseId)
+    : []
   const independentMaskCaseIdSet = new Set(independentMaskCaseIds)
   for (const item of cases) {
     if (independentMaskCaseIdSet.has(item.opaqueCaseId)) item.exactOriginalCanvasMaskRef = true
@@ -199,18 +203,9 @@ export function buildSyntheticPhaseFreeze(phaseId: H8aFreshPhaseId): {
   freeze: PhaseFreeze
   sourceBytesByCaseId: Map<string, Uint8Array>
 } {
-  const totalCases =
-    phaseId === PHASE_DEV40_ID || phaseId === PHASE_FLAT_DEV40_ID
-      ? DEV40_CASE_COUNT
-      : QUAL120_CASE_COUNT
-  const positiveCases =
-    phaseId === PHASE_DEV40_ID || phaseId === PHASE_FLAT_DEV40_ID
-      ? DEV40_POSITIVE_COUNT
-      : QUAL120_POSITIVE_COUNT
-  const negativeCases =
-    phaseId === PHASE_DEV40_ID || phaseId === PHASE_FLAT_DEV40_ID
-      ? DEV40_NEGATIVE_COUNT
-      : QUAL120_NEGATIVE_COUNT
+  const totalCases = isDevPhase(phaseId) ? DEV40_CASE_COUNT : QUAL120_CASE_COUNT
+  const positiveCases = isDevPhase(phaseId) ? DEV40_POSITIVE_COUNT : QUAL120_POSITIVE_COUNT
+  const negativeCases = isDevPhase(phaseId) ? DEV40_NEGATIVE_COUNT : QUAL120_NEGATIVE_COUNT
   const { producerCases, pairedSchedule } = buildScheduledCases(phaseId)
   const freezeId = `${phaseId}-freeze-test`
   const annotationBundle = buildSyntheticAnnotationBundle(
@@ -222,18 +217,17 @@ export function buildSyntheticPhaseFreeze(phaseId: H8aFreshPhaseId): {
   const evaluatorAnnotationsSha256 = computeEvaluatorAnnotationsSha256(annotationBundle)
 
   const strata = ['photo', 'ui', 'map'] as const
-  const perStratumCaseCount =
-    phaseId === PHASE_DEV40_ID || phaseId === PHASE_FLAT_DEV40_ID
-      ? {
-          photo: DEV40_STRATUM_QUOTAS.photo.total,
-          ui: DEV40_STRATUM_QUOTAS.ui.total,
-          map: DEV40_STRATUM_QUOTAS.map.total,
-        }
-      : {
-          photo: QUAL120_STRATUM_COUNT + QUAL120_NEGATIVE_COUNT / 3,
-          ui: QUAL120_STRATUM_COUNT + QUAL120_NEGATIVE_COUNT / 3,
-          map: QUAL120_STRATUM_COUNT + QUAL120_NEGATIVE_COUNT / 3,
-        }
+  const perStratumCaseCount = isDevPhase(phaseId)
+    ? {
+        photo: DEV40_STRATUM_QUOTAS.photo.total,
+        ui: DEV40_STRATUM_QUOTAS.ui.total,
+        map: DEV40_STRATUM_QUOTAS.map.total,
+      }
+    : {
+        photo: QUAL120_STRATUM_COUNT + QUAL120_NEGATIVE_COUNT / 3,
+        ui: QUAL120_STRATUM_COUNT + QUAL120_NEGATIVE_COUNT / 3,
+        map: QUAL120_STRATUM_COUNT + QUAL120_NEGATIVE_COUNT / 3,
+      }
 
   const freezeWithoutProof = {
     schema: H8A_FRESH_SCHEMA,
@@ -259,9 +253,11 @@ export function buildSyntheticPhaseFreeze(phaseId: H8aFreshPhaseId): {
         profileId: candidateIdForPhase(phaseId),
         recipeIdentitySha256: recipeIdentity(candidateIdForPhase(phaseId)),
         requestPolicyIdentitySha256:
-          candidateIdForPhase(phaseId) === PROFILE_FLAT_CANDIDATE_ID
-            ? H8A_FLAT_CANDIDATE_PROFILE.requestPolicyIdentitySha256
-            : H8A_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
+          candidateIdForPhase(phaseId) === PROFILE_CANDIDATE_ID
+            ? H8A_CANDIDATE_PROFILE.requestPolicyIdentitySha256
+            : candidateIdForPhase(phaseId) === PROFILE_FLAT_CANDIDATE_ID
+              ? H8A_FLAT_CANDIDATE_PROFILE.requestPolicyIdentitySha256
+              : H8A_SCOPE_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
       },
       {
         profileId: PROFILE_CONTROL_ID,
@@ -275,8 +271,7 @@ export function buildSyntheticPhaseFreeze(phaseId: H8aFreshPhaseId): {
     callLimits: {
       candidateMaxPhysicalCallsPerCase: 4,
       controlMaxPhysicalCallsPerCase: 6,
-      phaseWorstCasePhysicalCalls:
-        phaseId === PHASE_DEV40_ID || phaseId === PHASE_FLAT_DEV40_ID ? 400 : 1200,
+      phaseWorstCasePhysicalCalls: isDevPhase(phaseId) ? 400 : 1200,
     },
     nativeLimits: {
       avoidConcurrentOwnedNativeWork: true as const,
@@ -295,8 +290,7 @@ export function buildSyntheticPhaseFreeze(phaseId: H8aFreshPhaseId): {
     conservativeCostProof: buildConservativeCostProof(0.005, {
       candidateProfileId: candidateIdForPhase(phaseId),
     }),
-    enforceQualificationSourceGroupSeparation:
-      phaseId === PHASE_QUAL120_ID || phaseId === PHASE_FLAT_QUAL120_ID,
+    enforceQualificationSourceGroupSeparation: isQualificationPhase(phaseId),
     evaluatorAnnotationsSha256,
   }
   const freeze = phaseFreezeSchema.parse(freezeWithoutProof)
@@ -314,6 +308,7 @@ export function buildOutputRow(
   profileId:
     | typeof PROFILE_CANDIDATE_ID
     | typeof PROFILE_FLAT_CANDIDATE_ID
+    | typeof PROFILE_SCOPE_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID,
   overrides?: Partial<OutputRow>,
 ): OutputRow {
@@ -337,6 +332,7 @@ export function buildCloseout(
   profileId:
     | typeof PROFILE_CANDIDATE_ID
     | typeof PROFILE_FLAT_CANDIDATE_ID
+    | typeof PROFILE_SCOPE_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID,
   rows: OutputRow[],
 ): ImmutableCloseout {

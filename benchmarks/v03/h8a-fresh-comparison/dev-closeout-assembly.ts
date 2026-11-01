@@ -2,12 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import type { CampaignLedgerPort } from './campaign-ledger-port.js'
 import { ImmutableCaseArtifactStore } from './case-artifact-store.js'
-import {
-  PROFILE_CONTROL_ID,
-  PHASE_DEV40_ID,
-  PHASE_FLAT_DEV40_ID,
-  candidateIdForPhase,
-} from './constants.js'
+import { PROFILE_CONTROL_ID, isDevPhase, candidateIdForPhase } from './constants.js'
 import type { H8aFreshProfileId } from './profiles.js'
 import { validateImmutableCloseouts } from './evaluator.js'
 import { computePhaseFreezeCommitmentSha256 } from './freeze-commitment.js'
@@ -166,7 +161,7 @@ export async function assembleDev40Closeouts(input: {
   const candidateId = candidateIdForPhase(freeze.phaseId)
   const annotations = input.annotations
   const selection = validateDevScreenSelection(input.selection, freeze, annotations)
-  if (freeze.phaseId !== PHASE_DEV40_ID && freeze.phaseId !== PHASE_FLAT_DEV40_ID)
+  if (!isDevPhase(freeze.phaseId))
     throw new RangeError('Full DEV40 assembly requires a DEV40 freeze')
   if (selection.devFreezeCommitmentSha256 !== computePhaseFreezeCommitmentSha256(freeze))
     throw new RangeError('DEV40 assembly selection is bound to a different freeze')

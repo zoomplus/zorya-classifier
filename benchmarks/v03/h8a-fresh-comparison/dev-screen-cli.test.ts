@@ -8,6 +8,7 @@ import { CampaignLedger } from './campaign-ledger.js'
 import {
   PROFILE_CANDIDATE_ID,
   PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
   PHASE_DEV40_ID,
   PHASE_FLAT_DEV40_ID,
@@ -23,6 +24,7 @@ import {
   verifyCampaignConfig,
   verifyDevPhaseBinding,
   verifyPriorStageFiles,
+  resolveLegacyDevScreenCandidateBinding,
 } from './dev-screen-cli.js'
 import {
   devScreenReportSchema,
@@ -61,6 +63,22 @@ const syntheticClosurePaths = [
   'benchmarks/v03/h8a-fresh-comparison/physical-dispatch.ts',
   'benchmarks/v03/h8a-fresh-comparison/campaign-fetch-boundary.ts',
 ]
+
+await test('legacy DEV CLI binding accepts only its original raw and flat profiles', () => {
+  assert.deepEqual(resolveLegacyDevScreenCandidateBinding(PROFILE_CANDIDATE_ID), {
+    candidateProfileId: PROFILE_CANDIDATE_ID,
+    recipeId: PROFILE_CANDIDATE_ID,
+  })
+  assert.deepEqual(resolveLegacyDevScreenCandidateBinding(PROFILE_FLAT_CANDIDATE_ID), {
+    candidateProfileId: PROFILE_FLAT_CANDIDATE_ID,
+    recipeId: PROFILE_FLAT_CANDIDATE_ID,
+  })
+  assert.throws(
+    () => resolveLegacyDevScreenCandidateBinding(PROFILE_SCOPE_CANDIDATE_ID),
+    /does not accept/u,
+  )
+  assert.throws(() => resolveLegacyDevScreenCandidateBinding('unknown-profile'), /does not accept/u)
+})
 
 function hash(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex')

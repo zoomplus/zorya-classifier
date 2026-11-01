@@ -4,6 +4,7 @@ import { hashIdentity } from './hash-identity.js'
 import {
   H8A_CANDIDATE_PROFILE,
   H8A_FLAT_CANDIDATE_PROFILE,
+  H8A_SCOPE_CANDIDATE_PROFILE,
   V02_CONTROL_PROFILE,
 } from './profiles.js'
 import { phaseFreezeSchema, type PhaseFreeze } from './schemas.js'
@@ -20,9 +21,13 @@ import {
   PHASE_DEV40_ID,
   PHASE_QUAL120_ID,
   PHASE_FLAT_DEV40_ID,
+  PHASE_SCOPE_DEV40_ID,
+  PHASE_SCOPE_QUAL120_ID,
   PROFILE_FLAT_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
+  candidateIdForPhase,
 } from './constants.js'
 
 await test('phase freeze rejects unknown keys and wrong phase counts', () => {
@@ -105,8 +110,7 @@ await test('missing or invalid conservative cost proof rejects paid freeze valid
   )
 })
 
-await test('shared freeze admission uses study scope for successor ledgers', async () => {
-  const { freeze } = buildSyntheticPhaseFreeze(PHASE_FLAT_DEV40_ID)
+await test('shared freeze admission passes only recognized candidate identities to study-scoped ledgers', async () => {
   const scoped: Array<[string, number]> = []
   const ledger = {
     snapshot: () => ({
@@ -133,10 +137,21 @@ await test('shared freeze admission uses study scope for successor ledgers', asy
     },
     assertExposureAllowsAdditionalUsd: async () => undefined,
   }
-  await assertFreezeAdmissionAsync(freeze, ledger)
-  assert.deepEqual(
-    scoped.map(([profileId]) => profileId),
-    [PROFILE_FLAT_CANDIDATE_ID, PROFILE_CONTROL_ID],
+  for (const [phaseId, candidateProfileId] of [
+    [PHASE_FLAT_DEV40_ID, PROFILE_FLAT_CANDIDATE_ID],
+    [PHASE_SCOPE_DEV40_ID, PROFILE_SCOPE_CANDIDATE_ID],
+  ] as const) {
+    const { freeze } = buildSyntheticPhaseFreeze(phaseId)
+    await assertFreezeAdmissionAsync(freeze, ledger)
+    assert.deepEqual(
+      scoped.splice(0).map(([profileId]) => profileId),
+      [candidateProfileId, PROFILE_CONTROL_ID],
+    )
+  }
+  const { freeze: rawFreeze } = buildSyntheticPhaseFreeze(PHASE_DEV40_ID)
+  await assert.rejects(
+    assertFreezeAdmissionAsync(rawFreeze, ledger),
+    /registered flat or authored-scope profile/u,
   )
 })
 
@@ -208,4 +223,34 @@ await test('flat comparison freeze has a separate phase and recipe identity with
   assert.throws(() =>
     validateConservativeCostProof({ ...freeze, conservativeCostProof: legacyReservation }),
   )
+})
+
+await test('authored-scope profile has a separate policy identity and accepts both new phase bindings', () => {
+  assert.equal(
+    H8A_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
+    '0c9a1bff40a1ab4fed251a2b1f9f56b8b47325b8aa79e18875d8fbf549760a5e',
+  )
+  assert.equal(
+    H8A_FLAT_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
+    '0c9a1bff40a1ab4fed251a2b1f9f56b8b47325b8aa79e18875d8fbf549760a5e',
+  )
+  assert.equal(H8A_SCOPE_CANDIDATE_PROFILE.profileId, PROFILE_SCOPE_CANDIDATE_ID)
+  assert.equal(H8A_SCOPE_CANDIDATE_PROFILE.requestPolicy.nativeRecipeId, PROFILE_FLAT_CANDIDATE_ID)
+  assert.equal(H8A_SCOPE_CANDIDATE_PROFILE.requestPolicy.queryPolicyId, 'strict-authored-scope-v1')
+  assert.equal(
+    H8A_SCOPE_CANDIDATE_PROFILE.requestPolicy.queryPolicySha256,
+    '8146bc76ed3166a1cf8573518d23765266bf53f9172f9794e1e85a3fe793d9bc',
+  )
+  assert.notEqual(
+    H8A_SCOPE_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
+    H8A_FLAT_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
+  )
+  for (const phaseId of [PHASE_SCOPE_DEV40_ID, PHASE_SCOPE_QUAL120_ID]) {
+    const { freeze } = buildSyntheticPhaseFreeze(phaseId)
+    assert.equal(freeze.profileBindings[0]?.profileId, PROFILE_SCOPE_CANDIDATE_ID)
+    assert.doesNotThrow(() => phaseFreezeSchema.parse(freeze))
+    validateProfileIdentities(freeze)
+    validateConservativeCostProof(freeze)
+  }
+  assert.throws(() => Reflect.apply(candidateIdForPhase, undefined, ['unknown-phase']))
 })
