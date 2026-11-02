@@ -174,8 +174,9 @@ try {
   archivePath = join(tempRoot, packRecord.filename)
   const archive = await readFile(archivePath)
   archiveHash = createHash('sha256').update(archive).digest('hex')
-  const listing = command('tar', ['-tzf', archivePath], { label: 'tar listing' }).trim().split('\n')
-  const archiveMembers = listing.filter((member) => member && !member.endsWith('/')).sort()
+  const listing = command('tar', ['-tzf', archivePath], { label: 'tar listing' }).split(/\r?\n/u)
+  if (listing.at(-1) === '') listing.pop()
+  const archiveMembers = listing.filter((member) => !member.endsWith('/')).sort()
   assert.ok(archiveMembers.length > 0 && archiveMembers.length <= 10_000)
   assert.equal(
     new Set(archiveMembers).size,
