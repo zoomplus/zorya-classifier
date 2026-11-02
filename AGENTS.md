@@ -2,6 +2,8 @@
 
 Canonical owner-wide policies live under `/root/.cursor/rules/` (repository cleanliness, Context7 for external SDK documentation, Luna prose authorship, and related rules). The supervisor must include applicable constraints in task prompts; Cursor does not automatically load home rules. Project pointers: [.cursor/rules/zorya-classifier.mdc](.cursor/rules/zorya-classifier.mdc), Russian workflow/architecture [docs/agents.ru.md](docs/agents.ru.md), [docs/architecture.ru.md](docs/architecture.ru.md), [docs/development.ru.md](docs/development.ru.md), wave status [docs/refactoring-plan.ru.md](docs/refactoring-plan.ru.md).
 
+Текущий порядок работ по MCP: решение владельца от 2026-11-02 — сначала отдельный MCP-пакет на опубликованной библиотеке `0.2.3`, H8a исследуется отдельно и не является предпосылкой MCP. Канонический план реализации и полной приёмки: [docs/mcp-implementation-plan.ru.md](docs/mcp-implementation-plan.ru.md). Исторический план H8a/MCP сохраняется для receipts, но его прежний порядок заменён этим решением.
+
 This repository is independent of Zorya Games. Implement the accepted MIT library plan in docs/plan.md.
 For the current accuracy iteration follow docs/0.3.0-quality-plan.md. The owner authorizes testing alternative localization/segmentation mechanisms with internet research and a written hypothesis before implementation. Preserve v0.2 evidence and default API compatibility; do not treat the historical v0.2 primary flow as a prohibition on separately named benchmark experiments. Promote only a candidate that passes the new independent quality gate.
 Use strict TypeScript and Zod at public/provider boundaries. No explicit any, unchecked external casts, broad lint disables, or swallowed rejected promises.
