@@ -937,6 +937,7 @@ export class DevReplayLedger implements SuccessorCampaignAdmissionPort {
   }): Promise<DevReplayLedger> {
     const requestedRoot = options.root
     const offlineTestOnly = options.offlineTestOnly === true
+    const durable = !offlineTestOnly
     const policy = replayStudyPolicy(options.studyId)
     const protocolSha256 = digest.parse(options.protocolSha256)
     const caseIds = [...options.caseIds]
@@ -994,7 +995,7 @@ export class DevReplayLedger implements SuccessorCampaignAdmissionPort {
       (await realpath(dirname(root))) !== dirname(root)
     )
       throw new ProviderRefusalReplayLedgerError('Replay ledger parent is not canonical')
-    const unlock = await acquireExclusiveFileLock(`${root}.registration.lock`, true)
+    const unlock = await acquireExclusiveFileLock(`${root}.registration.lock`, durable)
     try {
       await mkdir(root, { recursive: false, mode: 0o700 }).catch(async (error: unknown) => {
         if (!(error instanceof Error && Reflect.get(error, 'code') === 'EEXIST')) throw error
@@ -1015,7 +1016,7 @@ export class DevReplayLedger implements SuccessorCampaignAdmissionPort {
         throw new ProviderRefusalReplayLedgerError(
           'Namespace is already bound to different protocol',
         )
-      const store = new AtomicJsonLedgerStore(join(root, 'campaign-ledger.json'), true)
+      const store = new AtomicJsonLedgerStore(join(root, 'campaign-ledger.json'), durable)
       const initial = initialState(registration, policy)
       let state = await store.read((raw) => stateSchema.parse(raw))
       if (existing && !state)
@@ -1038,7 +1039,7 @@ export class DevReplayLedger implements SuccessorCampaignAdmissionPort {
           throw new ProviderRefusalReplayLedgerError(
             'Unregistered ledger root contains unknown files',
           )
-        await atomicWriteJsonFile(registrationPath, registration, true)
+        await atomicWriteJsonFile(registrationPath, registration, durable)
       }
       assertState(state, registration, policy)
       const cached = latestLedgerStates.get(root)

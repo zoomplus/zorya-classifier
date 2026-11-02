@@ -602,7 +602,7 @@ await test('authored-scope parent registration supplies the cap and links the ca
     parentAuditSha256: '5e7f8db8bbdd59c39d04bd78536fead6dd269568f5816872e0cbfef48e18736a',
     parentLedgerSha256: 'b3c2348e09d8459ebc8b6935b03753c6b1082ce1f0f6584656bd8f39c4ca727b',
     parentLedgerVersion: 556,
-    canonicalRoot: join(LEGACY_REPLAY_ROOT, 'admission', 'successor-campaign'),
+    canonicalRoot: dirname(policy.parentRegistrationPath!),
     caseIds: Array.from({ length: 40 }, (_, index) => `opaque-${index}`),
     maxPhysicalCalls: 2_000,
     dev40MaxPhysicalCalls: 400,

@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { lstat, mkdir, readFile, realpath, readdir } from 'node:fs/promises'
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { tmpdir } from 'node:os'
 import { z } from 'zod'
 import { PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
 import {
@@ -188,6 +189,7 @@ export interface SuccessorCampaignLedgerOptions {
   parentRoot: string
   parentLedgerPath: string
   executionId?: typeof UI_STATE_DEV40_EXECUTION_V2_ID
+  offlineTestOnly?: boolean
 }
 
 export class SuccessorCampaignLedgerBlockedError extends Error {
@@ -502,6 +504,21 @@ async function validateRegistrationInputs(options: SuccessorCampaignLedgerOption
 }> {
   const studyRoot = await assertPhysicalDirectory(options.studyRoot, true)
   const parentRoot = await assertPhysicalDirectory(options.parentRoot, true)
+  const offlineTestOnly = options.offlineTestOnly === true
+  const temporaryRoot = resolve(tmpdir())
+  if (
+    offlineTestOnly &&
+    (options.executionId !== undefined ||
+      studyRoot === UI_STATE_DEV40_ROOT ||
+      parentRoot === UI_STATE_DEV40_PARENT_ROOT ||
+      studyRoot === temporaryRoot ||
+      parentRoot === temporaryRoot ||
+      !isInside(temporaryRoot, studyRoot) ||
+      !isInside(temporaryRoot, parentRoot))
+  )
+    throw new SuccessorCampaignLedgerBlockedError(
+      'Offline test mode requires disposable temporary roots without a live execution identity',
+    )
   const expectedParentLedger = resolve(options.parentLedgerPath)
   const expectedParentRoot = resolve(studyRoot, '..', 'h8a-fresh-dev-qual-campaign-v1')
   if (options.executionId && options.executionId !== UI_STATE_DEV40_EXECUTION_V2_ID)
@@ -633,7 +650,9 @@ export class SuccessorCampaignLedger implements SuccessorCampaignAdmissionPort {
   ) {}
 
   static async register(options: SuccessorCampaignLedgerOptions): Promise<SuccessorCampaignLedger> {
-    const validated = await validateRegistrationInputs(options)
+    const ownedOptions = { ...options }
+    const durable = ownedOptions.offlineTestOnly !== true
+    const validated = await validateRegistrationInputs(ownedOptions)
     const admissionRoot = join(validated.studyRoot, 'admission')
     await mkdir(admissionRoot, { recursive: false, mode: 0o700 }).catch(async (error: unknown) => {
       if (!(error instanceof Error && Reflect.get(error, 'code') === 'EEXIST')) throw error
@@ -652,7 +671,7 @@ export class SuccessorCampaignLedger implements SuccessorCampaignAdmissionPort {
       throw new SuccessorCampaignLedgerBlockedError('Successor admission root is aliased')
     const unlock = await acquireExclusiveFileLock(
       join(admissionRoot, 'successor-registration.lock'),
-      true,
+      durable,
     )
     try {
       let rootExists = false
@@ -672,7 +691,7 @@ export class SuccessorCampaignLedger implements SuccessorCampaignAdmissionPort {
 
       const registrationPath = join(validated.successorRoot, 'registration.json')
       const ledgerPath = join(validated.successorRoot, 'campaign-ledger.json')
-      const storage = new AtomicJsonLedgerStore(ledgerPath, true)
+      const storage = new AtomicJsonLedgerStore(ledgerPath, durable)
       const expectedState = initialState(validated.registration)
       let existingRegistration: SuccessorRegistration | undefined
       try {
@@ -694,7 +713,7 @@ export class SuccessorCampaignLedger implements SuccessorCampaignAdmissionPort {
           throw new SuccessorCampaignLedgerBlockedError(
             'Unregistered successor root contains noninitial state',
           )
-        await atomicWriteJsonFile(registrationPath, validated.registration, true)
+        await atomicWriteJsonFile(registrationPath, validated.registration, durable)
       } else if (!existingState) {
         const existingEntries = await readdir(validated.successorRoot)
         if (existingEntries.length > 0)
@@ -702,7 +721,7 @@ export class SuccessorCampaignLedger implements SuccessorCampaignAdmissionPort {
             'Unregistered successor root contains unknown files',
           )
         existingState = await storage.openOrCreate((raw) => stateSchema.parse(raw), expectedState)
-        await atomicWriteJsonFile(registrationPath, validated.registration, true)
+        await atomicWriteJsonFile(registrationPath, validated.registration, durable)
       }
       return new SuccessorCampaignLedger(
         validated.successorRoot,
@@ -716,7 +735,9 @@ export class SuccessorCampaignLedger implements SuccessorCampaignAdmissionPort {
   }
 
   static async open(options: SuccessorCampaignLedgerOptions): Promise<SuccessorCampaignLedger> {
-    const validated = await validateRegistrationInputs(options)
+    const ownedOptions = { ...options }
+    const durable = ownedOptions.offlineTestOnly !== true
+    const validated = await validateRegistrationInputs(ownedOptions)
     const registration = await readRegistration(validated.successorRoot)
     if (!exactRegistration(registration, validated.registration))
       throw new SuccessorCampaignLedgerBlockedError(
@@ -724,7 +745,7 @@ export class SuccessorCampaignLedger implements SuccessorCampaignAdmissionPort {
       )
     const storage = new AtomicJsonLedgerStore(
       join(validated.successorRoot, 'campaign-ledger.json'),
-      true,
+      durable,
     )
     const state = await storage.read((raw) => stateSchema.parse(raw))
     if (!state)

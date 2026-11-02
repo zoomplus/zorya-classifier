@@ -46,15 +46,15 @@ export async function readPinnedReplayFile(
       throw new RangeError('Pinned replay input grew beyond its bounded file size')
     const bytes = buffer.subarray(0, offset)
     const after = await handle.stat({ bigint: true })
-    const afterPath = await lstat(absolute)
+    const afterPath = await lstat(absolute, { bigint: true })
     if (
       replaySha256(bytes) !== expectedSha256 ||
       before.dev !== after.dev ||
       before.ino !== after.ino ||
       before.size !== after.size ||
       bytes.length !== Number(before.size) ||
-      BigInt(afterPath.dev) !== after.dev ||
-      BigInt(afterPath.ino) !== after.ino ||
+      afterPath.dev !== after.dev ||
+      afterPath.ino !== after.ino ||
       (await realpath(absolute)) !== absolute
     )
       throw new RangeError('Pinned replay input changed while being read')

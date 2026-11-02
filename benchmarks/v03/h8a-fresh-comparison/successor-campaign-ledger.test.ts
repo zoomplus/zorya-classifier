@@ -2,9 +2,10 @@ import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
+import { UI_STATE_DEV40_EXECUTION_V2_ID } from './ui-state-dev40-policy.js'
 import { PROFILE_CONTROL_ID, PROFILE_FLAT_CANDIDATE_ID } from './constants.js'
 import {
   CANDIDATE_MAX_USD_PER_DISPATCH,
@@ -55,7 +56,7 @@ async function makeFixture(): Promise<LedgerFixture> {
     copyFile(join(fixtureRoot, 'parent-ledger.json.fixture'), parentLedgerPath),
   ])
   return {
-    options: { studyRoot, parentRoot, parentLedgerPath },
+    options: { studyRoot, parentRoot, parentLedgerPath, offlineTestOnly: true },
     studyRoot,
     parentLedgerPath,
     successorRoot: resolve(studyRoot, SUCCESSOR_REGISTRATION_RELATIVE_PATH),
@@ -83,6 +84,34 @@ await test('independent DEV40 successor ledger', async (context) => {
   context.after(async () => {
     for (const root of ownedTemporaryRoots) await rm(root, { recursive: true, force: true })
   })
+
+  await context.test('offline mode refuses live execution identities', async () => {
+    const fixture = await makeFixture()
+    await assert.rejects(
+      SuccessorCampaignLedger.register({
+        ...fixture.options,
+        executionId: UI_STATE_DEV40_EXECUTION_V2_ID,
+      }),
+      /Offline test mode requires disposable temporary roots/u,
+    )
+  })
+
+  await context.test(
+    'register and open own options before asynchronous filesystem checks',
+    async () => {
+      const fixture = await makeFixture()
+      const registerOptions = { ...fixture.options }
+      const pendingRegistration = SuccessorCampaignLedger.register(registerOptions)
+      registerOptions.executionId = UI_STATE_DEV40_EXECUTION_V2_ID
+      const registered = await pendingRegistration
+      assert.equal(registered.snapshot().physicalDispatchCount, 100)
+
+      const openOptions = { ...fixture.options }
+      const pendingOpen = SuccessorCampaignLedger.open(openOptions)
+      openOptions.parentRoot = join(dirname(fixture.studyRoot), 'missing-parent-root')
+      assert.equal((await pendingOpen).snapshot().physicalDispatchCount, 100)
+    },
+  )
 
   await context.test(
     'registers one deterministic child, carries parent counters, and never writes the parent ledger',
