@@ -18,12 +18,149 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm ci --ignore-scripts --prefix packages/mcp
+      - name: Configure canonical Windows test temp directory
+        if: runner.os == 'Windows'
+        env:
+          ZORYA_CI_RUNNER_TEMP: ${{ runner.temp }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { appendFile, lstat, mkdtemp, realpath, rm } from 'node:fs/promises'
+          import { tmpdir } from 'node:os'
+          import { isAbsolute, join, parse, relative, resolve, sep } from 'node:path'
+
+          const runnerTemp = await realpath(process.env.ZORYA_CI_RUNNER_TEMP)
+          const workspace = await realpath(process.env.GITHUB_WORKSPACE)
+          const originalTmpdir = tmpdir()
+          const originalTmpdirRealpath = await realpath(originalTmpdir)
+          console.log(
+            JSON.stringify({
+              status: 'ORIGINAL_TEMP_DIAGNOSTIC',
+              platform: process.platform,
+              cwd: process.cwd(),
+              originalTmpdir,
+              originalTmpdirRealpath,
+              runnerTemp,
+              workspace,
+            }),
+          )
+          const canonicalTemp = await mkdtemp(join(runnerTemp, 'zorya-classifier-ci-'))
+          try {
+            assert.equal(await realpath(canonicalTemp), canonicalTemp)
+            assert.equal(resolve(canonicalTemp), canonicalTemp)
+            const workspaceRelative = relative(workspace, canonicalTemp)
+            assert.equal(
+              workspaceRelative === '' ||
+                (workspaceRelative !== '..' &&
+                  !workspaceRelative.startsWith(`..${sep}`) &&
+                  !isAbsolute(workspaceRelative)),
+              false,
+            )
+            assert.equal(
+              parse(workspace).root.toLowerCase(),
+              parse(canonicalTemp).root.toLowerCase(),
+            )
+
+            process.env.TMP = canonicalTemp
+            process.env.TEMP = canonicalTemp
+            process.env.TMPDIR = canonicalTemp
+            assert.equal(tmpdir(), canonicalTemp)
+            assert.equal(await realpath(tmpdir()), tmpdir())
+
+            const githubEnv = process.env.GITHUB_ENV
+            assert.ok(githubEnv)
+            await appendFile(
+              githubEnv,
+              `TMP=${canonicalTemp}\nTEMP=${canonicalTemp}\nTMPDIR=${canonicalTemp}\nZORYA_CI_TEMP_DIR=${canonicalTemp}\n`,
+            )
+            console.log(
+              JSON.stringify({
+                status: 'PASS',
+                platform: process.platform,
+                cwd: process.cwd(),
+                runnerTemp,
+                canonicalTemp,
+                canonicalTempRealpath: await realpath(canonicalTemp),
+                tmpdir: tmpdir(),
+                workspace,
+              }),
+            )
+          } catch (primaryError) {
+            try {
+              const ownedTempStat = await lstat(canonicalTemp)
+              assert.equal(ownedTempStat.isDirectory(), true)
+              assert.equal(ownedTempStat.isSymbolicLink(), false)
+              await rm(canonicalTemp, { recursive: true, force: false })
+            } catch (cleanupError) {
+              const describe = (error) => ({
+                type: error instanceof Error ? error.name : 'unknown',
+                message: error instanceof Error ? error.message : 'Unknown failure',
+              })
+              console.error(
+                JSON.stringify({
+                  status: 'FAIL',
+                  primaryFailure: describe(primaryError),
+                  cleanupFailure: describe(cleanupError),
+                }),
+              )
+              throw new AggregateError(
+                [primaryError, cleanupError],
+                'Canonical Windows test temp setup failed and its owned directory cleanup also failed',
+              )
+            }
+            console.error(
+              JSON.stringify({
+                status: 'FAIL',
+                primaryFailure: {
+                  type: primaryError instanceof Error ? primaryError.name : 'unknown',
+                  message:
+                    primaryError instanceof Error ? primaryError.message : 'Unknown failure',
+                },
+                ownedTempRemoved: true,
+              }),
+            )
+            throw primaryError
+          }
+          NODE
       - run: npm run check
       - name: Controlled oracle geometry (offline)
         if: runner.os == 'Linux'
         run: python3 -m unittest discover -s benchmarks/v02/controlled_oracles -p 'test_*.py' -v
       - run: npm run pack:check
       - run: npm run format:check
+      - name: Remove owned Windows test temp directory
+        if: always() && runner.os == 'Windows'
+        env:
+          ZORYA_CI_RUNNER_TEMP: ${{ runner.temp }}
+          ZORYA_CI_TEMP_DIR: ${{ env.ZORYA_CI_TEMP_DIR }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { lstat, realpath, rm } from 'node:fs/promises'
+          import { basename, isAbsolute, relative, resolve, sep } from 'node:path'
+
+          const requestedTemp = process.env.ZORYA_CI_TEMP_DIR
+          if (!requestedTemp) {
+            console.log('No task-owned Windows test temp directory was created.')
+            process.exit(0)
+          }
+          const runnerTemp = await realpath(process.env.ZORYA_CI_RUNNER_TEMP)
+          const canonicalTemp = resolve(requestedTemp)
+          assert.equal(basename(canonicalTemp).startsWith('zorya-classifier-ci-'), true)
+          assert.equal(await realpath(canonicalTemp), canonicalTemp)
+          const tempStat = await lstat(canonicalTemp)
+          assert.equal(tempStat.isDirectory(), true)
+          assert.equal(tempStat.isSymbolicLink(), false)
+          const fromRunnerTemp = relative(runnerTemp, canonicalTemp)
+          assert.notEqual(fromRunnerTemp, '')
+          assert.notEqual(fromRunnerTemp, '..')
+          assert.equal(fromRunnerTemp.startsWith(`..${sep}`), false)
+          assert.equal(isAbsolute(fromRunnerTemp), false)
+          await rm(canonicalTemp, { recursive: true, force: false })
+          console.log(JSON.stringify({ status: 'PASS', removedOwnedTemp: true }))
+          NODE
   mcp-docker:
     runs-on: ubuntu-latest
     steps:

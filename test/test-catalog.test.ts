@@ -71,6 +71,19 @@ await test('portable catalog includes offline v03 evaluator suites', async () =>
   )
 })
 
+await test('UI-state protocol fixture stays portable and pinned audit stays local-evidence', async () => {
+  const catalog = await loadCatalog()
+  const portableProtocolTest =
+    'benchmarks/v03/h8a-fresh-comparison/ui-state-zero-query-execution-v2.test.ts'
+  const localProtocolTest =
+    'benchmarks/v03/h8a-fresh-comparison/ui-state-zero-query-execution-v2-local-evidence.test.ts'
+
+  assert.ok(catalog.groups.portable.includes(portableProtocolTest))
+  assert.equal(catalog.groups['local-evidence'].includes(portableProtocolTest), false)
+  assert.ok(catalog.groups['local-evidence'].includes(localProtocolTest))
+  assert.equal(catalog.groups.portable.includes(localProtocolTest), false)
+})
+
 await test('catalog validator rejects duplicate classifications', async () => {
   const catalog = await loadCatalog()
   const broken: TestCatalog = {
