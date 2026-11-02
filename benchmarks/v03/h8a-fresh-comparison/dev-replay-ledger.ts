@@ -22,8 +22,16 @@ import {
   QUAL120_WORST_CASE_PHYSICAL_CALLS,
 } from './constants.js'
 import type { H8aFreshProfileId } from './profiles.js'
-import { AUTHORED_SCOPE_STUDY_ID, replayStudyPolicy } from './dev-replay-study-policy.js'
-import type { ReplayStudyId, ReplayStudyPolicy } from './dev-replay-study-policy.js'
+import {
+  AUTHORED_SCOPE_STUDY_ID,
+  NATIVE_SELECTOR_CORRECTED_STUDY_ID,
+  replayStudyPolicy,
+} from './dev-replay-study-policy.js'
+import type {
+  NATIVE_SELECTOR_STUDY_ID,
+  ReplayStudyId,
+  ReplayStudyPolicy,
+} from './dev-replay-study-policy.js'
 import { parseReplayJson, readPinnedReplayFile } from './dev-replay-files.js'
 
 const REPLAY_GLOBAL_MAX_PHYSICAL_CALLS = 2_000 as const
@@ -47,7 +55,7 @@ const parentFields = {
   uncertainPhysicalDispatchCount: z.literal(0),
   logicalAttemptCount: z.number().int().nonnegative(),
   knownCostUsd: z.number().finite().nonnegative(),
-  unknownReserveUsd: z.literal(0.24),
+  unknownReserveUsd: z.number().finite().nonnegative(),
   inFlightReservations: z.array(z.unknown()).length(0),
   resumeBlocked: z.literal(false),
   crashRecoveryLatched: z.literal(false),
@@ -66,6 +74,7 @@ const linkedReplayParentSchema = z
       'h8a-provider-refusal-replay-ledger-v1',
       'h8a-authored-scope-replay-ledger-v1',
       'h8a-native-presence-replay-ledger-v1',
+      'h8a-native-selector-replay-ledger-v1',
     ]),
     ...parentFields,
     registrationSha256: digest,
@@ -83,6 +92,7 @@ const linkedReplayParentRegistrationSchema = z
       'provider-refusal-dev40-replay-v1',
       'authored-scope-dev40-v1',
       'native-presence-flat-dev40-v1',
+      'native-selector-flat-dev40-v1',
     ]),
     freezeId: z.enum([
       'h8a-provider-refusal-dev40-replay-20261101-v1',
@@ -116,7 +126,7 @@ type VerifiedParentBaseline = Readonly<{
   uncertainPhysicalDispatchCount: 0
   logicalAttemptCount: number
   knownCostUsd: number
-  unknownReserveUsd: 0.24
+  unknownReserveUsd: number
   inFlightReservations: readonly []
   resumeBlocked: false
   crashRecoveryLatched: false
@@ -130,18 +140,21 @@ const registrationSchema = z
       'h8a-authored-scope-replay-registration-v1',
       'h8a-native-presence-replay-registration-v1',
       'h8a-native-selector-replay-registration-v1',
+      'h8a-native-selector-corrected-replay-registration-v1',
     ]),
     studyId: z.enum([
       'provider-refusal-dev40-replay-v1',
       'authored-scope-dev40-v1',
       'native-presence-flat-dev40-v1',
       'native-selector-flat-dev40-v1',
+      'native-selector-flat-dev40-corrected-v1',
     ]),
     freezeId: z.enum([
       'h8a-provider-refusal-dev40-replay-20261101-v1',
       'h8a-authored-scope-dev40-20261101-v1',
       'h8a-native-presence-flat-dev40-20261101-v1',
       'h8a-native-selector-flat-dev40-20261101-v1',
+      'h8a-native-selector-flat-dev40-corrected-20261102-v1',
     ]),
     protocolSha256: digest,
     parentAuditSha256: digest,
@@ -186,6 +199,7 @@ const stateSchema = z
       'h8a-authored-scope-replay-ledger-v1',
       'h8a-native-presence-replay-ledger-v1',
       'h8a-native-selector-replay-ledger-v1',
+      'h8a-native-selector-corrected-replay-ledger-v1',
     ]),
     ledgerVersion: z.number().int().nonnegative(),
     registrationSha256: digest,
@@ -500,7 +514,8 @@ export function validateAuthoredScopeReplayParentPair(
   if (
     studyId !== 'authored-scope-dev40-v1' &&
     studyId !== 'native-presence-flat-dev40-v1' &&
-    studyId !== 'native-selector-flat-dev40-v1'
+    studyId !== 'native-selector-flat-dev40-v1' &&
+    studyId !== NATIVE_SELECTOR_CORRECTED_STUDY_ID
   )
     throw new ProviderRefusalReplayLedgerError('Parent registration wire pair is not registered')
   const parent = verifyAuthoredScopeParentPair(parentValue, registrationValue, policy)
@@ -517,7 +532,8 @@ export function validateAuthoredScopeReplayParentPair(
 }
 
 /** Read-only validation of the live V5 DEV40 registration/ledger at QUAL admission. */
-export function validateNativeSelectorDev40LedgerForQual(
+function validateNativeSelectorDev40LedgerForQualStudy(
+  studyId: typeof NATIVE_SELECTOR_STUDY_ID | typeof NATIVE_SELECTOR_CORRECTED_STUDY_ID,
   parentValue: unknown,
   registrationValue: unknown,
   expected: { protocolSha256: string; caseIds: readonly string[] },
@@ -541,15 +557,15 @@ export function validateNativeSelectorDev40LedgerForQual(
   }>[]
   logicalAttempts: readonly Readonly<{ profileId: string; opaqueCaseId: string }>[]
 }> {
-  const policy = replayStudyPolicy('native-selector-flat-dev40-v1')
+  const policy = replayStudyPolicy(studyId)
   const rawRegistration = z.record(z.unknown()).parse(registrationValue)
   const registration = registrationSchema.parse(registrationValue)
   const parent = stateSchema.parse(parentValue)
   assertRegistrationPolicy(registration, policy)
   assertState(parent, registration, policy)
   if (
-    registration.studyId !== 'native-selector-flat-dev40-v1' ||
-    registration.freezeId !== 'h8a-native-selector-flat-dev40-20261101-v1' ||
+    registration.studyId !== policy.studyId ||
+    registration.freezeId !== policy.freezeId ||
     registration.canonicalRoot !==
       resolve(policy.canonicalRoot, 'admission', 'successor-campaign') ||
     registration.caseIds.length !== 40 ||
@@ -587,6 +603,32 @@ export function validateNativeSelectorDev40LedgerForQual(
     caseCounts: Object.freeze(parent.caseCounts.map((row) => Object.freeze({ ...row }))),
     logicalAttempts: Object.freeze(parent.logicalAttempts.map((row) => Object.freeze({ ...row }))),
   })
+}
+
+export function validateNativeSelectorDev40LedgerForQual(
+  parentValue: unknown,
+  registrationValue: unknown,
+  expected: { protocolSha256: string; caseIds: readonly string[] },
+): ReturnType<typeof validateNativeSelectorDev40LedgerForQualStudy> {
+  return validateNativeSelectorDev40LedgerForQualStudy(
+    'native-selector-flat-dev40-v1',
+    parentValue,
+    registrationValue,
+    expected,
+  )
+}
+
+export function validateNativeSelectorCorrectedDev40LedgerForQual(
+  parentValue: unknown,
+  registrationValue: unknown,
+  expected: { protocolSha256: string; caseIds: readonly string[] },
+): ReturnType<typeof validateNativeSelectorDev40LedgerForQualStudy> {
+  return validateNativeSelectorDev40LedgerForQualStudy(
+    NATIVE_SELECTOR_CORRECTED_STUDY_ID,
+    parentValue,
+    registrationValue,
+    expected,
+  )
 }
 
 async function readParentLedger(

@@ -25,12 +25,20 @@ import {
 import { computePhaseFreezeCommitmentSha256 } from './freeze-commitment.js'
 import { buildCaseArtifactIdentity, devScreenReportSchema } from './dev-screen-runner.js'
 import { buildDevScreenSelection } from './dev-screen-sampling.js'
-import { validateNativeSelectorDev40LedgerForQual } from './dev-replay-ledger.js'
-import { nativeSelectorReplayProtocolSchema } from './dev-replay-admission.js'
+import {
+  validateNativeSelectorDev40LedgerForQual,
+  validateNativeSelectorCorrectedDev40LedgerForQual,
+} from './dev-replay-ledger.js'
+import {
+  nativeSelectorReplayProtocolSchema,
+  nativeSelectorCorrectedReplayProtocolSchema,
+} from './dev-replay-admission.js'
 import {
   NATIVE_SELECTOR_PRICE_PROOF,
   NATIVE_SELECTOR_ROOT,
   NATIVE_SELECTOR_STUDY_ID,
+  NATIVE_SELECTOR_CORRECTED_ROOT,
+  NATIVE_SELECTOR_CORRECTED_STUDY_ID,
 } from './dev-replay-study-policy.js'
 import { readPinnedReplayFile, isWithinDirectory, parseReplayJson } from './dev-replay-files.js'
 import { hashIdentity } from './hash-identity.js'
@@ -40,9 +48,13 @@ import {
   NATIVE_SELECTOR_QUAL_STUDY_ID,
   NATIVE_SELECTOR_QUAL_DEADLINE_ISO,
   nativeSelectorQualProtocolSchema,
+  nativeSelectorQualExposedExclusionsSchema,
   validateNativeSelectorQualMetadata,
+  nativeSelectorQualAnnotationProvenancePolicySchema,
 } from './native-selector-qual-protocol.js'
 import type { VerifiedNativeSelectorQualProtocol } from './native-selector-qual-protocol.js'
+import { validateNativeSelectorSourceOracleProvenance } from './native-selector-qual-oracle-provenance.js'
+import { verifyNativeSelectorQualHistoricalExclusions } from './native-selector-qual-historical-exclusions.js'
 
 const digest = z.string().regex(/^[a-f0-9]{64}$/u)
 const offlineNativeSelectorParentProtocolSchema = nativeSelectorReplayProtocolSchema.extend({
@@ -51,6 +63,13 @@ const offlineNativeSelectorParentProtocolSchema = nativeSelectorReplayProtocolSc
   runtimeProof: z.object({ path: z.string().min(1), sha256: digest }).strict(),
   runtimeEnvironment: z.object({ path: z.string().min(1), sha256: digest }).strict(),
 })
+const offlineNativeSelectorCorrectedParentProtocolSchema =
+  nativeSelectorCorrectedReplayProtocolSchema.extend({
+    parentAudit: z.record(z.unknown()),
+    sourceAudit: z.object({ path: z.string().min(1), sha256: digest }).strict(),
+    runtimeProof: z.object({ path: z.string().min(1), sha256: digest }).strict(),
+    runtimeEnvironment: z.object({ path: z.string().min(1), sha256: digest }).strict(),
+  })
 const trustedArtifactRoot = resolve('/root/.codex/artifacts')
 const parentSourceUnionPath = resolve(
   '/root/.codex/artifacts/zorya-classifier-mcp-20261101/ui-state-dev40-v1/admission/execution-v2/source-union-audit-v1.json',
@@ -78,8 +97,11 @@ const reviewSchema = z
   .strict()
 const parentAuditSchema = z
   .object({
-    schema: z.literal('h8a-native-selector-replay-dev40-closeout-v1'),
-    studyId: z.literal(NATIVE_SELECTOR_STUDY_ID),
+    schema: z.enum([
+      'h8a-native-selector-replay-dev40-closeout-v1',
+      'h8a-native-selector-corrected-replay-dev40-closeout-v1',
+    ]),
+    studyId: z.enum([NATIVE_SELECTOR_STUDY_ID, NATIVE_SELECTOR_CORRECTED_STUDY_ID]),
     freezeId: z.string().min(1),
     protocolSha256: digest,
     candidateCloseoutSha256: digest,
@@ -485,10 +507,11 @@ function sameCaseCounts(
   )
 }
 
-async function readParentGraph(
+export async function readNativeSelectorQualParentGraph(
   graph: VerifiedNativeSelectorQualProtocol['protocol']['parentDev'],
   options: { offlineTestOnly?: true; namespaceRoot?: string } = {},
 ): Promise<{
+  studyId: typeof NATIVE_SELECTOR_STUDY_ID | typeof NATIVE_SELECTOR_CORRECTED_STUDY_ID
   freeze: PhaseFreeze
   annotations: EvaluatorPrivateAnnotationBundle
   parentState: ReturnType<typeof validateNativeSelectorDev40LedgerForQual>
@@ -508,11 +531,15 @@ async function readParentGraph(
   }>
   producerSourceCommit: string
   producerClosureFiles: Array<{ path: string; sha256: string; bytes: number }>
+  sourceAuditReferences: Array<{ path: string; sha256: string }>
   runtimeProofRef: { path: string; sha256: string }
   runtimeEnvironmentRef: { path: string; sha256: string }
 }> {
-  const root = resolve(graph.root)
   const offlineTestOnly = options.offlineTestOnly === true
+  const selectedProductionStudyId = offlineTestOnly
+    ? undefined
+    : assertNativeSelectorQualParentRoot(graph.root)
+  const root = resolve(graph.root)
   if (offlineTestOnly) {
     const namespaceRoot = resolve(options.namespaceRoot ?? '')
     const canonicalTempRoot = resolve(await realpath(tmpdir()))
@@ -526,7 +553,7 @@ async function readParentGraph(
       !isWithinDirectory(namespaceRoot, root)
     )
       throw new RangeError('Offline parent graph requires a disposable nested namespace')
-  } else assertNativeSelectorQualParentRoot(graph.root)
+  }
   await assertCanonicalDirectory(root)
   const refs = [
     graph.protocol,
@@ -571,9 +598,28 @@ async function readParentGraph(
     !registrationBytes
   )
     throw new RangeError('Native-selector parent graph is incomplete')
-  const nativeParentProtocol = (
-    offlineTestOnly ? offlineNativeSelectorParentProtocolSchema : nativeSelectorReplayProtocolSchema
-  ).parse(parseJson(protocolBytes))
+  const protocolValue: unknown = parseJson(protocolBytes)
+  const parentStudyId =
+    typeof protocolValue === 'object' && protocolValue !== null
+      ? Reflect.get(protocolValue, 'studyId')
+      : undefined
+  if (
+    parentStudyId !== NATIVE_SELECTOR_STUDY_ID &&
+    parentStudyId !== NATIVE_SELECTOR_CORRECTED_STUDY_ID
+  )
+    throw new RangeError('QUAL parent protocol is outside the closed V5 study set')
+  if (!offlineTestOnly && parentStudyId !== selectedProductionStudyId)
+    throw new RangeError('QUAL parent root and registered study identity disagree')
+  const nativeParentProtocol =
+    parentStudyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID
+      ? (offlineTestOnly
+          ? offlineNativeSelectorCorrectedParentProtocolSchema
+          : nativeSelectorCorrectedReplayProtocolSchema
+        ).parse(protocolValue)
+      : (offlineTestOnly
+          ? offlineNativeSelectorParentProtocolSchema
+          : nativeSelectorReplayProtocolSchema
+        ).parse(protocolValue)
   if (
     nativeParentProtocol.freeze.path !== graph.freeze.path ||
     nativeParentProtocol.freeze.sha256 !== graph.freeze.sha256 ||
@@ -610,6 +656,11 @@ async function readParentGraph(
     freeze.producerCases.length !== 40 ||
     candidate.outputRows.length !== 40 ||
     control.outputRows.length !== 40 ||
+    closeout.studyId !== parentStudyId ||
+    closeout.schema !==
+      (parentStudyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID
+        ? 'h8a-native-selector-corrected-replay-dev40-closeout-v1'
+        : 'h8a-native-selector-replay-dev40-closeout-v1') ||
     closeout.freezeId !== freeze.freezeId ||
     closeout.protocolSha256 !== graph.protocol.sha256 ||
     closeout.candidateCloseoutSha256 !== candidate.closeoutSha256 ||
@@ -620,10 +671,14 @@ async function readParentGraph(
   )
     throw new RangeError('Native-selector DEV40 parent is not completely eligible for QUAL')
   validateImmutableCloseouts({ freeze, candidateCloseout: candidate, controlCloseout: control })
-  const linked = validateNativeSelectorDev40LedgerForQual(ledger, registration, {
+  const ledgerExpected = {
     protocolSha256: graph.protocol.sha256,
     caseIds: freeze.producerCases.map((row) => row.opaqueCaseId),
-  })
+  }
+  const linked =
+    parentStudyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID
+      ? validateNativeSelectorCorrectedDev40LedgerForQual(ledger, registration, ledgerExpected)
+      : validateNativeSelectorDev40LedgerForQual(ledger, registration, ledgerExpected)
   if (
     linked.maxPhysicalCalls !== 2_000 ||
     linked.physicalDispatchCount + 1_200 > linked.maxPhysicalCalls
@@ -825,6 +880,7 @@ async function readParentGraph(
     evaluationRows,
   )
   return {
+    studyId: parentStudyId,
     freeze,
     annotations,
     parentState: linked,
@@ -832,15 +888,20 @@ async function readParentGraph(
     sourceUnionRows: sourceUnion.rows,
     producerSourceCommit: closure.sourceCommit,
     producerClosureFiles: closure.files,
+    sourceAuditReferences: sourceAudit.references,
     runtimeProofRef: nativeParentProtocol.runtimeProof,
     runtimeEnvironmentRef: nativeParentProtocol.runtimeEnvironment,
   }
 }
 
 /** Keep the QUAL lineage edge closed to the selected V5 DEV40 namespace. */
-export function assertNativeSelectorQualParentRoot(parentRoot: string): void {
-  if (resolve(parentRoot) !== resolve(NATIVE_SELECTOR_ROOT))
-    throw new RangeError('QUAL parent must be the native-selector DEV40 namespace')
+export function assertNativeSelectorQualParentRoot(
+  parentRoot: string,
+): typeof NATIVE_SELECTOR_STUDY_ID | typeof NATIVE_SELECTOR_CORRECTED_STUDY_ID {
+  if (resolve(parentRoot) === resolve(NATIVE_SELECTOR_ROOT)) return NATIVE_SELECTOR_STUDY_ID
+  if (resolve(parentRoot) === resolve(NATIVE_SELECTOR_CORRECTED_ROOT))
+    return NATIVE_SELECTOR_CORRECTED_STUDY_ID
+  throw new RangeError('QUAL parent must use a closed native-selector DEV40 namespace')
 }
 
 /** QUAL inherits execution limits and task policy from the selected DEV freeze. */
@@ -874,11 +935,62 @@ export async function verifyNativeSelectorQualParentGraphForOfflineTest(input: {
   offlineTestOnly: true
   namespaceRoot: string
   graph: VerifiedNativeSelectorQualProtocol['protocol']['parentDev']
-}): Promise<Awaited<ReturnType<typeof readParentGraph>>> {
-  return readParentGraph(input.graph, {
+}): Promise<Awaited<ReturnType<typeof readNativeSelectorQualParentGraph>>> {
+  return readNativeSelectorQualParentGraph(input.graph, {
     offlineTestOnly: true,
     namespaceRoot: input.namespaceRoot,
   })
+}
+
+export async function verifyNativeSelectorQualParentExclusions(input: {
+  parent: Pick<
+    Awaited<ReturnType<typeof readNativeSelectorQualParentGraph>>,
+    'studyId' | 'sourceAuditReferences' | 'annotations'
+  >
+  exposedExclusionsValue: unknown
+  offlineNamespaceRoot?: string
+}): Promise<Awaited<ReturnType<typeof verifyNativeSelectorQualHistoricalExclusions>> | undefined> {
+  const exposed = nativeSelectorQualExposedExclusionsSchema.parse(input.exposedExclusionsValue)
+  if (input.parent.studyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID) {
+    if (!exposed.historical)
+      throw new RangeError('Corrected-parent QUAL requires both pinned historical exclusion files')
+    return verifyNativeSelectorQualHistoricalExclusions({
+      sourceAuditReferences: input.parent.sourceAuditReferences,
+      exposed: exposed.historical,
+      expectedDevSourceGroups: input.parent.annotations.cases.map((row) => row.sourceGroup),
+      ...(input.offlineNamespaceRoot ? { offlineNamespaceRoot: input.offlineNamespaceRoot } : {}),
+    })
+  }
+  if (exposed.historical)
+    throw new RangeError('Historical exclusion mode is reserved for the corrected DEV parent')
+  return undefined
+}
+
+/** Bind the exclusion audit's DEV group representation to the selected parent cohort. */
+export function assertNativeSelectorQualDevGroupCoverage(input: {
+  parentGroups: readonly string[]
+  auditGroups: readonly string[]
+  historicalDevGroups?: readonly string[]
+}): void {
+  const normalize = (value: string): string => value.replace(/\/+$/u, '')
+  if (input.historicalDevGroups) {
+    const parentSet = [...new Set(input.parentGroups.map(normalize))].sort()
+    const normalizedAudit = input.auditGroups.map(normalize)
+    const auditSet = [...new Set(normalizedAudit)].sort()
+    const historySet = [...new Set(input.historicalDevGroups.map(normalize))].sort()
+    if (
+      auditSet.length !== input.auditGroups.length ||
+      parentSet.length !== auditSet.length ||
+      parentSet.length !== historySet.length ||
+      parentSet.some((group, index) => group !== auditSet[index] || group !== historySet[index])
+    )
+      throw new RangeError('QUAL DEV source-group audit differs from the selected parent history')
+    return
+  }
+  const parent = [...input.parentGroups].sort()
+  const audit = [...input.auditGroups].sort()
+  if (parent.length !== audit.length || parent.some((group, index) => group !== audit[index]))
+    throw new RangeError('QUAL DEV source-group audit differs from the selected parent')
 }
 
 export async function verifyNativeSelectorQualAdmission(input: {
@@ -910,7 +1022,7 @@ export async function verifyNativeSelectorQualAdmission(input: {
     admissionStart >= Date.parse(NATIVE_SELECTOR_QUAL_DEADLINE_ISO)
   )
     throw new RangeError('QUAL admission deadline has passed')
-  const parent = await readParentGraph(protocol.parentDev)
+  const parent = await readNativeSelectorQualParentGraph(protocol.parentDev)
   const [
     freezeBytes,
     annotationsBytes,
@@ -935,13 +1047,17 @@ export async function verifyNativeSelectorQualAdmission(input: {
     ],
     root,
   )
-  const closureBytes = await pinnedParentRef(protocol.producerClosure, NATIVE_SELECTOR_ROOT)
+  const closureBytes = await pinnedParentRef(protocol.producerClosure, protocol.parentDev.root)
   const runtimeProofBytes = await pinnedArtifactRef(protocol.runtimeProof)
   const runtimeEnvironmentBytes = await pinnedArtifactRef(protocol.runtimeEnvironment)
   const assetsBytes = await pinnedArtifactRef(protocol.nativeAssetsProof)
   if (resolve(protocol.priceProof.path) !== resolve(NATIVE_SELECTOR_PRICE_PROOF.path))
     throw new RangeError('QUAL price proof path differs from the pinned canonical price proof')
   const priceBytes = await pinnedArtifactRef(protocol.priceProof)
+  const historicalExclusionSets = await verifyNativeSelectorQualParentExclusions({
+    parent,
+    exposedExclusionsValue: parseJson(exposedExclusionsBytes!),
+  })
   const metadata = validateNativeSelectorQualMetadata({
     protocolSha256: input.protocolSha256,
     protocolBytes,
@@ -954,6 +1070,22 @@ export async function verifyNativeSelectorQualAdmission(input: {
     acquisitionPolicyValue: parseJson(acquisitionBytes!),
     rightsPolicyValue: parseJson(rightsBytes!),
     annotationProvenancePolicyValue: parseJson(annotationPolicyBytes!),
+    ...(historicalExclusionSets ? { historicalExclusionSets } : {}),
+  })
+  const annotationProvenancePolicy = nativeSelectorQualAnnotationProvenancePolicySchema.parse(
+    parseJson(annotationPolicyBytes!),
+  )
+  await validateNativeSelectorSourceOracleProvenance({
+    freeze: metadata.freeze,
+    annotations: metadata.annotations,
+    sourceRows: metadata.sourceManifest.sources.map((source) => ({
+      caseId: source.caseId,
+      sha256: source.sha256,
+      sourceGroup: source.sourceGroup,
+    })),
+    provenanceRows: annotationProvenancePolicy.annotations,
+    artifactRoot: trustedArtifactRoot,
+    readPinned: readPinnedReplayFile,
   })
   assertNativeSelectorQualExecutionPolicyInheritance(parent.freeze, metadata.freeze)
   if (
@@ -1088,7 +1220,6 @@ export async function verifyNativeSelectorQualAdmission(input: {
   if (
     sorted(metadata.exclusionAudit.devCaseIds) !==
       sorted(parentResult.freeze.producerCases.map((row) => row.opaqueCaseId)) ||
-    sorted(metadata.exclusionAudit.devSourceGroups) !== sorted(parentGroups) ||
     sorted(metadata.exclusionAudit.devEncodedHashes) !== sorted(devEncoded) ||
     sorted(metadata.exclusionAudit.devRgbHashes) !== sorted(devRgb) ||
     sorted(metadata.exclusionAudit.devPerceptualHashes) !== sorted(devPerceptual) ||
@@ -1124,6 +1255,13 @@ export async function verifyNativeSelectorQualAdmission(input: {
     throw new RangeError(
       'QUAL encoded, RGB, perceptual-hash, or source-group exclusions disagree with pinned DEV evidence',
     )
+  assertNativeSelectorQualDevGroupCoverage({
+    parentGroups,
+    auditGroups: metadata.exclusionAudit.devSourceGroups,
+    ...(historicalExclusionSets
+      ? { historicalDevGroups: historicalExclusionSets.devSourceGroups }
+      : {}),
+  })
   const sourceBytes = new Map<string, Uint8Array>()
   for (const source of metadata.sourceManifest.sources) {
     const ref = { path: source.path, sha256: source.sha256, bytes: source.bytes }
@@ -1376,8 +1514,8 @@ export async function createNativeSelectorQualOfflineTestAdmission(input: {
     )
       throw new RangeError('Offline QUAL metadata bytes differ from their raw pinned fixture')
   }
-  if (metadata.protocol.parentDev.root !== NATIVE_SELECTOR_ROOT)
-    throw new RangeError('Offline QUAL fixture must retain the selected V5 DEV40 parent edge')
+  if (!isWithinDirectory(namespaceRoot, resolve(metadata.protocol.parentDev.root)))
+    throw new RangeError('Offline QUAL fixture must keep the selected DEV40 parent graph local')
   for (const source of metadata.sourceManifest.sources) {
     const bytes = sourceBytes.get(source.caseId)
     const producer = metadata.freeze.producerCases.find((row) => row.opaqueCaseId === source.caseId)

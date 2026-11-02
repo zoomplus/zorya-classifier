@@ -166,7 +166,10 @@
       "benchmarks/v03/h8a-fresh-comparison/native-selector-qual-ledger.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/native-selector-qual-runner.test.ts",
       "benchmarks/v03/h8a-fresh-comparison/native-selector-qual-cli.test.ts",
-      "benchmarks/v02/native-selector-wire-evidence.test.ts"
+      "benchmarks/v02/native-selector-wire-evidence.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/native-selector-corrected-replay.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/native-selector-qual-oracle-provenance.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/native-selector-qual-historical-exclusions.test.ts"
     ],
     "local-evidence": [
       "benchmarks/v03/h5-replay-local.test.ts",

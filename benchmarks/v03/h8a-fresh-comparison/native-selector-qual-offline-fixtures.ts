@@ -14,7 +14,7 @@ import {
   PHASE_NATIVE_SELECTOR_QUAL120_ID,
   PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
 } from './constants.js'
-import { NATIVE_SELECTOR_ROOT, NATIVE_SELECTOR_PRICE_PROOF } from './dev-replay-study-policy.js'
+import { NATIVE_SELECTOR_PRICE_PROOF } from './dev-replay-study-policy.js'
 import {
   NATIVE_SELECTOR_QUAL_FREEZE_ID,
   NATIVE_SELECTOR_QUAL_STUDY_ID,
@@ -305,18 +305,20 @@ export async function buildOfflineAdmission(namespaceRoot: string, photoNearHash
     sha256: sha256(name),
     bytes: name.length + 1,
   })
+  const offlineParentRoot = join(namespaceRoot, 'parent')
+  await mkdir(offlineParentRoot, { recursive: true })
   const protocol = nativeSelectorQualProtocolSchema.parse({
     schema: 'h8a-native-selector-qual120-protocol-v1',
     studyId: NATIVE_SELECTOR_QUAL_STUDY_ID,
     freezeId: NATIVE_SELECTOR_QUAL_FREEZE_ID,
     phaseId: PHASE_NATIVE_SELECTOR_QUAL120_ID,
     parentDev: {
-      root: NATIVE_SELECTOR_ROOT,
+      root: offlineParentRoot,
       protocol: dummyRef('parent-protocol'),
       freeze: dummyRef('parent-freeze'),
       annotations: dummyRef('parent-annotations'),
       sourceAudit: {
-        path: '/tmp/parent-source-audit.json',
+        path: join(offlineParentRoot, 'source-audit.json'),
         sha256: parentSourceAuditSha256,
         bytes: 1,
       },

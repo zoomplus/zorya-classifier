@@ -12,6 +12,8 @@ import {
 } from './constants.js'
 import { phaseFreezeSchema, evaluatorPrivateAnnotationBundleSchema } from './schemas.js'
 import type { PhaseFreeze, EvaluatorPrivateAnnotationBundle } from './schemas.js'
+import type { VerifiedHistoricalExclusionSets } from './native-selector-qual-historical-exclusions.js'
+import { nativeSelectorQualHistoricalExclusionsSchema } from './native-selector-qual-historical-exclusions.js'
 import {
   computeSourceGroupStratumCommitmentSha256,
   validateSourceGroupSplitSeparation,
@@ -87,21 +89,42 @@ const rightsPolicySchema = z
       .length(QUAL120_CASE_COUNT),
   })
   .strict()
-const annotationProvenancePolicySchema = z
+export const nativeSelectorQualAnnotationProvenancePolicySchema = z
   .object({
     schema: z.literal('h8a-native-selector-qual120-annotation-provenance-v1'),
     freezeId: z.literal(NATIVE_SELECTOR_QUAL_FREEZE_ID),
     annotations: z
       .array(
-        z
-          .object({
-            caseId: z.string().min(1),
-            sourceSha256: digest,
-            provenanceSha256: digest,
-            annotationMethod: z.enum(['independent-human-review-v1', 'published-ground-truth-v1']),
-            packedMaskSha256: digest.nullable(),
-          })
-          .strict(),
+        z.discriminatedUnion('annotationMethod', [
+          z
+            .object({
+              caseId: z.string().min(1),
+              sourceSha256: digest,
+              provenanceSha256: digest,
+              annotationMethod: z.literal('independent-human-review-v1'),
+              packedMaskSha256: digest.nullable(),
+            })
+            .strict(),
+          z
+            .object({
+              caseId: z.string().min(1),
+              sourceSha256: digest,
+              provenanceSha256: digest,
+              annotationMethod: z.literal('published-ground-truth-v1'),
+              packedMaskSha256: digest.nullable(),
+            })
+            .strict(),
+          z
+            .object({
+              caseId: z.string().min(1),
+              sourceSha256: digest,
+              provenanceSha256: digest,
+              annotationMethod: z.literal('independent-source-oracle-v1'),
+              packedMaskSha256: z.null(),
+              sourceOracleProof: fileRefSchema,
+            })
+            .strict(),
+        ]),
       )
       .length(QUAL120_CASE_COUNT),
   })
@@ -264,7 +287,8 @@ export const nativeSelectorQualExposedExclusionsSchema = z
           })
           .strict(),
       )
-      .min(1),
+      .min(0),
+    historical: nativeSelectorQualHistoricalExclusionsSchema.optional(),
   })
   .strict()
 
@@ -294,6 +318,84 @@ export function hashQualProtocolFileBytes(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex')
 }
 
+type QualExclusionAuditRows = Pick<
+  z.infer<typeof nativeSelectorQualExclusionAuditSchema>,
+  | 'devSourceGroups'
+  | 'excludedEncodedHashes'
+  | 'excludedRgbHashes'
+  | 'excludedPerceptualHashes'
+  | 'excludedSourceGroups'
+>
+type QualExplicitExclusion = z.infer<
+  typeof nativeSelectorQualExposedExclusionsSchema
+>['sources'][number]
+
+/** Match historical exclusions as sets; preserve the legacy explicit-row multiset contract. */
+export function assertNativeSelectorQualExclusionAuditCoverage(input: {
+  audit: QualExclusionAuditRows
+  explicitSources: readonly QualExplicitExclusion[]
+  historical?: VerifiedHistoricalExclusionSets
+}): void {
+  const history = input.historical
+  const expectedEncoded = [
+    ...input.explicitSources.map((row) => row.sourceBytesSha256),
+    ...(history?.encodedHashes ?? []),
+  ]
+  const expectedRgb = input.explicitSources
+    .flatMap((row) => [row.sharpRuntimeDecodedRgbSha256, row.pillowCanonicalRgbSha256])
+    .concat(history?.pillowRgbHashes ?? [])
+  const expectedPerceptual = [
+    ...input.explicitSources.map((row) => row.perceptualHash),
+    ...(history?.perceptualHashes ?? []),
+  ]
+  const expectedGroups = history
+    ? [
+        ...input.explicitSources.map((row) => row.sourceGroup.replace(/\/+$/u, '')),
+        ...history.sourceGroups.map((group) => group.replace(/\/+$/u, '')),
+      ]
+    : input.explicitSources.map((row) => row.sourceGroup)
+  if (history) {
+    if (
+      !sameSet(
+        input.audit.devSourceGroups.map((group) => group.replace(/\/+$/u, '')),
+        history.devSourceGroups,
+      ) ||
+      !sameSet(input.audit.excludedEncodedHashes, expectedEncoded) ||
+      !sameSet(input.audit.excludedRgbHashes, expectedRgb) ||
+      !sameSet(input.audit.excludedPerceptualHashes, expectedPerceptual) ||
+      !sameSet(input.audit.excludedSourceGroups, expectedGroups)
+    )
+      throw new RangeError('QUAL exclusions do not match their pinned source manifest')
+    return
+  }
+  if (
+    !sameMultiset(input.audit.excludedEncodedHashes, expectedEncoded) ||
+    !sameMultiset(input.audit.excludedRgbHashes, expectedRgb) ||
+    !sameMultiset(input.audit.excludedPerceptualHashes, expectedPerceptual) ||
+    !sameMultiset(input.audit.excludedSourceGroups, expectedGroups)
+  )
+    throw new RangeError('QUAL exclusions do not match their pinned source manifest')
+}
+
+function sameSet(left: readonly string[], right: readonly string[]): boolean {
+  const leftSet = new Set(left)
+  const rightSet = new Set(right)
+  return (
+    leftSet.size === left.length &&
+    leftSet.size === rightSet.size &&
+    [...leftSet].every((value) => rightSet.has(value))
+  )
+}
+
+function sameMultiset(left: readonly string[], right: readonly string[]): boolean {
+  const sortedLeft = [...left].sort()
+  const sortedRight = [...right].sort()
+  return (
+    sortedLeft.length === sortedRight.length &&
+    sortedLeft.every((value, index) => value === sortedRight[index])
+  )
+}
+
 export function validateNativeSelectorQualMetadata(input: {
   freezeValue: unknown
   annotationsValue: unknown
@@ -309,6 +411,7 @@ export function validateNativeSelectorQualMetadata(input: {
   offlineTestOnly?: true
   offlineTestDeadlineIso?: string
   offlineTestNow?: number
+  historicalExclusionSets?: VerifiedHistoricalExclusionSets
 }): VerifiedNativeSelectorQualProtocol {
   const protocolValue: unknown = JSON.parse(Buffer.from(input.protocolBytes).toString('utf8'))
   const protocol = nativeSelectorQualProtocolSchema.parse(protocolValue)
@@ -325,9 +428,15 @@ export function validateNativeSelectorQualMetadata(input: {
   const exposedExclusions = nativeSelectorQualExposedExclusionsSchema.parse(
     input.exposedExclusionsValue,
   )
+  if (!exposedExclusions.sources.length && !input.historicalExclusionSets)
+    throw new RangeError('QUAL exclusions require explicit rows or verified parent-linked history')
+  if (Boolean(exposedExclusions.historical) !== Boolean(input.historicalExclusionSets))
+    throw new RangeError(
+      'QUAL historical exclusion pins were not validated against the selected parent',
+    )
   const acquisitionPolicy = acquisitionPolicySchema.parse(input.acquisitionPolicyValue)
   const rightsPolicy = rightsPolicySchema.parse(input.rightsPolicyValue)
-  const annotationPolicy = annotationProvenancePolicySchema.parse(
+  const annotationPolicy = nativeSelectorQualAnnotationProvenancePolicySchema.parse(
     input.annotationProvenancePolicyValue,
   )
   const expectedDeadline =
@@ -416,6 +525,11 @@ export function validateNativeSelectorQualMetadata(input: {
         !provenance ||
         provenance.sourceSha256 !== source.sha256 ||
         provenance.provenanceSha256 !== source.annotationProvenanceSha256 ||
+        (provenance.annotationMethod === 'independent-source-oracle-v1' &&
+          (annotation?.stratum === 'photo' ||
+            (annotation?.referenceMasks.length ?? 0) !== 0 ||
+            provenance.packedMaskSha256 !== null ||
+            provenance.sourceOracleProof.sha256 !== provenance.provenanceSha256)) ||
         provenance.packedMaskSha256 !== (annotation?.referenceMasks[0]?.packedBinarySha256 ?? null)
       )
     })
@@ -480,25 +594,14 @@ export function validateNativeSelectorQualMetadata(input: {
     })
   )
     throw new RangeError('QUAL source groups intersect DEV or excluded groups')
-  const excludedEncoded = exposedExclusions.sources.map((row) => row.sourceBytesSha256)
-  const excludedRgb = exposedExclusions.sources.flatMap((row) => [
-    row.sharpRuntimeDecodedRgbSha256,
-    row.pillowCanonicalRgbSha256,
-  ])
-  const excludedPhash = exposedExclusions.sources.map((row) => row.perceptualHash)
-  const excludedGroups = exposedExclusions.sources.map((row) => row.sourceGroup)
-  if (
-    exclusionAudit.exposedExclusionAuditSha256 !== protocol.exposedExclusions.sha256 ||
-    exclusionAudit.excludedEncodedHashes.slice().sort().join('\0') !==
-      excludedEncoded.slice().sort().join('\0') ||
-    exclusionAudit.excludedRgbHashes.slice().sort().join('\0') !==
-      excludedRgb.slice().sort().join('\0') ||
-    exclusionAudit.excludedPerceptualHashes.slice().sort().join('\0') !==
-      excludedPhash.slice().sort().join('\0') ||
-    exclusionAudit.excludedSourceGroups.slice().sort().join('\0') !==
-      excludedGroups.slice().sort().join('\0')
-  )
+  const historical = input.historicalExclusionSets
+  if (exclusionAudit.exposedExclusionAuditSha256 !== protocol.exposedExclusions.sha256)
     throw new RangeError('QUAL exclusions do not match their pinned source manifest')
+  assertNativeSelectorQualExclusionAuditCoverage({
+    audit: exclusionAudit,
+    explicitSources: exposedExclusions.sources,
+    ...(historical ? { historical } : {}),
+  })
   validateSourceGroupSplitSeparation({
     devSourceGroupIds: exclusionAudit.devSourceGroups,
     qualificationSourceGroupIds: groupIds,

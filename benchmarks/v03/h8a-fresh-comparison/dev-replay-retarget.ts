@@ -8,6 +8,7 @@ import {
   AUTHORED_SCOPE_STUDY_ID,
   NATIVE_PRESENCE_STUDY_ID,
   NATIVE_SELECTOR_STUDY_ID,
+  NATIVE_SELECTOR_CORRECTED_STUDY_ID,
   replayStudyPolicy,
 } from './dev-replay-study-policy.js'
 
@@ -16,7 +17,8 @@ export function assertClosedReplayRetargetIdentity(
   studyId:
     | typeof AUTHORED_SCOPE_STUDY_ID
     | typeof NATIVE_PRESENCE_STUDY_ID
-    | typeof NATIVE_SELECTOR_STUDY_ID,
+    | typeof NATIVE_SELECTOR_STUDY_ID
+    | typeof NATIVE_SELECTOR_CORRECTED_STUDY_ID,
   parentPhaseId: string,
   nextFreezeId: string,
   nextPhaseId: string,
@@ -24,18 +26,21 @@ export function assertClosedReplayRetargetIdentity(
   if (
     studyId !== AUTHORED_SCOPE_STUDY_ID &&
     studyId !== NATIVE_PRESENCE_STUDY_ID &&
-    studyId !== NATIVE_SELECTOR_STUDY_ID
+    studyId !== NATIVE_SELECTOR_STUDY_ID &&
+    studyId !== NATIVE_SELECTOR_CORRECTED_STUDY_ID
   )
     throw new RangeError('Replay retarget study is outside the closed successor set')
   const policy = replayStudyPolicy(studyId)
   const expectedParentPhase =
-    studyId === NATIVE_SELECTOR_STUDY_ID
-      ? PHASE_NATIVE_PRESENCE_DEV40_ID
-      : studyId === NATIVE_PRESENCE_STUDY_ID
-        ? PHASE_SCOPE_DEV40_ID
-        : PHASE_FLAT_DEV40_ID
+    studyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID
+      ? PHASE_NATIVE_SELECTOR_DEV40_ID
+      : studyId === NATIVE_SELECTOR_STUDY_ID
+        ? PHASE_NATIVE_PRESENCE_DEV40_ID
+        : studyId === NATIVE_PRESENCE_STUDY_ID
+          ? PHASE_SCOPE_DEV40_ID
+          : PHASE_FLAT_DEV40_ID
   const expectedChildPhase =
-    studyId === NATIVE_SELECTOR_STUDY_ID
+    studyId === NATIVE_SELECTOR_STUDY_ID || studyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID
       ? PHASE_NATIVE_SELECTOR_DEV40_ID
       : studyId === NATIVE_PRESENCE_STUDY_ID
         ? PHASE_NATIVE_PRESENCE_DEV40_ID

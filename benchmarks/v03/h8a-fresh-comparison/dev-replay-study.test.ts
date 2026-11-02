@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { replaySha256, readPinnedReplayFile } from './dev-replay-files.js'
 import {
   assertAdmissionDeadline,
@@ -23,6 +23,7 @@ import {
   AUTHORED_SCOPE_STUDY_ID,
   LEGACY_REPLAY_ROOT,
   LEGACY_REPLAY_STUDY_ID,
+  NATIVE_SELECTOR_CORRECTED_STUDY_ID,
   NATIVE_SELECTOR_STUDY_ID,
   REPLAY_STUDY_REGISTRY,
   replayStudyPolicy,
@@ -149,6 +150,7 @@ await test('closed replay registry separates scope authority and inherited count
     AUTHORED_SCOPE_STUDY_ID,
     'native-presence-flat-dev40-v1',
     NATIVE_SELECTOR_STUDY_ID,
+    NATIVE_SELECTOR_CORRECTED_STUDY_ID,
   ])
   const legacy = replayStudyPolicy(LEGACY_REPLAY_STUDY_ID)
   const scoped = replayStudyPolicy(AUTHORED_SCOPE_STUDY_ID)
@@ -621,6 +623,69 @@ await test('authored-scope parent registration supplies the cap and links the ca
     /not registered/u,
   )
   assert.equal(policy.parentLedgerVersion, 161)
+})
+
+await test('corrected selector identity accepts its exact closed V5 parent wire pair', () => {
+  const corrected = replayStudyPolicy(NATIVE_SELECTOR_CORRECTED_STUDY_ID)
+  if (
+    !corrected.parentRegistrationPath ||
+    !corrected.parentRegistrationStudyId ||
+    !corrected.parentRegistrationFreezeId ||
+    !corrected.parentRegistrationSchema
+  )
+    throw new RangeError('Corrected selector fixture lacks its closed parent registration pins')
+  const parentPolicy = replayStudyPolicy(corrected.parentRegistrationStudyId)
+  const registrationBody = {
+    schema: corrected.parentRegistrationSchema,
+    studyId: corrected.parentRegistrationStudyId,
+    freezeId: corrected.parentRegistrationFreezeId,
+    protocolSha256: 'a'.repeat(64),
+    parentAuditSha256: parentPolicy.parentAuditSha256,
+    parentLedgerSha256: parentPolicy.parentLedgerSha256,
+    parentLedgerVersion: parentPolicy.parentLedgerVersion,
+    canonicalRoot: dirname(corrected.parentRegistrationPath),
+    caseIds: Array.from({ length: 40 }, (_, index) => `corrected-parent-case-${index}`),
+    maxPhysicalCalls: 2_000,
+    dev40MaxPhysicalCalls: parentPolicy.incrementalCallLimit,
+    dev40MaxIncrementalUsd: parentPolicy.incrementalExposureUsd,
+    candidateMaxUsdPerDispatch: parentPolicy.candidateUsdPerDispatch,
+    controlMaxUsdPerDispatch: parentPolicy.controlUsdPerDispatch,
+    ownerDollarCeilingUsd: null,
+    retries: 0,
+  }
+  const registration = {
+    ...registrationBody,
+    registrationSha256: replaySha256(JSON.stringify(registrationBody)),
+  }
+  const state = {
+    schema: corrected.parentLedgerSchema,
+    ledgerVersion: corrected.parentLedgerVersion,
+    registrationSha256: registration.registrationSha256,
+    nextReservationId: corrected.nextReservationId,
+    nextPhysicalId: corrected.nextPhysicalId,
+    physicalDispatchCount: corrected.inheritedPhysicalCalls,
+    uncertainPhysicalDispatchCount: 0,
+    logicalAttemptCount: corrected.inheritedLogicalAttempts,
+    knownCostUsd: corrected.inheritedKnownCostUsd,
+    unknownReserveUsd: corrected.inheritedUnknownReserveUsd,
+    inFlightReservations: [],
+    resumeBlocked: false,
+    crashRecoveryLatched: false,
+    integrityBlocked: false,
+  }
+  assert.deepEqual(
+    validateAuthoredScopeReplayParentPair(state, registration, NATIVE_SELECTOR_CORRECTED_STUDY_ID),
+    {
+      ledgerVersion: corrected.parentLedgerVersion,
+      physicalDispatchCount: corrected.inheritedPhysicalCalls,
+      logicalAttemptCount: corrected.inheritedLogicalAttempts,
+      knownCostUsd: corrected.inheritedKnownCostUsd,
+      unknownReserveUsd: corrected.inheritedUnknownReserveUsd,
+      maxPhysicalCalls: 2_000,
+      nextPhysicalId: corrected.nextPhysicalId,
+      nextReservationId: corrected.nextReservationId,
+    },
+  )
 })
 
 await test('registration owns every selector and ordered case ID before awaiting', async () => {

@@ -54,6 +54,23 @@ export const NATIVE_SELECTOR_PRICE_PROOF = Object.freeze({
     '/root/.codex/artifacts/zorya-classifier-mcp-20261101/query-scope-research-v1/native-selector-research-v1/native-route-catalog-v1.json',
   catalogSha256: '22c20d0d49d68ca4558de06956825973f6075cea44c04bfc6ffb4c0b75877974',
 })
+export const NATIVE_SELECTOR_CORRECTED_STUDY_ID = 'native-selector-flat-dev40-corrected-v1' as const
+export const NATIVE_SELECTOR_CORRECTED_FREEZE_ID =
+  'h8a-native-selector-flat-dev40-corrected-20261102-v1' as const
+export const NATIVE_SELECTOR_CORRECTED_ROOT =
+  '/root/.codex/artifacts/zorya-classifier-mcp-20261101/native-selector-flat-dev40-corrected-v1' as const
+export const NATIVE_SELECTOR_CORRECTED_PARENT_AUDIT_PATH =
+  '/root/.codex/artifacts/zorya-classifier-mcp-20261101/query-scope-research-v1/native-selector-research-v1/corrected-prospective-parent-audit-v1.json' as const
+export const NATIVE_SELECTOR_CORRECTED_PARENT_AUDIT_SHA256 =
+  '171f4ddf517a6d5a09ea5116a3650308c28850494ea1f74babc10f89eea00813' as const
+export const NATIVE_SELECTOR_CORRECTION_PLAN_PATH =
+  'docs/research/v03-native-selector-correction-plan.ru.md' as const
+export const NATIVE_SELECTOR_CORRECTION_PLAN_SHA256 =
+  '59b1936fd05a2ea9ad6bb37d48c23fb70080be62870bad710fa19f98fd42accb' as const
+export const NATIVE_SELECTOR_REPAIRED_RECORDER_PATH = 'benchmarks/v02/recording.ts' as const
+export const NATIVE_SELECTOR_REPAIRED_RECORDER_SHA256 =
+  '53028e360c2a50c3b7e321824d4bec37398a2a11f40bb06528f58d8d017234ac' as const
+export const NATIVE_SELECTOR_REPAIRED_RECORDER_BYTES = 29_877 as const
 
 export const REPLAY_STUDY_REGISTRY = Object.freeze({
   [LEGACY_REPLAY_STUDY_ID]: Object.freeze({
@@ -223,6 +240,51 @@ export const REPLAY_STUDY_REGISTRY = Object.freeze({
     parentAnnotationsPath:
       '/root/.codex/artifacts/zorya-classifier-mcp-20261101/native-presence-flat-dev40-v1/protocol-inputs/evaluator-private-annotations.json',
     parentAnnotationsSha256: 'baab789da7a8065624712efb7261db04039be46d0c48deb05c8ab6bb8ecd1d79',
+  }),
+  [NATIVE_SELECTOR_CORRECTED_STUDY_ID]: Object.freeze({
+    studyId: NATIVE_SELECTOR_CORRECTED_STUDY_ID,
+    freezeId: NATIVE_SELECTOR_CORRECTED_FREEZE_ID,
+    canonicalRoot: NATIVE_SELECTOR_CORRECTED_ROOT,
+    candidateProfileId: PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
+    controlProfileId: PROFILE_CONTROL_ID,
+    inheritedPhysicalCalls: 413,
+    inheritedLogicalAttempts: 134,
+    inheritedKnownCostUsd: 0.22744121499999995,
+    inheritedUnknownReserveUsd: 0.36,
+    nextPhysicalId: 414,
+    nextReservationId: 414,
+    candidateCallsPerCase: 4,
+    controlCallsPerCase: 6,
+    candidateUsdPerDispatch: 0.12,
+    controlUsdPerDispatch: 0.12,
+    incrementalCallLimit: 400,
+    incrementalExposureUsd: 48,
+    parentAuditPath: NATIVE_SELECTOR_CORRECTED_PARENT_AUDIT_PATH,
+    parentAuditSha256: NATIVE_SELECTOR_CORRECTED_PARENT_AUDIT_SHA256,
+    parentLedgerPath:
+      '/root/.codex/artifacts/zorya-classifier-mcp-20261101/native-selector-flat-dev40-v1/admission/successor-campaign/campaign-ledger.json',
+    parentLedgerSha256: 'a9dcff4a998414adff81be72a5f759295a82eac2ef5c9606105af8b1536d943b',
+    parentLedgerVersion: 416,
+    parentLedgerSchema: 'h8a-native-selector-replay-ledger-v1',
+    parentRegistrationPath:
+      '/root/.codex/artifacts/zorya-classifier-mcp-20261101/native-selector-flat-dev40-v1/admission/successor-campaign/registration.json',
+    parentRegistrationSha256: 'f30697ed1d861b97ef51b7cefbfdf141d0d71a600635d182fa40ca2d6595d66c',
+    parentRegistrationSchema: 'h8a-native-selector-replay-registration-v1',
+    parentRegistrationStudyId: NATIVE_SELECTOR_STUDY_ID,
+    parentRegistrationFreezeId: NATIVE_SELECTOR_FREEZE_ID,
+    ledgerSchema: 'h8a-native-selector-corrected-replay-ledger-v1',
+    registrationSchema: 'h8a-native-selector-corrected-replay-registration-v1',
+    queryPolicy: AUTHORED_SCOPE_QUERY_POLICY,
+    presencePolicy: NATIVE_PRESENCE_POLICY,
+    selectionPolicy: NATIVE_SELECTOR_POLICY,
+    priceProof: NATIVE_SELECTOR_PRICE_PROOF,
+    phaseId: PHASE_NATIVE_SELECTOR_DEV40_ID,
+    parentFreezePath:
+      '/root/.codex/artifacts/zorya-classifier-mcp-20261101/native-selector-flat-dev40-v1/protocol-inputs/phase-freeze.json',
+    parentFreezeSha256: '8349fe156eb4d1afdf32c958188903d007fc543456da4dd61006d14bb6f0ffe9',
+    parentAnnotationsPath:
+      '/root/.codex/artifacts/zorya-classifier-mcp-20261101/native-selector-flat-dev40-v1/protocol-inputs/evaluator-private-annotations.json',
+    parentAnnotationsSha256: '39cabf4e33b6fe13704f736380e4e0ffc5a7a252b54820c77d62c42c74190abe',
   }),
 })
 

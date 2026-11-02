@@ -5,6 +5,7 @@ import {
   NATIVE_SELECTOR_QUAL_FREEZE_ID,
   NATIVE_SELECTOR_QUAL_STUDY_ID,
   hashQualProtocolFileBytes,
+  assertNativeSelectorQualExclusionAuditCoverage,
   nativeSelectorQualProtocolSchema,
   nativeSelectorQualSourceManifestSchema,
 } from './native-selector-qual-protocol.js'
@@ -62,5 +63,124 @@ await test('QUAL source manifest requires source-aligned 64-bit pHash values', (
       ),
     }).success,
     false,
+  )
+})
+
+await test('historical QUAL exclusions merge as deduplicated sets without fabricating Sharp history', () => {
+  const explicitSources = [
+    {
+      caseId: 'explicit-a',
+      sourceBytesSha256: 'a'.repeat(64),
+      sharpRuntimeDecodedRgbSha256: 'b'.repeat(64),
+      pillowCanonicalRgbSha256: 'c'.repeat(64),
+      perceptualHash: '1111111111111111',
+      sourceGroup: 'historic-group/',
+    },
+    {
+      caseId: 'explicit-b',
+      sourceBytesSha256: 'd'.repeat(64),
+      sharpRuntimeDecodedRgbSha256: 'e'.repeat(64),
+      pillowCanonicalRgbSha256: 'f'.repeat(64),
+      perceptualHash: '2222222222222222',
+      sourceGroup: 'historic-group',
+    },
+  ]
+  const historical = {
+    devSourceGroups: ['dev-group'],
+    sourceGroups: ['historic-group', 'prior-group'],
+    encodedHashes: ['a'.repeat(64), 'g'.repeat(64)],
+    pillowRgbHashes: ['f'.repeat(64), 'h'.repeat(64)],
+    perceptualHashes: ['1111111111111111', '3333333333333333'],
+  }
+  const audit = {
+    devSourceGroups: ['dev-group'],
+    excludedEncodedHashes: ['a'.repeat(64), 'd'.repeat(64), 'g'.repeat(64)],
+    excludedRgbHashes: [
+      'b'.repeat(64),
+      'c'.repeat(64),
+      'e'.repeat(64),
+      'f'.repeat(64),
+      'h'.repeat(64),
+    ],
+    excludedPerceptualHashes: ['1111111111111111', '2222222222222222', '3333333333333333'],
+    excludedSourceGroups: ['historic-group', 'prior-group'],
+  }
+  assert.doesNotThrow(() =>
+    assertNativeSelectorQualExclusionAuditCoverage({ audit, explicitSources, historical }),
+  )
+  assert.throws(
+    () =>
+      assertNativeSelectorQualExclusionAuditCoverage({
+        audit: { ...audit, excludedSourceGroups: ['historic-group'] },
+        explicitSources,
+        historical,
+      }),
+    /pinned source manifest/u,
+  )
+  assert.throws(
+    () =>
+      assertNativeSelectorQualExclusionAuditCoverage({
+        audit: {
+          ...audit,
+          excludedPerceptualHashes: [...audit.excludedPerceptualHashes, '1111111111111111'],
+        },
+        explicitSources,
+        historical,
+      }),
+    /pinned source manifest/u,
+  )
+})
+
+await test('legacy explicit-only exclusion rows retain multiset comparison behavior', () => {
+  const source = {
+    caseId: 'legacy-explicit',
+    sourceBytesSha256: 'a'.repeat(64),
+    sharpRuntimeDecodedRgbSha256: 'b'.repeat(64),
+    pillowCanonicalRgbSha256: 'c'.repeat(64),
+    perceptualHash: '1111111111111111',
+    sourceGroup: 'same-group',
+  }
+  const audit = {
+    devSourceGroups: [],
+    excludedEncodedHashes: [source.sourceBytesSha256, source.sourceBytesSha256],
+    excludedRgbHashes: [
+      source.sharpRuntimeDecodedRgbSha256,
+      source.pillowCanonicalRgbSha256,
+      source.sharpRuntimeDecodedRgbSha256,
+      source.pillowCanonicalRgbSha256,
+    ],
+    excludedPerceptualHashes: [source.perceptualHash, source.perceptualHash],
+    excludedSourceGroups: [source.sourceGroup, source.sourceGroup],
+  }
+  assert.doesNotThrow(() =>
+    assertNativeSelectorQualExclusionAuditCoverage({
+      audit,
+      explicitSources: [source, source],
+    }),
+  )
+  assert.throws(
+    () =>
+      assertNativeSelectorQualExclusionAuditCoverage({
+        audit: { ...audit, excludedSourceGroups: [source.sourceGroup] },
+        explicitSources: [source, source],
+      }),
+    /pinned source manifest/u,
+  )
+
+  const trailingSlashSource = { ...source, sourceGroup: 'legacy/' }
+  const trailingSlashAudit = { ...audit, excludedSourceGroups: ['legacy/', 'legacy/'] }
+  assert.doesNotThrow(() =>
+    assertNativeSelectorQualExclusionAuditCoverage({
+      audit: trailingSlashAudit,
+      explicitSources: [trailingSlashSource, trailingSlashSource],
+    }),
+  )
+  assert.throws(
+    () =>
+      assertNativeSelectorQualExclusionAuditCoverage({
+        audit: { ...trailingSlashAudit, excludedSourceGroups: ['legacy', 'legacy'] },
+        explicitSources: [trailingSlashSource, trailingSlashSource],
+      }),
+    /pinned source manifest/u,
   )
 })

@@ -10,6 +10,7 @@ import {
   NATIVE_PRESENCE_POLICY,
   NATIVE_PRESENCE_ROOT,
   NATIVE_PRESENCE_STUDY_ID,
+  NATIVE_SELECTOR_CORRECTED_STUDY_ID,
   NATIVE_SELECTOR_STUDY_ID,
   REPLAY_STUDY_REGISTRY,
   replayStudyPolicy,
@@ -51,6 +52,7 @@ await test('native presence is a third closed study and retains its separate bin
     AUTHORED_SCOPE_STUDY_ID,
     NATIVE_PRESENCE_STUDY_ID,
     NATIVE_SELECTOR_STUDY_ID,
+    NATIVE_SELECTOR_CORRECTED_STUDY_ID,
   ])
   const policy = replayStudyPolicy(NATIVE_PRESENCE_STUDY_ID)
   assert.equal(policy.freezeId, NATIVE_PRESENCE_FREEZE_ID)

@@ -16,6 +16,7 @@ import {
 import {
   isVerifiedNativeSelectorQualAdmission,
   nativeSelectorQualAdmissionSnapshot,
+  assertNativeSelectorQualParentRoot,
   verifyNativeSelectorQualAdmission,
 } from './native-selector-qual-admission.js'
 import type { VerifiedNativeSelectorQualAdmission } from './native-selector-qual-admission.js'
@@ -177,6 +178,7 @@ export async function runNativeSelectorQualCli(
         closurePath: admission.protocol.producerClosure.path,
         closureSha256: admission.protocol.producerClosure.sha256,
         expectedSourceCommit: admission.protocol.policy.producerSourceCommit,
+        parentStudyId: assertNativeSelectorQualParentRoot(admission.protocol.parentDev.root),
         repositoryRoot,
       })
     const release = await acquireExclusiveFileLock(join(executionRoot, '.qual-runner.lock'), true)
@@ -202,6 +204,7 @@ export async function runNativeSelectorQualCli(
         closurePath: admission.protocol.producerClosure.path,
         closureSha256: admission.protocol.producerClosure.sha256,
         expectedSourceCommit: admission.protocol.policy.producerSourceCommit,
+        parentStudyId: assertNativeSelectorQualParentRoot(admission.protocol.parentDev.root),
         repositoryRoot,
       })
     const release = await acquireExclusiveFileLock(join(executionRoot, '.qual-runner.lock'), true)
@@ -275,6 +278,7 @@ export async function runNativeSelectorQualCli(
         closurePath: admission.protocol.producerClosure.path,
         closureSha256: admission.protocol.producerClosure.sha256,
         expectedSourceCommit: admission.protocol.policy.producerSourceCommit,
+        parentStudyId: assertNativeSelectorQualParentRoot(admission.protocol.parentDev.root),
         repositoryRoot,
       })
     const registered = JSON.parse(await readFile(registrationPath, 'utf8')) as unknown

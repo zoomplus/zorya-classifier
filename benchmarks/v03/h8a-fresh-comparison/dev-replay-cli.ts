@@ -26,6 +26,7 @@ import type {
   VerifiedAuthoredScopeReplayAdmission,
   VerifiedNativePresenceReplayAdmission,
   VerifiedNativeSelectorReplayAdmission,
+  VerifiedNativeSelectorCorrectedReplayAdmission,
   VerifiedProviderRefusalReplayAdmission,
 } from './dev-replay-admission.js'
 import { DevReplayLedger } from './dev-replay-ledger.js'
@@ -42,6 +43,8 @@ import {
   NATIVE_PRESENCE_STUDY_ID,
   NATIVE_SELECTOR_ROOT,
   NATIVE_SELECTOR_STUDY_ID,
+  NATIVE_SELECTOR_CORRECTED_ROOT,
+  NATIVE_SELECTOR_CORRECTED_STUDY_ID,
   LEGACY_REPLAY_ROOT,
   LEGACY_REPLAY_STUDY_ID,
   replayStudyPolicy,
@@ -64,13 +67,19 @@ type ReplayAdmission =
   | VerifiedAuthoredScopeReplayAdmission
   | VerifiedNativePresenceReplayAdmission
   | VerifiedNativeSelectorReplayAdmission
+  | VerifiedNativeSelectorCorrectedReplayAdmission
+
+function isNativeSelectorReplayStudy(studyId: string): boolean {
+  return studyId === NATIVE_SELECTOR_STUDY_ID || studyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID
+}
 
 function isQueryPolicyReplayAdmission(
   admission: ReplayAdmission,
 ): admission is
   | VerifiedAuthoredScopeReplayAdmission
   | VerifiedNativePresenceReplayAdmission
-  | VerifiedNativeSelectorReplayAdmission {
+  | VerifiedNativeSelectorReplayAdmission
+  | VerifiedNativeSelectorCorrectedReplayAdmission {
   return 'queryPolicy' in admission.protocol
 }
 
@@ -118,6 +127,7 @@ function testNamespaceRoot(studyId: ReplayStudyId, hooks?: DevReplayOfflineCliHo
     resolve(AUTHORED_SCOPE_ROOT),
     resolve(NATIVE_PRESENCE_ROOT),
     resolve(NATIVE_SELECTOR_ROOT),
+    resolve(NATIVE_SELECTOR_CORRECTED_ROOT),
   ])
   if (!hooks) return resolve(policy.canonicalRoot)
   const root = resolve(hooks.namespaceRoot)
@@ -219,18 +229,21 @@ const bindingBodySchema = z
       'h8a-authored-scope-replay-study-binding-v1',
       'h8a-native-presence-replay-study-binding-v1',
       'h8a-native-selector-replay-study-binding-v1',
+      'h8a-native-selector-corrected-replay-study-binding-v1',
     ]),
     studyId: z.enum([
       'provider-refusal-dev40-replay-v1',
       'authored-scope-dev40-v1',
       'native-presence-flat-dev40-v1',
       'native-selector-flat-dev40-v1',
+      'native-selector-flat-dev40-corrected-v1',
     ]),
     freezeId: z.enum([
       'h8a-provider-refusal-dev40-replay-20261101-v1',
       'h8a-authored-scope-dev40-20261101-v1',
       'h8a-native-presence-flat-dev40-20261101-v1',
       'h8a-native-selector-flat-dev40-20261101-v1',
+      'h8a-native-selector-flat-dev40-corrected-20261102-v1',
     ]),
     protocolSha256: DIGEST,
     parentAuditSha256: DIGEST,
@@ -329,10 +342,21 @@ export function assertRequiredReplayClosure(
     'benchmarks/v03/h6-context-composer.ts',
     'docs/research/v03-native-selector-hypothesis.ru.md',
   ]
+  const correctedSelectorRequired = [
+    ...selectorRequired,
+    'benchmarks/v03/h8a-fresh-comparison/native-selector-corrected-replay-cli.ts',
+    'benchmarks/v03/h8a-fresh-comparison/native-selector-qual-oracle-provenance.ts',
+    'benchmarks/v03/h8a-fresh-comparison/native-selector-qual-historical-exclusions.ts',
+    'docs/research/v03-native-selector-correction-plan.ru.md',
+  ]
   if (
     REQUIRED_REPLAY_CLOSURE_PATHS.some((path) => !pathSet.has(path)) ||
     (studyId === NATIVE_PRESENCE_STUDY_ID && nativeRequired.some((path) => !pathSet.has(path))) ||
-    (studyId === NATIVE_SELECTOR_STUDY_ID && selectorRequired.some((path) => !pathSet.has(path)))
+    ((studyId === NATIVE_SELECTOR_STUDY_ID || studyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID) &&
+      (studyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID
+        ? correctedSelectorRequired
+        : selectorRequired
+      ).some((path) => !pathSet.has(path)))
   )
     throw new RangeError('Replay producer closure omits a shared runner or evaluation dependency')
 }
@@ -343,6 +367,7 @@ const launchSchema = z
       'h8a-authored-scope-replay-launch-intent-v1',
       'h8a-native-presence-replay-launch-intent-v1',
       'h8a-native-selector-replay-launch-intent-v1',
+      'h8a-native-selector-corrected-replay-launch-intent-v1',
     ]),
     stage: screenSchema,
     protocolSha256: DIGEST,
@@ -357,6 +382,7 @@ const terminalSchema = z
       'h8a-authored-scope-replay-terminal-stop-v1',
       'h8a-native-presence-replay-terminal-stop-v1',
       'h8a-native-selector-replay-terminal-stop-v1',
+      'h8a-native-selector-corrected-replay-terminal-stop-v1',
     ]),
     stage: screenSchema,
     protocolSha256: DIGEST,
@@ -379,7 +405,7 @@ function sha256(bytes: Uint8Array | string): string {
 function replaySchemaName(studyId: ReplayStudyId, suffix: string): string {
   const name = replayStudyPolicy(studyId).ledgerSchema.replace(/ledger-v1$/u, `${suffix}-v1`)
   if (
-    !/^h8a-(?:provider-refusal|authored-scope|native-presence|native-selector)-replay-[a-z0-9-]+-v1$/u.test(
+    !/^h8a-(?:provider-refusal|authored-scope|native-presence|native-selector(?:-corrected)?)-replay-[a-z0-9-]+-v1$/u.test(
       name,
     )
   )
@@ -393,7 +419,8 @@ export function safeReplayErrorCode(error: unknown): string {
 }
 export function replayRuntimeBinding(studyId: ReplayStudyId) {
   const policy = replayStudyPolicy(studyId)
-  if (studyId === NATIVE_SELECTOR_STUDY_ID) return NATIVE_SELECTOR_RUNTIME_BINDING
+  if (studyId === NATIVE_SELECTOR_STUDY_ID || studyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID)
+    return NATIVE_SELECTOR_RUNTIME_BINDING
   if (studyId === NATIVE_PRESENCE_STUDY_ID)
     return {
       candidateProfileId: policy.candidateProfileId,
@@ -547,6 +574,7 @@ export async function verifyNativeSelectorQualSourceClosure(input: {
   closureSha256: string
   expectedSourceCommit: string
   repositoryRoot: string
+  parentStudyId?: typeof NATIVE_SELECTOR_STUDY_ID | typeof NATIVE_SELECTOR_CORRECTED_STUDY_ID
 }): Promise<void> {
   const bytes = await readPinnedReplayFile(input.closurePath, input.closureSha256, 4 * 1024 * 1024)
   const closure = closureSchema.parse(JSON.parse(bytes.toString('utf8')) as unknown)
@@ -557,7 +585,7 @@ export async function verifyNativeSelectorQualSourceClosure(input: {
   if (files.length === 0 || new Set(paths).size !== paths.length)
     throw new RangeError('QUAL producer closure is empty or repeats a source path')
   assertLiveRunnerClosure(paths)
-  assertRequiredReplayClosure(paths, NATIVE_SELECTOR_STUDY_ID)
+  assertRequiredReplayClosure(paths, input.parentStudyId ?? NATIVE_SELECTOR_STUDY_ID)
   const repository = resolve(input.repositoryRoot)
   if ((await realpath(repository)) !== repository)
     throw new RangeError('QUAL source root is symlinked or aliased')
@@ -615,7 +643,7 @@ async function writeRegistration(
     runtimeEnvironmentSha256: admission.protocol.runtimeEnvironment.sha256,
     policySha256: admission.protocol.executionPolicy,
     ...(admission.protocol.studyId === NATIVE_PRESENCE_STUDY_ID ||
-    admission.protocol.studyId === NATIVE_SELECTOR_STUDY_ID
+    isNativeSelectorReplayStudy(admission.protocol.studyId)
       ? { runtimeBinding: replayRuntimeBinding(admission.protocol.studyId) }
       : {}),
     deadlineIso: admission.protocol.deadlineIso,
@@ -660,11 +688,11 @@ async function readRegisteredBinding(root: string, admission: ReplayAdmission): 
     (admission.protocol.studyId === NATIVE_PRESENCE_STUDY_ID &&
       JSON.stringify(binding.runtimeBinding) !==
         JSON.stringify(replayRuntimeBinding(NATIVE_PRESENCE_STUDY_ID))) ||
-    (admission.protocol.studyId === NATIVE_SELECTOR_STUDY_ID &&
+    (isNativeSelectorReplayStudy(admission.protocol.studyId) &&
       JSON.stringify(binding.runtimeBinding) !==
-        JSON.stringify(replayRuntimeBinding(NATIVE_SELECTOR_STUDY_ID))) ||
+        JSON.stringify(replayRuntimeBinding(admission.protocol.studyId))) ||
     (admission.protocol.studyId !== NATIVE_PRESENCE_STUDY_ID &&
-      admission.protocol.studyId !== NATIVE_SELECTOR_STUDY_ID &&
+      !isNativeSelectorReplayStudy(admission.protocol.studyId) &&
       binding.runtimeBinding !== undefined) ||
     sha256(JSON.stringify(body)) !== bindingSha256
   )
@@ -949,10 +977,9 @@ async function runStage(
       const historical = await loadHistoricalControl(verifiedRuntime.proof.historicalSourceRoot)
       assertDeadline(admission.protocol.deadlineIso)
       const runtimeBinding = replayRuntimeBinding(admission.protocol.studyId)
-      const selectorFactoryOptions =
-        admission.protocol.studyId === NATIVE_SELECTOR_STUDY_ID
-          ? nativeSelectorRuntimeFactoryOptions()
-          : undefined
+      const selectorFactoryOptions = isNativeSelectorReplayStudy(admission.protocol.studyId)
+        ? nativeSelectorRuntimeFactoryOptions()
+        : undefined
       if (
         selectorFactoryOptions &&
         JSON.stringify(runtimeBinding) !== JSON.stringify(NATIVE_SELECTOR_RUNTIME_BINDING)

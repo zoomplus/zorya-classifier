@@ -13,23 +13,34 @@ import {
   NATIVE_PRESENCE_ROOT,
   NATIVE_SELECTOR_FREEZE_ID,
   NATIVE_SELECTOR_STUDY_ID,
+  NATIVE_SELECTOR_CORRECTED_STUDY_ID,
+  NATIVE_SELECTOR_CORRECTED_FREEZE_ID,
+  NATIVE_SELECTOR_CORRECTION_PLAN_PATH,
+  NATIVE_SELECTOR_CORRECTION_PLAN_SHA256,
+  NATIVE_SELECTOR_REPAIRED_RECORDER_PATH,
+  NATIVE_SELECTOR_REPAIRED_RECORDER_SHA256,
+  NATIVE_SELECTOR_REPAIRED_RECORDER_BYTES,
   NATIVE_SELECTOR_POLICY,
   NATIVE_SELECTOR_PRICE_PROOF,
   NATIVE_SELECTOR_ROOT,
   replayStudyPolicy,
 } from './dev-replay-study-policy.js'
 import {
+  assertCorrectedReplayClosureEvidence,
   authoredScopeReplayProtocolSchema,
   nativePresenceReplayProtocolSchema,
   nativeSelectorReplayProtocolSchema,
+  nativeSelectorCorrectedReplayProtocolSchema,
   parseReplayProtocolForStudy,
   type VerifiedAuthoredScopeReplayAdmission,
   type VerifiedNativePresenceReplayAdmission,
   type VerifiedNativeSelectorReplayAdmission,
+  type VerifiedNativeSelectorCorrectedReplayAdmission,
 } from './dev-replay-admission.js'
 import { runAuthoredScopeReplayCli } from './authored-scope-replay-cli.js'
 import { runNativePresenceReplayCli } from './native-presence-replay-cli.js'
 import { runNativeSelectorReplayCli } from './native-selector-replay-cli.js'
+import { runNativeSelectorCorrectedReplayCli } from './native-selector-corrected-replay-cli.js'
 import {
   assertRequiredReplayClosure,
   REQUIRED_REPLAY_CLOSURE_PATHS,
@@ -134,6 +145,7 @@ type QueryReplayAdmission =
   | VerifiedAuthoredScopeReplayAdmission
   | VerifiedNativePresenceReplayAdmission
   | VerifiedNativeSelectorReplayAdmission
+  | VerifiedNativeSelectorCorrectedReplayAdmission
 
 function assertQueryReplayAdmission(
   admission: Parameters<DevReplayOfflineCliHooks['executeScreen']>[0],
@@ -156,17 +168,22 @@ async function makeScopeFixture(
   studyId:
     | typeof AUTHORED_SCOPE_STUDY_ID
     | typeof NATIVE_PRESENCE_STUDY_ID
-    | typeof NATIVE_SELECTOR_STUDY_ID = AUTHORED_SCOPE_STUDY_ID,
+    | typeof NATIVE_SELECTOR_STUDY_ID
+    | typeof NATIVE_SELECTOR_CORRECTED_STUDY_ID = AUTHORED_SCOPE_STUDY_ID,
+  repairedRecorderSha256?: string,
 ) {
+  const isCorrected = studyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID
   const isNative = studyId === NATIVE_PRESENCE_STUDY_ID
-  const isSelector = studyId === NATIVE_SELECTOR_STUDY_ID
+  const isSelector = studyId === NATIVE_SELECTOR_STUDY_ID || isCorrected
   const phaseId = isSelector
     ? PHASE_NATIVE_SELECTOR_DEV40_ID
     : isNative
       ? PHASE_NATIVE_PRESENCE_DEV40_ID
       : PHASE_SCOPE_DEV40_ID
   const freezeId = isSelector
-    ? NATIVE_SELECTOR_FREEZE_ID
+    ? isCorrected
+      ? NATIVE_SELECTOR_CORRECTED_FREEZE_ID
+      : NATIVE_SELECTOR_FREEZE_ID
     : isNative
       ? NATIVE_PRESENCE_FREEZE_ID
       : AUTHORED_SCOPE_FREEZE_ID
@@ -179,8 +196,27 @@ async function makeScopeFixture(
     base.freeze.producerCases,
     base.freeze.pairedSchedule,
   )
+  const closureFiles = isCorrected
+    ? [
+        {
+          path: NATIVE_SELECTOR_CORRECTION_PLAN_PATH,
+          sha256: NATIVE_SELECTOR_CORRECTION_PLAN_SHA256,
+          bytes: (await readFile(join(process.cwd(), NATIVE_SELECTOR_CORRECTION_PLAN_PATH)))
+            .byteLength,
+        },
+        {
+          path: NATIVE_SELECTOR_REPAIRED_RECORDER_PATH,
+          sha256: repairedRecorderSha256 ?? NATIVE_SELECTOR_REPAIRED_RECORDER_SHA256,
+          bytes: NATIVE_SELECTOR_REPAIRED_RECORDER_BYTES,
+        },
+      ]
+    : []
   const closureBytes = Buffer.from(
-    '{"schema":"h8a-producer-closure-files-v1","sourceCommit":"605354e298ffa0a5b7f6a002e23cb690a4296345","files":[]}',
+    JSON.stringify({
+      schema: 'h8a-producer-closure-files-v1',
+      sourceCommit: '605354e298ffa0a5b7f6a002e23cb690a4296345',
+      files: closureFiles,
+    }),
     'utf8',
   )
   const closureSha256 = sha256(closureBytes)
@@ -208,7 +244,9 @@ async function makeScopeFixture(
   ])
   const protocolBody = {
     schema: isSelector
-      ? 'h8a-native-selector-replay-protocol-v1'
+      ? isCorrected
+        ? 'h8a-native-selector-corrected-replay-protocol-v1'
+        : 'h8a-native-selector-replay-protocol-v1'
       : isNative
         ? 'h8a-native-presence-replay-protocol-v1'
         : 'h8a-authored-scope-replay-protocol-v1',
@@ -269,7 +307,9 @@ async function makeScopeFixture(
     physicalCallsAt: 'fetch',
   }
   const protocol = isSelector
-    ? nativeSelectorReplayProtocolSchema.parse(protocolBody)
+    ? isCorrected
+      ? nativeSelectorCorrectedReplayProtocolSchema.parse(protocolBody)
+      : nativeSelectorReplayProtocolSchema.parse(protocolBody)
     : isNative
       ? nativePresenceReplayProtocolSchema.parse(protocolBody)
       : authoredScopeReplayProtocolSchema.parse(protocolBody)
@@ -278,16 +318,27 @@ async function makeScopeFixture(
   await writeFile(protocolPath, protocolBytes)
   const sourceBytes = new Map(base.sourceBytesByCaseId)
   const admission: QueryReplayAdmission = isSelector
-    ? {
-        protocol: nativeSelectorReplayProtocolSchema.parse(protocol),
-        protocolSha256: sha256(protocolBytes),
-        freeze,
-        annotations,
-        selection,
-        sourceBytes,
-        referenceMaskBytes: new Map(),
-        freezeCommitmentSha256: computePhaseFreezeCommitmentSha256(freeze),
-      }
+    ? isCorrected
+      ? {
+          protocol: nativeSelectorCorrectedReplayProtocolSchema.parse(protocol),
+          protocolSha256: sha256(protocolBytes),
+          freeze,
+          annotations,
+          selection,
+          sourceBytes,
+          referenceMaskBytes: new Map(),
+          freezeCommitmentSha256: computePhaseFreezeCommitmentSha256(freeze),
+        }
+      : {
+          protocol: nativeSelectorReplayProtocolSchema.parse(protocol),
+          protocolSha256: sha256(protocolBytes),
+          freeze,
+          annotations,
+          selection,
+          sourceBytes,
+          referenceMaskBytes: new Map(),
+          freezeCommitmentSha256: computePhaseFreezeCommitmentSha256(freeze),
+        }
     : isNative
       ? {
           protocol: nativePresenceReplayProtocolSchema.parse(protocol),
@@ -851,6 +902,114 @@ await test('native selector CLI binds selection policy and completes DEV8/12/40 
   } finally {
     await rm(directory, { recursive: true, force: false })
   }
+})
+
+await test('corrected native-selector CLI runs the shared register/run/review/closeout lifecycle', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'native-selector-corrected-cli-lifecycle-'))
+  try {
+    const fixture = await makeScopeFixture(directory, true, NATIVE_SELECTOR_CORRECTED_STUDY_ID)
+    for (const stage of ['dev8', 'dev12', 'dev40'] as const) {
+      if (stage !== 'dev8') {
+        await runNativeSelectorCorrectedReplayCli(
+          [
+            'review',
+            stage === 'dev12' ? 'dev8' : 'dev12',
+            '--judgement',
+            'advance',
+            '--reason',
+            'synthetic corrected replay review',
+            '--protocol',
+            fixture.protocolPath,
+            '--protocol-sha256',
+            fixture.protocolSha256,
+          ],
+          directory,
+          fixture.hooks,
+        )
+      } else {
+        await runNativeSelectorCorrectedReplayCli(
+          cliArgs('register', fixture.protocolPath, fixture.protocolSha256),
+          directory,
+          fixture.hooks,
+        )
+      }
+      await runNativeSelectorCorrectedReplayCli(
+        cliArgs('run', fixture.protocolPath, fixture.protocolSha256, stage),
+        directory,
+        fixture.hooks,
+      )
+    }
+    await runNativeSelectorCorrectedReplayCli(
+      [
+        'review',
+        'dev40',
+        '--judgement',
+        'advance',
+        '--reason',
+        'synthetic corrected replay review',
+        '--protocol',
+        fixture.protocolPath,
+        '--protocol-sha256',
+        fixture.protocolSha256,
+      ],
+      directory,
+      fixture.hooks,
+    )
+    await runNativeSelectorCorrectedReplayCli(
+      cliArgs('closeout', fixture.protocolPath, fixture.protocolSha256),
+      directory,
+      fixture.hooks,
+    )
+    const closeout = z
+      .object({
+        studyId: z.literal(NATIVE_SELECTOR_CORRECTED_STUDY_ID),
+        freezeId: z.literal(NATIVE_SELECTOR_CORRECTED_FREEZE_ID),
+        allStageReviewsAdvance: z.literal(true),
+        qualEligible: z.literal(true),
+      })
+      .passthrough()
+      .parse(
+        JSON.parse(
+          await readFile(
+            join(fixture.namespaceRoot, 'execution/closeout/dev40-closeout.json'),
+            'utf8',
+          ),
+        ) as unknown,
+      )
+    assert.equal(closeout.studyId, NATIVE_SELECTOR_CORRECTED_STUDY_ID)
+  } finally {
+    await rm(directory, { recursive: true, force: false })
+  }
+})
+
+await test('corrected admission requires the repaired recorder source pin before downstream setup', () => {
+  const fixedClosure = [
+    {
+      path: NATIVE_SELECTOR_CORRECTION_PLAN_PATH,
+      sha256: NATIVE_SELECTOR_CORRECTION_PLAN_SHA256,
+      bytes: 1,
+    },
+    {
+      path: NATIVE_SELECTOR_REPAIRED_RECORDER_PATH,
+      sha256: NATIVE_SELECTOR_REPAIRED_RECORDER_SHA256,
+      bytes: NATIVE_SELECTOR_REPAIRED_RECORDER_BYTES,
+    },
+  ]
+  assert.doesNotThrow(() => assertCorrectedReplayClosureEvidence(fixedClosure))
+  for (const closure of [
+    fixedClosure.filter((file) => file.path !== NATIVE_SELECTOR_REPAIRED_RECORDER_PATH),
+    fixedClosure.map((file) =>
+      file.path === NATIVE_SELECTOR_REPAIRED_RECORDER_PATH
+        ? { ...file, sha256: '0'.repeat(64) }
+        : file,
+    ),
+    fixedClosure.map((file) =>
+      file.path === NATIVE_SELECTOR_REPAIRED_RECORDER_PATH
+        ? { ...file, bytes: file.bytes + 1 }
+        : file,
+    ),
+  ])
+    assert.throws(() => assertCorrectedReplayClosureEvidence(closure))
 })
 
 await test('native presence DEV stop remains terminal and only permits read-only closeout', async () => {
