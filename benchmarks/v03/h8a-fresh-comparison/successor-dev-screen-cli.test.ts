@@ -144,7 +144,8 @@ await test('incomplete freeze refuses before key read, runtime creation, and pro
   await assert.rejects(readFile(join(root, 'terminal-stop.json')), { code: 'ENOENT' })
 })
 
-await test('zero-query recovery guard refuses before lock, ledger, key, runtime, or launch intent', async () => {
+await test('zero-query recovery guard refuses before lock, ledger, key, runtime, or launch intent', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-11-02T12:00:00.000Z') })
   const root = await mkdtemp(join(tmpdir(), 'h8a-successor-zero-query-guard-'))
   directoryRoots.push(root)
   const verified = await fixture()
@@ -254,7 +255,8 @@ await test('invalid deadline refuses before guard, lock, key, runtime, and launc
   await assert.rejects(readFile(join(root, 'terminal-stop.json')), { code: 'ENOENT' })
 })
 
-await test('normal DEV screen keeps case-level fetch limits local to the exhausted candidate case', async () => {
+await test('normal DEV screen keeps case-level fetch limits local to the exhausted candidate case', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-11-02T12:00:00.000Z') })
   const root = await mkdtemp(join(tmpdir(), 'h8a-successor-case-limit-'))
   directoryRoots.push(root)
   const verified = await fixture()
@@ -402,7 +404,8 @@ await test('normal DEV screen keeps case-level fetch limits local to the exhaust
   assert.equal(report.completedPairs, exhaustedScheduleIndex)
 })
 
-await test('runner lock serializes contenders before key lookup without poisoning a clean stage', async () => {
+await test('runner lock serializes contenders before key lookup without poisoning a clean stage', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-11-02T12:00:00.000Z') })
   const root = await mkdtemp(join(tmpdir(), 'h8a-successor-race-'))
   directoryRoots.push(root)
   const verified = await fixture()
@@ -465,7 +468,8 @@ await test('runner lock serializes contenders before key lookup without poisonin
   await assert.rejects(readFile(join(root, 'terminal-stop.json')), { code: 'ENOENT' })
 })
 
-await test('a launched failed stage is terminal and cannot read the key or execute on resubmission', async () => {
+await test('a launched failed stage is terminal and cannot read the key or execute on resubmission', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-11-02T12:00:00.000Z') })
   const root = await mkdtemp(join(tmpdir(), 'h8a-successor-terminal-'))
   directoryRoots.push(root)
   const verified = await fixture()
@@ -528,7 +532,8 @@ await test('a launched failed stage is terminal and cannot read the key or execu
   assert.deepEqual(await readFile(join(root, 'terminal-stop.json')), terminalStopBeforeRetry)
 })
 
-await test('missing cumulative prior-stage report is not swallowed and refuses before key read', async () => {
+await test('missing cumulative prior-stage report is not swallowed and refuses before key read', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-11-02T12:00:00.000Z') })
   const root = await mkdtemp(join(tmpdir(), 'h8a-successor-prior-stage-'))
   directoryRoots.push(root)
   const verified = await fixture()
@@ -566,7 +571,8 @@ await test('missing cumulative prior-stage report is not swallowed and refuses b
   await assert.rejects(readFile(join(root, 'terminal-stop.json')), { code: 'ENOENT' })
 })
 
-await test('corrupt cumulative prior-stage report is not swallowed and refuses before key read', async () => {
+await test('corrupt cumulative prior-stage report is not swallowed and refuses before key read', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-11-02T12:00:00.000Z') })
   const root = await mkdtemp(join(tmpdir(), 'h8a-successor-corrupt-stage-'))
   directoryRoots.push(root)
   await mkdir(join(root, 'reports'), { recursive: true })

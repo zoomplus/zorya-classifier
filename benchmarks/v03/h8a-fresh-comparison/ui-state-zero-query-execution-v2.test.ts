@@ -59,7 +59,8 @@ await test('execution-v2 refuses altered predecessor evidence pins', async () =>
   )
 })
 
-await test('execution-v2 refuses a deadline extension and the original sub-millisecond form', async () => {
+await test('execution-v2 refuses a deadline extension and the original sub-millisecond form', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-11-02T12:00:00.000Z') })
   const protocol = await verifyZeroQueryExecutionV2Preconditions()
   for (const deadlineIso of ['2026-11-02T12:11:51.739Z', '2026-11-02T12:11:51.738058Z']) {
     assert.throws(() =>

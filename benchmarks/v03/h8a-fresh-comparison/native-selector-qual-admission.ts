@@ -84,6 +84,9 @@ const perceptualHashValidationPath = resolve(
   dirname(fileURLToPath(import.meta.url)),
   '../fresh-dev/validation.py',
 )
+const maxPinnedPythonExecutableBytes = 64 * 1024 * 1024
+const maxQualSourceImageBytes = 5 * 1024 * 1024
+const maxQualSourcePixels = 2_097_152
 const reviewSchema = z
   .object({
     schema: z.literal('h8a-dev-screen-review-v1'),
@@ -180,34 +183,227 @@ function parseJson(bytes: Uint8Array): unknown {
   return parseReplayJson(bytes)
 }
 
-async function verifyPerceptualHashFromPinnedPython(
-  jpegBytes: Uint8Array,
-  pythonExecutable: string,
-): Promise<{ perceptualHash: string; pillowRgbSha256: string }> {
-  if (jpegBytes.byteLength > 5 * 1024 * 1024)
-    throw new RangeError('QUAL source exceeds the pinned JPEG byte cap')
-  const ownedJpegBytes = Buffer.from(jpegBytes)
-  const script = [
-    'import hashlib,sys',
-    'sys.path.insert(0, __import__("os").path.dirname(sys.argv[1]))',
-    'import imaging',
-    'jpeg=sys.stdin.buffer.read()',
-    'rgb,width,height=imaging.decode_jpeg_rgb_normalized(jpeg)',
-    'value=imaging.perceptual_hash64_from_rgb(rgb,width,height)',
-    'sys.stdout.write("%016x %s\\n" % (value,hashlib.sha256(rgb).hexdigest()))',
-  ].join(';')
-  return new Promise((resolveResult, rejectResult) => {
-    const child = spawn(pythonExecutable, ['-c', script, perceptualHashModulePath], {
-      stdio: ['pipe', 'pipe', 'ignore'],
+interface VerifiedPinnedPythonExecutable {
+  logicalPath: string
+  canonicalPath: string
+  sha256: string
+  prefixPath: string
+  device: number
+  inode: number
+  bytes: number
+}
+
+export async function verifyPinnedPythonExecutable(
+  logicalPath: string,
+  expectedSha256: string,
+): Promise<VerifiedPinnedPythonExecutable> {
+  const absoluteLogicalPath = resolve(logicalPath)
+  let canonicalPath: string
+  try {
+    canonicalPath = await realpath(absoluteLogicalPath)
+  } catch (error) {
+    throw new RangeError('Pinned Python executable path could not be resolved', { cause: error })
+  }
+  if (!isAbsolute(canonicalPath) || resolve(canonicalPath) !== canonicalPath)
+    throw new RangeError('Pinned Python executable did not resolve to a canonical absolute path')
+  let bytes: Buffer
+  let afterReadPath: string
+  let fileInfo: Awaited<ReturnType<typeof lstat>>
+  try {
+    bytes = await readPinnedReplayFile(
+      canonicalPath,
+      expectedSha256,
+      maxPinnedPythonExecutableBytes,
+    )
+    afterReadPath = await realpath(absoluteLogicalPath)
+    fileInfo = await lstat(canonicalPath)
+  } catch (error) {
+    throw new RangeError('Pinned Python executable failed its bounded byte pin', { cause: error })
+  }
+  if (
+    afterReadPath !== canonicalPath ||
+    !fileInfo.isFile() ||
+    fileInfo.isSymbolicLink() ||
+    fileInfo.size !== bytes.byteLength
+  )
+    throw new RangeError('Pinned Python executable alias changed during verification')
+  return {
+    logicalPath: absoluteLogicalPath,
+    canonicalPath,
+    sha256: expectedSha256,
+    prefixPath: resolve(dirname(absoluteLogicalPath), '..'),
+    device: fileInfo.dev,
+    inode: fileInfo.ino,
+    bytes: fileInfo.size,
+  }
+}
+
+async function assertPinnedPythonExecutableBinding(
+  executable: VerifiedPinnedPythonExecutable,
+): Promise<void> {
+  let currentTarget: string
+  let fileInfo: Awaited<ReturnType<typeof lstat>>
+  try {
+    currentTarget = await realpath(executable.logicalPath)
+    fileInfo = await lstat(executable.canonicalPath)
+  } catch (error) {
+    throw new RangeError('Pinned Python executable alias could not be rechecked', { cause: error })
+  }
+  if (
+    currentTarget !== executable.canonicalPath ||
+    !fileInfo.isFile() ||
+    fileInfo.isSymbolicLink() ||
+    fileInfo.dev !== executable.device ||
+    fileInfo.ino !== executable.inode ||
+    fileInfo.size !== executable.bytes
+  )
+    throw new RangeError(
+      'Pinned Python executable alias or target changed during QUAL verification',
+    )
+}
+
+export async function verifyPerceptualHashFromPinnedPython(
+  sourceBytes: Uint8Array,
+  executable: VerifiedPinnedPythonExecutable,
+  runtimeVersions: { python: string; pillow: string },
+  options: { signal?: AbortSignal; timeoutMs?: number } = {},
+): Promise<{
+  perceptualHash: string
+  pillowRgbSha256: string
+  width: number
+  height: number
+}> {
+  const startedAt = process.hrtime.bigint()
+  const timeoutMs = options.timeoutMs ?? 15_000
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0 || timeoutMs > 15_000)
+    throw new RangeError('Pinned pHash worker timeout must be within its fixed 15-second bound')
+  const deadline = startedAt + BigInt(timeoutMs) * 1_000_000n
+  const remainingTimeoutMs = (): number => Number(deadline - process.hrtime.bigint()) / 1_000_000
+  if (options.signal?.aborted)
+    throw new RangeError('Pinned pHash worker was cancelled before startup', {
+      cause: options.signal.reason,
     })
+  if (sourceBytes.byteLength > maxQualSourceImageBytes)
+    throw new RangeError('QUAL source exceeds the pinned image byte cap')
+  const ownedSourceBytes = Buffer.from(sourceBytes)
+  const isJpeg = ownedSourceBytes[0] === 0xff && ownedSourceBytes[1] === 0xd8
+  const isPng =
+    ownedSourceBytes.length >= 8 &&
+    ownedSourceBytes[0] === 0x89 &&
+    ownedSourceBytes[1] === 0x50 &&
+    ownedSourceBytes[2] === 0x4e &&
+    ownedSourceBytes[3] === 0x47 &&
+    ownedSourceBytes[4] === 0x0d &&
+    ownedSourceBytes[5] === 0x0a &&
+    ownedSourceBytes[6] === 0x1a &&
+    ownedSourceBytes[7] === 0x0a
+  if (!isJpeg && !isPng) throw new RangeError('QUAL source must be a bounded JPEG or PNG image')
+  await assertPinnedPythonExecutableBinding(executable)
+  if (options.signal?.aborted)
+    throw new RangeError('Pinned pHash worker was cancelled before startup', {
+      cause: options.signal.reason,
+    })
+  if (remainingTimeoutMs() <= 0)
+    throw new RangeError('Pinned pHash worker exceeded its fixed 15-second bound before startup')
+  const script = [
+    'import hashlib,io,os,stat,sys',
+    'module_path,expected_executable_sha,expected_prefix,expected_python,expected_pillow,source_format,source_byte_cap,source_pixel_cap,executable_byte_cap=sys.argv[1:10]',
+    'executable_path="/proc/self/exe" if sys.platform.startswith("linux") else os.path.realpath(sys.executable)',
+    'fd=os.open(executable_path,os.O_RDONLY|getattr(os,"O_CLOEXEC",0))',
+    'try:',
+    ' st=os.fstat(fd)',
+    ' if not stat.S_ISREG(st.st_mode) or st.st_size<=0 or st.st_size>int(executable_byte_cap): raise RuntimeError("executed Python binary is outside its bounded regular-file contract")',
+    ' digest=hashlib.sha256()',
+    ' total=0',
+    ' while True:',
+    '  chunk=os.read(fd,min(1048576,int(executable_byte_cap)+1-total))',
+    '  if not chunk: break',
+    '  total+=len(chunk)',
+    '  if total>int(executable_byte_cap): raise RuntimeError("executed Python binary exceeded its byte cap")',
+    '  digest.update(chunk)',
+    ' if digest.hexdigest()!=expected_executable_sha: raise RuntimeError("executed Python binary hash mismatch")',
+    'finally: os.close(fd)',
+    'if os.path.normpath(sys.prefix)!=expected_prefix: raise RuntimeError("Python virtual environment prefix mismatch")',
+    'if ".".join(map(str,sys.version_info[:3]))!=expected_python: raise RuntimeError("Python version mismatch")',
+    'sys.path.insert(0,os.path.dirname(module_path))',
+    'import imaging',
+    'import PIL',
+    'if PIL.__version__!=expected_pillow: raise RuntimeError("Pillow version mismatch")',
+    'source=sys.stdin.buffer.read(int(source_byte_cap)+1)',
+    'if len(source)>int(source_byte_cap): raise RuntimeError("source image exceeded its byte cap")',
+    'if source_format=="jpeg":',
+    ' from PIL import Image',
+    ' with Image.open(io.BytesIO(source)) as check_image:',
+    '  if check_image.format!="JPEG": raise RuntimeError("source signature and JPEG format disagree")',
+    ' rgb,width,height=imaging.decode_jpeg_rgb_normalized(source)',
+    'elif source_format=="png":',
+    ' from PIL import Image,ImageOps',
+    ' with Image.open(io.BytesIO(source)) as image:',
+    '  if image.format!="PNG": raise RuntimeError("source signature and PNG format disagree")',
+    '  width,height=image.size',
+    '  if width<=0 or height<=0 or width*height>int(source_pixel_cap): raise RuntimeError("decoded PNG canvas exceeds its pixel cap")',
+    '  oriented=ImageOps.exif_transpose(image)',
+    '  rgb_image=oriented.convert("RGB")',
+    '  rgb=rgb_image.tobytes()',
+    '  width,height=rgb_image.size',
+    '  if oriented is not image: oriented.close()',
+    '  rgb_image.close()',
+    'else: raise RuntimeError("unsupported source image format")',
+    'if width<=0 or height<=0 or width*height>int(source_pixel_cap): raise RuntimeError("decoded image canvas exceeds its pixel cap")',
+    'value=imaging.perceptual_hash64_from_rgb(rgb,width,height)',
+    'sys.stdout.write("%016x %s %d %d\\n" % (value,hashlib.sha256(rgb).hexdigest(),width,height))',
+  ].join('\n')
+  return new Promise((resolveResult, rejectResult) => {
+    const child = spawn(
+      executable.logicalPath,
+      [
+        '-c',
+        script,
+        perceptualHashModulePath,
+        executable.sha256,
+        executable.prefixPath,
+        runtimeVersions.python,
+        runtimeVersions.pillow,
+        isJpeg ? 'jpeg' : 'png',
+        String(maxQualSourceImageBytes),
+        String(maxQualSourcePixels),
+        String(maxPinnedPythonExecutableBytes),
+      ],
+      {
+        stdio: ['pipe', 'pipe', 'ignore'],
+        env: {
+          PATH: `${dirname(executable.logicalPath)}:/usr/bin:/bin`,
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+          PYTHONDONTWRITEBYTECODE: '1',
+          PYTHONNOUSERSITE: '1',
+        },
+      },
+    )
     const chunks: Buffer[] = []
     let outputBytes = 0
     let timedOut = false
     let overflow = false
-    const timer = setTimeout(() => {
+    let cancelled = false
+    let childError: Error | undefined
+    let inputError: Error | undefined
+    const remainingAfterSpawn = remainingTimeoutMs()
+    let timer: ReturnType<typeof setTimeout> | undefined
+    if (remainingAfterSpawn <= 0) {
       timedOut = true
       child.kill('SIGKILL')
-    }, 15_000)
+    } else {
+      timer = setTimeout(() => {
+        timedOut = true
+        child.kill('SIGKILL')
+      }, remainingAfterSpawn)
+    }
+    const onAbort = (): void => {
+      cancelled = true
+      child.kill('SIGKILL')
+    }
+    options.signal?.addEventListener('abort', onAbort, { once: true })
+    if (options.signal?.aborted) onAbort()
     child.stdout.on('data', (chunk: Buffer) => {
       outputBytes += chunk.byteLength
       if (outputBytes > 160) {
@@ -215,27 +411,39 @@ async function verifyPerceptualHashFromPinnedPython(
         child.kill('SIGKILL')
       } else chunks.push(Buffer.from(chunk))
     })
-    child.stdin.on('error', () => undefined)
-    child.once('error', () => {
-      clearTimeout(timer)
-      rejectResult(new RangeError('Pinned pHash worker could not start'))
+    child.stdin.once('error', (error) => {
+      inputError = error
+      child.kill('SIGKILL')
     })
     child.once('close', (code) => {
-      clearTimeout(timer)
-      if (timedOut || overflow || code !== 0) {
-        rejectResult(new RangeError('Pinned pHash worker did not complete successfully'))
-        return
-      }
-      const match = /^([a-f0-9]{16}) ([a-f0-9]{64})\n$/u.exec(
-        Buffer.concat(chunks).toString('utf8'),
-      )
-      if (!match) {
-        rejectResult(new RangeError('Pinned pHash worker returned an invalid closed result'))
-        return
-      }
-      resolveResult({ perceptualHash: match[1]!, pillowRgbSha256: match[2]! })
+      if (timer !== undefined) clearTimeout(timer)
+      options.signal?.removeEventListener('abort', onAbort)
+      void (async () => {
+        await assertPinnedPythonExecutableBinding(executable)
+        if (remainingTimeoutMs() <= 0) timedOut = true
+        if (timedOut || cancelled || overflow || code !== 0 || childError || inputError) {
+          throw new RangeError('Pinned pHash worker did not complete successfully')
+        }
+        const match = /^([a-f0-9]{16}) ([a-f0-9]{64}) ([1-9][0-9]*) ([1-9][0-9]*)\n$/u.exec(
+          Buffer.concat(chunks).toString('utf8'),
+        )
+        if (!match) throw new RangeError('Pinned pHash worker returned an invalid closed result')
+        const width = Number(match[3])
+        const height = Number(match[4])
+        if (
+          !Number.isSafeInteger(width) ||
+          !Number.isSafeInteger(height) ||
+          width * height > maxQualSourcePixels
+        )
+          throw new RangeError('Pinned pHash worker returned invalid normalized canvas dimensions')
+        return { perceptualHash: match[1]!, pillowRgbSha256: match[2]!, width, height }
+      })().then(resolveResult, rejectResult)
     })
-    child.stdin.end(ownedJpegBytes)
+    child.once('error', (error) => {
+      childError = error
+      child.kill('SIGKILL')
+    })
+    child.stdin.end(ownedSourceBytes)
   })
 }
 
@@ -1130,10 +1338,9 @@ export async function verifyNativeSelectorQualAdmission(input: {
     .parse(parseJson(runtimeEnvironmentBytes!))
   if (runtimeProof.pythonSha256 !== runtimeEnvironment.python.executableSha256)
     throw new RangeError('QUAL pinned Python runtime does not match its environment proof')
-  await readPinnedReplayFile(
+  const pinnedPythonExecutable = await verifyPinnedPythonExecutable(
     runtimeProof.pythonExecutable,
     runtimeProof.pythonSha256,
-    64 * 1024 * 1024,
   )
   const nativeAssetsProof = z
     .object({
@@ -1266,19 +1473,24 @@ export async function verifyNativeSelectorQualAdmission(input: {
   for (const source of metadata.sourceManifest.sources) {
     const ref = { path: source.path, sha256: source.sha256, bytes: source.bytes }
     const bytes = await pinnedRef(ref, root)
+    const pHash = await verifyPerceptualHashFromPinnedPython(bytes, pinnedPythonExecutable, {
+      python: runtimeEnvironment.python.version,
+      pillow: runtimeEnvironment.python.requiredNativeVersions.Pillow,
+    })
     const decoded = await sharp(bytes)
       .rotate()
       .removeAlpha()
       .toColourspace('srgb')
       .raw()
       .toBuffer({ resolveWithObject: true })
-    const pHash = await verifyPerceptualHashFromPinnedPython(bytes, runtimeProof.pythonExecutable)
     const producer = metadata.freeze.producerCases.find((row) => row.opaqueCaseId === source.caseId)
     if (
       !producer ||
       sha256(bytes) !== producer.sourceBytesSha256 ||
       decoded.info.width !== producer.sourceCanvasWidth ||
       decoded.info.height !== producer.sourceCanvasHeight ||
+      pHash.width !== decoded.info.width ||
+      pHash.height !== decoded.info.height ||
       sha256(decoded.data) !== source.rgbPixelsSha256 ||
       pHash.pillowRgbSha256 !== source.pillowCanonicalRgbSha256 ||
       pHash.perceptualHash !== source.perceptualHash

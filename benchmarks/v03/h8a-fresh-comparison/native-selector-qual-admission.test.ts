@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
+import sharp from 'sharp'
 import test from 'node:test'
 import {
   assertNativeSelectorQualParentRoot,
@@ -11,6 +12,8 @@ import {
   readNativeSelectorQualParentGraph,
   verifyNativeSelectorQualParentExclusions,
   verifyNativeSelectorQualParentGraphForOfflineTest,
+  verifyPerceptualHashFromPinnedPython,
+  verifyPinnedPythonExecutable,
 } from './native-selector-qual-admission.js'
 import {
   NATIVE_SELECTOR_POLICY,
@@ -48,6 +51,10 @@ import { NATIVE_SELECTOR_QUAL_FREEZE_ID } from './native-selector-qual-protocol.
 
 const sha256 = (value: Uint8Array | string): string =>
   createHash('sha256').update(value).digest('hex')
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
 
 async function writePinned(
   root: string,
@@ -1126,5 +1133,193 @@ await test('historical QUAL group coverage uses the selected parent unique-group
         auditGroups: ['legacy-group'],
       }),
     /selected parent/u,
+  )
+})
+
+await test('QUAL pHash verifies the pinned Python alias and preserves normalized JPEG and PNG fingerprints', async (context) => {
+  const proofPath =
+    '/root/.codex/artifacts/zorya-classifier-mcp-20261101/main-flat-compare-v2/checked-runtime-files-v2.json'
+  const environmentPath =
+    '/root/.codex/artifacts/zorya-classifier-mcp-20261101/main-flat-compare-v2/runtime-environment-v2.json'
+  let proofBytes: Buffer
+  let environmentBytes: Buffer
+  try {
+    ;[proofBytes, environmentBytes] = await Promise.all([
+      readFile(proofPath),
+      readFile(environmentPath),
+    ])
+  } catch {
+    context.skip('pinned QUAL runtime evidence is not available in this environment')
+    return
+  }
+  assert.equal(
+    sha256(proofBytes),
+    '278015e2d7a9bbd7f308c865c01a9dc2277ec48d89d11852400940ef6e0ec389',
+  )
+  assert.equal(
+    sha256(environmentBytes),
+    '1941f16dfb906f54331cc06c8b58bed15b86b65d86f16f7f708b49bc60680ba6',
+  )
+  const proofValue: unknown = JSON.parse(proofBytes.toString('utf8'))
+  const environmentValue: unknown = JSON.parse(environmentBytes.toString('utf8'))
+  assert.ok(isRecord(proofValue))
+  assert.ok(isRecord(environmentValue))
+  const pythonExecutable = proofValue.pythonExecutable
+  const pythonSha256 = proofValue.pythonSha256
+  const pythonEnvironment = environmentValue.python
+  assert.equal(typeof pythonExecutable, 'string')
+  assert.equal(typeof pythonSha256, 'string')
+  assert.ok(isRecord(pythonEnvironment))
+  const pythonVersion = pythonEnvironment.version
+  const requiredVersions = pythonEnvironment.requiredNativeVersions
+  assert.equal(typeof pythonVersion, 'string')
+  assert.ok(isRecord(requiredVersions))
+  const pillowVersion = requiredVersions.Pillow
+  assert.equal(typeof pillowVersion, 'string')
+  if (
+    typeof pythonExecutable !== 'string' ||
+    typeof pythonSha256 !== 'string' ||
+    typeof pythonVersion !== 'string' ||
+    typeof pillowVersion !== 'string'
+  )
+    throw new TypeError('pinned runtime proof has malformed Python identity fields')
+
+  const logicalFileInfo = await lstat(pythonExecutable)
+  const executable = await verifyPinnedPythonExecutable(pythonExecutable, pythonSha256)
+  assert.ok(
+    logicalFileInfo.isSymbolicLink(),
+    'the frozen Python entrypoint exercises venv symlink resolution',
+  )
+  assert.equal(await realpath(pythonExecutable), executable.canonicalPath)
+  await assert.rejects(
+    verifyPinnedPythonExecutable(pythonExecutable, '0'.repeat(64)),
+    /bounded byte pin/u,
+  )
+
+  const width = 12
+  const height = 8
+  const pixels = Buffer.alloc(width * height * 3)
+  for (let index = 0; index < pixels.length; index += 1)
+    pixels[index] = (index * 37 + Math.floor(index / 3) * 19) % 256
+  const png = await sharp(pixels, { raw: { width, height, channels: 3 } })
+    .png()
+    .toBuffer()
+  const swappedAliasRoot = await mkdtemp(join(tmpdir(), 'qual-pinned-python-alias-'))
+  try {
+    const swappedAliasPath = join(swappedAliasRoot, 'python')
+    await symlink(pythonExecutable, swappedAliasPath)
+    const swappedAliasPin = await verifyPinnedPythonExecutable(swappedAliasPath, pythonSha256)
+    await rm(swappedAliasPath)
+    await symlink(process.execPath, swappedAliasPath)
+    await assert.rejects(
+      verifyPerceptualHashFromPinnedPython(png, swappedAliasPin, {
+        python: pythonVersion,
+        pillow: pillowVersion,
+      }),
+      /alias or target changed/u,
+    )
+  } finally {
+    await rm(swappedAliasRoot, { recursive: true, force: true })
+  }
+  const pngDecoded = await sharp(png)
+    .rotate()
+    .removeAlpha()
+    .toColourspace('srgb')
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+  const pngFingerprint = await verifyPerceptualHashFromPinnedPython(png, executable, {
+    python: pythonVersion,
+    pillow: pillowVersion,
+  })
+  assert.equal(pngFingerprint.width, pngDecoded.info.width)
+  assert.equal(pngFingerprint.height, pngDecoded.info.height)
+  assert.equal(pngFingerprint.pillowRgbSha256, sha256(pngDecoded.data))
+  assert.deepEqual(pngFingerprint, {
+    perceptualHash: '2e0f557cf22a8255',
+    pillowRgbSha256: '619da61b09dd5ee5bc271fb927b04f96076be0123a4692adede58e6b529e3278',
+    width: 12,
+    height: 8,
+  })
+  const cancelled = new AbortController()
+  const cancelledWorker = verifyPerceptualHashFromPinnedPython(
+    png,
+    executable,
+    { python: pythonVersion, pillow: pillowVersion },
+    { signal: cancelled.signal },
+  )
+  cancelled.abort(new Error('controlled test cancellation'))
+  await assert.rejects(cancelledWorker, /cancelled before startup/u)
+  await assert.rejects(
+    verifyPerceptualHashFromPinnedPython(
+      png,
+      executable,
+      { python: pythonVersion, pillow: pillowVersion },
+      { timeoutMs: 1 },
+    ),
+    /worker did not complete/u,
+  )
+
+  const jpeg = await sharp(pixels, { raw: { width, height, channels: 3 } })
+    .jpeg({ quality: 100, chromaSubsampling: '4:4:4' })
+    .withMetadata({ orientation: 6 })
+    .toBuffer()
+  const jpegDecoded = await sharp(jpeg)
+    .rotate()
+    .removeAlpha()
+    .toColourspace('srgb')
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+  const jpegFingerprint = await verifyPerceptualHashFromPinnedPython(jpeg, executable, {
+    python: pythonVersion,
+    pillow: pillowVersion,
+  })
+  assert.equal(jpegFingerprint.width, jpegDecoded.info.width)
+  assert.equal(jpegFingerprint.height, jpegDecoded.info.height)
+  assert.equal(jpegFingerprint.pillowRgbSha256, sha256(jpegDecoded.data))
+  assert.deepEqual(jpegFingerprint, {
+    perceptualHash: '4993491f05b2655f',
+    pillowRgbSha256: '63f9a858688d7eddea83d50cebc9be91823b9982509d4293a45b5ae8243e2127',
+    width: 8,
+    height: 12,
+  })
+
+  await assert.rejects(
+    verifyPerceptualHashFromPinnedPython(Buffer.from('RIFF0000WEBP'), executable, {
+      python: pythonVersion,
+      pillow: pillowVersion,
+    }),
+    /JPEG or PNG/u,
+  )
+  await assert.rejects(
+    verifyPerceptualHashFromPinnedPython(Buffer.alloc(5 * 1024 * 1024 + 1), executable, {
+      python: pythonVersion,
+      pillow: pillowVersion,
+    }),
+    /byte cap/u,
+  )
+  await assert.rejects(
+    verifyPerceptualHashFromPinnedPython(
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]),
+      executable,
+      { python: pythonVersion, pillow: pillowVersion },
+    ),
+    /worker did not complete/u,
+  )
+  const oversizedPng = await sharp({
+    create: {
+      width: 2049,
+      height: 1024,
+      channels: 3,
+      background: { r: 32, g: 64, b: 128 },
+    },
+  })
+    .png()
+    .toBuffer()
+  await assert.rejects(
+    verifyPerceptualHashFromPinnedPython(oversizedPng, executable, {
+      python: pythonVersion,
+      pillow: pillowVersion,
+    }),
+    /worker did not complete/u,
   )
 })
