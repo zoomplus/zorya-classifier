@@ -40,7 +40,7 @@ The release archive also installs with `npm install ./zorya-classifier-0.2.3.tgz
 
 ## MCP server
 
-The separate [`zorya-classifier-mcp`](packages/mcp/README.md) package adds stdio and authenticated HTTP transports on top of the published `zorya-classifier@0.2.3` package. It requires an explicit model/provider profile or a programmatically injected `DecisionPort`, and does not select models or download segmentation assets. See its Russian guide for bounded inputs, OIDC, BYOK storage, Docker and runtime behavior.
+The separate [`zorya-classifier-mcp`](packages/mcp/README.md) package adds stdio and HTTP transports on top of the published `zorya-classifier@0.2.3` package. HTTP supports OIDC or an explicit IP allowlist mode with per-session capability tokens for clients such as ChatGPT that cannot supply custom authentication headers. The server requires an explicit model/provider profile or a programmatically injected `DecisionPort`, and does not select models or download segmentation assets. See its Russian guide for bounded inputs, both access modes, Docker and runtime behavior.
 
 ## Capability and status
 

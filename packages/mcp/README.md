@@ -1,16 +1,68 @@
 # zorya-classifier-mcp
 
-Отдельный MCP-сервер для опубликованной библиотеки `zorya-classifier@0.2.3`. Сервер не выбирает модель, provider или локальные веса и не скачивает их. Для каждого запуска оператор явно задаёт профиль, модель, provider (если он нужен адаптеру) и секрет через окружение или защищённый BYOK flow.
+Отдельный MCP-сервер версии `0.2.0` для опубликованной библиотеки `zorya-classifier@0.2.3`. Сервер не выбирает модель, provider или локальные веса и не скачивает их. Для каждого запуска оператор явно задаёт профиль, модель, provider (если он нужен адаптеру) и секрет через окружение или, только в OIDC-режиме, защищённый BYOK flow.
 
-Требуется Node.js `22.12.0` или новее. Сервер поддерживает локальный stdio и удалённый HTTP: Streamable HTTP, совместимость с legacy SSE, OIDC-аутентификацию, ограниченный файловый viewer и отдельное подключение BYOK ключа OpenRouter.
+Требуется Node.js `22.12.0` или новее. Сервер поддерживает локальный stdio и два явных HTTP-режима: OIDC с Streamable HTTP, legacy SSE, viewer и BYOK; либо Streamable HTTP с IP allowlist и краткоживущими capability-сессиями без OAuth-входа.
 
 ## Установка и stdio
 
 Установите отдельный пакет из npm:
 
 ```sh
-npm install --global zorya-classifier-mcp@0.1.0
+npm install --global zorya-classifier-mcp@0.2.0
 ```
+
+## ChatGPT с IP allowlist и без OAuth-входа
+
+Режим `http.accessMode: "ip"` предназначен для MCP-клиентов, которые не передают собственные HTTP-заголовки или API-ключи. В ChatGPT откройте **Settings → Apps & Connectors → Advanced settings → Create connector**, задайте URL MCP-сервера, выберите **No authentication** и установите личный connector. Программная проверка MCP-клиента не подтверждает доступность UI или connector в каждом аккаунте ChatGPT.
+
+Для текущего deployment целевой адрес — `https://startzorya.com/mcp/classifier`. Используйте его только после отдельной проверки production HTTPS-маршрута; наличие адреса в документации само по себе не подтверждает публикацию сервера.
+
+IP allowlist разрешает сетевой диапазон и не устанавливает личность пользователя: пользователи ChatGPT могут выходить через общие адреса. Поэтому каждый клиент сначала вызывает `zorya_open_session`, затем сохраняет полученный `sessionToken` приватно и передаёт его в каждом из шести `zorya_*` инструментов, `zorya_read_artifact` и при опросе задания. Этот случайный capability token ограничивает доступ к заданиям и файлам одной сессией; он не передаётся в URL или HTTP-заголовках. Откройте отдельную сессию на отдельный разговор и не публикуйте её токен.
+
+Пример конфигурации ниже показывает форму, но `203.0.113.8/32` — зарезервированный документационный адрес, а не рабочий диапазон. Перед запуском замените его точными официальными CIDR-диапазонами ChatGPT, проверенными для вашего deployment. `allowedHosts` должен точно совпадать с HTTP `Host`, включая порт, если клиент его передаёт. Заголовок `x-real-ip` доверяется только от socket peer, входящего в `trustedProxyCidrs`; дубликаты и forwarding headers отклоняются. CIDR `/0`, wildcard-hosts и локальные файлы не разрешены.
+
+```json
+{
+  "transport": "http",
+  "core": {
+    "profiles": {
+      "luna": {
+        "id": "luna",
+        "adapter": "openrouter-vision",
+        "credentialMode": "service",
+        "apiKeyEnv": "OPENROUTER_API_KEY",
+        "model": "openai/gpt-6-luna",
+        "provider": "openai"
+      }
+    },
+    "defaultProfileId": "luna"
+  },
+  "http": {
+    "accessMode": "ip",
+    "bindHost": "127.0.0.1",
+    "port": 18783,
+    "mcpPath": "/mcp",
+    "allowedCidrs": ["203.0.113.8/32"],
+    "trustedProxyCidrs": ["127.0.0.1/32"],
+    "allowedHosts": ["mcp.example.net"],
+    "allowedOrigins": [],
+    "maxSessions": 10000,
+    "sessionTtlMs": 14400000,
+    "maxJobsPerSessionPerDay": 20,
+    "maxJobsPerDay": 2000,
+    "maxRequestsPerMinute": 60,
+    "maxConcurrentRequests": 32,
+    "maxRequestBodyBytes": 32000000,
+    "requestTimeoutMs": 30000
+  },
+  "remoteImageHosts": []
+}
+```
+
+Задайте `ZORYA_MCP_CONFIG` путём к JSON вне репозитория. `OPENROUTER_API_KEY` передайте только в окружении процесса через менеджер секретов; ключ не записывайте в JSON или настройки connector. В конфигурации нужны только `service` или явные keyless-профили; `byok`, browser login, PKCE, HTTP uploads и viewer в IP-режиме отключены. Для изображений через URL добавьте только проверенные hostname в `remoteImageHosts`. Модель и provider задаются явно; профиль по умолчанию не означает автоматический fallback.
+
+Сессии, задания и лимиты IP-режима хранятся в памяти одного процесса. По умолчанию capability-сессия истекает через 4 часа; лимиты 20 отправок на сессию в сутки и 2000 отправок глобально в сутки ограничивают количество заданий, но не являются бюджетом стоимости. После перезапуска сессии и задания теряются. Токены сессий хранятся на сервере только в виде SHA-256 хэшей.
 
 Проверьте, что каталог global npm binaries доступен в `PATH` процесса MCP-клиента; при необходимости укажите полный путь к `zorya-classifier-mcp`.
 
@@ -137,7 +189,7 @@ MCP `stdio` резервирует stdout под протокол; диагно�
 mkdir -p /srv/zorya/mcp-runtime
 cd /srv/zorya/mcp-runtime
 npm init -y
-npm install zorya-classifier-mcp@0.1.0 onnxruntime-node@1.23.2
+npm install zorya-classifier-mcp@0.2.0 onnxruntime-node@1.23.2
 ```
 
 В stdio-конфигурации MCP-клиента для такого локального проекта задайте `command: "/usr/bin/node"` и `args: ["/srv/zorya/mcp-runtime/node_modules/zorya-classifier-mcp/dist/cli.js"]`; переменную `ZORYA_MCP_CONFIG` передайте в окружении процесса.
@@ -151,14 +203,14 @@ Viewer показывает ограниченное представление 
 Соберите образ из каталога пакета и передайте конфигурацию снаружи контейнера:
 
 ```sh
-docker build -t zorya-classifier-mcp:0.1.0 .
+docker build -t zorya-classifier-mcp:0.2.0 .
 docker run --rm \
   --publish 127.0.0.1:8787:8787 \
   --mount type=bind,src=/srv/zorya/config.json,dst=/run/zorya/config.json,readonly \
   --mount type=bind,src=/srv/zorya/state,dst=/var/lib/zorya \
   --env ZORYA_MCP_CONFIG=/run/zorya/config.json \
   --env ZORYA_VAULT_KEY \
-  zorya-classifier-mcp:0.1.0
+  zorya-classifier-mcp:0.2.0
 ```
 
 Образ запускается от непривилегированного пользователя. Конфигурация, ключи, изображения и веса не включаются в build context или образ. В production используйте secret manager для окружения и HTTPS reverse proxy; не публикуйте незашифрованный HTTP порт напрямую в сеть.

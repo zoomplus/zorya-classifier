@@ -24,7 +24,7 @@ const evidenceRootInput = resolve(
 )
 const publishedLibrarySha256 = '3e13abef137b232d6ff7467a8dca470040eb303df8839aa1fc4298c141e20e0c'
 const expectedPackageName = 'zorya-classifier-mcp'
-const expectedPackageVersion = '0.1.0'
+const expectedPackageVersion = '0.2.0'
 const maxPackedFileBytes = 2 * 1024 * 1024
 
 function resolveNpmCli() {

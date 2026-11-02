@@ -6,7 +6,14 @@ import {
 } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 
-import type { CoreApplication, JsonObject, Principal, ResourcePayload } from '../contracts.js'
+import type {
+  AnonymousSessionPort,
+  CoreApplication,
+  JsonObject,
+  JsonValue,
+  Principal,
+  ResourcePayload,
+} from '../contracts.js'
 import { publicError, safeError } from '../errors.js'
 import {
   cancelJobToolInputSchema,
@@ -110,6 +117,15 @@ const classifyOutputSchema = z.union([submissionSchema, errorOutputSchema])
 const spatialOutputSchema = z.union([submissionSchema, errorOutputSchema])
 const jobOutputSchema = z.union([jobSnapshotSchema, errorOutputSchema])
 const capabilitiesOutputSchema = z.union([capabilitiesSchema, errorOutputSchema])
+const anonymousSessionOutputSchema = z.strictObject({
+  sessionToken: z.string().length(43),
+  expiresAt: z.number().int().positive(),
+})
+const readArtifactOutputSchema = z.strictObject({
+  artifactId: z.string().min(1).max(128),
+  mediaType: z.string().min(1).max(128),
+  byteLength: z.number().int().nonnegative(),
+})
 const principalScopedServerOptionsSchema = z.strictObject({
   resourceTimeoutMs: z.number().int().min(100).max(120_000).optional(),
 })
@@ -125,7 +141,7 @@ export function createPrincipalScopedMcpServer(
   options: PrincipalScopedMcpServerOptions = {},
 ): McpServer {
   const parsedOptions = principalScopedServerOptionsSchema.parse(options)
-  const server = new McpServer({ name: 'zorya-classifier-mcp', version: '0.1.0' })
+  const server = new McpServer({ name: 'zorya-classifier-mcp', version: '0.2.0' })
   const resourceTimeoutMs = parsedOptions.resourceTimeoutMs ?? defaultResourceTimeoutMs
 
   server.registerTool(
@@ -255,6 +271,258 @@ export function createPrincipalScopedMcpServer(
   )
 
   return server
+}
+
+/** MCP-поверхность IP-режима: allowlist допускает сеть, а операции требуют capability-сессию. */
+export function createAnonymousMcpServer(
+  application: CoreApplication,
+  sessions: AnonymousSessionPort,
+  options: { readonly maxArtifactBytes: number },
+): McpServer {
+  const server = new McpServer(
+    { name: 'zorya-classifier-mcp', version: '0.2.0' },
+    {
+      instructions:
+        'Open zorya_open_session once. Keep its sessionToken private and reuse it in all six zorya_* tools, zorya_read_artifact, and job polling. The IP allowlist admits a network, not an individual identity. Use only configured server profiles; no model is selected implicitly.',
+    },
+  )
+  server.registerTool(
+    'zorya_open_session',
+    {
+      title: 'Open an anonymous session',
+      description:
+        'Create one short-lived private session, then reuse its sessionToken for every classification, job, and artifact call. The IP allowlist does not identify individual users.',
+      inputSchema: z.strictObject({}),
+      outputSchema: anonymousSessionOutputSchema,
+    },
+    async () => {
+      try {
+        const opened = sessions.open()
+        return jsonToolResult(
+          anonymousSessionOutputSchema.parse({
+            sessionToken: opened.token,
+            expiresAt: opened.expiresAt,
+          }),
+        )
+      } catch (error) {
+        return jsonToolResult(errorOutputSchema.parse({ error: safeError(error) }), true)
+      }
+    },
+  )
+
+  registerAnonymousOperation(
+    server,
+    application,
+    sessions,
+    'zorya_classify',
+    classifyToolInputSchema.safeExtend({ sessionToken: z.string().min(1).max(128) }),
+    classifyOutputSchema,
+    'Classify supplied text or an image using an explicitly configured server profile. Open a session once and reuse its sessionToken.',
+    true,
+    true,
+  )
+  registerAnonymousOperation(
+    server,
+    application,
+    sessions,
+    'zorya_locate',
+    locateToolInputSchema.safeExtend({ sessionToken: z.string().min(1).max(128) }),
+    spatialOutputSchema,
+    'Locate a visible target using an explicitly configured server profile. Open a session once and reuse its sessionToken.',
+    true,
+    true,
+  )
+  registerAnonymousOperation(
+    server,
+    application,
+    sessions,
+    'zorya_extract',
+    extractToolInputSchema.safeExtend({ sessionToken: z.string().min(1).max(128) }),
+    spatialOutputSchema,
+    'Extract a visible instance using an explicitly configured server profile and segmenter. Open a session once and reuse its sessionToken.',
+    true,
+    true,
+  )
+  registerAnonymousOperation(
+    server,
+    application,
+    sessions,
+    'zorya_get_job',
+    getJobToolInputSchema.extend({ sessionToken: z.string().min(1).max(128) }),
+    jobOutputSchema,
+    'Read a job created in this anonymous session. Open a session once and reuse its sessionToken.',
+    false,
+  )
+  registerAnonymousOperation(
+    server,
+    application,
+    sessions,
+    'zorya_cancel_job',
+    cancelJobToolInputSchema.extend({ sessionToken: z.string().min(1).max(128) }),
+    jobOutputSchema,
+    'Cancel a job created in this anonymous session. Open a session once and reuse its sessionToken.',
+    false,
+  )
+  registerAnonymousOperation(
+    server,
+    application,
+    sessions,
+    'zorya_capabilities',
+    capabilitiesToolInputSchema.extend({ sessionToken: z.string().min(1).max(128) }),
+    capabilitiesOutputSchema,
+    'List configured server profiles, operations, and limits. No model is selected implicitly. Open a session once and reuse its sessionToken.',
+    false,
+  )
+
+  server.registerTool(
+    'zorya_read_artifact',
+    {
+      title: 'Read a session artifact',
+      description:
+        'Read bounded image or packed-mask bytes for an artifact created in this anonymous session. Open a session once and reuse its sessionToken.',
+      inputSchema: z.strictObject({
+        sessionToken: z.string().min(1).max(128),
+        artifactId: z
+          .string()
+          .min(1)
+          .max(128)
+          .regex(/^[A-Za-z0-9_-]+$/u),
+      }),
+      outputSchema: readArtifactOutputSchema,
+    },
+    async (args, context) => {
+      try {
+        const principal = sessions.resolve(args.sessionToken)
+        const payload = await application.readResource({
+          uri: `zorya://artifacts/${encodeURIComponent(args.artifactId)}`,
+          principal,
+          signal: context.mcpReq.signal,
+          deadlineAt: Date.now() + defaultResourceTimeoutMs,
+        })
+        if (payload.kind !== 'binary' || payload.bytes.byteLength > options.maxArtifactBytes)
+          throw new Error('Artifact is unavailable or exceeds the configured read limit.')
+        const ownedBytes = Buffer.from(payload.bytes)
+        let encoded: string
+        try {
+          encoded = ownedBytes.toString('base64')
+        } finally {
+          ownedBytes.fill(0)
+          payload.bytes.fill(0)
+        }
+        const content = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(
+          payload.mediaType,
+        )
+          ? [{ type: 'image' as const, data: encoded, mimeType: payload.mediaType }]
+          : [
+              {
+                type: 'resource' as const,
+                resource: {
+                  uri: `zorya://artifacts/${encodeURIComponent(args.artifactId)}`,
+                  mimeType: payload.mediaType,
+                  blob: encoded,
+                },
+              },
+            ]
+        return {
+          content,
+          structuredContent: readArtifactOutputSchema.parse({
+            artifactId: args.artifactId,
+            mediaType: payload.mediaType,
+            byteLength: payload.bytes.byteLength,
+          }),
+        }
+      } catch (error) {
+        return jsonToolResult(errorOutputSchema.parse({ error: safeError(error) }), true)
+      }
+    },
+  )
+  return server
+}
+
+function registerAnonymousOperation(
+  server: McpServer,
+  application: CoreApplication,
+  sessions: AnonymousSessionPort,
+  toolName:
+    | 'zorya_classify'
+    | 'zorya_locate'
+    | 'zorya_extract'
+    | 'zorya_get_job'
+    | 'zorya_cancel_job'
+    | 'zorya_capabilities',
+  inputSchema: z.ZodObject,
+  outputSchema: z.ZodType,
+  description: string,
+  countsAsJob: boolean,
+  acceptsChatgptFile = false,
+): void {
+  server.registerTool(
+    toolName,
+    {
+      title: toolName.replaceAll('_', ' '),
+      description,
+      inputSchema,
+      outputSchema,
+      ...(acceptsChatgptFile ? { _meta: { 'openai/fileParams': ['image_file'] } } : {}),
+    },
+    async (args, context) => {
+      try {
+        const parsed = inputSchema.parse(args)
+        const sessionToken = parsed['sessionToken']
+        if (typeof sessionToken !== 'string') throw new Error('An anonymous session is required.')
+        const principal = sessions.resolve(sessionToken)
+        const { sessionToken: _sessionToken, ...operationArgs } = parsed
+        if (containsLocalPath(operationArgs))
+          throw new Error('Local filesystem inputs are unavailable over HTTP.')
+        if (countsAsJob) sessions.recordSubmission(sessionToken)
+        const output = await application.invoke({
+          toolName,
+          args: operationArgs,
+          principal,
+          signal: context.mcpReq.signal,
+        })
+        if (toolName === 'zorya_capabilities' && isJsonRecord(output['inputs'])) {
+          const transport = output['transport']
+          const transportRecord = isJsonRecord(transport) ? transport : {}
+          const protocols = transportRecord['supportedProtocols']
+          const safeOutput = {
+            ...output,
+            transport: {
+              ...transportRecord,
+              supportedProtocols: Array.isArray(protocols)
+                ? protocols.filter(
+                    (protocol) =>
+                      typeof protocol === 'string' && protocol.startsWith('streamable-http:'),
+                  )
+                : [],
+            },
+            inputs: { ...output['inputs'], localPath: false, uploadedId: false },
+          }
+          const validated = outputSchema.parse(safeOutput)
+          return jsonToolResult(z.record(z.string(), z.json()).parse(validated))
+        }
+        const validated = outputSchema.parse(output)
+        return jsonToolResult(z.record(z.string(), z.json()).parse(validated))
+      } catch (error) {
+        return jsonToolResult(errorOutputSchema.parse({ error: safeError(error) }), true)
+      }
+    },
+  )
+}
+
+function isJsonRecord(value: unknown): value is { readonly [key: string]: JsonValue } {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+function containsLocalPath(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false
+  if (Array.isArray(value)) return value.some(containsLocalPath)
+  const entries = Object.entries(value)
+  if (
+    entries.some(([key, item]) => key === 'kind' && (item === 'localPath' || item === 'uploadedId'))
+  )
+    return true
+  return entries.some(([, item]) => containsLocalPath(item))
 }
 
 async function invokeTool(

@@ -61,6 +61,8 @@ await test('pinned MCP SDK client performs authenticated modern streamable HTTP 
       assert.equal(principal.ownerId, authenticated.ownerId)
       if (principal.transport !== 'http')
         throw new Error('HTTP factory received a non-HTTP principal.')
+      if (principal.access === 'anonymous-capability')
+        throw new Error('OIDC factory received an anonymous capability principal.')
       assert.equal(principal.identity.subject, authenticated.identity.subject)
       const mcp = new McpServer({ name: 'controlled-test-server', version: '1.0.0' })
       mcp.registerTool('owner_echo', { inputSchema: z.object({}) }, async () => ({
@@ -196,7 +198,8 @@ await test('pinned legacy SSE client is authenticated on both stream creation an
       },
     },
     createServerForPrincipal(principal) {
-      if (principal.transport !== 'http') throw new Error('Expected an HTTP principal.')
+      if (principal.transport !== 'http' || principal.access === 'anonymous-capability')
+        throw new Error('Expected an OIDC HTTP principal.')
       const mcp = new McpServer({ name: 'controlled-legacy-server', version: '1.0.0' })
       mcp.registerTool('owner_echo', { inputSchema: z.object({}) }, async () => ({
         content: [{ type: 'text' as const, text: principal.ownerId }],

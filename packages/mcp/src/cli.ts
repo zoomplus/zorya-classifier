@@ -18,6 +18,8 @@ import { createOpenRouterPkceService } from './auth/openrouter-pkce.js'
 import { parseHttpConfig } from './http/config.js'
 import type { HttpConfig } from './http/config.js'
 import { createHttpServer } from './http/server.js'
+import { parseIpHttpConfig } from './http/ip-config.js'
+import { createIpHttpServer } from './http/ip-server.js'
 import { createEnvironmentCredentialPort } from './library/environment-credentials.js'
 import { createMediaPort } from './media/loader.js'
 import {
@@ -47,7 +49,7 @@ const cliConfigSchema = z.strictObject({
   transport: z.enum(['stdio', 'http']),
   core: z.unknown(),
   remoteImageHosts: z.array(z.string().min(1).max(253)).max(128).default([]),
-  credentialVault: vaultConfigSchema,
+  credentialVault: vaultConfigSchema.optional(),
   stdio: z
     .strictObject({
       ownerId: z.string().min(1).max(512).optional(),
@@ -129,7 +131,23 @@ function parseCliConfig(value: unknown): CliConfig {
   ) {
     throw new Error('Browser login and OpenRouter connection require the HTTP transport.')
   }
+  const ipMode = config.transport === 'http' && isIpHttpConfig(config.http)
+  if (!ipMode && config.credentialVault === undefined)
+    throw new Error('credentialVault is required for stdio and OIDC HTTP modes.')
+  if (ipMode && (config.browserLogin !== undefined || config.openRouterPkceProfileId !== undefined))
+    throw new Error('IP access mode does not support browser login or BYOK management.')
+  if (ipMode && config.credentialVault?.mode === 'encrypted-file')
+    throw new Error('IP access mode does not use a provider credential vault.')
   return config
+}
+
+function isIpHttpConfig(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'accessMode' in value &&
+    value.accessMode === 'ip'
+  )
 }
 
 export function assertHttpCompositionConfig(
@@ -156,7 +174,7 @@ export function assertHttpCompositionConfig(
 
 function decodeVaultKey(
   environment: Readonly<Record<string, string | undefined>>,
-  config: CliConfig['credentialVault'],
+  config: NonNullable<CliConfig['credentialVault']>,
 ): Uint8Array | undefined {
   if (config.mode === 'memory-only') return undefined
   const encoded = environment[config.keyEnv]
@@ -257,7 +275,7 @@ async function start(): Promise<void> {
   let credentialVault: CredentialVault | undefined
   let application: ReturnType<typeof createCoreApplication> | undefined
   let stdio: ManagedStdioHandle | undefined
-  let http: ReturnType<typeof createHttpServer> | undefined
+  let http: { shutdown(): Promise<void> } | undefined
   let shutdownPromise: Promise<void> | undefined
   let shutdownListenersInstalled = false
 
@@ -317,22 +335,23 @@ async function start(): Promise<void> {
     })
     artifactStore = sharedArtifactStore
 
-    const vaultKey = decodeVaultKey(process.env, cliConfig.credentialVault)
+    const vaultConfiguration = cliConfig.credentialVault ?? { mode: 'memory-only' as const }
+    const vaultKey = decodeVaultKey(process.env, vaultConfiguration)
     let createdVault: CredentialVault | undefined
     try {
-      const vaultConfiguration =
-        cliConfig.credentialVault.mode === 'memory-only'
+      const vaultSettings =
+        vaultConfiguration.mode === 'memory-only'
           ? { mode: 'memory-only' as const }
           : vaultKey === undefined
             ? undefined
             : {
                 mode: 'encrypted-file' as const,
-                filePath: resolve(cliConfig.credentialVault.filePath),
+                filePath: resolve(vaultConfiguration.filePath),
                 encryptionKey: vaultKey,
               }
-      if (vaultConfiguration === undefined)
+      if (vaultSettings === undefined)
         throw new Error('Encrypted credential vault key is unavailable.')
-      createdVault = await createCredentialVault(vaultConfiguration)
+      createdVault = await createCredentialVault(vaultSettings)
       credentialVault = createdVault
     } finally {
       vaultKey?.fill(0)
@@ -377,6 +396,36 @@ async function start(): Promise<void> {
       process.once('SIGINT', onSignal)
       process.once('SIGTERM', onSignal)
       process.stdin.once('end', onSignal)
+      shutdownListenersInstalled = true
+      return
+    }
+
+    if (isIpHttpConfig(cliConfig.http)) {
+      if (
+        Object.values(coreConfig.profiles).some(
+          (profile) => profile.adapter !== 'injected-decision' && profile.credentialMode === 'byok',
+        )
+      ) {
+        throw new Error(
+          'IP access mode supports only service-credential or keyless configured profiles.',
+        )
+      }
+      const ipConfig = parseIpHttpConfig(cliConfig.http)
+      const runningIpServer = createIpHttpServer({
+        config: ipConfig,
+        application: coreApplication,
+        maxArtifactBytes: limits.maxArtifactBytes,
+      })
+      http = runningIpServer
+      await new Promise<void>((resolveListen, rejectListen) => {
+        runningIpServer.server.once('error', rejectListen)
+        runningIpServer.server.listen(ipConfig.port, ipConfig.bindHost, () => {
+          runningIpServer.server.off('error', rejectListen)
+          resolveListen()
+        })
+      })
+      process.once('SIGINT', onSignal)
+      process.once('SIGTERM', onSignal)
       shutdownListenersInstalled = true
       return
     }

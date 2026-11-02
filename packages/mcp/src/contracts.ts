@@ -23,7 +23,24 @@ export interface VerifiedIdentity {
 /** Server-derived identity. Tool arguments never provide an owner identifier. */
 export type Principal =
   | { readonly ownerId: string; readonly transport: 'stdio'; readonly identity?: never }
-  | { readonly ownerId: string; readonly transport: 'http'; readonly identity: VerifiedIdentity }
+  | {
+      readonly ownerId: string
+      readonly transport: 'http'
+      readonly access: 'anonymous-capability'
+      readonly identity?: never
+    }
+  | {
+      readonly ownerId: string
+      readonly transport: 'http'
+      readonly identity: VerifiedIdentity
+      readonly access?: never
+    }
+
+export interface AnonymousSessionPort {
+  open(): { readonly token: string; readonly expiresAt: number }
+  resolve(token: unknown): Principal
+  recordSubmission(token: string): void
+}
 
 export type JsonPrimitive = string | number | boolean | null
 export type JsonValue = JsonPrimitive | readonly JsonValue[] | { readonly [key: string]: JsonValue }

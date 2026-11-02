@@ -1,5 +1,13 @@
 # Проверка `zorya-classifier-mcp` 0.1.0
 
+> Этот исторический отчёт описывает опубликованный пакет 0.1.0 и его receipts; новые байты 0.2.0 сюда не приписываются. Кандидат 0.2.0 добавляет отдельный `http.accessMode: "ip"` с capability-сессиями для клиентов без OAuth custom headers. Для него требуются собственные source/package/registry/deployment receipts. Пока такие receipts не добавлены, публикация и production endpoint 0.2.0 считаются непроверенными.
+
+## Ограниченная проверка source candidate 0.2.0
+
+На task worktree `task/mcp-noauth-20261102`, основанном на `013905efc963708467dec7388df9bc0514197a67`, прошли `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run boundaries`, `npm run dead-code:ci` и `npm run build` в `packages/mcp`. Targeted MCP-команда завершилась **17/17 passed, 0 failed, 0 skipped**: capability sessions, IP HTTP с реальным SDK-клиентом, OIDC HTTP и modern/legacy stdio. В частности, тесты проверили межсессионный отказ для job/read/cancel/artifact, токен на каждом инструменте, CIDR и mapped IPv4, trusted proxy `x-real-ip`, дублирующие Host/Origin/forwarding headers, частичное body с таймаутом и закрытием socket, а также отсутствие Bearer challenge и `no-store` заголовки.
+
+В схеме каждого из шести существующих инструментов IP-режима требуется `sessionToken`; отдельная отрицательная проверка подтвердила отказ при его отсутствии у `zorya_get_job`. Это локальная проверка выбранных package paths, не полная MCP suite. Вызовов внешнего provider, root `npm run check`, root `npm run pack:check`, публикации npm/GitHub, production deployment и проверки UI ChatGPT не выполняли. Эти acceptance этапы остаются за главным оркестратором и rollout; в части публикации и deployment статус остаётся `UNVERIFIED`.
+
 **Состояние на 2 ноября 2026 года.** Финальный независимый read-only аудит подтвердил `APPROVE` всех 22 строк. Отчёт `final-release-acceptance.ru.md`, SHA-256 `a790a3eed011ff748adb1f00da2af2cb359ef6813a33488dbb8fc8658ca7d4f7`, охватывает release commit `861f52e6ef07caac4c464c31056fccf67a603834`, root/CI gates и публичные npm/GitHub bytes. Аккаунтный UI и production hosting — отдельные `UNVERIFIED` rollout-проверки; H8a — `UNMEASURED`, реальных provider calls не было.
 
 ## Состав пакета
