@@ -58,6 +58,8 @@ export class JobScheduler {
   readonly #running = new Map<string, QueuedJob>()
   readonly #runTasks = new Map<string, Promise<void>>()
   readonly #cleanupTasks = new Set<Promise<void>>()
+  readonly #sweepTimer: NodeJS.Timeout
+  #cleanupFailureCount = 0
   #closed = false
   #shutdownPromise: Promise<void> | undefined
 
@@ -66,6 +68,16 @@ export class JobScheduler {
     this.#onEvict = options.onEvict
     this.#onCleanupFailure =
       options.onCleanupFailure ?? (() => console.error('MCP artifact cleanup failed.'))
+    const sweepIntervalMs = Math.max(25, Math.min(1_000, this.#config.limits.jobTtlMs / 4))
+    this.#sweepTimer = setInterval(() => {
+      if (this.#closed) return
+      try {
+        this.#pruneExpired(Date.now())
+      } catch {
+        this.#reportCleanupFailure()
+      }
+    }, sweepIntervalMs)
+    this.#sweepTimer.unref()
   }
 
   submit(input: SubmitJobInput): JsonObject {
@@ -176,6 +188,7 @@ export class JobScheduler {
   async #shutdownOwned(): Promise<void> {
     if (this.#closed) return
     this.#closed = true
+    clearInterval(this.#sweepTimer)
     for (const job of this.#jobs.values()) {
       if (job.state === 'queued') {
         job.cancelTriggered = true
@@ -195,9 +208,12 @@ export class JobScheduler {
     for (const job of this.#jobs.values()) {
       if (job.artifacts.length === 0) continue
       job.artifacts = []
-      this.#scheduleCleanup(job.ownerId, job.id)
+      await this.#scheduleCleanup(job.ownerId, job.id)
     }
     await Promise.all([...this.#cleanupTasks])
+    if (this.#cleanupFailureCount > 0) {
+      throw new McpCoreError('INTERNAL', 'Artifact cleanup failed.')
+    }
   }
 
   #assertOpen(): void {
@@ -253,7 +269,7 @@ export class JobScheduler {
       if (ownerId !== undefined && job.ownerId !== ownerId) continue
       if (job.state === 'queued' || job.state === 'running' || job.state === 'cancelling') continue
       this.#jobs.delete(job.id)
-      this.#scheduleCleanup(job.ownerId, job.id)
+      void this.#scheduleCleanup(job.ownerId, job.id).catch(() => this.#reportCleanupFailure())
     }
   }
 
@@ -263,16 +279,28 @@ export class JobScheduler {
       if (job.state === 'queued' || job.state === 'running' || job.state === 'cancelling') continue
       if (job.completedAt === undefined || now - job.completedAt < ttl) continue
       this.#jobs.delete(job.id)
-      this.#scheduleCleanup(job.ownerId, job.id)
+      void this.#scheduleCleanup(job.ownerId, job.id).catch(() => this.#reportCleanupFailure())
     }
   }
 
-  #scheduleCleanup(ownerId: string, jobId: string): void {
-    const cleanup = Promise.resolve().then(() => this.#onEvict(ownerId, jobId))
-    this.#cleanupTasks.add(cleanup)
-    void cleanup
-      .catch(() => this.#onCleanupFailure())
+  #scheduleCleanup(ownerId: string, jobId: string): Promise<void> {
+    const cleanup = Promise.resolve()
+      .then(() => this.#onEvict(ownerId, jobId))
+      .catch(() => {
+        this.#reportCleanupFailure()
+      })
       .finally(() => this.#cleanupTasks.delete(cleanup))
+    this.#cleanupTasks.add(cleanup)
+    return cleanup
+  }
+
+  #reportCleanupFailure(): void {
+    this.#cleanupFailureCount += 1
+    try {
+      this.#onCleanupFailure()
+    } catch {
+      console.error('MCP artifact cleanup failure reporter failed.')
+    }
   }
 
   #onDeadline(job: QueuedJob): void {
@@ -334,7 +362,7 @@ export class JobScheduler {
         () => this.#runTasks.delete(job.id),
         () => {
           this.#runTasks.delete(job.id)
-          this.#onCleanupFailure()
+          this.#reportCleanupFailure()
         },
       )
     }
@@ -388,11 +416,7 @@ export class JobScheduler {
     } finally {
       if (job.state !== 'succeeded' && job.artifacts.length > 0) {
         job.artifacts = []
-        try {
-          await this.#onEvict(job.ownerId, job.id)
-        } catch {
-          this.#onCleanupFailure()
-        }
+        await this.#scheduleCleanup(job.ownerId, job.id)
       }
       this.#clearTimer(job)
       this.#running.delete(job.id)

@@ -58,7 +58,7 @@ function deferred<T>(): { promise: Promise<T>; resolve(value: T): void } {
 }
 
 async function waitFor(predicate: () => boolean): Promise<void> {
-  const deadline = Date.now() + 1_000
+  const deadline = Date.now() + 2_000
   while (!predicate()) {
     if (Date.now() >= deadline) throw new Error('Timed out waiting for scheduler state.')
     await new Promise<void>((resolve) => setTimeout(resolve, 1))
@@ -241,4 +241,118 @@ await test('a task settling after its deadline cannot succeed before the timer c
   await waitFor(() => scheduler.get(ownerA.ownerId, jobId).state === 'failed')
   assert.equal(scheduler.get(ownerA.ownerId, jobId).error?.code, 'TIMEOUT')
   await scheduler.shutdown()
+})
+
+await test('terminal jobs expire during idle time and clean up without another request', async () => {
+  const evicted: string[] = []
+  const scheduler = new JobScheduler({
+    config: schedulerConfig({ jobTtlMs: 1_000 }),
+    onEvict: async (_ownerId, jobId) => {
+      evicted.push(jobId)
+    },
+  })
+  const submitted = scheduler.submit({
+    principal: ownerA,
+    operation: 'classify',
+    queuedBytes: 0,
+    task: async () => output,
+  })
+  const jobId = String(submitted['jobId'])
+  await waitFor(() => scheduler.get(ownerA.ownerId, jobId).state === 'succeeded')
+
+  await waitFor(() => evicted.length === 1)
+  assert.deepEqual(evicted, [jobId])
+  assert.throws(
+    () => scheduler.get(ownerA.ownerId, jobId),
+    (error: unknown) => error instanceof McpCoreError && error.code === 'NOT_FOUND',
+  )
+  await scheduler.shutdown()
+})
+
+await test('an expired running job stays stored until its physical task settles', async () => {
+  const released = deferred<OperationOutput>()
+  const evicted: string[] = []
+  const scheduler = new JobScheduler({
+    config: schedulerConfig({ jobTtlMs: 1_000, jobTimeoutMs: 10_000 }),
+    onEvict: async (_ownerId, jobId) => {
+      evicted.push(jobId)
+    },
+  })
+  const submitted = scheduler.submit({
+    principal: ownerA,
+    operation: 'classify',
+    queuedBytes: 0,
+    task: async () => released.promise,
+  })
+  const jobId = String(submitted['jobId'])
+  await waitFor(() => scheduler.get(ownerA.ownerId, jobId).state === 'running')
+  await new Promise<void>((resolve) => setTimeout(resolve, 1_100))
+
+  assert.equal(scheduler.get(ownerA.ownerId, jobId).state, 'running')
+  assert.deepEqual(evicted, [])
+  released.resolve(output)
+  await waitFor(() => scheduler.get(ownerA.ownerId, jobId).state === 'succeeded')
+  await waitFor(() => evicted.length === 1)
+  assert.deepEqual(evicted, [jobId])
+  await scheduler.shutdown()
+})
+
+await test('shutdown stops the TTL sweep and joins cleanup already in progress', async () => {
+  const finishCleanup = deferred<void>()
+  let cleanupCount = 0
+  const scheduler = new JobScheduler({
+    config: schedulerConfig({ jobTtlMs: 1_000 }),
+    onEvict: async () => {
+      cleanupCount += 1
+      await finishCleanup.promise
+    },
+  })
+  const submitted = scheduler.submit({
+    principal: ownerA,
+    operation: 'classify',
+    queuedBytes: 0,
+    task: async () => output,
+  })
+  const jobId = String(submitted['jobId'])
+  await waitFor(() => scheduler.get(ownerA.ownerId, jobId).state === 'succeeded')
+  await waitFor(() => cleanupCount === 1)
+
+  let shutdownSettled = false
+  const shutdown = scheduler.shutdown().then(() => {
+    shutdownSettled = true
+  })
+  await new Promise<void>((resolve) => setTimeout(resolve, 30))
+  assert.equal(shutdownSettled, false)
+  finishCleanup.resolve()
+  await shutdown
+  assert.equal(cleanupCount, 1)
+  await new Promise<void>((resolve) => setTimeout(resolve, 300))
+  assert.equal(cleanupCount, 1)
+})
+
+await test('TTL cleanup failures are reported and surfaced by shutdown', async () => {
+  let failuresReported = 0
+  const scheduler = new JobScheduler({
+    config: schedulerConfig({ jobTtlMs: 1_000 }),
+    onEvict: async () => {
+      throw new Error('private cleanup detail')
+    },
+    onCleanupFailure: () => {
+      failuresReported += 1
+    },
+  })
+  const submitted = scheduler.submit({
+    principal: ownerA,
+    operation: 'classify',
+    queuedBytes: 0,
+    task: async () => output,
+  })
+  const jobId = String(submitted['jobId'])
+  await waitFor(() => scheduler.get(ownerA.ownerId, jobId).state === 'succeeded')
+  await waitFor(() => failuresReported === 1)
+  await assert.rejects(
+    scheduler.shutdown(),
+    (error: unknown) => error instanceof McpCoreError && error.code === 'INTERNAL',
+  )
+  assert.equal(failuresReported, 1)
 })
