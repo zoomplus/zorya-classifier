@@ -1418,6 +1418,38 @@ function parseAuthoredScopeJson(bytes: Uint8Array): unknown {
   }
 }
 
+/** Validate the immutable report and review identity for one corrected-parent stage. */
+export function validateCorrectedNativeSelectorParentStageReport(input: {
+  stage: 'dev8' | 'dev12' | 'dev40'
+  report: Record<string, unknown>
+  review: Record<string, unknown>
+  freeze: PhaseFreeze
+  annotations: EvaluatorPrivateAnnotationBundle
+}): void {
+  const { stage, report, review, freeze, annotations } = input
+  const { reportSha256, ...reportBody } = report
+  const { reviewSha256, ...reviewBody } = review
+  const expectedPairs = stage === 'dev8' ? 8 : stage === 'dev12' ? 12 : 40
+  const expectedCompleted = stage === 'dev40' ? 15 : expectedPairs
+  if (
+    report.schema !== 'h8a-dev-screen-report-v1' ||
+    report.screen !== stage ||
+    report.expectedPairs !== expectedPairs ||
+    report.completedPairs !== expectedCompleted ||
+    report.freezeCommitmentSha256 !== computePhaseFreezeCommitmentSha256(freeze) ||
+    report.selectionCommitmentSha256 !==
+      buildDevScreenSelection(freeze, annotations).selectionCommitmentSha256 ||
+    typeof reportSha256 !== 'string' ||
+    reportSha256 !== hashIdentity(reportBody) ||
+    review.schema !== 'h8a-dev-screen-review-v1' ||
+    review.judgement !== (stage === 'dev40' ? 'stop' : 'advance') ||
+    review.screenReportSha256 !== reportSha256 ||
+    typeof reviewSha256 !== 'string' ||
+    reviewSha256 !== hashIdentity(reviewBody)
+  )
+    throw new RangeError('Corrected native-selector parent stage report or review is invalid')
+}
+
 /** Verify a study selected from the immutable registry; callers cannot supply policy or lineage. */
 export async function verifyDevReplayAdmission(input: {
   studyId: string
@@ -1796,27 +1828,13 @@ export async function verifyDevReplayAdmission(input: {
     for (const stage of ['dev8', 'dev12', 'dev40'] as const) {
       const report = readCorrectedEvidence(`execution/reports/${stage}-report.json`)
       const review = readCorrectedEvidence(`execution/reviews/${stage}-review.json`)
-      const { reportSha256, ...reportBody } = report
-      const { reviewSha256, ...reviewBody } = review
-      const expectedPairs = stage === 'dev8' ? 8 : stage === 'dev12' ? 12 : 40
-      const expectedCompleted = stage === 'dev40' ? 15 : expectedPairs
-      if (
-        report.schema !== 'h8a-dev-screen-report-v1' ||
-        report.screen !== stage ||
-        report.expectedPairs !== expectedPairs ||
-        report.completedPairs !== expectedCompleted ||
-        report.freezeCommitmentSha256 !== computePhaseFreezeCommitmentSha256(parentFreeze) ||
-        report.selectionCommitmentSha256 !==
-          hashIdentity(buildDevScreenSelection(parentFreeze, parentAnnotations)) ||
-        typeof reportSha256 !== 'string' ||
-        reportSha256 !== hashIdentity(reportBody) ||
-        review.schema !== 'h8a-dev-screen-review-v1' ||
-        review.judgement !== (stage === 'dev40' ? 'stop' : 'advance') ||
-        review.screenReportSha256 !== reportSha256 ||
-        typeof reviewSha256 !== 'string' ||
-        reviewSha256 !== hashIdentity(reviewBody)
-      )
-        throw new RangeError('Corrected native-selector parent stage report or review is invalid')
+      validateCorrectedNativeSelectorParentStageReport({
+        stage,
+        report,
+        review,
+        freeze: parentFreeze,
+        annotations: parentAnnotations,
+      })
       reportRows.push({ report, review })
     }
     const [dev8, dev12, dev40] = reportRows
