@@ -366,20 +366,24 @@ try {
   const typeLogPath = join(runRoot, 'consumer-types.log')
   await writeFile(typeLogPath, typecheckResult, { flag: 'wx', mode: 0o600 })
 
-  smokeResult = command(process.execPath, ['--test', 'test/consumer/smoke.test.mjs'], {
-    label: 'installed archive SDK consumer smoke',
-    timeout: 180_000,
-    failureLog: join(runRoot, 'consumer-smoke-failure.tap'),
-    env: sdkConsumerEnvironment,
-  })
+  smokeResult = command(
+    process.execPath,
+    ['--test', '--test-reporter=tap', 'test/consumer/smoke.test.mjs'],
+    {
+      label: 'installed archive SDK consumer smoke',
+      timeout: 180_000,
+      failureLog: join(runRoot, 'consumer-smoke-failure.tap'),
+      env: sdkConsumerEnvironment,
+    },
+  )
+  const sdkLogPath = join(runRoot, 'consumer-smoke.tap')
+  await writeFile(sdkLogPath, smokeResult, { flag: 'wx', mode: 0o600 })
   const testCount = smokeResult.match(/^# tests (\d+)$/mu)?.[1]
   const passCount = smokeResult.match(/^# pass (\d+)$/mu)?.[1]
   const skipCount = smokeResult.match(/^# skipped (\d+)$/mu)?.[1]
   if (testCount !== '5' || passCount !== '5' || skipCount !== '0') {
     throw new Error('Installed SDK consumer TAP did not execute all five tests without skips.')
   }
-  const sdkLogPath = join(runRoot, 'consumer-smoke.tap')
-  await writeFile(sdkLogPath, smokeResult, { flag: 'wx', mode: 0o600 })
   cliResult = command(process.execPath, ['test/consumer/cli-smoke.mjs', installedRoot, npmCli], {
     label: 'installed CLI smoke',
     timeout: 60_000,

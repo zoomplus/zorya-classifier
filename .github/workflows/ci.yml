@@ -127,7 +127,21 @@ jobs:
       - name: Controlled oracle geometry (offline)
         if: runner.os == 'Linux'
         run: python3 -m unittest discover -s benchmarks/v02/controlled_oracles -p 'test_*.py' -v
-      - run: npm run pack:check
+      - name: MCP archive acceptance
+        env:
+          ZORYA_MCP_EVIDENCE_DIR: ${{ runner.temp }}/zorya-classifier-mcp-pack-${{ matrix.os }}-node-${{ matrix.node }}
+        run: npm run pack:check
+      - name: Upload MCP archive acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-pack-${{ matrix.os }}-node-${{ matrix.node }}-attempt-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/zorya-classifier-mcp-pack-${{ matrix.os }}-node-${{ matrix.node }}/run-*/*.json
+            ${{ runner.temp }}/zorya-classifier-mcp-pack-${{ matrix.os }}-node-${{ matrix.node }}/run-*/*.log
+            ${{ runner.temp }}/zorya-classifier-mcp-pack-${{ matrix.os }}-node-${{ matrix.node }}/run-*/*.tap
+          retention-days: 5
+          if-no-files-found: warn
       - run: npm run format:check
       - name: Remove owned Windows test temp directory
         if: always() && runner.os == 'Windows'
@@ -171,5 +185,15 @@ jobs:
       - run: npm ci --ignore-scripts --prefix packages/mcp
       - name: Docker MCP runtime smoke
         env:
-          ZORYA_MCP_EVIDENCE_DIR: ${{ runner.temp }}/zorya-classifier-mcp-evidence
+          ZORYA_MCP_EVIDENCE_DIR: ${{ runner.temp }}/zorya-classifier-mcp-docker-evidence-${{ github.run_attempt }}
         run: npm --prefix packages/mcp run docker:check
+      - name: Upload MCP Docker smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-docker-attempt-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/zorya-classifier-mcp-docker-evidence-${{ github.run_attempt }}/docker-*/*.json
+            ${{ runner.temp }}/zorya-classifier-mcp-docker-evidence-${{ github.run_attempt }}/docker-*/*.log
+          retention-days: 5
+          if-no-files-found: warn
