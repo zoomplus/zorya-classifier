@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { DecisionPort, DecisionRequest, DecisionResult } from '../../src/entities/contracts.js'
-import { ClassifierError } from '../../src/entities/errors.js'
+import { ClassifierError, type ErrorCode } from '../../src/entities/errors.js'
 import type { RunBudget } from './budget.js'
 import { createDecisionTrace, hashCanonical, sanitizeDecisionRequest } from './protocol.js'
 import { observeProviderRefusal } from './provider-refusal.js'
@@ -135,6 +135,28 @@ interface RecorderPersistenceFailure {
 }
 
 const responseLimit = 1024 * 1024
+
+const classifierErrorCodes = [
+  'INVALID_INPUT',
+  'INVALID_RESPONSE',
+  'TIMEOUT',
+  'ABORTED',
+  'CAPACITY',
+  'DISPOSED',
+  'PROVIDER',
+  'AUTHENTICATION',
+  'UNSUPPORTED',
+  'RESOURCE_LIMIT',
+] as const satisfies readonly ErrorCode[]
+
+function classifierErrorCode(error: unknown): ErrorCode | undefined {
+  if (error instanceof ClassifierError) return error.code
+  if (!(error instanceof Error)) return undefined
+  const name = Object.getOwnPropertyDescriptor(error, 'name')
+  const code = Object.getOwnPropertyDescriptor(error, 'code')
+  if (name?.value !== 'ClassifierError' || !code || !Object.hasOwn(code, 'value')) return undefined
+  return classifierErrorCodes.find((knownCode) => knownCode === code.value)
+}
 
 function safeField(value: unknown): string | null {
   return typeof value === 'string' && value.length <= 256 && /^[\w./:-]+$/u.test(value)
@@ -738,7 +760,7 @@ export function recordProvider(
       }
       return captured.response
     } catch (error) {
-      record.errorCode = error instanceof ClassifierError ? error.code : 'HTTP_FETCH_ERROR'
+      record.errorCode = classifierErrorCode(error) ?? 'HTTP_FETCH_ERROR'
       record.durationMs = performance.now() - started
       if (record.wireReceipt === null)
         await persist(
@@ -832,7 +854,7 @@ export function recordProvider(
         }
         return result
       } catch (error) {
-        logical.errorCode = error instanceof ClassifierError ? error.code : 'PROVIDER_ERROR'
+        logical.errorCode = classifierErrorCode(error) ?? 'PROVIDER_ERROR'
         await persist(
           'logical-outcome',
           join(directory, `logical-outcome-${logical.logicalId}.json`),

@@ -18,7 +18,12 @@ import { CampaignLedger } from './campaign-ledger.js'
 import { validateImmutableCloseouts } from './evaluator.js'
 import { hashIdentity } from './hash-identity.js'
 import { outputRowSchema, phaseFreezeSchema } from './schemas.js'
-import { PROFILE_CANDIDATE_ID, PROFILE_SCOPE_CANDIDATE_ID, PHASE_DEV40_ID } from './constants.js'
+import {
+  PROFILE_CANDIDATE_ID,
+  PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
+  PHASE_DEV40_ID,
+} from './constants.js'
 import {
   PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY,
   PROVIDER_REFUSAL_REPLAY_POLICY_SHA256,
@@ -30,6 +35,19 @@ import {
 
 function sha256(value: string): string {
   return createHash('sha256').update(value).digest('hex')
+}
+
+async function loadForeignClassifierError(code: string, message: string): Promise<Error> {
+  const foreignModuleUrl = new URL('../../../src/entities/errors.js', import.meta.url)
+  foreignModuleUrl.searchParams.set('module-copy', 'foreign-classifier-error-helper')
+  const foreignModule: unknown = await import(foreignModuleUrl.href)
+  if (!foreignModule || typeof foreignModule !== 'object')
+    throw new Error('Missing foreign error module')
+  const foreignClassifierError = Reflect.get(foreignModule, 'ClassifierError')
+  if (typeof foreignClassifierError !== 'function') throw new Error('Missing foreign error class')
+  const error: unknown = Reflect.construct(foreignClassifierError, [code, message])
+  if (!(error instanceof Error)) throw new Error('Foreign error was not an Error instance')
+  return error
 }
 
 await test('legacy freeze JSON and policy hash remain stable when opt-in is omitted', () => {
@@ -311,6 +329,7 @@ await test('only actual request-bound chat refusal with a complete settled recei
     assert.ok(logicalCall)
     assert.equal(physicalCall.httpStatus, 200)
     assert.equal(physicalCall.errorCode, 'INVALID_RESPONSE')
+    assert.equal(logicalCall.errorCode, 'INVALID_RESPONSE')
     assert.equal(physicalCall.providerRefusal?.protocol, 'openrouter-chat-message-refusal-v1')
     assert.equal(budget.snapshot().unknownCostCalls, 1)
     assert.equal(budget.snapshot().inFlightCalls, 0)
@@ -458,6 +477,475 @@ await test('only actual request-bound chat refusal with a complete settled recei
         logicalReceipts,
         physicalReceipts: [{ ...physicalReceipts[0]!, chargeState: 'known' }],
       }),
+    )
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('foreign native refusal errors retain their closed code through recorder receipts', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-refusal-foreign-error-'))
+  try {
+    const foreignModuleUrl = new URL('../../../src/entities/errors.js', import.meta.url)
+    foreignModuleUrl.searchParams.set('module-copy', 'foreign-refusal-error')
+    const foreignModule: unknown = await import(foreignModuleUrl.href)
+    assert.ok(foreignModule && typeof foreignModule === 'object')
+    const foreignClassifierError = Reflect.get(foreignModule, 'ClassifierError')
+    assert.equal(typeof foreignClassifierError, 'function')
+    if (typeof foreignClassifierError !== 'function') throw new Error('Missing foreign error class')
+    const foreignError = Reflect.construct(foreignClassifierError, [
+      'PROVIDER',
+      'controlled historical named refusal',
+    ])
+    assert.equal(foreignError instanceof ClassifierError, false)
+
+    const route = {
+      model: 'openai/gpt-6-luna-decisions',
+      provider: 'openai',
+      providerName: 'OpenAI',
+      apiEndpoint: '/api/alpha/decisions',
+      allowFallbacks: false as const,
+    }
+    const budget = new RunBudget(1, 0.55, 0.12)
+    const recorder = recordProvider(
+      (fetch) => ({
+        async decide(_request, signal) {
+          const response = await fetch('https://openrouter.ai/api/alpha/decisions', {
+            method: 'POST',
+            signal,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: route.model,
+              provider: { only: ['openai'], allow_fallbacks: false },
+              questions: { presence: { type: 'choice', criteria: { yes: 'Yes', no: 'No' } } },
+            }),
+          })
+          await response.text()
+          throw foreignError
+        },
+      }),
+      budget,
+      join(root, 'provider-receipts'),
+      route,
+      async () =>
+        new Response(
+          JSON.stringify({
+            error: {
+              code: 502,
+              message: 'OpenAI refused to answer question "presence"',
+            },
+          }),
+          { status: 502, headers: { 'Content-Type': 'application/json' } },
+        ),
+    )
+
+    const abort = new AbortController()
+    await assert.rejects(
+      recorder.port.decide(
+        {
+          state: ['controlled'],
+          questions: {
+            presence: {
+              type: 'choice',
+              rankingSize: 1,
+              instructions: 'Select one.',
+              criteria: { yes: 'Yes.', no: 'No.' },
+            },
+          },
+        },
+        abort.signal,
+      ),
+    )
+    const physicalCall = recorder.calls[0]
+    const logicalCall = recorder.logicalCalls[0]
+    assert.ok(physicalCall)
+    assert.ok(logicalCall)
+    assert.equal(physicalCall.httpStatus, 502)
+    assert.equal(physicalCall.providerRefusal?.protocol, 'openrouter-native-named-refusal-v1')
+    assert.equal(physicalCall.errorCode, 'PROVIDER')
+    assert.equal(logicalCall.errorCode, 'PROVIDER')
+    assert.equal(budget.snapshot().unknownCostCalls, 1)
+    assert.equal(budget.snapshot().inFlightCalls, 0)
+
+    const identitySha256 = sha256('foreign named-refusal case identity')
+    const journal = [
+      {
+        reservationId: physicalCall.reservationId,
+        physicalId: 44,
+        profileId: PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
+        opaqueCaseId: 'foreign-refusal-case',
+        caseExecutionIdentitySha256: identitySha256,
+        logicalId: logicalCall.logicalId,
+        recorderPhysicalId: physicalCall.physicalId,
+        requestSha256: physicalCall.requestSha256,
+        requestBodySha256: physicalCall.requestBodySha256,
+        endpoint: '/api/alpha/decisions' as const,
+        dispatchState: 'confirmed' as const,
+        settled: true,
+        costUsd: null,
+        httpStatus: physicalCall.httpStatus,
+      },
+    ]
+    const logicalReceipts = [
+      {
+        logicalId: logicalCall.logicalId,
+        opaqueCaseId: 'foreign-refusal-case',
+        profileId: PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
+        requestSha256: logicalCall.requestSha256,
+        physicalIds: [physicalCall.reservationId],
+        outcome: 'failed' as const,
+        errorCode: 'PROVIDER',
+      },
+    ]
+    const physicalReceipts = [
+      {
+        receiptId: physicalCall.reservationId,
+        physicalId: 44,
+        logicalId: logicalCall.logicalId,
+        dispatchState: 'confirmed' as const,
+        settled: true,
+        costUsd: null,
+        chargeState: 'unknown' as const,
+      },
+    ]
+    const evidenceInput = {
+      executionPolicy: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY,
+      errorCode: 'PROVIDER',
+      profileId: PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
+      opaqueCaseId: 'foreign-refusal-case',
+      caseExecutionIdentitySha256: identitySha256,
+      recorder,
+      journal,
+      logicalReceipts,
+      physicalReceipts,
+      signal: abort.signal,
+    }
+    const evidence = buildProviderRefusalReplayEvidence(evidenceInput)
+    assert.equal(evidence?.protocol, 'openrouter-native-named-refusal-v1')
+    assert.equal(evidence?.responseStatus, 502)
+    assert.equal(evidence?.errorCode, 'PROVIDER')
+    assert.equal(
+      buildProviderRefusalReplayEvidence({
+        ...evidenceInput,
+        journal: [{ ...journal[0]!, endpoint: '/api/v1/chat/completions' }],
+      }),
+      undefined,
+    )
+    assert.equal(
+      buildProviderRefusalReplayEvidence({
+        ...evidenceInput,
+        journal: [{ ...journal[0]!, requestBodySha256: sha256('mismatched request body') }],
+      }),
+      undefined,
+    )
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('the recorder error bridge rejects unknown shapes and preserves local cancellation codes', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-refusal-error-boundary-'))
+  try {
+    const route = {
+      model: 'openai/gpt-6-luna-decisions',
+      provider: 'openai',
+      providerName: 'OpenAI',
+      apiEndpoint: '/api/alpha/decisions',
+      allowFallbacks: false as const,
+    }
+    const request = {
+      state: ['controlled'],
+      questions: {
+        presence: {
+          type: 'choice' as const,
+          rankingSize: 1 as const,
+          instructions: 'Select one.',
+          criteria: { yes: 'Yes.', no: 'No.' },
+        },
+      },
+    }
+    const refusalResponse = () =>
+      new Response(
+        JSON.stringify({
+          error: { code: 502, message: 'OpenAI refused to answer question "presence"' },
+        }),
+        { status: 502, headers: { 'Content-Type': 'application/json' } },
+      )
+    const runFailure = async (label: string, thrown: unknown, dispatch: boolean) => {
+      const budget = new RunBudget(1, 0.55, 0.12)
+      const recorder = recordProvider(
+        (fetch) => ({
+          async decide(_request, signal) {
+            if (dispatch) {
+              const response = await fetch('https://openrouter.ai/api/alpha/decisions', {
+                method: 'POST',
+                signal,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  model: route.model,
+                  provider: { only: ['openai'], allow_fallbacks: false },
+                  questions: { presence: { type: 'choice', criteria: { yes: 'Yes', no: 'No' } } },
+                }),
+              })
+              await response.text()
+            }
+            throw thrown
+          },
+        }),
+        budget,
+        join(root, label),
+        route,
+        async () => refusalResponse(),
+      )
+      const abort = new AbortController()
+      await assert.rejects(recorder.port.decide(request, abort.signal))
+      return recorder
+    }
+
+    const generic502 = await runFailure('generic-502', new Error('adapter failure'), true)
+    assert.equal(generic502.calls[0]?.httpStatus, 502)
+    assert.equal(
+      generic502.calls[0]?.providerRefusal?.protocol,
+      'openrouter-native-named-refusal-v1',
+    )
+    assert.equal(generic502.calls[0]?.errorCode, 'PROVIDER_ERROR')
+    assert.equal(generic502.logicalCalls[0]?.errorCode, 'PROVIDER_ERROR')
+
+    const unknownCode = new Error('untrusted typed error')
+    Object.defineProperty(unknownCode, 'name', { value: 'ClassifierError' })
+    Object.defineProperty(unknownCode, 'code', { value: 'UNRECOGNIZED' })
+    const unknownTyped = await runFailure('unknown-code', unknownCode, false)
+    assert.equal(unknownTyped.logicalCalls[0]?.errorCode, 'PROVIDER_ERROR')
+
+    const nonError = await runFailure('non-error', 'PROVIDER', false)
+    assert.equal(nonError.logicalCalls[0]?.errorCode, 'PROVIDER_ERROR')
+
+    const aborted = await runFailure(
+      'aborted',
+      new ClassifierError('ABORTED', 'controlled cancellation'),
+      false,
+    )
+    assert.equal(aborted.logicalCalls[0]?.errorCode, 'ABORTED')
+
+    const timedOut = await runFailure(
+      'timeout',
+      new ClassifierError('TIMEOUT', 'controlled timeout'),
+      false,
+    )
+    assert.equal(timedOut.logicalCalls[0]?.errorCode, 'TIMEOUT')
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('foreign native 200 refusals preserve INVALID_RESPONSE in both receipt layers', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-refusal-foreign-200-'))
+  try {
+    const route = {
+      model: 'openai/gpt-6-luna-decisions',
+      provider: 'openai',
+      providerName: 'OpenAI',
+      apiEndpoint: '/api/alpha/decisions',
+      allowFallbacks: false as const,
+    }
+    const foreignError = await loadForeignClassifierError(
+      'INVALID_RESPONSE',
+      'controlled native refusal response',
+    )
+    const recorder = recordProvider(
+      (fetch) => ({
+        async decide(_request, signal) {
+          const response = await fetch('https://openrouter.ai/api/alpha/decisions', {
+            method: 'POST',
+            signal,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: route.model,
+              provider: { only: ['openai'], allow_fallbacks: false },
+              questions: { presence: { type: 'choice', criteria: { yes: 'Yes', no: 'No' } } },
+            }),
+          })
+          await response.text()
+          throw foreignError
+        },
+      }),
+      new RunBudget(1, 0.55, 0.12),
+      join(root, 'provider-receipts'),
+      route,
+      async () =>
+        new Response(JSON.stringify({ answers: [{ type: 'refusal', name: 'presence' }] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+    )
+    const abort = new AbortController()
+    await assert.rejects(
+      recorder.port.decide(
+        {
+          state: ['controlled'],
+          questions: {
+            presence: {
+              type: 'choice',
+              rankingSize: 1,
+              instructions: 'Select one.',
+              criteria: { yes: 'Yes.', no: 'No.' },
+            },
+          },
+        },
+        abort.signal,
+      ),
+    )
+    assert.equal(recorder.calls[0]?.httpStatus, 200)
+    assert.equal(recorder.calls[0]?.providerRefusal?.protocol, 'openrouter-native-named-refusal-v1')
+    assert.equal(recorder.calls[0]?.errorCode, 'INVALID_RESPONSE')
+    assert.equal(recorder.logicalCalls[0]?.errorCode, 'INVALID_RESPONSE')
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('foreign fetch rejections retain ABORTED and TIMEOUT while settling unknown cost', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-refusal-foreign-fetch-error-'))
+  try {
+    const route = {
+      model: 'openai/gpt-6-luna',
+      provider: 'openai',
+      providerName: 'OpenAI',
+      apiEndpoint: '/api/v1/chat/completions',
+      allowFallbacks: false as const,
+    }
+    for (const code of ['ABORTED', 'TIMEOUT'] as const) {
+      const budget = new RunBudget(1, 0.55, 0.12)
+      const foreignError = await loadForeignClassifierError(
+        code,
+        `controlled ${code.toLowerCase()}`,
+      )
+      const recorder = recordProvider(
+        (fetch) => ({
+          async decide(_request, signal) {
+            await fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              signal,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                model: route.model,
+                provider: {
+                  only: ['openai'],
+                  allow_fallbacks: false,
+                  require_parameters: true,
+                },
+                messages: [],
+              }),
+            })
+            throw new Error('controlled fetch rejection was not observed')
+          },
+        }),
+        budget,
+        join(root, code),
+        route,
+        async () => {
+          throw foreignError
+        },
+      )
+      const abort = new AbortController()
+      await assert.rejects(
+        recorder.port.decide(
+          {
+            state: ['controlled'],
+            questions: {
+              selection: {
+                type: 'choice',
+                rankingSize: 1,
+                instructions: 'Select one.',
+                criteria: { visible: 'Visible.', absent: 'Absent.' },
+              },
+            },
+          },
+          abort.signal,
+        ),
+      )
+      assert.equal(recorder.calls[0]?.errorCode, code)
+      assert.equal(recorder.logicalCalls[0]?.errorCode, code)
+      assert.equal(recorder.calls[0]?.wireReceipt, null)
+      assert.equal(budget.snapshot().unknownCostCalls, 1)
+      assert.equal(budget.snapshot().inFlightCalls, 0)
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+await test('a typed provider failure without the frozen named refusal stays technical', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-refusal-generic-provider-'))
+  try {
+    const route = {
+      model: 'openai/gpt-6-luna-decisions',
+      provider: 'openai',
+      providerName: 'OpenAI',
+      apiEndpoint: '/api/alpha/decisions',
+      allowFallbacks: false as const,
+    }
+    const recorder = recordProvider(
+      (fetch) => ({
+        async decide(_request, signal) {
+          const response = await fetch('https://openrouter.ai/api/alpha/decisions', {
+            method: 'POST',
+            signal,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: route.model,
+              provider: { only: ['openai'], allow_fallbacks: false },
+              questions: { presence: { type: 'choice', criteria: { yes: 'Yes', no: 'No' } } },
+            }),
+          })
+          await response.text()
+          throw new ClassifierError('PROVIDER', 'controlled generic provider failure')
+        },
+      }),
+      new RunBudget(1, 0.55, 0.12),
+      join(root, 'provider-receipts'),
+      route,
+      async () =>
+        new Response(
+          JSON.stringify({ error: { code: 502, message: 'Temporary upstream service failure' } }),
+          { status: 502, headers: { 'Content-Type': 'application/json' } },
+        ),
+    )
+    const abort = new AbortController()
+    await assert.rejects(
+      recorder.port.decide(
+        {
+          state: ['controlled'],
+          questions: {
+            presence: {
+              type: 'choice',
+              rankingSize: 1,
+              instructions: 'Select one.',
+              criteria: { yes: 'Yes.', no: 'No.' },
+            },
+          },
+        },
+        abort.signal,
+      ),
+    )
+    assert.equal(recorder.calls[0]?.httpStatus, 502)
+    assert.equal(recorder.calls[0]?.providerRefusal, undefined)
+    assert.equal(recorder.calls[0]?.errorCode, 'PROVIDER')
+    assert.equal(recorder.logicalCalls[0]?.errorCode, 'PROVIDER')
+    assert.equal(
+      buildProviderRefusalReplayEvidence({
+        executionPolicy: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY,
+        errorCode: 'PROVIDER',
+        profileId: PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
+        opaqueCaseId: 'generic-provider-case',
+        caseExecutionIdentitySha256: sha256('generic provider case identity'),
+        recorder,
+        journal: [],
+        logicalReceipts: [],
+        physicalReceipts: [],
+        signal: abort.signal,
+      }),
+      undefined,
     )
   } finally {
     await rm(root, { recursive: true, force: true })
