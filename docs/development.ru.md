@@ -6,13 +6,19 @@
 
 ```sh
 npm ci --ignore-scripts
+npm ci --ignore-scripts --prefix packages/mcp
 npm run prepare    # по желанию: локальный Husky
+npm run test:mcp
 npm run check
 npm run pack:check
+npm run mcp:check
+npm run mcp:pack:check
 npm run format:check
 ```
 
-`npm test` по умолчанию — офлайн-каталог переносимых тестов (без живого провайдера). Импорт пакета не запускает фоновые процессы и не скачивает веса.
+`zorya-classifier` и `packages/mcp` — два независимо блокируемых npm-пакета: устанавливайте оба lockfile, не рассчитывайте на workspace hoisting. Root `npm run check` и `npm run pack:check` охватывают обе package-поверхности, сохраняя отдельные dependency locks и working directories. Таргетированные `mcp:check` и `mcp:pack:check` запускают gates только MCP-пакета. MCP использует опубликованную `zorya-classifier@0.2.3` и собственную Zod 4; библиотека сохраняет Zod 3 и свой публичный API.
+
+`npm test` по умолчанию остаётся офлайн-каталогом переносимых тестов библиотеки (без живого провайдера). Root test catalog содержит отдельную четвёртую группу `mcp`, которая запускает runner пакета из `packages/mcp` cwd; это гарантирует резолв опубликованной зависимости из package lock, без подстановки root TypeScript aliases. Импорт пакета не запускает фоновые процессы и не скачивает веса. Подробности и подтверждённые текущие receipts: [MCP README](../packages/mcp/README.md) и [MCP validation](mcp-validation.ru.md).
 
 ## Порядок чтения
 
@@ -23,31 +29,38 @@ npm run format:check
 5. [CONTRIBUTING.md](https://github.com/zoomplus/zorya-classifier/blob/main/CONTRIBUTING.md) — ожидания запроса на слияние.
 6. Пространственные сценарии v0.2: [v02-usage.md](v02-usage.md), [0.2.0-plan.md](0.2.0-plan.md).
 7. Итерация качества: [план 0.3.0](https://github.com/zoomplus/zorya-classifier/blob/main/docs/0.3.0-quality-plan.md).
+8. Отдельный MCP-сервер: [README пакета](../packages/mcp/README.md), [план реализации](mcp-implementation-plan.ru.md), [результаты проверок](mcp-validation.ru.md).
 
 ## Скрипты
 
-| Команда                                    | Назначение                                                                                                     |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `npm test`                                 | Переносимый каталог: `node --import tsx scripts/run-classified-tests.mjs portable`                             |
-| `npm run test:local-evidence`              | Три файла, **7** тестов воспроизведения с локальными/замороженными артефактами (нужны предварительные условия) |
-| `npm run test:python-native`               | Тесты с предварительными условиями Python и нативной среды                                                     |
-| `npm run check`                            | секреты, проверка типов, ESLint, границы слоёв, Knip, тесты, сборка                                            |
-| `npm run pack:check`                       | Установка архива пакета в изолированный проект-потребитель, проверка байтов и API                              |
-| `npm run secrets:check` / `secrets:staged` | Сканирование рабочего дерева и версий файлов, добавленных в индекс Git                                         |
-| `npm run boundaries`                       | Слои и циклы                                                                                                   |
-| `npm run dead-code:ci`                     | Knip (явные точки входа; исключение — необязательный `onnxruntime-node`)                                       |
+| Команда                                    | Назначение                                                                                 |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `npm test`                                 | Переносимый каталог: `node --import tsx scripts/run-classified-tests.mjs portable`         |
+| `npm run test:mcp`                         | MCP-группа каталога: делегирование runner-у пакета из его рабочего каталога `packages/mcp` |
+| `npm run test:local-evidence`              | 5 файлов, 16 тестов с локальными/замороженными артефактами; нужны предварительные условия  |
+| `npm run test:python-native`               | Тесты с предварительными условиями Python и нативной среды                                 |
+| `npm run check`                            | Проверки root-библиотеки и обязательная MCP package test lane                              |
+| `npm run pack:check`                       | Байты и API архивов обоих пакетов в изолированных consumers                                |
+| `npm run mcp:check`                        | Полный check независимо заблокированного `packages/mcp`                                    |
+| `npm run mcp:pack:check`                   | Архивный, установленный consumer и secret checks для `zorya-classifier-mcp`                |
+| `npm run secrets:check` / `secrets:staged` | Сканирование рабочего дерева и версий файлов, добавленных в индекс Git                     |
+| `npm run boundaries`                       | Слои и циклы                                                                               |
+| `npm run dead-code:ci`                     | Knip (явные точки входа; исключение — необязательный `onnxruntime-node`)                   |
 
 Единый раннер: `scripts/run-classified-tests.mjs` и Zod-каталог `scripts/test-catalog.ts` / `scripts/test-catalog.json`.
 
-## Три группы тестов
+## Четыре группы тестов
 
-| Группа               | Команда                       | Состав                                                                                                                                                                                                                                                                  |
-| -------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`portable`**       | `npm test`                    | Заглушки, фикстуры, границы слоёв, большинство `test/*.test.ts`, часть `benchmarks/v03/*.test.ts`; необязательные нативные и артефактные тесты **видны здесь** и могут **пропускаться** без предварительных условий (в том числе `H6`, `H8`)                            |
-| **`local-evidence`** | `npm run test:local-evidence` | Ровно **три файла**, **7** тестов: мок-воспроизведение H5 (`benchmarks/v03/h5-replay-local.test.ts`), мок-воспроизведение `grounded-mask` (`grounded-mask-replay-local.test.ts`), минимальный замороженный манифест H10 (`evaluate-h10-clipseg-local-evidence.test.ts`) |
-| **`python-native`**  | `npm run test:python-native`  | `h10-clipseg-runner.test.ts`, `h11-sa2va-runner.test.ts`                                                                                                                                                                                                                |
+| Группа               | Команда                                                                       | Состав                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| -------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`portable`**       | `npm test`                                                                    | Заглушки, фикстуры, границы слоёв, большинство `test/*.test.ts`, часть `benchmarks/v03/*.test.ts`; необязательные нативные проверки (включая H6 и native H8) **видны здесь** и могут **пропускаться** без предварительных условий. Синтетическая проверка `ui-state-zero-query-execution-v2.test.ts` не читает внешнее дерево evidence.                                                                                                             |
+| **`local-evidence`** | `npm run test:local-evidence`                                                 | **5 файлов, 16 тестов:** H5 (`benchmarks/v03/h5-replay-local.test.ts`), `grounded-mask` (`grounded-mask-replay-local.test.ts`), H10 (`evaluate-h10-clipseg-local-evidence.test.ts`), `test/jev-native-box-local-evidence.test.ts` и четыре сценария `benchmarks/v03/h8a-fresh-comparison/ui-state-zero-query-execution-v2-local-evidence.test.ts`. Последние проверяют реальные закреплённые protocol/predecessor receipts из внешнего frozen root. |
+| **`python-native`**  | `npm run test:python-native`                                                  | `h10-clipseg-runner.test.ts`, `h11-sa2va-runner.test.ts`                                                                                                                                                                                                                                                                                                                                                                                            |
+| **`mcp`**            | `npm run test:mcp` (`node --import tsx scripts/run-classified-tests.mjs mcp`) | Запускает runner MCP-пакета из `packages/mcp`; тесты разрешают опубликованную `zorya-classifier@0.2.3` по MCP lockfile, а не по root source aliases.                                                                                                                                                                                                                                                                                                |
 
-`H6`/`H8` и другие необязательные нативные проверки **не** входят в группу `local-evidence`; они остаются в переносимом каталоге. Новый тест добавляют в `*.test.ts` и **ровно одну** группу каталога; `test/test-catalog.test.ts` проверяет классификацию.
+Необязательные native H6 и native H8 проверки остаются в `portable` и могут пропускаться при отсутствии своих условий. Четыре H8 zero-query сценария, которым нужны внешние protocol/predecessor artifacts, входят в `local-evidence`; они отделены от одноимённого по теме синтетического portable fixture. Новый тест добавляют в `*.test.ts` и **ровно одну** группу каталога; `test/test-catalog.test.ts` проверяет классификацию.
+
+`mcp` — группа отдельного package test runner, а не дополнительный источник library tests. Root `portable` остаётся группой библиотеки; уже опубликованные исторические счётчики этого каталога и платформенные измерения не заменяются количеством MCP package tests. Состав и точные receipts MCP указаны в [MCP validation](mcp-validation.ru.md).
 
 ### Предварительные условия `local-evidence`
 
@@ -55,8 +68,10 @@ npm run format:check
 
 - Воспроизведение `grounded-mask` ищет **соседний** архив модели/данных и Python-журнал относительно **родителя** каталога, заданного корнем данных (переменная `ZORYA_V03_DATA_ROOT` и связанные пути в секции предварительных условий каталога). Нужна корректная структура архивного каталога и квитанции модели/окружения.
 - Указать `ZORYA_V03_DATA_ROOT` только на каталог с исходниками репозитория **не создаёт** эти артефакты автоматически.
+- Четырём `ui-state-zero-query-execution-v2-local-evidence` сценариям нужен подготовленный frozen artifact root, заданный в политике как `UI_STATE_DEV40_ROOT`, с закреплённым zero-query protocol и predecessor evidence authority/freeze/execution. Проверки сверяют путь внутри этого root и соответствие pinned SHA-256; отсутствующее или изменённое свидетельство приводит к отказу.
+- Переносимая `ui-state-zero-query-execution-v2.test.ts` использует локальный синтетический protocol fixture для проверки схемы, счётчиков и deadline. Этот fixture не читает `UI_STATE_DEV40_ROOT`, не подменяет реальные receipts и не считается подтверждением frozen H8 evidence.
 
-При **правильной** раскладке данных на Linux Node 22 зафиксирован успешный прогон **7/7** — журнал `final-local-evidence-node22-configured.log`. Ранний прогон с неверной конфигурацией — `final-local-evidence-node22.log` (три падения `grounded-mask`) — сохранён как исторический, его не скрывают.
+При **правильной** раскладке данных на Linux Node 22 зафиксирован исторический успешный прогон **7/7** только для трёх исходных suites — журнал `final-local-evidence-node22-configured.log`. Ранний прогон с неверной конфигурацией — `final-local-evidence-node22.log` (три падения `grounded-mask`) — сохранён как исторический, его не скрывают. Эти старые counts относятся только к прежним трём suites и не являются результатом нынешней группы из пяти файлов и 16 сценариев.
 
 Не коммитьте пути к частным корпусам и абсолютные адреса конкретного хоста в документацию.
 
@@ -133,8 +148,11 @@ npm run test:python-native
 
 ```sh
 npm ci --ignore-scripts
+npm ci --ignore-scripts --prefix packages/mcp
 npm run check
 npm run pack:check
+npm run mcp:check
+npm run mcp:pack:check
 npm run format:check
 ```
 

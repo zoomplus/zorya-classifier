@@ -1,6 +1,6 @@
 # Правила для агентов (Zorya Classifier)
 
-Независимая MIT-библиотека. Технический контракт на английском: [AGENTS.md](https://github.com/zoomplus/zorya-classifier/blob/main/AGENTS.md). Архитектура и разработка: [архитектура](architecture.ru.md), [разработка](development.ru.md). Статус волн: [план рефакторинга](refactoring-plan.ru.md).
+Независимая MIT-библиотека. Технический контракт на английском: [AGENTS.md](https://github.com/zoomplus/zorya-classifier/blob/main/AGENTS.md). Архитектура и разработка: [архитектура](architecture.ru.md), [разработка](development.ru.md). Статус волн: [план рефакторинга](refactoring-plan.ru.md). MCP-компаньон: [package README](../packages/mcp/README.md), [план](mcp-implementation-plan.ru.md), [validation receipts](mcp-validation.ru.md).
 
 ## Глобальные правила владельца
 
@@ -77,19 +77,21 @@ cursor-agent \
 
 ## Тесты
 
-| Набор                   | Команда                                                                                                    |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Переносимый каталог     | `npm test`                                                                                                 |
-| Локальные свидетельства | `npm run test:local-evidence` (H5, `grounded-mask`, минимальный H10 — см. [разработку](development.ru.md)) |
-| Группа `python-native`  | `npm run test:python-native` (см. [разработку](development.ru.md))                                         |
+| Набор                   | Команда                                                                                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Переносимый каталог     | `npm test`                                                                                                                               |
+| Локальные свидетельства | `npm run test:local-evidence` (H5, `grounded-mask`, минимальный H10 — см. [разработку](development.ru.md))                               |
+| Группа `python-native`  | `npm run test:python-native` (см. [разработку](development.ru.md))                                                                       |
+| Группа `mcp`            | `npm run test:mcp` — запускает отдельный package runner из `packages/mcp` cwd (`node --import tsx scripts/run-classified-tests.mjs mcp`) |
+| MCP package gates       | `npm run mcp:check` и `npm run mcp:pack:check` — независимые lockfile, package tests и установленный archive                             |
 
-Единый раннер: `scripts/run-classified-tests.mjs`. Не ссылаться на удалённый `run-portable-tests.mjs`.
+Единый root раннер и Zod-каталог: `scripts/run-classified-tests.mjs`, `scripts/test-catalog.ts`, `scripts/test-catalog.json`. Группа `portable` остаётся library-only; `mcp` делегирует в пакетный runner с собственным cwd, чтобы TypeScript aliases root не подменяли registry `zorya-classifier@0.2.3`. Root `check` и `pack:check` включают обязательные package gates обоих lockfile; отдельные `mcp:check`/`mcp:pack:check` нужны для точечной проверки MCP. Не ссылаться на удалённый `run-portable-tests.mjs`.
 
-Измеренные счётчики переносимого каталога и платформы — [план рефакторинга](refactoring-plan.ru.md). На измеренном Linux-хосте Python **3.12.3**: установлены `PIL`/`Pillow`; **`numpy`**, **`torch`** и **`transformers`** **отсутствуют**; набор `python-native` **не запускался**. Переносимый каталог: **772** успешных, **0** пропущенных (необязательные тесты без ресурсов могут пропускаться). Узкие проверки исполнителя Composer под встроенным Linux Node 24 **не** равны полным проверкам главного оркестратора на Node 24.
+Измеренные счётчики переносимого каталога и платформы — [план рефакторинга](refactoring-plan.ru.md). Значение **772** успешных / **0** пропущенных относится к сохранённому историческому Linux portable-прогону библиотеки; новые MCP package counts не заменяют эту историческую запись. На измеренном Linux-хосте Python **3.12.3**: установлены `PIL`/`Pillow`; **`numpy`**, **`torch`** и **`transformers`** отсутствуют; набор `python-native` не запускался. Узкие проверки исполнителя Composer под встроенным Linux Node 24 не равны полным проверкам главного оркестратора на Node 24.
 
 ## Секреты, платные прогоны, публикация
 
-`npm run secrets:check`, сканирование **версий файлов, добавленных в индекс Git** (Husky), `npm run pack:check`. Ключ каталога `benchmarks`: `OPENROUTER_API_KEY` или явный `--env-file` **только** в `run-region-seeded-dev.ts` / `run-quality-pilot.ts` — [разработку](development.ru.md).
+`npm run secrets:check`, сканирование **версий файлов, добавленных в индекс Git** (Husky), `npm run pack:check` и `npm run mcp:pack:check`. Последний проверяет bytes MCP archive после установки в consumer и его секреты; используйте receipts из [MCP validation](mcp-validation.ru.md). Ключ каталога `benchmarks`: `OPENROUTER_API_KEY` или явный `--env-file` **только** в `run-region-seeded-dev.ts` / `run-quality-pilot.ts` — [разработку](development.ru.md).
 
 Не коммитить `.env`, частные медиа, журналы чатов. Платные прогоны, GPU и публикация — явная область работ и бюджеты.
 
