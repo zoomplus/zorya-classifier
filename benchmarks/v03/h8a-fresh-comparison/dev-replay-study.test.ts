@@ -24,19 +24,25 @@ import {
   LEGACY_REPLAY_ROOT,
   LEGACY_REPLAY_STUDY_ID,
   NATIVE_SELECTOR_CORRECTED_STUDY_ID,
+  NATIVE_SELECTOR_FREEZE_ID,
   NATIVE_SELECTOR_STUDY_ID,
   REPLAY_STUDY_REGISTRY,
   replayStudyPolicy,
 } from './dev-replay-study-policy.js'
 import type { ReplayStudyId } from './dev-replay-study-policy.js'
 import { makeAuthoredScopeProtocolFixture } from './dev-replay-test-fixtures.js'
-import { DevReplayLedger, validateAuthoredScopeReplayParentPair } from './dev-replay-ledger.js'
+import {
+  DevReplayLedger,
+  selectNativeSelectorParentAuditReferences,
+  validateAuthoredScopeReplayParentPair,
+} from './dev-replay-ledger.js'
 import { ProviderRefusalReplayLedger } from './provider-refusal-replay-ledger.js'
 import { buildSyntheticAnnotationBundle, buildSyntheticPhaseFreeze } from './test-fixtures.js'
 import {
   PHASE_FLAT_DEV40_ID,
   PHASE_SCOPE_DEV40_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
+  PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
   STRATUMS,
 } from './constants.js'
 import { phaseFreezeSchema, evaluatorPrivateAnnotationBundleSchema } from './schemas.js'
@@ -48,6 +54,87 @@ import { hashIdentity } from './hash-identity.js'
 import { validateConservativeCostProof } from './freeze-admission.js'
 
 const caseIds = (): string[] => Array.from({ length: 40 }, (_, index) => `case-${index}`)
+
+function makeCorrectedNativeSelectorParentAudit() {
+  const policy = replayStudyPolicy(NATIVE_SELECTOR_CORRECTED_STUDY_ID)
+  const refs = Array.from({ length: 29 }, (_, index) => ({
+    path: `/offline/native-selector-ref-${index}.json`,
+    sha256: (index + 1).toString(16).padStart(64, '0'),
+    bytes: 100 + index,
+  }))
+  refs[0] = {
+    path: policy.parentLedgerPath,
+    sha256: policy.parentLedgerSha256,
+    bytes: 7_345,
+  }
+  refs[1] = {
+    path: policy.parentRegistrationPath!,
+    sha256: policy.parentRegistrationSha256!,
+    bytes: 2_256,
+  }
+  return {
+    schema: 'main-native-selector-corrected-prospective-parent-audit-v1',
+    checkedAtUtc: '2026-11-02T03:00:30.260525+00:00',
+    parentStudyId: NATIVE_SELECTOR_STUDY_ID,
+    parentFreezeId: NATIVE_SELECTOR_FREEZE_ID,
+    parentClosed: true,
+    parentReviewDecision: 'stop',
+    parentSourceCommit: '2572b8c405fc5cd8971a7b39f2683a6f75b65370',
+    parentLedgerVersion: 416,
+    parentRegistrationBodySha256:
+      'b17dd817d013af08067274e4d95609bffd25eaaaf934629efd207fa96a0cc1cb',
+    parentPhysicalDispatchCount: 413,
+    parentCaseArmAttempts: 134,
+    parentKnownCostUsd: 0.22744121499999995,
+    parentUnknownReserveUsd: 0.36,
+    parentNextPhysicalId: 414,
+    parentNextReservationId: 414,
+    parentInFlightReservations: 0,
+    parentUncertainPhysicalDispatchCount: 0,
+    parentResumeBlocked: false,
+    parentCrashRecoveryLatched: false,
+    parentIntegrityBlocked: false,
+    parentQualEligible: false,
+    parentCompletePairs: 15,
+    parentFullyUnstartedPairs: 24,
+    parentPartialPairs: 1,
+    parentMissingPredictionRows: 49,
+    correction: {
+      kind: 'cross-source-typed-error-recording-defect-v1',
+      maximumCorrectedFullRuns: 1,
+      sourceFixCommit: '77fa1d75a53df945237dcf820871e3c30764a58f',
+      sourceFixTree: 'fa2f9774822a402347f7e5d87283d88573e576a2',
+      fixedRecorderSha256: '53028e360c2a50c3b7e321824d4bec37398a2a11f40bb06528f58d8d017234ac',
+      regressionFailedBeforeFix: true,
+      regressionPassesAfterFix: true,
+      mainActualHistoricalControlledAdapterCases: 3,
+      realCallsInDefectReproductionAndVerification: 0,
+      usesGroundTruthOrCandidateOutcomes: false,
+      originalRecordsMustRemainFailedAndImmutable: true,
+    },
+    deadlineIso: '2026-11-02T12:11:51.738Z',
+    globalPhysicalCallLimit: 2_000,
+    remainingPhysicalCalls: 1_587,
+    prospectiveDevPhysicalCallLimit: 400,
+    prospectiveDevExposureUsd: 48,
+    reservedUsdPerPhysicalDispatch: 0.12,
+    candidateMaxCallsPerCase: 4,
+    controlMaxCallsPerCase: 6,
+    conditionalQualPhysicalCallLimit: 1_200,
+    conditionalQualExposureUsd: 144,
+    qualBudgetNotYetAdmitted: true,
+    qualAdmissionRequiresActualRemainingAtLeast: 1_200,
+    maximumActualNewDevCallsCompatibleWithFullQualReserve: 387,
+    ownerDollarCeilingUsd: null,
+    candidateProfileId: PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
+    candidateRecipeSha256: '3de74926736d37ccc9184f45f015d4d5e0711ea087b29153a001d1a599276e74',
+    controlRecipeSha256: 'ad521b3467280fb169f15e2db4e5841724654ef11be31138879f2bb157dea716',
+    newProviderCalls: 0,
+    newNativeInferenceCalls: 0,
+    newStudyRegistered: false,
+    refs,
+  }
+}
 
 function makeRetargetedSyntheticFreeze() {
   const parentSeed = buildSyntheticPhaseFreeze(PHASE_FLAT_DEV40_ID).freeze
@@ -685,6 +772,93 @@ await test('corrected selector identity accepts its exact closed V5 parent wire 
       nextPhysicalId: corrected.nextPhysicalId,
       nextReservationId: corrected.nextReservationId,
     },
+  )
+})
+
+await test('native-selector parent audit reference selection preserves closed old and corrected wire shapes', () => {
+  const corrected = makeCorrectedNativeSelectorParentAudit()
+  assert.deepEqual(
+    selectNativeSelectorParentAuditReferences(NATIVE_SELECTOR_CORRECTED_STUDY_ID, corrected),
+    corrected.refs,
+  )
+  const withoutRefs = Object.fromEntries(
+    Object.entries(corrected).filter(([key]) => key !== 'refs'),
+  )
+  assert.throws(() =>
+    selectNativeSelectorParentAuditReferences(NATIVE_SELECTOR_CORRECTED_STUDY_ID, withoutRefs),
+  )
+  assert.throws(() =>
+    selectNativeSelectorParentAuditReferences(NATIVE_SELECTOR_CORRECTED_STUDY_ID, {
+      ...withoutRefs,
+      references: corrected.refs,
+    }),
+  )
+  assert.throws(() =>
+    selectNativeSelectorParentAuditReferences(NATIVE_SELECTOR_CORRECTED_STUDY_ID, {
+      ...corrected,
+      schema: 'main-native-selector-prospective-parent-audit-v1',
+    }),
+  )
+  assert.throws(() =>
+    selectNativeSelectorParentAuditReferences(NATIVE_SELECTOR_CORRECTED_STUDY_ID, {
+      ...corrected,
+      refs: corrected.refs.slice(1),
+    }),
+  )
+  assert.throws(() =>
+    selectNativeSelectorParentAuditReferences(NATIVE_SELECTOR_CORRECTED_STUDY_ID, {
+      ...corrected,
+      parentStudyId: 'native-selector-flat-dev40-corrected-v1',
+    }),
+  )
+  assert.throws(() =>
+    selectNativeSelectorParentAuditReferences(NATIVE_SELECTOR_CORRECTED_STUDY_ID, {
+      ...corrected,
+      refs: corrected.refs.map((reference, index) =>
+        index === 0 ? { ...reference, path: '/offline/ledger-alias.json' } : reference,
+      ),
+    }),
+  )
+  assert.throws(() =>
+    selectNativeSelectorParentAuditReferences(NATIVE_SELECTOR_CORRECTED_STUDY_ID, {
+      ...corrected,
+      refs: corrected.refs.map((reference, index) =>
+        index === 0 ? { ...reference, sha256: 'f'.repeat(64) } : reference,
+      ),
+    }),
+  )
+
+  const oldPolicy = replayStudyPolicy(NATIVE_SELECTOR_STUDY_ID)
+  const oldRefs = Array.from({ length: 14 }, (_, index) => ({
+    path: `/offline/old-native-selector-ref-${index}.json`,
+    sha256: (index + 1).toString(16).padStart(64, '0'),
+    bytes: 100 + index,
+  }))
+  oldRefs[0] = {
+    path: oldPolicy.parentLedgerPath!,
+    sha256: oldPolicy.parentLedgerSha256,
+    bytes: 7_345,
+  }
+  oldRefs[1] = {
+    path: oldPolicy.parentRegistrationPath!,
+    sha256: oldPolicy.parentRegistrationSha256!,
+    bytes: 2_256,
+  }
+  const oldAudit = {
+    schema: 'main-native-selector-prospective-parent-audit-v1',
+    parentStudyId: 'native-presence-flat-dev40-v1',
+    parentClosed: true,
+    parentReviewDecision: 'stop',
+    parentPhysicalDispatchCount: 317,
+    parentCaseArmAttempts: 103,
+    parentKnownCostUsd: 0.19184451499999994,
+    parentUnknownReserveUsd: 0.24,
+    globalPhysicalCallLimit: 2_000,
+    refs: oldRefs,
+  }
+  assert.deepEqual(
+    selectNativeSelectorParentAuditReferences(NATIVE_SELECTOR_STUDY_ID, oldAudit),
+    oldRefs,
   )
 })
 

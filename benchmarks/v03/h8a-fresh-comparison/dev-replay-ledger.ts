@@ -24,14 +24,14 @@ import {
 import type { H8aFreshProfileId } from './profiles.js'
 import {
   AUTHORED_SCOPE_STUDY_ID,
+  NATIVE_SELECTOR_CORRECTED_PARENT_AUDIT_PATH,
+  NATIVE_SELECTOR_CORRECTED_PARENT_AUDIT_SHA256,
   NATIVE_SELECTOR_CORRECTED_STUDY_ID,
+  NATIVE_SELECTOR_FREEZE_ID,
+  NATIVE_SELECTOR_STUDY_ID,
   replayStudyPolicy,
 } from './dev-replay-study-policy.js'
-import type {
-  NATIVE_SELECTOR_STUDY_ID,
-  ReplayStudyId,
-  ReplayStudyPolicy,
-} from './dev-replay-study-policy.js'
+import type { ReplayStudyId, ReplayStudyPolicy } from './dev-replay-study-policy.js'
 import { parseReplayJson, readPinnedReplayFile } from './dev-replay-files.js'
 
 const REPLAY_GLOBAL_MAX_PHYSICAL_CALLS = 2_000 as const
@@ -172,6 +172,140 @@ const registrationSchema = z
     registrationSha256: digest,
   })
   .strict()
+
+const selectorParentAuditReferenceSchema = z
+  .object({
+    path: z.string().min(1),
+    sha256: digest,
+    bytes: z.number().int().positive(),
+  })
+  .strict()
+const nativeSelectorProspectiveParentAuditSchema = z
+  .object({
+    schema: z.literal('main-native-selector-prospective-parent-audit-v1'),
+    parentStudyId: z.literal('native-presence-flat-dev40-v1'),
+    parentClosed: z.literal(true),
+    parentReviewDecision: z.literal('stop'),
+    parentPhysicalDispatchCount: z.literal(317),
+    parentCaseArmAttempts: z.literal(103),
+    parentKnownCostUsd: z.literal(0.19184451499999994),
+    parentUnknownReserveUsd: z.literal(0.24),
+    globalPhysicalCallLimit: z.literal(REPLAY_GLOBAL_MAX_PHYSICAL_CALLS),
+    refs: z.array(selectorParentAuditReferenceSchema).length(14),
+  })
+  .passthrough()
+const nativeSelectorCorrectedParentAuditSchema = z
+  .object({
+    schema: z.literal('main-native-selector-corrected-prospective-parent-audit-v1'),
+    checkedAtUtc: z.string().datetime({ offset: true }),
+    parentStudyId: z.literal(NATIVE_SELECTOR_STUDY_ID),
+    parentFreezeId: z.literal(NATIVE_SELECTOR_FREEZE_ID),
+    parentClosed: z.literal(true),
+    parentReviewDecision: z.literal('stop'),
+    parentSourceCommit: z.literal('2572b8c405fc5cd8971a7b39f2683a6f75b65370'),
+    parentLedgerVersion: z.literal(416),
+    parentRegistrationBodySha256: z.literal(
+      'b17dd817d013af08067274e4d95609bffd25eaaaf934629efd207fa96a0cc1cb',
+    ),
+    parentPhysicalDispatchCount: z.literal(413),
+    parentCaseArmAttempts: z.literal(134),
+    parentKnownCostUsd: z.literal(0.22744121499999995),
+    parentUnknownReserveUsd: z.literal(0.36),
+    parentNextPhysicalId: z.literal(414),
+    parentNextReservationId: z.literal(414),
+    parentInFlightReservations: z.literal(0),
+    parentUncertainPhysicalDispatchCount: z.literal(0),
+    parentResumeBlocked: z.literal(false),
+    parentCrashRecoveryLatched: z.literal(false),
+    parentIntegrityBlocked: z.literal(false),
+    parentQualEligible: z.literal(false),
+    parentCompletePairs: z.literal(15),
+    parentFullyUnstartedPairs: z.literal(24),
+    parentPartialPairs: z.literal(1),
+    parentMissingPredictionRows: z.literal(49),
+    correction: z
+      .object({
+        kind: z.literal('cross-source-typed-error-recording-defect-v1'),
+        maximumCorrectedFullRuns: z.literal(1),
+        sourceFixCommit: z.literal('77fa1d75a53df945237dcf820871e3c30764a58f'),
+        sourceFixTree: z.literal('fa2f9774822a402347f7e5d87283d88573e576a2'),
+        fixedRecorderSha256: z.literal(
+          '53028e360c2a50c3b7e321824d4bec37398a2a11f40bb06528f58d8d017234ac',
+        ),
+        regressionFailedBeforeFix: z.literal(true),
+        regressionPassesAfterFix: z.literal(true),
+        mainActualHistoricalControlledAdapterCases: z.literal(3),
+        realCallsInDefectReproductionAndVerification: z.literal(0),
+        usesGroundTruthOrCandidateOutcomes: z.literal(false),
+        originalRecordsMustRemainFailedAndImmutable: z.literal(true),
+      })
+      .strict(),
+    deadlineIso: z.literal('2026-11-02T12:11:51.738Z'),
+    globalPhysicalCallLimit: z.literal(REPLAY_GLOBAL_MAX_PHYSICAL_CALLS),
+    remainingPhysicalCalls: z.literal(1587),
+    prospectiveDevPhysicalCallLimit: z.literal(400),
+    prospectiveDevExposureUsd: z.literal(48),
+    reservedUsdPerPhysicalDispatch: z.literal(0.12),
+    candidateMaxCallsPerCase: z.literal(4),
+    controlMaxCallsPerCase: z.literal(6),
+    conditionalQualPhysicalCallLimit: z.literal(1200),
+    conditionalQualExposureUsd: z.literal(144),
+    qualBudgetNotYetAdmitted: z.literal(true),
+    qualAdmissionRequiresActualRemainingAtLeast: z.literal(1200),
+    maximumActualNewDevCallsCompatibleWithFullQualReserve: z.literal(387),
+    ownerDollarCeilingUsd: z.null(),
+    candidateProfileId: z.literal(PROFILE_NATIVE_SELECTOR_CANDIDATE_ID),
+    candidateRecipeSha256: z.literal(
+      '3de74926736d37ccc9184f45f015d4d5e0711ea087b29153a001d1a599276e74',
+    ),
+    controlRecipeSha256: z.literal(
+      'ad521b3467280fb169f15e2db4e5841724654ef11be31138879f2bb157dea716',
+    ),
+    newProviderCalls: z.literal(0),
+    newNativeInferenceCalls: z.literal(0),
+    newStudyRegistered: z.literal(false),
+    refs: z.array(selectorParentAuditReferenceSchema).length(29),
+  })
+  .strict()
+
+type SelectorParentAuditReference = z.infer<typeof selectorParentAuditReferenceSchema>
+
+/** Select the exact closed reference list for either native-selector parent audit. */
+export function selectNativeSelectorParentAuditReferences(
+  studyId: ReplayStudyId,
+  auditValue: unknown,
+): readonly SelectorParentAuditReference[] {
+  if (studyId === NATIVE_SELECTOR_STUDY_ID)
+    return nativeSelectorProspectiveParentAuditSchema.parse(auditValue).refs
+  if (studyId !== NATIVE_SELECTOR_CORRECTED_STUDY_ID)
+    throw new ProviderRefusalReplayLedgerError('Study has no native-selector parent audit refs')
+
+  const policy = replayStudyPolicy(studyId)
+  if (
+    policy.parentAuditPath !== NATIVE_SELECTOR_CORRECTED_PARENT_AUDIT_PATH ||
+    policy.parentAuditSha256 !== NATIVE_SELECTOR_CORRECTED_PARENT_AUDIT_SHA256
+  )
+    throw new ProviderRefusalReplayLedgerError(
+      'Corrected native-selector parent audit differs from its registered immutable pin',
+    )
+  const audit = nativeSelectorCorrectedParentAuditSchema.parse(auditValue)
+  const paths = new Set(audit.refs.map((reference) => reference.path))
+  const ledger = audit.refs.find((reference) => reference.path === policy.parentLedgerPath)
+  const registration = audit.refs.find(
+    (reference) => reference.path === policy.parentRegistrationPath,
+  )
+  if (
+    paths.size !== 29 ||
+    !ledger ||
+    ledger.sha256 !== policy.parentLedgerSha256 ||
+    !registration ||
+    registration.sha256 !== policy.parentRegistrationSha256
+  )
+    throw new ProviderRefusalReplayLedgerError(
+      'Corrected native-selector parent audit refs differ from the closed parent pins',
+    )
+  return audit.refs
+}
 
 const reservationSchema = z
   .object({
@@ -696,36 +830,11 @@ async function readParentLedger(
   }
   const auditBytes = await readPinnedReplayFile(policy.parentAuditPath, policy.parentAuditSha256)
   const parsedAudit = parseReplayJson(auditBytes)
-  const selectorAudit =
-    policy.studyId === 'native-selector-flat-dev40-v1'
-      ? z
-          .object({
-            schema: z.literal('main-native-selector-prospective-parent-audit-v1'),
-            parentStudyId: z.literal('native-presence-flat-dev40-v1'),
-            parentClosed: z.literal(true),
-            parentReviewDecision: z.literal('stop'),
-            parentPhysicalDispatchCount: z.literal(317),
-            parentCaseArmAttempts: z.literal(103),
-            parentKnownCostUsd: z.literal(0.19184451499999994),
-            parentUnknownReserveUsd: z.literal(0.24),
-            globalPhysicalCallLimit: z.literal(REPLAY_GLOBAL_MAX_PHYSICAL_CALLS),
-            refs: z
-              .array(
-                z
-                  .object({
-                    path: z.string().min(1),
-                    sha256: digest,
-                    bytes: z.number().int().positive(),
-                  })
-                  .strict(),
-              )
-              .length(14),
-          })
-          .passthrough()
-          .parse(parsedAudit)
-      : undefined
-  const audit = selectorAudit
-    ? { references: selectorAudit.refs }
+  const selectorAuditStudy =
+    policy.studyId === NATIVE_SELECTOR_STUDY_ID ||
+    policy.studyId === NATIVE_SELECTOR_CORRECTED_STUDY_ID
+  const auditReferences = selectorAuditStudy
+    ? selectNativeSelectorParentAuditReferences(policy.studyId, parsedAudit)
     : z
         .object({
           references:
@@ -744,8 +853,8 @@ async function readParentLedger(
               : z.array(z.object({ path: z.string(), sha256: digest }).strict()),
         })
         .passthrough()
-        .parse(parsedAudit)
-  const ref = audit.references.find((row) => row.path === policy.parentLedgerPath)
+        .parse(parsedAudit).references
+  const ref = auditReferences.find((row) => row.path === policy.parentLedgerPath)
   if (!ref || ref.sha256 !== policy.parentLedgerSha256)
     throw new ProviderRefusalReplayLedgerError('Pinned parent ledger reference is missing')
   const bytes = await readPinnedReplayFile(ref.path, ref.sha256, 4 * 1024 * 1024)
@@ -762,10 +871,11 @@ async function readParentLedger(
   if (
     policy.studyId !== AUTHORED_SCOPE_STUDY_ID &&
     policy.studyId !== 'native-presence-flat-dev40-v1' &&
-    policy.studyId !== 'native-selector-flat-dev40-v1'
+    policy.studyId !== NATIVE_SELECTOR_STUDY_ID &&
+    policy.studyId !== NATIVE_SELECTOR_CORRECTED_STUDY_ID
   )
     throw new ProviderRefusalReplayLedgerError('Parent registration wire pair is not registered')
-  const registrationRef = audit.references.find((row) => row.path === policy.parentRegistrationPath)
+  const registrationRef = auditReferences.find((row) => row.path === policy.parentRegistrationPath)
   if (!registrationRef || registrationRef.sha256 !== policy.parentRegistrationSha256)
     throw new ProviderRefusalReplayLedgerError('Pinned parent registration reference is missing')
   const registrationBytes = await readPinnedReplayFile(
