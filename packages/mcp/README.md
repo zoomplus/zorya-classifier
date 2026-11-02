@@ -4,7 +4,7 @@
 
 Требуется Node.js `22.12.0` или новее. Сервер поддерживает локальный stdio и два явных HTTP-режима: OIDC с Streamable HTTP, legacy SSE, viewer и BYOK; либо Streamable HTTP с IP allowlist и краткоживущими capability-сессиями без OAuth-входа.
 
-## Установка и stdio
+## Установка
 
 Установите отдельный пакет из npm:
 
@@ -14,7 +14,7 @@ npm install --global zorya-classifier-mcp@0.2.0
 
 ## ChatGPT с IP allowlist и без OAuth-входа
 
-Режим `http.accessMode: "ip"` предназначен для MCP-клиентов, которые не передают собственные HTTP-заголовки или API-ключи. В ChatGPT откройте **Settings → Apps & Connectors → Advanced settings → Create connector**, задайте URL MCP-сервера, выберите **No authentication** и установите личный connector. Программная проверка MCP-клиента не подтверждает доступность UI или connector в каждом аккаунте ChatGPT.
+Режим `http.accessMode: "ip"` предназначен для MCP-клиентов, которые не передают собственные HTTP-заголовки или API-ключи. В веб-версии ChatGPT откройте **Plugins → + → Add custom MCP server**, задайте **Server URL**, выберите **No authentication**, нажмите **Create as plugin**, затем установите личный plugin. Этот порядок соответствует [официальной инструкции OpenAI](https://developers.openai.com/api/docs/guides/custom-mcp-server). Программная проверка MCP-клиента не подтверждает доступность UI или connector в каждом аккаунте ChatGPT.
 
 Для текущего deployment целевой адрес — `https://startzorya.com/mcp/classifier`. Используйте его только после отдельной проверки production HTTPS-маршрута; наличие адреса в документации само по себе не подтверждает публикацию сервера.
 
@@ -63,6 +63,8 @@ IP allowlist разрешает сетевой диапазон и не уста
 Задайте `ZORYA_MCP_CONFIG` путём к JSON вне репозитория. `OPENROUTER_API_KEY` передайте только в окружении процесса через менеджер секретов; ключ не записывайте в JSON или настройки connector. В конфигурации нужны только `service` или явные keyless-профили; `byok`, browser login, PKCE, HTTP uploads и viewer в IP-режиме отключены. Для изображений через URL добавьте только проверенные hostname в `remoteImageHosts`. Модель и provider задаются явно; профиль по умолчанию не означает автоматический fallback.
 
 Сессии, задания и лимиты IP-режима хранятся в памяти одного процесса. По умолчанию capability-сессия истекает через 4 часа; лимиты 20 отправок на сессию в сутки и 2000 отправок глобально в сутки ограничивают количество заданий, но не являются бюджетом стоимости. После перезапуска сессии и задания теряются. Токены сессий хранятся на сервере только в виде SHA-256 хэшей.
+
+## Явная конфигурация stdio
 
 Проверьте, что каталог global npm binaries доступен в `PATH` процесса MCP-клиента; при необходимости укажите полный путь к `zorya-classifier-mcp`.
 
