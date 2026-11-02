@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import {
   AUTHORED_SCOPE_STUDY_ID,
   NATIVE_PRESENCE_FREEZE_ID,
@@ -103,6 +103,7 @@ await test('native protocol requires the exact selected study and both distinct 
 
 function parentPair() {
   const parent = replayStudyPolicy(AUTHORED_SCOPE_STUDY_ID)
+  const nativePresence = replayStudyPolicy(NATIVE_PRESENCE_STUDY_ID)
   const registrationBody = {
     schema: parent.registrationSchema,
     studyId: parent.studyId,
@@ -111,7 +112,7 @@ function parentPair() {
     parentAuditSha256: parent.parentAuditSha256,
     parentLedgerSha256: parent.parentLedgerSha256,
     parentLedgerVersion: parent.parentLedgerVersion,
-    canonicalRoot: join(parent.canonicalRoot, 'admission', 'successor-campaign'),
+    canonicalRoot: dirname(nativePresence.parentRegistrationPath!),
     caseIds: Array.from({ length: 40 }, (_, index) => `parent-case-${index}`),
     maxPhysicalCalls: 2_000,
     dev40MaxPhysicalCalls: parent.incrementalCallLimit,
