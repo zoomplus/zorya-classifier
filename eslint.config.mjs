@@ -56,4 +56,16 @@ export default tseslint.config(
       },
     },
   },
+  {
+    files: ['packages/mcp/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        AbortController: 'readonly',
+        Response: 'readonly',
+        clearTimeout: 'readonly',
+        setImmediate: 'readonly',
+        setTimeout: 'readonly',
+      },
+    },
+  },
 )
