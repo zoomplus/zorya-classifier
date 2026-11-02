@@ -181,6 +181,24 @@
       "benchmarks/v03/h10-clipseg-runner.test.ts",
       "benchmarks/v03/h11-sa2va-runner.test.ts",
       "benchmarks/v03/h8a-full/h8a-full-runtime.test.ts"
+    ],
+    "mcp": [
+      "packages/mcp/test/auth/browser-session.test.ts",
+      "packages/mcp/test/auth/credential-vault.test.ts",
+      "packages/mcp/test/auth/oidc.test.ts",
+      "packages/mcp/test/auth/openrouter-pkce.test.ts",
+      "packages/mcp/test/core/application.test.ts",
+      "packages/mcp/test/core/config.test.ts",
+      "packages/mcp/test/core/job-scheduler.test.ts",
+      "packages/mcp/test/core/packed-mask.test.ts",
+      "packages/mcp/test/http/server.test.ts",
+      "packages/mcp/test/media/loader.test.ts",
+      "packages/mcp/test/media/private-artifact-store.test.ts",
+      "packages/mcp/test/media/remote-image.test.ts",
+      "packages/mcp/test/stdio/server.test.ts",
+      "packages/mcp/test/viewer/core-access.test.ts",
+      "packages/mcp/test/viewer/document.test.ts",
+      "packages/mcp/test/viewer/settings.test.ts"
     ]
   },
   "prerequisites": {

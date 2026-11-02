@@ -43,6 +43,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "node --import tsx scripts/run-classified-tests.mjs portable",
+    "test:mcp": "node --import tsx scripts/run-classified-tests.mjs mcp",
     "test:local-evidence": "node --import tsx scripts/run-classified-tests.mjs local-evidence",
     "test:python-native": "node --import tsx scripts/run-classified-tests.mjs python-native",
     "check": "npm run secrets:check && npm run typecheck && npm run lint && npm run boundaries && npm run dead-code:ci && npm test && npm run build && npm run mcp:check",

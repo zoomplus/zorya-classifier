@@ -7,8 +7,9 @@ const repositoryRoot = fileURLToPath(new URL('../', import.meta.url))
 const catalogPath = fileURLToPath(new URL('./test-catalog.json', import.meta.url))
 const skipDirectories = new Set(['node_modules', 'dist', '.run', '.git'])
 
-const knownTestGroups = ['portable', 'local-evidence', 'python-native'] as const
+const knownTestGroups = ['portable', 'local-evidence', 'python-native', 'mcp'] as const
 type KnownTestGroup = (typeof knownTestGroups)[number]
+const mcpTestDirectory = 'packages/mcp/test/'
 
 const prerequisitesSchema = z.record(
   z.enum(knownTestGroups),
@@ -67,6 +68,9 @@ const catalogSchema = z
         portable: z.array(catalogRelativeTestPathSchema),
         'local-evidence': z.array(catalogRelativeTestPathSchema),
         'python-native': z.array(catalogRelativeTestPathSchema),
+        // Existing version-1 fixture inputs can omit the newly separated package group.
+        // Repository completeness still rejects a missing MCP classification at validation time.
+        mcp: z.array(catalogRelativeTestPathSchema).default([]),
       })
       .strict(),
     prerequisites: prerequisitesSchema.optional(),
@@ -139,6 +143,15 @@ export async function validateCatalog(
   for (const group of knownTestGroups) {
     const files = resolvedCatalog.groups[group]
     for (const file of files) {
+      const isMcpTest = file.startsWith(mcpTestDirectory)
+      if (group === 'mcp' && !isMcpTest) {
+        errors.push(`Non-MCP test classified in mcp group: ${file}`)
+        continue
+      }
+      if (group !== 'mcp' && isMcpTest) {
+        errors.push(`MCP test classified outside mcp group: ${file}`)
+        continue
+      }
       const containmentIssue = catalogPathContainmentIssue(file)
       if (containmentIssue) {
         errors.push(containmentIssue)
@@ -177,4 +190,18 @@ export async function listGroup(
   const files = resolved.groups[groupName]
   if (!files) throw new Error(`Unknown test group: ${groupName}`)
   return files
+}
+
+export function createTestCommand(
+  groupName: KnownTestGroup,
+  root: string,
+  files: readonly string[],
+): { args: string[]; cwd: string } {
+  if (groupName === 'mcp') {
+    return { args: ['scripts/run-tests.mjs'], cwd: join(root, 'packages/mcp') }
+  }
+  return {
+    args: ['--import', 'tsx', '--test', '--test-concurrency=2', ...files],
+    cwd: root,
+  }
 }
