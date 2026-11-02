@@ -10,8 +10,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.tests.json",
+    "test": "node --import tsx --test test/core/*.test.ts test/stdio/*.test.ts",
     "test:config": "node --import tsx --test test/core/config.test.ts",
-    "check": "npm run typecheck && npm run test:config && npm run build"
+    "check": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/node": "2.1.2",

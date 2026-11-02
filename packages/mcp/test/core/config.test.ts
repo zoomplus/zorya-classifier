@@ -20,7 +20,7 @@ function baseConfig(overrides: Record<string, unknown> = {}): unknown {
   }
 }
 
-test('configuration requires a matching explicitly selected profile', () => {
+await test('configuration requires a matching explicitly selected profile', () => {
   assert.throws(() => parseMcpConfig({ profiles: { vision: { id: 'vision' } } }))
   assert.throws(() => parseMcpConfig(baseConfig({ defaultProfileId: 'missing' })))
   assert.equal(
@@ -30,7 +30,7 @@ test('configuration requires a matching explicitly selected profile', () => {
   assert.equal(parseMcpConfig(baseConfig()).defaultProfileId, 'vision')
 })
 
-test('programmatic DecisionPort profiles need no fabricated model or credential', () => {
+await test('programmatic DecisionPort profiles need no fabricated model or credential', () => {
   const injected = parseMcpConfig({
     profiles: {
       localDecision: {
@@ -73,7 +73,7 @@ test('programmatic DecisionPort profiles need no fabricated model or credential'
   )
 })
 
-test('OpenRouter profiles require an explicit provider and reject custom endpoints', () => {
+await test('OpenRouter profiles require an explicit provider and reject custom endpoints', () => {
   const noProvider = baseConfig({
     profiles: {
       vision: {
@@ -103,7 +103,7 @@ test('OpenRouter profiles require an explicit provider and reject custom endpoin
   assert.equal(mcpConfigSchema.safeParse(customEndpoint).success, false)
 })
 
-test('generic adapters require an explicit credential-free HTTPS endpoint or loopback HTTP', () => {
+await test('generic adapters require an explicit credential-free HTTPS endpoint or loopback HTTP', () => {
   const generic = (endpoint?: string): unknown =>
     baseConfig({
       profiles: {
@@ -129,7 +129,7 @@ test('generic adapters require an explicit credential-free HTTPS endpoint or loo
   assert.equal(mcpConfigSchema.safeParse(generic('not a url')).success, false)
 })
 
-test('profile identifiers stay machine-safe and display metadata preserves aliases', () => {
+await test('profile identifiers stay machine-safe and display metadata preserves aliases', () => {
   const spacedIdentifier = baseConfig({
     profiles: {
       vision: {
@@ -167,7 +167,7 @@ test('profile identifiers stay machine-safe and display metadata preserves alias
   }
 })
 
-test('image caps cannot exceed the published classifier byte and pixel bounds', () => {
+await test('image caps cannot exceed the published classifier byte and pixel bounds', () => {
   const maxBytes = mcpConfigSchema.safeParse(baseConfig({ limits: { maxImageBytes: 16_777_217 } }))
   const maxPixels = mcpConfigSchema.safeParse(
     baseConfig({ limits: { maxImagePixels: 16_777_217 } }),
@@ -178,11 +178,12 @@ test('image caps cannot exceed the published classifier byte and pixel bounds', 
   const parsed = parseMcpConfig(baseConfig())
   assert.equal(parsed.limits.maxImageBytes, 16_777_216)
   assert.equal(parsed.limits.maxImagePixels, 16_777_216)
+  assert.equal(parsed.limits.maxQueuedInputBytesPerOwner, 33_554_432)
   assert.equal(parsed.limits.maxActiveJobs, 1)
   assert.equal(parsed.limits.maxActiveJobsPerOwner, 1)
 })
 
-test('native segmentation requires explicit caller-owned asset paths and bounded threads', () => {
+await test('native segmentation requires explicit caller-owned asset paths and bounded threads', () => {
   const missingAssets = mcpConfigSchema.safeParse(
     baseConfig({ segmentation: { kind: 'mobile-sam' } }),
   )
@@ -192,9 +193,23 @@ test('native segmentation requires explicit caller-owned asset paths and bounded
         kind: 'mobile-sam',
         encoderPath: '/models/encoder.onnx',
         decoderPath: '/models/decoder.onnx',
-        threads: 65,
+        threads: 9,
       },
     }),
+  )
+  const invalidDeviceId = mcpConfigSchema.safeParse(
+    baseConfig({
+      segmentation: {
+        kind: 'mobile-sam',
+        encoderPath: '/models/encoder.onnx',
+        decoderPath: '/models/decoder.onnx',
+        executionProvider: 'dml',
+        deviceId: 33,
+      },
+    }),
+  )
+  const invalidTimeout = mcpConfigSchema.safeParse(
+    baseConfig({ limits: { jobTimeoutMs: 120_001 } }),
   )
   const validNative = mcpConfigSchema.safeParse(
     baseConfig({
@@ -203,12 +218,15 @@ test('native segmentation requires explicit caller-owned asset paths and bounded
         encoderPath: '/models/encoder.onnx',
         decoderPath: '/models/decoder.onnx',
         executionProvider: 'cpu',
-        threads: 2,
+        threads: 8,
+        deviceId: 32,
       },
     }),
   )
 
   assert.equal(missingAssets.success, false)
   assert.equal(invalidThreads.success, false)
+  assert.equal(invalidDeviceId.success, false)
+  assert.equal(invalidTimeout.success, false)
   assert.equal(validNative.success, true)
 })
