@@ -88,7 +88,7 @@ MCP `stdio` резервирует stdout под протокол; диагно�
   "remoteImageHosts": ["images.example.net"],
   "browserLogin": {
     "clientId": "zorya-mcp-client",
-    "scopes": ["openid", "profile"]
+    "scopes": ["profile", "mcp:invoke"]
   },
   "openRouterPkceProfileId": "vision",
   "http": {
@@ -108,6 +108,8 @@ MCP `stdio` резервирует stdout под протокол; диагно�
 ```
 
 Передайте конфигурацию путём `ZORYA_MCP_CONFIG`. `resourceMetadataUrl` должен указывать на метаданные, которые встроенный сервер отдаёт по пути, вычисленному из `resourceUrl`. Если включён `browserLogin`, `allowedOrigins` должен содержать собственный origin сервера: форма BYOK отправляет same-origin POST с CSRF токеном. На POSIX для `encrypted-file` задайте `ZORYA_VAULT_KEY` как canonical Base64 ровно 32 байт, используя имя из `keyEnv`; каталог и файл хранилища должны быть доступны только владельцу процесса. Этот режим проверяет POSIX-права файла и каталога и на Windows завершается типизированной ошибкой `UNSUPPORTED_OPERATION`. На Windows явно выберите `memory-only`; BYOK ключи тогда теряются при остановке. Ключ не передаётся в аргументах или JSON. OpenRouter PKCE подключает provider credential отдельно от OIDC bearer token. Если PKCE не нужен, удалите `openRouterPkceProfileId`.
+
+Для browser login CLI запрашивает объединение `browserLogin.scopes` и `http.requiredScopes`, убирая повторы; scope `openid` браузерный сервис добавляет сам. В примере `mcp:invoke` задан как разрешение ресурса и включён в authorization request.
 
 Для удалённого клиента используйте собственный HTTPS hostname, reverse proxy, OIDC issuer и адрес MCP из `resourceUrl`. После OAuth авторизации provider credential подключается отдельно через OpenRouter PKCE. Настройки endpoint, OIDC и proxy принадлежат оператору сервера; доступность интерфейса или production-функций в конкретном аккаунте ChatGPT проверяется отдельно.
 

@@ -422,7 +422,13 @@ async function start(): Promise<void> {
               redirectUri: new URL(httpConfig.loginCallbackPath, httpConfig.publicOrigin).href,
               publicOrigin: httpConfig.publicOrigin,
               resource: httpConfig.resourceUrl,
-              scopes: cliConfig.browserLogin.scopes,
+              scopes: [
+                ...new Set(
+                  [...cliConfig.browserLogin.scopes, ...httpConfig.requiredScopes].filter(
+                    (scope) => scope !== 'openid',
+                  ),
+                ),
+              ],
               ...(cliConfig.browserLogin.allowInsecureLoopbackCookies === undefined
                 ? {}
                 : {

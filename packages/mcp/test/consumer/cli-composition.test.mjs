@@ -256,3 +256,125 @@ await test('CLI rejects generic BYOK configured for OpenRouter PKCE before conta
     await rm(workRoot, { recursive: true, force: true })
   }
 })
+
+await test('CLI browser authorization requests deduplicated required resource scopes', async () => {
+  const issuer = createServer((request, response) => {
+    if (request.url === '/.well-known/openid-configuration') {
+      response.writeHead(200, { 'content-type': 'application/json' })
+      response.end(
+        JSON.stringify({
+          issuer: issuerUrl,
+          authorization_endpoint: `${issuerUrl}authorize`,
+          token_endpoint: `${issuerUrl}token`,
+          jwks_uri: `${issuerUrl}jwks`,
+        }),
+      )
+      return
+    }
+    response.writeHead(404)
+    response.end()
+  })
+  issuer.listen(0, '127.0.0.1')
+  await once(issuer, 'listening')
+  const issuerAddress = issuer.address()
+  assert.ok(issuerAddress && typeof issuerAddress !== 'string')
+  const issuerUrl = `http://127.0.0.1:${issuerAddress.port}/`
+  const httpProbe = createServer()
+  httpProbe.listen(0, '127.0.0.1')
+  await once(httpProbe, 'listening')
+  const httpAddress = httpProbe.address()
+  assert.ok(httpAddress && typeof httpAddress !== 'string')
+  await new Promise((resolveClose, rejectClose) =>
+    httpProbe.close((error) => (error ? rejectClose(error) : resolveClose())),
+  )
+
+  const origin = `http://127.0.0.1:${httpAddress.port}`
+  const workRoot = await mkdtemp(join(tmpdir(), 'zorya-mcp-oauth-scope-'))
+  const configPath = join(workRoot, 'runtime.json')
+  const config = {
+    transport: 'http',
+    core: {
+      profiles: {
+        explicit: {
+          id: 'explicit',
+          adapter: 'openai-compatible-vision',
+          credentialMode: 'none',
+          endpoint: 'https://provider.example.test/v1/chat/completions',
+          model: 'fixture/explicit-model',
+        },
+      },
+      defaultProfileId: 'explicit',
+    },
+    credentialVault: { mode: 'memory-only' },
+    remoteImageHosts: [],
+    browserLogin: {
+      clientId: 'controlled-oauth-client',
+      scopes: ['openid', 'profile', 'mcp:invoke', 'library:read'],
+      allowInsecureLoopbackCookies: true,
+    },
+    http: {
+      bindHost: '127.0.0.1',
+      port: httpAddress.port,
+      publicOrigin: origin,
+      resourceUrl: `${origin}/mcp`,
+      resourceMetadataUrl: `${origin}/.well-known/oauth-protected-resource/mcp`,
+      issuer: issuerUrl,
+      audience: `${origin}/mcp`,
+      requiredScopes: ['mcp:invoke', 'reports:read', 'library:read'],
+      allowedHosts: ['127.0.0.1'],
+      allowedOrigins: [origin],
+    },
+  }
+  await writeFile(configPath, `${JSON.stringify(config)}\n`, { flag: 'wx', mode: 0o600 })
+  const safeEnvironment = Object.fromEntries(
+    ['PATH', 'TMPDIR', 'TMP', 'TEMP', 'SystemRoot', 'ComSpec', 'PATHEXT']
+      .filter((name) => process.env[name] !== undefined)
+      .map((name) => [name, process.env[name]]),
+  )
+  safeEnvironment['ZORYA_MCP_CONFIG'] = configPath
+  const cliPath = resolve('src/cli.ts')
+  const child = spawn(process.execPath, ['--import', 'tsx', cliPath], {
+    cwd: resolve('.'),
+    env: safeEnvironment,
+    stdio: ['ignore', 'ignore', 'pipe'],
+    shell: false,
+    windowsHide: true,
+  })
+  let stderr = ''
+  child.stderr.setEncoding('utf8')
+  child.stderr.on('data', (chunk) => {
+    stderr += chunk
+  })
+  const timeout = setTimeout(() => child.kill(), 10_000)
+  try {
+    let loginResponse
+    const deadlineAt = Date.now() + 8_000
+    while (loginResponse === undefined && Date.now() < deadlineAt) {
+      try {
+        loginResponse = await fetch(`${origin}/login`, { redirect: 'manual' })
+      } catch {
+        await new Promise((resolveDelay) => setTimeout(resolveDelay, 25))
+      }
+    }
+    assert.ok(loginResponse, `CLI did not start its HTTP server: ${stderr}`)
+    assert.equal(loginResponse.status, 302)
+    const location = loginResponse.headers.get('location')
+    assert.ok(location)
+    const authorization = new URL(location)
+    assert.equal(authorization.origin, new URL(`${issuerUrl}authorize`).origin)
+    const scopes = authorization.searchParams.get('scope')?.split(' ') ?? []
+    assert.deepEqual(scopes, ['openid', 'profile', 'mcp:invoke', 'library:read', 'reports:read'])
+    assert.equal(new Set(scopes).size, scopes.length)
+  } finally {
+    clearTimeout(timeout)
+    await new Promise((resolveClose) => {
+      if (child.exitCode !== null || child.signalCode !== null) return resolveClose()
+      child.once('close', resolveClose)
+      child.kill('SIGTERM')
+    })
+    await new Promise((resolveClose, rejectClose) =>
+      issuer.close((error) => (error ? rejectClose(error) : resolveClose())),
+    )
+    await rm(workRoot, { recursive: true, force: true })
+  }
+})

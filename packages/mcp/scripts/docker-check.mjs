@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises'
+import { chmod, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { Client } from '@modelcontextprotocol/client'
@@ -39,7 +39,9 @@ const containerName = `zorya-mcp-smoke-${ownedSuffix}`
 let imageBuilt = false
 let client
 let buildOutput = ''
-let failure
+let primaryFailure
+const cleanupFailures = []
+let containerStderr = ''
 let passReceipt
 let imageId
 let configuredUser
@@ -66,6 +68,7 @@ try {
     remoteImageHosts: [],
   }
   await writeFile(configPath, `${JSON.stringify(config)}\n`, { mode: 0o644, flag: 'wx' })
+  await chmod(configPath, 0o644)
 
   buildOutput = run('docker', ['build', '--pull', '--tag', imageTag, '--file', 'Dockerfile', '.'], {
     cwd: packageRoot,
@@ -105,6 +108,11 @@ try {
     env: { PATH: process.env['PATH'] ?? '' },
     stderr: 'pipe',
     maxBufferSize: 32 * 1024 * 1024,
+  })
+  const stderr = transport.stderr
+  stderr?.setEncoding('utf8')
+  stderr?.on('data', (chunk) => {
+    containerStderr = `${containerStderr}${chunk}`.slice(-16_384)
   })
   client = new Client(
     { name: 'mcp-docker-consumer-smoke', version: '0.1.0' },
@@ -163,7 +171,8 @@ try {
     smokeLog: join(runRoot, 'docker-smoke.log'),
   }
 } catch (error) {
-  failure = {
+  primaryFailure = {
+    phase: 'smoke',
     status: 'FAIL',
     runId,
     imageTag,
@@ -177,14 +186,7 @@ try {
     try {
       await client.close()
     } catch (error) {
-      failure ??= {
-        status: 'FAIL',
-        runId,
-        imageTag,
-        errorType: error instanceof Error ? error.name : 'unknown',
-        message: 'MCP client cleanup failed.',
-        providerRequests: 0,
-      }
+      cleanupFailures.push(failureRecord('client-cleanup', error))
     }
   }
   try {
@@ -208,14 +210,7 @@ try {
     assert.equal(afterRemoval, '', 'The task-owned Docker container remains after cleanup.')
     containerRemoved = true
   } catch (error) {
-    failure ??= {
-      status: 'FAIL',
-      runId,
-      imageTag,
-      errorType: error instanceof Error ? error.name : 'unknown',
-      message: 'Owned Docker smoke container cleanup could not be verified.',
-      providerRequests: 0,
-    }
+    cleanupFailures.push(failureRecord('container-cleanup', error))
   }
   if (imageBuilt) {
     try {
@@ -232,71 +227,34 @@ try {
       assert.equal(remainingImageTags, '', 'The task-owned Docker image tag remains after cleanup.')
       imageTagRemoved = true
     } catch (error) {
-      failure ??= {
-        status: 'FAIL',
-        runId,
-        imageTag,
-        errorType: error instanceof Error ? error.name : 'unknown',
-        message: 'Owned Docker smoke image cleanup failed.',
-        providerRequests: 0,
-      }
+      cleanupFailures.push(failureRecord('image-cleanup', error))
     }
   }
   try {
-    const buildLogPath = join(runRoot, 'docker-build.log')
-    let existingBuildLog
-    try {
-      existingBuildLog = await readFile(buildLogPath, 'utf8')
-    } catch (error) {
-      if (!(error instanceof Error) || !('code' in error) || error.code !== 'ENOENT') {
-        failure ??= {
-          status: 'FAIL',
-          runId,
-          imageTag,
-          errorType: error instanceof Error ? error.name : 'unknown',
-          message: 'Owned Docker build log could not be read consistently.',
-          providerRequests: 0,
-        }
-      }
-    }
-    if (failure === undefined) {
-      if (existingBuildLog !== undefined) {
-        assert.equal(
-          existingBuildLog,
-          buildOutput,
-          'Retained Docker build log changed during the run.',
-        )
-      } else if (buildOutput.length > 0) {
-        await writeFile(buildLogPath, buildOutput, { flag: 'wx', mode: 0o600 })
-      }
-    }
+    await retainBuildLog(runRoot, buildOutput)
   } catch (error) {
-    failure ??= {
-      status: 'FAIL',
-      runId,
-      imageTag,
-      errorType: error instanceof Error ? error.name : 'unknown',
-      message: 'Owned Docker build log could not be retained consistently.',
-      providerRequests: 0,
-    }
+    cleanupFailures.push(failureRecord('build-log-retention', error))
   }
   try {
     await rm(workRoot, { recursive: true, force: true })
   } catch (error) {
-    failure ??= {
+    cleanupFailures.push(failureRecord('temporary-directory-cleanup', error))
+  }
+  if (primaryFailure !== undefined || cleanupFailures.length > 0) {
+    const receiptPath = join(runRoot, 'failure.json')
+    const failure = {
       status: 'FAIL',
       runId,
       imageTag,
-      errorType: error instanceof Error ? error.name : 'unknown',
-      message: 'Owned Docker smoke temporary directory cleanup failed.',
+      imageId: imageId ?? null,
+      containerName,
+      primaryFailure: primaryFailure ?? null,
+      cleanupFailures,
+      containerStderr: containerStderr.length === 0 ? null : containerStderr,
+      containerRemoved,
+      imageTagRemoved,
       providerRequests: 0,
     }
-  }
-  if (failure !== undefined) {
-    if (buildOutput.length > 0) {
-      await writeFile(join(runRoot, 'docker-build.log'), buildOutput, { flag: 'wx', mode: 0o600 })
-    }
-    const receiptPath = join(runRoot, 'failure.json')
     await writeFile(receiptPath, `${JSON.stringify(failure, null, 2)}\n`, {
       flag: 'wx',
       mode: 0o600,
@@ -310,6 +268,30 @@ try {
       mode: 0o600,
     })
     process.stdout.write(`${JSON.stringify({ status: 'PASS', receipt: passReceiptPath })}\n`)
+  }
+}
+
+async function retainBuildLog(runRoot, output) {
+  if (output.length === 0) return
+  const logPath = join(runRoot, 'docker-build.log')
+  let existing
+  try {
+    existing = await readFile(logPath, 'utf8')
+  } catch (error) {
+    if (!(error instanceof Error) || !('code' in error) || error.code !== 'ENOENT') throw error
+  }
+  if (existing !== undefined) {
+    assert.equal(existing, output, 'Retained Docker build log changed during the run.')
+    return
+  }
+  await writeFile(logPath, output, { flag: 'wx', mode: 0o600 })
+}
+
+function failureRecord(phase, error) {
+  return {
+    phase,
+    errorType: error instanceof Error ? error.name : 'unknown',
+    message: error instanceof Error ? error.message : 'Unknown cleanup failure.',
   }
 }
 
