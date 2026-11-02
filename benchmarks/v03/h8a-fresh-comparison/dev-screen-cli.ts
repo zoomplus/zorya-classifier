@@ -290,19 +290,19 @@ async function verifyPinnedFile(
   const real = await realpath(target)
   if (target !== real && !allowExecutableAlias)
     throw new RangeError('Pinned runtime path is symlinked or aliased')
-  const beforePath = await lstat(real)
+  const beforePath = await lstat(real, { bigint: true })
   if (
     !beforePath.isFile() ||
     beforePath.isSymbolicLink() ||
-    (expectedBytes !== undefined && beforePath.size !== expectedBytes) ||
-    beforePath.size > maxBytes
+    (expectedBytes !== undefined && beforePath.size !== BigInt(expectedBytes)) ||
+    beforePath.size > BigInt(maxBytes)
   )
     throw new RangeError('Pinned runtime file size or type mismatch')
-  const expectedSize = expectedBytes ?? beforePath.size
+  const expectedSize = expectedBytes === undefined ? beforePath.size : BigInt(expectedBytes)
   const handle = await open(real, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW)
   try {
     const before = await handle.stat({ bigint: true })
-    if (!before.isFile() || before.size !== BigInt(expectedSize) || before.size > BigInt(maxBytes))
+    if (!before.isFile() || before.size !== expectedSize || before.size > BigInt(maxBytes))
       throw new RangeError('Opened runtime file is not the pinned regular file')
     const hash = createHash('sha256')
     let bytesRead = 0
@@ -314,18 +314,18 @@ async function verifyPinnedFile(
       hash.update(value)
     }
     const after = await handle.stat({ bigint: true })
-    const pathAfter = await lstat(real)
+    const pathAfter = await lstat(real, { bigint: true })
     if (
-      bytesRead !== expectedSize ||
-      BigInt(beforePath.dev) !== before.dev ||
-      BigInt(beforePath.ino) !== before.ino ||
+      bytesRead !== Number(expectedSize) ||
+      beforePath.dev !== before.dev ||
+      beforePath.ino !== before.ino ||
       before.dev !== after.dev ||
       before.ino !== after.ino ||
       before.size !== after.size ||
       before.mtimeNs !== after.mtimeNs ||
       before.ctimeNs !== after.ctimeNs ||
-      BigInt(pathAfter.dev) !== after.dev ||
-      BigInt(pathAfter.ino) !== after.ino ||
+      pathAfter.dev !== after.dev ||
+      pathAfter.ino !== after.ino ||
       (await realpath(target)) !== real
     )
       throw new RangeError('Pinned runtime file changed during verification')
@@ -347,8 +347,8 @@ async function readVerifiedRegularFile(
   const real = await realpath(target)
   if (target !== real || (trustedRoot && !within(resolve(trustedRoot), real)))
     throw new RangeError('Pinned input path is symlinked, aliased, or outside its root')
-  const beforePath = await lstat(target)
-  if (!beforePath.isFile() || beforePath.isSymbolicLink() || beforePath.size > maxBytes)
+  const beforePath = await lstat(target, { bigint: true })
+  if (!beforePath.isFile() || beforePath.isSymbolicLink() || beforePath.size > BigInt(maxBytes))
     throw new RangeError('Pinned input must be a bounded regular file')
   const handle = await open(target, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW)
   try {
@@ -357,18 +357,18 @@ async function readVerifiedRegularFile(
       throw new RangeError('Opened input must be a bounded regular file')
     const bytes = await handle.readFile()
     const after = await handle.stat({ bigint: true })
-    const pathAfter = await lstat(target)
+    const pathAfter = await lstat(target, { bigint: true })
     if (
       bytes.byteLength !== Number(before.size) ||
-      BigInt(beforePath.dev) !== before.dev ||
-      BigInt(beforePath.ino) !== before.ino ||
+      beforePath.dev !== before.dev ||
+      beforePath.ino !== before.ino ||
       before.dev !== after.dev ||
       before.ino !== after.ino ||
       before.size !== after.size ||
       before.mtimeNs !== after.mtimeNs ||
       before.ctimeNs !== after.ctimeNs ||
-      BigInt(pathAfter.dev) !== after.dev ||
-      BigInt(pathAfter.ino) !== after.ino ||
+      pathAfter.dev !== after.dev ||
+      pathAfter.ino !== after.ino ||
       (await realpath(target)) !== target
     )
       throw new RangeError('Pinned input changed while it was read')
@@ -673,12 +673,12 @@ export async function acquireRunnerLock(root: string): Promise<() => Promise<voi
         .parse(lockValue)
       const [ownedFile, currentPath] = await Promise.all([
         handle.stat({ bigint: true }),
-        lstat(lockPath),
+        lstat(lockPath, { bigint: true }),
       ])
       if (
         lock.ownerToken !== ownerToken ||
-        BigInt(currentPath.dev) !== ownedFile.dev ||
-        BigInt(currentPath.ino) !== ownedFile.ino
+        currentPath.dev !== ownedFile.dev ||
+        currentPath.ino !== ownedFile.ino
       )
         throw new RangeError('Runner lock ownership changed')
       await unlink(lockPath)
