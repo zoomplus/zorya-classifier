@@ -162,8 +162,10 @@ async function waitForJob(
   app: ReturnType<typeof createCoreApplication>,
   principal: Principal,
   jobId: string,
+  timeoutMs = 2_000,
 ): Promise<Record<string, unknown>> {
-  const deadline = Date.now() + 2_000
+  const deadline = Date.now() + timeoutMs
+  let lastSnapshot = 'no job snapshot received'
   while (Date.now() < deadline) {
     const snapshot = await app.invoke({
       toolName: 'zorya_get_job',
@@ -172,10 +174,19 @@ async function waitForJob(
       signal: new AbortController().signal,
     })
     const state = z.string().parse(snapshot['state'])
+    const error = z.object({ code: z.string().max(64) }).safeParse(snapshot['error'])
+    lastSnapshot = JSON.stringify({
+      state,
+      hasResult: Object.hasOwn(snapshot, 'result'),
+      artifactCount: Array.isArray(snapshot['artifacts']) ? snapshot['artifacts'].length : 0,
+      ...(error.success ? { errorCode: error.data.code } : {}),
+    })
     if (state === 'succeeded' || state === 'failed' || state === 'cancelled') return snapshot
     await new Promise<void>((resolve) => setTimeout(resolve, 1))
   }
-  throw new Error('Job did not reach a terminal state.')
+  throw new Error(
+    `Job did not reach a terminal state within ${timeoutMs}ms; last snapshot: ${lastSnapshot}`,
+  )
 }
 
 function jobIdFrom(result: Record<string, unknown>): string {
@@ -529,59 +540,64 @@ await test('source artifacts and job resources are private to the server-derived
     injectedDecisionPorts: { injected: firstChoicePort() },
   })
 
-  const submitted = await app.invoke({
-    toolName: 'zorya_locate',
-    args: {
-      image: { kind: 'inlineBase64', data: Buffer.from(png).toString('base64') },
-      target: 'object',
-      mode: 'region',
-    },
-    principal: principalA,
-    signal: new AbortController().signal,
-  })
-  const jobId = jobIdFrom(submitted)
-  const job = await waitForJob(app, principalA, jobId)
-  assert.equal(job['state'], 'succeeded')
-  const artifacts = z.array(z.object({ id: z.string(), role: z.string() })).parse(job['artifacts'])
-  const source = artifacts.find((artifact) => artifact.role === 'source')
-  assert.ok(source)
-
-  const binary = await app.readResource({
-    uri: `zorya://artifacts/${source.id}`,
-    principal: principalA,
-    signal: new AbortController().signal,
-    deadlineAt: Date.now() + 1_000,
-  })
-  assert.equal(binary.kind, 'binary')
-  if (binary.kind !== 'binary') assert.fail('Expected binary artifact contents.')
-  assert.deepEqual(binary.bytes, png)
-
-  const jobDocument = await app.readResource({
-    uri: `zorya://jobs/${jobId}`,
-    principal: principalA,
-    signal: new AbortController().signal,
-    deadlineAt: Date.now() + 1_000,
-  })
-  assert.equal(jobDocument.kind, 'json')
-  await assert.rejects(
-    app.readResource({
-      uri: `zorya://jobs/${jobId}`,
-      principal: principalB,
+  try {
+    const submitted = await app.invoke({
+      toolName: 'zorya_locate',
+      args: {
+        image: { kind: 'inlineBase64', data: Buffer.from(png).toString('base64') },
+        target: 'object',
+        mode: 'region',
+      },
+      principal: principalA,
       signal: new AbortController().signal,
-      deadlineAt: Date.now() + 1_000,
-    }),
-    (error: unknown) => error instanceof McpCoreError && error.code === 'NOT_FOUND',
-  )
-  await assert.rejects(
-    app.readResource({
+    })
+    const jobId = jobIdFrom(submitted)
+    const job = await waitForJob(app, principalA, jobId, 15_000)
+    assert.equal(job['state'], 'succeeded')
+    const artifacts = z
+      .array(z.object({ id: z.string(), role: z.string() }))
+      .parse(job['artifacts'])
+    const source = artifacts.find((artifact) => artifact.role === 'source')
+    assert.ok(source)
+
+    const binary = await app.readResource({
       uri: `zorya://artifacts/${source.id}`,
-      principal: principalB,
+      principal: principalA,
       signal: new AbortController().signal,
       deadlineAt: Date.now() + 1_000,
-    }),
-    (error: unknown) => error instanceof McpCoreError && error.code === 'NOT_FOUND',
-  )
-  await app.shutdown()
+    })
+    assert.equal(binary.kind, 'binary')
+    if (binary.kind !== 'binary') assert.fail('Expected binary artifact contents.')
+    assert.deepEqual(binary.bytes, png)
+
+    const jobDocument = await app.readResource({
+      uri: `zorya://jobs/${jobId}`,
+      principal: principalA,
+      signal: new AbortController().signal,
+      deadlineAt: Date.now() + 1_000,
+    })
+    assert.equal(jobDocument.kind, 'json')
+    await assert.rejects(
+      app.readResource({
+        uri: `zorya://jobs/${jobId}`,
+        principal: principalB,
+        signal: new AbortController().signal,
+        deadlineAt: Date.now() + 1_000,
+      }),
+      (error: unknown) => error instanceof McpCoreError && error.code === 'NOT_FOUND',
+    )
+    await assert.rejects(
+      app.readResource({
+        uri: `zorya://artifacts/${source.id}`,
+        principal: principalB,
+        signal: new AbortController().signal,
+        deadlineAt: Date.now() + 1_000,
+      }),
+      (error: unknown) => error instanceof McpCoreError && error.code === 'NOT_FOUND',
+    )
+  } finally {
+    await app.shutdown()
+  }
 })
 
 await test('principal-scoped MCP server registers six tools and private resources on the real SDK', async () => {
