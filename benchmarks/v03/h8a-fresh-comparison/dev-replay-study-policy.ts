@@ -3,8 +3,13 @@ import {
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+  PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
 } from './constants.js'
-import { PHASE_SCOPE_DEV40_ID, PHASE_NATIVE_PRESENCE_DEV40_ID } from './constants.js'
+import {
+  PHASE_SCOPE_DEV40_ID,
+  PHASE_NATIVE_PRESENCE_DEV40_ID,
+  PHASE_NATIVE_SELECTOR_DEV40_ID,
+} from './constants.js'
 
 export const LEGACY_REPLAY_STUDY_ID = 'provider-refusal-dev40-replay-v1' as const
 export const LEGACY_REPLAY_FREEZE_ID = 'h8a-provider-refusal-dev40-replay-20261101-v1' as const
@@ -28,6 +33,26 @@ export const NATIVE_PRESENCE_POLICY = Object.freeze({
   policyId: 'control-binary-v1',
   sha256: '0a59411c518355279f60dba58f3d26b7910b81ad88cd3238f91214654a8c4fac',
   hypothesisSha256: 'f7a44466f985fa1c53eb57c93fe6dcaf44548ee2da72c9e2f8e9f8285ecb14f5',
+})
+export const NATIVE_SELECTOR_STUDY_ID = 'native-selector-flat-dev40-v1' as const
+export const NATIVE_SELECTOR_FREEZE_ID = 'h8a-native-selector-flat-dev40-20261101-v1' as const
+export const NATIVE_SELECTOR_ROOT =
+  '/root/.codex/artifacts/zorya-classifier-mcp-20261101/native-selector-flat-dev40-v1' as const
+export const NATIVE_SELECTOR_PARENT_AUDIT_PATH =
+  '/root/.codex/artifacts/zorya-classifier-mcp-20261101/query-scope-research-v1/native-selector-research-v1/prospective-parent-audit-v1.json' as const
+export const NATIVE_SELECTOR_PARENT_AUDIT_SHA256 =
+  'a4ec08fd76c065f8f6698e45b5b067ae1f6c5d60b5912edc580990fa15181600' as const
+export const NATIVE_SELECTOR_POLICY = Object.freeze({
+  policyId: 'native-categorical-all-stages-v1',
+  sha256: '67593b86c44a23231a191b04b2b453d608a2a79161080de7594050d1b4c7b4e0',
+  hypothesisSha256: '6ea930d091365eec2f073bfc024d85546d436135d19cd98ac92af631e5a751b8',
+})
+export const NATIVE_SELECTOR_PRICE_PROOF = Object.freeze({
+  path: '/root/.codex/artifacts/zorya-classifier-mcp-20261101/query-scope-research-v1/native-selector-research-v1/native-route-cost-proof-v1.json',
+  sha256: '433b8c9f8d91c3b52fd2cb08ceb6443a612124349aa3ea6425463e41002e1b4d',
+  catalogPath:
+    '/root/.codex/artifacts/zorya-classifier-mcp-20261101/query-scope-research-v1/native-selector-research-v1/native-route-catalog-v1.json',
+  catalogSha256: '22c20d0d49d68ca4558de06956825973f6075cea44c04bfc6ffb4c0b75877974',
 })
 
 export const REPLAY_STUDY_REGISTRY = Object.freeze({
@@ -152,6 +177,52 @@ export const REPLAY_STUDY_REGISTRY = Object.freeze({
     parentAnnotationsPath:
       '/root/.codex/artifacts/zorya-classifier-mcp-20261101/authored-scope-dev40-v1/protocol-inputs/evaluator-private-annotations.json',
     parentAnnotationsSha256: '9ee7a831ce6f903ae27505bc844c23638091f3484f4d4a8ecdffeecfd854d71f',
+  }),
+  [NATIVE_SELECTOR_STUDY_ID]: Object.freeze({
+    studyId: NATIVE_SELECTOR_STUDY_ID,
+    freezeId: NATIVE_SELECTOR_FREEZE_ID,
+    canonicalRoot: NATIVE_SELECTOR_ROOT,
+    candidateProfileId: PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
+    controlProfileId: PROFILE_CONTROL_ID,
+    inheritedPhysicalCalls: 317,
+    inheritedLogicalAttempts: 103,
+    inheritedKnownCostUsd: 0.19184451499999994,
+    inheritedUnknownReserveUsd: 0.24,
+    nextPhysicalId: 318,
+    nextReservationId: 318,
+    candidateCallsPerCase: 4,
+    controlCallsPerCase: 6,
+    candidateUsdPerDispatch: 0.12,
+    controlUsdPerDispatch: 0.12,
+    incrementalCallLimit: 400,
+    incrementalExposureUsd: 48,
+    parentAuditPath:
+      '/root/.codex/artifacts/zorya-classifier-mcp-20261101/query-scope-research-v1/native-selector-research-v1/prospective-parent-audit-v1.json',
+    parentAuditSha256: 'a4ec08fd76c065f8f6698e45b5b067ae1f6c5d60b5912edc580990fa15181600',
+    parentLedgerPath:
+      '/root/.codex/artifacts/zorya-classifier-mcp-20261101/native-presence-flat-dev40-v1/admission/successor-campaign/campaign-ledger.json',
+    parentLedgerSha256: '58b6bee18de48d99e0804197555030cfd6e11cfe28ab744ee2e3c5cc81d2c4ae',
+    parentLedgerVersion: 180,
+    parentLedgerSchema: 'h8a-native-presence-replay-ledger-v1',
+    parentRegistrationPath:
+      '/root/.codex/artifacts/zorya-classifier-mcp-20261101/native-presence-flat-dev40-v1/admission/successor-campaign/registration.json',
+    parentRegistrationSha256: '5accb2fd43df0afc78f9882feb612ca023536883dccf55a1c1f544e2f2bdd7ed',
+    parentRegistrationSchema: 'h8a-native-presence-replay-registration-v1',
+    parentRegistrationStudyId: NATIVE_PRESENCE_STUDY_ID,
+    parentRegistrationFreezeId: NATIVE_PRESENCE_FREEZE_ID,
+    ledgerSchema: 'h8a-native-selector-replay-ledger-v1',
+    registrationSchema: 'h8a-native-selector-replay-registration-v1',
+    queryPolicy: AUTHORED_SCOPE_QUERY_POLICY,
+    presencePolicy: NATIVE_PRESENCE_POLICY,
+    selectionPolicy: NATIVE_SELECTOR_POLICY,
+    priceProof: NATIVE_SELECTOR_PRICE_PROOF,
+    phaseId: PHASE_NATIVE_SELECTOR_DEV40_ID,
+    parentFreezePath:
+      '/root/.codex/artifacts/zorya-classifier-mcp-20261101/native-presence-flat-dev40-v1/protocol-inputs/phase-freeze.json',
+    parentFreezeSha256: 'fd7b3297558d685e2fd887e4054ec9d35574f3a88c9393c1cb73ec55cbe07654',
+    parentAnnotationsPath:
+      '/root/.codex/artifacts/zorya-classifier-mcp-20261101/native-presence-flat-dev40-v1/protocol-inputs/evaluator-private-annotations.json',
+    parentAnnotationsSha256: 'baab789da7a8065624712efb7261db04039be46d0c48deb05c8ab6bb8ecd1d79',
   }),
 })
 

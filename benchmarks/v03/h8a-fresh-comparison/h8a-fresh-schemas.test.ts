@@ -6,6 +6,7 @@ import {
   H8A_FLAT_CANDIDATE_PROFILE,
   H8A_SCOPE_CANDIDATE_PROFILE,
   H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE,
+  H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE,
   V02_CONTROL_PROFILE,
 } from './profiles.js'
 import { phaseFreezeSchema, type PhaseFreeze } from './schemas.js'
@@ -26,9 +27,12 @@ import {
   PHASE_SCOPE_QUAL120_ID,
   PHASE_NATIVE_PRESENCE_DEV40_ID,
   PHASE_NATIVE_PRESENCE_QUAL120_ID,
+  PHASE_NATIVE_SELECTOR_DEV40_ID,
+  PHASE_NATIVE_SELECTOR_QUAL120_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+  PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
   PROFILE_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
   candidateIdForPhase,
@@ -298,4 +302,50 @@ await test('native-presence profile is closed, separately bound and carries the 
     validateProfileIdentities(freeze)
     validateConservativeCostProof(freeze)
   }
+})
+
+await test('native-selector v5 is a closed all-stage native profile with independent DEV and QUAL identity', () => {
+  const profile = H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE
+  assert.equal(profile.profileId, PROFILE_NATIVE_SELECTOR_CANDIDATE_ID)
+  assert.equal(profile.recipeKind, 'h8a-cpu-flat-native-categorical-all-stages')
+  assert.deepEqual(profile.requestPolicy, {
+    allowFallbacks: false,
+    allowProviderSort: false,
+    allowRetries: false,
+    caseDeadlineSeconds: 240,
+    maxVisionChatPhysicalCallsPerCase: 0,
+    maxNativeDecisionPhysicalCallsPerCase: 4,
+    maxPhysicalCallsPerCase: 4,
+    route: {
+      apiKind: 'openai-compatible-native-decisions',
+      apiEndpoint: '/api/alpha/decisions',
+      model: 'openai/gpt-6-luna-decisions',
+      provider: 'openai',
+      providerName: 'OpenAI',
+    },
+    nativeRecipeId: PROFILE_FLAT_CANDIDATE_ID,
+    presencePolicyId: 'control-binary-v1',
+    presencePolicySha256: '0a59411c518355279f60dba58f3d26b7910b81ad88cd3238f91214654a8c4fac',
+    queryPolicyId: 'strict-authored-scope-v1',
+    queryPolicySha256: '8146bc76ed3166a1cf8573518d23765266bf53f9172f9794e1e85a3fe793d9bc',
+    selectionPolicyId: 'native-categorical-all-stages-v1',
+  })
+  assert.notEqual(
+    profile.requestPolicyIdentitySha256,
+    H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicyIdentitySha256,
+  )
+  for (const phaseId of [PHASE_NATIVE_SELECTOR_DEV40_ID, PHASE_NATIVE_SELECTOR_QUAL120_ID]) {
+    const { freeze } = buildSyntheticPhaseFreeze(phaseId)
+    assert.equal(candidateIdForPhase(phaseId), PROFILE_NATIVE_SELECTOR_CANDIDATE_ID)
+    assert.equal(freeze.profileBindings[0]?.profileId, PROFILE_NATIVE_SELECTOR_CANDIDATE_ID)
+    assert.doesNotThrow(() => phaseFreezeSchema.parse(freeze))
+    validateProfileIdentities(freeze)
+    validateConservativeCostProof(freeze)
+  }
+  assert.throws(() =>
+    phaseFreezeSchema.parse({
+      ...buildSyntheticPhaseFreeze(PHASE_NATIVE_SELECTOR_DEV40_ID).freeze,
+      phaseId: 'h8a-native-selector-paired-dev41-v1',
+    }),
+  )
 })

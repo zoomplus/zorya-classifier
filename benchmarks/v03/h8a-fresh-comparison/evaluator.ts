@@ -13,6 +13,8 @@ import {
   PHASE_SCOPE_QUAL120_ID,
   PHASE_NATIVE_PRESENCE_DEV40_ID,
   PHASE_NATIVE_PRESENCE_QUAL120_ID,
+  PHASE_NATIVE_SELECTOR_DEV40_ID,
+  PHASE_NATIVE_SELECTOR_QUAL120_ID,
   PROFILE_CANDIDATE_ID,
   candidateIdForPhase,
   PROFILE_CONTROL_ID,
@@ -609,7 +611,9 @@ export function joinCloseoutsWithPrivateAnnotations(input: {
     input.freeze.phaseId === PHASE_SCOPE_DEV40_ID ||
     input.freeze.phaseId === PHASE_SCOPE_QUAL120_ID ||
     input.freeze.phaseId === PHASE_NATIVE_PRESENCE_DEV40_ID ||
-    input.freeze.phaseId === PHASE_NATIVE_PRESENCE_QUAL120_ID
+    input.freeze.phaseId === PHASE_NATIVE_PRESENCE_QUAL120_ID ||
+    input.freeze.phaseId === PHASE_NATIVE_SELECTOR_DEV40_ID ||
+    input.freeze.phaseId === PHASE_NATIVE_SELECTOR_QUAL120_ID
 
   const joined: CaseQualityRow[] = []
   for (const truth of annotations.cases) {

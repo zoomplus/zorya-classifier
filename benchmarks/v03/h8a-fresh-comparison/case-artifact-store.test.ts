@@ -14,6 +14,7 @@ import {
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+  PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
 } from './constants.js'
 import { hashIdentity } from './hash-identity.js'
 import type { CaseExecutionPortResult } from './paired-runner.js'
@@ -28,6 +29,7 @@ function identity(
     | typeof PROFILE_FLAT_CANDIDATE_ID
     | typeof PROFILE_SCOPE_CANDIDATE_ID
     | typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+    | typeof PROFILE_NATIVE_SELECTOR_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID = PROFILE_CANDIDATE_ID,
 ): CaseArtifactIdentity {
   const hash = 'a'.repeat(64)
@@ -55,6 +57,7 @@ function result(
     | typeof PROFILE_FLAT_CANDIDATE_ID
     | typeof PROFILE_SCOPE_CANDIDATE_ID
     | typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+    | typeof PROFILE_NATIVE_SELECTOR_CANDIDATE_ID
     | typeof PROFILE_CONTROL_ID = PROFILE_CANDIDATE_ID,
 ): CaseExecutionPortResult {
   const maskSha = maskBytes ? digest(maskBytes) : null
@@ -612,5 +615,32 @@ await test('native-presence recovery refuses unrelated profile and route journal
     } finally {
       await rm(root, { recursive: true, force: true })
     }
+  }
+})
+
+await test('native-selector v5 identity round-trips through the immutable case artifact store', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'h8a-native-selector-case-artifact-'))
+  try {
+    const store = new ImmutableCaseArtifactStore(root)
+    const id = identity(PROFILE_NATIVE_SELECTOR_CANDIDATE_ID)
+    const opened = await store.begin(id, new Date().toISOString())
+    const completed = await store.complete({
+      identitySha256: opened.identitySha256,
+      identity: opened.identity,
+      result: result(undefined, undefined, PROFILE_NATIVE_SELECTOR_CANDIDATE_ID),
+      durationMs: 1,
+      startedAtIso: new Date().toISOString(),
+      completedAtIso: new Date().toISOString(),
+      knownCostUsd: 0,
+      unknownDispatchCount: 0,
+      blobs: new Map(),
+    })
+    assert.equal(completed.result.outputRow.profileId, PROFILE_NATIVE_SELECTOR_CANDIDATE_ID)
+    assert.equal(
+      (await store.load(opened.identitySha256, id))?.result.outputRow.profileId,
+      PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
+    )
+  } finally {
+    await rm(root, { recursive: true, force: true })
   }
 })

@@ -7,6 +7,7 @@ import {
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+  PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
   QUAL120_WORST_CASE_PHYSICAL_CALLS,
   candidateIdForPhase,
 } from './constants.js'
@@ -137,10 +138,11 @@ export async function assertFreezeAdmissionAsync(
     if (
       candidateProfileId !== PROFILE_FLAT_CANDIDATE_ID &&
       candidateProfileId !== PROFILE_SCOPE_CANDIDATE_ID &&
-      candidateProfileId !== PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+      candidateProfileId !== PROFILE_NATIVE_PRESENCE_CANDIDATE_ID &&
+      candidateProfileId !== PROFILE_NATIVE_SELECTOR_CANDIDATE_ID
     )
       throw new RangeError(
-        'Study-scoped ledger requires a registered flat, authored-scope, or native-presence profile',
+        'Study-scoped ledger requires a registered flat, authored-scope, native-presence, or native-selector profile',
       )
     await ledger.assertStudyScopeCanAdmitPhysicalReservedUsd(candidateProfileId, candidateBound)
     await ledger.assertStudyScopeCanAdmitPhysicalReservedUsd(PROFILE_CONTROL_ID, controlBound)

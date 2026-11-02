@@ -1,7 +1,7 @@
 import type { CaseExecutionPortResult } from './paired-runner.js'
 
 interface NativePresenceEvidenceSource {
-  sourceId: 'native-presence' | 'vision'
+  sourceId: 'native-presence' | 'native-selector' | 'vision'
   logicalReceipts: CaseExecutionPortResult['logicalReceipts']
   physicalReceipts: CaseExecutionPortResult['physicalReceipts']
 }

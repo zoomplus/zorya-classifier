@@ -12,6 +12,7 @@ import {
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+  PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
 } from './constants.js'
 import { assertProviderRefusalReplayEvidence } from './provider-refusal-replay.js'
@@ -31,6 +32,7 @@ const identitySchema = z.object({
     PROFILE_FLAT_CANDIDATE_ID,
     PROFILE_SCOPE_CANDIDATE_ID,
     PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+    PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
     PROFILE_CONTROL_ID,
   ]),
   sourceBytesSha256: z.string().regex(/^[a-f0-9]{64}$/u),
@@ -108,7 +110,8 @@ function isCandidateProfile(profileId: CaseArtifactIdentity['profileId']): boole
     profileId === PROFILE_CANDIDATE_ID ||
     profileId === PROFILE_FLAT_CANDIDATE_ID ||
     profileId === PROFILE_SCOPE_CANDIDATE_ID ||
-    profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+    profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID ||
+    profileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID
   )
 }
 
@@ -138,6 +141,7 @@ const dispatchBaseSchema = z.object({
     PROFILE_FLAT_CANDIDATE_ID,
     PROFILE_SCOPE_CANDIDATE_ID,
     PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+    PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
     PROFILE_CONTROL_ID,
   ]),
   opaqueCaseId: z.string().min(1),

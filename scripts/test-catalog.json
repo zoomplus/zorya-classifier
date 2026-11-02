@@ -158,7 +158,15 @@
       "test/vision-compatible.test.ts",
       "test/vision.test.ts",
       "test/whole-object-boundary-view.test.ts",
-      "test/whole-object.test.ts"
+      "test/whole-object.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/native-selector-runtime.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/native-selector-replay.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/native-selector-qual-protocol.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/native-selector-qual-admission.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/native-selector-qual-ledger.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/native-selector-qual-runner.test.ts",
+      "benchmarks/v03/h8a-fresh-comparison/native-selector-qual-cli.test.ts",
+      "benchmarks/v02/native-selector-wire-evidence.test.ts"
     ],
     "local-evidence": [
       "benchmarks/v03/h5-replay-local.test.ts",

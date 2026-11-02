@@ -2,6 +2,7 @@ import type { DecisionPort } from '../../../src/entities/contracts.js'
 import { RunBudget } from '../../v02/budget.js'
 import { recordProvider } from '../../v02/recording.js'
 import type { Recorder } from '../../v02/recording.js'
+import type { NativeWireEvidenceCaptureOptions } from '../../v02/recording.js'
 
 interface FixedRuntimeRoute {
   model: string
@@ -19,6 +20,7 @@ export function createFixedRouteRecorder(input: {
   receiptDirectory: string
   route: FixedRuntimeRoute
   dispatchFetch: typeof globalThis.fetch
+  nativeWireEvidenceCapture?: NativeWireEvidenceCaptureOptions
 }): Recorder {
   const budget = new RunBudget(
     input.maxPhysicalCalls,
@@ -31,5 +33,7 @@ export function createFixedRouteRecorder(input: {
     input.receiptDirectory,
     input.route,
     input.dispatchFetch,
+    undefined,
+    input.nativeWireEvidenceCapture,
   )
 }

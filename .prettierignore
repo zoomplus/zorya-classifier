@@ -81,3 +81,5 @@ benchmarks/v02/evidence/exposed-regression-v4/provenance/ui-source-truth.json
 benchmarks/v02/evidence/exposed-regression-v4/provenance/map-source-truth.json
 benchmarks/v02/evidence/exposed-regression-v4/provenance/admission-receipt.json
 benchmarks/v02/evidence/exposed-regression-v4/audit/openimages-mask-canvas-audit.json
+# Preserve the accepted hypothesis bytes pinned at SHA-256 6ea930d091365eec2f073bfc024d85546d436135d19cd98ac92af631e5a751b8.
+docs/research/v03-native-selector-hypothesis.ru.md

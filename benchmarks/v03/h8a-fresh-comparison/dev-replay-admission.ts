@@ -4,10 +4,18 @@ import sharp from 'sharp'
 import { PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY } from './provider-refusal-replay.js'
 import { H6_PRESENCE_POLICY_SHA256 } from '../h6-presence-policy.js'
 import { computeEvaluatorAnnotationsSha256 } from './annotation-digest.js'
-import { phaseFreezeSchema, evaluatorPrivateAnnotationBundleSchema } from './schemas.js'
+import {
+  phaseFreezeSchema,
+  evaluatorPrivateAnnotationBundleSchema,
+  immutableCloseoutSchema,
+} from './schemas.js'
 import { computePhaseFreezeCommitmentSha256 } from './freeze-commitment.js'
 import { unpackBinaryLsb0V1 } from './packed-binary-lsb0.js'
-import { assertReferenceBoxesWithinCanvas, assertReferenceMaskDeclaration } from './evaluator.js'
+import {
+  assertReferenceBoxesWithinCanvas,
+  assertReferenceMaskDeclaration,
+  validateImmutableCloseouts,
+} from './evaluator.js'
 import {
   UI_STATE_DEV40_RUNTIME_ENVIRONMENT_PATH,
   UI_STATE_DEV40_RUNTIME_ENVIRONMENT_SHA256,
@@ -19,8 +27,10 @@ import {
   PHASE_FLAT_DEV40_ID,
   PHASE_SCOPE_DEV40_ID,
   PHASE_NATIVE_PRESENCE_DEV40_ID,
+  PHASE_NATIVE_SELECTOR_DEV40_ID,
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_CONTROL_ID,
+  PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
   STRATUMS,
 } from './constants.js'
 import type { PhaseFreeze, EvaluatorPrivateAnnotationBundle } from './schemas.js'
@@ -44,6 +54,13 @@ import {
   NATIVE_PRESENCE_STUDY_ID,
   NATIVE_PRESENCE_FREEZE_ID,
   NATIVE_PRESENCE_POLICY,
+  NATIVE_PRESENCE_ROOT,
+  NATIVE_SELECTOR_STUDY_ID,
+  NATIVE_SELECTOR_FREEZE_ID,
+  NATIVE_SELECTOR_POLICY,
+  NATIVE_SELECTOR_PRICE_PROOF,
+  NATIVE_SELECTOR_PARENT_AUDIT_PATH,
+  NATIVE_SELECTOR_PARENT_AUDIT_SHA256,
   REPLAY_STUDY_REGISTRY,
   replayStudyPolicy,
 } from './dev-replay-study-policy.js'
@@ -72,6 +89,76 @@ export const PROVIDER_REFUSAL_REPLAY_RUNTIME_ENVIRONMENT_PATH = resolve(
 
 const digest = z.string().regex(/^[a-f0-9]{64}$/u)
 const refSchema = z.object({ path: z.string().min(1), sha256: digest }).strict()
+const nativeSelectorParentReferenceSchema = z
+  .object({ path: z.string().min(1), sha256: digest, bytes: z.number().int().positive() })
+  .strict()
+const nativeSelectorParentAuditSchema = z
+  .object({
+    schema: z.literal('main-native-selector-prospective-parent-audit-v1'),
+    checkedAtUtc: z.literal('2026-11-01T23:05:02.770Z'),
+    parentStudyId: z.literal(NATIVE_PRESENCE_STUDY_ID),
+    parentClosed: z.literal(true),
+    parentReviewDecision: z.literal('stop'),
+    parentSourceCommit: z.literal('f33f7a10e2860e839be6aee74804c1336fa5ad91'),
+    parentPhysicalDispatchCount: z.literal(317),
+    parentCaseArmAttempts: z.literal(103),
+    parentKnownCostUsd: z.literal(0.19184451499999994),
+    parentUnknownReserveUsd: z.literal(0.24),
+    parentInFlightReservations: z.literal(0),
+    parentUncertainPhysicalDispatchCount: z.literal(0),
+    parentResumeBlocked: z.literal(false),
+    parentCrashRecoveryLatched: z.literal(false),
+    parentIntegrityBlocked: z.literal(false),
+    parentQualEligible: z.literal(false),
+    deadlineIso: z.literal(PROVIDER_REFUSAL_REPLAY_DEADLINE_ISO),
+    globalPhysicalCallLimit: z.literal(2_000),
+    remainingPhysicalCalls: z.literal(1_683),
+    prospectiveDevWorstCaseCalls: z.literal(400),
+    conditionalQualWorstCaseCalls: z.literal(1_200),
+    headroomAfterWorstCaseCalls: z.literal(83),
+    ownerDollarCeilingUsd: z.null(),
+    refs: z.array(nativeSelectorParentReferenceSchema).length(14),
+  })
+  .strict()
+const nativeSelectorPriceProofSchema = z
+  .object({
+    schema: z.literal('main-native-selector-route-cost-metadata-v1'),
+    observedAtUtc: z.string().datetime({ offset: true }),
+    url: z.literal('https://openrouter.ai/api/v1/models/openai/gpt-6-luna-decisions/endpoints'),
+    httpStatus: z.literal(200),
+    httpDate: z.string().min(1),
+    contentType: z.literal('application/json'),
+    rawCatalog: z
+      .object({
+        path: z.literal(NATIVE_SELECTOR_PRICE_PROOF.catalogPath),
+        sha256: z.literal(NATIVE_SELECTOR_PRICE_PROOF.catalogSha256),
+        bytes: z.literal(1_377),
+      })
+      .strict(),
+    model: z.literal('openai/gpt-6-luna-decisions'),
+    provider: z.literal('openai'),
+    providerName: z.literal('OpenAI'),
+    nativeEndpoint: z.literal('/api/alpha/decisions'),
+    eligibleEndpoints: z.literal(1),
+    inputTokenBound: z.literal(1_050_000),
+    inputRateUpperUsd: z.literal(1e-7),
+    maxOutputTokens: z.literal(0),
+    outputRateUpperUsd: z.literal(0),
+    computedWorstUsd: z.literal(0.105),
+    reserveUsdPerPhysicalDispatch: z.literal(0.12),
+    candidateMaxCallsPerCase: z.literal(4),
+    controlMaxCallsPerCase: z.literal(6),
+    perPairMaximumUsd: z.literal(1.2),
+    dev40MaximumIncrementalUsd: z.literal(48),
+    conditionalQual120MaximumIncrementalUsd: z.literal(144),
+    ownerDollarCeilingUsd: z.null(),
+    newPricingFetched: z.literal(true),
+    inferenceProviderCalls: z.literal(0),
+    nativeInferenceCalls: z.literal(0),
+    metadataHttpRequests: z.literal(1),
+    notAFuturePriceGuarantee: z.literal(true),
+  })
+  .strict()
 const sourceRefSchema = refSchema
   .extend({ caseId: z.string().min(1), bytes: z.number().int().nonnegative() })
   .strict()
@@ -736,18 +823,63 @@ export const nativePresenceReplayProtocolSchema = authoredScopeReplayProtocolSch
     })
     .strict(),
 })
+export const nativeSelectorReplayProtocolSchema = authoredScopeReplayProtocolSchema
+  .extend({
+    schema: z.literal('h8a-native-selector-replay-protocol-v1'),
+    studyId: z.literal(NATIVE_SELECTOR_STUDY_ID),
+    freezeId: z.literal(NATIVE_SELECTOR_FREEZE_ID),
+    parentAudit: z
+      .object({
+        path: z.literal(NATIVE_SELECTOR_PARENT_AUDIT_PATH),
+        sha256: z.literal(NATIVE_SELECTOR_PARENT_AUDIT_SHA256),
+      })
+      .strict(),
+    selectionPolicy: z
+      .object({
+        policyId: z.literal(NATIVE_SELECTOR_POLICY.policyId),
+        sha256: z.literal(NATIVE_SELECTOR_POLICY.sha256),
+        hypothesisSha256: z.literal(NATIVE_SELECTOR_POLICY.hypothesisSha256),
+      })
+      .strict(),
+    presencePolicy: z
+      .object({
+        policyId: z.literal(NATIVE_PRESENCE_POLICY.policyId),
+        sha256: z.literal(NATIVE_PRESENCE_POLICY.sha256),
+        hypothesisSha256: z.literal(NATIVE_PRESENCE_POLICY.hypothesisSha256),
+      })
+      .strict(),
+    priceProof: z
+      .object({
+        path: z.literal(NATIVE_SELECTOR_PRICE_PROOF.path),
+        sha256: z.literal(NATIVE_SELECTOR_PRICE_PROOF.sha256),
+      })
+      .strict(),
+    budget: authoredScopeReplayProtocolSchema.shape.budget.extend({
+      candidateMaxUsdPerDispatch: z.literal(0.12),
+      controlMaxUsdPerDispatch: z.literal(0.12),
+    }),
+  })
+  .strict()
 
 type AuthoredScopeReplayProtocol = z.infer<typeof authoredScopeReplayProtocolSchema>
 type NativePresenceReplayProtocol = z.infer<typeof nativePresenceReplayProtocolSchema>
+type NativeSelectorReplayProtocol = z.infer<typeof nativeSelectorReplayProtocolSchema>
 type ClosedReplayProtocol =
   | AuthoredScopeReplayProtocol
   | NativePresenceReplayProtocol
+  | NativeSelectorReplayProtocol
   | z.infer<typeof providerRefusalReplayProtocolSchema>
 
 export function parseReplayProtocolForStudy(studyId: string, value: unknown): ClosedReplayProtocol {
   if (!Object.hasOwn(REPLAY_STUDY_REGISTRY, studyId))
     throw new RangeError('Replay study is outside the closed registry')
   try {
+    if (studyId === NATIVE_SELECTOR_STUDY_ID) {
+      const protocol = nativeSelectorReplayProtocolSchema.parse(value)
+      if (protocol.studyId !== studyId)
+        throw new RangeError('Replay protocol study identity mismatch')
+      return protocol
+    }
     if (studyId === NATIVE_PRESENCE_STUDY_ID) {
       const protocol = nativePresenceReplayProtocolSchema.parse(value)
       if (protocol.studyId !== studyId)
@@ -772,6 +904,7 @@ export function parseReplayProtocolForStudy(studyId: string, value: unknown): Cl
 export function parseClosedReplayProtocol(value: unknown):
   | { studyId: 'authored-scope-dev40-v1'; protocol: AuthoredScopeReplayProtocol }
   | { studyId: typeof NATIVE_PRESENCE_STUDY_ID; protocol: NativePresenceReplayProtocol }
+  | { studyId: typeof NATIVE_SELECTOR_STUDY_ID; protocol: NativeSelectorReplayProtocol }
   | {
       studyId: typeof PROVIDER_REFUSAL_REPLAY_STUDY_ID
       protocol: z.infer<typeof providerRefusalReplayProtocolSchema>
@@ -787,6 +920,11 @@ export function parseClosedReplayProtocol(value: unknown):
     return {
       studyId: NATIVE_PRESENCE_STUDY_ID,
       protocol: nativePresenceReplayProtocolSchema.parse(value),
+    }
+  if (candidateStudyId === NATIVE_SELECTOR_STUDY_ID)
+    return {
+      studyId: NATIVE_SELECTOR_STUDY_ID,
+      protocol: nativeSelectorReplayProtocolSchema.parse(value),
     }
   if (candidateStudyId === PROVIDER_REFUSAL_REPLAY_STUDY_ID)
     return {
@@ -816,6 +954,16 @@ export interface VerifiedNativePresenceReplayAdmission {
   referenceMaskBytes: ReadonlyMap<string, Uint8Array>
   freezeCommitmentSha256: string
 }
+export interface VerifiedNativeSelectorReplayAdmission {
+  protocol: NativeSelectorReplayProtocol
+  protocolSha256: string
+  freeze: PhaseFreeze
+  annotations: EvaluatorPrivateAnnotationBundle
+  selection: ReturnType<typeof buildDevScreenSelection>
+  sourceBytes: ReadonlyMap<string, Uint8Array>
+  referenceMaskBytes: ReadonlyMap<string, Uint8Array>
+  freezeCommitmentSha256: string
+}
 
 type ScopeProtocolRef = { path: string; sha256: string }
 
@@ -837,7 +985,10 @@ export function assertAuthoredScopeFreezeRetargeting(
 }
 
 export function assertClosedReplayFreezeRetargeting(
-  studyId: typeof AUTHORED_SCOPE_STUDY_ID | typeof NATIVE_PRESENCE_STUDY_ID,
+  studyId:
+    | typeof AUTHORED_SCOPE_STUDY_ID
+    | typeof NATIVE_PRESENCE_STUDY_ID
+    | typeof NATIVE_SELECTOR_STUDY_ID,
   parentFreeze: PhaseFreeze,
   nextFreeze: PhaseFreeze,
   parentAnnotations: EvaluatorPrivateAnnotationBundle,
@@ -846,9 +997,17 @@ export function assertClosedReplayFreezeRetargeting(
 ): void {
   const scopePolicy = replayStudyPolicy(studyId)
   const expectedPhaseId =
-    studyId === NATIVE_PRESENCE_STUDY_ID ? PHASE_NATIVE_PRESENCE_DEV40_ID : PHASE_SCOPE_DEV40_ID
+    studyId === NATIVE_SELECTOR_STUDY_ID
+      ? PHASE_NATIVE_SELECTOR_DEV40_ID
+      : studyId === NATIVE_PRESENCE_STUDY_ID
+        ? PHASE_NATIVE_PRESENCE_DEV40_ID
+        : PHASE_SCOPE_DEV40_ID
   const expectedParentPhase =
-    studyId === NATIVE_PRESENCE_STUDY_ID ? PHASE_SCOPE_DEV40_ID : PHASE_FLAT_DEV40_ID
+    studyId === NATIVE_SELECTOR_STUDY_ID
+      ? PHASE_NATIVE_PRESENCE_DEV40_ID
+      : studyId === NATIVE_PRESENCE_STUDY_ID
+        ? PHASE_SCOPE_DEV40_ID
+        : PHASE_FLAT_DEV40_ID
   assertClosedReplayRetargetIdentity(
     studyId,
     parentFreeze.phaseId,
@@ -907,9 +1066,10 @@ export function assertClosedReplayFreezeRetargeting(
   const costProof = nextFreeze.conservativeCostProof
   const candidateCostBound = costProof.profileDispatchUpperBounds[0]
   const controlCostBound = costProof.profileDispatchUpperBounds[1]
+  const expectedCandidateCost = studyId === NATIVE_SELECTOR_STUDY_ID ? 0.12 : 0.55
   if (
     candidateCostBound.profileId !== scopePolicy.candidateProfileId ||
-    candidateCostBound.maxUsdPerPhysicalDispatch !== 0.55 ||
+    candidateCostBound.maxUsdPerPhysicalDispatch !== expectedCandidateCost ||
     controlCostBound.profileId !== PROFILE_CONTROL_ID ||
     controlCostBound.maxUsdPerPhysicalDispatch !== 0.12
   )
@@ -917,6 +1077,11 @@ export function assertClosedReplayFreezeRetargeting(
       'Authored-scope cost proof does not bind the registered candidate and control',
     )
   validateConservativeCostProof(nextFreeze)
+  if (
+    studyId === NATIVE_SELECTOR_STUDY_ID &&
+    costProof.derivedFrom !== `pinned-price-proof-sha256:${NATIVE_SELECTOR_PRICE_PROOF.sha256}`
+  )
+    throw new RangeError('Native-selector cost proof does not bind the pinned fresh price proof')
 
   const annotationById = new Map(annotations.cases.map((row) => [row.opaqueCaseId, row]))
   if (annotationById.size !== annotations.cases.length)
@@ -960,16 +1125,26 @@ export function assertClosedReplayFreezeRetargeting(
   const normalizedNextProof = normalizedNext.conservativeCostProof as {
     profileDispatchUpperBounds: Array<Record<string, unknown>>
     proofSha256: string
+    maxUsdPerPhysicalDispatch: number
+    derivedFrom: string
   }
   const normalizedParentProof = normalizedParent.conservativeCostProof as {
     profileDispatchUpperBounds: Array<Record<string, unknown>>
     proofSha256: string
+    maxUsdPerPhysicalDispatch: number
+    derivedFrom: string
   }
   const normalizedNextCandidateBound = normalizedNextProof.profileDispatchUpperBounds[0]
   const normalizedParentCandidateBound = normalizedParentProof.profileDispatchUpperBounds[0]
   if (!normalizedNextCandidateBound || !normalizedParentCandidateBound)
     throw new RangeError('Authored-scope candidate cost proof is incomplete')
   normalizedNextCandidateBound.profileId = normalizedParentCandidateBound.profileId
+  if (studyId === NATIVE_SELECTOR_STUDY_ID) {
+    normalizedNextCandidateBound.maxUsdPerPhysicalDispatch =
+      normalizedParentCandidateBound.maxUsdPerPhysicalDispatch
+    normalizedNextProof.maxUsdPerPhysicalDispatch = normalizedParentProof.maxUsdPerPhysicalDispatch
+    normalizedNextProof.derivedFrom = normalizedParentProof.derivedFrom
+  }
   normalizedNextProof.proofSha256 = normalizedParentProof.proofSha256
   const nextStrata = normalizedNext.sourceStrataCommitments as Array<Record<string, unknown>>
   const parentStrata = normalizedParent.sourceStrataCommitments as Array<Record<string, unknown>>
@@ -1084,6 +1259,7 @@ export async function verifyDevReplayAdmission(input: {
   | VerifiedProviderRefusalReplayAdmission
   | VerifiedAuthoredScopeReplayAdmission
   | VerifiedNativePresenceReplayAdmission
+  | VerifiedNativeSelectorReplayAdmission
 > {
   const studyId = input.studyId
   const protocolPath = input.protocolPath
@@ -1114,15 +1290,25 @@ export async function verifyDevReplayAdmission(input: {
       ...(allowExpiredReadOnly === undefined ? {} : { allowExpiredReadOnly }),
     })
   }
-  if (studyId !== AUTHORED_SCOPE_STUDY_ID && studyId !== NATIVE_PRESENCE_STUDY_ID)
+  if (
+    studyId !== AUTHORED_SCOPE_STUDY_ID &&
+    studyId !== NATIVE_PRESENCE_STUDY_ID &&
+    studyId !== NATIVE_SELECTOR_STUDY_ID
+  )
     throw new RangeError('Replay study is outside the closed registry')
   const isNativePresence = studyId === NATIVE_PRESENCE_STUDY_ID
+  const isNativeSelector = studyId === NATIVE_SELECTOR_STUDY_ID
   const policy = replayStudyPolicy(studyId)
   if (
     isNativePresence &&
     (!('presencePolicy' in policy) || H6_PRESENCE_POLICY_SHA256 !== policy.presencePolicy.sha256)
   )
     throw new RangeError('Native-presence policy hash differs from the implemented H6 policy')
+  if (
+    isNativeSelector &&
+    (!('presencePolicy' in policy) || H6_PRESENCE_POLICY_SHA256 !== policy.presencePolicy.sha256)
+  )
+    throw new RangeError('Native-selector presence policy differs from the implemented H6 policy')
   const expectedProtocolPath = resolve(policy.canonicalRoot, 'protocol-inputs', 'protocol.json')
   if (resolve(protocolPath) !== expectedProtocolPath)
     throw new RangeError('Replay protocol must use its registered production path')
@@ -1144,12 +1330,84 @@ export async function verifyDevReplayAdmission(input: {
     policy.parentAuditPath,
     policy.parentAuditSha256,
   )
-  const parentAudit = isNativePresence
-    ? nativePresenceParentAuditSchema.parse(parseAuthoredScopeJson(parentAuditBytes))
-    : validateScopeParentAudit(parseAuthoredScopeJson(parentAuditBytes))
+  if (isNativeSelector) {
+    const selectorProtocol = nativeSelectorReplayProtocolSchema.parse(protocol)
+    if (
+      JSON.stringify(selectorProtocol.priceProof) !==
+        JSON.stringify({
+          path: NATIVE_SELECTOR_PRICE_PROOF.path,
+          sha256: NATIVE_SELECTOR_PRICE_PROOF.sha256,
+        }) ||
+      JSON.stringify(selectorProtocol.selectionPolicy) !== JSON.stringify(NATIVE_SELECTOR_POLICY)
+    )
+      throw new RangeError('Native-selector protocol price or selection policy is not registered')
+    const priceBytes = await readPinnedReplayFile(
+      NATIVE_SELECTOR_PRICE_PROOF.path,
+      NATIVE_SELECTOR_PRICE_PROOF.sha256,
+      64 * 1024,
+    )
+    const priceProof = nativeSelectorPriceProofSchema.parse(parseAuthoredScopeJson(priceBytes))
+    const catalogBytes = await readPinnedReplayFile(
+      priceProof.rawCatalog.path,
+      priceProof.rawCatalog.sha256,
+      64 * 1024,
+    )
+    if (
+      catalogBytes.byteLength !== priceProof.rawCatalog.bytes ||
+      replaySha256(catalogBytes) !== NATIVE_SELECTOR_PRICE_PROOF.catalogSha256
+    )
+      throw new RangeError('Native-selector raw provider price catalog differs from its proof')
+    const catalog = z
+      .object({
+        data: z
+          .object({
+            id: z.literal('openai/gpt-6-luna-decisions'),
+            endpoints: z
+              .array(
+                z
+                  .object({
+                    model_id: z.literal('openai/gpt-6-luna-decisions'),
+                    provider_name: z.literal('OpenAI'),
+                    tag: z.literal('openai'),
+                    pricing: z
+                      .object({ prompt: z.literal('0.0000001'), completion: z.literal('0') })
+                      .passthrough(),
+                  })
+                  .passthrough(),
+              )
+              .length(1),
+          })
+          .passthrough(),
+      })
+      .passthrough()
+      .parse(parseAuthoredScopeJson(catalogBytes))
+    if (catalog.data.endpoints.length !== priceProof.eligibleEndpoints)
+      throw new RangeError('Native-selector price proof does not identify its single native route')
+  }
+  const selectorParentAudit = isNativeSelector
+    ? nativeSelectorParentAuditSchema.parse(parseAuthoredScopeJson(parentAuditBytes))
+    : undefined
+  const parentAudit = selectorParentAudit
+    ? {
+        references: selectorParentAudit.refs,
+        baseline: {
+          ledgerVersion: 180,
+          parentLedgerVersion: 180,
+          physicalDispatchCount: selectorParentAudit.parentPhysicalDispatchCount,
+          logicalAttemptCount: selectorParentAudit.parentCaseArmAttempts,
+          logicalCaseAttemptCount: selectorParentAudit.parentCaseArmAttempts,
+          knownCostUsd: selectorParentAudit.parentKnownCostUsd,
+          unknownReserveUsd: selectorParentAudit.parentUnknownReserveUsd,
+          nextPhysicalId: selectorParentAudit.parentPhysicalDispatchCount + 1,
+          nextReservationId: selectorParentAudit.parentPhysicalDispatchCount + 1,
+        },
+      }
+    : isNativePresence
+      ? nativePresenceParentAuditSchema.parse(parseAuthoredScopeJson(parentAuditBytes))
+      : validateScopeParentAudit(parseAuthoredScopeJson(parentAuditBytes))
   const referencePaths = new Set<string>()
   const nativeParentEvidence = new Map<string, Uint8Array>()
-  const parentReferences: readonly { path: string; sha256: string }[] = parentAudit.references
+  const parentReferences = parentAudit.references
   for (const reference of parentReferences) {
     const absolute = resolve(reference.path)
     if (!inside(trustedRoot, absolute) || referencePaths.has(absolute))
@@ -1159,7 +1417,7 @@ export async function verifyDevReplayAdmission(input: {
     const expectedLength = Reflect.get(reference, 'bytes')
     if (typeof expectedLength === 'number' && referenceBytes.byteLength !== expectedLength)
       throw new RangeError('Native-presence parent reference byte length differs from its pin')
-    if (isNativePresence) nativeParentEvidence.set(absolute, referenceBytes)
+    if (isNativePresence || isNativeSelector) nativeParentEvidence.set(absolute, referenceBytes)
   }
   if (isNativePresence) {
     const parentRoot = resolve(
@@ -1209,12 +1467,103 @@ export async function verifyDevReplayAdmission(input: {
     )
       throw new RangeError('Native-presence parent lacks a hash-bound terminal DEV stop')
   }
+  if (selectorParentAudit) {
+    const parentRoot = resolve(NATIVE_PRESENCE_ROOT)
+    const readSelectorEvidence = (relativePath: string): Record<string, unknown> => {
+      const bytes = nativeParentEvidence.get(resolve(parentRoot, relativePath))
+      if (!bytes) throw new RangeError('Native-selector sealed parent evidence is incomplete')
+      return z.record(z.unknown()).parse(parseAuthoredScopeJson(bytes))
+    }
+    const report = readSelectorEvidence('execution/reports/dev8-report.json')
+    const review = readSelectorEvidence('execution/reviews/dev8-review.json')
+    const candidateCloseout = readSelectorEvidence(
+      'execution/closeouts/dev40-candidate-closeout.json',
+    )
+    const controlCloseout = readSelectorEvidence('execution/closeouts/dev40-control-closeout.json')
+    const closeout = readSelectorEvidence('execution/closeout/dev40-closeout.json')
+    const parentProtocolBytes = nativeParentEvidence.get(
+      resolve(parentRoot, 'protocol-inputs/protocol.json'),
+    )
+    if (!parentProtocolBytes)
+      throw new RangeError('Native-selector R3 protocol is absent from its parent audit')
+    const parentProtocol = nativePresenceReplayProtocolSchema.parse(
+      parseAuthoredScopeJson(parentProtocolBytes),
+    )
+    const mainAuditBytes = await readPinnedReplayFile(
+      '/root/.codex/artifacts/zorya-classifier-mcp-20261101/query-scope-research-v1/native-presence-implementation/wave29-main-validation/main-closeout-audit-v1.json',
+      '9f4e1a05c6e77b7ae72631a492999f04b916e61188b91587b79e7117dc2bc1aa',
+    )
+    const mainAudit = z.record(z.unknown()).parse(parseAuthoredScopeJson(mainAuditBytes))
+    const reportBody = Object.fromEntries(
+      Object.entries(report).filter(([key]) => key !== 'reportSha256'),
+    )
+    const reviewBody = Object.fromEntries(
+      Object.entries(review).filter(([key]) => key !== 'reviewSha256'),
+    )
+    const parentFreezeBytes = nativeParentEvidence.get(
+      resolve(parentRoot, 'protocol-inputs/phase-freeze.json'),
+    )
+    if (!parentFreezeBytes)
+      throw new RangeError('Native-selector parent phase freeze is absent from its audit')
+    const parentFreeze = phaseFreezeSchema.parse(parseAuthoredScopeJson(parentFreezeBytes))
+    validateImmutableCloseouts({
+      freeze: parentFreeze,
+      candidateCloseout: immutableCloseoutSchema.parse(candidateCloseout),
+      controlCloseout: immutableCloseoutSchema.parse(controlCloseout),
+    })
+    const parentProtocolRef = parentReferences.find(
+      (reference) => reference.path === resolve(parentRoot, 'protocol-inputs/protocol.json'),
+    )
+    if (
+      report.schema !== 'h8a-dev-screen-report-v1' ||
+      report.screen !== 'dev8' ||
+      report.completedPairs !== 8 ||
+      report.expectedPairs !== 8 ||
+      report.reportSha256 !== hashIdentity(reportBody) ||
+      review.schema !== 'h8a-dev-screen-review-v1' ||
+      review.reviewProtocol !== 'no-apparent-collapse-main-review-v1' ||
+      review.reviewerId !== 'main-orchestrator' ||
+      review.judgement !== 'stop' ||
+      review.screenReportSha256 !== report.reportSha256 ||
+      review.reviewSha256 !== hashIdentity(reviewBody) ||
+      candidateCloseout.schema !== 'h8a-fresh-immutable-closeout-v1' ||
+      candidateCloseout.freezeId !== NATIVE_PRESENCE_FREEZE_ID ||
+      candidateCloseout.phaseId !== PHASE_NATIVE_PRESENCE_DEV40_ID ||
+      candidateCloseout.profileId !== PROFILE_NATIVE_PRESENCE_CANDIDATE_ID ||
+      !Array.isArray(candidateCloseout.outputRows) ||
+      candidateCloseout.outputRows.length !== 40 ||
+      controlCloseout.schema !== 'h8a-fresh-immutable-closeout-v1' ||
+      controlCloseout.freezeId !== NATIVE_PRESENCE_FREEZE_ID ||
+      controlCloseout.phaseId !== PHASE_NATIVE_PRESENCE_DEV40_ID ||
+      controlCloseout.profileId !== PROFILE_CONTROL_ID ||
+      !Array.isArray(controlCloseout.outputRows) ||
+      controlCloseout.outputRows.length !== 40 ||
+      closeout.schema !== 'h8a-native-presence-replay-dev40-closeout-v1' ||
+      closeout.studyId !== NATIVE_PRESENCE_STUDY_ID ||
+      closeout.freezeId !== NATIVE_PRESENCE_FREEZE_ID ||
+      closeout.protocolSha256 !== parentProtocolRef?.sha256 ||
+      closeout.candidateCloseoutSha256 !== candidateCloseout.closeoutSha256 ||
+      closeout.controlCloseoutSha256 !== controlCloseout.closeoutSha256 ||
+      closeout.allStageReviewsAdvance !== false ||
+      closeout.terminalStop !== null ||
+      closeout.qualEligible !== false ||
+      parentProtocol.studyId !== NATIVE_PRESENCE_STUDY_ID ||
+      parentProtocol.freeze.path !== policy.parentFreezePath ||
+      parentProtocol.freeze.sha256 !== policy.parentFreezeSha256 ||
+      mainAudit.schema !== 'main-native-presence-closeout-audit-v1' ||
+      mainAudit.studyId !== NATIVE_PRESENCE_STUDY_ID ||
+      mainAudit.reportSha256 !== report.reportSha256 ||
+      mainAudit.reviewSha256 !== review.reviewSha256 ||
+      mainAudit.qualEligible !== false
+    )
+      throw new RangeError('Native-selector parent is not the pinned closed STOP-reviewed DEV40')
+  }
   const requiredRefs = [
     [policy.parentLedgerPath, policy.parentLedgerSha256],
     [policy.parentFreezePath!, policy.parentFreezeSha256!],
     [policy.parentAnnotationsPath!, policy.parentAnnotationsSha256!],
   ] as const
-  assertRequiredParentAuditReferences(parentAudit.references, requiredRefs)
+  assertRequiredParentAuditReferences(parentReferences, requiredRefs)
   const ledgerBytes = await readPinnedReplayFile(policy.parentLedgerPath, policy.parentLedgerSha256)
   if (isNativePresence) {
     const registrationRef = parentAudit.references.find(
@@ -1248,31 +1597,61 @@ export async function verifyDevReplayAdmission(input: {
     )
       throw new RangeError('Native-presence parent pair differs from its frozen audit baseline')
   }
-  const parentLedger = isNativePresence
-    ? null
-    : z
-        .object({
-          schema: z.literal('h8a-provider-refusal-replay-ledger-v1'),
-          ledgerVersion: z.literal(161),
-          nextReservationId: z.literal(240),
-          nextPhysicalId: z.literal(240),
-          physicalDispatchCount: z.literal(239),
-          uncertainPhysicalDispatchCount: z.literal(0),
-          logicalAttemptCount: z.literal(75),
-          knownCostUsd: z.literal(0.14494101499999998),
-          unknownReserveUsd: z.literal(0.24),
-          inFlightReservations: z.array(z.unknown()).length(0),
-          resumeBlocked: z.literal(false),
-          crashRecoveryLatched: z.literal(false),
-          integrityBlocked: z.literal(false),
-        })
-        .passthrough()
-        .parse(parseAuthoredScopeJson(ledgerBytes))
-  const expectedParentLedgerVersion = Reflect.get(
-    parentAudit.baseline,
-    isNativePresence ? 'ledgerVersion' : 'parentLedgerVersion',
+  if (selectorParentAudit) {
+    const registrationRef = parentReferences.find(
+      (reference) => reference.path === policy.parentRegistrationPath,
+    )
+    if (!registrationRef || registrationRef.sha256 !== policy.parentRegistrationSha256)
+      throw new RangeError('Native-selector parent registration reference is missing')
+    const registrationBytes = nativeParentEvidence.get(resolve(registrationRef.path))
+    if (!registrationBytes)
+      throw new RangeError('Native-selector parent registration is absent from the audit pins')
+    const linked = validateAuthoredScopeReplayParentPair(
+      parseAuthoredScopeJson(ledgerBytes),
+      parseAuthoredScopeJson(registrationBytes),
+      NATIVE_SELECTOR_STUDY_ID,
+    )
+    if (
+      linked.ledgerVersion !== 180 ||
+      linked.physicalDispatchCount !== selectorParentAudit.parentPhysicalDispatchCount ||
+      linked.logicalAttemptCount !== selectorParentAudit.parentCaseArmAttempts ||
+      linked.knownCostUsd !== selectorParentAudit.parentKnownCostUsd ||
+      linked.unknownReserveUsd !== selectorParentAudit.parentUnknownReserveUsd ||
+      linked.nextPhysicalId !== selectorParentAudit.parentPhysicalDispatchCount + 1 ||
+      linked.nextReservationId !== selectorParentAudit.parentPhysicalDispatchCount + 1 ||
+      linked.maxPhysicalCalls !== selectorParentAudit.globalPhysicalCallLimit
+    )
+      throw new RangeError('Native-selector parent pair differs from its frozen prospective audit')
+  }
+  const parentLedger =
+    isNativePresence || isNativeSelector
+      ? null
+      : z
+          .object({
+            schema: z.literal('h8a-provider-refusal-replay-ledger-v1'),
+            ledgerVersion: z.literal(161),
+            nextReservationId: z.literal(240),
+            nextPhysicalId: z.literal(240),
+            physicalDispatchCount: z.literal(239),
+            uncertainPhysicalDispatchCount: z.literal(0),
+            logicalAttemptCount: z.literal(75),
+            knownCostUsd: z.literal(0.14494101499999998),
+            unknownReserveUsd: z.literal(0.24),
+            inFlightReservations: z.array(z.unknown()).length(0),
+            resumeBlocked: z.literal(false),
+            crashRecoveryLatched: z.literal(false),
+            integrityBlocked: z.literal(false),
+          })
+          .passthrough()
+          .parse(parseAuthoredScopeJson(ledgerBytes))
+  const expectedParentLedgerVersion = isNativePresence
+    ? Reflect.get(parentAudit.baseline, 'ledgerVersion')
+    : Reflect.get(parentAudit.baseline, 'parentLedgerVersion')
+  if (
+    !isNativeSelector &&
+    parentLedger &&
+    parentLedger.ledgerVersion !== expectedParentLedgerVersion
   )
-  if (parentLedger && parentLedger.ledgerVersion !== expectedParentLedgerVersion)
     throw new RangeError('Authored-scope parent ledger differs from the frozen audit baseline')
 
   const sourceAuditBytes = await readPinnedReplayFile(
@@ -1402,6 +1781,17 @@ export async function verifyDevReplayAdmission(input: {
     )
       throw new RangeError('Native-presence closure does not bind its registered hypothesis')
   }
+  if (isNativeSelector) {
+    const hypothesis = closure.files.find(
+      (file) => file.path === 'docs/research/v03-native-selector-hypothesis.ru.md',
+    )
+    if (
+      !('selectionPolicy' in policy) ||
+      !hypothesis ||
+      hypothesis.sha256 !== policy.selectionPolicy.hypothesisSha256
+    )
+      throw new RangeError('Native-selector closure does not bind its registered hypothesis')
+  }
   assertClosedReplayFreezeRetargeting(
     studyId,
     parentFreeze,
@@ -1463,7 +1853,14 @@ export async function verifyDevReplayAdmission(input: {
     (isNativePresence &&
       (!('presencePolicy' in protocol) ||
         !('presencePolicy' in policy) ||
-        JSON.stringify(protocol.presencePolicy) !== JSON.stringify(policy.presencePolicy)))
+        JSON.stringify(protocol.presencePolicy) !== JSON.stringify(policy.presencePolicy))) ||
+    (isNativeSelector &&
+      (!('presencePolicy' in protocol) ||
+        !('presencePolicy' in policy) ||
+        !('selectionPolicy' in protocol) ||
+        !('selectionPolicy' in policy) ||
+        JSON.stringify(protocol.presencePolicy) !== JSON.stringify(policy.presencePolicy) ||
+        JSON.stringify(protocol.selectionPolicy) !== JSON.stringify(policy.selectionPolicy)))
   )
     throw new RangeError(
       'Authored-scope execution or query policy differs from the closed registry',
@@ -1483,6 +1880,8 @@ export async function verifyDevReplayAdmission(input: {
     referenceMaskBytes,
     freezeCommitmentSha256: computePhaseFreezeCommitmentSha256(freeze),
   }
+  if (protocol.studyId === NATIVE_SELECTOR_STUDY_ID)
+    return { ...admission, protocol: nativeSelectorReplayProtocolSchema.parse(protocol) }
   if (protocol.studyId === NATIVE_PRESENCE_STUDY_ID) return { ...admission, protocol }
   return { ...admission, protocol }
 }

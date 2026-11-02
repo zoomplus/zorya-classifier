@@ -5,6 +5,7 @@ import {
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+  PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
 } from './constants.js'
 import { H6_QUERY_POLICY_SHA256 } from '../h6-query-policy.js'
 import { H6_PRESENCE_POLICY_SHA256 } from '../h6-presence-policy.js'
@@ -23,6 +24,7 @@ export type H8aFreshProfileId =
   | typeof PROFILE_FLAT_CANDIDATE_ID
   | typeof PROFILE_SCOPE_CANDIDATE_ID
   | typeof PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+  | typeof PROFILE_NATIVE_SELECTOR_CANDIDATE_ID
   | typeof PROFILE_CONTROL_ID
 
 const h8aCandidateRequestPolicy = {
@@ -136,6 +138,36 @@ export const H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE = Object.freeze({
   requestPolicyIdentitySha256: hashIdentity(h8aNativePresenceCandidateRequestPolicy),
 })
 
+const h8aNativeSelectorCandidateRequestPolicy = Object.freeze({
+  allowFallbacks: false,
+  allowProviderSort: false,
+  allowRetries: false,
+  caseDeadlineSeconds: 240,
+  maxVisionChatPhysicalCallsPerCase: 0,
+  maxNativeDecisionPhysicalCallsPerCase: 4,
+  maxPhysicalCallsPerCase: 4,
+  route: Object.freeze({
+    apiKind: 'openai-compatible-native-decisions' as const,
+    apiEndpoint: '/api/alpha/decisions' as const,
+    model: 'openai/gpt-6-luna-decisions' as const,
+    provider: 'openai' as const,
+    providerName: 'OpenAI' as const,
+  }),
+  nativeRecipeId: PROFILE_FLAT_CANDIDATE_ID,
+  presencePolicyId: 'control-binary-v1' as const,
+  presencePolicySha256: H8A_BINARY_PRESENCE_POLICY_SHA256,
+  queryPolicyId: 'strict-authored-scope-v1' as const,
+  queryPolicySha256: H8A_SCOPE_QUERY_POLICY_SHA256,
+  selectionPolicyId: 'native-categorical-all-stages-v1' as const,
+})
+
+export const H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE = Object.freeze({
+  profileId: PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
+  recipeKind: 'h8a-cpu-flat-native-categorical-all-stages' as const,
+  requestPolicy: h8aNativeSelectorCandidateRequestPolicy,
+  requestPolicyIdentitySha256: hashIdentity(h8aNativeSelectorCandidateRequestPolicy),
+})
+
 export const V02_CONTROL_PROFILE = {
   profileId: PROFILE_CONTROL_ID,
   recipeKind: 'v02-final-v3-fresh-cohort-replay' as const,
@@ -149,6 +181,8 @@ export function profileById(profileId: H8aFreshProfileId) {
   if (profileId === PROFILE_SCOPE_CANDIDATE_ID) return H8A_SCOPE_CANDIDATE_PROFILE
   if (profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID)
     return H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE
+  if (profileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID)
+    return H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE
   if (profileId === PROFILE_CONTROL_ID) return V02_CONTROL_PROFILE
   throw new RangeError('Unknown profile identity')
 }
@@ -160,6 +194,7 @@ export function assertIndependentProfilePolicies(): void {
       H8A_FLAT_CANDIDATE_PROFILE,
       H8A_SCOPE_CANDIDATE_PROFILE,
       H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE,
+      H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE,
     ].some(
       (candidate) =>
         candidate.requestPolicyIdentitySha256 === V02_CONTROL_PROFILE.requestPolicyIdentitySha256,

@@ -5,7 +5,7 @@ import sharp from 'sharp'
 import type { createClassifier } from '../../../src/app/create-classifier.js'
 import type { DecisionPort } from '../../../src/entities/contracts.js'
 import type { SegmentationPort } from '../../../src/entities/segmentation.js'
-import { createOpenRouterVision } from '../../../src/openrouter.js'
+import { createOpenRouterDecisions, createOpenRouterVision } from '../../../src/openrouter.js'
 import { createSharpRaster } from '../../../src/infrastructure/raster.js'
 import { createH8aFullRuntime } from '../h8a-full/factory.js'
 import type { H8aFullSuccess } from '../h8a-full/contracts.js'
@@ -27,6 +27,7 @@ import {
   H8A_FLAT_CANDIDATE_PROFILE,
   H8A_SCOPE_CANDIDATE_PROFILE,
   H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE,
+  H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE,
   V02_CONTROL_PROFILE,
 } from './profiles.js'
 import type { H8aFreshProfileId } from './profiles.js'
@@ -39,6 +40,7 @@ import {
   PROFILE_FLAT_CANDIDATE_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+  PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
 } from './constants.js'
 import type { H8aFreshCandidateId } from './constants.js'
 import { assertNoForbiddenEvaluatorFields } from './forbidden-leakage.js'
@@ -108,6 +110,7 @@ export interface CandidateRuntimeBinding {
   recipeId: H8aFullRecipeId
   queryPolicyId: H6QueryPolicyId
   presencePolicyId?: H6PresencePolicyId
+  selectionPolicyId?: 'native-categorical-all-stages-v1'
 }
 
 type HistoricalCaseKernel = typeof processRegionSeededCase
@@ -162,6 +165,7 @@ interface H8FreshRuntimePortOptionsBase {
   cutoutArtifactDirectory: string
   nativeRuntime: Omit<Parameters<typeof createH8aFullRuntime>[0], 'artifactRoot'>
   candidateProfileId?: H8aFreshCandidateId
+  selectionPolicyId?: 'native-categorical-all-stages-v1'
   mobileSam: { encoderPath: string; decoderPath: string }
   sourceCanvasByOpaqueCaseId: ReadonlyMap<string, { width: number; height: number }>
   fetch?: typeof globalThis.fetch
@@ -180,6 +184,10 @@ export type OfflineFixtureRuntimePortOptions = H8FreshRuntimePortOptionsBase & {
   fetch: typeof globalThis.fetch
   /** Offline-only cleanup fault injection for receipt-preservation tests. */
   removeTemporaryCaseRoot?: (path: string) => Promise<void>
+  /** Offline-only fixed native receipt directory for persistence-failure tests. */
+  receiptDirectoryForTest?: (caseId: string, route: 'native-selector') => string
+  /** Offline-only observation of the actual recorder used by the public adapter. */
+  recorderForTest?: (caseId: string, route: 'native-selector', recorder: Recorder) => void
 }
 
 type AnyFreshRuntimePortOptions = H8FreshRuntimePortOptions | OfflineFixtureRuntimePortOptions
@@ -249,6 +257,8 @@ function candidateProfile(profileId: H8aFreshCandidateId) {
   if (profileId === PROFILE_SCOPE_CANDIDATE_ID) return H8A_SCOPE_CANDIDATE_PROFILE
   if (profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID)
     return H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE
+  if (profileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID)
+    return H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE
   throw new RangeError('Unknown candidate profile identity')
 }
 
@@ -257,7 +267,8 @@ function isCandidateProfileId(profileId: H8aFreshProfileId): profileId is H8aFre
     profileId === PROFILE_CANDIDATE_ID ||
     profileId === PROFILE_FLAT_CANDIDATE_ID ||
     profileId === PROFILE_SCOPE_CANDIDATE_ID ||
-    profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+    profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID ||
+    profileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID
   )
 }
 
@@ -283,7 +294,7 @@ function createRecordedDecision(
   apiKey: string,
   receiptDirectory: string,
   controlEngine: H8FreshControlEngine,
-  source: 'vision' | 'native-presence' | 'control',
+  source: 'vision' | 'native-presence' | 'native-selector' | 'control',
 ): Recorder {
   const boundary = createCampaignFetchBoundary({
     ledger: context.ledger,
@@ -302,24 +313,32 @@ function createRecordedDecision(
   const isCandidate = isCandidateProfileId(profileId)
   const selectedCandidateProfile = isCandidate ? candidateProfile(profileId) : undefined
   const route = selectedCandidateProfile
-    ? source === 'native-presence'
+    ? source === 'native-selector'
       ? {
-          model: H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.model,
-          provider:
-            H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.provider,
-          providerName:
-            H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.providerName,
-          apiEndpoint:
-            H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.apiEndpoint,
+          model: H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE.requestPolicy.route.model,
+          provider: H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE.requestPolicy.route.provider,
+          providerName: H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE.requestPolicy.route.providerName,
+          apiEndpoint: H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE.requestPolicy.route.apiEndpoint,
           allowFallbacks: false as const,
         }
-      : {
-          model: selectedCandidateProfile.requestPolicy.route.model,
-          provider: selectedCandidateProfile.requestPolicy.route.provider,
-          providerName: selectedCandidateProfile.requestPolicy.route.providerName,
-          apiEndpoint: selectedCandidateProfile.requestPolicy.route.apiEndpoint,
-          allowFallbacks: false as const,
-        }
+      : source === 'native-presence'
+        ? {
+            model: H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.model,
+            provider:
+              H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.provider,
+            providerName:
+              H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.providerName,
+            apiEndpoint:
+              H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute.apiEndpoint,
+            allowFallbacks: false as const,
+          }
+        : {
+            model: selectedCandidateProfile.requestPolicy.route.model,
+            provider: selectedCandidateProfile.requestPolicy.route.provider,
+            providerName: selectedCandidateProfile.requestPolicy.route.providerName,
+            apiEndpoint: selectedCandidateProfile.requestPolicy.route.apiEndpoint,
+            allowFallbacks: false as const,
+          }
     : {
         model: V02_CONTROL_PROFILE.requestPolicy.model,
         provider: V02_CONTROL_PROFILE.requestPolicy.provider,
@@ -328,16 +347,18 @@ function createRecordedDecision(
         allowFallbacks: false as const,
       }
   const maximumCalls =
-    source === 'native-presence'
-      ? profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
-        ? H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute
-            .maxPhysicalCallsPerCase
-        : 0
-      : source === 'vision' && profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
-        ? H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.maxVisionChatPhysicalCallsPerCase
-        : isCandidate
-          ? CANDIDATE_CASE_MAX_CALLS
-          : CONTROL_CASE_MAX_CALLS
+    source === 'native-selector'
+      ? H8A_NATIVE_SELECTOR_CANDIDATE_PROFILE.requestPolicy.maxNativeDecisionPhysicalCallsPerCase
+      : source === 'native-presence'
+        ? profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+          ? H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.nativePresenceRoute
+              .maxPhysicalCallsPerCase
+          : 0
+        : source === 'vision' && profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+          ? H8A_NATIVE_PRESENCE_CANDIDATE_PROFILE.requestPolicy.maxVisionChatPhysicalCallsPerCase
+          : isCandidate
+            ? CANDIDATE_CASE_MAX_CALLS
+            : CONTROL_CASE_MAX_CALLS
   if (maximumCalls < 1) throw new RangeError('Selected recorder route is not configured')
   const recorder = createFixedRouteRecorder({
     maxPhysicalCalls: maximumCalls,
@@ -345,7 +366,18 @@ function createRecordedDecision(
     receiptDirectory,
     route,
     dispatchFetch: boundary.fetch,
+    ...(source === 'native-selector'
+      ? { nativeWireEvidenceCapture: { enabled: true as const } }
+      : {}),
     createPort: (fetcher) => {
+      if (source === 'native-selector')
+        return createOpenRouterDecisions({
+          apiKey,
+          model: route.model,
+          provider: route.provider,
+          providerName: route.providerName,
+          fetch: fetcher,
+        })
       if (source === 'native-presence' || !selectedCandidateProfile)
         return controlEngine.createNativeCategoricalPresencePort(
           controlEngine.createOpenRouterDecisions({
@@ -718,13 +750,26 @@ function buildCandidatePort(
       let nativePresenceContext: DispatchEvidenceContext | undefined
       let nativePresenceRecorder: Recorder | undefined
       try {
+        const receiptDirectory =
+          options.controlEngine.kind === 'offline-fixture-only' &&
+          'receiptDirectoryForTest' in options &&
+          profileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID &&
+          options.receiptDirectoryForTest
+            ? options.receiptDirectoryForTest(input.opaqueCaseId, 'native-selector')
+            : join(options.artifactRoot, 'provider-receipts', randomUUID())
         recorder = createRecordedDecision(
           dispatchContext,
           options.apiKey,
-          join(options.artifactRoot, 'provider-receipts', randomUUID()),
+          receiptDirectory,
           options.controlEngine,
-          'vision',
+          profileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID ? 'native-selector' : 'vision',
         )
+        if (
+          profileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID &&
+          'recorderForTest' in options &&
+          options.recorderForTest
+        )
+          options.recorderForTest(input.opaqueCaseId, 'native-selector', recorder)
         nativePresenceContext =
           profileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
             ? {
@@ -759,7 +804,11 @@ function buildCandidatePort(
           includeCutout: true,
           signal: signalController.signal,
           decision: recorder.port,
-          ...(nativePresenceRecorder ? { presenceDecision: nativePresenceRecorder.port } : {}),
+          ...(nativePresenceRecorder
+            ? { presenceDecision: nativePresenceRecorder.port }
+            : profileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID
+              ? { presenceDecision: recorder.port }
+              : {}),
           imageState: raster.imageState,
         })
         assertCandidateResultRecipe(result, selectedRecipeId)
@@ -784,7 +833,14 @@ function buildCandidatePort(
               },
             ]
           : []),
-        { sourceId: 'vision' as const, recorder, context: dispatchContext },
+        {
+          sourceId:
+            profileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID
+              ? ('native-selector' as const)
+              : ('vision' as const),
+          recorder,
+          context: dispatchContext,
+        },
       ]
       for (const source of recorderSources) {
         try {
@@ -1377,12 +1433,22 @@ async function createH8FreshRuntimePortsInternal(
     throw new RangeError('Unsupported control engine kind')
   }
   const runtimeProfileId: unknown = options.candidateProfileId
+  const requestedSelectionPolicyId: unknown = options.selectionPolicyId
+  const configuredFetch = options.fetch
+  const configuredCandidateRuntime = options.createCandidateRuntime
+  const configuredRemoveTemporaryCaseRoot =
+    'removeTemporaryCaseRoot' in options ? options.removeTemporaryCaseRoot : undefined
+  const configuredReceiptDirectoryForTest =
+    'receiptDirectoryForTest' in options ? options.receiptDirectoryForTest : undefined
+  const configuredRecorderForTest =
+    'recorderForTest' in options ? options.recorderForTest : undefined
   if (
     runtimeProfileId !== undefined &&
     runtimeProfileId !== PROFILE_CANDIDATE_ID &&
     runtimeProfileId !== PROFILE_FLAT_CANDIDATE_ID &&
     runtimeProfileId !== PROFILE_SCOPE_CANDIDATE_ID &&
-    runtimeProfileId !== PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
+    runtimeProfileId !== PROFILE_NATIVE_PRESENCE_CANDIDATE_ID &&
+    runtimeProfileId !== PROFILE_NATIVE_SELECTOR_CANDIDATE_ID
   )
     throw new RangeError('Unknown candidate profile identity')
   const requestedRecipeId: unknown = options.nativeRuntime.recipeId ?? PROFILE_CANDIDATE_ID
@@ -1414,7 +1480,8 @@ async function createH8FreshRuntimePortsInternal(
     (selectedProfileId === PROFILE_CANDIDATE_ID && selectedRecipeId !== PROFILE_CANDIDATE_ID) ||
     ((selectedProfileId === PROFILE_FLAT_CANDIDATE_ID ||
       selectedProfileId === PROFILE_SCOPE_CANDIDATE_ID ||
-      selectedProfileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID) &&
+      selectedProfileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID ||
+      selectedProfileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID) &&
       selectedRecipeId !== PROFILE_FLAT_CANDIDATE_ID)
   )
     throw new RangeError('Candidate profile is incompatible with the selected native recipe')
@@ -1436,13 +1503,33 @@ async function createH8FreshRuntimePortsInternal(
       'Native-presence profile requires explicit flat recipe and strict binary policies',
     )
   if (
+    selectedProfileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID &&
+    (runtimeProfileId !== PROFILE_NATIVE_SELECTOR_CANDIDATE_ID ||
+      selectedRecipeId !== PROFILE_FLAT_CANDIDATE_ID ||
+      selectedQueryPolicyId !== 'strict-authored-scope-v1' ||
+      selectedPresencePolicyId !== 'control-binary-v1' ||
+      requestedSelectionPolicyId !== 'native-categorical-all-stages-v1')
+  )
+    throw new RangeError(
+      'Native-selector profile requires its explicit flat, strict binary and categorical policies',
+    )
+  if (
+    selectedProfileId !== PROFILE_NATIVE_SELECTOR_CANDIDATE_ID &&
+    requestedSelectionPolicyId !== undefined
+  )
+    throw new RangeError(
+      'Categorical all-stage selection policy requires the native-selector profile',
+    )
+  if (
     selectedProfileId !== PROFILE_SCOPE_CANDIDATE_ID &&
     selectedProfileId !== PROFILE_NATIVE_PRESENCE_CANDIDATE_ID &&
+    selectedProfileId !== PROFILE_NATIVE_SELECTOR_CANDIDATE_ID &&
     selectedQueryPolicyId !== 'legacy-v1'
   )
     throw new RangeError('Strict authored-scope query policy requires the authored-scope profile')
   if (
     selectedProfileId !== PROFILE_NATIVE_PRESENCE_CANDIDATE_ID &&
+    selectedProfileId !== PROFILE_NATIVE_SELECTOR_CANDIDATE_ID &&
     selectedPresencePolicyId !== 'legacy-three-way-v1'
   )
     throw new RangeError('Binary presence policy requires the native-presence profile')
@@ -1452,6 +1539,12 @@ async function createH8FreshRuntimePortsInternal(
     queryPolicyId: selectedQueryPolicyId,
     ...(selectedProfileId === PROFILE_NATIVE_PRESENCE_CANDIDATE_ID
       ? { presencePolicyId: selectedPresencePolicyId }
+      : {}),
+    ...(selectedProfileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID
+      ? {
+          presencePolicyId: selectedPresencePolicyId,
+          selectionPolicyId: 'native-categorical-all-stages-v1' as const,
+        }
       : {}),
   })
   const ownedCanvasEntries = [...options.sourceCanvasByOpaqueCaseId].map(([opaqueId, canvas]) => {
@@ -1468,22 +1561,47 @@ async function createH8FreshRuntimePortsInternal(
   })
   if (ownedCanvasEntries.length === 0)
     throw new RangeError('Frozen source canvas map must not be empty')
-  const ownedOptions: AnyFreshRuntimePortOptions = {
-    ...options,
+  const commonOwnedOptions = {
+    apiKey: options.apiKey,
     artifactRoot: options.artifactRoot,
     temporaryRoot: options.temporaryRoot,
     maskArtifactDirectory: options.maskArtifactDirectory,
     cutoutArtifactDirectory: options.cutoutArtifactDirectory,
-    apiKey: options.apiKey,
-    candidateProfileId: selectedProfileId,
     nativeRuntime: {
       ...options.nativeRuntime,
       recipeId: selectedRecipeId,
-      queryPolicyId: selectedQueryPolicyId,
-      presencePolicyId: selectedPresencePolicyId,
+      queryPolicyId: selectedQueryPolicyId as H6QueryPolicyId,
+      presencePolicyId: selectedPresencePolicyId as H6PresencePolicyId,
     },
+    candidateProfileId: selectedProfileId,
+    ...(selectedProfileId === PROFILE_NATIVE_SELECTOR_CANDIDATE_ID
+      ? { selectionPolicyId: 'native-categorical-all-stages-v1' as const }
+      : {}),
     mobileSam: { ...options.mobileSam },
     sourceCanvasByOpaqueCaseId: new Map(ownedCanvasEntries),
+    ...(configuredFetch ? { fetch: configuredFetch } : {}),
+    ...(configuredCandidateRuntime ? { createCandidateRuntime: configuredCandidateRuntime } : {}),
+  }
+  let ownedOptions: AnyFreshRuntimePortOptions
+  if (options.controlEngine.kind === 'offline-fixture-only') {
+    if (!('fetch' in options) || !configuredFetch)
+      throw new TypeError('Offline control fixtures require an injected fetcher')
+    ownedOptions = {
+      ...commonOwnedOptions,
+      controlEngine: options.controlEngine,
+      fetch: configuredFetch,
+      ...(configuredRemoveTemporaryCaseRoot
+        ? { removeTemporaryCaseRoot: configuredRemoveTemporaryCaseRoot }
+        : {}),
+      ...(configuredReceiptDirectoryForTest
+        ? { receiptDirectoryForTest: configuredReceiptDirectoryForTest }
+        : {}),
+      ...(configuredRecorderForTest ? { recorderForTest: configuredRecorderForTest } : {}),
+    }
+  } else if (options.controlEngine.kind === 'verified-historical-v02') {
+    ownedOptions = { ...commonOwnedOptions, controlEngine: options.controlEngine }
+  } else {
+    throw new RangeError('Unsupported control engine kind')
   }
   await mkdir(ownedOptions.artifactRoot, { recursive: true, mode: 0o700 })
   await mkdir(ownedOptions.temporaryRoot, { recursive: true, mode: 0o700 })

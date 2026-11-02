@@ -23,6 +23,7 @@ import {
   AUTHORED_SCOPE_STUDY_ID,
   LEGACY_REPLAY_ROOT,
   LEGACY_REPLAY_STUDY_ID,
+  NATIVE_SELECTOR_STUDY_ID,
   REPLAY_STUDY_REGISTRY,
   replayStudyPolicy,
 } from './dev-replay-study-policy.js'
@@ -147,6 +148,7 @@ await test('closed replay registry separates scope authority and inherited count
     LEGACY_REPLAY_STUDY_ID,
     AUTHORED_SCOPE_STUDY_ID,
     'native-presence-flat-dev40-v1',
+    NATIVE_SELECTOR_STUDY_ID,
   ])
   const legacy = replayStudyPolicy(LEGACY_REPLAY_STUDY_ID)
   const scoped = replayStudyPolicy(AUTHORED_SCOPE_STUDY_ID)
@@ -161,6 +163,15 @@ await test('closed replay registry separates scope authority and inherited count
     '9b56da23c01bde7658bf7d5aaa264a9d66192b88705e81b88cb1e9dc6d787fa7',
   )
   assert.equal(scoped.queryPolicy?.sha256, AUTHORED_SCOPE_QUERY_POLICY.sha256)
+  const selector = replayStudyPolicy(NATIVE_SELECTOR_STUDY_ID)
+  assert.equal(selector.inheritedPhysicalCalls, 317)
+  assert.equal(selector.inheritedLogicalAttempts, 103)
+  assert.equal(selector.nextPhysicalId, 318)
+  assert.equal(selector.candidateUsdPerDispatch, 0.12)
+  assert.equal(selector.controlUsdPerDispatch, 0.12)
+  assert.equal(selector.incrementalCallLimit, 400)
+  assert.equal(selector.incrementalExposureUsd, 48)
+  assert.equal(selector.selectionPolicy?.policyId, 'native-categorical-all-stages-v1')
   assert.throws(() => replayStudyPolicy('caller-selected-study-v1'), /closed registry/u)
 })
 

@@ -11,17 +11,25 @@ import {
   NATIVE_PRESENCE_STUDY_ID,
   NATIVE_PRESENCE_POLICY,
   NATIVE_PRESENCE_ROOT,
+  NATIVE_SELECTOR_FREEZE_ID,
+  NATIVE_SELECTOR_STUDY_ID,
+  NATIVE_SELECTOR_POLICY,
+  NATIVE_SELECTOR_PRICE_PROOF,
+  NATIVE_SELECTOR_ROOT,
   replayStudyPolicy,
 } from './dev-replay-study-policy.js'
 import {
   authoredScopeReplayProtocolSchema,
   nativePresenceReplayProtocolSchema,
+  nativeSelectorReplayProtocolSchema,
   parseReplayProtocolForStudy,
   type VerifiedAuthoredScopeReplayAdmission,
   type VerifiedNativePresenceReplayAdmission,
+  type VerifiedNativeSelectorReplayAdmission,
 } from './dev-replay-admission.js'
 import { runAuthoredScopeReplayCli } from './authored-scope-replay-cli.js'
 import { runNativePresenceReplayCli } from './native-presence-replay-cli.js'
+import { runNativeSelectorReplayCli } from './native-selector-replay-cli.js'
 import {
   assertRequiredReplayClosure,
   REQUIRED_REPLAY_CLOSURE_PATHS,
@@ -35,9 +43,11 @@ import { buildSyntheticAnnotationBundle, buildSyntheticPhaseFreeze } from './tes
 import {
   PHASE_SCOPE_DEV40_ID,
   PHASE_NATIVE_PRESENCE_DEV40_ID,
+  PHASE_NATIVE_SELECTOR_DEV40_ID,
   PROFILE_CONTROL_ID,
   PROFILE_SCOPE_CANDIDATE_ID,
   PROFILE_NATIVE_PRESENCE_CANDIDATE_ID,
+  PROFILE_NATIVE_SELECTOR_CANDIDATE_ID,
 } from './constants.js'
 import { PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY } from './provider-refusal-replay.js'
 import {
@@ -123,6 +133,7 @@ function assertScopeAdmission(
 type QueryReplayAdmission =
   | VerifiedAuthoredScopeReplayAdmission
   | VerifiedNativePresenceReplayAdmission
+  | VerifiedNativeSelectorReplayAdmission
 
 function assertQueryReplayAdmission(
   admission: Parameters<DevReplayOfflineCliHooks['executeScreen']>[0],
@@ -144,11 +155,21 @@ async function makeScopeFixture(
   materializeArtifactRows = false,
   studyId:
     | typeof AUTHORED_SCOPE_STUDY_ID
-    | typeof NATIVE_PRESENCE_STUDY_ID = AUTHORED_SCOPE_STUDY_ID,
+    | typeof NATIVE_PRESENCE_STUDY_ID
+    | typeof NATIVE_SELECTOR_STUDY_ID = AUTHORED_SCOPE_STUDY_ID,
 ) {
   const isNative = studyId === NATIVE_PRESENCE_STUDY_ID
-  const phaseId = isNative ? PHASE_NATIVE_PRESENCE_DEV40_ID : PHASE_SCOPE_DEV40_ID
-  const freezeId = isNative ? NATIVE_PRESENCE_FREEZE_ID : AUTHORED_SCOPE_FREEZE_ID
+  const isSelector = studyId === NATIVE_SELECTOR_STUDY_ID
+  const phaseId = isSelector
+    ? PHASE_NATIVE_SELECTOR_DEV40_ID
+    : isNative
+      ? PHASE_NATIVE_PRESENCE_DEV40_ID
+      : PHASE_SCOPE_DEV40_ID
+  const freezeId = isSelector
+    ? NATIVE_SELECTOR_FREEZE_ID
+    : isNative
+      ? NATIVE_PRESENCE_FREEZE_ID
+      : AUTHORED_SCOPE_FREEZE_ID
   const policy = replayStudyPolicy(studyId)
   const namespaceRoot = join(directory, studyId)
   const base = buildSyntheticPhaseFreeze(phaseId)
@@ -186,9 +207,11 @@ async function makeScopeFixture(
     writeFile(closurePath, closureBytes),
   ])
   const protocolBody = {
-    schema: isNative
-      ? 'h8a-native-presence-replay-protocol-v1'
-      : 'h8a-authored-scope-replay-protocol-v1',
+    schema: isSelector
+      ? 'h8a-native-selector-replay-protocol-v1'
+      : isNative
+        ? 'h8a-native-presence-replay-protocol-v1'
+        : 'h8a-authored-scope-replay-protocol-v1',
     studyId,
     freezeId,
     deadlineIso,
@@ -223,28 +246,49 @@ async function makeScopeFixture(
     executionPolicy: PROVIDER_REFUSAL_REPLAY_EXECUTION_POLICY.policySha256,
     queryPolicy: policy.queryPolicy,
     ...(isNative ? { presencePolicy: NATIVE_PRESENCE_POLICY } : {}),
+    ...(isSelector
+      ? {
+          presencePolicy: NATIVE_PRESENCE_POLICY,
+          selectionPolicy: NATIVE_SELECTOR_POLICY,
+          priceProof: {
+            path: NATIVE_SELECTOR_PRICE_PROOF.path,
+            sha256: NATIVE_SELECTOR_PRICE_PROOF.sha256,
+          },
+        }
+      : {}),
     budget: {
       globalPhysicalCallLimit: 2_000,
       dev40PhysicalCallLimit: 400,
       candidateMaxCallsPerCase: 4,
       controlMaxCallsPerCase: 6,
-      candidateMaxUsdPerDispatch: 0.55,
+      candidateMaxUsdPerDispatch: isSelector ? 0.12 : 0.55,
       controlMaxUsdPerDispatch: 0.12,
       ownerDollarCeilingUsd: null,
     },
     noRetryOrFallback: true,
     physicalCallsAt: 'fetch',
   }
-  const protocol =
-    studyId === NATIVE_PRESENCE_STUDY_ID
+  const protocol = isSelector
+    ? nativeSelectorReplayProtocolSchema.parse(protocolBody)
+    : isNative
       ? nativePresenceReplayProtocolSchema.parse(protocolBody)
       : authoredScopeReplayProtocolSchema.parse(protocolBody)
   const protocolBytes = Buffer.from(JSON.stringify(protocol))
   const protocolPath = join(directory, 'protocol.json')
   await writeFile(protocolPath, protocolBytes)
   const sourceBytes = new Map(base.sourceBytesByCaseId)
-  const admission: QueryReplayAdmission =
-    studyId === NATIVE_PRESENCE_STUDY_ID
+  const admission: QueryReplayAdmission = isSelector
+    ? {
+        protocol: nativeSelectorReplayProtocolSchema.parse(protocol),
+        protocolSha256: sha256(protocolBytes),
+        freeze,
+        annotations,
+        selection,
+        sourceBytes,
+        referenceMaskBytes: new Map(),
+        freezeCommitmentSha256: computePhaseFreezeCommitmentSha256(freeze),
+      }
+    : isNative
       ? {
           protocol: nativePresenceReplayProtocolSchema.parse(protocol),
           protocolSha256: sha256(protocolBytes),
@@ -690,6 +734,118 @@ await test('native presence CLI binds the four-field runtime and completes DEV8/
     assert.equal(closeout.missingPredictionRows, 0)
     assert.equal(closeout.allStageReviewsAdvance, true)
     // Offline hook lifecycle validates orchestration and identity only, not candidate quality.
+    assert.equal(closeout.qualEligible, true)
+    assert.equal(executeCount, 3)
+  } finally {
+    await rm(directory, { recursive: true, force: false })
+  }
+})
+
+await test('native selector CLI binds selection policy and completes DEV8/12/40 offline hooks', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'native-selector-cli-lifecycle-'))
+  try {
+    const fixture = await makeScopeFixture(directory, true, NATIVE_SELECTOR_STUDY_ID)
+    let executeCount = 0
+    const originalExecuteScreen = fixture.hooks.executeScreen
+    fixture.hooks.executeScreen = async (admission, stage) => {
+      executeCount++
+      return originalExecuteScreen(admission, stage)
+    }
+    await assert.rejects(
+      runNativeSelectorReplayCli(
+        cliArgs('register', fixture.protocolPath, fixture.protocolSha256),
+        directory,
+        { ...fixture.hooks, namespaceRoot: NATIVE_SELECTOR_ROOT },
+      ),
+      /temporary namespace/u,
+    )
+    await runNativeSelectorReplayCli(
+      cliArgs('register', fixture.protocolPath, fixture.protocolSha256),
+      directory,
+      fixture.hooks,
+    )
+    const binding = z
+      .object({
+        studyId: z.literal(NATIVE_SELECTOR_STUDY_ID),
+        runtimeBinding: z
+          .object({
+            candidateProfileId: z.literal(PROFILE_NATIVE_SELECTOR_CANDIDATE_ID),
+            recipeId: z.literal('h8a-cpu-flat-target-v2'),
+            queryPolicyId: z.literal('strict-authored-scope-v1'),
+            presencePolicyId: z.literal('control-binary-v1'),
+            selectionPolicyId: z.literal('native-categorical-all-stages-v1'),
+          })
+          .strict(),
+      })
+      .passthrough()
+      .parse(
+        JSON.parse(
+          await readFile(join(fixture.namespaceRoot, 'admission/study-binding.json'), 'utf8'),
+        ) as unknown,
+      )
+    assert.deepEqual(binding.runtimeBinding, replayRuntimeBinding(NATIVE_SELECTOR_STUDY_ID))
+    for (const stage of ['dev8', 'dev12', 'dev40'] as const) {
+      await assert.rejects(
+        runNativeSelectorReplayCli(
+          [
+            'run',
+            stage,
+            '--protocol',
+            fixture.protocolPath,
+            '--protocol-sha256',
+            fixture.protocolSha256,
+          ],
+          directory,
+          fixture.hooks,
+        ),
+        /allow-paid/u,
+      )
+      await runNativeSelectorReplayCli(
+        cliArgs('run', fixture.protocolPath, fixture.protocolSha256, stage),
+        directory,
+        fixture.hooks,
+      )
+      await runNativeSelectorReplayCli(
+        [
+          'review',
+          stage,
+          '--judgement',
+          'advance',
+          '--reason',
+          'synthetic offline selector lifecycle fixture',
+          '--protocol',
+          fixture.protocolPath,
+          '--protocol-sha256',
+          fixture.protocolSha256,
+        ],
+        directory,
+        fixture.hooks,
+      )
+    }
+    await runNativeSelectorReplayCli(
+      cliArgs('closeout', fixture.protocolPath, fixture.protocolSha256),
+      directory,
+      fixture.hooks,
+    )
+    const closeout = z
+      .object({
+        studyId: z.literal(NATIVE_SELECTOR_STUDY_ID),
+        missingPredictionRows: z.number(),
+        allStageReviewsAdvance: z.boolean(),
+        qualEligible: z.boolean(),
+      })
+      .passthrough()
+      .parse(
+        JSON.parse(
+          await readFile(
+            join(fixture.namespaceRoot, 'execution/closeout/dev40-closeout.json'),
+            'utf8',
+          ),
+        ) as unknown,
+      )
+    assert.equal(closeout.missingPredictionRows, 0)
+    assert.equal(closeout.allStageReviewsAdvance, true)
+    // Offline orchestration proves lifecycle wiring only, not candidate quality.
     assert.equal(closeout.qualEligible, true)
     assert.equal(executeCount, 3)
   } finally {

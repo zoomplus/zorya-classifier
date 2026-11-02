@@ -8,6 +8,12 @@ import type { RunBudget } from './budget.js'
 import { createDecisionTrace, hashCanonical, sanitizeDecisionRequest } from './protocol.js'
 import { observeProviderRefusal } from './provider-refusal.js'
 import type { ProviderRefusalObservation } from './provider-refusal.js'
+import {
+  buildNativeWireEvidence,
+  nativeWireQuestionSpecs,
+} from './native-selector-wire-evidence.js'
+import type { NativeWireEvidence } from './native-selector-wire-evidence.js'
+import type { NativeWireQuestionSpec } from './native-selector-wire-evidence.js'
 
 type WireErrorCategory =
   | 'unsupported-parameter'
@@ -94,6 +100,7 @@ interface LogicalCallRecord {
   logicalId: number
   requestSha256: string
   request: ReturnType<typeof sanitizeDecisionRequest>
+  nativeWireQuestions?: NativeWireQuestionSpec[]
   physicalIds: number[]
   errorCode?: string
 }
@@ -338,6 +345,8 @@ interface CapturedResponse {
   response: Response
   wireReceipt: NonNullable<PhysicalCallRecord['wireReceipt']>
   providerRefusal?: ProviderRefusalObservation
+  rawBytes?: Uint8Array
+  parsedBody?: unknown
 }
 
 /** Read the wire body once, then replay only the bounded captured bytes to the adapter. */
@@ -367,10 +376,18 @@ async function readWireReceipt(
     })
   }
   if (!response.body)
-    return { response: replay(new Uint8Array()), wireReceipt: emptyWireReceipt(response, 'empty') }
+    return {
+      response: replay(new Uint8Array()),
+      wireReceipt: emptyWireReceipt(response, 'empty'),
+      rawBytes: new Uint8Array(),
+    }
   const reader = response.body.getReader()
   if (!reader)
-    return { response: replay(new Uint8Array()), wireReceipt: emptyWireReceipt(response, 'empty') }
+    return {
+      response: replay(new Uint8Array()),
+      wireReceipt: emptyWireReceipt(response, 'empty'),
+      rawBytes: new Uint8Array(),
+    }
   const chunks: Uint8Array[] = []
   let bytes = 0
   const deadline = performance.now() + timeoutMs
@@ -463,15 +480,28 @@ async function readWireReceipt(
   }
   const raw = Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)))
   if (disposition)
-    return { response: replay(raw), wireReceipt: emptyWireReceipt(response, disposition) }
+    return {
+      response: replay(raw),
+      wireReceipt: emptyWireReceipt(response, disposition),
+      rawBytes: raw,
+    }
   let parsed: unknown
   try {
     parsed = JSON.parse(raw.toString('utf8'))
   } catch {
-    return { response: replay(raw), wireReceipt: emptyWireReceipt(response, 'invalid-json') }
+    return {
+      response: replay(raw),
+      wireReceipt: emptyWireReceipt(response, 'invalid-json'),
+      rawBytes: raw,
+    }
   }
   if (!parsed || typeof parsed !== 'object')
-    return { response: replay(raw), wireReceipt: emptyWireReceipt(response, 'invalid-json') }
+    return {
+      response: replay(raw),
+      wireReceipt: emptyWireReceipt(response, 'invalid-json'),
+      rawBytes: raw,
+      parsedBody: parsed,
+    }
   const object = parsed as Record<string, unknown>
   const parsedDisposition = responseDisposition(object)
   const providerRefusal = observeProviderRefusal({
@@ -529,7 +559,13 @@ async function readWireReceipt(
     },
   }
   if (providerRefusal) captured.providerRefusal = providerRefusal
+  captured.rawBytes = raw
+  captured.parsedBody = parsed
   return captured
+}
+
+export interface NativeWireEvidenceCaptureOptions {
+  enabled: true
 }
 
 /** Instrument the actual transport fetch boundary. A DecisionPort attempt alone consumes no budget. */
@@ -540,6 +576,7 @@ export function recordProvider(
   route: PhysicalCallRecord['route'],
   baseFetch: typeof globalThis.fetch = globalThis.fetch,
   wireReadTimeoutMs = 45_000,
+  nativeWireEvidenceCapture?: NativeWireEvidenceCaptureOptions,
 ): Recorder {
   const calls: PhysicalCallRecord[] = []
   const logicalCalls: LogicalCallRecord[] = []
@@ -679,27 +716,48 @@ export function recordProvider(
         logical.logicalId,
         record.physicalId,
       )
+      if (nativeWireEvidenceCapture) {
+        const expectedQuestions = logical.nativeWireQuestions
+        if (!expectedQuestions) throw new Error('Native wire capture lost its closed question IDs')
+        const evidence: NativeWireEvidence = buildNativeWireEvidence({
+          expectedQuestions,
+          responseBytes: captured.rawBytes ?? new Uint8Array(),
+          responseBody: captured.parsedBody,
+          logicalId: logical.logicalId,
+          recorderPhysicalId: record.physicalId,
+          requestSha256: record.requestSha256,
+          requestBodySha256: record.requestBodySha256,
+        })
+        await persist(
+          'physical-http',
+          join(directory, `native-wire-${record.physicalId}.json`),
+          JSON.stringify(evidence, null, 2) + '\n',
+          logical.logicalId,
+          record.physicalId,
+        )
+      }
       return captured.response
     } catch (error) {
       record.errorCode = error instanceof ClassifierError ? error.code : 'HTTP_FETCH_ERROR'
       record.durationMs = performance.now() - started
-      await persist(
-        'physical-http',
-        join(directory, `physical-http-${record.physicalId}.json`),
-        JSON.stringify(
-          {
-            physicalId: record.physicalId,
-            logicalId: record.logicalId,
-            httpStatus: null,
-            durationMs: record.durationMs,
-            errorCode: record.errorCode,
-          },
-          null,
-          2,
-        ) + '\n',
-        logical.logicalId,
-        record.physicalId,
-      )
+      if (record.wireReceipt === null)
+        await persist(
+          'physical-http',
+          join(directory, `physical-http-${record.physicalId}.json`),
+          JSON.stringify(
+            {
+              physicalId: record.physicalId,
+              logicalId: record.logicalId,
+              httpStatus: null,
+              durationMs: record.durationMs,
+              errorCode: record.errorCode,
+            },
+            null,
+            2,
+          ) + '\n',
+          logical.logicalId,
+          record.physicalId,
+        )
       throw error
     }
   }
@@ -715,6 +773,9 @@ export function recordProvider(
         logicalId: logicalCalls.length + 1,
         requestSha256: requestInfo.requestSha256,
         request: requestInfo.request,
+        ...(nativeWireEvidenceCapture
+          ? { nativeWireQuestions: nativeWireQuestionSpecs(structuredClone(request)) }
+          : {}),
         physicalIds: [],
       }
       logicalCalls.push(logical)

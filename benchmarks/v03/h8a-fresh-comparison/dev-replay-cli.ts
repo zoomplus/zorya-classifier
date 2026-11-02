@@ -25,9 +25,14 @@ import { parseReplayProtocolForStudy, verifyDevReplayAdmission } from './dev-rep
 import type {
   VerifiedAuthoredScopeReplayAdmission,
   VerifiedNativePresenceReplayAdmission,
+  VerifiedNativeSelectorReplayAdmission,
   VerifiedProviderRefusalReplayAdmission,
 } from './dev-replay-admission.js'
 import { DevReplayLedger } from './dev-replay-ledger.js'
+import {
+  NATIVE_SELECTOR_RUNTIME_BINDING,
+  nativeSelectorRuntimeFactoryOptions,
+} from './native-selector-runtime-binding.js'
 import { ProviderRefusalReplayLedger } from './dev-replay-ledger.js'
 import { readPinnedReplayFile } from './dev-replay-files.js'
 import {
@@ -35,6 +40,8 @@ import {
   AUTHORED_SCOPE_STUDY_ID,
   NATIVE_PRESENCE_ROOT,
   NATIVE_PRESENCE_STUDY_ID,
+  NATIVE_SELECTOR_ROOT,
+  NATIVE_SELECTOR_STUDY_ID,
   LEGACY_REPLAY_ROOT,
   LEGACY_REPLAY_STUDY_ID,
   replayStudyPolicy,
@@ -56,10 +63,14 @@ type ReplayAdmission =
   | VerifiedProviderRefusalReplayAdmission
   | VerifiedAuthoredScopeReplayAdmission
   | VerifiedNativePresenceReplayAdmission
+  | VerifiedNativeSelectorReplayAdmission
 
 function isQueryPolicyReplayAdmission(
   admission: ReplayAdmission,
-): admission is VerifiedAuthoredScopeReplayAdmission | VerifiedNativePresenceReplayAdmission {
+): admission is
+  | VerifiedAuthoredScopeReplayAdmission
+  | VerifiedNativePresenceReplayAdmission
+  | VerifiedNativeSelectorReplayAdmission {
   return 'queryPolicy' in admission.protocol
 }
 
@@ -106,6 +117,7 @@ function testNamespaceRoot(studyId: ReplayStudyId, hooks?: DevReplayOfflineCliHo
     resolve(LEGACY_REPLAY_ROOT),
     resolve(AUTHORED_SCOPE_ROOT),
     resolve(NATIVE_PRESENCE_ROOT),
+    resolve(NATIVE_SELECTOR_ROOT),
   ])
   if (!hooks) return resolve(policy.canonicalRoot)
   const root = resolve(hooks.namespaceRoot)
@@ -206,16 +218,19 @@ const bindingBodySchema = z
       'h8a-provider-refusal-replay-study-binding-v1',
       'h8a-authored-scope-replay-study-binding-v1',
       'h8a-native-presence-replay-study-binding-v1',
+      'h8a-native-selector-replay-study-binding-v1',
     ]),
     studyId: z.enum([
       'provider-refusal-dev40-replay-v1',
       'authored-scope-dev40-v1',
       'native-presence-flat-dev40-v1',
+      'native-selector-flat-dev40-v1',
     ]),
     freezeId: z.enum([
       'h8a-provider-refusal-dev40-replay-20261101-v1',
       'h8a-authored-scope-dev40-20261101-v1',
       'h8a-native-presence-flat-dev40-20261101-v1',
+      'h8a-native-selector-flat-dev40-20261101-v1',
     ]),
     protocolSha256: DIGEST,
     parentAuditSha256: DIGEST,
@@ -227,13 +242,25 @@ const bindingBodySchema = z
     runtimeEnvironmentSha256: DIGEST,
     policySha256: DIGEST,
     runtimeBinding: z
-      .object({
-        candidateProfileId: z.literal('h8a-cpu-native-presence-flat-v4'),
-        recipeId: z.literal('h8a-cpu-flat-target-v2'),
-        queryPolicyId: z.literal('strict-authored-scope-v1'),
-        presencePolicyId: z.literal('control-binary-v1'),
-      })
-      .strict()
+      .union([
+        z
+          .object({
+            candidateProfileId: z.literal('h8a-cpu-native-presence-flat-v4'),
+            recipeId: z.literal('h8a-cpu-flat-target-v2'),
+            queryPolicyId: z.literal('strict-authored-scope-v1'),
+            presencePolicyId: z.literal('control-binary-v1'),
+          })
+          .strict(),
+        z
+          .object({
+            candidateProfileId: z.literal('h8a-cpu-native-selector-flat-v5'),
+            recipeId: z.literal('h8a-cpu-flat-target-v2'),
+            queryPolicyId: z.literal('strict-authored-scope-v1'),
+            presencePolicyId: z.literal('control-binary-v1'),
+            selectionPolicyId: z.literal('native-categorical-all-stages-v1'),
+          })
+          .strict(),
+      ])
       .optional(),
     deadlineIso: z.string().datetime({ offset: true }),
     freezeCommitmentSha256: DIGEST,
@@ -283,9 +310,29 @@ export function assertRequiredReplayClosure(
     'benchmarks/v03/h6-presence-policy.ts',
     'docs/research/v03-native-presence-hypothesis.ru.md',
   ]
+  const selectorRequired = [
+    'benchmarks/v03/h8a-fresh-comparison/native-selector-replay-cli.ts',
+    'benchmarks/v03/h8a-fresh-comparison/native-selector-qual-cli.ts',
+    'benchmarks/v03/h8a-fresh-comparison/native-selector-qual-protocol.ts',
+    'benchmarks/v03/h8a-fresh-comparison/native-selector-qual-admission.ts',
+    'benchmarks/v03/h8a-fresh-comparison/native-selector-qual-ledger.ts',
+    'benchmarks/v03/h8a-fresh-comparison/native-selector-qual-runner.ts',
+    'benchmarks/v03/h8a-fresh-comparison/native-selector-runtime-binding.ts',
+    'benchmarks/v03/h8a-fresh-comparison/native-presence-evidence.ts',
+    'benchmarks/v02/native-selector-wire-evidence.ts',
+    'benchmarks/v02/recording.ts',
+    'benchmarks/v03/h8a-fresh-comparison/runtime-recording.ts',
+    'benchmarks/v03/fresh-dev/imaging.py',
+    'benchmarks/v03/fresh-dev/validation.py',
+    'benchmarks/v03/h6-presence-policy.ts',
+    'benchmarks/v03/h6-query-policy.ts',
+    'benchmarks/v03/h6-context-composer.ts',
+    'docs/research/v03-native-selector-hypothesis.ru.md',
+  ]
   if (
     REQUIRED_REPLAY_CLOSURE_PATHS.some((path) => !pathSet.has(path)) ||
-    (studyId === NATIVE_PRESENCE_STUDY_ID && nativeRequired.some((path) => !pathSet.has(path)))
+    (studyId === NATIVE_PRESENCE_STUDY_ID && nativeRequired.some((path) => !pathSet.has(path))) ||
+    (studyId === NATIVE_SELECTOR_STUDY_ID && selectorRequired.some((path) => !pathSet.has(path)))
   )
     throw new RangeError('Replay producer closure omits a shared runner or evaluation dependency')
 }
@@ -295,6 +342,7 @@ const launchSchema = z
       'h8a-provider-refusal-replay-launch-intent-v1',
       'h8a-authored-scope-replay-launch-intent-v1',
       'h8a-native-presence-replay-launch-intent-v1',
+      'h8a-native-selector-replay-launch-intent-v1',
     ]),
     stage: screenSchema,
     protocolSha256: DIGEST,
@@ -308,6 +356,7 @@ const terminalSchema = z
       'h8a-provider-refusal-replay-terminal-stop-v1',
       'h8a-authored-scope-replay-terminal-stop-v1',
       'h8a-native-presence-replay-terminal-stop-v1',
+      'h8a-native-selector-replay-terminal-stop-v1',
     ]),
     stage: screenSchema,
     protocolSha256: DIGEST,
@@ -329,7 +378,11 @@ function sha256(bytes: Uint8Array | string): string {
 }
 function replaySchemaName(studyId: ReplayStudyId, suffix: string): string {
   const name = replayStudyPolicy(studyId).ledgerSchema.replace(/ledger-v1$/u, `${suffix}-v1`)
-  if (!/^h8a-(?:provider-refusal|authored-scope|native-presence)-replay-[a-z0-9-]+-v1$/u.test(name))
+  if (
+    !/^h8a-(?:provider-refusal|authored-scope|native-presence|native-selector)-replay-[a-z0-9-]+-v1$/u.test(
+      name,
+    )
+  )
     throw new RangeError('Replay schema family is outside the closed registry')
   return name
 }
@@ -340,6 +393,7 @@ export function safeReplayErrorCode(error: unknown): string {
 }
 export function replayRuntimeBinding(studyId: ReplayStudyId) {
   const policy = replayStudyPolicy(studyId)
+  if (studyId === NATIVE_SELECTOR_STUDY_ID) return NATIVE_SELECTOR_RUNTIME_BINDING
   if (studyId === NATIVE_PRESENCE_STUDY_ID)
     return {
       candidateProfileId: policy.candidateProfileId,
@@ -487,6 +541,50 @@ async function verifyClosure(admission: ReplayAdmission, repositoryRoot: string)
   }
 }
 
+/** Verify the exact live source tree for the selected V5 DEV/QUAL producer closure. */
+export async function verifyNativeSelectorQualSourceClosure(input: {
+  closurePath: string
+  closureSha256: string
+  expectedSourceCommit: string
+  repositoryRoot: string
+}): Promise<void> {
+  const bytes = await readPinnedReplayFile(input.closurePath, input.closureSha256, 4 * 1024 * 1024)
+  const closure = closureSchema.parse(JSON.parse(bytes.toString('utf8')) as unknown)
+  if (closure.sourceCommit !== input.expectedSourceCommit)
+    throw new RangeError('QUAL producer closure commit differs from its selected DEV parent')
+  const files = closure.files ?? closure.sourceFiles ?? []
+  const paths = files.map((item) => item.path)
+  if (files.length === 0 || new Set(paths).size !== paths.length)
+    throw new RangeError('QUAL producer closure is empty or repeats a source path')
+  assertLiveRunnerClosure(paths)
+  assertRequiredReplayClosure(paths, NATIVE_SELECTOR_STUDY_ID)
+  const repository = resolve(input.repositoryRoot)
+  if ((await realpath(repository)) !== repository)
+    throw new RangeError('QUAL source root is symlinked or aliased')
+  const currentCommit = execFileSync('git', ['rev-parse', 'HEAD'], {
+    cwd: repository,
+    encoding: 'utf8',
+  }).trim()
+  if (currentCommit !== closure.sourceCommit)
+    throw new RangeError('QUAL producer closure commit differs from the current checkout')
+  const status = execFileSync('git', ['status', '--porcelain', '--untracked-files=all'], {
+    cwd: repository,
+    encoding: 'utf8',
+  })
+  if (status.trim().length > 0) throw new RangeError('QUAL source checkout is not clean')
+  for (const item of files) {
+    if (isAbsolute(item.path) || item.path.split(/[\\/]/u).some((part) => part === '..'))
+      throw new RangeError('QUAL producer closure contains an escaping source path')
+    const absolute = resolve(repository, item.path)
+    const relativePath = relative(repository, absolute)
+    if (isAbsolute(relativePath) || relativePath === '..' || relativePath.startsWith(`..${sep}`))
+      throw new RangeError('QUAL producer closure source path escaped repository root')
+    const current = await readPinnedReplayFile(absolute, item.sha256, 16 * 1024 * 1024)
+    if (current.length !== item.bytes)
+      throw new RangeError('QUAL producer closure differs from current source bytes')
+  }
+}
+
 async function writeRegistration(
   admission: ReplayAdmission,
   repositoryRoot: string,
@@ -516,8 +614,9 @@ async function writeRegistration(
     runtimeProofSha256: admission.protocol.runtimeProof.sha256,
     runtimeEnvironmentSha256: admission.protocol.runtimeEnvironment.sha256,
     policySha256: admission.protocol.executionPolicy,
-    ...(admission.protocol.studyId === NATIVE_PRESENCE_STUDY_ID
-      ? { runtimeBinding: replayRuntimeBinding(NATIVE_PRESENCE_STUDY_ID) }
+    ...(admission.protocol.studyId === NATIVE_PRESENCE_STUDY_ID ||
+    admission.protocol.studyId === NATIVE_SELECTOR_STUDY_ID
+      ? { runtimeBinding: replayRuntimeBinding(admission.protocol.studyId) }
       : {}),
     deadlineIso: admission.protocol.deadlineIso,
     freezeCommitmentSha256: admission.freezeCommitmentSha256,
@@ -561,7 +660,11 @@ async function readRegisteredBinding(root: string, admission: ReplayAdmission): 
     (admission.protocol.studyId === NATIVE_PRESENCE_STUDY_ID &&
       JSON.stringify(binding.runtimeBinding) !==
         JSON.stringify(replayRuntimeBinding(NATIVE_PRESENCE_STUDY_ID))) ||
+    (admission.protocol.studyId === NATIVE_SELECTOR_STUDY_ID &&
+      JSON.stringify(binding.runtimeBinding) !==
+        JSON.stringify(replayRuntimeBinding(NATIVE_SELECTOR_STUDY_ID))) ||
     (admission.protocol.studyId !== NATIVE_PRESENCE_STUDY_ID &&
+      admission.protocol.studyId !== NATIVE_SELECTOR_STUDY_ID &&
       binding.runtimeBinding !== undefined) ||
     sha256(JSON.stringify(body)) !== bindingSha256
   )
@@ -846,18 +949,30 @@ async function runStage(
       const historical = await loadHistoricalControl(verifiedRuntime.proof.historicalSourceRoot)
       assertDeadline(admission.protocol.deadlineIso)
       const runtimeBinding = replayRuntimeBinding(admission.protocol.studyId)
+      const selectorFactoryOptions =
+        admission.protocol.studyId === NATIVE_SELECTOR_STUDY_ID
+          ? nativeSelectorRuntimeFactoryOptions()
+          : undefined
+      if (
+        selectorFactoryOptions &&
+        JSON.stringify(runtimeBinding) !== JSON.stringify(NATIVE_SELECTOR_RUNTIME_BINDING)
+      )
+        throw new RangeError('Native-selector runtime binding differs from its closed factory map')
+      const candidateProfileId =
+        selectorFactoryOptions?.candidateProfileId ?? runtimeBinding.candidateProfileId
+      const factoryNativeBinding = selectorFactoryOptions?.nativeRuntime ?? runtimeBinding
       runtimePorts = await createH8FreshRuntimePorts({
         apiKey,
         artifactRoot: executionRoot,
         temporaryRoot: launchRoot,
         maskArtifactDirectory: join(executionRoot, 'masks'),
         cutoutArtifactDirectory: join(executionRoot, 'cutouts'),
-        candidateProfileId: runtimeBinding.candidateProfileId,
+        candidateProfileId,
         nativeRuntime: {
-          recipeId: runtimeBinding.recipeId,
-          queryPolicyId: runtimeBinding.queryPolicyId,
-          ...('presencePolicyId' in runtimeBinding
-            ? { presencePolicyId: runtimeBinding.presencePolicyId }
+          recipeId: factoryNativeBinding.recipeId,
+          queryPolicyId: factoryNativeBinding.queryPolicyId,
+          ...('presencePolicyId' in factoryNativeBinding
+            ? { presencePolicyId: factoryNativeBinding.presencePolicyId }
             : {}),
           pythonExecutable: verifiedRuntime.pythonExecutable,
           assetRoot: verifiedRuntime.candidateAssetsRoot,
@@ -873,6 +988,9 @@ async function runStage(
           ]),
         ),
         controlEngine: historical,
+        ...(selectorFactoryOptions
+          ? { selectionPolicyId: selectorFactoryOptions.selectionPolicyId }
+          : {}),
       })
       report = await executeDevScreen({
         freeze: admission.freeze,
