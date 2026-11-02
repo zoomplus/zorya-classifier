@@ -31,7 +31,7 @@
     "test": "node scripts/run-tests.mjs",
     "boundaries": "node scripts/boundaries.mjs",
     "dead-code:ci": "knip --config knip.json --no-progress",
-    "secrets:check": "node ../../scripts/secrets.mjs --worktree",
+    "secrets:check": "npm --prefix ../.. run secrets:check",
     "check": "npm run secrets:check && npm run typecheck && npm run lint && npm run boundaries && npm run dead-code:ci && npm test && npm run build && npm run format:check",
     "pack:check": "npm run build && node scripts/pack-check.mjs",
     "docker:check": "node scripts/docker-check.mjs"
