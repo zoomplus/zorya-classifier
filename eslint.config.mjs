@@ -4,7 +4,16 @@ import promise from 'eslint-plugin-promise'
 import unicorn from 'eslint-plugin-unicorn'
 import { noDiscardedInterval } from './tools/no-discarded-interval.mjs'
 export default tseslint.config(
-  { ignores: ['node_modules/**', 'dist/**', '.run/**', '.husky/_/**', 'benchmarks/cache/**'] },
+  {
+    ignores: [
+      'node_modules/**',
+      'dist/**',
+      'packages/mcp/dist/**',
+      '.run/**',
+      '.husky/_/**',
+      'benchmarks/cache/**',
+    ],
+  },
   { linterOptions: { reportUnusedDisableDirectives: 'error' } },
   js.configs.recommended,
   ...tseslint.configs.recommended,

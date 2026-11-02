@@ -1,0 +1,6 @@
+{
+  "entry": ["scripts/*.mjs", "test/**/*.ts", "test/**/*.mts", "test/**/*.mjs"],
+  "project": ["src/**/*.ts", "test/**/*.ts", "test/**/*.mts", "test/**/*.mjs", "scripts/**/*.mjs"],
+  "ignoreExportsUsedInFile": { "interface": true, "type": true },
+  "ignoreDependencies": ["tsx"]
+}

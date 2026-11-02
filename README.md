@@ -38,6 +38,10 @@ npm install zorya-classifier
 
 The release archive also installs with `npm install ./zorya-classifier-0.2.3.tgz` (filename follows `package.json` version). Runtime dependencies are Zod and Sharp; model weights, Electron, a database and background services are not included. Optional local segmentation backends and their model assets are a separate responsibility of the caller; the library does not download or choose them.
 
+## MCP server
+
+The separate [`zorya-classifier-mcp`](packages/mcp/README.md) package adds stdio and authenticated HTTP transports on top of the published `zorya-classifier@0.2.3` package. It requires an explicit model/provider profile or a programmatically injected `DecisionPort`, and does not select models or download segmentation assets. See its Russian guide for bounded inputs, OIDC, BYOK storage, Docker and runtime behavior.
+
 ## Capability and status
 
 Spatial APIs are implemented and documented; the [H8a vs Jev DEV12 box comparison](https://github.com/zoomplus/zorya-classifier/blob/v0.2.3/docs/research/v03-jev-native-box-results.ru.md) is one research recipe, not a promoted default. Historical metrics below and in `docs/evidence/**` are preserved as recorded.

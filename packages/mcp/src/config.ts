@@ -50,7 +50,7 @@ const injectedDecisionProfileSchema = z.strictObject({
   credentialMode: z.literal('none'),
 })
 
-export const modelProfileSchema = z.union([
+const modelProfileSchema = z.union([
   serviceProfileSchema,
   byokProfileSchema,
   keylessOpenAIProfileSchema,

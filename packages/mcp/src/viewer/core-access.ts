@@ -123,13 +123,6 @@ function descriptor(value: z.output<typeof artifactDescriptorSchema>): ArtifactD
   }
 }
 
-function deadlineSignal(signal?: AbortSignal): {
-  readonly signal: AbortSignal
-  readonly deadlineAt: number
-} {
-  return { signal: signal ?? new AbortController().signal, deadlineAt: Date.now() + 30_000 }
-}
-
 export function createCoreViewerAccess(application: CoreApplication): {
   readonly readDocument: ViewerDocumentReader
   readonly readArtifact: ViewerArtifactReader
@@ -188,11 +181,4 @@ export function createCoreViewerAccess(application: CoreApplication): {
         : undefined
     },
   }
-}
-
-export function viewerRequestBudget(signal?: AbortSignal): {
-  readonly signal: AbortSignal
-  readonly deadlineAt: number
-} {
-  return deadlineSignal(signal)
 }

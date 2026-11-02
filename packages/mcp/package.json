@@ -4,15 +4,37 @@
   "description": "Standalone MCP server for the published zorya-classifier library",
   "type": "module",
   "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "zorya-classifier-mcp": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE.md"
+  ],
+  "sideEffects": false,
   "engines": {
     "node": ">=22.12.0"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node scripts/clean-dist.mjs && tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.tests.json",
-    "test": "node --import tsx --test test/core/*.test.ts test/stdio/*.test.ts",
-    "test:config": "node --import tsx --test test/core/config.test.ts",
-    "check": "npm run typecheck && npm test && npm run build"
+    "lint": "eslint . --max-warnings 0",
+    "format:check": "prettier --check .",
+    "test": "node scripts/run-tests.mjs",
+    "boundaries": "node scripts/boundaries.mjs",
+    "dead-code:ci": "knip --config knip.json --no-progress",
+    "secrets:check": "node ../../scripts/secrets.mjs --worktree",
+    "check": "npm run secrets:check && npm run typecheck && npm run lint && npm run boundaries && npm run dead-code:ci && npm test && npm run build && npm run format:check",
+    "pack:check": "npm run build && node scripts/pack-check.mjs",
+    "docker:check": "node scripts/docker-check.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/node": "2.1.2",
@@ -26,9 +48,15 @@
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "2.4.0",
+    "@eslint/js": "9.39.5",
     "@types/node": "24.3.0",
+    "eslint": "9.39.5",
+    "eslint-plugin-promise": "7.3.0",
+    "eslint-plugin-unicorn": "59.0.1",
+    "knip": "5.62.0",
     "prettier": "3.6.2",
     "tsx": "4.20.5",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "typescript-eslint": "8.71.1"
   }
 }
