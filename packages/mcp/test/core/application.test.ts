@@ -532,12 +532,32 @@ await test('source artifacts and job resources are private to the server-derived
     .toBuffer()
   const png = Uint8Array.from(imageBytes)
   const ports = createTestPorts(png)
+  let decisionCalls = 0
+  const absencePort: DecisionPort = {
+    async decide(request, signal) {
+      signal.throwIfAborted()
+      decisionCalls += 1
+      assert.equal(request.questions['presence']?.type, 'noul')
+      const answers = Object.fromEntries(
+        Object.entries(request.questions).map(([id, question]) => {
+          if (question.type === 'noul') return [id, { type: 'noul' as const, noul: 0 }]
+          const keys = Object.keys(question.criteria)
+          const choice = keys[0] ?? ''
+          const probabilities = Object.fromEntries(
+            keys.map((key, index) => [key, index === 0 ? 1 : 0]),
+          )
+          return [id, { type: 'choice' as const, choice, probabilities }]
+        }),
+      )
+      return { answers, metadata: responseMetadata }
+    },
+  }
   const app = createCoreApplication({
     config: testConfig(),
     mediaPort: ports.mediaPort,
     artifactPort: ports.artifactPort,
     credentialPort: ports.credentialPort,
-    injectedDecisionPorts: { injected: firstChoicePort() },
+    injectedDecisionPorts: { injected: absencePort },
   })
 
   try {
@@ -554,6 +574,26 @@ await test('source artifacts and job resources are private to the server-derived
     const jobId = jobIdFrom(submitted)
     const job = await waitForJob(app, principalA, jobId, 15_000)
     assert.equal(job['state'], 'succeeded')
+    const result = z
+      .object({
+        operation: z.literal('locate'),
+        result: z
+          .object({
+            geometryKind: z.literal('coarse-region'),
+            result: z
+              .object({
+                status: z.literal('not-found'),
+                reason: z.literal('absent-in-evaluated-region'),
+              })
+              .passthrough(),
+          })
+          .passthrough(),
+      })
+      .passthrough()
+      .parse(job['result'])
+    assert.equal(result.operation, 'locate')
+    assert.equal(result.result.result.status, 'not-found')
+    assert.equal(decisionCalls, 1)
     const artifacts = z
       .array(z.object({ id: z.string(), role: z.string() }))
       .parse(job['artifacts'])
