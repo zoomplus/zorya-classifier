@@ -1,0 +1,33 @@
+{
+  "name": "zorya-classifier-mcp",
+  "version": "0.1.0",
+  "description": "Standalone MCP server for the published zorya-classifier library",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.tests.json",
+    "test:config": "node --import tsx --test test/core/config.test.ts",
+    "check": "npm run typecheck && npm run test:config && npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/node": "2.1.2",
+    "@modelcontextprotocol/server": "2.4.0",
+    "@modelcontextprotocol/server-legacy": "2.4.0",
+    "ipaddr.js": "2.5.0",
+    "jose": "6.2.15",
+    "sharp": "0.34.5",
+    "zod": "4.2.0",
+    "zorya-classifier": "0.2.3"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.4.0",
+    "@types/node": "24.3.0",
+    "prettier": "3.6.2",
+    "tsx": "4.20.5",
+    "typescript": "5.9.2"
+  }
+}
