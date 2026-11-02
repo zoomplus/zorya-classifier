@@ -184,6 +184,7 @@
       "benchmarks/v03/h8a-full/h8a-full-runtime.test.ts"
     ],
     "mcp": [
+      "packages/mcp/test/auth/anonymous-sessions.test.ts",
       "packages/mcp/test/auth/browser-session.test.ts",
       "packages/mcp/test/auth/credential-vault.test.ts",
       "packages/mcp/test/auth/oidc.test.ts",
@@ -192,6 +193,7 @@
       "packages/mcp/test/core/config.test.ts",
       "packages/mcp/test/core/job-scheduler.test.ts",
       "packages/mcp/test/core/packed-mask.test.ts",
+      "packages/mcp/test/http/ip-server.test.ts",
       "packages/mcp/test/http/server.test.ts",
       "packages/mcp/test/media/loader.test.ts",
       "packages/mcp/test/media/private-artifact-store.test.ts",
